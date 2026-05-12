@@ -1,0 +1,39 @@
+# Dependencies
+node_modules
+
+# Build output
+.next
+out
+tsconfig.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+dev.log
+
+# DB (SQLite dev artifact — schema lives in prisma/schema.prisma)
+prisma/dev.db
+prisma/dev.db-journal
+
+# OS / editor
+.DS_Store
+.vercel
+.idea
+.vscode
+
+# Curl / session scratch
+cookies.txt
+*.session
+
+# Misc
+free-claude-code-main.zip
+*.zip
+*.tar
+*.tar.gz
+
+# Transient bug-fix artifacts (the triad writes here)
+.claude/bug-state/

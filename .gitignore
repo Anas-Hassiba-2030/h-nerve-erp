@@ -38,3 +38,4 @@ free-claude-code-main.zip
 # Transient bug-fix artifacts (the triad writes here)
 .claude/bug-state/
 .claude/settings.local.json
+.gstack/

@@ -16,10 +16,21 @@ import { getActiveWorkspaceId } from "./workspace";
 // type. $extends would alter the export type and risk a typecheck cascade
 // across the whole codebase right before the pitch.
 //
-// SCOPED_MODELS is intentionally Hotel-only for now (pattern proof). The
-// follow-up expands it and routes the cross-company views to
-// `prismaUnscoped`. Cross-workspace write-by-id (update/delete/upsert) is
-// deliberately NOT guarded yet — documented follow-up.
+// SCOPED_MODELS = every model with a REQUIRED `companyId String`.
+//
+// EXCLUDED ON PURPOSE:
+//  - User / MarketStock: companyId is OPTIONAL. Scoping User would make
+//    `prisma.user.findUnique({where:{id}})` return null inside a foreign
+//    workspace, and both layouts then redirect("/logout") — auth breakage.
+//    MarketStock is a global markets feature with optional links.
+//  - Company / Tenant: the workspace switcher must see them all.
+//  - Booking / Crop: no companyId column; they inherit isolation
+//    indirectly (their parent Hotel/Farm lists are scoped). Direct
+//    by-parent-id queries stay unscoped — documented follow-up.
+//
+// Still deferred (documented follow-ups): cross-workspace write-by-id
+// guard (update/delete/upsert); routing group/Empire views to
+// `prismaUnscoped`. The no-cookie invariant holds regardless.
 
 const globalForPrisma = globalThis as unknown as {
   prismaScoped: PrismaClient | undefined;
@@ -32,7 +43,15 @@ function baseClient(): PrismaClient {
   });
 }
 
-const SCOPED_MODELS = new Set<string>(["Hotel"]);
+const SCOPED_MODELS = new Set<string>([
+  "Hotel",
+  "DairyBatch",
+  "Farm",
+  "Program",
+  "Transaction",
+  "FutureProject",
+  "SustainabilityScore",
+]);
 
 function makeScopedClient(): PrismaClient {
   const client = baseClient();

@@ -79,6 +79,7 @@ export function OnboardingTour({ locale = "en" }: { locale?: "ar" | "en" }) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (process.env.NEXT_PUBLIC_DISABLE_INTRO === "1") return; // pitch/demo machine
     const seen = window.localStorage.getItem(STORAGE_KEY);
     if (!seen) setOpen(true);
   }, []);

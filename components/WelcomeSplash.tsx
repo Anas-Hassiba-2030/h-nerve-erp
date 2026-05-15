@@ -99,6 +99,7 @@ export function WelcomeSplash({ locale }: { locale: "ar" | "en" }) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (process.env.NEXT_PUBLIC_DISABLE_INTRO === "1") return; // pitch/demo machine
     const seen = window.localStorage.getItem(STORAGE_KEY);
     // Defer to OnboardingTour for true first-time users — only show this
     // splash to returning users who haven't yet seen the v1.4 update.

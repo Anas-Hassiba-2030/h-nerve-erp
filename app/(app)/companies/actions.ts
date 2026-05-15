@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
+import { requireRole } from "@/lib/authz";
 import {
   parseFormState,
   formStateFromError,
@@ -111,7 +112,10 @@ export async function updateCompany(
 }
 
 export async function deleteCompany(formData: FormData) {
-  await requireUser();
+  // Phase D: deleting a whole company cascades to every child record
+  // (hotels, dairy, farms, transactions…). ADMIN only — server-side
+  // backstop even though the UI hides the control for lower roles.
+  await requireRole("ADMIN");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   await prisma.company.delete({ where: { id } });

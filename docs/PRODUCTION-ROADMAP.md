@@ -49,12 +49,17 @@ Not a build phase — the toolkit that runs through all of them:
 - **`/ultrareview`** — deep multi-agent review before the pitch (billed).
 
 ### Phase A — Make it real & safe to show (days)
-- ✅ Add `ANTHROPIC_API_KEY` — **DONE** (in gitignored `.env`; Brain now live).
-- Rotate `SESSION_PASSWORD` (currently ends `change-me-please`); change the
-  `admin123` seed password; rotate the chat-shared API key after the pitch.
-- Gate `app/(admin)/layout.tsx` to `role === "ADMIN"`.
-- _Tool:_ Plan Mode for the changes; verify live with `/gstack`.
-- _Outcome:_ honest, secure, genuinely-intelligent demo.
+**✅ PHASE A COMPLETE** (commit `ea0324a`, 2026-05-16):
+- ✅ `ANTHROPIC_API_KEY` in gitignored `.env` (Brain runs live).
+- ✅ Strong random `SESSION_PASSWORD`; seed password env-configurable
+  (`SEED_ADMIN_PASSWORD`); chat-shared key still to rotate post-pitch.
+- ✅ `app/(admin)/layout.tsx` hard-gated to `role === "ADMIN"`.
+- _Outcome reached:_ honest, secure, genuinely-intelligent demo.
+
+**Pitch-credibility fixes (Terminal-2 walkthrough), 2026-05-16:**
+✅ #1 modal wall (env flag) · ✅ #2 Arena −100% (deterministic seed,
+DB-verified +76%) · ✅ #3 Council Arabic bidi garble · ⏳ #4 personal
+branding (awaiting Anas) · 🟡 #5 broader Arabic/English text.
 
 ### Phase B — Real data foundation (1–2 weeks)
 - SQLite → Postgres (Neon/Supabase free tier is fine to start).
@@ -62,23 +67,26 @@ Not a build phase — the toolkit that runs through all of them:
 - Automated backups; separate `dev` / `staging` / `prod` databases.
 - _Outcome:_ multiple users can use it at once without data corruption.
 
-### Phase C — Per-company workspace isolation (~3–5 weeks) — *your idea, see Q3*
-- A "current workspace" context (cookie/session).
-- Scope every Prisma query to the active company/tenant.
-- Clicking a company → enter its branded, data-isolated dashboard.
-- _Outcome:_ the "separate ERP per company" experience.
+### Phase C — Per-company workspace isolation — ✅ DONE (merged to `main`)
+- ✅ Cookie workspace context (`lib/workspace.ts`); scoped `prisma` vs
+  `prismaUnscoped` (`lib/db.ts`, `$use`, 7 company-owned models).
+- ✅ Enter/exit + WorkspaceBanner; ✅ proven by 10 unit tests (no server).
+- ✅ No-cookie invariant ⇒ pitch demo byte-identical to pre-Phase-C.
+- Follow-ups: write-by-id guard; route Empire/group views to unscoped.
 
-### Phase D — Access control (1–2 weeks)
+### Phase D — Access control (1–2 weeks) — ⏭ NEXT
 - Role-based authorization on **every** server action, not just admin.
 - Audit log of who changed what.
 - Rate-limit + cost-cap the AI endpoints.
 - _Outcome:_ safe for real staff with different permission levels.
 
-### Phase E — Reliability & operations (1–2 weeks)
-- Automated tests on auth + the 5 core CRUD modules + regression tests.
-- Error monitoring (Sentry), structured logging.
-- Deployment: Dockerfile or Vercel project + CI.
-- _Outcome:_ you can deploy with confidence and see failures.
+### Phase E — Reliability & operations — 🟡 IN PROGRESS
+- ✅ Vitest + **39-test regression net** (workspace scoping, authz,
+  utils/formatters, anomaly engine) + ✅ CI gate (`.github/workflows/ci.yml`:
+  tsc + tests on push/PR).
+- Remaining: error monitoring (Sentry), structured logging, Dockerfile/
+  deploy, broaden tests to the 5 core CRUD modules.
+- _Outcome (partial):_ AI-introduced regressions now caught automatically.
 
 ### Phase F — Replace the stubs (weeks → months, demand-driven)
 - Real document parser (Claude Vision) — currently a TODO

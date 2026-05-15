@@ -19,8 +19,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!session) redirect("/login");
   const dbUser = await prisma.user.findUnique({ where: { id: session.id } });
   if (!dbUser) redirect("/logout");
-  // Demo-friendly: any logged-in user can preview admin. In production
-  // we'd hard-gate to role === "ADMIN".
+  // Hard gate: only the ADMIN role may enter the superadmin console.
+  // Logged-in non-admins are sent back to the operator dashboard.
+  if (dbUser.role !== "ADMIN") redirect("/dashboard");
 
   return (
     <div className="admin-shell" data-shell="admin">

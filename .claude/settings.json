@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "statusMessage": "Type-checking the project (tsc)…",
+            "timeout": 180,
+            "command": "$ErrorActionPreference='SilentlyContinue'; $o = & npx tsc --noEmit 2>&1; if ($LASTEXITCODE -ne 0) { $errs = ($o | Select-Object -First 8) -join \"`n\"; $j = @{ systemMessage = \"TypeScript errors detected - 'npm run build' (the pitch build) will FAIL until these are fixed:`n$errs\" } | ConvertTo-Json -Compress; Write-Output $j }"
+          }
+        ]
+      }
+    ]
+  }
+}

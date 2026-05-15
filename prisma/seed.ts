@@ -119,7 +119,7 @@ async function main() {
   // -------------------------------------------------------------------
   // USERS — with chess ranks + XP
   // -------------------------------------------------------------------
-  const adminHash = await bcrypt.hash("admin123", 10);
+  const adminHash = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD || "admin123", 10);
   const admin = await prisma.user.create({
     data: {
       email: "admin@hourani.jo",

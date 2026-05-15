@@ -3,7 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  // Phase B: migrated SQLite -> Postgres (Neon). To revert: set provider
+  // back to "sqlite" and point DATABASE_URL at file:./dev.db.
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

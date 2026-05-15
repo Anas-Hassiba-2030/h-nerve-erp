@@ -163,3 +163,34 @@ Build **Option 1** as Phase C. Demo it as: from the companies grid you click
 operations — "every Hourani unit gets its own ERP, one platform." That single
 interaction will land harder in the boardroom than any other feature, and it's
 weeks of focused work, not a rewrite.
+
+---
+
+# Phase G — Post-pitch refinement (2026-05-16, in progress)
+
+Driven by Anas's feedback after the first working build. Tracked here so
+nothing is dropped.
+
+### G1 — Real per-company ERP (Command Center) — ⏭ headline
+Feedback: entering a company just scoped the *group* dashboard; it felt
+generic, not "a fully detailed المها ERP that analyzes everything."
+- New dedicated **Company Command Center** shown on entering a workspace:
+  sector-aware (Arena→hospitality, Maha→dairy, Loran→agri, AAU→education),
+  deep financials (P&L, margin, revenue trend), operational modules for
+  that sector, team, alerts, AI insights, future projects, supply links.
+- `enterWorkspace` redirects to the Command Center, not `/dashboard`.
+
+### G2 — Performance — ⏭
+Feedback: system feels heavy/laggy. Likely causes: Next **dev mode** +
+**Neon remote latency** (vs instant local SQLite) + realtime SSE polling.
+- Production build path documented; realtime poll interval tuned; query
+  waterfalls reduced; fast local-SQLite option kept one toggle away.
+
+### G3 — Phases audit — ⏭
+Verify A–G, nothing left behind; this file stays the single source of truth.
+
+### G4 — Operating Protocol (user manual) — ⏭
+Feedback: "I'm lost — rebuild-the-brain, errors, how to run it."
+- `docs/OPERATING-PROTOCOL.md`: how to run (dev vs build), login, every
+  major area, what "rebuild the brain" does + cost, common errors + fixes,
+  SQLite↔Postgres toggle, pitch-day checklist.

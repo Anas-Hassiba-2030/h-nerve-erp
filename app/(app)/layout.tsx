@@ -15,12 +15,14 @@ import { TimeMachineBanner } from "@/components/TimeMachineBanner";
 import { getAsOf } from "@/lib/timemachine";
 import { RealtimePresence } from "@/components/realtime/RealtimePresence";
 import { DocumentDropZone } from "@/components/DocumentDropZone";
-import { prisma } from "@/lib/db";
+import { prisma, prismaUnscoped } from "@/lib/db";
 import { getLocale, getMessages } from "@/lib/i18n.server";
 import { readFlash } from "@/lib/toast";
 import { SIDEBAR_COOKIE } from "@/lib/sidebarPref";
 import { unreadCountFor } from "@/lib/messages";
 import { getViewAsTenant, getTenantThemeCookie } from "@/lib/tenancy";
+import { getActiveWorkspaceId } from "@/lib/workspace";
+import { WorkspaceBanner } from "@/components/WorkspaceBanner";
 import { THEME_PRESETS, themeCssVars, type ThemeKey } from "@/lib/brand/themes";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -64,6 +66,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     viewAsTheme && THEME_PRESETS[viewAsTheme] ? viewAsTheme : "heritage";
   const themeStyle = themeKey !== "heritage" ? themeCssVars(themeKey) : null;
 
+  // Phase C — active company workspace (cookie-driven). The banner gives a
+  // one-click exit so the user is never trapped inside a workspace.
+  const activeWorkspaceId = getActiveWorkspaceId();
+  const activeCompany = activeWorkspaceId
+    ? await prismaUnscoped.company.findUnique({
+        where: { id: activeWorkspaceId },
+        select: { name: true, nameEn: true },
+      })
+    : null;
+
   return (
     <div
       className="flex min-h-screen flex-row-reverse"
@@ -75,6 +87,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           tenantName={viewAsTenantData.name}
           tenantSlug={viewAsTenantData.slug}
           themeName={THEME_PRESETS[themeKey].nameEn}
+          locale={locale}
+        />
+      ) : null}
+      {activeCompany ? (
+        <WorkspaceBanner
+          companyName={locale === "ar" ? activeCompany.name : activeCompany.nameEn}
           locale={locale}
         />
       ) : null}

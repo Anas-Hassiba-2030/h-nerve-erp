@@ -8,7 +8,7 @@
 import Link from "next/link";
 import {
   Building2, Pencil, Plus, Users2, MapPin, Download,
-  Hotel, Milk, Sprout, GraduationCap, Briefcase, ArrowRight, Eye, Globe2,
+  Hotel, Milk, Sprout, GraduationCap, Briefcase, ArrowRight, Eye, Globe2, DoorOpen,
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
@@ -22,6 +22,7 @@ import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { formatNumber } from "@/lib/utils";
 import { deleteCompany } from "./actions";
+import { enterWorkspace } from "@/app/actions/workspace";
 
 const SECTOR_LABEL: Record<string, { ar: string; en: string }> = {
   HOSPITALITY: { ar: "ضيافة", en: "Hospitality" },
@@ -499,15 +500,29 @@ function CompanyTile({
           background: "var(--heri-cream-2)",
         }}
       >
-        <Link
-          href={`/companies/${c.id}`}
-          className="heri-btn heri-btn-primary"
-          style={{ padding: "8px 14px", fontSize: 12 }}
-        >
-          <Eye className="h-3 w-3" strokeWidth={1.5} />
-          {ar ? "عرض الملف" : "Open profile"}
-          <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5" strokeWidth={1.5} />
-        </Link>
+        <div className="flex items-center gap-2">
+          <form action={enterWorkspace}>
+            <input type="hidden" name="companyId" value={c.id} />
+            <button
+              type="submit"
+              className="heri-btn heri-btn-primary"
+              style={{ padding: "8px 14px", fontSize: 12 }}
+              title={ar ? "ادخل مساحة عمل هذه الشركة" : "Enter this company's workspace"}
+            >
+              <DoorOpen className="h-3 w-3" strokeWidth={1.5} />
+              {ar ? "دخول مساحة العمل" : "Enter workspace"}
+            </button>
+          </form>
+          <Link
+            href={`/companies/${c.id}`}
+            className="heri-btn heri-btn-secondary"
+            style={{ padding: "8px 14px", fontSize: 12 }}
+          >
+            <Eye className="h-3 w-3" strokeWidth={1.5} />
+            {ar ? "عرض الملف" : "Open profile"}
+            <ArrowRight className="h-3 w-3 transition group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5" strokeWidth={1.5} />
+          </Link>
+        </div>
         <div className="flex items-center gap-1">
           <Link
             href={`/companies/${c.id}/edit`}

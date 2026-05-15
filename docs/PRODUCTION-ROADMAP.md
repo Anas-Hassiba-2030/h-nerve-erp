@@ -61,11 +61,14 @@ Not a build phase — the toolkit that runs through all of them:
 DB-verified +76%) · ✅ #3 Council Arabic bidi garble · ⏳ #4 personal
 branding (awaiting Anas) · 🟡 #5 broader Arabic/English text.
 
-### Phase B — Real data foundation (1–2 weeks)
-- SQLite → Postgres (Neon/Supabase free tier is fine to start).
-- Adopt `prisma migrate` instead of `db push`; commit migration history.
-- Automated backups; separate `dev` / `staging` / `prod` databases.
-- _Outcome:_ multiple users can use it at once without data corruption.
+### Phase B — Real data foundation — 🟡 LIVE ON POSTGRES
+- ✅ SQLite → **Neon Postgres** (`schema.prisma` provider=postgresql,
+  `DATABASE_URL` → Neon in gitignored `.env`). Schema pushed + fully
+  seeded + live-verified (5 companies, Arena +76%).
+- Remaining: switch `db push` → `prisma migrate` (versioned history);
+  automated backups; separate dev/staging/prod; rotate the chat-shared
+  Neon credential. SQLite-revert path documented in `schema.prisma`/`.env`.
+- _Outcome (reached):_ runs on production-grade cloud Postgres.
 
 ### Phase C — Per-company workspace isolation — ✅ DONE (merged to `main`)
 - ✅ Cookie workspace context (`lib/workspace.ts`); scoped `prisma` vs

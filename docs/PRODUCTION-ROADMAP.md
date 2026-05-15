@@ -74,11 +74,14 @@ branding (awaiting Anas) · 🟡 #5 broader Arabic/English text.
 - ✅ No-cookie invariant ⇒ pitch demo byte-identical to pre-Phase-C.
 - Follow-ups: write-by-id guard; route Empire/group views to unscoped.
 
-### Phase D — Access control (1–2 weeks) — ⏭ NEXT
-- Role-based authorization on **every** server action, not just admin.
-- Audit log of who changed what.
-- Rate-limit + cost-cap the AI endpoints.
-- _Outcome:_ safe for real staff with different permission levels.
+### Phase D — Access control — 🟡 CORE DONE
+- ✅ RBAC backstop on **all 28 destructive actions**: `deleteCompany`
+  = ADMIN; the other 27 delete/purge actions = MANAGER+ (STAFF can no
+  longer delete shared records). `requireRole` from `lib/authz`.
+- ✅ Audit log already exists (`logActivity` / `ActivityLog`).
+- Remaining: role checks on sensitive create/update, AI endpoint
+  rate-limit + cost-cap.
+- _Outcome (partial):_ safe for real staff at different permission levels.
 
 ### Phase E — Reliability & operations — 🟡 IN PROGRESS
 - ✅ Vitest + **39-test regression net** (workspace scoping, authz,

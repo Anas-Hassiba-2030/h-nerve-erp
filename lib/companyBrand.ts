@@ -83,28 +83,29 @@ export const COMPANY_BRANDS: Record<string, CompanyBrand> = {
   },
 };
 
-// User's own ventures — used in the combined hero logo on the login page
-// and as co-branding in exports.
+// Platform identity marks — used in the combined hero logo on the login page
+// and as co-branding in exports. Object keys are kept stable (other files
+// import them); only the human-readable display strings are neutral.
 export const PERSONAL_BRANDS = {
   ANAS_AI: {
     code: "ANAS_AI",
-    name: "أنس للذكاء الاصطناعي",
-    nameEn: "Anas AI",
-    emblem: "AI",
+    name: "إتش-نيرف · الدماغ",
+    nameEn: "H-Nerve Brain",
+    emblem: "HN",
     accent: "#0a0a0a",
     gradient: "linear-gradient(135deg, #000 0%, #2a2a2a 100%)",
-    motto: "هندسة الذكاء بالعربية",
-    mottoEn: "Engineering intelligence in Arabic",
+    motto: "ذكاء الأعمال بالعربية",
+    mottoEn: "Business intelligence in Arabic",
   },
   HASIBA_G: {
     code: "HASIBA_G",
-    name: "حسيبة جي",
-    nameEn: "Hasiba G",
-    emblem: "HG",
+    name: "إتش-نيرف · المنصة",
+    nameEn: "H-Nerve Platform",
+    emblem: "HN",
     accent: "#1a1a1a",
     gradient: "linear-gradient(135deg, #1a1a1a 0%, #c69345 110%)",
-    motto: "تجارة إلكترونية ذكية",
-    mottoEn: "Smart e-commerce",
+    motto: "منصة ذكاء المؤسسات",
+    mottoEn: "Enterprise intelligence platform",
   },
 } as const;
 

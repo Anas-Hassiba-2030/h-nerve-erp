@@ -8,7 +8,7 @@ import {
   type ExportAnalytics,
 } from "@/lib/exportAnalytics";
 
-// Branded CSV exports — header carries Hourani Group + Anas AI + Hasiba G marks.
+// Branded CSV exports — header carries Hourani Group + H-Nerve marks.
 // Each module uses its own company emblem in the banner, plus an embedded
 // "Executive summary" block of KPIs + analyst commentary so anyone opening
 // the file in Excel sees the analysis before the raw data.
@@ -47,7 +47,7 @@ function bannerLines(brandKey: string, title: string, recordCount: number, local
     `# ║ ${pad(`Report-ID: ${reportId}`, W - 4)} ║`,
     `# ║ ${pad(`Brand    : ${brand.emblem} ${brand.emblemSymbol ?? ""}  ${brand.motto.slice(0, 50)}`, W - 4)} ║`,
     `# ╠${fill}╣`,
-    `# ║ ${pad("Powered by Hourani Holding · Anas AI · Hasiba G", W - 4)} ║`,
+    `# ║ ${pad("Powered by H-Nerve · Hourani Group", W - 4)} ║`,
     `# ║ ${pad(`${PERSONAL_BRANDS.ANAS_AI.nameEn} · ${PERSONAL_BRANDS.HASIBA_G.nameEn}`, W - 4)} ║`,
     `# ║ ${pad(ar ? "تقرير سرّي · للقيادة التنفيذية فقط" : "Confidential · For executive leadership only", W - 4)} ║`,
     `# ╚${fill}╝`,

@@ -618,8 +618,8 @@ function pageShell({
         </div>
       </div>
       <div class="footer-bar">
-        ${ar ? "صُمم وطُوّر بواسطة" : "Crafted by"}
-        Anas Hasiba · Anas AI · Hasiba G ·
+        ${ar ? "بدعم من" : "Powered by"}
+        H-Nerve · ${ar ? "مجموعة الحوراني" : "Hourani Group"} ·
         © ${now.getFullYear()}
       </div>
     </footer>

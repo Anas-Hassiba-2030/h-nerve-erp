@@ -84,7 +84,7 @@ export default async function LoginPage({
       </div>
 
       <div className="anim-fade-in text-center text-[10px] uppercase tracking-[0.25em] text-white/55" style={{ animationDelay: ".5s" }}>
-        {m["auth.poweredBy"]} · Hourani Holding · Anas AI · Hasiba G
+        {m["auth.poweredBy"]} · {ar ? "مجموعة الحوراني · إتش-نيرف" : "Hourani Group · H-Nerve"}
       </div>
     </div>
   );

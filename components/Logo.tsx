@@ -1,5 +1,5 @@
 // The combined H-Nerve mark: a central nerve node with three orbiting
-// satellites — Hourani Group (ح), Anas AI (AI), Hasiba G (HG).
+// satellites — Hourani Group (ح), H-Nerve Brain (HN), H-Nerve (HN).
 // Pure SVG, animated entirely in CSS.
 
 export function Logo({
@@ -74,7 +74,7 @@ export function Logo({
         <circle cx="50" cy="50" r="4" fill="var(--accent)" />
       </svg>
 
-      {/* Orbiting satellites: Hourani, Anas AI, Hasiba G */}
+      {/* Orbiting satellites: Hourani Group, H-Nerve Brain, H-Nerve */}
       {withSatellites ? (
         <>
           <Satellite
@@ -86,20 +86,20 @@ export function Logo({
             tooltip="Hourani Group"
           />
           <Satellite
-            label="AI"
+            label="HN"
             color="#0a0a0a"
             angle={120}
             radius={size * 0.52}
             delay="-4s"
-            tooltip="Anas AI"
+            tooltip="H-Nerve Brain"
           />
           <Satellite
-            label="HG"
+            label="HN"
             color="#1a1a1a"
             angle={240}
             radius={size * 0.52}
             delay="-8s"
-            tooltip="Hasiba G"
+            tooltip="H-Nerve"
           />
         </>
       ) : null}

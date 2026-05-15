@@ -473,7 +473,7 @@ export default async function SettingsPage() {
           style={{ color: "var(--text-muted)", animationDelay: "0.4s" }}
         >
           H-Nerve ERP · {ar ? "نظام مجموعة الحوراني العصبي المركزي" : "Hourani Group's Central Nervous System"} ·{" "}
-          {ar ? "صُمم وطُوّر بواسطة" : "Crafted by"} Anas Hasiba
+          {ar ? "بدعم من إتش-نيرف · مجموعة الحوراني" : "Powered by H-Nerve · Hourani Group"}
         </p>
       </PageContainer>
     </>

@@ -5,7 +5,7 @@ import { getLocale } from "@/lib/i18n.server";
 //
 // Three balanced columns on desktop, single column on mobile:
 //   1. Identity   — logo + system name + version + copyright
-//   2. Partnership — Hourani × Anas AI × Hasiba G as elegant micro-marks
+//   2. Partnership — Hourani Group × H-Nerve as elegant micro-marks
 //   3. Status      — system pill + secure indicator
 //
 // No heavy gradients, no bloat — just Bloomberg-grade quiet confidence.
@@ -75,20 +75,14 @@ export function Footer() {
             <PartnerMark
               emblem="ح"
               symbol="♛"
-              name={ar ? "الحوراني القابضة" : "Hourani Holding"}
+              name={ar ? "مجموعة الحوراني" : "Hourani Group"}
               gradient="linear-gradient(135deg, #1a2940 0%, #c69345 110%)"
             />
             <Cross />
             <PartnerMark
-              emblem="AI"
-              name={ar ? "أنس للذكاء الاصطناعي" : "Anas AI"}
-              gradient="linear-gradient(135deg, #050505 0%, #2a2a2a 100%)"
-            />
-            <Cross />
-            <PartnerMark
-              emblem="HG"
-              name={ar ? "حسيبة جي" : "Hasiba G"}
-              gradient="linear-gradient(135deg, #1a1a1a 0%, #c69345 110%)"
+              emblem="HN"
+              name={ar ? "إتش-نيرف" : "H-Nerve"}
+              gradient="linear-gradient(135deg, var(--brand-deep) 0%, var(--accent) 110%)"
             />
           </div>
         </div>

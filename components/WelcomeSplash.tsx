@@ -54,12 +54,12 @@ const SLIDES: Slide[] = [
     bullets_ar: [
       "تقرير شامل للمجموعة من الداشبورد",
       "PDF عبر الطباعة + CSV لـ Excel",
-      "بصمة الحوراني + Anas AI + Hasiba G",
+      "ختم رسمي لمجموعة الحوراني",
     ],
     bullets_en: [
       "Whole-group combined report from the dashboard",
       "Print-to-PDF + Excel CSV per module",
-      "Hourani · Anas AI · Hasiba G watermark",
+      "Official Hourani Group watermark",
     ],
   },
   {

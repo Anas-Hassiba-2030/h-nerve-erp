@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
+import { requireRole } from "@/lib/authz";
 import { ALERT_KINDS, seedDefaultRules, type AlertKind } from "@/lib/alertEngine";
 import { logActivity } from "@/lib/activityLog";
 import { flashToast } from "@/lib/toast";
@@ -87,7 +88,7 @@ export async function seedRules() {
 }
 
 export async function deleteRule(formData: FormData) {
-  await requireUser();
+  await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const rule = await prisma.alertRule.findUnique({ where: { id } });

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
+import { requireRole } from "@/lib/authz";
 import { logActivity } from "@/lib/activityLog";
 
 const farmSchema = z.object({
@@ -91,7 +92,7 @@ export async function updateSensors(farmId: string, formData: FormData) {
 }
 
 export async function deleteFarm(formData: FormData) {
-  await requireUser();
+  await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const before = await prisma.farm.findUnique({ where: { id } });
@@ -144,7 +145,7 @@ export async function createCrop(formData: FormData) {
 }
 
 export async function deleteCrop(formData: FormData) {
-  await requireUser();
+  await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const crop = await prisma.crop.findUnique({ where: { id } });

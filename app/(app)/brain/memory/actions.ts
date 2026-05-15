@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/session";
+import { requireRole } from "@/lib/authz";
 import { seedMemoryLake } from "@/lib/brain/seedMemories";
 import { memoryLake } from "@/lib/brain/memory.live";
 import { prisma } from "@/lib/db";
@@ -14,7 +15,7 @@ export async function seedMemories(): Promise<void> {
 }
 
 export async function deleteMemory(formData: FormData): Promise<void> {
-  await requireUser();
+  await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   await prisma.memory.delete({ where: { id } });

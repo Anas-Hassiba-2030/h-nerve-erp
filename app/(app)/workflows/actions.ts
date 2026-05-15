@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/session";
+import { requireRole } from "@/lib/authz";
 import { prisma } from "@/lib/db";
 import { getTemplate, defaultParams } from "@/lib/workflows/templates";
 import { runWorkflow, type RunMode } from "@/lib/workflows/runtime";
@@ -48,7 +49,7 @@ export async function addNode(formData: FormData): Promise<void> {
 }
 
 export async function deleteNode(formData: FormData): Promise<void> {
-  await requireUser();
+  await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   const workflowId = String(formData.get("workflowId") ?? "");
   if (!id) return;
@@ -87,7 +88,7 @@ export async function addEdge(formData: FormData): Promise<void> {
 }
 
 export async function deleteEdge(formData: FormData): Promise<void> {
-  await requireUser();
+  await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   const workflowId = String(formData.get("workflowId") ?? "");
   if (!id) return;
@@ -117,7 +118,7 @@ export async function testRunWorkflow(input: { workflowId: string }) {
 }
 
 export async function deleteWorkflow(formData: FormData): Promise<void> {
-  await requireUser();
+  await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   await prisma.workflow.delete({ where: { id } });

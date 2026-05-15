@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/session";
-import { hasRole, isSafeId } from "@/lib/authz";
+import { hasRole, isSafeId, requireRole } from "@/lib/authz";
 import { prisma } from "@/lib/db";
 import {
   hardDelete,
@@ -51,7 +51,7 @@ export async function restoreOne(formData: FormData) {
 }
 
 export async function purgeOne(formData: FormData) {
-  const user = await requireUser();
+  const user = await requireRole("MANAGER");
   const entity = String(formData.get("entity") ?? "") as SoftEntity;
   const id = String(formData.get("id") ?? "");
   if (!VALID.includes(entity) || !isSafeId(id)) return;
@@ -140,7 +140,7 @@ export async function restoreSelected(formData: FormData) {
 }
 
 export async function purgeSelected(formData: FormData) {
-  const user = await requireUser();
+  const user = await requireRole("MANAGER");
   const requested = readSelection(formData);
   if (!requested.length) return;
   const rows = await filterAuthorized(requested, user);
@@ -159,7 +159,7 @@ export async function purgeSelected(formData: FormData) {
 }
 
 export async function purgeAllExpired() {
-  const user = await requireUser();
+  const user = await requireRole("MANAGER");
   // Only managers and above can sweep across the group. STAFF would only get
   // their own expired tasks anyway; a single-user sweep isn't a useful UX.
   if (!hasRole(user, "MANAGER")) return;

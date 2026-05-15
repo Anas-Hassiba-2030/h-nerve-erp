@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/session";
+import { requireRole } from "@/lib/authz";
 import { prisma } from "@/lib/db";
 import { parseDocument } from "@/lib/docintel/parser";
 
@@ -142,7 +143,7 @@ export async function commitDocument(formData: FormData): Promise<void> {
 }
 
 export async function deleteDocument(formData: FormData): Promise<void> {
-  await requireUser();
+  await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   await prisma.document.update({

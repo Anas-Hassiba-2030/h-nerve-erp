@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
+import { requireRole } from "@/lib/authz";
 import { rankFor, bonusFor } from "@/lib/gamification";
 import { softDelete, softRestore, deletedLabel, restoredLabel } from "@/lib/softDelete";
 import { flashToast } from "@/lib/toast";
@@ -125,7 +126,7 @@ export async function setTaskStatus(formData: FormData) {
 }
 
 export async function deleteTask(formData: FormData) {
-  await requireUser();
+  await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const before = await prisma.task.findUnique({ where: { id } });

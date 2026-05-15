@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
+import { requireRole } from "@/lib/authz";
 import { softDelete, softRestore, deletedLabel, restoredLabel } from "@/lib/softDelete";
 import { flashToast } from "@/lib/toast";
 import { logActivity } from "@/lib/activityLog";
@@ -103,7 +104,7 @@ function deriveInsightCategory(i: { title: string; body: string; module: string 
 }
 
 export async function deleteInsight(formData: FormData) {
-  const me = await requireUser();
+  const me = await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const before = await prisma.aIInsight.findUnique({ where: { id } });

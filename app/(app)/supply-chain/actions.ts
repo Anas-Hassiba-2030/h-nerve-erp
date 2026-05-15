@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
+import { requireRole } from "@/lib/authz";
 import { softDelete, softRestore, deletedLabel, restoredLabel } from "@/lib/softDelete";
 import { flashToast } from "@/lib/toast";
 import { logActivity } from "@/lib/activityLog";
@@ -90,7 +91,7 @@ export async function setForecastStatus(formData: FormData) {
 }
 
 export async function deleteForecast(formData: FormData) {
-  await requireUser();
+  await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const before = await prisma.supplyForecast.findUnique({ where: { id } });

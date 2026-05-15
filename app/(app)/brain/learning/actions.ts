@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/session";
+import { requireRole } from "@/lib/authz";
 import { learnPatterns } from "@/lib/brain/feedback.live";
 import { seedFeedback as seedFeedbackLib } from "@/lib/brain/seedFeedback";
 import { prisma } from "@/lib/db";
@@ -45,7 +46,7 @@ export async function unlearnPattern(formData: FormData): Promise<void> {
 }
 
 export async function deletePattern(formData: FormData): Promise<void> {
-  await requireUser();
+  await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   await prisma.brainPattern.delete({ where: { id } });

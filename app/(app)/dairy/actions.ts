@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
+import { requireRole } from "@/lib/authz";
 import { generateNumber } from "@/lib/utils";
 import { logActivity } from "@/lib/activityLog";
 import {
@@ -115,7 +116,7 @@ export async function setBatchStatus(formData: FormData) {
 }
 
 export async function deleteBatch(formData: FormData) {
-  await requireUser();
+  await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const before = await prisma.dairyBatch.findUnique({ where: { id } });

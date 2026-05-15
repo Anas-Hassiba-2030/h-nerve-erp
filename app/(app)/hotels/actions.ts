@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
+import { requireRole } from "@/lib/authz";
 import { generateNumber } from "@/lib/utils";
 import { logActivity } from "@/lib/activityLog";
 import {
@@ -94,7 +95,7 @@ export async function createHotel(
 }
 
 export async function deleteHotel(formData: FormData) {
-  await requireUser();
+  await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const before = await prisma.hotel.findUnique({ where: { id } });
@@ -162,7 +163,7 @@ export async function createBooking(formData: FormData) {
 }
 
 export async function deleteBooking(formData: FormData) {
-  await requireUser();
+  await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const before = await prisma.booking.findUnique({ where: { id } });

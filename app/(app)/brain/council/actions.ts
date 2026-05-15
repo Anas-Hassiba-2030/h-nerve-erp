@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/session";
+import { requireRole } from "@/lib/authz";
 import { council } from "@/lib/brain/council.live";
 import { prisma } from "@/lib/db";
 
@@ -22,7 +23,7 @@ export async function convene(formData: FormData): Promise<void> {
 }
 
 export async function deleteSession(formData: FormData): Promise<void> {
-  await requireUser();
+  await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   await prisma.councilSession.delete({ where: { id } });

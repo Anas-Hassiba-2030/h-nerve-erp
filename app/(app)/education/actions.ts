@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/session";
+import { requireRole } from "@/lib/authz";
 
 const programSchema = z.object({
   companyId: z.string().min(1),
@@ -61,7 +62,7 @@ export async function setProgramStage(formData: FormData) {
 }
 
 export async function deleteProgram(formData: FormData) {
-  await requireUser();
+  await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   await prisma.program.delete({ where: { id } });

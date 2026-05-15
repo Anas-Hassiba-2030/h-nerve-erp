@@ -6,8 +6,10 @@
 //  - Sliding comment bubbles
 //  - Typing-near-element ochre underline
 //
-// Polls /api/realtime every 280ms while the tab is visible. On hidden,
-// goes idle until visibilitychange fires.
+// Polls /api/realtime every 25s while the tab is visible, 60s while
+// hidden. (Was 280ms/1500ms — far too chatty; it hammered the network
+// and made the whole app feel laggy. The server session TTL was raised
+// to 60s in lib/realtime.ts so peers don't expire between polls.)
 //
 // Phase 17 of docs/PHASES-INTELLIGENCE.md.
 
@@ -162,16 +164,17 @@ export function RealtimePresence({ user, locale = "ar" }: Props) {
     }
     let alive = true;
     let tickHandle: number | null = null;
-    let nextDelay = 280;
+    let nextDelay = 25_000;
 
     async function tick() {
       if (!alive) return;
-      // Slow down (but never fully stop) when the tab is hidden so the
-      // phantom timeline still ticks in MCP/automated/embedded contexts
+      // Slow down further (but never fully stop) when the tab is hidden so
+      // the phantom timeline still ticks in MCP/automated/embedded contexts
       // that report visibility=hidden even when the tab is actually
-      // rendered. 280ms while visible, 1500ms while hidden.
+      // rendered. 25s while visible, 60s while hidden. The server session
+      // TTL (lib/realtime.ts) is 60s so peers don't expire between polls.
       const slow = document.visibilityState === "hidden";
-      nextDelay = slow ? 1500 : 280;
+      nextDelay = slow ? 60_000 : 25_000;
       try {
         // POST own state (fire and forget)
         fetch("/api/realtime", {

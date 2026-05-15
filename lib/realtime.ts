@@ -6,17 +6,21 @@
 //
 // Architecture:
 // - In-memory presence store keyed by scopeId (typically a normalized URL).
-// - Each entry has a TTL (10s); a GET filters out anything stale.
-// - Real users POST their cursor/typing/comment state every ~250ms.
+// - Each entry has a TTL (60s); a GET filters out anything stale.
+// - Real users POST their cursor/typing/comment state every ~25s
+//   (raised from ~250ms for performance — see components/realtime/
+//   RealtimePresence.tsx). TTL must stay >= the poll interval or peers
+//   expire between polls.
 // - Phantom demo users are generated server-side based on scope so the
 //   wow moment lands without needing a second browser open. They follow
 //   pre-scripted timelines that loop every 18 seconds.
 //
 // This is intentionally polling-based, not WebSockets — H-Nerve's runtime
 // is Next.js dev/Vercel, which doesn't ship a long-lived socket server by
-// default. Polling at 250ms with HTTP/1.1 keep-alive is fine for a 5-10
-// person company exec view, and the API surface is identical to what a
-// proper Yjs/Liveblocks integration would expose.
+// default. Polling at 25s with HTTP/1.1 keep-alive is fine for a 5-10
+// person company exec view (presence + comments don't need sub-second
+// freshness), and the API surface is identical to what a proper Yjs/
+// Liveblocks integration would expose.
 
 export type RTUser = {
   id: string;
@@ -71,7 +75,10 @@ export type RTScopeState = {
   comments: RTComment[];
 };
 
-const TTL_MS = 10_000;
+// 60s. Must stay >= the client poll interval (25s visible / 60s hidden
+// in components/realtime/RealtimePresence.tsx) or real peers expire from
+// the store between polls and flicker out of each other's presence.
+const TTL_MS = 60_000;
 
 // ---------------------------------------------------------------------------
 // In-memory store. The Next dev server reuses the module instance across

@@ -121,7 +121,7 @@ export default async function BrainCouncilIndex() {
                   style={{ fontSize: 10 }}
                 >
                   {llmEnabled
-                    ? (ar ? "حالة المحرك: مُتصِل بـ Claude" : "Engine: live · Claude")
+                    ? (ar ? (<>حالة المحرك: مُتصِل بـ <bdi dir="ltr">Claude</bdi></>) : "Engine: live · Claude")
                     : (ar ? "حالة المحرك: وضع تجريبي (بدون مفتاح)" : "Engine: stub mode (no API key)")}
                 </span>
                 {openCount > 0 ? (

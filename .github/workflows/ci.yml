@@ -1,0 +1,25 @@
+# Phase E — CI gate. Runs on every push / PR: typecheck + unit tests.
+# The same two checks we run locally, now enforced automatically so an
+# AI-introduced regression can never reach main unnoticed.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Unit tests
+        run: npx vitest run

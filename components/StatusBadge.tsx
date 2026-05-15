@@ -18,7 +18,7 @@ const STATUS_TONE: Record<string, Tone> = {
   HARVESTING: "warn", WARN: "warn",
   // Critical
   CRITICAL: "critical", CANCELLED: "critical", RECALLED: "critical",
-  CHECKED_OUT: "neutral", REJECTED: "critical",
+  COMPLETED: "neutral", CHECKED_OUT: "neutral", REJECTED: "critical",
   // Drafts / dormant
   DRAFT: "neutral", INTAKE: "neutral", PAUSED: "neutral",
   ARCHIVED: "neutral", CLOSED: "neutral",

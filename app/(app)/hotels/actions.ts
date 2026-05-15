@@ -36,7 +36,7 @@ const bookingSchema = z.object({
   checkOut: z.string().min(1),
   revenue: z.coerce.number().min(0).default(0),
   status: z
-    .enum(["PENDING", "CONFIRMED", "CHECKED_IN", "CHECKED_OUT", "CANCELLED"])
+    .enum(["CONFIRMED", "ACTIVE", "CHECKED_IN", "COMPLETED", "CANCELLED"])
     .default("CONFIRMED"),
   notes: z.string().max(500).optional().or(z.literal("")),
 });

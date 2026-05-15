@@ -31,6 +31,14 @@ async function main() {
   await prisma.dairyBatch.deleteMany();
   await prisma.booking.deleteMany();
   await prisma.hotel.deleteMany();
+  // Brain models — include in wipe so re-seeding is idempotent
+  await prisma.planStep.deleteMany();
+  await prisma.plan.deleteMany();
+  await prisma.brainIQHistory.deleteMany();
+  await prisma.selfTuningReport.deleteMany();
+  await prisma.brainFeedback.deleteMany();
+  await prisma.brainPattern.deleteMany();
+  await prisma.brainWeight.deleteMany();
   await prisma.user.deleteMany();
   await prisma.company.deleteMany();
 
@@ -314,9 +322,9 @@ async function main() {
     const room = roomTypes[Math.min(roomTypes.length - 1, Math.floor(Math.random() * (roomTypes.length + 1)))];
     const adrMul = room === "PRESIDENTIAL" ? 3 : room === "SUITE" ? 2 : room === "DELUXE" ? 1.4 : 1;
     const status =
-      startOffset + nights < 0 ? "CHECKED_OUT" :
+      startOffset + nights < 0 ? "COMPLETED" :
       startOffset <= 0 ? "CHECKED_IN" :
-      Math.random() < 0.85 ? "CONFIRMED" : "PENDING";
+      Math.random() < 0.85 ? "CONFIRMED" : "CONFIRMED";
     await prisma.booking.create({
       data: {
         hotelId: hotel.id,
@@ -467,39 +475,127 @@ async function main() {
 
   // -------------------------------------------------------------------
   // TRANSACTIONS
+  // Deterministic layout: Arena REVENUE is explicitly present in BOTH
+  // the prior period (days -60 to -31) AND the current period (days -30
+  // to -1), with the current period larger → healthy positive delta.
+  // Other companies follow the same pattern at known day offsets.
+  // All amounts are realistic JOD figures from the original seed.
   // -------------------------------------------------------------------
   let tRef = 1;
-  const txCategories = [
-    { kind: "REVENUE", category: "حجوزات فندقية", company: arena.id, range: [12000, 95000] },
-    { kind: "REVENUE", category: "مبيعات تجزئة - ألبان", company: maha.id, range: [4000, 28000] },
-    { kind: "REVENUE", category: "مبيعات الجملة - فنادق المجموعة", company: maha.id, range: [3000, 12000] },
-    { kind: "REVENUE", category: "مبيعات خضروات", company: loran.id, range: [2500, 18000] },
-    { kind: "REVENUE", category: "رسوم دراسية", company: aau.id, range: [40000, 220000] },
-    { kind: "EXPENSE", category: "مواد خام - ألبان", company: maha.id, range: [2000, 14000] },
-    { kind: "EXPENSE", category: "أعلاف ماشية", company: loran.id, range: [1500, 9000] },
-    { kind: "EXPENSE", category: "رواتب", company: arena.id, range: [25000, 60000] },
-    { kind: "EXPENSE", category: "تسويق رقمي", company: arena.id, range: [800, 6500] },
-    { kind: "EXPENSE", category: "صيانة دفيئات", company: loran.id, range: [600, 3500] },
-    { kind: "TRANSFER", category: "تحويل داخلي - تمويل توسعة", company: hHolding.id, range: [10000, 80000] },
-  ];
-  for (let i = 0; i < 80; i++) {
-    const t = txCategories[i % txCategories.length];
-    const [min, max] = t.range;
-    const occurredAt = at(-Math.floor(Math.random() * 90), 12);
+
+  // Helper to create one transaction without randomised date.
+  const tx = async (
+    companyId: string,
+    kind: string,
+    category: string,
+    amount: number,
+    dayOffset: number,
+  ) => {
     await prisma.transaction.create({
       data: {
-        companyId: t.company,
+        companyId,
         reference: ref("TX", tRef++),
-        kind: t.kind,
-        category: t.category,
-        amount: rand(min, max),
+        kind,
+        category,
+        amount,
         currency: "JOD",
-        description: t.category,
-        occurredAt,
+        description: category,
+        occurredAt: at(dayOffset, 12),
         createdById: admin.id,
       },
     });
-  }
+  };
+
+  // ── Arena Space (HOSPITALITY) ─────────────────────────────────────
+  // Prior period (days -60 to -31): 6 REVENUE rows, total ≈ 280 000 JOD
+  await tx(arena.id, "REVENUE", "حجوزات فندقية - أرينا عمّان",    42000, -58);
+  await tx(arena.id, "REVENUE", "حجوزات فندقية - البحر الميت",    55000, -52);
+  await tx(arena.id, "REVENUE", "حجوزات فندقية - أرينا عمّان",    38000, -47);
+  await tx(arena.id, "REVENUE", "حجوزات فندقية - صوفيا",          32000, -42);
+  await tx(arena.id, "REVENUE", "حجوزات فندقية - البحر الميت",    63000, -38);
+  await tx(arena.id, "REVENUE", "حجوزات فندقية - فارنا",          50000, -33);
+  // Prior period EXPENSE rows
+  await tx(arena.id, "EXPENSE", "رواتب وتشغيل",                   48000, -55);
+  await tx(arena.id, "EXPENSE", "تسويق رقمي وإعلانات",             4200, -44);
+  await tx(arena.id, "EXPENSE", "صيانة دورية",                     6800, -35);
+
+  // Current period (days -29 to -1): 8 REVENUE rows, total ≈ 420 000 JOD
+  // Spread so every 7-day sparkline bucket has a hit.
+  await tx(arena.id, "REVENUE", "حجوزات فندقية - أرينا عمّان",    58000, -29);
+  await tx(arena.id, "REVENUE", "حجوزات فندقية - البحر الميت",    72000, -24);
+  await tx(arena.id, "REVENUE", "حجوزات فندقية - مؤتمر AI 2026",  95000, -20);
+  await tx(arena.id, "REVENUE", "حجوزات فندقية - أرينا عمّان",    47000, -16);
+  await tx(arena.id, "REVENUE", "حجوزات فندقية - فارنا",          61000, -12);
+  await tx(arena.id, "REVENUE", "حجوزات فندقية - صوفيا",          38000,  -8);
+  await tx(arena.id, "REVENUE", "حجوزات فندقية - البحر الميت",    68000,  -4);
+  await tx(arena.id, "REVENUE", "حجوزات فندقية - أرينا عمّان",    54000,  -1);
+  // Current period EXPENSE rows
+  await tx(arena.id, "EXPENSE", "رواتب وتشغيل",                   52000, -27);
+  await tx(arena.id, "EXPENSE", "تسويق رقمي وإعلانات",             5800, -15);
+  await tx(arena.id, "EXPENSE", "صيانة دورية وتحديثات",            8200,  -6);
+
+  // ── Maha Dairy ───────────────────────────────────────────────────
+  // Prior period
+  await tx(maha.id, "REVENUE", "مبيعات تجزئة - ألبان",            18000, -57);
+  await tx(maha.id, "REVENUE", "مبيعات الجملة - فنادق المجموعة",   9000, -50);
+  await tx(maha.id, "REVENUE", "مبيعات تجزئة - ألبان",            22000, -40);
+  await tx(maha.id, "REVENUE", "مبيعات الجملة - فنادق المجموعة",  11000, -36);
+  await tx(maha.id, "EXPENSE", "مواد خام - ألبان",                 8000, -54);
+  await tx(maha.id, "EXPENSE", "أعلاف وصيانة",                     5500, -43);
+  // Current period
+  await tx(maha.id, "REVENUE", "مبيعات تجزئة - ألبان",            26000, -28);
+  await tx(maha.id, "REVENUE", "مبيعات الجملة - فنادق المجموعة",  12000, -22);
+  await tx(maha.id, "REVENUE", "مبيعات تجزئة - ألبان",            24000, -14);
+  await tx(maha.id, "REVENUE", "مبيعات الجملة - فنادق المجموعة",  10000,  -7);
+  await tx(maha.id, "REVENUE", "مبيعات تجزئة - ألبان",            28000,  -3);
+  await tx(maha.id, "EXPENSE", "مواد خام - ألبان",                10000, -25);
+  await tx(maha.id, "EXPENSE", "أعلاف وصيانة",                     6200, -10);
+
+  // ── Loran Agriculture ────────────────────────────────────────────
+  // Prior period
+  await tx(loran.id, "REVENUE", "مبيعات خضروات - جملة",           12000, -59);
+  await tx(loran.id, "REVENUE", "مبيعات خضروات - تجزئة",           8000, -48);
+  await tx(loran.id, "REVENUE", "مبيعات خضروات - جملة",           15000, -37);
+  await tx(loran.id, "EXPENSE", "أعلاف ماشية وبذور",               6000, -53);
+  await tx(loran.id, "EXPENSE", "صيانة دفيئات",                    2800, -41);
+  // Current period
+  await tx(loran.id, "REVENUE", "مبيعات خضروات - جملة",           17000, -26);
+  await tx(loran.id, "REVENUE", "مبيعات خضروات - تجزئة",          10000, -18);
+  await tx(loran.id, "REVENUE", "مبيعات خضروات - جملة",           14000,  -9);
+  await tx(loran.id, "REVENUE", "مبيعات خضروات - تجزئة",          11000,  -2);
+  await tx(loran.id, "EXPENSE", "أعلاف ماشية وبذور",               7500, -23);
+  await tx(loran.id, "EXPENSE", "صيانة دفيئات",                    3100,  -5);
+
+  // ── Al-Ahliyya University / The Tank ─────────────────────────────
+  // Prior period
+  await tx(aau.id, "REVENUE", "رسوم دراسية - الفصل الثاني",      185000, -56);
+  await tx(aau.id, "REVENUE", "رسوم برامج The Tank",               42000, -46);
+  await tx(aau.id, "EXPENSE", "رواتب أعضاء هيئة التدريس",          95000, -60);
+  await tx(aau.id, "EXPENSE", "تشغيل وصيانة المرافق",              28000, -39);
+  // Current period
+  await tx(aau.id, "REVENUE", "رسوم دراسية - الفصل الثاني",      210000, -27);
+  await tx(aau.id, "REVENUE", "رسوم برامج The Tank",               55000, -19);
+  await tx(aau.id, "REVENUE", "رسوم التسجيل الصيفي",               38000, -11);
+  await tx(aau.id, "EXPENSE", "رواتب أعضاء هيئة التدريس",         100000, -30);
+  await tx(aau.id, "EXPENSE", "تشغيل وصيانة المرافق",              31000,  -8);
+
+  // ── Hourani Holding (transfers + older historical) ────────────────
+  await tx(hHolding.id, "TRANSFER", "تحويل داخلي - تمويل أرينا",  60000, -62);
+  await tx(hHolding.id, "TRANSFER", "تحويل داخلي - رأس مال لوران", 35000, -45);
+  await tx(hHolding.id, "TRANSFER", "تحويل داخلي - تمويل توسعة",  80000, -31);
+  await tx(hHolding.id, "TRANSFER", "تحويل داخلي - أرينا سبيس",   45000, -17);
+
+  // ── Historical depth (months 2-3 for trend sparkline) ────────────
+  // Six monthly buckets for the sparkline need data in months -6 to -1.
+  // Months 2-6 ago (days -61 to -180) — one Arena REVENUE row per month.
+  await tx(arena.id, "REVENUE", "حجوزات فندقية - تاريخي",         215000, -90);
+  await tx(arena.id, "REVENUE", "حجوزات فندقية - تاريخي",         232000, -120);
+  await tx(arena.id, "REVENUE", "حجوزات فندقية - تاريخي",         248000, -150);
+  await tx(arena.id, "REVENUE", "حجوزات فندقية - تاريخي",         261000, -180);
+  await tx(maha.id,  "REVENUE", "مبيعات ألبان - تاريخي",           72000,  -90);
+  await tx(maha.id,  "REVENUE", "مبيعات ألبان - تاريخي",           78000, -120);
+  await tx(loran.id, "REVENUE", "مبيعات خضروات - تاريخي",          38000,  -90);
+  await tx(aau.id,   "REVENUE", "رسوم دراسية - تاريخي",           390000,  -90);
 
   // -------------------------------------------------------------------
   // INSIGHTS
@@ -703,6 +799,104 @@ async function main() {
   for (const t of tasks) {
     await prisma.task.create({ data: t });
   }
+
+  // -------------------------------------------------------------------
+  // BRAIN IQ HISTORY — rising trajectory for the Brain IQ page.
+  // Eight weekly snapshots, starting from 102 and climbing to 127.
+  // Components follow a realistic warming curve.
+  // -------------------------------------------------------------------
+  const iqSnapshots = [
+    { weeksAgo: 8, iq: 102, accuracy: 0.42, decisionVelocity: 0.28, outcomeQuality: 0.30, userTrust: 0.50, drivenBy: "accuracy",  note: "Initial calibration — model accuracy improving." },
+    { weeksAgo: 7, iq: 107, accuracy: 0.50, decisionVelocity: 0.32, outcomeQuality: 0.35, userTrust: 0.52, drivenBy: "accuracy",  note: "Accuracy lift after first insight batch review." },
+    { weeksAgo: 6, iq: 110, accuracy: 0.55, decisionVelocity: 0.40, outcomeQuality: 0.38, userTrust: 0.55, drivenBy: "velocity",  note: "Two council sessions committed in a week." },
+    { weeksAgo: 5, iq: 114, accuracy: 0.60, decisionVelocity: 0.48, outcomeQuality: 0.42, userTrust: 0.58, drivenBy: "outcome",   note: "First plan completed on time — outcome quality rising." },
+    { weeksAgo: 4, iq: 118, accuracy: 0.65, decisionVelocity: 0.55, outcomeQuality: 0.50, userTrust: 0.62, drivenBy: "trust",     note: "Users enabling more pattern suggestions." },
+    { weeksAgo: 3, iq: 121, accuracy: 0.70, decisionVelocity: 0.60, outcomeQuality: 0.56, userTrust: 0.66, drivenBy: "accuracy",  note: "Narrator confidence threshold eased." },
+    { weeksAgo: 2, iq: 124, accuracy: 0.74, decisionVelocity: 0.65, outcomeQuality: 0.62, userTrust: 0.70, drivenBy: "velocity",  note: "Arena conference plan fast-tracked by council." },
+    { weeksAgo: 0, iq: 127, accuracy: 0.78, decisionVelocity: 0.70, outcomeQuality: 0.68, userTrust: 0.74, drivenBy: "outcome",   note: "All four components above 60% for the first time." },
+  ];
+  for (const s of iqSnapshots) {
+    const snappedAt = at(-s.weeksAgo * 7, 9);
+    await prisma.brainIQHistory.create({
+      data: {
+        scope: "default",
+        snappedAt,
+        iq: s.iq,
+        accuracy: s.accuracy,
+        decisionVelocity: s.decisionVelocity,
+        outcomeQuality: s.outcomeQuality,
+        userTrust: s.userTrust,
+        drivenBy: s.drivenBy,
+        note: s.note,
+      },
+    });
+  }
+
+  // -------------------------------------------------------------------
+  // PLANS — realistic action plans so Brain IQ velocity > 0.
+  // Three plans: one DONE, one ACTIVE (committed), one DRAFT.
+  // This gives decisionVelocity = 2/3 ≈ 67% (committed / created).
+  // -------------------------------------------------------------------
+  const plan1 = await prisma.plan.create({
+    data: {
+      goal: "رفع إشغال أرينا البحر الميت إلى 75% خلال موسم الربيع",
+      goalEn: "Lift Arena Dead Sea occupancy to 75% for the spring season",
+      rationale: "الإشغال الحالي 58% — تفعيل حملة عائلية مع عروض النهاية الأسبوعية يمكن أن يغلق الفجوة.",
+      rationaleEn: "Current occupancy 58% — activating a family campaign with weekend packages can close the gap.",
+      targetMetric: "occupancy",
+      targetDelta: 0.17,
+      targetDeadline: at(45, 18),
+      projectedDelta: 0.19,
+      confidence: 0.82,
+      status: "DONE",
+      committedAt: at(-30, 10),
+      completedAt: at(-5, 16),
+    },
+  });
+  await prisma.planStep.createMany({
+    data: [
+      { planId: plan1.id, orderIndex: 1, action: "إطلاق حملة رمضانية عائلية على Instagram + Google Ads", actionEn: "Launch Ramadan family campaign on Instagram + Google Ads", ownerRole: "MARKETING", durationDays: 5, status: "DONE", completedAt: at(-28, 14) },
+      { planId: plan1.id, orderIndex: 2, action: "تفعيل باقة عطلة نهاية الأسبوع (إفطار + إقامة) بسعر خاص", actionEn: "Activate weekend package (breakfast + stay) at promotional price", ownerRole: "OPS_HOTEL", durationDays: 3, status: "DONE", completedAt: at(-22, 11) },
+      { planId: plan1.id, orderIndex: 3, action: "مراجعة أداء الأسبوع الأول وتعديل الميزانية الإعلانية", actionEn: "Review first-week performance and adjust ad budget", ownerRole: "CFO", durationDays: 2, status: "DONE", completedAt: at(-10, 15) },
+    ],
+  });
+
+  const plan2 = await prisma.plan.create({
+    data: {
+      goal: "تخفيض مخاطر انتهاء صلاحية منتجات المها بنسبة 40%",
+      goalEn: "Reduce Maha expiry risk by 40% within 30 days",
+      rationale: "دفعتان من اللبنة على وشك الانتهاء — تحويل إلى منافذ التجزئة بعروض مخفضة يحمي الهامش ويصفّي المخزون.",
+      rationaleEn: "Two labneh batches near expiry — routing to retail with markdown offers protects margin and clears stock.",
+      targetMetric: "expiry_risk",
+      targetDelta: -0.40,
+      targetDeadline: at(20, 18),
+      projectedDelta: -0.45,
+      confidence: 0.77,
+      status: "ACTIVE",
+      committedAt: at(-3, 11),
+    },
+  });
+  await prisma.planStep.createMany({
+    data: [
+      { planId: plan2.id, orderIndex: 1, action: "إشعار فوري لمديري منافذ التجزئة الثلاثة بتخفيض 15%", actionEn: "Immediate notification to 3 retail managers with 15% markdown", ownerRole: "OPS_DAIRY", durationDays: 1, status: "DONE", completedAt: at(-2, 10) },
+      { planId: plan2.id, orderIndex: 2, action: "تحويل 200 كغ لبنة إلى عرض ترويجي في أرينا البحر الميت", actionEn: "Route 200 kg labneh to Arena Dead Sea as a buffet promotion", ownerRole: "OPS_HOTEL", durationDays: 2, status: "IN_PROGRESS" },
+      { planId: plan2.id, orderIndex: 3, action: "تقرير انتهاء الأزمة وتوصيات لتحسين جدولة الإنتاج", actionEn: "Crisis-end report and production-scheduling improvement recommendations", ownerRole: "CFO", durationDays: 3, status: "PENDING" },
+    ],
+  });
+
+  await prisma.plan.create({
+    data: {
+      goal: "نشر لوحة H-Nerve لأول عميل SaaS خارج مجموعة الحوراني",
+      goalEn: "Deploy H-Nerve dashboard for first external SaaS client",
+      rationale: "الكود قابل للإعداد متعدد المستأجرين — استهداف مجموعة قابضة إقليمية واحدة كـ pilot يثبت النموذج.",
+      rationaleEn: "Multi-tenant scaffolding is ready — targeting one regional holding group as pilot proves the model.",
+      targetMetric: "revenue",
+      targetDelta: 0.12,
+      targetDeadline: at(90, 18),
+      confidence: 0.65,
+      status: "DRAFT",
+    },
+  });
 
   console.log("\n✓ تم زرع بيانات H-Nerve ERP الكاملة بنجاح.\n");
   console.log("بيانات الدخول الرئيسية:");

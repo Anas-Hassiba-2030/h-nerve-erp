@@ -38,10 +38,10 @@ export default async function NewBookingPage() {
             <div>
               <label className="label" htmlFor="status">الحالة</label>
               <select id="status" name="status" defaultValue="CONFIRMED" className="select">
-                <option value="PENDING">قيد الانتظار</option>
                 <option value="CONFIRMED">مؤكد</option>
+                <option value="ACTIVE">نشط</option>
                 <option value="CHECKED_IN">دخل الفندق</option>
-                <option value="CHECKED_OUT">غادر</option>
+                <option value="COMPLETED">مكتمل / غادر</option>
                 <option value="CANCELLED">ملغى</option>
               </select>
             </div>

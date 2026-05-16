@@ -3,9 +3,11 @@ generator client {
 }
 
 datasource db {
-  // Phase B: migrated SQLite -> Postgres (Neon). To revert: set provider
-  // back to "sqlite" and point DATABASE_URL at file:./dev.db.
-  provider = "postgresql"
+  // LOCAL DEMO default = sqlite (reliable; Neon free-tier dropped
+  // connections and crash-looped the demo). PILOT path = set provider
+  // back to "postgresql" + point DATABASE_URL at Neon. Phase B work is
+  // preserved and documented in docs/OPERATING-PROTOCOL.md §6.
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 

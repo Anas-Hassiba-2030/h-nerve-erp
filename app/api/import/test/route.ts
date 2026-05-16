@@ -172,29 +172,87 @@ export async function POST(req: NextRequest) {
         ? "REJECTED"
         : "OK";
 
-  // --- Persist batch header + rows. Wrapped so a DB hiccup returns the
-  // import result instead of a 500, but failures are logged. ---
+  // --- Persist: ImportLog + ImportRow audit trail AND upsert accepted
+  // rows into the operational Product table — ONE transaction so an
+  // ImportRow can never point at a Product that wasn't written. Outer
+  // try/catch preserves Phase 1–2 behaviour (a DB hiccup logs + still
+  // returns the import result, never a 500). ---
+  let created = 0;
+  let updated = 0;
+  // Product.tenantId is required; the wire field is optional. Tenant-less
+  // imports fall back to "default" (single-tenant default).
+  const productTenant = tenantId ?? "default";
   try {
-    const log = await prismaUnscoped.importLog.create({
-      data: {
-        endpoint: "test",
-        source,
-        tenantId,
-        accepted,
-        rejected,
-        errors: errors.length ? JSON.stringify(errors.slice(0, 100)) : null,
-        status,
-        ip,
-      },
-    });
-    if (rowsToCreate.length) {
-      await prismaUnscoped.importRow.createMany({
-        data: rowsToCreate.map((r) => ({ ...r, importLogId: log.id })),
+    await prismaUnscoped.$transaction(async (tx) => {
+      const log = await tx.importLog.create({
+        data: {
+          endpoint: "test",
+          source,
+          tenantId,
+          accepted,
+          rejected,
+          errors: errors.length ? JSON.stringify(errors.slice(0, 100)) : null,
+          status,
+          ip,
+        },
       });
-    }
+
+      for (const r of rowsToCreate) {
+        let productId: string | null = null;
+        if (r.status === "ACCEPTED" && r.sku) {
+          // findUnique + branch, not a bare upsert(): upsert() can't
+          // report created-vs-updated, which the response needs.
+          const existing = await tx.product.findUnique({
+            where: { tenantId_sku: { tenantId: productTenant, sku: r.sku } },
+            select: { id: true },
+          });
+          if (existing) {
+            // Only overwrite fields the import actually provided — never
+            // clobber existing data with a null (decision #4 spirit).
+            await tx.product.update({
+              where: { id: existing.id },
+              data: {
+                lastImportedAt: new Date(),
+                importCount: { increment: 1 },
+                ...(r.productName != null ? { name: r.productName } : {}),
+                ...(r.quantity != null ? { quantity: r.quantity } : {}),
+                ...(r.unitCost != null ? { unitCost: r.unitCost } : {}),
+                ...(r.supplier != null ? { supplier: r.supplier } : {}),
+                ...(r.warehouse != null ? { warehouse: r.warehouse } : {}),
+              },
+            });
+            productId = existing.id;
+            updated++;
+          } else {
+            const p = await tx.product.create({
+              data: {
+                tenantId: productTenant,
+                sku: r.sku,
+                name: r.productName ?? r.sku, // name is required; fall back to sku
+                quantity: r.quantity ?? 0,
+                unitCost: r.unitCost ?? null,
+                supplier: r.supplier ?? null,
+                warehouse: r.warehouse ?? null,
+              },
+              select: { id: true },
+            });
+            productId = p.id;
+            created++;
+          }
+        }
+        await tx.importRow.create({
+          data: { ...r, importLogId: log.id, productId },
+        });
+      }
+    });
   } catch (e) {
-    console.error("[import] failed to persist ImportLog/ImportRow:", e);
+    console.error("[import] failed to persist batch:", e);
+    created = 0;
+    updated = 0;
   }
 
-  return NextResponse.json({ accepted, rejected, errors }, { status: 200 });
+  return NextResponse.json(
+    { accepted, rejected, errors, upserted: { created, updated } },
+    { status: 200 },
+  );
 }

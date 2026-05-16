@@ -165,6 +165,20 @@ Defense in depth — two independent layers:
 Hierarchy (`lib/authz.ts`): STAFF < MANAGER < EXECUTIVE < ADMIN —
 `requireRole("MANAGER")` admits MANAGER, EXECUTIVE, ADMIN.
 
+**Dry-run (no seed change needed — accounts already exist, all
+password `admin123`):**
+- Read-only path: `staff@hourani.jo` → enter any workspace → every
+  number/signal visible, zero action buttons.
+- Commit path: `maha.gm@hourani.jo` (MANAGER) → Maha workspace →
+  full action buttons. `admin@hourani.jo` (ADMIN) also passes.
+
+**Minor follow-ups (not blocking):**
+- `team/page.tsx` — the `{canMutate ? (` wrapper indentation is flat
+  vs. its `<form>` child; cosmetic, tidy on next touch.
+- `ForbiddenError` from a direct STAFF POST shows Next's raw error
+  page. Consistent with Phase D; a global error boundary →
+  friendly `/workspace` redirect + flash is the eventual polish.
+
 ---
 
 ## Long horizon (carried from PHASES-INTELLIGENCE.md)

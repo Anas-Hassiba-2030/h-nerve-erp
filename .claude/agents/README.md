@@ -137,9 +137,20 @@ All agents:
 
 ## Permissions
 Domain engineers and platform engineers have full Read + Edit + Write +
-Bash + Glob + Grep. Reviewers (`heritage-design-reviewer`,
-`i18n-bilingual-reviewer`) are read-only by design — they recommend,
-they don't ship.
+Bash + Glob + Grep.
+
+`heritage-design-reviewer` is the only **strictly read-only** agent
+(Read + Glob + Grep) — it recommends, it never touches a file.
+
+`i18n-bilingual-reviewer` is a **fix-capable reviewer**: Read + Edit +
+Glob + Grep. It applies bilingual / RTL corrections in place but has no
+Write or Bash — it edits existing files, it never creates or runs.
+
+`root-cause-analyzer` is read-only **on the codebase** (no `Edit`) but
+holds a single scoped `Write` for one purpose: emitting
+`.claude/bug-state/diagnosis.md`. Without that grant the triad's
+artifact handoff (stage 2 → stage 3) cannot complete — it is not a
+read-only agent, it is a write-one-artifact agent.
 
 ## When to add a new agent
 

@@ -6,10 +6,11 @@
 //  - Sliding comment bubbles
 //  - Typing-near-element ochre underline
 //
-// Polls /api/realtime every 25s while the tab is visible, 60s while
-// hidden. (Was 280ms/1500ms — far too chatty; it hammered the network
-// and made the whole app feel laggy. The server session TTL was raised
-// to 60s in lib/realtime.ts so peers don't expire between polls.)
+// W8 (Phase 17): inbound peers arrive via SSE (EventSource on
+// /api/realtime/stream) — sub-second, no poll lag. Outbound own
+// cursor/typing still POSTs on a 20s heartbeat (60s while hidden);
+// SSE is server→client only. If EventSource is unavailable or the
+// stream hard-fails, we fall back to the legacy 25s GET poll.
 //
 // Phase 17 of docs/PHASES-INTELLIGENCE.md.
 
@@ -157,64 +158,101 @@ export function RealtimePresence({ user, locale = "ar" }: Props) {
     };
   }, []);
 
-  // Poll loop
+  // Transport: SSE inbound (peers/comments) + POST heartbeat outbound.
   useEffect(() => {
     if (typeof window !== "undefined") {
       (window as any).__rtMounted = true;
     }
     let alive = true;
-    let tickHandle: number | null = null;
-    let nextDelay = 25_000;
+    let es: EventSource | null = null;
+    let pollHandle: number | null = null;
+    let beatHandle: number | null = null;
+    let usingFallback = false;
 
-    async function tick() {
+    function applyScope(data: Scope) {
+      setPeers(data.sessions);
+      setComments(
+        data.comments.filter((c) => !dismissed.current.has(c.id)),
+      );
+    }
+
+    // --- outbound: heartbeat my cursor/typing up to the server ---
+    function postBeat() {
+      fetch("/api/realtime", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scopeId: pathname,
+          user: me,
+          cursor: myCursor.current,
+          typing: myTyping.current,
+        }),
+      }).catch(() => {});
+    }
+    function scheduleBeat() {
       if (!alive) return;
-      // Slow down further (but never fully stop) when the tab is hidden so
-      // the phantom timeline still ticks in MCP/automated/embedded contexts
-      // that report visibility=hidden even when the tab is actually
-      // rendered. 25s while visible, 60s while hidden. The server session
-      // TTL (lib/realtime.ts) is 60s so peers don't expire between polls.
-      const slow = document.visibilityState === "hidden";
-      nextDelay = slow ? 60_000 : 25_000;
-      try {
-        // POST own state (fire and forget)
-        fetch("/api/realtime", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            scopeId: pathname,
-            user: me,
-            cursor: myCursor.current,
-            typing: myTyping.current,
-          }),
-        }).catch(() => {});
+      postBeat();
+      const hidden = document.visibilityState === "hidden";
+      beatHandle = window.setTimeout(scheduleBeat, hidden ? 60_000 : 20_000);
+    }
+    scheduleBeat(); // announce immediately, then on the heartbeat
 
-        // GET peers
-        const res = await fetch(
-          `/api/realtime?scopeId=${encodeURIComponent(pathname)}&userId=${encodeURIComponent(me.id)}`,
-          { method: "GET", cache: "no-store" },
-        );
-        if (res.ok) {
-          const data: Scope = await res.json();
-          setPeers(data.sessions);
-          setComments(
-            data.comments.filter((c) => !dismissed.current.has(c.id)),
+    // --- inbound: legacy GET poll, used only as an SSE fallback ---
+    function startPolling() {
+      if (usingFallback) return;
+      usingFallback = true;
+      async function tick() {
+        if (!alive) return;
+        const delay =
+          document.visibilityState === "hidden" ? 60_000 : 25_000;
+        try {
+          const res = await fetch(
+            `/api/realtime?scopeId=${encodeURIComponent(pathname)}&userId=${encodeURIComponent(me.id)}`,
+            { method: "GET", cache: "no-store" },
           );
-        }
-      } catch {}
-      if (alive)
-        tickHandle = window.setTimeout(tick, nextDelay);
-    }
-    tick();
-    function onVis() {
-      if (document.visibilityState === "visible" && alive && tickHandle == null) {
-        tick();
+          if (res.ok) applyScope((await res.json()) as Scope);
+        } catch {}
+        if (alive) pollHandle = window.setTimeout(tick, delay);
       }
+      tick();
     }
-    document.addEventListener("visibilitychange", onVis);
+
+    // --- inbound: SSE (the real-time path) ---
+    function startSSE() {
+      try {
+        es = new EventSource(
+          `/api/realtime/stream?scopeId=${encodeURIComponent(pathname)}&userId=${encodeURIComponent(me.id)}`,
+        );
+      } catch {
+        startPolling();
+        return;
+      }
+      es.onmessage = (ev) => {
+        if (!alive || !ev.data) return;
+        try {
+          applyScope(JSON.parse(ev.data) as Scope);
+        } catch {}
+      };
+      es.onerror = () => {
+        // EventSource auto-reconnects on transient blips (readyState
+        // CONNECTING). Only fall back if it has truly given up.
+        if (!alive || usingFallback) return;
+        if (es && es.readyState === EventSource.CLOSED) {
+          es.close();
+          es = null;
+          startPolling();
+        }
+      };
+    }
+
+    if (typeof EventSource !== "undefined") startSSE();
+    else startPolling();
+
     return () => {
       alive = false;
-      if (tickHandle != null) window.clearTimeout(tickHandle);
-      document.removeEventListener("visibilitychange", onVis);
+      if (es) es.close();
+      if (pollHandle != null) window.clearTimeout(pollHandle);
+      if (beatHandle != null) window.clearTimeout(beatHandle);
     };
   }, [pathname, me]);
 

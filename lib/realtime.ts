@@ -15,12 +15,14 @@
 //   wow moment lands without needing a second browser open. They follow
 //   pre-scripted timelines that loop every 18 seconds.
 //
-// This is intentionally polling-based, not WebSockets — H-Nerve's runtime
-// is Next.js dev/Vercel, which doesn't ship a long-lived socket server by
-// default. Polling at 25s with HTTP/1.1 keep-alive is fine for a 5-10
-// person company exec view (presence + comments don't need sub-second
-// freshness), and the API surface is identical to what a proper Yjs/
-// Liveblocks integration would expose.
+// W8 (Phase 17): the READ path is now server push via SSE
+// (app/api/realtime/stream). A raw WebSocket needs a long-lived socket
+// server, which Next.js/Vercel serverless does not provide — SSE gives
+// the same outcome (sub-second peer updates, no 25s lag) on the
+// existing runtime, with the same in-memory store and no new
+// dependency. Writes (cursor/typing/comment) stay POST — SSE is
+// server→client only. The legacy GET in app/api/realtime/route.ts is
+// kept as a graceful fallback if EventSource is unavailable.
 
 export type RTUser = {
   id: string;
@@ -75,10 +77,12 @@ export type RTScopeState = {
   comments: RTComment[];
 };
 
-// 60s. Must stay >= the client poll interval (25s visible / 60s hidden
-// in components/realtime/RealtimePresence.tsx) or real peers expire from
-// the store between polls and flicker out of each other's presence.
-const TTL_MS = 60_000;
+// 90s. With SSE there is no read poll, so the old "TTL >= poll
+// interval" invariant is gone. The new invariant: TTL must stay >
+// the client heartbeat (20s in RealtimePresence.tsx) so an idle
+// viewer who isn't moving their mouse still beats and never expires,
+// while a peer who closes the tab clears within ~90s.
+const TTL_MS = 90_000;
 
 // ---------------------------------------------------------------------------
 // In-memory store. The Next dev server reuses the module instance across
@@ -98,6 +102,45 @@ function getOrCreate(scopeId: string): ScopeRecord {
     SCOPES.set(scopeId, r);
   }
   return r;
+}
+
+// ---------------------------------------------------------------------------
+// W8 — SSE pub/sub. Each open stream subscribes a "scope changed"
+// callback for its scopeId. beat/postComment/dismissComment call
+// notify() so every connection on that scope re-reads and pushes.
+// A Set of thunks (not Node EventEmitter) avoids the default
+// max-listeners warning when many execs share a hot scope.
+// ---------------------------------------------------------------------------
+type ScopeListener = () => void;
+const SUBSCRIBERS = new Map<string, Set<ScopeListener>>();
+
+/** Subscribe to changes on a scope. Returns an unsubscribe thunk. */
+export function subscribe(scopeId: string, fn: ScopeListener): () => void {
+  let set = SUBSCRIBERS.get(scopeId);
+  if (!set) {
+    set = new Set();
+    SUBSCRIBERS.set(scopeId, set);
+  }
+  set.add(fn);
+  return () => {
+    const s = SUBSCRIBERS.get(scopeId);
+    if (!s) return;
+    s.delete(fn);
+    if (s.size === 0) SUBSCRIBERS.delete(scopeId);
+  };
+}
+
+/** Fan out a "scope changed" signal. Never throws into the caller. */
+function notify(scopeId: string): void {
+  const set = SUBSCRIBERS.get(scopeId);
+  if (!set) return;
+  for (const fn of set) {
+    try {
+      fn();
+    } catch {
+      /* a dead stream must never break a mutation */
+    }
+  }
 }
 
 // Phantom user definitions — used by the demo timeline.
@@ -247,6 +290,7 @@ export function beat(input: BeatInput) {
     typing: input.typing ?? prev?.typing ?? { near: null, startedAt: 0 },
     lastBeatAt: Date.now(),
   });
+  notify(input.scopeId);
 }
 
 export function postComment(input: {
@@ -272,12 +316,15 @@ export function postComment(input: {
   r.comments.push(c);
   // Cap comments per scope so memory doesn't grow unbounded
   if (r.comments.length > 60) r.comments = r.comments.slice(-60);
+  notify(input.scopeId);
   return c;
 }
 
 export function dismissComment(scopeId: string, commentId: string) {
   const r = getOrCreate(scopeId);
+  const before = r.comments.length;
   r.comments = r.comments.filter((c) => c.id !== commentId);
+  if (r.comments.length !== before) notify(scopeId);
 }
 
 export function readScope(

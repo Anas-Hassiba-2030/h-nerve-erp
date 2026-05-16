@@ -219,7 +219,19 @@ collision = **desktop app commits its brain-meta schema first**.
 
 ---
 
-### Wave W8 — Real-time push transport (Phase 17) 🔄 IN PROGRESS
+### Wave W8 — Real-time push transport (Phase 17) ✅ COMPLETE
+
+**Shipped:** per-`scopeId` pub/sub in `lib/realtime.ts`
+(`subscribe`/`notify`, Set-of-thunks not EventEmitter); new
+`GET /api/realtime/stream` SSE route (immediate snapshot →
+push-on-change → 20s keepalive → abort cleanup); writes unchanged
+on POST; `RealtimePresence.tsx` consumes `EventSource`, 25s GET
+poll removed (kept only as SSE-failure fallback), outbound own
+state on a 20s/60s heartbeat; presence TTL re-based 60s→90s (new
+invariant: TTL > heartbeat, so an idle viewer never expires while
+a closed tab clears in ~90s). TS-clean; `/api/realtime/stream`
+mounts + auth-gates (401 unauth). Full two-browser behavioural
+check is a pitch dry-run item (can't drive 2 sessions headless).
 
 **What & why.** Today presence/comments **poll every 25 s** — peers
 lag up to 25 s. Upgrade the read path to **server push** so changes

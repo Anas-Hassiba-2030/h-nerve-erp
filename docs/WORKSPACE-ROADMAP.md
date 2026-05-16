@@ -109,12 +109,37 @@ companyId) so dismiss uses the unscoped client + status flip only.
 
 ---
 
-## Wave W5 — Cross-company elegance
+## Wave W5 — Cross-company elegance ✅ COMPLETE
 
-- ⬜ Workspace switcher in the band (jump company without exiting)
-- ⬜ "Compare two units" side-by-side (reuse `/compare`)
-- ⬜ Time-Machine aware: scrub a company's past state
-- ⬜ Empire dashboard tiles deep-link into each company's Command
+- ✅ **Workspace switcher in the band** — pure `<details>` disclosure
+  (no client state lib), lists every unit with sector glyph + code,
+  current marked "here"; each row posts to the existing
+  `enterWorkspace` action → cookie swap → land on the new unit's
+  Command. Jump Maha → Arena → Loran without ever leaving the shell.
+- ✅ **Deep-link into a unit's Command from the portfolio roll-up.**
+  (Re-framed: the Empire grid is white-label *tenants* + synthetic
+  siblings, not the operating companies — deep-linking there would be
+  dishonest. The Holding workspace's cross-unit roll-up rows *are*
+  the operating companies, so each row is now a `enterWorkspace`
+  form-button: Holding → click Maha → in Maha's Command → switcher →
+  hop to Arena. Loop closed with the switcher.)
+- ✅ **Time-Machine aware: scrub a company's past state.** The global
+  `TimeMachineBanner` already announces travel app-wide; the gap was
+  that workspace *numbers* stayed live (a lie). Now: Finance bounds
+  its P&L + ledger query to `occurredAt ≤ asOf` and stamps the
+  section "State as of {date}"; the Holding roll-up's 30d window ends
+  at the cursor (group as it stood that day). One `where` clause
+  each — low-risk, honest. (Command Center health composite left
+  live — a deliberate follow-up, too many sub-queries to bound safely
+  in this pass.)
+- ✅ **"Compare two units" side-by-side (reuse `/compare`).** A
+  "Compare vs unit" pill in the command band deep-links to
+  `/compare?a=<thisUnit>`. Verified safe: `lib/workspaceScope.ts`
+  explicitly excludes `Company` from scoping ("the switcher must see
+  them all"), so `/compare`'s `company.findMany()` still returns
+  every unit even with a workspace cookie active. The page
+  auto-fills B with the next unit and ships its own A/B pickers —
+  zero new comparison code, full reuse.
 
 ---
 

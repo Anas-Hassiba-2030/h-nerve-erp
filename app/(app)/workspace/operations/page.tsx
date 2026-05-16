@@ -12,8 +12,10 @@ import {
 import { HeritageSection, HeritagePill } from "@/components/heritage";
 import { StatusBadge } from "@/components/StatusBadge";
 import { advanceBatchStatus } from "../actions";
+import { enterWorkspace } from "@/app/actions/workspace";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/workspace";
+import { getAsOf } from "@/lib/timemachine";
 import { getLocale } from "@/lib/i18n.server";
 import { formatNumber, formatMoney } from "@/lib/utils";
 
@@ -867,20 +869,24 @@ async function HoldingOps({ ar }: { ar: boolean }) {
   const companies = await prismaUnscoped.company.findMany({
     orderBy: { employees: "desc" },
   });
-  const now = Date.now();
+  // Time-Machine aware — the 30d portfolio window ends at the cursor,
+  // so the roll-up shows the group as it stood on that past day.
+  const { asOf } = getAsOf();
   const DAY = 86_400_000;
-  const since = new Date(now - 30 * DAY);
+  const until = asOf ?? new Date();
+  const since = new Date(until.getTime() - 30 * DAY);
+  const window = { gte: since, lte: until };
 
   const rows = await Promise.all(
     companies.map(async (c) => {
       const [rev, exp, headcount] = await Promise.all([
         prismaUnscoped.transaction.aggregate({
           _sum: { amount: true },
-          where: { companyId: c.id, kind: "REVENUE", occurredAt: { gte: since } },
+          where: { companyId: c.id, kind: "REVENUE", occurredAt: window },
         }),
         prismaUnscoped.transaction.aggregate({
           _sum: { amount: true },
-          where: { companyId: c.id, kind: "EXPENSE", occurredAt: { gte: since } },
+          where: { companyId: c.id, kind: "EXPENSE", occurredAt: window },
         }),
         prismaUnscoped.user.count({ where: { companyId: c.id } }),
       ]);
@@ -930,32 +936,48 @@ async function HoldingOps({ ar }: { ar: boolean }) {
             const sec = SECTOR_LABEL[x.c.sector] ?? { ar: x.c.sector, en: x.c.sector };
             return (
               <li key={x.c.id} className="ws-dest-row">
-                <div className="ws-dest-head">
-                  <span className="ws-dest-name">
-                    {ar ? x.c.name : x.c.nameEn ?? x.c.name}
-                    <span className="ws-mono" style={{ color: "var(--heri-ink-3)", fontWeight: 400 }}>
-                      {"  "}· {ar ? sec.ar : sec.en} · {formatNumber(x.headcount)} {ar ? "فرد" : "ppl"}
-                    </span>
-                  </span>
-                  <span className="ws-mono ws-dest-pct">{formatMoney(x.rev)}</span>
-                </div>
-                <div className="ws-dest-bar">
-                  <span
-                    className="ws-dest-fill"
-                    style={{
-                      width: `${pct}%`,
-                      background:
-                        x.margin >= 25
-                          ? "var(--heri-teal)"
-                          : x.margin >= 0
-                            ? "var(--heri-copper)"
-                            : "var(--heri-terracotta)",
-                    }}
-                  />
-                </div>
-                <div className="ws-dest-n ws-mono">
-                  {ar ? "صافي" : "net"} {formatMoney(x.net)} · {ar ? "هامش" : "margin"} {x.margin}%
-                </div>
+                <form action={enterWorkspace} className="ws-dest-jump-form">
+                  <input type="hidden" name="companyId" value={x.c.id} />
+                  <button
+                    type="submit"
+                    className="ws-dest-jump"
+                    aria-label={
+                      ar
+                        ? `ادخل مساحة عمل ${x.c.name}`
+                        : `Enter ${x.c.nameEn ?? x.c.name} workspace`
+                    }
+                  >
+                    <div className="ws-dest-head">
+                      <span className="ws-dest-name">
+                        {ar ? x.c.name : x.c.nameEn ?? x.c.name}
+                        <span className="ws-mono" style={{ color: "var(--heri-ink-3)", fontWeight: 400 }}>
+                          {"  "}· {ar ? sec.ar : sec.en} · {formatNumber(x.headcount)} {ar ? "فرد" : "ppl"}
+                        </span>
+                      </span>
+                      <span className="ws-dest-jump-cta ws-mono" aria-hidden>
+                        {ar ? "ادخل ←" : "Enter →"}
+                      </span>
+                      <span className="ws-mono ws-dest-pct">{formatMoney(x.rev)}</span>
+                    </div>
+                    <div className="ws-dest-bar">
+                      <span
+                        className="ws-dest-fill"
+                        style={{
+                          width: `${pct}%`,
+                          background:
+                            x.margin >= 25
+                              ? "var(--heri-teal)"
+                              : x.margin >= 0
+                                ? "var(--heri-copper)"
+                                : "var(--heri-terracotta)",
+                        }}
+                      />
+                    </div>
+                    <div className="ws-dest-n ws-mono">
+                      {ar ? "صافي" : "net"} {formatMoney(x.net)} · {ar ? "هامش" : "margin"} {x.margin}%
+                    </div>
+                  </button>
+                </form>
               </li>
             );
           })}

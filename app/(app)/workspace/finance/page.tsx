@@ -6,6 +6,7 @@ import { WorkspaceFinancials } from "@/components/workspace/WorkspaceFinancials"
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/workspace";
 import { getLocale } from "@/lib/i18n.server";
+import { getAsOf, formatAsOfLabel } from "@/lib/timemachine";
 import { formatMoney } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +23,11 @@ export default async function WorkspaceFinancePage() {
   const locale = getLocale();
   const ar = locale === "ar";
 
+  // Time-Machine aware — when the user has scrubbed back, the whole
+  // P&L + ledger reconstructs the company's books as of that date.
+  const { asOf, isTraveling } = getAsOf();
   const txns = await prisma.transaction.findMany({
+    where: asOf ? { occurredAt: { lte: asOf } } : undefined,
     orderBy: { occurredAt: "desc" },
     take: 1200,
   });
@@ -46,7 +51,15 @@ export default async function WorkspaceFinancePage() {
       </section>
 
       <HeritageSection
-        eyebrow={ar ? "مفلتر لهذه الشركة فقط" : "Filtered to this company only"}
+        eyebrow={
+          isTraveling && asOf
+            ? ar
+              ? `الحالة كما في ${formatAsOfLabel(asOf, "ar")}`
+              : `State as of ${formatAsOfLabel(asOf, "en")}`
+            : ar
+              ? "مفلتر لهذه الشركة فقط"
+              : "Filtered to this company only"
+        }
         title={ar ? "القيادة المالية" : "Financial command"}
       >
         <WorkspaceFinancials ar={ar} txns={txns.map((t) => ({ kind: t.kind, amount: t.amount, occurredAt: t.occurredAt }))} />

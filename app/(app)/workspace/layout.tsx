@@ -9,11 +9,12 @@
 
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LogOut } from "lucide-react";
+import { LogOut, ArrowLeftRight } from "lucide-react";
 import { prismaUnscoped } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/workspace";
 import { getLocale } from "@/lib/i18n.server";
 import { WorkspaceNav } from "@/components/workspace/WorkspaceNav";
+import { WorkspaceSwitcher } from "@/components/workspace/WorkspaceSwitcher";
 import { exitWorkspace } from "@/app/actions/workspace";
 
 const SECTOR_GLYPH: Record<string, string> = {
@@ -56,6 +57,13 @@ export default async function WorkspaceLayout({
     },
   });
   if (!company) redirect("/companies");
+
+  // W5 — every company is reachable from inside the shell. Unscoped so
+  // the switcher sees all units regardless of the active workspace.
+  const allCompanies = await prismaUnscoped.company.findMany({
+    select: { id: true, code: true, name: true, nameEn: true, sector: true },
+    orderBy: { name: "asc" },
+  });
 
   const locale = getLocale();
   const ar = locale === "ar";
@@ -101,12 +109,27 @@ export default async function WorkspaceLayout({
             </div>
           </div>
 
-          <form action={exitWorkspace}>
-            <button type="submit" className="ws-band-exit">
-              <LogOut className="h-3.5 w-3.5" strokeWidth={1.7} />
-              <span>{ar ? "خروج لكل الشركات" : "Exit to all companies"}</span>
-            </button>
-          </form>
+          <div className="ws-band-actions">
+            <WorkspaceSwitcher
+              ar={ar}
+              currentId={workspaceId}
+              companies={allCompanies}
+            />
+            <Link
+              href={`/compare?a=${workspaceId}`}
+              className="ws-band-exit"
+              prefetch={false}
+            >
+              <ArrowLeftRight className="h-3.5 w-3.5" strokeWidth={1.7} />
+              <span>{ar ? "قارن بوحدة أخرى" : "Compare vs unit"}</span>
+            </Link>
+            <form action={exitWorkspace}>
+              <button type="submit" className="ws-band-exit">
+                <LogOut className="h-3.5 w-3.5" strokeWidth={1.7} />
+                <span>{ar ? "خروج لكل الشركات" : "Exit to all companies"}</span>
+              </button>
+            </form>
+          </div>
         </div>
 
         <WorkspaceNav ar={ar} />

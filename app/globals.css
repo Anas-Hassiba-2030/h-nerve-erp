@@ -8267,6 +8267,137 @@ html[dir="rtl"] .sidebar-drawer-panel { --drawer-from: -100%; }
   border-color: var(--heri-copper);
 }
 
+/* W5 — workspace switcher (jump unit without exiting) */
+.ws-band-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ws-switch {
+  position: relative;
+}
+.ws-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: transparent;
+  color: var(--heri-cream);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  list-style: none;
+  user-select: none;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+.ws-switch-btn::-webkit-details-marker { display: none; }
+.ws-switch-btn:hover,
+.ws-switch[open] .ws-switch-btn {
+  background: var(--heri-copper);
+  color: var(--heri-ink);
+  border-color: var(--heri-copper);
+}
+.ws-switch-caret {
+  font-size: 9px;
+  transition: transform 160ms var(--ease-out-quart, ease);
+}
+.ws-switch[open] .ws-switch-caret { transform: rotate(180deg); }
+.ws-switch-menu {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(100% + 8px);
+  z-index: 60;
+  min-width: 288px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 8px;
+  background: var(--heri-cream);
+  color: var(--heri-ink);
+  border: 1px solid var(--heri-rule-strong);
+  box-shadow: 0 18px 44px -18px rgba(0, 0, 0, 0.55);
+  animation: ws-rise 200ms var(--ease-out-quart, ease) both;
+}
+.ws-switch-head {
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--heri-ink-3);
+  padding: 6px 8px 8px;
+}
+.ws-switch-item-form { display: block; }
+.ws-switch-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  background: transparent;
+  border: 0;
+  border-inline-start: 2px solid transparent;
+  color: var(--heri-ink);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: background 130ms ease, border-color 130ms ease;
+}
+.ws-switch-item:hover {
+  background: var(--heri-cream-2);
+  border-inline-start-color: var(--heri-copper);
+}
+.ws-switch-item:disabled,
+.ws-switch-item[data-active="true"] {
+  cursor: default;
+  opacity: 0.7;
+  background: var(--heri-cream-2);
+}
+.ws-switch-glyph {
+  font-size: 15px;
+  width: 22px;
+  text-align: center;
+  flex: none;
+}
+.ws-switch-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ws-switch-code {
+  font-size: 10px;
+  color: var(--heri-ink-3);
+  flex: none;
+}
+.ws-switch-here {
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--heri-copper);
+  flex: none;
+}
+.ws-switch-go {
+  color: var(--heri-copper);
+  opacity: 0;
+  flex: none;
+  transition: opacity 130ms ease;
+}
+.ws-switch-item:hover .ws-switch-go { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .ws-switch-caret,
+  .ws-switch-menu,
+  .ws-switch-item,
+  .ws-switch-go { transition: none !important; animation: none !important; }
+}
+
 /* Workspace nav */
 .ws-nav {
   display: flex;
@@ -8968,6 +9099,43 @@ html[dir="rtl"] .sidebar-drawer-panel { --drawer-from: -100%; }
   transition: width 600ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .ws-dest-n { margin-top: 4px; font-size: 10.5px; color: var(--heri-ink-3); }
+
+/* W5 — Holding roll-up rows deep-link into each unit's Command */
+.ws-dest-jump-form { display: block; }
+.ws-dest-jump {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-inline-start: 2px solid transparent;
+  padding: 6px 8px 8px;
+  margin-inline-start: -10px;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+.ws-dest-jump:hover,
+.ws-dest-jump:focus-visible {
+  background: var(--heri-cream-2);
+  border-inline-start-color: var(--heri-copper);
+  outline: none;
+}
+.ws-dest-jump-cta {
+  font-size: 10px;
+  color: var(--heri-copper);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  opacity: 0;
+  margin-inline-start: auto;
+  padding-inline: 10px;
+  transition: opacity 140ms ease;
+}
+.ws-dest-jump:hover .ws-dest-jump-cta,
+.ws-dest-jump:focus-visible .ws-dest-jump-cta { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .ws-dest-jump, .ws-dest-jump-cta { transition: none !important; }
+}
 
 /* ---- Elegance: section stagger entrance ---- */
 .ws-page > * {

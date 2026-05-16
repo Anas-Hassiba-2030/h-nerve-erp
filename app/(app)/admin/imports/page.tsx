@@ -9,7 +9,7 @@
 import { redirect } from "next/navigation";
 import { ArrowRight, Inbox } from "lucide-react";
 import { getLocale } from "@/lib/i18n.server";
-import { requireUser } from "@/lib/session";
+import { getCurrentUser } from "@/lib/session";
 import { prismaUnscoped } from "@/lib/db";
 import { Topbar } from "@/components/Topbar";
 import { formatDateTime, formatNumber, formatMoney2 } from "@/lib/utils";
@@ -19,8 +19,10 @@ export const dynamic = "force-dynamic";
 
 export default async function ImportsAdminPage() {
   const ar = getLocale() === "ar";
-  const user = await requireUser();
-  // Defensive gate — this surface exposes cross-tenant import data.
+  // Standard (app) gate (mirrors (admin)/layout.tsx): no session → /login,
+  // then role-gate this cross-tenant surface.
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
   if (!["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) {
     redirect("/dashboard");
   }

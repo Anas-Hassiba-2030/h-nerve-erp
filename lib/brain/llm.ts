@@ -40,6 +40,12 @@ export function llmConfig() {
   };
 }
 
+// Phase D — runaway cost guard. A single process makes at most
+// BRAIN_MAX_LLM_CALLS real Anthropic calls (default 200); after that it
+// silently serves the stub so a loop or bug can't drain the API budget.
+let __llmCallCount = 0;
+let __llmCapLogged = false;
+
 /**
  * Fire one Claude Messages-API call. If no key is configured, returns the stub.
  * The stub is required so the UI is never broken in dev / unauthenticated demos.
@@ -57,6 +63,18 @@ export async function callLlm(req: LlmRequest, stub: StubGenerator): Promise<Llm
       ms: Date.now() - t0,
     };
   }
+
+  const cap = Number(process.env.BRAIN_MAX_LLM_CALLS ?? 200);
+  if (cap > 0 && __llmCallCount >= cap) {
+    if (!__llmCapLogged) {
+      __llmCapLogged = true;
+      console.warn(
+        `[brain.llm] cost cap reached (${cap} real calls) — serving stub to protect the API budget. Raise BRAIN_MAX_LLM_CALLS to allow more.`,
+      );
+    }
+    return { text: stub(req), isStub: true, ms: Date.now() - t0 };
+  }
+  __llmCallCount++;
 
   try {
     const body = {

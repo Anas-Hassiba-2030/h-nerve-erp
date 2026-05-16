@@ -15,8 +15,8 @@ export function ClearTestImportsButton({ ar }: { ar: boolean }) {
         if (
           !confirm(
             ar
-              ? "حذف كل دفعات الاستيراد التجريبية (المصدر يبدأ بـ legacy- أو يحتوي على test)؟ هذا يشمل دفعات n8n الواردة من legacy-warehouse-db. لا يمكن التراجع."
-              : "Delete all test import batches (source starts with 'legacy-' or contains 'test')? This includes the n8n 'legacy-warehouse-db' payloads. This cannot be undone.",
+              ? "حذف كل الاستيرادات التجريبية بما في ذلك دفعات flood-tenant والدفعات بدون مصدر (المصدر يبدأ بـ legacy- أو يحتوي على test أو فارغ، أو المستأجر = flood-tenant)؟ لا يمكن التراجع."
+              : "Delete all test imports including flood-tenant and source-less batches (source starts with 'legacy-', contains 'test', is empty, or tenant = flood-tenant)? This cannot be undone.",
           )
         ) {
           e.preventDefault();

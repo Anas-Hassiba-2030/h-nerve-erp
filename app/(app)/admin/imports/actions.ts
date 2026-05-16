@@ -24,6 +24,9 @@ export async function clearTestImports(): Promise<void> {
     OR: [
       { source: { startsWith: "legacy-" } },
       { source: { contains: "test" } },
+      { source: null }, // source-less batches (NULL)
+      { source: "" }, // empty-string source
+      { tenantId: "flood-tenant" }, // the rate-limit flood rows
     ],
   };
 

@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/session";
 import { requireRole } from "@/lib/authz";
 import {
   parseFormState,
@@ -44,7 +43,8 @@ export async function createCompany(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  await requireUser();
+  // Phase D: creating a business unit is a privileged mutation.
+  await requireRole("MANAGER");
   const parsed = parseFormState(companySchema, read(formData));
   if (!parsed.ok) return parsed.state;
 
@@ -79,7 +79,8 @@ export async function updateCompany(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  await requireUser();
+  // Phase D: editing a business unit is a privileged mutation.
+  await requireRole("MANAGER");
   const parsed = parseFormState(companySchema, read(formData));
   if (!parsed.ok) return parsed.state;
 

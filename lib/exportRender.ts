@@ -34,7 +34,8 @@ export function escapeHtml(s: any): string {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 export function renderKpiGrid(kpis: KpiCard[], ar: boolean): string {

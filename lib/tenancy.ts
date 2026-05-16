@@ -64,5 +64,8 @@ export const STEP_DELAY_MS: Record<ProvisioningStepKey, number> = {
 };
 
 export function isValidSlug(slug: string): boolean {
-  return /^[a-z0-9](?:[a-z0-9-]{1,30}[a-z0-9])?$/.test(slug);
+  // Valid lengths 1..32: a lone alphanumeric, or alnum + up to 30 middle
+  // (alnum/hyphen) + alnum. {0,30} (not {1,30}) is what permits 2-char
+  // slugs while still forbidding leading/trailing hyphens and capping at 32.
+  return /^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/.test(slug);
 }

@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/session";
 import { requireRole } from "@/lib/authz";
 import { generateNumber } from "@/lib/utils";
 import { logActivity } from "@/lib/activityLog";
@@ -20,7 +19,8 @@ const txSchema = z.object({
 });
 
 export async function createTransaction(formData: FormData) {
-  const user = await requireUser();
+  // Phase D: recording money movements is a privileged mutation.
+  const user = await requireRole("MANAGER");
   const data = txSchema.parse({
     companyId: formData.get("companyId"),
     kind: formData.get("kind"),

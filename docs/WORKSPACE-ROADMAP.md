@@ -199,6 +199,119 @@ Make what exists not break on stage; make the role model legible.
 
 ---
 
+## Waves W8–W10 — Production hardening (REAL data + automation)
+
+Goal (Anas, 2026-05-16): before the pitch, prove the system can hold
+**real information** and **automate** it. Three waves. Decisions taken:
+Postgres host = **Neon free**, Vision = **gated, default OFF**, schema
+collision = **desktop app commits its brain-meta schema first**.
+
+### ⚠️ Blockers on you (Anas) — W9 cannot start until both are done
+
+1. **Create a Neon project** (neon.tech → free → new project) and
+   paste its connection string into `.env` as `DATABASE_URL=...`
+   (or send it to me). One string, ~2 minutes, no install.
+2. **Tell the Claude desktop app to finish + commit its
+   `lib/brain/meta.*` schema changes.** W9 rewrites
+   `prisma/schema.prisma` (Float→Decimal money); if the desktop app
+   edits the same file uncommitted, the work collides. W8 and W10 do
+   **not** touch the schema, so they proceed regardless.
+
+---
+
+### Wave W8 — Real-time push transport (Phase 17) 🔄 IN PROGRESS
+
+**What & why.** Today presence/comments **poll every 25 s** — peers
+lag up to 25 s. Upgrade the read path to **server push** so changes
+appear in well under a second.
+
+**Why SSE, not raw WebSocket** (transparent note): on Next.js /
+Vercel the runtime has no long-lived socket server — a raw WS server
+needs a custom Node host and would break the deploy story (the code
+already documents this, `lib/realtime.ts:18-23`). **SSE** (the server
+holds the HTTP connection open and pushes) delivers the *same
+outcome* — real-time, no 25 s lag — on the existing runtime. Same
+in-memory store, no new dependency, no infra.
+
+**Steps:**
+1. Add a tiny per-`scopeId` pub/sub (an `EventEmitter`) to
+   `lib/realtime.ts`; `beat()` / `postComment()` / `dismissComment()`
+   notify subscribers of that scope.
+2. New `GET /api/realtime/stream` route handler returning a
+   `ReadableStream` (`text/event-stream`): subscribe the connection
+   to its scope, push `RTScopeState` on every change, plus a
+   `: keepalive` comment every 20 s so proxies don't kill the idle
+   socket. Drop the subscription on `request.signal` abort.
+3. Writes stay POST (SSE is server→client only) — cursors/typing/
+   comments still go *up* via the existing endpoint, unchanged.
+4. `components/realtime/RealtimePresence.tsx`: consume via
+   `EventSource`; **remove/disable the 25 s poll** (no double
+   heartbeats) with a graceful fallback to polling if `EventSource`
+   errors.
+5. Re-base the presence TTL: the old "TTL ≥ poll interval" invariant
+   is meaningless with no poll — keep a lightweight client heartbeat
+   and lift TTL to ~5 min so an idle viewer doesn't vanish from peers.
+
+**Touches:** `lib/realtime.ts`, `app/api/realtime/**`,
+`components/realtime/RealtimePresence.tsx`, `.rt-*` CSS if needed.
+Disjoint from the desktop app's `lib/brain/meta.*`. No money, no infra.
+
+---
+
+### Wave W9 — SQLite → Postgres (REAL data integrity) ⬜ BLOCKED
+
+**What & why.** SQLite stores money as `Float` (rounding errors) and
+has no real migrations. Postgres + `Decimal` = trustworthy money and
+a real migration history — the foundation for "real information."
+
+**Steps (once blockers clear):**
+1. `prisma/schema.prisma`: `datasource db` → `provider = "postgresql"`,
+   `url = env("DATABASE_URL")` (Neon string).
+2. Retype every money column `Float` → `Decimal @db.Decimal(14,2)`
+   (Transaction.amount, FutureProject.budgetJod, Plan.targetDelta is
+   a ratio so stays Float, etc. — full audit during the wave).
+3. Adjust `lib/utils.ts` money helpers + any `Number()` math that now
+   receives `Prisma.Decimal` (`.toNumber()` / `Decimal` arithmetic).
+4. `npx prisma migrate dev --name init_postgres` — first **real**
+   migration (replaces `db push`). Commit the `migrations/` folder.
+5. Port the seed (`prisma/seed.ts`) — Decimal-safe; reseed Neon.
+6. Full TS pass + smoke every money surface (finance, Holding
+   roll-up, compare, dashboard) for Decimal/number breakage.
+
+**Risk:** widest blast radius of the three (touches every monetary
+calc). Done in isolation, verified surface-by-surface.
+
+---
+
+### Wave W10 — Real document intelligence / Claude Vision (Phase 18) ⬜
+
+**What & why.** `lib/docintel/parser.ts` is a deterministic stub.
+Wave W10 adds a **real Claude Vision** extraction path so a dropped
+invoice/lab-report/contract is actually read — the "automate it"
+piece.
+
+**Money gate (decided):** real path lives behind
+`DOCINTEL_USE_VISION=true`. **Default OFF** — the stub stays the live
+path; **zero API credit is spent** until Anas sets the env var
+himself. Building it costs nothing.
+
+**Steps:**
+1. `lib/docintel/parser.ts`: keep the stub as default export path;
+   add `parseWithVision(file)` using the Anthropic SDK
+   (`claude-opus-4-7` vision) behind the env flag — a factory that
+   returns the stub unless `DOCINTEL_USE_VISION === "true"`.
+2. Structured extraction prompt → typed `ExtractedDoc` (same shape
+   the stub returns, so the Documents ledger/UI is unchanged).
+3. Graceful fallback: any Vision error → stub result + a logged
+   note, never a hard failure in the drop zone.
+4. Document the env var + cost in `.env.example` and the roadmap.
+   No live call in tests/CI.
+
+**Touches:** `lib/docintel/**`, maybe `app/(app)/documents/**`.
+Disjoint, no infra, no spend while the flag is off.
+
+---
+
 ## Long horizon (carried from PHASES-INTELLIGENCE.md)
 
 - ⬜ Phase 18 real Claude Vision in `lib/docintel/parser.ts`

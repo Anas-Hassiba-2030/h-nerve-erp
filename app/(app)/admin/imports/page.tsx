@@ -6,6 +6,7 @@
 // the URL, so this still serves at /admin/imports with no collision
 // against (admin)/admin/tenants. Server component, no client fetching.
 
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, Inbox } from "lucide-react";
 import { getLocale } from "@/lib/i18n.server";
@@ -151,8 +152,19 @@ export default async function ImportsAdminPage() {
                             key={r.id}
                             style={{ borderTop: "1px solid var(--border)" }}
                           >
-                            <td className="px-3 py-2 font-mono" style={{ color: "var(--text)" }}>
-                              {r.sku ?? dash}
+                            <td className="px-3 py-2 font-mono">
+                              {r.sku ? (
+                                <Link
+                                  href={`/admin/products?sku=${encodeURIComponent(r.sku)}`}
+                                  className="underline decoration-dotted underline-offset-2"
+                                  style={{ color: "var(--brand-deep)" }}
+                                  title={ar ? "عرض في كتالوج المنتجات" : "View in product catalog"}
+                                >
+                                  {r.sku}
+                                </Link>
+                              ) : (
+                                <span style={{ color: "var(--text)" }}>{dash}</span>
+                              )}
                             </td>
                             <td className="px-3 py-2" style={{ color: "var(--text)" }}>
                               {r.productName ?? dash}

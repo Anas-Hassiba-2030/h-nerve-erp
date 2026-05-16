@@ -19,6 +19,7 @@ import { timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { prismaUnscoped } from "@/lib/db";
 import { checkImportRate, IMPORT_MAX_PER_WINDOW } from "@/lib/importRateLimit";
+import { applyMapping, parseMappingRow } from "@/lib/importMapping";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -111,6 +112,38 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // --- Per-tenant column mapping (Phase 4). Opt-in: resolved by
+  // (tenantId, sourceSystem) where sourceSystem is a hyphen-bounded
+  // prefix of the batch `source` ("maha-erp" ⊂ "maha-erp-2026-…"),
+  // longest match wins (robust to hyphenated systems like
+  // "hotel-pms-excel" — a naive split-on-first-"-" would break those).
+  // Placed AFTER the rate limiter so a flood can't hammer the mappings
+  // table, and BEFORE the per-record Zod so records are canonical
+  // before validation. No mapping / inactive / bad JSON → unchanged
+  // (backward compatible). prismaUnscoped: TenantImportMapping has no
+  // companyId, so workspace-scoping is moot (consistent w/ this file).
+  let mappingApplied = false;
+  let mappingSourceSystem: string | null = null;
+  let effectiveRecords: unknown[] = records;
+  if (tenantId && source) {
+    const candidates = await prismaUnscoped.tenantImportMapping.findMany({
+      where: { tenantId, active: true },
+    });
+    const hit = candidates
+      .filter(
+        (mp) =>
+          source === mp.sourceSystem ||
+          source.startsWith(`${mp.sourceSystem}-`),
+      )
+      .sort((a, b) => b.sourceSystem.length - a.sourceSystem.length)[0];
+    const mapping = parseMappingRow(hit);
+    if (mapping) {
+      effectiveRecords = applyMapping({ records }, mapping).records;
+      mappingApplied = true;
+      mappingSourceSystem = hit.sourceSystem;
+    }
+  }
+
   // --- Validate + shape each record ---
   const errors: ImportError[] = [];
   const rowsToCreate: Array<{
@@ -125,7 +158,7 @@ export async function POST(req: NextRequest) {
     error: string | null;
   }> = [];
 
-  records.forEach((rec, index) => {
+  effectiveRecords.forEach((rec, index) => {
     // Verbatim copy for debugging, length-bounded so one giant record
     // can't bloat the table.
     const rowData = JSON.stringify(rec ?? null).slice(0, 4000);
@@ -252,7 +285,16 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json(
-    { accepted, rejected, errors, upserted: { created, updated } },
+    {
+      accepted,
+      rejected,
+      errors,
+      upserted: { created, updated },
+      mapping: {
+        applied: mappingApplied,
+        ...(mappingSourceSystem ? { sourceSystem: mappingSourceSystem } : {}),
+      },
+    },
     { status: 200 },
   );
 }

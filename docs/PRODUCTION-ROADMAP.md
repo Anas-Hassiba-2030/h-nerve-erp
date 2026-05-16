@@ -171,7 +171,13 @@ weeks of focused work, not a rewrite.
 Driven by Anas's feedback after the first working build. Tracked here so
 nothing is dropped.
 
-### G1 — Real per-company ERP (Command Center) — ⏭ headline
+### G1 — Real per-company ERP (Command Center) — ✅ DONE (`66c3d51`)
+`/workspace` Command Center: branded hero + financial command (trend +
+sparklines) + sector ops (hospitality/dairy/agri/education/holding) +
+future-projects pipeline + unit team + drill-downs. enterWorkspace lands
+here. Browser-verified live (Arena: all sections render, no console
+errors, screenshot `docs/smoke-2026-05-16/06-command-center.png`).
+Original spec below.
 Feedback: entering a company just scoped the *group* dashboard; it felt
 generic, not "a fully detailed المها ERP that analyzes everything."
 - New dedicated **Company Command Center** shown on entering a workspace:
@@ -180,17 +186,42 @@ generic, not "a fully detailed المها ERP that analyzes everything."
   that sector, team, alerts, AI insights, future projects, supply links.
 - `enterWorkspace` redirects to the Command Center, not `/dashboard`.
 
-### G2 — Performance — ⏭
+### G2 — Performance — ✅ DONE (`8c15dac`)
+Realtime poll 280ms→25s/60s, TTL→60s; `docs/PERFORMANCE.md` (prod-build
++ optional local-SQLite fix order). Original below.
 Feedback: system feels heavy/laggy. Likely causes: Next **dev mode** +
 **Neon remote latency** (vs instant local SQLite) + realtime SSE polling.
 - Production build path documented; realtime poll interval tuned; query
   waterfalls reduced; fast local-SQLite option kept one toggle away.
 
-### G3 — Phases audit — ⏭
-Verify A–G, nothing left behind; this file stays the single source of truth.
+### G3 — Phases audit — ✅ DONE
+See the "Phases audit A→G" table at the bottom of this file.
 
-### G4 — Operating Protocol (user manual) — ⏭
+### G4 — Operating Protocol (user manual) — ✅ DONE (`c5366d5`)
+`docs/OPERATING-PROTOCOL.md` shipped. Original below.
 Feedback: "I'm lost — rebuild-the-brain, errors, how to run it."
 - `docs/OPERATING-PROTOCOL.md`: how to run (dev vs build), login, every
   major area, what "rebuild the brain" does + cost, common errors + fixes,
   SQLite↔Postgres toggle, pitch-day checklist.
+
+---
+
+# Phases audit A→G (G3) — 2026-05-16, single source of truth
+
+| Phase | What | Status |
+|---|---|---|
+| A | Security (admin gate, secrets, API key) | ✅ done |
+| B | SQLite → Neon Postgres (seeded, verified) | ✅ done (migrations/backups = future) |
+| C | Per-company workspace isolation (data scoping) | ✅ done, merged, 10 tests |
+| D | RBAC on all 28 destructive actions | ✅ core done (create/update + AI rate-limit = future) |
+| E | Regression net (39 tests) + CI gate | 🟡 net+CI live; CRUD-module tests = future |
+| F | Replace stubs (real doc parser, real integrations, wire/retire Brain.ts) | ⏳ not started (post-pitch) |
+| G1 | Real per-company ERP Command Center | ✅ done, browser-verified |
+| G2 | Performance | ✅ done |
+| G3 | This audit | ✅ done |
+| G4 | Operating Protocol manual | ✅ done |
+| Pitch fixes | #1 modals · #2 Arena · #3 garble · #4 branding | ✅ all done + smoke-verified |
+
+**Nothing dropped.** Open items are explicitly future-tagged: Phase F
+(stubs→real), Phase B migrations/backups, Phase D create/update + AI
+cost-caps, Phase E broader CRUD tests. All tracked above.

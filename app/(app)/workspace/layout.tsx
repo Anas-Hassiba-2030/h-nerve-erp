@@ -9,9 +9,10 @@
 
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LogOut, ArrowLeftRight } from "lucide-react";
+import { LogOut, ArrowLeftRight, Lock } from "lucide-react";
 import { prismaUnscoped } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/workspace";
+import { getUserIfRole } from "@/lib/authz";
 import { getLocale } from "@/lib/i18n.server";
 import { WorkspaceNav } from "@/components/workspace/WorkspaceNav";
 import { WorkspaceSwitcher } from "@/components/workspace/WorkspaceSwitcher";
@@ -67,6 +68,8 @@ export default async function WorkspaceLayout({
 
   const locale = getLocale();
   const ar = locale === "ar";
+  // W6 surfaced — make the role model visible, not "buttons missing".
+  const canMutate = !!(await getUserIfRole("MANAGER"));
   const glyph = SECTOR_GLYPH[company.sector] ?? "■";
   const sectorLabel = SECTOR_LABEL[company.sector] ?? {
     ar: company.sector,
@@ -110,6 +113,19 @@ export default async function WorkspaceLayout({
           </div>
 
           <div className="ws-band-actions">
+            {!canMutate ? (
+              <span
+                className="ws-band-ro"
+                title={
+                  ar
+                    ? "حسابك للقراءة فقط — الإجراءات تتطلب صلاحية مدير"
+                    : "Your account is read-only — actions need MANAGER+"
+                }
+              >
+                <Lock className="h-3 w-3" strokeWidth={2} />
+                <span>{ar ? "قراءة فقط" : "Read-only"}</span>
+              </span>
+            ) : null}
             <WorkspaceSwitcher
               ar={ar}
               currentId={workspaceId}

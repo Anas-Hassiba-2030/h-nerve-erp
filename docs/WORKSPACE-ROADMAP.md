@@ -172,12 +172,30 @@ password `admin123`):**
 - Commit path: `maha.gm@hourani.jo` (MANAGER) → Maha workspace →
   full action buttons. `admin@hourani.jo` (ADMIN) also passes.
 
-**Minor follow-ups (not blocking):**
-- `team/page.tsx` — the `{canMutate ? (` wrapper indentation is flat
-  vs. its `<form>` child; cosmetic, tidy on next touch.
-- `ForbiddenError` from a direct STAFF POST shows Next's raw error
-  page. Consistent with Phase D; a global error boundary →
-  friendly `/workspace` redirect + flash is the eventual polish.
+**Minor follow-ups — both now resolved:**
+- ✅ `team/page.tsx` conditional re-indented (cosmetic, done).
+- ✅ `ForbiddenError` UX — *already_ handled. `app/(app)/error.tsx`
+  is a polished branded boundary covering every `(app)` descendant
+  (incl. workspace server actions). A STAFF direct-POST gets the
+  calm "your data is safe · retry · back" panel with collapsed
+  technical details — never a raw stack trace. No new code needed.
+
+---
+
+## Wave W7 — Pitch hardening ✅ COMPLETE
+
+Make what exists not break on stage; make the role model legible.
+
+- ✅ **Read-only badge in the command band.** When the signed-in
+  user is below MANAGER, an amber `🔒 Read-only` pill sits in the
+  band actions (bilingual tooltip explaining why). Turns "buttons
+  are missing" into "the system visibly enforces roles" — a thing
+  to point at during the demo, not a gap to explain away.
+- ✅ Confirmed the `(app)/error.tsx` boundary already shields every
+  workspace error path (no raw traces in front of leadership).
+- ✅ Dry-run accounts verified in seed (all `admin123`):
+  `staff@hourani.jo` read-only · `maha.gm@hourani.jo` MANAGER ·
+  `admin@hourani.jo` ADMIN. No seed change required.
 
 ---
 

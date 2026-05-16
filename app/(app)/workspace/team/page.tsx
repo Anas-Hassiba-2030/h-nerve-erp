@@ -125,33 +125,33 @@ export default async function WorkspaceTeamPage() {
                   </div>
                 </div>
                 {canMutate ? (
-                <form action={assignProjectOwner} className="ws-owner-form">
-                  <input type="hidden" name="id" value={p.id} />
-                  <select
-                    name="owner"
-                    defaultValue={p.ownerName ?? ""}
-                    className="ws-owner-select"
-                    aria-label={ar ? "مالك المشروع" : "Project owner"}
-                  >
-                    <option value="">
-                      {ar ? "— بدون مالك —" : "— Unassigned —"}
-                    </option>
-                    {orphanOwner ? (
-                      <option value={orphanOwner}>
-                        {orphanOwner}
-                        {ar ? " (خارج الفريق)" : " (left team)"}
+                  <form action={assignProjectOwner} className="ws-owner-form">
+                    <input type="hidden" name="id" value={p.id} />
+                    <select
+                      name="owner"
+                      defaultValue={p.ownerName ?? ""}
+                      className="ws-owner-select"
+                      aria-label={ar ? "مالك المشروع" : "Project owner"}
+                    >
+                      <option value="">
+                        {ar ? "— بدون مالك —" : "— Unassigned —"}
                       </option>
-                    ) : null}
-                    {memberNames.map((n) => (
-                      <option key={n} value={n}>
-                        {n}
-                      </option>
-                    ))}
-                  </select>
-                  <button type="submit" className="ws-act ws-act-ghost">
-                    {ar ? "إسناد" : "Assign"}
-                  </button>
-                </form>
+                      {orphanOwner ? (
+                        <option value={orphanOwner}>
+                          {orphanOwner}
+                          {ar ? " (خارج الفريق)" : " (left team)"}
+                        </option>
+                      ) : null}
+                      {memberNames.map((n) => (
+                        <option key={n} value={n}>
+                          {n}
+                        </option>
+                      ))}
+                    </select>
+                    <button type="submit" className="ws-act ws-act-ghost">
+                      {ar ? "إسناد" : "Assign"}
+                    </button>
+                  </form>
                 ) : null}
               </li>
               );

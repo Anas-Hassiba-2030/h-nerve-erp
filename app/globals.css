@@ -8273,6 +8273,23 @@ html[dir="rtl"] .sidebar-drawer-panel { --drawer-from: -100%; }
   align-items: center;
   gap: 10px;
 }
+/* W6 — read-only badge: makes the role model visible on the band */
+.ws-band-ro {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background: color-mix(in srgb, var(--heri-amber) 16%, transparent);
+  color: var(--heri-amber);
+  border: 1px solid color-mix(in srgb, var(--heri-amber) 45%, transparent);
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: default;
+}
 .ws-switch {
   position: relative;
 }

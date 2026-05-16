@@ -1407,9 +1407,57 @@ model ImportRow {
   status      String    @default("ACCEPTED")
   // Rejection reason when status = "REJECTED".
   error       String?
+  // Live-product linkage. Null for rejected rows and pre-Phase-3 rows.
+  productId   String?
+  product     Product?  @relation(fields: [productId], references: [id])
   createdAt   DateTime  @default(now())
 
   @@index([importLogId])
   @@index([sku])
+  @@index([productId])
+}
+
+// =====================================================================
+// PRODUCT — operational source of truth. The import endpoint upserts
+// into this by (tenantId, sku); ImportLog/ImportRow remain the audit
+// trail. tenantId is an OPAQUE caller-supplied label (matches
+// ImportLog.tenantId + docs/IMPORT-PIPELINE.md) — deliberately NOT a
+// Tenant FK: Tenant.id is a cuid, the table is empty (single-tenant by
+// default), and the n8n payload sends "hourani-hotels". A hard FK would
+// P2003 every import. Composite-unique + indexed gives dedup and
+// tenant-scoped queries without the harmful constraint.
+// =====================================================================
+model Product {
+  id              String    @id @default(cuid())
+  tenantId        String
+  sku             String
+  name            String
+  quantity        Int       @default(0)
+  // Money. Intended precision/scale = (12,2); the native @db.Decimal
+  // attribute is unsupported on the sqlite provider (same as
+  // ImportRow.unitCost) — applied on the W9 Postgres cutover.
+  unitCost        Decimal?
+  supplier        String?
+  warehouse       String?
+
+  // Provenance / audit linkage.
+  firstImportedAt DateTime  @default(now())
+  lastImportedAt  DateTime  @default(now())
+  // Spec's "importHistory count" — # of imports that touched this row.
+  importCount     Int       @default(1)
+
+  // Soft-delete column only. Wiring into lib/softDelete.ts is deferred
+  // (no delete UI this phase, per the task).
+  deletedAt       DateTime?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  importRows      ImportRow[]
+
+  @@unique([tenantId, sku])
+  @@index([tenantId, deletedAt])
+  @@index([tenantId, supplier])
+  @@index([tenantId, warehouse])
 }
 

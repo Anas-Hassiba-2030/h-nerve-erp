@@ -1461,3 +1461,37 @@ model Product {
   @@index([tenantId, warehouse])
 }
 
+// =====================================================================
+// TENANT IMPORT MAPPING — per (tenantId, sourceSystem) field-name
+// translation, applied by the import endpoint BEFORE Zod (Phase 4).
+// Opt-in: no row, or active=false → payload passes through unchanged.
+// tenantId is an OPAQUE label, no Tenant FK (same precedent as Phase 3
+// Product). JSON is stored as String — codebase-wide convention
+// (SQLite has no JSON type; cf. ImportRow.rowData, *Json columns).
+// =====================================================================
+model TenantImportMapping {
+  id           String   @id @default(cuid())
+  tenantId     String
+  // Short identifier the tenant picks, e.g. "maha-erp". Matched against
+  // the batch `source` by prefix at import time.
+  sourceSystem String
+  // Human label: "Maha Dairy stock export".
+  description  String?
+
+  // JSON object string { "their_field": "our_field" }, e.g.
+  // {"Item Code":"sku","Stock Level":"quantity","السعر":"unitCost"}.
+  fieldMapJson String   @default("{}")
+  // Optional JSON object string of fallback values for missing fields,
+  // e.g. {"warehouse":"Amman-A"}. Null/absent → no defaults.
+  defaultsJson String?
+
+  // Disabled mappings are ignored (payload passes through as-is).
+  active       Boolean  @default(true)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([tenantId, sourceSystem])
+  @@index([tenantId, active])
+}
+

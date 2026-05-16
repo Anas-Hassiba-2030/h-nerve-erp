@@ -1358,6 +1358,10 @@ model ImportLog {
   endpoint  String   @default("test")
   // Optional caller-supplied label (body.source) — who/what sent it.
   source    String?
+  // Caller-supplied tenant label from the POST body. NOT a Tenant FK —
+  // it is an opaque, caller-controlled string (length-capped on write,
+  // never auto-creates a Tenant row).
+  tenantId  String?
   accepted  Int      @default(0)
   rejected  Int      @default(0)
   // JSON-stringified Array<{ index: number; error: string }>.
@@ -1368,7 +1372,44 @@ model ImportLog {
   ip        String?
   createdAt DateTime @default(now())
 
+  // One row per record in the batch (structured + raw).
+  rows      ImportRow[]
+
   @@index([createdAt])
   @@index([endpoint])
+  @@index([tenantId])
+}
+
+// =====================================================================
+// IMPORT ROW — one row per record inside an ImportLog batch. The
+// endpoint lifts known fields into structured columns so /admin/imports
+// can query them, and keeps the verbatim record in `rowData` for
+// debugging. Cascade-deleted with its parent batch.
+// =====================================================================
+model ImportRow {
+  id          String    @id @default(cuid())
+  importLogId String
+  importLog   ImportLog @relation(fields: [importLogId], references: [id], onDelete: Cascade)
+  // Structured columns lifted from the record.
+  sku         String?
+  productName String?
+  quantity    Int?
+  // Money. Intended precision/scale = (12,2). The native @db.Decimal
+  // attribute is NOT supported on the sqlite provider, so it is omitted
+  // here and applied on the Postgres cutover (W9). Prisma's Decimal
+  // scalar still gives exact decimal handling on SQLite.
+  unitCost    Decimal?
+  supplier    String?
+  warehouse   String?
+  // Verbatim record JSON, kept for debugging (SQLite has no JSON type).
+  rowData     String    @default("{}")
+  // "ACCEPTED" | "REJECTED"
+  status      String    @default("ACCEPTED")
+  // Rejection reason when status = "REJECTED".
+  error       String?
+  createdAt   DateTime  @default(now())
+
+  @@index([importLogId])
+  @@index([sku])
 }
 

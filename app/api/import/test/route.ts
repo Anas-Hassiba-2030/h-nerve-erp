@@ -2,23 +2,51 @@
 //
 //   POST /api/import/test
 //   Authorization: Bearer <IMPORT_API_TOKEN>
-//   Body: { records: object[], source?: string }   (or a bare array)
+//   Body: { source?: string, tenantId?: string, records: object[] }
+//         (a bare array is still accepted for back-compat)
 //   →  200 { accepted, rejected, errors }
+//   →  401 unauthorized · 503 token unset · 400 bad body
+//   →  429 { error } + Retry-After  (cap: 100 req / 60s per tenant)
 //
-// A Bearer-authenticated external ingestion test endpoint. Each record
-// must be a non-null, non-array object with at least one key; anything
-// else is rejected with a reason. Every call writes one ImportLog row
-// (best-effort — logging never blocks the response). SQLite as-is; no
-// schema datasource changes.
+// Bearer-authenticated external ingestion endpoint. Each record must
+// carry a non-empty `sku`; the other warehouse fields are optional and
+// preserved. Every call writes one ImportLog batch header plus one
+// ImportRow per record (structured columns + verbatim rowData) so
+// /admin/imports can query and expand them. SQLite as-is.
 
 import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
+import { z } from "zod";
 import { prismaUnscoped } from "@/lib/db";
+import { checkImportRate, IMPORT_MAX_PER_WINDOW } from "@/lib/importRateLimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type ImportError = { index: number; error: string };
+
+// Only `sku` is required. Every other field is optional and, if the
+// wrong type, falls back to undefined (.catch) rather than failing the
+// whole record — the verbatim value is still kept in rowData.
+const RecordSchema = z
+  .object({
+    sku: z
+      .string({ required_error: "sku is required", invalid_type_error: "sku is required" })
+      .trim()
+      .min(1, "sku is required"),
+    name: z.string().trim().optional().catch(undefined),
+    quantity: z.number().int().optional().catch(undefined),
+    unitCost: z.number().optional().catch(undefined),
+    supplier: z.string().trim().optional().catch(undefined),
+    warehouse: z.string().trim().optional().catch(undefined),
+  })
+  .passthrough();
+
+const PayloadSchema = z.object({
+  source: z.string().trim().max(120).optional(),
+  tenantId: z.string().trim().max(64).optional(),
+  records: z.array(z.unknown()).max(10_000),
+});
 
 function tokenMatches(provided: string, expected: string): boolean {
   const a = Buffer.from(provided);
@@ -44,49 +72,98 @@ export async function POST(req: NextRequest) {
   }
 
   // --- Body ---
-  let body: unknown;
+  let raw: unknown;
   try {
-    body = await req.json();
+    raw = await req.json();
   } catch {
+    return NextResponse.json({ error: "invalid JSON body" }, { status: 400 });
+  }
+  // Back-compat: a bare array is treated as { records: [...] }.
+  const envelope = Array.isArray(raw) ? { records: raw } : raw;
+  const parsed = PayloadSchema.safeParse(envelope);
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: "invalid JSON body" },
+      {
+        error: "expected { records: [...], source?, tenantId? } or an array",
+        detail: parsed.error.issues[0]?.message,
+      },
       { status: 400 },
     );
   }
+  const { source = null, tenantId = null, records } = parsed.data;
 
-  let records: unknown[];
-  let source: string | null = null;
-  if (Array.isArray(body)) {
-    records = body;
-  } else if (
-    body &&
-    typeof body === "object" &&
-    Array.isArray((body as any).records)
-  ) {
-    records = (body as any).records;
-    const s = (body as any).source;
-    source = typeof s === "string" ? s.slice(0, 120) : null;
-  } else {
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    null;
+
+  // --- Rate limit (per tenant; tenantId is caller-controlled so fall
+  // back to ip, then a shared bucket) ---
+  const rateKey = `t:${tenantId ?? ip ?? "anon"}`;
+  const rate = checkImportRate(rateKey);
+  if (!rate.allowed) {
     return NextResponse.json(
-      { error: "expected an array or { records: [...] }" },
-      { status: 400 },
+      {
+        error: `rate limit exceeded (max ${IMPORT_MAX_PER_WINDOW}/min)`,
+        retryAfter: rate.retryAfterSec,
+      },
+      { status: 429, headers: { "Retry-After": String(rate.retryAfterSec) } },
     );
   }
 
-  // --- Validate each record ---
+  // --- Validate + shape each record ---
   const errors: ImportError[] = [];
-  let accepted = 0;
+  const rowsToCreate: Array<{
+    sku: string | null;
+    productName: string | null;
+    quantity: number | null;
+    unitCost: number | null;
+    supplier: string | null;
+    warehouse: string | null;
+    rowData: string;
+    status: "ACCEPTED" | "REJECTED";
+    error: string | null;
+  }> = [];
+
   records.forEach((rec, index) => {
-    if (rec === null || typeof rec !== "object" || Array.isArray(rec)) {
-      errors.push({ index, error: "record must be a non-array object" });
+    // Verbatim copy for debugging, length-bounded so one giant record
+    // can't bloat the table.
+    const rowData = JSON.stringify(rec ?? null).slice(0, 4000);
+    const r = RecordSchema.safeParse(rec);
+    if (!r.success) {
+      const msg =
+        r.error.issues.find((i) => i.path[0] === "sku")?.message ??
+        r.error.issues[0]?.message ??
+        "invalid record";
+      errors.push({ index, error: msg });
+      rowsToCreate.push({
+        sku: null,
+        productName: null,
+        quantity: null,
+        unitCost: null,
+        supplier: null,
+        warehouse: null,
+        rowData,
+        status: "REJECTED",
+        error: msg,
+      });
       return;
     }
-    if (Object.keys(rec as object).length === 0) {
-      errors.push({ index, error: "record is empty" });
-      return;
-    }
-    accepted++;
+    const d = r.data;
+    rowsToCreate.push({
+      sku: d.sku,
+      productName: d.name ?? null,
+      quantity: d.quantity ?? null,
+      unitCost: d.unitCost ?? null,
+      supplier: d.supplier ?? null,
+      warehouse: d.warehouse ?? null,
+      rowData,
+      status: "ACCEPTED",
+      error: null,
+    });
   });
+
+  const accepted = rowsToCreate.filter((r) => r.status === "ACCEPTED").length;
   const rejected = errors.length;
   const status =
     accepted > 0 && rejected > 0
@@ -95,26 +172,28 @@ export async function POST(req: NextRequest) {
         ? "REJECTED"
         : "OK";
 
-  // --- Audit row (never blocks the response) ---
+  // --- Persist batch header + rows. Wrapped so a DB hiccup returns the
+  // import result instead of a 500, but failures are logged. ---
   try {
-    const ip =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      req.headers.get("x-real-ip") ||
-      null;
-    await prismaUnscoped.importLog.create({
+    const log = await prismaUnscoped.importLog.create({
       data: {
         endpoint: "test",
         source,
+        tenantId,
         accepted,
         rejected,
-        // Cap stored errors so a huge bad batch can't bloat the row.
         errors: errors.length ? JSON.stringify(errors.slice(0, 100)) : null,
         status,
         ip,
       },
     });
-  } catch {
-    /* logging is best-effort — the import result still returns */
+    if (rowsToCreate.length) {
+      await prismaUnscoped.importRow.createMany({
+        data: rowsToCreate.map((r) => ({ ...r, importLogId: log.id })),
+      });
+    }
+  } catch (e) {
+    console.error("[import] failed to persist ImportLog/ImportRow:", e);
   }
 
   return NextResponse.json({ accepted, rejected, errors }, { status: 200 });

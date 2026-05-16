@@ -25,7 +25,7 @@ export async function enterWorkspace(formData: FormData) {
     sameSite: "lax",
     path: "/",
   });
-  redirect("/dashboard");
+  redirect("/workspace"); // Phase G1: land on the Company Command Center
 }
 
 export async function exitWorkspace() {

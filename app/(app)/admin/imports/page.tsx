@@ -12,7 +12,7 @@ import { getLocale } from "@/lib/i18n.server";
 import { requireUser } from "@/lib/session";
 import { prismaUnscoped } from "@/lib/db";
 import { Topbar } from "@/components/Topbar";
-import { formatDateTime, formatNumber } from "@/lib/utils";
+import { formatDateTime, formatNumber, formatMoney2 } from "@/lib/utils";
 import { ClearTestImportsButton } from "./ClearTestImportsButton";
 
 export const dynamic = "force-dynamic";
@@ -160,7 +160,7 @@ export default async function ImportsAdminPage() {
                             </td>
                             <td className="px-3 py-2 text-end font-mono">
                               {r.unitCost != null
-                                ? formatNumber(Number(r.unitCost), 2)
+                                ? formatMoney2(Number(r.unitCost))
                                 : dash}
                             </td>
                             <td className="px-3 py-2" style={{ color: "var(--text)" }}>

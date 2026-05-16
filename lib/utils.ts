@@ -18,6 +18,16 @@ export function formatMoney(value: number, currency = "JOD") {
   }).format(value || 0);
 }
 
+// Money with cents — ALWAYS 2 decimals (0.80, 12.00, 1,250.00). No currency
+// symbol; use where the column header already carries the unit. Separate
+// from formatNumber so non-money callers keep trailing-zero trimming.
+export function formatMoney2(value: number) {
+  return new Intl.NumberFormat(NUM_LOCALE, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value || 0);
+}
+
 export function formatNumber(value: number, fractionDigits = 0) {
   return new Intl.NumberFormat(NUM_LOCALE, {
     maximumFractionDigits: fractionDigits,

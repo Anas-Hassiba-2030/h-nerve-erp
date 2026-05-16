@@ -19,7 +19,11 @@ import { timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { prismaUnscoped } from "@/lib/db";
 import { checkImportRate, IMPORT_MAX_PER_WINDOW } from "@/lib/importRateLimit";
-import { applyMapping, parseMappingRow } from "@/lib/importMapping";
+import {
+  applyMapping,
+  parseMappingRow,
+  sourceMatchesSystem,
+} from "@/lib/importMapping";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -130,11 +134,7 @@ export async function POST(req: NextRequest) {
       where: { tenantId, active: true },
     });
     const hit = candidates
-      .filter(
-        (mp) =>
-          source === mp.sourceSystem ||
-          source.startsWith(`${mp.sourceSystem}-`),
-      )
+      .filter((mp) => sourceMatchesSystem(source, mp.sourceSystem))
       .sort((a, b) => b.sourceSystem.length - a.sourceSystem.length)[0];
     const mapping = parseMappingRow(hit);
     if (mapping) {

@@ -16,6 +16,7 @@ import { prismaUnscoped } from "@/lib/db";
 import { Topbar } from "@/components/Topbar";
 import { formatDateTime, formatNumber } from "@/lib/utils";
 import { MappingDeleteButton } from "./MappingDeleteButton";
+import { MappingTester } from "./MappingTester";
 import { createMapping, updateMapping, toggleMappingActive } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -233,6 +234,13 @@ export default async function MappingsAdminPage() {
                         </tbody>
                       </table>
                     </div>
+
+                    {/* Test mapping preview (pure, client-side) */}
+                    <MappingTester
+                      fieldMapJson={m.fieldMapJson}
+                      defaultsJson={m.defaultsJson}
+                      ar={ar}
+                    />
 
                     {/* Edit + toggle + delete */}
                     <form

@@ -14,6 +14,7 @@ import { getCurrentUser } from "@/lib/session";
 import { prismaUnscoped } from "@/lib/db";
 import { Topbar } from "@/components/Topbar";
 import { formatDateTime, formatNumber, formatMoney2 } from "@/lib/utils";
+import { sourceMatchesSystem } from "@/lib/importMapping";
 import { ClearTestImportsButton } from "./ClearTestImportsButton";
 
 export const dynamic = "force-dynamic";
@@ -37,6 +38,23 @@ export default async function ImportsAdminPage() {
   const totalRows = batches.reduce((s, b) => s + b.rows.length, 0);
   const totalAccepted = batches.reduce((s, b) => s + b.accepted, 0);
   const totalRejected = batches.reduce((s, b) => s + b.rejected, 0);
+
+  // "mapped" badge: ImportLog has no mapping column (schema frozen per
+  // Phase 3/4 scope), so re-derive whether an active mapping matched
+  // this batch using the SAME prefix rule the endpoint used
+  // (sourceMatchesSystem — shared source of truth, no drift).
+  const activeMappings = await prismaUnscoped.tenantImportMapping.findMany({
+    where: { active: true },
+    select: { tenantId: true, sourceSystem: true },
+  });
+  const wasMapped = (b: { source: string | null; tenantId: string | null }) =>
+    !!b.source &&
+    !!b.tenantId &&
+    activeMappings.some(
+      (mp) =>
+        mp.tenantId === b.tenantId &&
+        sourceMatchesSystem(b.source as string, mp.sourceSystem),
+    );
 
   const dash = "—";
 
@@ -93,6 +111,19 @@ export default async function ImportsAdminPage() {
                   >
                     {b.source ?? (ar ? "(بدون مصدر)" : "(no source)")}
                   </span>
+                  {wasMapped(b) ? (
+                    <Link
+                      href="/admin/mappings"
+                      className="badge-violet"
+                      title={
+                        ar
+                          ? "طُبِّقت خريطة استيراد على هذه الدفعة"
+                          : "An import mapping was applied to this batch"
+                      }
+                    >
+                      {ar ? "مُترجَم" : "mapped"}
+                    </Link>
+                  ) : null}
                   <span className="badge-slate">
                     {b.tenantId ?? (ar ? "بدون مستأجر" : "no tenant")}
                   </span>

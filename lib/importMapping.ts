@@ -62,6 +62,20 @@ function safeObject(s: string): Record<string, unknown> | null {
   }
 }
 
+/**
+ * Whether a batch `source` belongs to `sourceSystem`: exact match, or a
+ * hyphen-bounded prefix ("maha-erp" ⊂ "maha-erp-2026-…" but not
+ * "maha-erpsilon"). Single source of truth shared by the import
+ * endpoint (mapping resolution) and the /admin/imports "mapped" badge,
+ * so the two can never drift.
+ */
+export function sourceMatchesSystem(
+  source: string,
+  sourceSystem: string,
+): boolean {
+  return source === sourceSystem || source.startsWith(`${sourceSystem}-`);
+}
+
 type Payload = { records: unknown[] };
 
 /**

@@ -1,0 +1,148 @@
+"use server";
+
+// Server actions for /admin/mappings (Phase 4).
+//
+// CRUD over TenantImportMapping. JSON columns are validated here (parse
+// + must be a flat object) before write, with a toast on bad input —
+// we never persist malformed JSON, and never 500 the page for it.
+//
+// TODO(Phase 11): per-tenant authz — currently any ADMIN/EXECUTIVE/
+// MANAGER may edit any tenant's mapping. No per-tenant scoping yet.
+
+import { revalidatePath } from "next/cache";
+import { getCurrentUser } from "@/lib/session";
+import { getLocale } from "@/lib/i18n.server";
+import { prismaUnscoped } from "@/lib/db";
+import { flashToast } from "@/lib/toast";
+
+async function gate() {
+  const user = await getCurrentUser();
+  if (!user || !["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) {
+    throw new Error("forbidden");
+  }
+}
+
+function ok(ar: boolean, label: string) {
+  flashToast({ type: "info", entity: "info", label });
+  revalidatePath("/admin/mappings");
+}
+
+function fail(ar: boolean, label: string) {
+  flashToast({ type: "info", entity: "info", label: `⚠ ${label}` });
+  revalidatePath("/admin/mappings");
+}
+
+// Parse a JSON string to a flat object. Returns the canonical
+// re-stringified form, or null if invalid / not a plain object.
+function normalizeJsonObject(raw: string): string | null {
+  const s = raw.trim();
+  if (!s) return null;
+  try {
+    const v = JSON.parse(s);
+    if (!v || typeof v !== "object" || Array.isArray(v)) return null;
+    return JSON.stringify(v);
+  } catch {
+    return null;
+  }
+}
+
+export async function createMapping(formData: FormData): Promise<void> {
+  await gate();
+  const ar = getLocale() === "ar";
+  const tenantId = String(formData.get("tenantId") ?? "").trim().slice(0, 64);
+  const sourceSystem = String(formData.get("sourceSystem") ?? "")
+    .trim()
+    .slice(0, 64);
+  const description =
+    String(formData.get("description") ?? "").trim().slice(0, 200) || null;
+  const fieldMapRaw = String(formData.get("fieldMapJson") ?? "{}");
+  const defaultsRaw = String(formData.get("defaultsJson") ?? "").trim();
+
+  if (!tenantId || !sourceSystem) {
+    return fail(ar, ar ? "المستأجر ونظام المصدر مطلوبان" : "tenantId and sourceSystem are required");
+  }
+  const fieldMapJson = normalizeJsonObject(fieldMapRaw);
+  if (!fieldMapJson) {
+    return fail(ar, ar ? "خريطة الحقول JSON غير صالحة" : "fieldMap is not valid JSON object");
+  }
+  let defaultsJson: string | null = null;
+  if (defaultsRaw) {
+    defaultsJson = normalizeJsonObject(defaultsRaw);
+    if (!defaultsJson) {
+      return fail(ar, ar ? "الافتراضيات JSON غير صالحة" : "defaults is not valid JSON object");
+    }
+  }
+
+  try {
+    await prismaUnscoped.tenantImportMapping.create({
+      data: { tenantId, sourceSystem, description, fieldMapJson, defaultsJson },
+    });
+  } catch {
+    return fail(
+      ar,
+      ar
+        ? `يوجد بالفعل خريطة لـ (${tenantId}, ${sourceSystem})`
+        : `a mapping for (${tenantId}, ${sourceSystem}) already exists`,
+    );
+  }
+  ok(ar, ar ? "تم إنشاء الخريطة" : "Mapping created");
+}
+
+export async function updateMapping(formData: FormData): Promise<void> {
+  await gate();
+  const ar = getLocale() === "ar";
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const description =
+    String(formData.get("description") ?? "").trim().slice(0, 200) || null;
+  const fieldMapJson = normalizeJsonObject(
+    String(formData.get("fieldMapJson") ?? "{}"),
+  );
+  if (!fieldMapJson) {
+    return fail(ar, ar ? "خريطة الحقول JSON غير صالحة" : "fieldMap is not valid JSON object");
+  }
+  const defaultsRaw = String(formData.get("defaultsJson") ?? "").trim();
+  let defaultsJson: string | null = null;
+  if (defaultsRaw) {
+    defaultsJson = normalizeJsonObject(defaultsRaw);
+    if (!defaultsJson) {
+      return fail(ar, ar ? "الافتراضيات JSON غير صالحة" : "defaults is not valid JSON object");
+    }
+  }
+  await prismaUnscoped.tenantImportMapping.update({
+    where: { id },
+    data: { description, fieldMapJson, defaultsJson },
+  });
+  ok(ar, ar ? "تم تحديث الخريطة" : "Mapping updated");
+}
+
+export async function toggleMappingActive(formData: FormData): Promise<void> {
+  await gate();
+  const ar = getLocale() === "ar";
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const current = await prismaUnscoped.tenantImportMapping.findUnique({
+    where: { id },
+    select: { active: true },
+  });
+  if (!current) return;
+  await prismaUnscoped.tenantImportMapping.update({
+    where: { id },
+    data: { active: !current.active },
+  });
+  ok(
+    ar,
+    !current.active
+      ? ar ? "تم تفعيل الخريطة" : "Mapping activated"
+      : ar ? "تم تعطيل الخريطة" : "Mapping deactivated",
+  );
+}
+
+export async function deleteMapping(formData: FormData): Promise<void> {
+  await gate();
+  const ar = getLocale() === "ar";
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  await prismaUnscoped.tenantImportMapping.delete({ where: { id } });
+  ok(ar, ar ? "تم حذف الخريطة" : "Mapping deleted");
+}

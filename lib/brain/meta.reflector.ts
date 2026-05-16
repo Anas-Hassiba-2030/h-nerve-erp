@@ -13,17 +13,16 @@
 
 import { prisma } from "@/lib/db";
 import { callLlm, extractJson, type LlmRequest } from "./llm";
+import { scoreFromComponents, clamp01, type IQComponents } from "./meta.iq";
 
 // ─────────────────────────────────────────────────────────────────────
-// IQ computation
+// IQ computation — the four components are derived here from the DB;
+// the pure scoring math lives in ./meta.iq (zero-import, unit-tested).
 // ─────────────────────────────────────────────────────────────────────
 
-export type IQComponents = {
-  accuracy: number;          // [0,1] — accept ratio over feedback
-  decisionVelocity: number;  // [0,1] — committed plans / created artefacts
-  outcomeQuality: number;    // [0,1] — completed plans / committed plans
-  userTrust: number;         // [0,1] — patterns enabled / total patterns
-};
+// Re-exported so existing `import { IQComponents } from ".../meta.reflector"`
+// call sites keep resolving — the type's canonical home is now ./meta.iq.
+export type { IQComponents } from "./meta.iq";
 
 export type BrainIQ = {
   score: number;
@@ -97,21 +96,8 @@ export async function computeIQ(scope: string = "default"): Promise<BrainIQ> {
   return { score, components, trend, lastComputedAt: new Date() };
 }
 
-function scoreFromComponents(c: IQComponents): number {
-  // Base 80, max ~160 in normal usage. Sales-friendly.
-  return Math.round(
-    80 +
-      c.accuracy         * 25 +
-      c.decisionVelocity * 15 +
-      c.outcomeQuality   * 25 +
-      c.userTrust        * 15
-  );
-}
-
-function clamp01(v: number): number {
-  if (!Number.isFinite(v)) return 0;
-  return Math.max(0, Math.min(1, v));
-}
+// scoreFromComponents + clamp01 now live in ./meta.iq (pure, zero-import,
+// unit-tested in meta.reflector.test.ts) and are imported at the top.
 
 // ─────────────────────────────────────────────────────────────────────
 // Reflection — produce a SelfTuningReport

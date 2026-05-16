@@ -1345,3 +1345,30 @@ model DocClause {
   @@index([documentId, orderIndex])
 }
 
+// =====================================================================
+// IMPORT LOG — one row per external-import POST (POST
+// /api/import/test). Bearer-authenticated ingestion endpoint; this is
+// the audit trail of what came in, how much was accepted/rejected and
+// why. No companyId → not workspace-scoped (system-level).
+// SQLite has no JSON type, so `errors` is a JSON string.
+// =====================================================================
+model ImportLog {
+  id        String   @id @default(cuid())
+  // Which import endpoint produced this row ("test" for now).
+  endpoint  String   @default("test")
+  // Optional caller-supplied label (body.source) — who/what sent it.
+  source    String?
+  accepted  Int      @default(0)
+  rejected  Int      @default(0)
+  // JSON-stringified Array<{ index: number; error: string }>.
+  errors    String?
+  // "OK" | "PARTIAL" | "REJECTED"
+  status    String   @default("OK")
+  // Best-effort requester IP for the audit trail.
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([endpoint])
+}
+

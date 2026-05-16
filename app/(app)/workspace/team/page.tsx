@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { HeritageSection, HeritagePill } from "@/components/heritage";
 import { assignProjectOwner } from "../actions";
+import { getUserIfRole } from "@/lib/authz";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/workspace";
 import { getLocale } from "@/lib/i18n.server";
@@ -50,6 +51,8 @@ export default async function WorkspaceTeamPage() {
   const memberNames = Array.from(
     new Set(team.map((u) => u.name).filter(Boolean)),
   );
+  // W6 — STAFF see ownership read-only; only MANAGER+ may reassign.
+  const canMutate = !!(await getUserIfRole("MANAGER"));
 
   return (
     <div className="ws-page">
@@ -121,6 +124,7 @@ export default async function WorkspaceTeamPage() {
                       : ar ? "بدون مالك" : "Unassigned"}
                   </div>
                 </div>
+                {canMutate ? (
                 <form action={assignProjectOwner} className="ws-owner-form">
                   <input type="hidden" name="id" value={p.id} />
                   <select
@@ -148,6 +152,7 @@ export default async function WorkspaceTeamPage() {
                     {ar ? "إسناد" : "Assign"}
                   </button>
                 </form>
+                ) : null}
               </li>
               );
             })}

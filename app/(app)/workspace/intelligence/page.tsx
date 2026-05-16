@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { HeritageSection, HeritagePill } from "@/components/heritage";
 import { dismissSignal, acceptSignal } from "../actions";
+import { getUserIfRole } from "@/lib/authz";
 import { prismaUnscoped } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/workspace";
 import { getLocale } from "@/lib/i18n.server";
@@ -62,6 +63,8 @@ export default async function WorkspaceIntelligencePage() {
   const ar = locale === "ar";
   const modules = SECTOR_MODULES[company.sector] ?? [];
   const metrics = SECTOR_METRICS[company.sector] ?? [];
+  // W6 — STAFF read the feed; only MANAGER+ accept/dismiss signals.
+  const canMutate = !!(await getUserIfRole("MANAGER"));
 
   const [insights, plans] = await Promise.all([
     prismaUnscoped.aIInsight.findMany({
@@ -154,21 +157,23 @@ export default async function WorkspaceIntelligencePage() {
                   <p className="ws-signal-text">
                     {i.body.length > 220 ? i.body.slice(0, 220) + "…" : i.body}
                   </p>
-                  <div className="ws-signal-acts">
-                    <form action={acceptSignal} className="ws-act-form">
-                      <input type="hidden" name="id" value={i.id} />
-                      <button type="submit" className="ws-act">
-                        {ar ? "اقبل وأنشئ خطة" : "Accept → plan"}
-                        <span aria-hidden>{ar ? " ←" : " →"}</span>
-                      </button>
-                    </form>
-                    <form action={dismissSignal} className="ws-act-form">
-                      <input type="hidden" name="id" value={i.id} />
-                      <button type="submit" className="ws-act ws-act-ghost">
-                        {ar ? "تجاهل" : "Dismiss"}
-                      </button>
-                    </form>
-                  </div>
+                  {canMutate ? (
+                    <div className="ws-signal-acts">
+                      <form action={acceptSignal} className="ws-act-form">
+                        <input type="hidden" name="id" value={i.id} />
+                        <button type="submit" className="ws-act">
+                          {ar ? "اقبل وأنشئ خطة" : "Accept → plan"}
+                          <span aria-hidden>{ar ? " ←" : " →"}</span>
+                        </button>
+                      </form>
+                      <form action={dismissSignal} className="ws-act-form">
+                        <input type="hidden" name="id" value={i.id} />
+                        <button type="submit" className="ws-act ws-act-ghost">
+                          {ar ? "تجاهل" : "Dismiss"}
+                        </button>
+                      </form>
+                    </div>
+                  ) : null}
                 </div>
               </li>
             ))}

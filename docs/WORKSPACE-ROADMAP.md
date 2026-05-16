@@ -143,6 +143,30 @@ companyId) so dismiss uses the unscoped client + status flip only.
 
 ---
 
+## Wave W6 — Role-gating the ERP ✅ COMPLETE
+
+Makes the CLAUDE.md invariant *literally true*: the brain proposes,
+**only MANAGER+ commits**. Mirrors the Phase D create/update gating.
+Defense in depth — two independent layers:
+
+- ✅ **Server gate (the security boundary).** All six W4 mutations in
+  `app/(app)/workspace/actions.ts` swapped `requireUser()` →
+  `requireRole("MANAGER")` (returns the `SessionUser`, throws
+  `ForbiddenError` otherwise — drop-in, audit `actorId` unchanged).
+  A direct POST by STAFF is rejected server-side regardless of UI.
+- ✅ **UI gate (read-only workspace for STAFF).** Each of the four
+  pages computes `canMutate = !!(await getUserIfRole("MANAGER"))` and
+  hides the action forms when false: Operations (advance-batch on
+  the dairy board), Pipeline (budget edit + advance stage),
+  Intelligence (accept → plan + dismiss), Team (assign owner). STAFF
+  still see every number and signal — they just can't act. Holding
+  roll-up deep-links stay open (navigation, not a mutation).
+
+Hierarchy (`lib/authz.ts`): STAFF < MANAGER < EXECUTIVE < ADMIN —
+`requireRole("MANAGER")` admits MANAGER, EXECUTIVE, ADMIN.
+
+---
+
 ## Long horizon (carried from PHASES-INTELLIGENCE.md)
 
 - ⬜ Phase 18 real Claude Vision in `lib/docintel/parser.ts`

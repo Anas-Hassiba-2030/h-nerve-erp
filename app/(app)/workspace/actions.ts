@@ -1,15 +1,17 @@
 "use server";
 
 // Wave W4 — the workspace ERP becomes functional. Each action is a
-// guarded server action: requireUser → mutate ONE field on a
-// workspace-scoped row → write an ActivityLog audit row →
+// guarded server action: requireRole("MANAGER") → mutate ONE field on
+// a workspace-scoped row → write an ActivityLog audit row →
 // revalidatePath. No schema changes; every column already exists.
 //
-// Invariant (CLAUDE.md): the brain proposes, humans commit. These are
-// human-committed actions triggered from the UI — never auto-fired.
+// Invariant (CLAUDE.md): the brain proposes, humans commit. W6 makes
+// that literal — only MANAGER+ may commit these mutations. STAFF get a
+// read-only workspace (the action forms don't render for them either —
+// defense in depth: server gate here, UI gate in the pages).
 
 import { revalidatePath } from "next/cache";
-import { requireUser } from "@/lib/session";
+import { requireRole } from "@/lib/authz";
 import { prisma, prismaUnscoped } from "@/lib/db";
 
 const BATCH_CHAIN = ["IN_PRODUCTION", "READY", "SHIPPED", "RETAIL"];
@@ -43,7 +45,7 @@ async function audit(
 
 /** Advance a dairy batch one step along the production chain. */
 export async function advanceBatchStatus(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const user = await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
 
@@ -74,7 +76,7 @@ export async function advanceBatchStatus(formData: FormData): Promise<void> {
 
 /** Inline-edit a project's budget (JOD). Clamped to [0, 1e9]. */
 export async function updateProjectBudget(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const user = await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   const raw = String(formData.get("budget") ?? "").replace(/[^0-9.]/g, "");
   if (!id) return;
@@ -108,7 +110,7 @@ export async function updateProjectBudget(formData: FormData): Promise<void> {
  * unassign. Scoped read guarantees cross-company safety.
  */
 export async function assignProjectOwner(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const user = await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const ownerRaw = String(formData.get("owner") ?? "").trim().slice(0, 120);
@@ -136,7 +138,7 @@ export async function assignProjectOwner(formData: FormData): Promise<void> {
 
 /** Advance a future project one stage along the pipeline. */
 export async function advanceProjectStage(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const user = await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
 
@@ -169,7 +171,7 @@ export async function advanceProjectStage(formData: FormData): Promise<void> {
  * status — never delete (soft, auditable).
  */
 export async function dismissSignal(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const user = await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
 
@@ -212,7 +214,7 @@ const MODULE_METRIC: Record<string, string> = {
  * /plans. The signal moves to ACTIONED so it leaves the open feed.
  */
 export async function acceptSignal(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const user = await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
 

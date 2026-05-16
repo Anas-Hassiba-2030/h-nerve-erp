@@ -12,6 +12,7 @@ import {
 import { HeritageSection, HeritagePill } from "@/components/heritage";
 import { StatusBadge } from "@/components/StatusBadge";
 import { advanceBatchStatus } from "../actions";
+import { getUserIfRole } from "@/lib/authz";
 import { enterWorkspace } from "@/app/actions/workspace";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/workspace";
@@ -32,8 +33,10 @@ export default async function WorkspaceOperationsPage() {
 
   const locale = getLocale();
   const ar = locale === "ar";
+  // W6 — only MANAGER+ may mutate; STAFF get the read-only board.
+  const canMutate = !!(await getUserIfRole("MANAGER"));
 
-  if (company.sector === "DAIRY") return <DairyOps ar={ar} />;
+  if (company.sector === "DAIRY") return <DairyOps ar={ar} canMutate={canMutate} />;
   if (company.sector === "HOSPITALITY") return <HospitalityOps ar={ar} />;
   if (company.sector === "AGRICULTURE") return <AgricultureOps ar={ar} />;
   if (company.sector === "EDUCATION") return <EducationOps ar={ar} />;
@@ -43,7 +46,7 @@ export default async function WorkspaceOperationsPage() {
 // ---------------------------------------------------------------------------
 // DAIRY — flagship production board
 // ---------------------------------------------------------------------------
-async function DairyOps({ ar }: { ar: boolean }) {
+async function DairyOps({ ar, canMutate }: { ar: boolean; canMutate: boolean }) {
   const batches = await prisma.dairyBatch.findMany({
     orderBy: { productionDate: "desc" },
     take: 400,
@@ -165,7 +168,8 @@ async function DairyOps({ ar }: { ar: boolean }) {
                               : `expires in ${dleft}d`}
                         </div>
                       ) : null}
-                      {["IN_PRODUCTION", "READY", "SHIPPED"].includes(
+                      {canMutate &&
+                      ["IN_PRODUCTION", "READY", "SHIPPED"].includes(
                         b.status,
                       ) ? (
                         <form action={advanceBatchStatus} className="ws-act-form">

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { HeritageSection, HeritagePill } from "@/components/heritage";
 import { StatusBadge } from "@/components/StatusBadge";
 import { advanceProjectStage, updateProjectBudget } from "../actions";
+import { getUserIfRole } from "@/lib/authz";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/workspace";
 import { getLocale } from "@/lib/i18n.server";
@@ -31,6 +32,8 @@ export default async function WorkspacePipelinePage() {
 
   const locale = getLocale();
   const ar = locale === "ar";
+  // W6 — STAFF see the pipeline read-only; only MANAGER+ may edit.
+  const canMutate = !!(await getUserIfRole("MANAGER"));
 
   const projects = await prisma.futureProject.findMany({
     orderBy: { budgetJod: "desc" },
@@ -90,29 +93,33 @@ export default async function WorkspacePipelinePage() {
                         </HeritagePill>
                         <span className="ws-mono">{formatMoney(p.budgetJod)}</span>
                       </div>
-                      <form action={updateProjectBudget} className="ws-budget-form">
-                        <input type="hidden" name="id" value={p.id} />
-                        <span className="ws-budget-cur">JOD</span>
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          name="budget"
-                          defaultValue={Math.round(p.budgetJod)}
-                          className="ws-budget-input ws-mono"
-                          aria-label={ar ? "ميزانية المشروع" : "Project budget"}
-                        />
-                        <button type="submit" className="ws-act ws-act-ghost">
-                          {ar ? "حفظ" : "Save"}
-                        </button>
-                      </form>
-                      {p.stage !== "LIVE" ? (
-                        <form action={advanceProjectStage} className="ws-act-form">
-                          <input type="hidden" name="id" value={p.id} />
-                          <button type="submit" className="ws-act">
-                            {ar ? "تقديم المرحلة" : "Advance stage"}
-                            <span aria-hidden>{ar ? " ←" : " →"}</span>
-                          </button>
-                        </form>
+                      {canMutate ? (
+                        <>
+                          <form action={updateProjectBudget} className="ws-budget-form">
+                            <input type="hidden" name="id" value={p.id} />
+                            <span className="ws-budget-cur">JOD</span>
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              name="budget"
+                              defaultValue={Math.round(p.budgetJod)}
+                              className="ws-budget-input ws-mono"
+                              aria-label={ar ? "ميزانية المشروع" : "Project budget"}
+                            />
+                            <button type="submit" className="ws-act ws-act-ghost">
+                              {ar ? "حفظ" : "Save"}
+                            </button>
+                          </form>
+                          {p.stage !== "LIVE" ? (
+                            <form action={advanceProjectStage} className="ws-act-form">
+                              <input type="hidden" name="id" value={p.id} />
+                              <button type="submit" className="ws-act">
+                                {ar ? "تقديم المرحلة" : "Advance stage"}
+                                <span aria-hidden>{ar ? " ←" : " →"}</span>
+                              </button>
+                            </form>
+                          ) : null}
+                        </>
                       ) : null}
                     </div>
                   ))}

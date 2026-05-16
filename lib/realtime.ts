@@ -136,8 +136,16 @@ function phantomState(scopeId: string, now: number): {
   sessions: RTSession[];
   comments: RTComment[];
 } {
+  // PHANTOM PRESENCE DISABLED. The simulated CFO cursor that drifted
+  // around the screen was distracting in real use. Real multi-user
+  // presence (two actual people on the same page) still works — it just
+  // never injects a fake ghost user. To re-enable for a sales demo,
+  // delete the next line.
+  return { sessions: [], comments: [] };
+
   // Only show phantoms on certain scopes — the dashboard, the decision
   // theater, plans, insights. Not on settings/login etc.
+  // eslint-disable-next-line no-unreachable
   const phantomScopes = [
     "/dashboard",
     "/insights",

@@ -18,8 +18,8 @@ export type TickerItem = {
 
 export function LiveTicker({ items }: { items: TickerItem[] }) {
   if (!items || items.length === 0) return null;
-  // Duplicate items so the slide loop is seamless.
-  const loop = [...items, ...items];
+  // Static strip — no auto-scroll, so no need to duplicate for a loop.
+  const loop = items;
 
   return (
     <div

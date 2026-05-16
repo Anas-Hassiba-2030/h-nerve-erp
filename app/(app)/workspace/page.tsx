@@ -1,416 +1,229 @@
-// /workspace — the Company Command Center (Phase G1).
+// /workspace — Command Center (the company ERP's home).
 //
-// Where "Enter workspace" lands. A deep, sector-aware ERP for the ACTIVE
-// company: identity, financial command, sector operations, team, pipeline,
-// drill-downs. Requires an active workspace cookie; redirects out if none.
-// Heritage Modern; the Hero is the single chromatic surface.
+// The layout (workspace/layout.tsx) owns the company band + nav. This
+// page is the at-a-glance command surface: a Company Health composite,
+// financial pulse, sector KPIs, and signposts into the deep sections.
+// Every query is auto-scoped to the active company by the lib/db.ts
+// middleware.
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
-  Hotel, Milk, Sprout, GraduationCap, Briefcase, Users2,
-  ArrowLeft, TrendingUp, FlaskConical, Building2, ArrowUpRight,
+  ArrowUpRight, Factory, Wallet, Users2, GitBranch, BrainCircuit,
 } from "lucide-react";
-import { PageContainer } from "@/components/PageContainer";
-import { HeritageSection, HeritagePill } from "@/components/heritage";
-import { StatusBadge } from "@/components/StatusBadge";
-import { WorkspaceHero } from "@/components/workspace/WorkspaceHero";
+import { HeritageSection } from "@/components/heritage";
 import { WorkspaceFinancials } from "@/components/workspace/WorkspaceFinancials";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/workspace";
 import { getLocale } from "@/lib/i18n.server";
 import { formatMoney, formatNumber } from "@/lib/utils";
+import { computeCompanyHealth } from "@/lib/workspace/health";
 
-export default async function WorkspacePage() {
+export const dynamic = "force-dynamic";
+
+const SECTOR_MODULES: Record<string, string[]> = {
+  DAIRY: ["DAIRY", "SUPPLY"],
+  HOSPITALITY: ["HOTELS", "SUPPLY"],
+  AGRICULTURE: ["FARMS", "SUPPLY"],
+  EDUCATION: ["EDUCATION"],
+  INVESTMENT: ["FINANCE", "MARKETS"],
+  TRADE: ["SUPPLY", "MARKETS"],
+};
+
+export default async function WorkspaceCommandPage() {
   const workspaceId = getActiveWorkspaceId();
   if (!workspaceId) redirect("/companies");
-
   const company = await prismaUnscoped.company.findUnique({
     where: { id: workspaceId },
+    select: { sector: true, name: true, nameEn: true },
   });
   if (!company) redirect("/companies");
 
   const locale = getLocale();
   const ar = locale === "ar";
-  const dateLabel = new Intl.DateTimeFormat(
-    ar ? "ar-JO-u-nu-latn" : "en-US",
-    { weekday: "long", day: "numeric", month: "long", year: "numeric" },
-  ).format(new Date());
+  const modules = SECTOR_MODULES[company.sector] ?? [];
 
-  // Scoped client auto-filters these to the active workspace. User is not
-  // workspace-scoped, so it is filtered explicitly.
-  const [txns, hotels, batches, farms, programs, projects, team] =
-    await Promise.all([
-      prisma.transaction.findMany({
-        select: { kind: true, amount: true, occurredAt: true },
-        orderBy: { occurredAt: "desc" },
-        take: 800,
-      }),
-      prisma.hotel.findMany({ orderBy: { totalRooms: "desc" } }),
-      prisma.dairyBatch.findMany({ orderBy: { createdAt: "desc" }, take: 60 }),
-      prisma.farm.findMany({ include: { _count: { select: { crops: true } } } }),
-      prisma.program.findMany({ orderBy: { createdAt: "desc" } }),
-      prisma.futureProject.findMany({ orderBy: { budgetJod: "desc" }, take: 8 }),
-      prismaUnscoped.user.findMany({
-        where: { companyId: workspaceId },
-        select: { name: true, role: true, title: true, rank: true },
-        orderBy: { xp: "desc" },
-      }),
-    ]);
+  const [
+    txns, batches, hotels, farmsAgg, programs, projects, activeProjects,
+    teamCount, openInsights, criticalInsights,
+  ] = await Promise.all([
+    prisma.transaction.findMany({
+      select: { kind: true, amount: true, occurredAt: true },
+      orderBy: { occurredAt: "desc" },
+      take: 800,
+    }),
+    prisma.dairyBatch.findMany({ select: { qualityGrade: true, status: true } }),
+    prisma.hotel.findMany({
+      select: { totalRooms: true, _count: { select: { bookings: true } } },
+    }),
+    prisma.farm.findMany({
+      select: { _count: { select: { crops: true } } },
+    }),
+    prisma.program.count(),
+    prisma.futureProject.count(),
+    prisma.futureProject.count({
+      where: { stage: { in: ["APPROVED", "IN_PROGRESS"] } },
+    }),
+    prismaUnscoped.user.count({ where: { companyId: workspaceId } }),
+    prismaUnscoped.aIInsight.count({
+      where: { deletedAt: null, status: "OPEN", module: { in: modules } },
+    }),
+    prismaUnscoped.aIInsight.count({
+      where: {
+        deletedAt: null,
+        status: "OPEN",
+        severity: { in: ["CRITICAL", "ALERT"] },
+        module: { in: modules },
+      },
+    }),
+  ]);
 
-  const sector = company.sector;
+  // --- Financials -> margin% ---
+  const rev = txns.filter((t) => t.kind === "REVENUE").reduce((a, t) => a + t.amount, 0);
+  const exp = txns.filter((t) => t.kind === "EXPENSE").reduce((a, t) => a + t.amount, 0);
+  const marginPct = rev > 0 ? ((rev - exp) / rev) * 100 : 0;
+
+  // --- Sector-aware operational sub-score (0..100) ---
+  let operational = 70; // neutral default for holding/trade
+  if (company.sector === "DAIRY") {
+    const ok = batches.filter((b) => ["A", "B"].includes(b.qualityGrade)).length;
+    operational = batches.length ? (ok / batches.length) * 100 : 70;
+  } else if (company.sector === "HOSPITALITY") {
+    const rooms = hotels.reduce((a, h) => a + (h.totalRooms ?? 0), 0);
+    const bookings = hotels.reduce((a, h) => a + h._count.bookings, 0);
+    operational = rooms > 0 ? Math.min(100, (bookings / rooms) * 100) : 70;
+  } else if (company.sector === "AGRICULTURE") {
+    const crops = farmsAgg.reduce((a, f) => a + f._count.crops, 0);
+    operational = Math.min(100, 40 + crops * 4);
+  } else if (company.sector === "EDUCATION") {
+    operational = Math.min(100, 40 + programs * 12);
+  }
+
+  const health = computeCompanyHealth({
+    marginPct,
+    operational,
+    criticalSignals: criticalInsights,
+    activeProjects,
+  });
+
+  const sectorMetric =
+    company.sector === "DAIRY"
+      ? { label: ar ? "دفعات" : "Batches", value: formatNumber(batches.length) }
+      : company.sector === "HOSPITALITY"
+        ? { label: ar ? "فنادق" : "Hotels", value: formatNumber(hotels.length) }
+        : company.sector === "AGRICULTURE"
+          ? { label: ar ? "مزارع" : "Farms", value: formatNumber(farmsAgg.length) }
+          : company.sector === "EDUCATION"
+            ? { label: ar ? "برامج" : "Programs", value: formatNumber(programs) }
+            : { label: ar ? "مشاريع" : "Projects", value: formatNumber(projects) };
+
+  const sections = [
+    { href: "/workspace/operations", icon: Factory, ar: "العمليات", en: "Operations", descAr: "لوحة الإنتاج، الجودة، دورة الحياة", descEn: "Production board, QC, lifecycle" },
+    { href: "/workspace/finance", icon: Wallet, ar: "المالية", en: "Finance", descAr: "الأرباح، السجل، البيانات الشهرية", descEn: "P&L, ledger, monthly statements" },
+    { href: "/workspace/team", icon: Users2, ar: "الفريق", en: "Team", descAr: "الأشخاص، الأدوار، الأداء", descEn: "People, roles, performance" },
+    { href: "/workspace/pipeline", icon: GitBranch, ar: "المشاريع", en: "Pipeline", descAr: "مشاريع المستقبل والميزانيات", descEn: "Future projects + budgets" },
+    { href: "/workspace/intelligence", icon: BrainCircuit, ar: "الذكاء", en: "Intelligence", descAr: "إشارات الدماغ، الخطط، المجلس", descEn: "Brain signals, plans, council", badge: openInsights },
+  ];
 
   return (
-    <PageContainer>
-      <div className="space-y-6 pb-10">
-        <WorkspaceHero
-          ar={ar}
-          code={company.code}
-          name={company.name}
-          nameEn={company.nameEn}
-          sector={company.sector}
-          status={company.status}
-          city={company.city}
-          country={company.country}
-          foundedYear={company.foundedYear}
-          employees={company.employees}
-          ticker={company.ticker}
-          description={company.description}
-          dateLabel={dateLabel}
-        />
-
-        <HeritageSection
-          eyebrow={
-            ar
-              ? "نفس حساب لوحة المجموعة والمالية — الأرقام متطابقة"
-              : "Same math as the group dashboard & finance"
-          }
-          title={ar ? "القيادة المالية" : "Financial command"}
-        >
-          <WorkspaceFinancials ar={ar} txns={txns} />
-        </HeritageSection>
-
-        <HeritageSection
-          eyebrow={
-            ar ? "تفصيل خاص بنشاط هذه الوحدة" : "Specific to this unit's activity"
-          }
-          title={ar ? "العمليات التشغيلية" : "Operations"}
-        >
-          <SectorOps
-            ar={ar}
-            sector={sector}
-            hotels={hotels}
-            batches={batches}
-            farms={farms}
-            programs={programs}
-          />
-        </HeritageSection>
-
-        <div className="grid gap-6 lg:grid-cols-2">
-          <HeritageSection
-            title={ar ? "خط مشاريع المستقبل" : "Future-projects pipeline"}
-          >
-            {projects.length === 0 ? (
-              <Empty ar={ar} />
-            ) : (
-              <ul className="divide-y" style={{ borderColor: "var(--heri-rule)" }}>
-                {projects.map((p) => (
-                  <li
-                    key={p.id}
-                    className="flex items-center justify-between gap-3 py-2.5"
-                  >
-                    <div className="min-w-0">
-                      <div
-                        className="truncate text-sm font-semibold"
-                        style={{ color: "var(--heri-ink)" }}
-                      >
-                        {p.title}
-                      </div>
-                      <div
-                        className="heri-number-mono mt-0.5"
-                        style={{ fontSize: 11, color: "var(--heri-ink-3)" }}
-                      >
-                        {p.startQuarter} → {p.targetQuarter} · {p.priority}
-                      </div>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-2">
-                      <span
-                        className="heri-number-mono"
-                        style={{ fontSize: 12, color: "var(--heri-ink)" }}
-                      >
-                        {formatMoney(p.budgetJod)}
-                      </span>
-                      <StatusBadge status={p.stage} />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </HeritageSection>
-
-          <HeritageSection title={ar ? "فريق الوحدة" : "Unit team"}>
-            {team.length === 0 ? (
-              <Empty ar={ar} />
-            ) : (
-              <ul className="divide-y" style={{ borderColor: "var(--heri-rule)" }}>
-                {team.map((u, i) => (
-                  <li
-                    key={i}
-                    className="flex items-center justify-between gap-3 py-2.5"
-                  >
-                    <div className="min-w-0">
-                      <div
-                        className="truncate text-sm font-semibold"
-                        style={{ color: "var(--heri-ink)" }}
-                      >
-                        {u.name}
-                      </div>
-                      <div
-                        style={{ fontSize: 11, color: "var(--heri-ink-3)" }}
-                      >
-                        {u.title ?? u.role}
-                      </div>
-                    </div>
-                    <HeritagePill tone="info">{u.role}</HeritagePill>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </HeritageSection>
-        </div>
-
-        <HeritageSection title={ar ? "التنقل العميق" : "Drill down"}>
-          <div className="flex flex-wrap gap-2">
-            {[
-              { href: "/finance", label: ar ? "المالية" : "Finance" },
-              { href: "/hotels", label: ar ? "الفنادق" : "Hotels" },
-              { href: "/dairy", label: ar ? "الألبان" : "Dairy" },
-              { href: "/farms", label: ar ? "المزارع" : "Farms" },
-              { href: "/education", label: ar ? "التعليم" : "Education" },
-              { href: "/supply-chain", label: ar ? "سلسلة التوريد" : "Supply chain" },
-              { href: "/insights", label: ar ? "إشارات الذكاء" : "AI insights" },
-            ].map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5"
-                style={{
-                  background: "var(--heri-cream)",
-                  border: "1px solid var(--heri-rule-strong)",
-                  color: "var(--heri-ink)",
-                  fontSize: 12,
-                  fontWeight: 500,
-                }}
-              >
-                {l.label}
-                <ArrowUpRight className="h-3 w-3" strokeWidth={1.5} />
-              </Link>
-            ))}
-            <Link
-              href="/companies"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5"
-              style={{
-                background: "var(--heri-ink)",
-                color: "var(--heri-cream)",
-                fontSize: 12,
-                fontWeight: 600,
-              }}
-            >
-              <ArrowLeft className="h-3 w-3" strokeWidth={1.5} />
-              {ar ? "كل الشركات" : "All companies"}
-            </Link>
+    <div className="ws-page">
+      {/* Company Health hero */}
+      <section className="ws-health" data-grade={health.grade}>
+        <div className="ws-health-score">
+          <div className="ws-health-ring" style={{ ["--ws-h" as any]: `${health.score}` } as React.CSSProperties}>
+            <span className="ws-health-num">{health.score}</span>
+            <span className="ws-health-grade">{health.grade}</span>
           </div>
-        </HeritageSection>
-      </div>
-    </PageContainer>
-  );
-}
+        </div>
+        <div className="ws-health-body">
+          <div className="ws-health-eyebrow">
+            {ar ? "مؤشّر صحة الشركة" : "COMPANY HEALTH INDEX"}
+          </div>
+          <p className="ws-health-verdict">
+            {ar ? health.verdict.ar : health.verdict.en}
+          </p>
+          <div className="ws-health-factors">
+            {health.factors.map((f) => (
+              <div key={f.key} className="ws-health-factor">
+                <div className="ws-health-factor-head">
+                  <span>{ar ? f.label.ar : f.label.en}</span>
+                  <span className="ws-mono">{f.value}</span>
+                </div>
+                <div className="ws-health-factor-bar">
+                  <span
+                    className="ws-health-factor-fill"
+                    data-key={f.key}
+                    style={{ width: `${f.value}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-function Empty({ ar }: { ar: boolean }) {
-  return (
-    <div
-      className="py-6 text-center"
-      style={{ fontSize: 13, color: "var(--heri-ink-3)" }}
-    >
-      {ar ? "لا بيانات في هذه الوحدة بعد." : "No records for this unit yet."}
+      <section className="ws-stat-row">
+        <Stat label={sectorMetric.label} value={sectorMetric.value} />
+        <Stat label={ar ? "الفريق" : "Team"} value={formatNumber(teamCount)} />
+        <Stat label={ar ? "مشاريع" : "Projects"} value={formatNumber(projects)} />
+        <Stat label={ar ? "إشارات مفتوحة" : "Open signals"} value={formatNumber(openInsights)} accent />
+      </section>
+
+      <HeritageSection
+        eyebrow={
+          ar
+            ? "نفس حساب لوحة المجموعة — مفلتر لهذه الشركة"
+            : "Same math as the group dashboard — filtered to this company"
+        }
+        title={ar ? "النبض المالي" : "Financial pulse"}
+      >
+        <WorkspaceFinancials ar={ar} txns={txns} />
+      </HeritageSection>
+
+      <HeritageSection title={ar ? "أقسام نظام الشركة" : "Company ERP sections"}>
+        <div className="ws-section-grid">
+          {sections.map((s) => {
+            const Icon = s.icon;
+            return (
+              <Link key={s.href} href={s.href} className="ws-section-card">
+                <div className="ws-section-card-top">
+                  <span className="ws-section-card-icon">
+                    <Icon className="h-4 w-4" strokeWidth={1.6} />
+                  </span>
+                  {s.badge ? (
+                    <span className="ws-section-card-badge">{s.badge}</span>
+                  ) : null}
+                  <ArrowUpRight className="ws-section-card-arrow h-3.5 w-3.5" strokeWidth={1.5} />
+                </div>
+                <div className="ws-section-card-name">{ar ? s.ar : s.en}</div>
+                <div className="ws-section-card-desc">{ar ? s.descAr : s.descEn}</div>
+              </Link>
+            );
+          })}
+        </div>
+      </HeritageSection>
     </div>
   );
 }
 
-function StatTile({
-  icon, label, value, sub,
+function Stat({
+  label,
+  value,
+  accent,
 }: {
-  icon: React.ReactNode;
   label: string;
   value: string;
-  sub?: string;
+  accent?: boolean;
 }) {
   return (
-    <div
-      className="px-4 py-3.5"
-      style={{ background: "var(--heri-cream)", border: "1px solid var(--heri-rule)" }}
-    >
-      <div className="heri-eyebrow flex items-center gap-1.5">
-        {icon}
-        {label}
-      </div>
+    <div className="ws-stat">
+      <div className="ws-stat-label">{label}</div>
       <div
-        className="font-display mt-1.5"
-        style={{
-          fontSize: "clamp(18px,1.6vw,24px)",
-          fontWeight: 600,
-          color: "var(--heri-ink)",
-          fontVariantNumeric: "tabular-nums",
-        }}
+        className="ws-stat-value"
+        style={accent ? { color: "var(--heri-copper)" } : undefined}
       >
         {value}
       </div>
-      {sub ? (
-        <div className="heri-number-mono mt-1" style={{ fontSize: 10.5, color: "var(--heri-ink-3)" }}>
-          {sub}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function SectorOps({
-  ar, sector, hotels, batches, farms, programs,
-}: {
-  ar: boolean;
-  sector: string;
-  hotels: any[];
-  batches: any[];
-  farms: any[];
-  programs: any[];
-}) {
-  if (sector === "HOSPITALITY") {
-    const rooms = hotels.reduce((a, h) => a + (h.totalRooms ?? 0), 0);
-    const avgAdr =
-      hotels.length > 0
-        ? Math.round(
-            hotels.reduce((a, h) => a + (h.baselineADR ?? 0), 0) / hotels.length,
-          )
-        : 0;
-    return (
-      <div className="space-y-4">
-        <div className="grid gap-3 sm:grid-cols-3">
-          <StatTile icon={<Hotel className="h-3 w-3" />} label={ar ? "الفنادق" : "Hotels"} value={formatNumber(hotels.length)} />
-          <StatTile icon={<Building2 className="h-3 w-3" />} label={ar ? "إجمالي الغرف" : "Total rooms"} value={formatNumber(rooms)} />
-          <StatTile icon={<TrendingUp className="h-3 w-3" />} label={ar ? "متوسط السعر" : "Avg ADR"} value={formatMoney(avgAdr)} />
-        </div>
-        <ul className="divide-y" style={{ borderColor: "var(--heri-rule)" }}>
-          {hotels.map((h) => (
-            <li key={h.id} className="flex items-center justify-between gap-3 py-2.5">
-              <div className="min-w-0">
-                <div className="truncate text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
-                  {ar ? h.name : h.nameEn}
-                </div>
-                <div className="heri-number-mono mt-0.5" style={{ fontSize: 11, color: "var(--heri-ink-3)" }}>
-                  {h.city} · {formatNumber(h.totalRooms)} {ar ? "غرفة" : "rooms"} · {h.starRating}★
-                </div>
-              </div>
-              <span className="heri-number-mono" style={{ fontSize: 12, color: "var(--heri-ink)" }}>
-                {formatMoney(h.baselineADR ?? 0)}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  }
-
-  if (sector === "DAIRY") {
-    const byStatus = batches.reduce((m: Record<string, number>, b) => {
-      m[b.status] = (m[b.status] ?? 0) + 1;
-      return m;
-    }, {});
-    return (
-      <div className="space-y-4">
-        <div className="grid gap-3 sm:grid-cols-3">
-          <StatTile icon={<Milk className="h-3 w-3" />} label={ar ? "دفعات حديثة" : "Recent batches"} value={formatNumber(batches.length)} />
-          <StatTile icon={<FlaskConical className="h-3 w-3" />} label={ar ? "حالات" : "Statuses"} value={formatNumber(Object.keys(byStatus).length)} />
-          <StatTile icon={<TrendingUp className="h-3 w-3" />} label={ar ? "قيد الإنتاج" : "In production"} value={formatNumber(byStatus["IN_PRODUCTION"] ?? 0)} />
-        </div>
-        <ul className="divide-y" style={{ borderColor: "var(--heri-rule)" }}>
-          {batches.slice(0, 14).map((b) => (
-            <li key={b.id} className="flex items-center justify-between gap-3 py-2.5">
-              <div className="min-w-0">
-                <div className="truncate text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
-                  {ar ? (b.productAr ?? b.product) : b.product}
-                </div>
-                <div className="heri-number-mono mt-0.5" style={{ fontSize: 11, color: "var(--heri-ink-3)" }}>
-                  {b.batchNumber}
-                </div>
-              </div>
-              <StatusBadge status={b.status} />
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  }
-
-  if (sector === "AGRICULTURE") {
-    return (
-      <div className="space-y-4">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <StatTile icon={<Sprout className="h-3 w-3" />} label={ar ? "المزارع" : "Farms"} value={formatNumber(farms.length)} />
-          <StatTile icon={<Sprout className="h-3 w-3" />} label={ar ? "إجمالي المحاصيل" : "Total crops"} value={formatNumber(farms.reduce((a, f) => a + (f._count?.crops ?? 0), 0))} />
-        </div>
-        <ul className="divide-y" style={{ borderColor: "var(--heri-rule)" }}>
-          {farms.map((f) => (
-            <li key={f.id} className="flex items-center justify-between gap-3 py-2.5">
-              <div className="min-w-0">
-                <div className="truncate text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
-                  {f.name}
-                </div>
-                <div className="heri-number-mono mt-0.5" style={{ fontSize: 11, color: "var(--heri-ink-3)" }}>
-                  {f.location} · {f.type}
-                </div>
-              </div>
-              <HeritagePill tone="success">
-                {formatNumber(f._count?.crops ?? 0)} {ar ? "محصول" : "crops"}
-              </HeritagePill>
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  }
-
-  if (sector === "EDUCATION") {
-    return (
-      <div className="space-y-4">
-        <StatTile icon={<GraduationCap className="h-3 w-3" />} label={ar ? "البرامج" : "Programs"} value={formatNumber(programs.length)} />
-        <ul className="divide-y" style={{ borderColor: "var(--heri-rule)" }}>
-          {programs.map((p) => (
-            <li key={p.id} className="flex items-center justify-between gap-3 py-2.5">
-              <div className="min-w-0">
-                <div className="truncate text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
-                  {p.name}
-                </div>
-                <div className="heri-number-mono mt-0.5" style={{ fontSize: 11, color: "var(--heri-ink-3)" }}>
-                  {p.founder} · {p.cohort}
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  }
-
-  // INVESTMENT / TRADE / other — holding view
-  return (
-    <div
-      className="py-6 text-center"
-      style={{ fontSize: 13, color: "var(--heri-ink-3)" }}
-    >
-      <Briefcase className="mx-auto mb-2 h-5 w-5" strokeWidth={1.5} />
-      {ar
-        ? "وحدة قابضة — انظر الخط المالي وخط المشاريع أعلاه."
-        : "Holding unit — see the financial command and project pipeline above."}
     </div>
   );
 }

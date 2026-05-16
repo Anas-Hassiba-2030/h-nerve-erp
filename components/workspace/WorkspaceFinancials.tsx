@@ -3,7 +3,6 @@
 // previous-period delta, 12-month monthly trend) so the figures here AGREE
 // with /dashboard and /finance. Heritage Modern hairline treatment.
 
-import { Sparkline } from "@/components/Sparkline";
 import { HeritagePill } from "@/components/heritage";
 import { formatMoney, formatPercent, formatNumber } from "@/lib/utils";
 
@@ -178,31 +177,6 @@ export function WorkspaceFinancials({
               <Legend
                 color="var(--heri-terracotta)"
                 label={ar ? "مصاريف" : "Expenses"}
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="text-end">
-              <div
-                className="heri-number-mono"
-                style={{ fontSize: 10, color: "var(--heri-ink-3)" }}
-              >
-                {ar ? "إيراد" : "REVENUE"}
-              </div>
-              <Sparkline data={revenueTrend} width={120} height={34} positive />
-            </div>
-            <div className="text-end">
-              <div
-                className="heri-number-mono"
-                style={{ fontSize: 10, color: "var(--heri-ink-3)" }}
-              >
-                {ar ? "مصاريف" : "EXPENSE"}
-              </div>
-              <Sparkline
-                data={expenseTrend}
-                width={120}
-                height={34}
-                positive={false}
               />
             </div>
           </div>

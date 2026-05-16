@@ -48,13 +48,72 @@ export type ParseInput = {
   fileName: string;
   fileSize: number;
   mimeType?: string;
+  // W10 — raw file bytes, only populated when Vision is on AND the
+  // file is vision-eligible (see uploadDocument). The stub ignores it.
+  bytes?: Buffer;
 };
+
+// ---------------------------------------------------------------------------
+// W10 — Claude Vision gate (Phase 18). Default OFF: the stub stays the
+// live path and ZERO API credit is spent until the operator sets
+// DOCINTEL_USE_VISION=true *and* a key is configured. Read-only reuse
+// of the brain's single API config — no edit to lib/brain.
+// ---------------------------------------------------------------------------
+// Relative (not "@/...") so the zero-config vitest resolver and the
+// Next build agree — read-only reuse of the brain's API config.
+import { llmConfig, extractJson } from "../brain/llm";
+
+const ANTHROPIC_VERSION = "2023-06-01";
+// base64 inflates ~33%; 22MB raw ≈ 29MB encoded, safely under limits.
+const VISION_MAX_BYTES = 22 * 1024 * 1024;
+
+const VISION_IMAGE_TYPES = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/gif",
+  "image/webp",
+]);
+
+/** Intent flag AND capability: both must hold or the stub stays live. */
+export function visionEnabled(): boolean {
+  return process.env.DOCINTEL_USE_VISION === "true" && llmConfig().enabled;
+}
+
+/** Only images + PDF are vision-eligible; everything else → stub. */
+export function isVisionEligible(mimeType?: string): boolean {
+  if (!mimeType) return false;
+  return VISION_IMAGE_TYPES.has(mimeType) || mimeType === "application/pdf";
+}
+
+// Spend guard, mirroring lib/brain/llm.ts's pattern with its own
+// counter (can't share the brain's private one without editing it).
+let __visionCalls = 0;
+let __visionCapLogged = false;
 
 // ---------------------------------------------------------------------------
 // Public entry — async to allow LIVE Claude integration later.
 // ---------------------------------------------------------------------------
 export async function parseDocument(input: ParseInput): Promise<ParsedDoc> {
-  // Stub mode for now. The "intelligence" lives in pattern matching and
+  // W10 — real Claude Vision, gated. Tried first ONLY when the flag +
+  // key are set, the type is image/PDF, bytes are present, and the
+  // file is under the size guard. ANY failure (cap hit, non-2xx,
+  // bad JSON, throw) falls straight through to the stub below — the
+  // drop zone must never hard-fail because Vision had a bad day.
+  if (
+    visionEnabled() &&
+    isVisionEligible(input.mimeType) &&
+    input.bytes &&
+    input.fileSize <= VISION_MAX_BYTES
+  ) {
+    try {
+      const v = await parseWithVision(input);
+      if (v) return v;
+    } catch (err) {
+      console.warn("[docintel] Vision path failed; using stub:", err);
+    }
+  }
+
+  // Stub mode. The "intelligence" lives in pattern matching and
   // a small library of canned extractions — good enough for demos and
   // for offline development.
   // Synthetic latency. The "wow moment" is "4 seconds" so we cap there.
@@ -71,6 +130,168 @@ export async function parseDocument(input: ParseInput): Promise<ParsedDoc> {
   if (/csv|xlsx|spreadsheet|الإكسل|بيانات|sheet/.test(fn)) return spreadsheet(input, ms);
   // Generic fallback — still produces a usable extraction
   return genericDocument(input, ms);
+}
+
+// ---------------------------------------------------------------------------
+// W10 — real Claude Vision extraction. Returns null on ANY problem so
+// parseDocument falls back to the stub. Never throws to the caller.
+// ---------------------------------------------------------------------------
+async function parseWithVision(input: ParseInput): Promise<ParsedDoc | null> {
+  try {
+    const cfg = llmConfig();
+    if (!cfg.apiKey || !input.bytes) return null;
+
+    const cap = Number(process.env.DOCINTEL_MAX_VISION_CALLS ?? 50);
+    if (cap > 0 && __visionCalls >= cap) {
+      if (!__visionCapLogged) {
+        __visionCapLogged = true;
+        console.warn(
+          `[docintel] Vision cost cap reached (${cap} calls) — serving stub. Raise DOCINTEL_MAX_VISION_CALLS to allow more.`,
+        );
+      }
+      return null;
+    }
+
+    const mime = input.mimeType ?? "";
+    const b64 = input.bytes.toString("base64");
+    const mediaBlock =
+      mime === "application/pdf"
+        ? {
+            type: "document",
+            source: { type: "base64", media_type: "application/pdf", data: b64 },
+          }
+        : {
+            type: "image",
+            source: { type: "base64", media_type: mime, data: b64 },
+          };
+
+    const system = `You extract structured business-document data for a bilingual (Arabic/English) ERP. Return ONLY one JSON object — no prose, no markdown fence — matching this TypeScript type exactly:
+
+type ParsedDoc = {
+  kind: "contract" | "invoice" | "lab_report" | "spreadsheet" | "other";
+  title: string; titleEn: string;          // Arabic + English
+  summary: string; summaryEn: string;      // <=130 words each, both languages
+  headline: string; headlineEn: string;    // one line each
+  linkedTo: "LORAN" | "MAHA" | "ARENA" | "TANK" | "GROUP" | null;
+  fields: Record<string, any>;             // key facts; keys depend on kind
+  clauses: Array<{
+    kind: "risk"|"obligation"|"termination"|"renewal"|"indemnity"|"data"|"info";
+    quote: string; quoteEn?: string;       // verbatim from the doc + EN translation
+    page?: number; severity: "low"|"medium"|"high";
+    note?: string; noteEn?: string;        // your advisory note, both languages
+  }>;
+};
+
+Classify "kind" from the document's own content (not its filename). Always fill BOTH the Arabic and English fields. Omit a key rather than guessing. Example of the expected shape and tone for a supplier contract: {"kind":"contract","title":"اتفاقية تزويد بذور","titleEn":"Seed Supply Agreement","headline":"١٤ صفحة · مدة ٣ سنوات","headlineEn":"14-page · 3-year term","summary":"...","summaryEn":"...","linkedTo":"LORAN","fields":{"termMonths":36,"totalValue":420000,"currency":"JOD"},"clauses":[{"kind":"risk","quote":"...","quoteEn":"...","page":7,"severity":"high","note":"...","noteEn":"..."}]}`;
+
+    const t0 = Date.now();
+    __visionCalls++;
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": cfg.apiKey,
+        "anthropic-version": ANTHROPIC_VERSION,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model: cfg.model,
+        max_tokens: 2000,
+        temperature: 0.2,
+        system,
+        messages: [
+          {
+            role: "user",
+            content: [
+              mediaBlock,
+              {
+                type: "text",
+                text: `Extract this ${mime} document ("${input.fileName}"). Quote clauses verbatim. Return only the JSON object.`,
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    if (!res.ok) {
+      console.warn(
+        "[docintel] Anthropic vision error:",
+        res.status,
+        (await res.text()).slice(0, 300),
+      );
+      return null;
+    }
+
+    const json: any = await res.json();
+    const text = Array.isArray(json?.content)
+      ? json.content
+          .filter((c: any) => c?.type === "text" && typeof c.text === "string")
+          .map((c: any) => c.text)
+          .join("\n")
+      : "";
+    const raw = extractJson<any>(text);
+    return coerceParsed(raw, Date.now() - t0);
+  } catch (err) {
+    console.warn("[docintel] parseWithVision threw:", err);
+    return null;
+  }
+}
+
+// Trust-no-input coercion: the model can return anything. We hard-map
+// every field to the ParsedDoc contract; if it's too thin to be
+// useful we return null and the stub takes over.
+function coerceParsed(raw: any, ms: number): ParsedDoc | null {
+  if (!raw || typeof raw !== "object") return null;
+
+  const str = (v: any): string => (typeof v === "string" ? v.trim() : "");
+  const KINDS = ["contract", "invoice", "lab_report", "spreadsheet", "other"];
+  const CLAUSE_KINDS = [
+    "risk", "obligation", "termination", "renewal", "indemnity", "data", "info",
+  ];
+  const SEV = ["low", "medium", "high"];
+  const LINKS = ["LORAN", "MAHA", "ARENA", "TANK", "GROUP"];
+
+  const title = str(raw.title) || str(raw.titleEn);
+  const summary = str(raw.summary) || str(raw.summaryEn);
+  // Too thin to be worth showing — let the stub produce something rich.
+  if (!title || !summary) return null;
+
+  const clauses = Array.isArray(raw.clauses)
+    ? raw.clauses
+        .map((c: any) => {
+          const quote = str(c?.quote) || str(c?.quoteEn);
+          if (!quote) return null;
+          const page = Number(c?.page);
+          return {
+            kind: CLAUSE_KINDS.includes(c?.kind) ? c.kind : "info",
+            quote,
+            quoteEn: str(c?.quoteEn) || undefined,
+            page: Number.isFinite(page) && page > 0 ? page : undefined,
+            severity: SEV.includes(c?.severity) ? c.severity : "low",
+            note: str(c?.note) || undefined,
+            noteEn: str(c?.noteEn) || undefined,
+          };
+        })
+        .filter(Boolean)
+        .slice(0, 24)
+    : [];
+
+  return {
+    kind: KINDS.includes(raw.kind) ? raw.kind : "other",
+    title,
+    titleEn: str(raw.titleEn) || title,
+    summary,
+    summaryEn: str(raw.summaryEn) || summary,
+    headline: str(raw.headline) || str(raw.headlineEn) || title,
+    headlineEn: str(raw.headlineEn) || str(raw.headline) || title,
+    linkedTo: LINKS.includes(raw.linkedTo) ? raw.linkedTo : null,
+    fields:
+      raw.fields && typeof raw.fields === "object" && !Array.isArray(raw.fields)
+        ? raw.fields
+        : {},
+    clauses: clauses as ParsedDoc["clauses"],
+    ms,
+  };
 }
 
 // ---------------------------------------------------------------------------

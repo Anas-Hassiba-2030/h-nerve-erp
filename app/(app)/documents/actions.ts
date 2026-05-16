@@ -5,7 +5,11 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/session";
 import { requireRole } from "@/lib/authz";
 import { prisma } from "@/lib/db";
-import { parseDocument } from "@/lib/docintel/parser";
+import {
+  parseDocument,
+  visionEnabled,
+  isVisionEligible,
+} from "@/lib/docintel/parser";
 
 // Phase 18 of docs/PHASES-INTELLIGENCE.md.
 // Server actions for the Document Intelligence flow.
@@ -60,11 +64,18 @@ export async function uploadDocument(formData: FormData): Promise<UploadResult> 
     },
   });
 
-  // 2. Run the parser (currently stubbed; deterministic latency 1.8-3.6s).
+  // 2. Run the parser. Read the file bytes ONLY when Vision is on and
+  // the type is vision-eligible — otherwise the stub path never pays
+  // the up-to-25MB arrayBuffer allocation.
+  const useVision = visionEnabled() && isVisionEligible(file.type);
+  const bytes = useVision
+    ? Buffer.from(await file.arrayBuffer())
+    : undefined;
   const parsed = await parseDocument({
     fileName: file.name,
     fileSize: file.size,
     mimeType: file.type,
+    bytes,
   });
 
   // 3. Persist the parse result.

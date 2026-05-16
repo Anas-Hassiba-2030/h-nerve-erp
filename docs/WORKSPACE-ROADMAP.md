@@ -295,7 +295,23 @@ calc). Done in isolation, verified surface-by-surface.
 
 ---
 
-### Wave W10 — Real document intelligence / Claude Vision (Phase 18) ⬜
+### Wave W10 — Real document intelligence / Claude Vision (Phase 18) ✅ COMPLETE (gated, OFF)
+
+**Shipped (zero spend until you flip the flag):** `parseWithVision`
+in `lib/docintel/parser.ts` — gate is `DOCINTEL_USE_VISION==="true"`
+**AND** an API key present (both, not either); MIME guard (images +
+PDF only, else stub); 22MB pre-base64 size guard; own spend cap
+`DOCINTEL_MAX_VISION_CALLS` (default 50, mirrors the brain's pattern
+without editing brain territory); raw `fetch` to the Anthropic
+Messages API with an `image`/`document` content block (no new
+dependency); read-only reuse of `llmConfig`/`extractJson` from
+`lib/brain/llm.ts`; strict `coerceParsed` trust-no-input validator
+(too-thin result → null → stub); blanket try/catch at two levels →
+**always** falls back to the rich stub, the drop zone never
+hard-fails. `uploadDocument` reads file bytes only when the gate is
+on (no 25MB alloc on the stub path). `.env.example` documents both
+vars with the cost warning. TS-clean. No live API call in
+tests/CI; default path unchanged.
 
 **What & why.** `lib/docintel/parser.ts` is a deterministic stub.
 Wave W10 adds a **real Claude Vision** extraction path so a dropped

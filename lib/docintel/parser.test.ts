@@ -3,7 +3,7 @@
 // wrong canned extraction live. Pure; synthetic latency driven by fake timers.
 
 import { vi, describe, it, expect, afterEach } from "vitest";
-import { parseDocument } from "./parser";
+import { parseDocument, isVisionEligible, visionEnabled } from "./parser";
 
 afterEach(() => vi.useRealTimers());
 
@@ -52,6 +52,46 @@ describe("parseDocument — filename routing (priority order)", () => {
     expect(d.linkedTo).toBeNull();
     expect(d.title).toBe("mystery");
     expect(d.clauses).toEqual([]);
+  });
+});
+
+describe("W10 — Vision gate (pure, no API)", () => {
+  it("isVisionEligible: images + PDF only, everything else stub", () => {
+    expect(isVisionEligible("image/png")).toBe(true);
+    expect(isVisionEligible("image/jpeg")).toBe(true);
+    expect(isVisionEligible("image/webp")).toBe(true);
+    expect(isVisionEligible("application/pdf")).toBe(true);
+    expect(isVisionEligible("text/csv")).toBe(false);
+    expect(isVisionEligible("application/vnd.ms-excel")).toBe(false);
+    expect(isVisionEligible(undefined)).toBe(false);
+  });
+
+  it("visionEnabled is OFF unless flag AND key are both set", () => {
+    const flag = process.env.DOCINTEL_USE_VISION;
+    const key = process.env.ANTHROPIC_API_KEY;
+    try {
+      delete process.env.DOCINTEL_USE_VISION;
+      delete process.env.ANTHROPIC_API_KEY;
+      expect(visionEnabled()).toBe(false);
+      process.env.DOCINTEL_USE_VISION = "true";
+      expect(visionEnabled()).toBe(false); // key still missing
+      process.env.ANTHROPIC_API_KEY = "sk-ant-test";
+      expect(visionEnabled()).toBe(true); // both set
+      process.env.DOCINTEL_USE_VISION = "false";
+      expect(visionEnabled()).toBe(false); // flag explicitly off
+    } finally {
+      if (flag === undefined) delete process.env.DOCINTEL_USE_VISION;
+      else process.env.DOCINTEL_USE_VISION = flag;
+      if (key === undefined) delete process.env.ANTHROPIC_API_KEY;
+      else process.env.ANTHROPIC_API_KEY = key;
+    }
+  });
+
+  it("Vision OFF → parseDocument still returns the rich stub (regression)", async () => {
+    const d = await parse("supplier_contract.pdf");
+    expect(d.kind).toBe("contract");
+    expect(d.linkedTo).toBe("LORAN");
+    expect(d.clauses.length).toBeGreaterThan(0);
   });
 });
 

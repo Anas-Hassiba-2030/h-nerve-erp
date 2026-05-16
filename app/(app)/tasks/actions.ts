@@ -23,7 +23,7 @@ const taskSchema = z.object({
 });
 
 export async function createTask(formData: FormData) {
-  const user = await requireUser();
+  const user = await requireRole("MANAGER");
   const data = taskSchema.parse({
     title: formData.get("title"),
     description: formData.get("description") ?? "",

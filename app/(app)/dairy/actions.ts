@@ -34,7 +34,7 @@ export async function createBatch(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  await requireUser();
+  await requireRole("MANAGER");
   const parsed = parseFormState(batchSchema, {
     companyId: formData.get("companyId"),
     product: formData.get("product"),

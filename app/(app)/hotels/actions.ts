@@ -46,7 +46,7 @@ export async function createHotel(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  await requireUser();
+  await requireRole("MANAGER");
   const parsed = parseFormState(hotelSchema, {
     companyId: formData.get("companyId"),
     name: formData.get("name"),
@@ -114,7 +114,7 @@ export async function deleteHotel(formData: FormData) {
 }
 
 export async function createBooking(formData: FormData) {
-  await requireUser();
+  await requireRole("MANAGER");
   const data = bookingSchema.parse({
     hotelId: formData.get("hotelId"),
     guestName: formData.get("guestName"),

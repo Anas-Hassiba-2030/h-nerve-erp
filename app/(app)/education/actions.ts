@@ -21,7 +21,7 @@ const programSchema = z.object({
 });
 
 export async function createProgram(formData: FormData) {
-  await requireUser();
+  await requireRole("MANAGER");
   const data = programSchema.parse({
     companyId: formData.get("companyId"),
     name: formData.get("name"),

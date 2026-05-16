@@ -25,7 +25,7 @@ const forecastSchema = z.object({
 });
 
 export async function createForecast(formData: FormData) {
-  const user = await requireUser();
+  const user = await requireRole("MANAGER");
   const data = forecastSchema.parse({
     sourceCompanyId: formData.get("sourceCompanyId"),
     targetCompanyId: formData.get("targetCompanyId"),

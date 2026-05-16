@@ -32,7 +32,7 @@ export async function createProject(
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  await requireUser();
+  await requireRole("MANAGER");
   const parsed = parseFormState(projectSchema, {
     companyId: formData.get("companyId"),
     title: formData.get("title"),

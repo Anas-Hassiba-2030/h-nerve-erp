@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/session";
 import { requireRole } from "@/lib/authz";
 import { logActivity } from "@/lib/activityLog";
 
@@ -36,7 +35,7 @@ const cropSchema = z.object({
 });
 
 export async function createFarm(formData: FormData) {
-  await requireUser();
+  await requireRole("MANAGER");
   const data = farmSchema.parse({
     companyId: formData.get("companyId"),
     name: formData.get("name"),
@@ -70,7 +69,7 @@ export async function createFarm(formData: FormData) {
 }
 
 export async function updateSensors(farmId: string, formData: FormData) {
-  await requireUser();
+  await requireRole("MANAGER");
   const data = sensorSchema.parse({
     tempC: formData.get("tempC") ?? "",
     humidity: formData.get("humidity") ?? "",
@@ -111,7 +110,7 @@ export async function deleteFarm(formData: FormData) {
 }
 
 export async function createCrop(formData: FormData) {
-  await requireUser();
+  await requireRole("MANAGER");
   const data = cropSchema.parse({
     farmId: formData.get("farmId"),
     name: formData.get("name"),

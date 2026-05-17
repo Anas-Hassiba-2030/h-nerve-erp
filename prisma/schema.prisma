@@ -1454,11 +1454,52 @@ model Product {
   updatedAt       DateTime  @updatedAt
 
   importRows      ImportRow[]
+  movements       InventoryMovement[]
 
   @@unique([tenantId, sku])
   @@index([tenantId, deletedAt])
   @@index([tenantId, supplier])
   @@index([tenantId, warehouse])
+}
+
+// =====================================================================
+// INVENTORY MOVEMENT — append-only stock ledger (Phase 5). Every stock
+// change is one immutable row; Product.quantity becomes a denormalized
+// cache = SUM(delta) WHERE productId AND deletedAt IS NULL. Mistakes are
+// corrected by a compensating reverse movement, never an edit/delete
+// (decision #1). tenantId is the same OPAQUE caller label as Product /
+// ImportLog — no Tenant FK. sourceImportLogId/documentRef are opaque
+// text for now (documentRef → FK in Phase 6, same precedent).
+// Movement type is a string enum per the CLAUDE.md SQLite rule.
+// =====================================================================
+model InventoryMovement {
+  id                String   @id @default(cuid())
+  tenantId          String
+  productId         String
+  // IMPORT | RECEIVED | SOLD | TRANSFER_OUT | TRANSFER_IN | ADJUSTMENT
+  // | DAMAGED | RETURN_FROM_CUSTOMER | RETURN_TO_SUPPLIER
+  type              String
+  // Signed: positive = stock in, negative = stock out.
+  delta             Int
+  reason            String
+  occurredAt        DateTime @default(now())
+
+  // Provenance.
+  sourceImportLogId String?
+  note              String?
+  userId            String?
+  documentRef       String?
+
+  // Append-only (decision #1): no edit/delete UI. deletedAt exists for
+  // exceptional admin correction only; recalc excludes soft-deleted rows.
+  deletedAt         DateTime?
+  createdAt         DateTime @default(now())
+
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, productId, occurredAt])
+  @@index([tenantId, type, occurredAt])
+  @@index([productId, deletedAt])
 }
 
 // =====================================================================

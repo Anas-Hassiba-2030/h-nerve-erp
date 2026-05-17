@@ -317,6 +317,7 @@ export async function POST(req: NextRequest) {
               delta: r.quantity ?? 0, // 0 → recordMovement no-ops
               reason: `Initial import: ${source ?? "unknown"}`,
               sourceImportLogId: log.id,
+              unitCost: r.unitCost ?? null, // feeds weighted-avg pool (decision #5)
             });
             if (mv) movementsCreated++;
             productId = p.id;

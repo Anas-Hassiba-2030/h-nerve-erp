@@ -11,9 +11,16 @@
 // (positive) and SO fulfillment writes SOLD (negative). prismaUnscoped:
 // these models have no companyId, consistent with the import surface.
 
+import { Prisma } from "@prisma/client";
 import { prismaUnscoped } from "@/lib/db";
 import { generateNumber } from "@/lib/utils";
 import { recordMovement, recalcProductQuantity } from "@/lib/inventory";
+import {
+  postJournalEntry,
+  getWeightedAverageCost,
+  money,
+  ACCT,
+} from "@/lib/accounting";
 
 export type POLineInput = {
   productId: string;
@@ -194,6 +201,7 @@ export async function receivePO(poId: string, receipts: Receipt[]) {
         delta: r.receivedQty,
         reason: `PO receipt: ${po.poNumber}`,
         documentRef: po.poNumber,
+        unitCost: line.unitCost ?? null, // costed inflow → weighted-avg pool
       });
       await tx.purchaseOrderLine.update({
         where: { id: line.id },
@@ -202,6 +210,32 @@ export async function receivePO(poId: string, receipts: Receipt[]) {
       affected.add(line.productId);
     }
     for (const pid of affected) await recalcProductQuantity(tx, pid);
+
+    // --- Accounting (Phase 8): DR Inventory / CR Accounts Payable for
+    // THIS receipt. Per-line amount rounded to 2dp (banker's) then
+    // summed, so both JE sides are built from identical numbers. Lines
+    // with no unitCost contribute nothing; an all-zero entry is skipped
+    // by postJournalEntry (returns null). Same tx → atomic with stock.
+    let invTotal = new Prisma.Decimal(0);
+    for (const r of receipts) {
+      if (r.receivedQty <= 0) continue;
+      const line = byLine.get(r.lineId)!;
+      if (line.unitCost == null) continue;
+      invTotal = invTotal.plus(
+        money(
+          new Prisma.Decimal(r.receivedQty).times(new Prisma.Decimal(line.unitCost)),
+        ),
+      );
+    }
+    await postJournalEntry(tx, {
+      tenantId: po.tenantId,
+      description: `PO receipt: ${po.poNumber}`,
+      reference: po.poNumber,
+      lines: [
+        { accountCode: ACCT.INVENTORY, debit: invTotal, memo: po.poNumber },
+        { accountCode: ACCT.AP, credit: invTotal, memo: po.poNumber },
+      ],
+    });
 
     // Recompute status from the fresh line state; only write if changed.
     const fresh = await tx.purchaseOrderLine.findMany({ where: { poId } });
@@ -384,6 +418,56 @@ export async function fulfillSO(soId: string, fulfillments: Fulfillment[]) {
       affected.add(line.productId);
     }
     for (const pid of affected) await recalcProductQuantity(tx, pid);
+
+    // --- Accounting (Phase 8): two JEs, both atomic in this tx.
+    //  Revenue: DR AR / CR Sales Revenue   (qty × unitPrice)
+    //  COGS:    DR COGS / CR Inventory      (qty × weighted-avg cost)
+    // Per-line rounded (2dp banker's) then summed. WAC excludes SOLD
+    // (it filters IMPORT|RECEIVED), so computing it after recordMovement
+    // is correct. Null unitPrice / WAC=0 → that JE is skipped by
+    // postJournalEntry (degenerate all-zero → null).
+    const wacCache = new Map<string, Prisma.Decimal>();
+    let revTotal = new Prisma.Decimal(0);
+    let cogsTotal = new Prisma.Decimal(0);
+    for (const f of fulfillments) {
+      if (f.fulfilledQty <= 0) continue;
+      const line = byLine.get(f.lineId)!;
+      if (line.unitPrice != null) {
+        revTotal = revTotal.plus(
+          money(
+            new Prisma.Decimal(f.fulfilledQty).times(
+              new Prisma.Decimal(line.unitPrice),
+            ),
+          ),
+        );
+      }
+      let wac = wacCache.get(line.productId);
+      if (!wac) {
+        wac = await getWeightedAverageCost(tx, line.productId);
+        wacCache.set(line.productId, wac);
+      }
+      cogsTotal = cogsTotal.plus(
+        money(new Prisma.Decimal(f.fulfilledQty).times(wac)),
+      );
+    }
+    await postJournalEntry(tx, {
+      tenantId: so.tenantId,
+      description: `SO revenue: ${so.soNumber}`,
+      reference: so.soNumber,
+      lines: [
+        { accountCode: ACCT.AR, debit: revTotal, memo: so.soNumber },
+        { accountCode: ACCT.REVENUE, credit: revTotal, memo: so.soNumber },
+      ],
+    });
+    await postJournalEntry(tx, {
+      tenantId: so.tenantId,
+      description: `SO COGS: ${so.soNumber}`,
+      reference: so.soNumber,
+      lines: [
+        { accountCode: ACCT.COGS, debit: cogsTotal, memo: so.soNumber },
+        { accountCode: ACCT.INVENTORY, credit: cogsTotal, memo: so.soNumber },
+      ],
+    });
 
     const fresh = await tx.salesOrderLine.findMany({ where: { soId } });
     const allDone = fresh.every((l) => l.fulfilledQty >= l.quantity);

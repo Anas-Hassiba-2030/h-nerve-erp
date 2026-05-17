@@ -17,6 +17,13 @@ import { getLocale } from "@/lib/i18n.server";
 import { prismaUnscoped } from "@/lib/db";
 import { flashToast } from "@/lib/toast";
 import { recordMovement, recalcProductQuantity } from "@/lib/inventory";
+import { Prisma } from "@prisma/client";
+import {
+  postJournalEntry,
+  getWeightedAverageCost,
+  money,
+  ACCT,
+} from "@/lib/accounting";
 
 async function gate(): Promise<SessionUser> {
   const user = await getCurrentUser();
@@ -72,6 +79,28 @@ export async function adjustStock(formData: FormData): Promise<void> {
         userId: user.id,
       });
       await recalcProductQuantity(tx, productId);
+
+      // --- Accounting (Phase 8): value the adjustment at last-known
+      // weighted-avg cost. delta>0 (stock added) DR Inventory / CR
+      // Inventory Adjustment; delta<0 (removed) the reverse. WAC=0
+      // (no costed inflow) → amount 0 → postJournalEntry skips it.
+      const wac = await getWeightedAverageCost(tx, productId);
+      const amount = money(new Prisma.Decimal(Math.abs(delta)).times(wac));
+      await postJournalEntry(tx, {
+        tenantId: product.tenantId,
+        description: `Stock adjustment ${product.sku}: ${reason}`,
+        reference: `ADJ:${product.sku}`,
+        lines:
+          delta > 0
+            ? [
+                { accountCode: ACCT.INVENTORY, debit: amount, memo: reason },
+                { accountCode: ACCT.INVENTORY_ADJUSTMENT, credit: amount, memo: reason },
+              ]
+            : [
+                { accountCode: ACCT.INVENTORY_ADJUSTMENT, debit: amount, memo: reason },
+                { accountCode: ACCT.INVENTORY, credit: amount, memo: reason },
+              ],
+      });
     });
   } catch (e) {
     console.error("[adjustStock] failed:", e);

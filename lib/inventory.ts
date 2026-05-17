@@ -55,6 +55,9 @@ export type RecordMovementInput = {
   note?: string | null;
   userId?: string | null;
   documentRef?: string | null;
+  /** Costed inflows only (IMPORT/RECEIVED) — feeds weighted-avg COGS
+   *  (Phase 8). Null/omitted = excluded from the costing pool. */
+  unitCost?: Prisma.Decimal.Value | null;
 };
 
 /**
@@ -92,6 +95,7 @@ export async function recordMovement(
       note: input.note ?? null,
       userId: input.userId ?? null,
       documentRef: input.documentRef ?? null,
+      unitCost: input.unitCost ?? null,
     },
   });
 }

@@ -93,6 +93,7 @@ export function Sidebar({
     {
       label: ar ? "الذكاء التشغيلي" : "Intelligence",
       items: [
+        { href: "/admin/brain", label: ar ? "رؤى العقل" : "Brain insights", icon: Brain, hint: "AI" },
         { href: "/brain/graph", label: ar ? "الرسم السببي" : "Causal graph", icon: Network, hint: "BRAIN" },
         { href: "/brain/scenarios", label: ar ? "ماذا لو…" : "What-if simulator", icon: Zap, hint: "BRAIN" },
         { href: "/brain/council", label: ar ? "المجلس" : "The council", icon: Users, hint: "BRAIN" },

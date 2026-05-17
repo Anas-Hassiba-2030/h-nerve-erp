@@ -39,7 +39,8 @@ export default async function CustomersPage({ searchParams }: { searchParams: SP
     await Promise.all([
       prismaUnscoped.customer.count(),
       prismaUnscoped.customer.count({ where: { deletedAt: null } }),
-      prismaUnscoped.salesOrder.count({ where: { customerId: { not: null }, deletedAt: null } }),
+      // SO.customerId is non-null post-Schema-2 → every non-deleted SO is linked.
+      prismaUnscoped.salesOrder.count({ where: { deletedAt: null } }),
       prismaUnscoped.salesOrder.count({
         where: { status: "FULFILLED", updatedAt: { gte: monthStart }, deletedAt: null },
       }),

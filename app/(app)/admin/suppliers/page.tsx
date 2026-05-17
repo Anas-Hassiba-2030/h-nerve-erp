@@ -39,7 +39,8 @@ export default async function SuppliersPage({ searchParams }: { searchParams: SP
       prismaUnscoped.supplier.count(),
       prismaUnscoped.supplier.count({ where: { deletedAt: null } }),
       prismaUnscoped.product.count({ where: { supplierId: { not: null }, deletedAt: null } }),
-      prismaUnscoped.purchaseOrder.count({ where: { supplierId: { not: null }, deletedAt: null } }),
+      // PO.supplierId is non-null post-Schema-2 → every non-deleted PO is linked.
+      prismaUnscoped.purchaseOrder.count({ where: { deletedAt: null } }),
       prismaUnscoped.supplier.findMany({
         where,
         orderBy: { name: "asc" },

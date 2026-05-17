@@ -266,7 +266,6 @@ export async function POST(req: NextRequest) {
                 importCount: { increment: 1 },
                 ...(r.productName != null ? { name: r.productName } : {}),
                 ...(r.unitCost != null ? { unitCost: r.unitCost } : {}),
-                ...(r.supplier != null ? { supplier: r.supplier } : {}),
                 ...(sup ? { supplierId: sup.id } : {}),
                 ...(r.warehouse != null ? { warehouse: r.warehouse } : {}),
               },
@@ -306,7 +305,6 @@ export async function POST(req: NextRequest) {
                 name: r.productName ?? r.sku, // name is required; fall back to sku
                 quantity: 0,
                 unitCost: r.unitCost ?? null,
-                supplier: r.supplier ?? null,
                 supplierId: sup?.id ?? null,
                 warehouse: r.warehouse ?? null,
               },

@@ -121,7 +121,6 @@ export async function createPO(data: {
         tenantId,
         poNumber,
         supplierId: sup.id,
-        supplier: sup.name, // legacy dual-write — removed at Schema-2
         status: "DRAFT",
         expectedAt: data.expectedAt ?? null,
         note: data.note?.trim() || null,
@@ -284,7 +283,6 @@ export async function createSO(data: {
         tenantId,
         soNumber,
         customerId: cus.id,
-        customer: cus.name, // legacy dual-write — removed at Schema-2
         status: "DRAFT",
         requiredBy: data.requiredBy ?? null,
         note: data.note?.trim() || null,

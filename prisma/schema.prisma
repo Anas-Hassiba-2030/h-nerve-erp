@@ -1437,7 +1437,8 @@ model Product {
   // attribute is unsupported on the sqlite provider (same as
   // ImportRow.unitCost) — applied on the W9 Postgres cutover.
   unitCost        Decimal?
-  supplier        String?            // legacy — dropped in Schema-2 (Phase 7)
+  // supplierId is nullable BY DESIGN (decision #7): import rows with no
+  // supplier field have no Supplier. All current products are linked.
   supplierId      String?
   warehouse       String?
 
@@ -1462,7 +1463,6 @@ model Product {
 
   @@unique([tenantId, sku])
   @@index([tenantId, deletedAt])
-  @@index([tenantId, supplier])
   @@index([tenantId, supplierId])
   @@index([tenantId, warehouse])
 }
@@ -1553,8 +1553,7 @@ model PurchaseOrder {
   id          String   @id @default(cuid())
   tenantId    String
   poNumber    String   @unique
-  supplier    String   // legacy NOT NULL — dual-written until Schema-2 drop
-  supplierId  String?
+  supplierId  String
   // DRAFT | SENT | PARTIAL | RECEIVED | CANCELLED
   status      String   @default("DRAFT")
   orderedAt   DateTime @default(now())
@@ -1562,14 +1561,13 @@ model PurchaseOrder {
   note        String?
 
   lines       PurchaseOrderLine[]
-  supplierRef Supplier? @relation(fields: [supplierId], references: [id])
+  supplierRef Supplier  @relation(fields: [supplierId], references: [id])
 
   deletedAt   DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([tenantId, status])
-  @@index([tenantId, supplier])
   @@index([tenantId, supplierId])
   @@index([tenantId, orderedAt])
 }
@@ -1601,8 +1599,7 @@ model SalesOrder {
   id          String   @id @default(cuid())
   tenantId    String
   soNumber    String   @unique
-  customer    String   // legacy NOT NULL — dual-written until Schema-2 drop
-  customerId  String?
+  customerId  String
   // DRAFT | CONFIRMED | PARTIAL | FULFILLED | CANCELLED
   status      String   @default("DRAFT")
   orderedAt   DateTime @default(now())
@@ -1610,14 +1607,13 @@ model SalesOrder {
   note        String?
 
   lines       SalesOrderLine[]
-  customerRef Customer? @relation(fields: [customerId], references: [id])
+  customerRef Customer  @relation(fields: [customerId], references: [id])
 
   deletedAt   DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([tenantId, status])
-  @@index([tenantId, customer])
   @@index([tenantId, customerId])
   @@index([tenantId, orderedAt])
 }

@@ -3,12 +3,14 @@ generator client {
 }
 
 datasource db {
-  // LOCAL DEMO default = sqlite (reliable; Neon free-tier dropped
-  // connections and crash-looped the demo). PILOT path = set provider
-  // back to "postgresql" + point DATABASE_URL at Neon. Phase B work is
-  // preserved and documented in docs/OPERATING-PROTOCOL.md §6.
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  // PRODUCTION (Phase 11) = PostgreSQL on Neon. `url` is the POOLED
+  // (pgbouncer) connection used at runtime; `directUrl` is the DIRECT
+  // connection used only for migrations. For a fast OFFLINE pitch demo,
+  // revert to SQLite per docs/OPERATING-PROTOCOL.md §6: provider="sqlite",
+  // drop directUrl, DATABASE_URL="file:./dev.db", then npm run db:reset.
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // =====================================================================
@@ -1430,11 +1432,9 @@ model ImportRow {
   sku         String?
   productName String?
   quantity    Int?
-  // Money. Intended precision/scale = (12,2). The native @db.Decimal
-  // attribute is NOT supported on the sqlite provider, so it is omitted
-  // here and applied on the Postgres cutover (W9). Prisma's Decimal
-  // scalar still gives exact decimal handling on SQLite.
-  unitCost    Decimal?
+  // Money, precision/scale (12,2). Applied at the Phase 11 Postgres
+  // cutover (was a bare Decimal on the sqlite provider).
+  unitCost    Decimal? @db.Decimal(12, 2)
   supplier    String?
   warehouse   String?
   // Verbatim record JSON, kept for debugging (SQLite has no JSON type).
@@ -1471,10 +1471,9 @@ model Product {
   quantity        Int       @default(0)
   // Phase 10: Brain low-stock threshold. Null → the engine uses 50.
   reorderPoint    Int?
-  // Money. Intended precision/scale = (12,2); the native @db.Decimal
-  // attribute is unsupported on the sqlite provider (same as
-  // ImportRow.unitCost) — applied on the W9 Postgres cutover.
-  unitCost        Decimal?
+  // Money, precision/scale (12,2). Applied at the Phase 11 Postgres
+  // cutover (same precedent as ImportRow.unitCost).
+  unitCost        Decimal? @db.Decimal(12, 2)
   // supplierId is nullable BY DESIGN (decision #7): import rows with no
   // supplier field have no Supplier. All current products are linked.
   supplierId      String?
@@ -1538,8 +1537,8 @@ model InventoryMovement {
   documentRef       String?
   // Costed inflows only (IMPORT from r.unitCost, RECEIVED from PO line).
   // Drives weighted-average COGS (Phase 8). Null = excluded from the
-  // costing pool.
-  unitCost          Decimal?
+  // costing pool. precision/scale (12,2) — Phase 11 Postgres cutover.
+  unitCost          Decimal? @db.Decimal(12, 2)
   // Phase 9: which warehouse this movement happened at — backfilled
   // from the product's warehouseId. transferRef links a paired
   // TRANSFER_OUT / TRANSFER_IN created in the same transaction.
@@ -1659,9 +1658,9 @@ model PurchaseOrderLine {
   productId   String
   quantity    Int      // ordered
   receivedQty Int      @default(0)
-  // Money. Bare Decimal? — @db.Decimal unsupported on sqlite (same
-  // precedent as Product.unitCost / ImportRow.unitCost; W9 cutover).
-  unitCost    Decimal?
+  // Money, precision/scale (12,2). Applied at the Phase 11 Postgres
+  // cutover (precedent: Product.unitCost / ImportRow.unitCost).
+  unitCost    Decimal? @db.Decimal(12, 2)
 
   po          PurchaseOrder @relation(fields: [poId], references: [id], onDelete: Cascade)
   product     Product       @relation(fields: [productId], references: [id])
@@ -1705,8 +1704,8 @@ model SalesOrderLine {
   productId     String
   quantity      Int      // ordered
   fulfilledQty  Int      @default(0)
-  // Money. Bare Decimal? (same precedent as above).
-  unitPrice     Decimal?
+  // Money, precision/scale (12,2). Phase 11 Postgres cutover (precedent above).
+  unitPrice     Decimal? @db.Decimal(12, 2)
 
   so            SalesOrder @relation(fields: [soId], references: [id], onDelete: Cascade)
   product       Product    @relation(fields: [productId], references: [id])
@@ -1770,7 +1769,7 @@ model Customer {
 // ACCOUNTING (Phase 8) — double-entry. Posted JournalEntries are
 // immutable (decision #2); SUM(debits)=SUM(credits) enforced in code
 // before POSTED. tenantId opaque (no Tenant FK — family precedent).
-// Money = bare Decimal (sqlite; W9 Postgres-cutover precedent).
+// Money = Decimal(12,2), applied at the Phase 11 Postgres cutover.
 // =====================================================================
 model LedgerAccount {
   id          String   @id @default(cuid())
@@ -1835,8 +1834,8 @@ model JournalLine {
   id             String   @id @default(cuid())
   journalEntryId String
   accountId      String
-  debit          Decimal  @default(0)
-  credit         Decimal  @default(0)
+  debit          Decimal  @default(0) @db.Decimal(12, 2)
+  credit         Decimal  @default(0) @db.Decimal(12, 2)
   memo           String?
 
   entry          JournalEntry  @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)

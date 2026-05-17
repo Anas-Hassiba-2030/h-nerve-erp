@@ -182,6 +182,36 @@ actions. New surfaces: `/admin/suppliers`, `/admin/customers` (CRUD,
 inline edit, linked orders; soft-delete blocked while non-cancelled
 PO/SO exist). PO/SO creation now uses Supplier/Customer dropdowns.
 
+## Phase 8 — Double-entry accounting
+
+`lib/accounting.ts` adds the ledger. Three business events auto-post
+balanced, immutable `JournalEntry`s (SUM debits = SUM credits, enforced
+in code before any write — all `Prisma.Decimal`, never JS floats):
+
+- **PO receipt** (`receivePO`): `DR Inventory (1001) / CR Accounts
+  Payable (2001)` — qty × `PurchaseOrderLine.unitCost`.
+- **SO fulfillment** (`fulfillSO`): two JEs — `DR AR (1201) / CR Sales
+  Revenue (4001)` (qty × unitPrice) **and** `DR COGS (5001) / CR
+  Inventory (1001)` (qty × weighted-average cost).
+- **Stock adjustment** (`adjustStock`): `DR/CR Inventory Adjustment
+  (5002)` vs `Inventory` by `|delta| × WAC`.
+
+**Weighted-average cost** = `Σ(δ × unitCost) / Σ δ` over costed inflows
+(`IMPORT|RECEIVED`, `unitCost` not null, not soft-deleted) — a perpetual
+moving average (pool not depleted on sale). `InventoryMovement.unitCost`
+carries cost on costed inflows; **IMPORT movements do NOT post JEs**
+(decision #7 — data sync, not a financial event) but still feed the
+costing pool. Each contributing line is rounded to 2dp (banker's) then
+summed, so both JE sides are built from identical numbers.
+
+All posting is inside the existing PO/SO/adjust transaction → atomic
+with the stock movement. Degenerate (null cost / WAC=0) entries are
+skipped. The Chart of Accounts must be seeded per tenant first
+(`getLedgerAccount` fails loud) — historical pre-Phase-8 events get no
+retroactive JEs. Surfaces: `/admin/journal` (period ledger + balance
+check), `/admin/accounts` (CoA + P&L + Balance Sheet; Equity includes
+current-period net income since period close is Phase 11).
+
 ## Notes / boundaries
 
 - **SKU dedup is live (Phase 3).** Re-posting the same `(tenantId, sku)`

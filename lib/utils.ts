@@ -277,3 +277,26 @@ export function movementBadge(type: string): string {
   };
   return map[type] ?? "badge-slate";
 }
+
+// ----- PO / SO order-status display (Phase 6) -----
+// Shared by /admin/purchase-orders + /admin/sales-orders + the movements
+// documentRef deep-links. PO: DRAFT|SENT|PARTIAL|RECEIVED|CANCELLED.
+// SO: DRAFT|CONFIRMED|PARTIAL|FULFILLED|CANCELLED.
+export const ORDER_STATUS_AR: Record<string, string> = {
+  DRAFT: "مسودة", SENT: "مُرسَل", CONFIRMED: "مؤكد", PARTIAL: "جزئي",
+  RECEIVED: "مُستلَم", FULFILLED: "مُنفَّذ", CANCELLED: "ملغى",
+};
+export const ORDER_STATUS_EN: Record<string, string> = {
+  DRAFT: "Draft", SENT: "Sent", CONFIRMED: "Confirmed", PARTIAL: "Partial",
+  RECEIVED: "Received", FULFILLED: "Fulfilled", CANCELLED: "Cancelled",
+};
+export function orderStatusBadge(status: string): string {
+  const map: Record<string, string> = {
+    DRAFT: "badge-slate",
+    SENT: "badge-blue", CONFIRMED: "badge-blue",
+    PARTIAL: "badge-amber",
+    RECEIVED: "badge-emerald", FULFILLED: "badge-emerald",
+    CANCELLED: "badge-red",
+  };
+  return map[status] ?? "badge-slate";
+}

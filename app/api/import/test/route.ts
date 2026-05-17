@@ -25,6 +25,7 @@ import {
   sourceMatchesSystem,
 } from "@/lib/importMapping";
 import { recordMovement, recalcProductQuantity } from "@/lib/inventory";
+import { findOrCreateSupplier } from "@/lib/orders";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -240,6 +241,13 @@ export async function POST(req: NextRequest) {
       for (const r of rowsToCreate) {
         let productId: string | null = null;
         if (r.status === "ACCEPTED" && r.sku) {
+          // Phase 7: auto-promote the supplier string to a real
+          // Supplier (idempotent upsert on (tenantId,name), same tx).
+          // n8n keeps sending the plain string; the first import that
+          // sees it creates the entity and links supplierId.
+          const sup = r.supplier
+            ? await findOrCreateSupplier(tx, productTenant, r.supplier)
+            : null;
           // findUnique + branch, not a bare upsert(): upsert() can't
           // report created-vs-updated, which the response needs.
           const existing = await tx.product.findUnique({
@@ -259,6 +267,7 @@ export async function POST(req: NextRequest) {
                 ...(r.productName != null ? { name: r.productName } : {}),
                 ...(r.unitCost != null ? { unitCost: r.unitCost } : {}),
                 ...(r.supplier != null ? { supplier: r.supplier } : {}),
+                ...(sup ? { supplierId: sup.id } : {}),
                 ...(r.warehouse != null ? { warehouse: r.warehouse } : {}),
               },
             });
@@ -298,6 +307,7 @@ export async function POST(req: NextRequest) {
                 quantity: 0,
                 unitCost: r.unitCost ?? null,
                 supplier: r.supplier ?? null,
+                supplierId: sup?.id ?? null,
                 warehouse: r.warehouse ?? null,
               },
               select: { id: true },

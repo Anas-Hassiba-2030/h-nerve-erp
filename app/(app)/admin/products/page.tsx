@@ -65,7 +65,7 @@ export default async function ProductsAdminPage({
 
   const where: Prisma.ProductWhereInput = { deletedAt: null };
   if (sku) where.sku = sku;
-  if (supplier) where.supplier = supplier;
+  if (supplier) where.supplierId = supplier; // supplier param is now a Supplier id
   if (warehouse) where.warehouse = warehouse;
   if (q) {
     // SQLite has no case-insensitive `mode` — case-sensitive contains.
@@ -74,10 +74,15 @@ export default async function ProductsAdminPage({
 
   // Two reads: KPI/pill aggregates over the WHOLE catalog (stable while
   // filtering), and the filtered list for the table.
-  const [catalog, products] = await Promise.all([
+  const [catalog, supplierList, products] = await Promise.all([
     prismaUnscoped.product.findMany({
       where: { deletedAt: null },
-      select: { quantity: true, supplier: true, warehouse: true },
+      select: { quantity: true, warehouse: true },
+    }),
+    prismaUnscoped.supplier.findMany({
+      where: { deletedAt: null },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
     }),
     prismaUnscoped.product.findMany({
       where,
@@ -94,18 +99,21 @@ export default async function ProductsAdminPage({
           orderBy: [{ occurredAt: "desc" }, { createdAt: "desc" }],
           take: 100,
         },
+        supplierRef: { select: { name: true } },
       },
     }),
   ]);
 
   const totalUnits = catalog.reduce((s, p) => s + p.quantity, 0);
   const lowStock = catalog.filter((p) => p.quantity < LOW_STOCK).length;
-  const suppliers = [
-    ...new Set(catalog.map((p) => p.supplier).filter(Boolean) as string[]),
-  ].sort();
+  // Supplier filter is now real entities (value = id, label = name);
+  // warehouse stays a plain string.
+  const suppliers = supplierList.map((s) => ({ value: s.id, label: s.name }));
   const warehouses = [
     ...new Set(catalog.map((p) => p.warehouse).filter(Boolean) as string[]),
-  ].sort();
+  ]
+    .sort()
+    .map((w) => ({ value: w, label: w }));
 
   const dash = "—";
 
@@ -129,7 +137,7 @@ export default async function ProductsAdminPage({
     paramKey,
   }: {
     label: string;
-    values: string[];
+    values: { value: string; label: string }[];
     active: string;
     paramKey: string;
   }) =>
@@ -149,11 +157,11 @@ export default async function ProductsAdminPage({
         </Link>
         {values.map((v) => (
           <Link
-            key={v}
-            href={hrefWith(paramKey, v)}
-            className={active === v ? "badge-emerald" : "badge-slate"}
+            key={v.value}
+            href={hrefWith(paramKey, v.value)}
+            className={active === v.value ? "badge-emerald" : "badge-slate"}
           >
-            {v}
+            {v.label}
           </Link>
         ))}
       </div>
@@ -265,8 +273,8 @@ export default async function ProductsAdminPage({
                   <span className="font-mono" style={{ color: "var(--text-muted)" }}>
                     {p.unitCost != null ? formatMoney2(Number(p.unitCost)) : dash}
                   </span>
-                  {p.supplier ? (
-                    <span className="badge-slate">{p.supplier}</span>
+                  {p.supplierRef ? (
+                    <span className="badge-slate">{p.supplierRef.name}</span>
                   ) : null}
                   {p.warehouse ? (
                     <span className="badge-slate">{p.warehouse}</span>

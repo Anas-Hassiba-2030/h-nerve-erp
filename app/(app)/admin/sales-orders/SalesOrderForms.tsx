@@ -16,14 +16,17 @@ import {
 } from "./actions";
 
 type ProductOpt = { id: string; sku: string; name: string; quantity: number };
+type CustomerOpt = { id: string; name: string };
 type Line = { productId: string; quantity: string; unitPrice: string };
 
 export function NewSOForm({
   products,
+  customers,
   tenantDefault,
   ar,
 }: {
   products: ProductOpt[];
+  customers: CustomerOpt[];
   tenantDefault: string;
   ar: boolean;
 }) {
@@ -72,7 +75,16 @@ export function NewSOForm({
           </label>
           <label className="flex flex-col gap-1 text-[11px] font-bold">
             {ar ? "العميل" : "Customer"}
-            <input name="customer" required placeholder={ar ? "مثال: فندق عمّان" : "e.g. Hotel Amman"} className="input text-xs" />
+            <select name="customerId" required defaultValue="" className="input text-xs">
+              <option value="" disabled>
+                {ar ? "— اختر عميلاً —" : "— select customer —"}
+              </option>
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="flex flex-col gap-1 text-[11px] font-bold">
             {ar ? "مطلوب بحلول" : "Required by"}

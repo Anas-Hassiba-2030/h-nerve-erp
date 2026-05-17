@@ -17,14 +17,17 @@ import {
 } from "./actions";
 
 type ProductOpt = { id: string; sku: string; name: string };
+type SupplierOpt = { id: string; name: string };
 type Line = { productId: string; quantity: string; unitCost: string };
 
 export function NewPOForm({
   products,
+  suppliers,
   tenantDefault,
   ar,
 }: {
   products: ProductOpt[];
+  suppliers: SupplierOpt[];
   tenantDefault: string;
   ar: boolean;
 }) {
@@ -73,7 +76,16 @@ export function NewPOForm({
           </label>
           <label className="flex flex-col gap-1 text-[11px] font-bold">
             {ar ? "المورّد" : "Supplier"}
-            <input name="supplier" required placeholder={ar ? "مثال: مزارع المها" : "e.g. Maha Dairy"} className="input text-xs" />
+            <select name="supplierId" required defaultValue="" className="input text-xs">
+              <option value="" disabled>
+                {ar ? "— اختر مورّداً —" : "— select supplier —"}
+              </option>
+              {suppliers.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="flex flex-col gap-1 text-[11px] font-bold">
             {ar ? "متوقع في" : "Expected at"}

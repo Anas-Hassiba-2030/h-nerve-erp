@@ -63,17 +63,22 @@ export default async function PurchaseOrdersPage({
 
   const where: Prisma.PurchaseOrderWhereInput = { deletedAt: null };
   if (statusF) where.status = statusF;
-  if (supplierF) where.supplier = supplierF;
+  if (supplierF) where.supplierId = supplierF; // supplierF is now a Supplier id
 
-  const [allPos, products, pos] = await Promise.all([
+  const [allPos, products, supplierList, pos] = await Promise.all([
     prismaUnscoped.purchaseOrder.findMany({
       where: { deletedAt: null },
-      select: { status: true, supplier: true, updatedAt: true },
+      select: { status: true, updatedAt: true },
     }),
     prismaUnscoped.product.findMany({
       where: { deletedAt: null },
       select: { id: true, sku: true, name: true, quantity: true, tenantId: true },
       orderBy: { sku: "asc" },
+    }),
+    prismaUnscoped.supplier.findMany({
+      where: { deletedAt: null },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
     }),
     prismaUnscoped.purchaseOrder.findMany({
       where,
@@ -81,6 +86,7 @@ export default async function PurchaseOrdersPage({
       take: 300,
       include: {
         lines: { include: { product: { select: { sku: true, name: true } } } },
+        supplierRef: { select: { name: true, email: true, phone: true } },
       },
     }),
   ]);
@@ -95,7 +101,7 @@ export default async function PurchaseOrdersPage({
     (p) => p.status === "RECEIVED" && p.updatedAt >= monthStart,
   ).length;
 
-  const suppliers = [...new Set(allPos.map((p) => p.supplier))].sort();
+  const suppliers = supplierList; // {id,name}[] — real entities now
   // Dominant product tenant → New-PO default (opaque string, editable).
   const tenantDefault =
     products.length > 0
@@ -137,7 +143,7 @@ export default async function PurchaseOrdersPage({
       />
 
       <div className="mt-3">
-        <NewPOForm products={products} tenantDefault={tenantDefault} ar={ar} />
+        <NewPOForm products={products} suppliers={suppliers} tenantDefault={tenantDefault} ar={ar} />
       </div>
 
       <div className="card card-pad mt-3 flex flex-col gap-3">
@@ -163,8 +169,8 @@ export default async function PurchaseOrdersPage({
               {ar ? "الكل" : "All"}
             </Link>
             {suppliers.map((s) => (
-              <Link key={s} href={hrefWith("supplier", s)} className={supplierF === s ? "badge-emerald" : "badge-slate"}>
-                {s}
+              <Link key={s.id} href={hrefWith("supplier", s.id)} className={supplierF === s.id ? "badge-emerald" : "badge-slate"}>
+                {s.name}
               </Link>
             ))}
           </div>
@@ -202,7 +208,7 @@ export default async function PurchaseOrdersPage({
                   <span className="font-mono text-sm font-extrabold" style={{ color: "var(--text)" }}>
                     {po.poNumber}
                   </span>
-                  <span className="badge-slate">{po.supplier}</span>
+                  <span className="badge-slate">{po.supplierRef?.name ?? "—"}</span>
                   <span className={orderStatusBadge(po.status)}>{oLabel(po.status)}</span>
                   <span className="ms-auto flex flex-wrap items-center gap-2 text-[11px]">
                     <span style={{ color: "var(--text-muted)" }}>
@@ -247,6 +253,13 @@ export default async function PurchaseOrdersPage({
                 </div>
 
                 <div className="flex flex-col gap-3 px-4 py-3" style={{ borderTop: "1px solid var(--border)" }}>
+                  <div className="flex flex-wrap items-center gap-3 text-[11px]" style={{ color: "var(--text-muted)" }}>
+                    <span className="font-bold" style={{ color: "var(--text)" }}>
+                      {po.supplierRef?.name ?? "—"}
+                    </span>
+                    {po.supplierRef?.email ? <span>✉ {po.supplierRef.email}</span> : null}
+                    {po.supplierRef?.phone ? <span className="font-mono">☎ {po.supplierRef.phone}</span> : null}
+                  </div>
                   <div className="flex flex-wrap items-center gap-2">
                     {po.status === "DRAFT" ? <MarkSentButton poId={po.id} ar={ar} /> : null}
                     {canCancel ? <CancelPOButton poId={po.id} ar={ar} /> : null}

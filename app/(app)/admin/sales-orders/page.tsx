@@ -62,17 +62,22 @@ export default async function SalesOrdersPage({
 
   const where: Prisma.SalesOrderWhereInput = { deletedAt: null };
   if (statusF) where.status = statusF;
-  if (customerF) where.customer = customerF;
+  if (customerF) where.customerId = customerF; // customerF is now a Customer id
 
-  const [allSos, products, sos] = await Promise.all([
+  const [allSos, products, customerList, sos] = await Promise.all([
     prismaUnscoped.salesOrder.findMany({
       where: { deletedAt: null },
-      select: { status: true, customer: true, updatedAt: true },
+      select: { status: true, updatedAt: true },
     }),
     prismaUnscoped.product.findMany({
       where: { deletedAt: null },
       select: { id: true, sku: true, name: true, quantity: true, tenantId: true },
       orderBy: { sku: "asc" },
+    }),
+    prismaUnscoped.customer.findMany({
+      where: { deletedAt: null },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
     }),
     prismaUnscoped.salesOrder.findMany({
       where,
@@ -84,6 +89,7 @@ export default async function SalesOrdersPage({
             product: { select: { sku: true, name: true, quantity: true } },
           },
         },
+        customerRef: { select: { name: true, email: true, phone: true } },
       },
     }),
   ]);
@@ -98,7 +104,7 @@ export default async function SalesOrdersPage({
     (s) => s.status === "FULFILLED" && s.updatedAt >= monthStart,
   ).length;
 
-  const customers = [...new Set(allSos.map((s) => s.customer))].sort();
+  const customers = customerList; // {id,name}[] — real entities now
   const tenantDefault =
     products.length > 0
       ? [...products.reduce((m, p) => m.set(p.tenantId, (m.get(p.tenantId) ?? 0) + 1), new Map<string, number>())]
@@ -139,7 +145,7 @@ export default async function SalesOrdersPage({
       />
 
       <div className="mt-3">
-        <NewSOForm products={products} tenantDefault={tenantDefault} ar={ar} />
+        <NewSOForm products={products} customers={customers} tenantDefault={tenantDefault} ar={ar} />
       </div>
 
       <div className="card card-pad mt-3 flex flex-col gap-3">
@@ -165,8 +171,8 @@ export default async function SalesOrdersPage({
               {ar ? "الكل" : "All"}
             </Link>
             {customers.map((c) => (
-              <Link key={c} href={hrefWith("customer", c)} className={customerF === c ? "badge-emerald" : "badge-slate"}>
-                {c}
+              <Link key={c.id} href={hrefWith("customer", c.id)} className={customerF === c.id ? "badge-emerald" : "badge-slate"}>
+                {c.name}
               </Link>
             ))}
           </div>
@@ -203,7 +209,7 @@ export default async function SalesOrdersPage({
                   <span className="font-mono text-sm font-extrabold" style={{ color: "var(--text)" }}>
                     {so.soNumber}
                   </span>
-                  <span className="badge-slate">{so.customer}</span>
+                  <span className="badge-slate">{so.customerRef?.name ?? "—"}</span>
                   <span className={orderStatusBadge(so.status)}>{oLabel(so.status)}</span>
                   <span className="ms-auto flex flex-wrap items-center gap-2 text-[11px]">
                     <span style={{ color: "var(--text-muted)" }}>
@@ -257,6 +263,13 @@ export default async function SalesOrdersPage({
                 </div>
 
                 <div className="flex flex-col gap-3 px-4 py-3" style={{ borderTop: "1px solid var(--border)" }}>
+                  <div className="flex flex-wrap items-center gap-3 text-[11px]" style={{ color: "var(--text-muted)" }}>
+                    <span className="font-bold" style={{ color: "var(--text)" }}>
+                      {so.customerRef?.name ?? "—"}
+                    </span>
+                    {so.customerRef?.email ? <span>✉ {so.customerRef.email}</span> : null}
+                    {so.customerRef?.phone ? <span className="font-mono">☎ {so.customerRef.phone}</span> : null}
+                  </div>
                   <div className="flex flex-wrap items-center gap-2">
                     {so.status === "DRAFT" ? <ConfirmSOButton soId={so.id} ar={ar} /> : null}
                     {canCancel ? <CancelSOButton soId={so.id} ar={ar} /> : null}

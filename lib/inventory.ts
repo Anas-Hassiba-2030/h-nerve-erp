@@ -58,6 +58,14 @@ export type RecordMovementInput = {
   /** Costed inflows only (IMPORT/RECEIVED) — feeds weighted-avg COGS
    *  (Phase 8). Null/omitted = excluded from the costing pool. */
   unitCost?: Prisma.Decimal.Value | null;
+  /** Phase 9: warehouse this movement happened at. Omitted/null →
+   *  resolved from the product's warehouseId, so Phase 6/7/8 callsites
+   *  (receivePO/fulfillSO/adjustStock) stay untouched. An explicit
+   *  value — createTransfer's paired TRANSFER_OUT/IN — always wins. */
+  warehouseId?: string | null;
+  /** Phase 9: links a paired TRANSFER_OUT / TRANSFER_IN written in the
+   *  same transaction. */
+  transferRef?: string | null;
 };
 
 /**
@@ -83,6 +91,18 @@ export async function recordMovement(
   }
   if (input.delta === 0) return null; // no-op, nothing to record
 
+  // Phase 9: tag the movement with its warehouse. Explicit wins
+  // (createTransfer passes the OUT/IN warehouse directly); otherwise
+  // inherit the product's warehouse so existing callers need no change.
+  let warehouseId = input.warehouseId ?? null;
+  if (warehouseId == null) {
+    const p = await db.product.findUnique({
+      where: { id: input.productId },
+      select: { warehouseId: true },
+    });
+    warehouseId = p?.warehouseId ?? null;
+  }
+
   return db.inventoryMovement.create({
     data: {
       tenantId: input.tenantId,
@@ -96,6 +116,8 @@ export async function recordMovement(
       userId: input.userId ?? null,
       documentRef: input.documentRef ?? null,
       unitCost: input.unitCost ?? null,
+      warehouseId,
+      transferRef: input.transferRef ?? null,
     },
   });
 }

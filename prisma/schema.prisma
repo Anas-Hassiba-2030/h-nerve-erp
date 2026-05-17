@@ -1440,11 +1440,10 @@ model Product {
   // supplierId is nullable BY DESIGN (decision #7): import rows with no
   // supplier field have no Supplier. All current products are linked.
   supplierId      String?
-  warehouse       String?
-  // Phase 9: nullable FK alongside the legacy `warehouse` string until
-  // the backfill runs; promoted to non-null + the legacy string dropped
-  // in the second db:push (same two-step pattern as Phase 7 Supplier).
-  warehouseId     String?
+  // Phase 9: every product lives at exactly one Warehouse. The SAME sku
+  // in two warehouses = two Product rows (see @@unique below). The
+  // legacy `warehouse` string was dropped after the backfill.
+  warehouseId     String
 
   // Provenance / audit linkage.
   firstImportedAt DateTime  @default(now())
@@ -1464,12 +1463,11 @@ model Product {
   poLines         PurchaseOrderLine[]
   soLines         SalesOrderLine[]
   supplierRef     Supplier? @relation(fields: [supplierId], references: [id])
-  warehouseRef    Warehouse? @relation(fields: [warehouseId], references: [id])
+  warehouseRef    Warehouse @relation(fields: [warehouseId], references: [id])
 
-  @@unique([tenantId, sku])
+  @@unique([tenantId, sku, warehouseId])
   @@index([tenantId, deletedAt])
   @@index([tenantId, supplierId])
-  @@index([tenantId, warehouse])
   @@index([tenantId, warehouseId])
 }
 

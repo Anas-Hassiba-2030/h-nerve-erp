@@ -1,6 +1,6 @@
 // /admin/products — operational product catalog (Phase 3).
 //
-// The import endpoint upserts into Product by (tenantId, sku); this is
+// The import endpoint upserts into Product by (tenantId, sku, warehouseId); this is
 // the read-only operational view the rest of the ERP reasons about.
 // Same placement rationale as /admin/imports: (app) route group for
 // Topbar + Heritage Modern. Server component, no client fetching.
@@ -66,7 +66,7 @@ export default async function ProductsAdminPage({
   const where: Prisma.ProductWhereInput = { deletedAt: null };
   if (sku) where.sku = sku;
   if (supplier) where.supplierId = supplier; // supplier param is now a Supplier id
-  if (warehouse) where.warehouse = warehouse;
+  if (warehouse) where.warehouseRef = { code: warehouse };
   if (q) {
     // SQLite has no case-insensitive `mode` — case-sensitive contains.
     where.OR = [{ sku: { contains: q } }, { name: { contains: q } }];
@@ -77,7 +77,7 @@ export default async function ProductsAdminPage({
   const [catalog, supplierList, products] = await Promise.all([
     prismaUnscoped.product.findMany({
       where: { deletedAt: null },
-      select: { quantity: true, warehouse: true },
+      select: { quantity: true, warehouseRef: { select: { code: true } } },
     }),
     prismaUnscoped.supplier.findMany({
       where: { deletedAt: null },
@@ -100,6 +100,7 @@ export default async function ProductsAdminPage({
           take: 100,
         },
         supplierRef: { select: { name: true } },
+        warehouseRef: { select: { code: true } },
       },
     }),
   ]);
@@ -107,10 +108,12 @@ export default async function ProductsAdminPage({
   const totalUnits = catalog.reduce((s, p) => s + p.quantity, 0);
   const lowStock = catalog.filter((p) => p.quantity < LOW_STOCK).length;
   // Supplier filter is now real entities (value = id, label = name);
-  // warehouse stays a plain string.
+  // warehouse filter is by Warehouse.code (Phase 9 — readable in the URL).
   const suppliers = supplierList.map((s) => ({ value: s.id, label: s.name }));
   const warehouses = [
-    ...new Set(catalog.map((p) => p.warehouse).filter(Boolean) as string[]),
+    ...new Set(
+      catalog.map((p) => p.warehouseRef?.code).filter(Boolean) as string[],
+    ),
   ]
     .sort()
     .map((w) => ({ value: w, label: w }));
@@ -174,8 +177,8 @@ export default async function ProductsAdminPage({
         title={ar ? "كتالوج المنتجات" : "Product Catalog"}
         subtitle={
           ar
-            ? "مصدر الحقيقة التشغيلي — يُحدَّث بالاستيراد عبر (tenantId, sku)"
-            : "Operational source of truth — upserted by import on (tenantId, sku)"
+            ? "مصدر الحقيقة التشغيلي — يُحدَّث بالاستيراد عبر (tenantId, sku, warehouseId)"
+            : "Operational source of truth — upserted by import on (tenantId, sku, warehouseId)"
         }
         actions={<AdminFamilyNav current="/admin/products" ar={ar} />}
         metrics={[
@@ -276,8 +279,8 @@ export default async function ProductsAdminPage({
                   {p.supplierRef ? (
                     <span className="badge-slate">{p.supplierRef.name}</span>
                   ) : null}
-                  {p.warehouse ? (
-                    <span className="badge-slate">{p.warehouse}</span>
+                  {p.warehouseRef ? (
+                    <span className="badge-slate">{p.warehouseRef.code}</span>
                   ) : null}
                   <span style={{ color: "var(--text-muted)" }}>
                     {relTime(p.lastImportedAt, ar)}

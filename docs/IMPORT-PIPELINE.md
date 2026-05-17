@@ -245,6 +245,42 @@ the product unless `createTransfer` sets it explicitly) + `transferRef`.
 New surface `/admin/warehouses` (CRUD, per-warehouse inventory, delete
 blocked while it holds products). PO/SO lines are unchanged (Phase 11).
 
+## Phase 10 — Brain integration
+
+`lib/intelligence/engine.ts` (deliberately **not** `lib/brain/`, which
+a parallel session owns) is a **rule-based** intelligence engine — no
+LLM, template-string text; sector-LLM reasoning is Phase 12. It
+**reads** operational data and writes **only** its own `BrainInsight`
+table — it never calls `recordMovement` / `postJournalEntry` (decision
+#1: intelligence proposes, humans act).
+
+`runBrainAnalysis(tenantId)` runs four analyzers atomically and upserts
+with dedup (so re-running never floods; `resolvedAt`/`dismissedAt` are
+never touched on update, so a dismissed insight stays dismissed):
+
+- **LOW_STOCK** — `quantity < COALESCE(reorderPoint, 50)`; CRITICAL if
+  `< reorderPoint/2`, else WARNING.
+- **REORDER_RECOMMENDATION** — a low-stock product with a supplier;
+  `suggestedQty = max(reorderPoint*2 − qty, 1)`, costed at the last
+  `RECEIVED` unit cost. INFO.
+- **STALE_PRODUCT** — `quantity > 0` with no movement in 30 days.
+  WARNING.
+- **IMPORT_ANOMALY** — an `ImportLog` in the last 24h with
+  `rejected/(accepted+rejected) > 0.2`. WARNING.
+
+Dedup key: `@@unique([tenantId, type, productId])` for product-scoped
+insights; import anomalies (`productId` NULL — SQLite NULLs are
+distinct) dedup in-engine on `metadata.importLogId`. `metadata` is a
+JSON-encoded `String` (no Json type on the SQLite connector — same
+convention as `TenantImportMapping.fieldMapJson`).
+
+Surfaces: `/admin/brain` (KPIs, Run Analysis, severity-grouped cards
+with Resolve/Dismiss, context deep-links), `GET /api/brain/insights`
+(active = both null), the executive dashboard "AI signals" count +
+Insights CTA → `/admin/brain`. The dashboard's "Live forecasts" ticker
+and activity/alert streams stay on the **real** `SupplyForecast` /
+`AIInsight` data (not insights, not mock — left intact).
+
 ## Notes / boundaries
 
 - **SKU dedup is live (Phase 3).** Re-posting the same `(tenantId, sku)`

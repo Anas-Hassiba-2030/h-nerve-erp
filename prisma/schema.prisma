@@ -1437,7 +1437,8 @@ model Product {
   // attribute is unsupported on the sqlite provider (same as
   // ImportRow.unitCost) — applied on the W9 Postgres cutover.
   unitCost        Decimal?
-  supplier        String?
+  supplier        String?            // legacy — dropped in Schema-2 (Phase 7)
+  supplierId      String?
   warehouse       String?
 
   // Provenance / audit linkage.
@@ -1457,10 +1458,12 @@ model Product {
   movements       InventoryMovement[]
   poLines         PurchaseOrderLine[]
   soLines         SalesOrderLine[]
+  supplierRef     Supplier? @relation(fields: [supplierId], references: [id])
 
   @@unique([tenantId, sku])
   @@index([tenantId, deletedAt])
   @@index([tenantId, supplier])
+  @@index([tenantId, supplierId])
   @@index([tenantId, warehouse])
 }
 
@@ -1550,7 +1553,8 @@ model PurchaseOrder {
   id          String   @id @default(cuid())
   tenantId    String
   poNumber    String   @unique
-  supplier    String   // plain string; becomes FK in Phase 7
+  supplier    String   // legacy NOT NULL — dual-written until Schema-2 drop
+  supplierId  String?
   // DRAFT | SENT | PARTIAL | RECEIVED | CANCELLED
   status      String   @default("DRAFT")
   orderedAt   DateTime @default(now())
@@ -1558,6 +1562,7 @@ model PurchaseOrder {
   note        String?
 
   lines       PurchaseOrderLine[]
+  supplierRef Supplier? @relation(fields: [supplierId], references: [id])
 
   deletedAt   DateTime?
   createdAt   DateTime @default(now())
@@ -1565,6 +1570,7 @@ model PurchaseOrder {
 
   @@index([tenantId, status])
   @@index([tenantId, supplier])
+  @@index([tenantId, supplierId])
   @@index([tenantId, orderedAt])
 }
 
@@ -1595,7 +1601,8 @@ model SalesOrder {
   id          String   @id @default(cuid())
   tenantId    String
   soNumber    String   @unique
-  customer    String   // plain string; becomes FK in Phase 7
+  customer    String   // legacy NOT NULL — dual-written until Schema-2 drop
+  customerId  String?
   // DRAFT | CONFIRMED | PARTIAL | FULFILLED | CANCELLED
   status      String   @default("DRAFT")
   orderedAt   DateTime @default(now())
@@ -1603,6 +1610,7 @@ model SalesOrder {
   note        String?
 
   lines       SalesOrderLine[]
+  customerRef Customer? @relation(fields: [customerId], references: [id])
 
   deletedAt   DateTime?
   createdAt   DateTime @default(now())
@@ -1610,6 +1618,7 @@ model SalesOrder {
 
   @@index([tenantId, status])
   @@index([tenantId, customer])
+  @@index([tenantId, customerId])
   @@index([tenantId, orderedAt])
 }
 
@@ -1627,5 +1636,56 @@ model SalesOrderLine {
 
   @@index([soId])
   @@index([productId])
+}
+
+// =====================================================================
+// SUPPLIER / CUSTOMER — real entities (Phase 7). Promotes the opaque
+// supplier/customer strings on Product/PurchaseOrder/SalesOrder to
+// tenant-scoped FK tables. Forward relation fields are supplierRef /
+// customerRef (the scalar names supplier/customer stay as legacy
+// columns until the Schema-2 drop, so the relation can't reuse them).
+// paymentTerms is a plain string (Phase 8 formalizes). Soft-delete via
+// deletedAt; not registered in lib/softDelete.ts (no trash UI),
+// consistent with Product / InventoryMovement / PO / SO.
+// =====================================================================
+model Supplier {
+  id            String   @id @default(cuid())
+  tenantId      String
+  name          String
+  email         String?
+  phone         String?
+  address       String?
+  paymentTerms  String?  // "Net 30" | "COD" | "Prepaid" — plain string
+  notes         String?
+
+  products       Product[]
+  purchaseOrders PurchaseOrder[]
+
+  deletedAt     DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId, deletedAt])
+}
+
+model Customer {
+  id            String   @id @default(cuid())
+  tenantId      String
+  name          String
+  email         String?
+  phone         String?
+  address       String?
+  paymentTerms  String?
+  notes         String?
+
+  salesOrders   SalesOrder[]
+
+  deletedAt     DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId, deletedAt])
 }
 

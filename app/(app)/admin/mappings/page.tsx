@@ -18,6 +18,7 @@ import { formatDateTime, formatNumber } from "@/lib/utils";
 import { MappingDeleteButton } from "./MappingDeleteButton";
 import { MappingTester } from "./MappingTester";
 import { createMapping, updateMapping, toggleMappingActive } from "./actions";
+import { AdminFamilyNav } from "@/components/AdminFamilyNav";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +63,7 @@ export default async function MappingsAdminPage() {
             ? "ترجمة أسماء أعمدة المصدر إلى الحقول القانونية — تُطبَّق قبل التحقق"
             : "Translate source column names to canonical fields — applied before validation"
         }
+        actions={<AdminFamilyNav current="/admin/mappings" ar={ar} />}
         metrics={[
           { label: ar ? "خرائط" : "Mappings", value: formatNumber(mappings.length), tone: "blue" },
           { label: ar ? "نشطة" : "Active", value: formatNumber(activeCount), tone: "emerald" },

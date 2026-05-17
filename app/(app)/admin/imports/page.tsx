@@ -16,6 +16,7 @@ import { Topbar } from "@/components/Topbar";
 import { formatDateTime, formatNumber, formatMoney2 } from "@/lib/utils";
 import { sourceMatchesSystem } from "@/lib/importMapping";
 import { ClearTestImportsButton } from "./ClearTestImportsButton";
+import { AdminFamilyNav } from "@/components/AdminFamilyNav";
 
 export const dynamic = "force-dynamic";
 
@@ -68,7 +69,13 @@ export default async function ImportsAdminPage() {
             ? "كل دفعة وصلت عبر POST /api/import/test — اضغط للتوسيع"
             : "Every batch received via POST /api/import/test — click to expand"
         }
-        actions={<ClearTestImportsButton ar={ar} />}
+        actions={
+          <AdminFamilyNav
+            current="/admin/imports"
+            ar={ar}
+            extra={<ClearTestImportsButton ar={ar} />}
+          />
+        }
         metrics={[
           { label: ar ? "دفعات" : "Batches", value: formatNumber(batches.length), tone: "blue" },
           { label: ar ? "سجلات" : "Rows", value: formatNumber(totalRows), tone: "violet" },

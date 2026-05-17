@@ -22,6 +22,7 @@ import {
   movementBadge,
 } from "@/lib/utils";
 import { MOVEMENT_TYPES } from "@/lib/inventory";
+import { AdminFamilyNav } from "@/components/AdminFamilyNav";
 
 export const dynamic = "force-dynamic";
 
@@ -154,16 +155,7 @@ export default async function MovementsAdminPage({
             ? "كل تغيّر في المخزون = سطر ثابت. الكمية المعروضة = مجموع الحركات"
             : "Every stock change is one immutable row — quantity = SUM(delta)"
         }
-        actions={
-          <div className="flex items-center gap-2">
-            <Link href="/admin/imports" className="btn-ghost btn-sm">
-              {ar ? "الاستيراد" : "Imports"}
-            </Link>
-            <Link href="/admin/products" className="btn-secondary btn-sm">
-              {ar ? "المنتجات" : "Products"}
-            </Link>
-          </div>
-        }
+        actions={<AdminFamilyNav current="/admin/movements" ar={ar} />}
         metrics={[
           { label: ar ? "إجمالي الحركات" : "Total movements", value: formatNumber(totalAll), tone: "blue" },
           { label: ar ? "حركات اليوم" : "Movements today", value: formatNumber(todayCount), tone: "violet" },
@@ -375,7 +367,31 @@ export default async function MovementsAdminPage({
                     )}
                   </Detail>
                   <Detail label={ar ? "مرجع المستند" : "Document ref"}>
-                    {mv.documentRef ?? dash}
+                    {mv.documentRef ? (
+                      mv.documentRef.startsWith("PO-") ? (
+                        <Link
+                          href={`/admin/purchase-orders?po=${encodeURIComponent(mv.documentRef)}`}
+                          className="underline decoration-dotted underline-offset-2"
+                          style={{ color: "var(--brand-deep)" }}
+                          title={ar ? "فتح أمر الشراء" : "Open purchase order"}
+                        >
+                          {mv.documentRef}
+                        </Link>
+                      ) : mv.documentRef.startsWith("SO-") ? (
+                        <Link
+                          href={`/admin/sales-orders?so=${encodeURIComponent(mv.documentRef)}`}
+                          className="underline decoration-dotted underline-offset-2"
+                          style={{ color: "var(--brand-deep)" }}
+                          title={ar ? "فتح أمر البيع" : "Open sales order"}
+                        >
+                          {mv.documentRef}
+                        </Link>
+                      ) : (
+                        mv.documentRef
+                      )
+                    ) : (
+                      dash
+                    )}
                   </Detail>
                   <Detail label={ar ? "سجّلها" : "Recorded by"}>
                     {mv.userId ?? dash}

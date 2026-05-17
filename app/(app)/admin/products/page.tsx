@@ -23,6 +23,7 @@ import {
   movementBadge,
 } from "@/lib/utils";
 import { AdjustStockForm } from "./AdjustStockForm";
+import { AdminFamilyNav } from "@/components/AdminFamilyNav";
 
 export const dynamic = "force-dynamic";
 
@@ -168,6 +169,7 @@ export default async function ProductsAdminPage({
             ? "مصدر الحقيقة التشغيلي — يُحدَّث بالاستيراد عبر (tenantId, sku)"
             : "Operational source of truth — upserted by import on (tenantId, sku)"
         }
+        actions={<AdminFamilyNav current="/admin/products" ar={ar} />}
         metrics={[
           { label: ar ? "منتجات" : "Products", value: formatNumber(catalog.length), tone: "blue" },
           { label: ar ? "وحدات بالمخزون" : "Units in stock", value: formatNumber(totalUnits), tone: "violet" },

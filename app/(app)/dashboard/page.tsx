@@ -21,7 +21,7 @@ import { TodayActivity, type ActivityLogLite } from "@/components/dashboard/Toda
 import { HeritageHero } from "@/components/dashboard/HeritageHero";
 import { HeritageSection, HeritagePill, HeritageQuickLink } from "@/components/heritage";
 import { listPins } from "@/lib/pins";
-import { prisma } from "@/lib/db";
+import { prisma, prismaUnscoped } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale, getMessages } from "@/lib/i18n.server";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/utils";
@@ -45,6 +45,13 @@ export default async function DashboardPage({
   const next3Days = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
 
   const next28Days = new Date(now.getTime() + 28 * 24 * 60 * 60 * 1000);
+  // Phase 10: "AI signals" = active Brain insights (resolved+dismissed
+  // both null). Direct read — server component, no internal HTTP hop;
+  // /api/brain/insights is for external callers. prismaUnscoped:
+  // BrainInsight has no companyId. Global count (single-tenant group).
+  const activeInsightCount = await prismaUnscoped.brainInsight.count({
+    where: { resolvedAt: null, dismissedAt: null },
+  });
   const [
     me, companies, totalRoomsAgg, activeBookings, bookingsAgg,
     dairyVolumeAgg, expiringDairy, farms, programs, forecasts, recentInsights,
@@ -405,11 +412,11 @@ export default async function DashboardPage({
           personalLine={personalLine}
           subtitle={
             ar
-              ? `${formatNumber(companies.length)} شركات · ${formatNumber(farms.length)} مزرعة · ${formatNumber(forecasts.length)} إشارة AI · ${formatPercent(occupancyPct, 0)} إشغال`
-              : `${formatNumber(companies.length)} companies · ${formatNumber(farms.length)} farms · ${formatNumber(forecasts.length)} AI signals · ${formatPercent(occupancyPct, 0)} occupancy.`
+              ? `${formatNumber(companies.length)} شركات · ${formatNumber(farms.length)} مزرعة · ${formatNumber(activeInsightCount)} إشارة AI · ${formatPercent(occupancyPct, 0)} إشغال`
+              : `${formatNumber(companies.length)} companies · ${formatNumber(farms.length)} farms · ${formatNumber(activeInsightCount)} AI signals · ${formatPercent(occupancyPct, 0)} occupancy.`
           }
           primaryCta={ar ? "الإشارات" : "Insights"}
-          primaryCtaHref="/insights"
+          primaryCtaHref="/admin/brain"
           secondaryCta={ar ? "تقرير المجموعة" : "Group report"}
           secondaryCtaHref={`/api/export/html/all?locale=${lc}`}
           reportLabel="report"

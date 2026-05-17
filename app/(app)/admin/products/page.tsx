@@ -23,6 +23,7 @@ import {
   movementBadge,
 } from "@/lib/utils";
 import { AdjustStockForm } from "./AdjustStockForm";
+import { ReorderPointForm } from "./ReorderPointForm";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
 
 export const dynamic = "force-dynamic";
@@ -269,8 +270,20 @@ export default async function ProductsAdminPage({
                 </span>
                 <span className="ms-auto flex flex-wrap items-center gap-2 text-[11px]">
                   <span
-                    className={p.quantity < LOW_STOCK ? "badge-amber" : "badge-emerald"}
+                    className={
+                      p.quantity < (p.reorderPoint ?? LOW_STOCK) / 2
+                        ? "badge-red"
+                        : p.quantity < (p.reorderPoint ?? LOW_STOCK)
+                          ? "badge-amber"
+                          : "badge-emerald"
+                    }
+                    title={
+                      ar
+                        ? `نقطة إعادة الطلب: ${p.reorderPoint ?? `${LOW_STOCK} (افتراضي)`}`
+                        : `Reorder point: ${p.reorderPoint ?? `${LOW_STOCK} (default)`}`
+                    }
                   >
+                    {p.quantity < (p.reorderPoint ?? LOW_STOCK) ? "● " : ""}
                     {ar ? "كمية" : "qty"} {formatNumber(p.quantity)}
                   </span>
                   <span className="font-mono" style={{ color: "var(--text-muted)" }}>
@@ -375,6 +388,11 @@ export default async function ProductsAdminPage({
                 </div>
 
                 <AdjustStockForm productId={p.id} sku={p.sku} ar={ar} />
+                <ReorderPointForm
+                  productId={p.id}
+                  current={p.reorderPoint}
+                  ar={ar}
+                />
 
                 {p.movements.length === 0 ? (
                   <p className="text-xs" style={{ color: "var(--text-muted)" }}>

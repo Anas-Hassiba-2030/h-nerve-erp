@@ -114,3 +114,48 @@ export async function adjustStock(formData: FormData): Promise<void> {
       : `Adjusted ${product.sku} by ${signed} units`,
   );
 }
+
+// Phase 10: set/clear a product's Brain reorder point. Empty → null
+// (engine falls back to 50). Revalidates /admin/brain too — the
+// low-stock analyzer reads this threshold.
+export async function setReorderPoint(formData: FormData): Promise<void> {
+  await gate();
+  const ar = getLocale() === "ar";
+
+  const productId = String(formData.get("productId") ?? "").trim();
+  if (!productId) return;
+  const raw = String(formData.get("reorderPoint") ?? "").trim();
+
+  let value: number | null;
+  if (raw === "") {
+    value = null;
+  } else {
+    const n = Number(raw);
+    if (!Number.isInteger(n) || n < 0) {
+      return toast(
+        ar
+          ? "⚠ نقطة إعادة الطلب يجب أن تكون عدداً صحيحاً ≥ 0 أو فارغة"
+          : "⚠ Reorder point must be a whole number ≥ 0, or empty",
+      );
+    }
+    value = n;
+  }
+
+  const product = await prismaUnscoped.product.findUnique({
+    where: { id: productId },
+    select: { sku: true },
+  });
+  if (!product) {
+    return toast(ar ? "⚠ المنتج غير موجود" : "⚠ Product not found");
+  }
+  await prismaUnscoped.product.update({
+    where: { id: productId },
+    data: { reorderPoint: value },
+  });
+  revalidatePath("/admin/brain");
+  toast(
+    ar
+      ? `تم ضبط نقطة إعادة الطلب لـ ${product.sku}${value == null ? " (افتراضي)" : `: ${value}`}`
+      : `Reorder point set for ${product.sku}${value == null ? " (default)" : `: ${value}`}`,
+  );
+}

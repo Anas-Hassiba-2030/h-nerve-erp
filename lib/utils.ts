@@ -249,3 +249,31 @@ export function severityEn(severity: string): string {
     INFO: "Info", WARN: "Warning", CRITICAL: "Critical", OPPORTUNITY: "Opportunity",
   } as Record<string, string>)[severity] ?? severity;
 }
+
+// ----- Inventory movement display (Phase 5) -----
+// The enum itself lives in lib/inventory.ts (data layer); these are the
+// display dictionaries + badge map, alongside STATUS_AR/statusBadgeClass.
+export const MOVEMENT_TYPES_AR: Record<string, string> = {
+  IMPORT: "استيراد", RECEIVED: "استلام", SOLD: "بيع",
+  TRANSFER_OUT: "تحويل صادر", TRANSFER_IN: "تحويل وارد",
+  ADJUSTMENT: "تسوية", DAMAGED: "تالف",
+  RETURN_FROM_CUSTOMER: "مرتجع عميل", RETURN_TO_SUPPLIER: "مرتجع لمورّد",
+};
+export const MOVEMENT_TYPES_EN: Record<string, string> = {
+  IMPORT: "Import", RECEIVED: "Received", SOLD: "Sold",
+  TRANSFER_OUT: "Transfer out", TRANSFER_IN: "Transfer in",
+  ADJUSTMENT: "Adjustment", DAMAGED: "Damaged",
+  RETURN_FROM_CUSTOMER: "Customer return", RETURN_TO_SUPPLIER: "Return to supplier",
+};
+
+// Color by stock direction: in = emerald, out = red, import = blue,
+// adjustment = violet (can be ±), transfer/return-to-supplier = amber.
+export function movementBadge(type: string): string {
+  const map: Record<string, string> = {
+    IMPORT: "badge-blue", RECEIVED: "badge-emerald", TRANSFER_IN: "badge-emerald",
+    RETURN_FROM_CUSTOMER: "badge-emerald", ADJUSTMENT: "badge-violet",
+    SOLD: "badge-red", DAMAGED: "badge-red",
+    TRANSFER_OUT: "badge-amber", RETURN_TO_SUPPLIER: "badge-amber",
+  };
+  return map[type] ?? "badge-slate";
+}

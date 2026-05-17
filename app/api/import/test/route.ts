@@ -24,6 +24,7 @@ import {
   parseMappingRow,
   sourceMatchesSystem,
 } from "@/lib/importMapping";
+import { recordMovement, recalcProductQuantity } from "@/lib/inventory";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -212,6 +213,7 @@ export async function POST(req: NextRequest) {
   // returns the import result, never a 500). ---
   let created = 0;
   let updated = 0;
+  let movementsCreated = 0;
   // Product.tenantId is required; the wire field is optional. Tenant-less
   // imports fall back to "default" (single-tenant default).
   const productTenant = tenantId ?? "default";
@@ -230,6 +232,11 @@ export async function POST(req: NextRequest) {
         },
       });
 
+      // Products this batch touched — recalc each ONCE after all
+      // movements are recorded (spec step 3), inside the same tx so the
+      // cache and the ledger commit together.
+      const affected = new Set<string>();
+
       for (const r of rowsToCreate) {
         let productId: string | null = null;
         if (r.status === "ACCEPTED" && r.sku) {
@@ -242,34 +249,70 @@ export async function POST(req: NextRequest) {
           if (existing) {
             // Only overwrite fields the import actually provided — never
             // clobber existing data with a null (decision #4 spirit).
+            // quantity is intentionally NOT written here: it is a cache
+            // owned solely by recalcProductQuantity (decision #2).
             await tx.product.update({
               where: { id: existing.id },
               data: {
                 lastImportedAt: new Date(),
                 importCount: { increment: 1 },
                 ...(r.productName != null ? { name: r.productName } : {}),
-                ...(r.quantity != null ? { quantity: r.quantity } : {}),
                 ...(r.unitCost != null ? { unitCost: r.unitCost } : {}),
                 ...(r.supplier != null ? { supplier: r.supplier } : {}),
                 ...(r.warehouse != null ? { warehouse: r.warehouse } : {}),
               },
             });
+            // oldQty from the LIVE ledger sum inside this tx (Option B):
+            // for a normal existing product this equals its cached
+            // quantity (post-backfill invariant); for the same brand-new
+            // SKU appearing twice in one batch the IMPORT movement is
+            // already counted, so delta resolves to 0 instead of
+            // double-counting. Source of truth = SUM(delta) (#2).
+            const agg = await tx.inventoryMovement.aggregate({
+              _sum: { delta: true },
+              where: { productId: existing.id, deletedAt: null },
+            });
+            const oldQty = agg._sum.delta ?? 0;
+            const newQty = r.quantity ?? oldQty;
+            const mv = await recordMovement(tx, {
+              tenantId: productTenant,
+              productId: existing.id,
+              type: "ADJUSTMENT",
+              delta: newQty - oldQty, // 0 → recordMovement no-ops
+              reason: `Reconciliation from import: ${source ?? "unknown"}`,
+              sourceImportLogId: log.id,
+            });
+            if (mv) movementsCreated++;
             productId = existing.id;
+            affected.add(existing.id);
             updated++;
           } else {
+            // Create at 0 and let recalc fill from the IMPORT movement
+            // below — recalcProductQuantity stays the SINGLE writer of
+            // Product.quantity (decision #2).
             const p = await tx.product.create({
               data: {
                 tenantId: productTenant,
                 sku: r.sku,
                 name: r.productName ?? r.sku, // name is required; fall back to sku
-                quantity: r.quantity ?? 0,
+                quantity: 0,
                 unitCost: r.unitCost ?? null,
                 supplier: r.supplier ?? null,
                 warehouse: r.warehouse ?? null,
               },
               select: { id: true },
             });
+            const mv = await recordMovement(tx, {
+              tenantId: productTenant,
+              productId: p.id,
+              type: "IMPORT",
+              delta: r.quantity ?? 0, // 0 → recordMovement no-ops
+              reason: `Initial import: ${source ?? "unknown"}`,
+              sourceImportLogId: log.id,
+            });
+            if (mv) movementsCreated++;
             productId = p.id;
+            affected.add(p.id);
             created++;
           }
         }
@@ -277,11 +320,18 @@ export async function POST(req: NextRequest) {
           data: { ...r, importLogId: log.id, productId },
         });
       }
+
+      // Recompute the denormalized cache once per touched product, from
+      // the ledger that now includes this batch's movements.
+      for (const id of affected) {
+        await recalcProductQuantity(tx, id);
+      }
     });
   } catch (e) {
     console.error("[import] failed to persist batch:", e);
     created = 0;
     updated = 0;
+    movementsCreated = 0;
   }
 
   return NextResponse.json(
@@ -290,6 +340,7 @@ export async function POST(req: NextRequest) {
       rejected,
       errors,
       upserted: { created, updated },
+      movements: { created: movementsCreated },
       mapping: {
         applied: mappingApplied,
         ...(mappingSourceSystem ? { sourceSystem: mappingSourceSystem } : {}),

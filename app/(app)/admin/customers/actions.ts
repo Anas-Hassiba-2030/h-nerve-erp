@@ -1,0 +1,99 @@
+"use server";
+
+// Server actions for /admin/customers (Phase 7). Mirror of the
+// suppliers actions — soft delete blocked while the customer still has
+// non-cancelled sales orders.
+
+import { revalidatePath } from "next/cache";
+import { getCurrentUser } from "@/lib/session";
+import { getLocale } from "@/lib/i18n.server";
+import { prismaUnscoped } from "@/lib/db";
+import { flashToast } from "@/lib/toast";
+
+async function gate() {
+  const user = await getCurrentUser();
+  if (!user || !["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) {
+    throw new Error("forbidden");
+  }
+}
+
+function ok(label: string) {
+  flashToast({ type: "info", entity: "info", label });
+  revalidatePath("/admin/customers");
+}
+function fail(label: string) {
+  flashToast({ type: "info", entity: "info", label: `⚠ ${label}` });
+  revalidatePath("/admin/customers");
+}
+
+function fields(formData: FormData) {
+  const s = (k: string, max: number) =>
+    String(formData.get(k) ?? "").trim().slice(0, max) || null;
+  return {
+    name: String(formData.get("name") ?? "").trim().slice(0, 200),
+    email: s("email", 200),
+    phone: s("phone", 60),
+    address: s("address", 400),
+    paymentTerms: s("paymentTerms", 60),
+    notes: s("notes", 1000),
+  };
+}
+
+export async function createCustomer(formData: FormData): Promise<void> {
+  await gate();
+  const ar = getLocale() === "ar";
+  const tenantId = String(formData.get("tenantId") ?? "").trim().slice(0, 64);
+  const f = fields(formData);
+  if (!tenantId || !f.name) {
+    return fail(ar ? "المستأجر والاسم مطلوبان" : "tenantId and name are required");
+  }
+  try {
+    await prismaUnscoped.customer.create({ data: { tenantId, ...f } });
+  } catch {
+    return fail(
+      ar
+        ? `يوجد عميل بالاسم «${f.name}» لهذا المستأجر`
+        : `a customer named "${f.name}" already exists for this tenant`,
+    );
+  }
+  ok(ar ? "تم إنشاء العميل" : "Customer created");
+}
+
+export async function updateCustomer(formData: FormData): Promise<void> {
+  await gate();
+  const ar = getLocale() === "ar";
+  const id = String(formData.get("id") ?? "").trim();
+  if (!id) return;
+  const f = fields(formData);
+  if (!f.name) return fail(ar ? "الاسم مطلوب" : "name is required");
+  try {
+    await prismaUnscoped.customer.update({ where: { id }, data: f });
+  } catch {
+    return fail(
+      ar ? "تعذّر التحديث (اسم مكرّر؟)" : "update failed (duplicate name?)",
+    );
+  }
+  ok(ar ? "تم تحديث العميل" : "Customer updated");
+}
+
+export async function deleteCustomer(formData: FormData): Promise<void> {
+  await gate();
+  const ar = getLocale() === "ar";
+  const id = String(formData.get("id") ?? "").trim();
+  if (!id) return;
+  const openSOs = await prismaUnscoped.salesOrder.count({
+    where: { customerId: id, deletedAt: null, status: { not: "CANCELLED" } },
+  });
+  if (openSOs > 0) {
+    return fail(
+      ar
+        ? `لا يمكن الحذف: للعميل ${openSOs} أمر بيع غير ملغى`
+        : `cannot delete: customer has ${openSOs} non-cancelled SO(s)`,
+    );
+  }
+  await prismaUnscoped.customer.update({
+    where: { id },
+    data: { deletedAt: new Date() },
+  });
+  ok(ar ? "تم حذف العميل" : "Customer deleted");
+}

@@ -160,6 +160,28 @@ API route; n8n/`/api/import/test` is untouched. Surfaces:
 `/admin/purchase-orders`, `/admin/sales-orders`; `/admin/movements`
 `documentRef` deep-links back to the originating order.
 
+## Phase 7 — Supplier & Customer entities
+
+The opaque `supplier`/`customer` strings on `Product`/`PurchaseOrder`/
+`SalesOrder` were promoted to tenant-scoped FK tables (`Supplier`,
+`Customer`) via a 4-step migration: add nullable FKs → backfill script
+(seed entities from the unique strings, set FK) → migrate all readers →
+`db push --accept-data-loss` to drop the legacy columns and make
+`PurchaseOrder.supplierId` / `SalesOrder.customerId` **non-null**.
+`Product.supplierId` stays **nullable** (import rows may carry no
+supplier). Forward relations are `supplierRef` / `customerRef` (the
+scalar names were freed by the drop but kept as the relation names).
+
+**Import auto-promote:** an accepted row's `supplier` string is
+idempotently `upsert`ed into a real `Supplier` on `(tenantId, name)` in
+the same tx, and `Product.supplierId` is linked — **n8n keeps sending
+the plain string unchanged**; the first import that sees a new vendor
+creates the entity. `findOrCreateSupplier`/`findOrCreateCustomer` in
+`lib/orders.ts` are shared by the import endpoint and the PO/SO create
+actions. New surfaces: `/admin/suppliers`, `/admin/customers` (CRUD,
+inline edit, linked orders; soft-delete blocked while non-cancelled
+PO/SO exist). PO/SO creation now uses Supplier/Customer dropdowns.
+
 ## Notes / boundaries
 
 - **SKU dedup is live (Phase 3).** Re-posting the same `(tenantId, sku)`

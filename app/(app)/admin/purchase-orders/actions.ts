@@ -14,8 +14,10 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
+import { prismaUnscoped } from "@/lib/db";
 import {
   createPO,
+  findOrCreateSupplier,
   markPOSent,
   receivePO,
   cancelPO,
@@ -50,7 +52,8 @@ export async function createPurchaseOrder(formData: FormData): Promise<void> {
   await gate();
   const ar = getLocale() === "ar";
   const tenantId = String(formData.get("tenantId") ?? "").trim();
-  const supplier = String(formData.get("supplier") ?? "").trim();
+  const supplierId = String(formData.get("supplierId") ?? "").trim();
+  const supplierName = String(formData.get("supplier") ?? "").trim();
   const expectedRaw = String(formData.get("expectedAt") ?? "").trim();
   const note = String(formData.get("note") ?? "").trim();
   let lines: POLineInput[] = [];
@@ -70,9 +73,21 @@ export async function createPurchaseOrder(formData: FormData): Promise<void> {
     return toast(ar ? "⚠ صيغة البنود غير صالحة" : "⚠ Invalid line data");
   }
   try {
+    // Transitional: the New-PO dropdown (later commit) sends supplierId;
+    // the current free-text form sends a name → find-or-create the
+    // Supplier. Both paths converge on a real supplierId.
+    let resolvedSupplierId = supplierId;
+    if (!resolvedSupplierId) {
+      if (!tenantId) return toast(ar ? "⚠ المستأجر مطلوب" : "⚠ Tenant is required");
+      if (!supplierName)
+        return toast(ar ? "⚠ المورّد مطلوب" : "⚠ Supplier is required");
+      resolvedSupplierId = (
+        await findOrCreateSupplier(prismaUnscoped, tenantId, supplierName)
+      ).id;
+    }
     const po = await createPO({
       tenantId,
-      supplier,
+      supplierId: resolvedSupplierId,
       lines,
       expectedAt: expectedRaw ? new Date(expectedRaw) : null,
       note: note || null,

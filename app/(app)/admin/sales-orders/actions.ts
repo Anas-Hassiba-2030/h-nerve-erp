@@ -10,8 +10,10 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
 import { flashToast } from "@/lib/toast";
+import { prismaUnscoped } from "@/lib/db";
 import {
   createSO,
+  findOrCreateCustomer,
   confirmSO,
   fulfillSO,
   cancelSO,
@@ -43,7 +45,8 @@ export async function createSalesOrder(formData: FormData): Promise<void> {
   await gate();
   const ar = getLocale() === "ar";
   const tenantId = String(formData.get("tenantId") ?? "").trim();
-  const customer = String(formData.get("customer") ?? "").trim();
+  const customerId = String(formData.get("customerId") ?? "").trim();
+  const customerName = String(formData.get("customer") ?? "").trim();
   const requiredRaw = String(formData.get("requiredBy") ?? "").trim();
   const note = String(formData.get("note") ?? "").trim();
   let lines: SOLineInput[] = [];
@@ -63,9 +66,20 @@ export async function createSalesOrder(formData: FormData): Promise<void> {
     return toast(ar ? "⚠ صيغة البنود غير صالحة" : "⚠ Invalid line data");
   }
   try {
+    // Transitional (mirrors createPurchaseOrder): dropdown → customerId;
+    // free-text form → name → find-or-create Customer.
+    let resolvedCustomerId = customerId;
+    if (!resolvedCustomerId) {
+      if (!tenantId) return toast(ar ? "⚠ المستأجر مطلوب" : "⚠ Tenant is required");
+      if (!customerName)
+        return toast(ar ? "⚠ العميل مطلوب" : "⚠ Customer is required");
+      resolvedCustomerId = (
+        await findOrCreateCustomer(prismaUnscoped, tenantId, customerName)
+      ).id;
+    }
     const so = await createSO({
       tenantId,
-      customer,
+      customerId: resolvedCustomerId,
       lines,
       requiredBy: requiredRaw ? new Date(requiredRaw) : null,
       note: note || null,

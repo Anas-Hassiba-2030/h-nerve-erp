@@ -58,21 +58,48 @@ async function loadProducts(db: Db, tenantId: string, productIds: string[]) {
   return byId;
 }
 
+/**
+ * Find-or-create a Supplier by (tenantId, name). Idempotent — never
+ * clobbers an edited Supplier (update: {}). Used by the import endpoint
+ * auto-promote and the transitional PO action (free-text → entity)
+ * until the New-PO dropdown lands.
+ */
+export async function findOrCreateSupplier(db: Db, tenantId: string, name: string) {
+  const n = name.trim();
+  if (!n) throw new Error("supplier name is required");
+  return db.supplier.upsert({
+    where: { tenantId_name: { tenantId, name: n } },
+    create: { tenantId, name: n },
+    update: {},
+  });
+}
+
+/** Mirror of findOrCreateSupplier for customers (SO path / future use). */
+export async function findOrCreateCustomer(db: Db, tenantId: string, name: string) {
+  const n = name.trim();
+  if (!n) throw new Error("customer name is required");
+  return db.customer.upsert({
+    where: { tenantId_name: { tenantId, name: n } },
+    create: { tenantId, name: n },
+    update: {},
+  });
+}
+
 // ---------------------------------------------------------------------
 // PURCHASE ORDERS
 // ---------------------------------------------------------------------
 
 export async function createPO(data: {
   tenantId: string;
-  supplier: string;
+  supplierId: string;
   lines: POLineInput[];
   expectedAt?: Date | null;
   note?: string | null;
 }) {
   const tenantId = data.tenantId.trim();
-  const supplier = data.supplier.trim();
+  const supplierId = data.supplierId.trim();
   if (!tenantId) throw new Error("tenantId is required");
-  if (!supplier) throw new Error("supplier is required");
+  if (!supplierId) throw new Error("supplierId is required");
   if (!data.lines?.length) throw new Error("at least one line is required");
   data.lines.forEach((l, i) => {
     if (!l.productId) throw new Error(`line ${i + 1}: productId is required`);
@@ -81,12 +108,20 @@ export async function createPO(data: {
   });
   const poNumber = generateNumber("PO");
   return prismaUnscoped.$transaction(async (tx) => {
+    // FK must exist AND belong to this tenant (opaque-string tenancy →
+    // enforce in the helper, never trust the caller).
+    const sup = await tx.supplier.findFirst({
+      where: { id: supplierId, tenantId, deletedAt: null },
+      select: { id: true, name: true },
+    });
+    if (!sup) throw new Error("supplier not found for this tenant");
     await loadProducts(tx, tenantId, data.lines.map((l) => l.productId));
     return tx.purchaseOrder.create({
       data: {
         tenantId,
         poNumber,
-        supplier,
+        supplierId: sup.id,
+        supplier: sup.name, // legacy dual-write — removed at Schema-2
         status: "DRAFT",
         expectedAt: data.expectedAt ?? null,
         note: data.note?.trim() || null,
@@ -214,15 +249,15 @@ export async function cancelPO(poId: string) {
 
 export async function createSO(data: {
   tenantId: string;
-  customer: string;
+  customerId: string;
   lines: SOLineInput[];
   requiredBy?: Date | null;
   note?: string | null;
 }) {
   const tenantId = data.tenantId.trim();
-  const customer = data.customer.trim();
+  const customerId = data.customerId.trim();
   if (!tenantId) throw new Error("tenantId is required");
-  if (!customer) throw new Error("customer is required");
+  if (!customerId) throw new Error("customerId is required");
   if (!data.lines?.length) throw new Error("at least one line is required");
   data.lines.forEach((l, i) => {
     if (!l.productId) throw new Error(`line ${i + 1}: productId is required`);
@@ -231,6 +266,11 @@ export async function createSO(data: {
   });
   const soNumber = generateNumber("SO");
   return prismaUnscoped.$transaction(async (tx) => {
+    const cus = await tx.customer.findFirst({
+      where: { id: customerId, tenantId, deletedAt: null },
+      select: { id: true, name: true },
+    });
+    if (!cus) throw new Error("customer not found for this tenant");
     const byId = await loadProducts(tx, tenantId, data.lines.map((l) => l.productId));
     // Stock availability INSIDE the tx (decision #8). Done in-tx so the
     // check stays correct after the W9 Postgres cutover (no TOCTOU race).
@@ -243,7 +283,8 @@ export async function createSO(data: {
       data: {
         tenantId,
         soNumber,
-        customer,
+        customerId: cus.id,
+        customer: cus.name, // legacy dual-write — removed at Schema-2
         status: "DRAFT",
         requiredBy: data.requiredBy ?? null,
         note: data.note?.trim() || null,

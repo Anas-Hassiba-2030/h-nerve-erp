@@ -1,7 +1,8 @@
 # H-Nerve — External Import Pipeline
 
 _The n8n → API → SQLite ingestion path and its operator surface. Written
-2026-05-16. Phase 1 of the import work; dedup is Phase 3._
+2026-05-16. Covers Phases 1–5: ingest → mapping → Product upsert →
+inventory-movement ledger._
 
 ---
 
@@ -107,14 +108,44 @@ in one transaction) where `source` starts with `legacy-`, contains
 first; an info toast reports the count. This is a dev cleanup button —
 aggressive by design.
 
+## Movement integration (Phase 5)
+
+Every import now also writes to the **inventory-movement ledger**
+(`InventoryMovement`, `lib/inventory.ts`). The ledger is the source of
+truth; **`Product.quantity` is a denormalized cache** =
+`SUM(InventoryMovement.delta) WHERE deletedAt IS NULL`, rewritten by
+`recalcProductQuantity` (the single writer of that column).
+
+On each accepted row, inside the same transaction as `ImportLog` /
+`ImportRow` / `Product`:
+
+- **New product** → an `IMPORT` movement, `delta = quantity`,
+  `reason = "Initial import: <source>"`.
+- **Existing product, quantity changed** → an `ADJUSTMENT` movement,
+  `delta = newQty − oldQty`, `reason = "Reconciliation from import:
+  <source>"`. `oldQty` is read from the live ledger sum (not the cached
+  column) so the same brand-new SKU appearing twice in one batch can't
+  double-count.
+- **Quantity unchanged** → no movement; other fields still update.
+
+`recalcProductQuantity` runs once per touched product after the batch.
+The response gains `movements: { created: N }`. Movements are
+**append-only** — a correction is a new signed `ADJUSTMENT`, never an
+edit/delete. Manual adjustments go through the **Adjust stock** form on
+`/admin/products` (`adjustStock` server action, attributed to the
+current user); the full ledger is at `/admin/movements`.
+
 ## Notes / boundaries
 
+- **SKU dedup is live (Phase 3).** Re-posting the same `(tenantId, sku)`
+  upserts the `Product` (and reconciles quantity via the ledger, above) —
+  it does not create duplicate products. `ImportLog`/`ImportRow` remain
+  the per-POST audit trail and are still append-only.
 - **SQLite, as-is.** No Neon/Postgres here (that is W9, separate). `unitCost`
   is a Prisma `Decimal` stored exact; the `@db.Decimal(12,2)` precision
   annotation is unsupported on SQLite and is deferred to the Postgres
   cutover (carried as a schema comment).
-- **No dedup yet.** Every import logs new rows; re-posting the same `sku`
-  creates new `ImportRow`s. SKU dedup is Phase 3.
-- **Visibility surface** is `/admin/imports` — `(app)` route group, Heritage
-  Modern, gated: no session → `/login`, non `ADMIN|EXECUTIVE|MANAGER` →
-  `/dashboard`.
+- **Visibility surfaces** are `/admin/imports` (audit), `/admin/products`
+  (catalog + Movement History) and `/admin/movements` (ledger) — all
+  `(app)` route group, Heritage Modern, gated: no session → `/login`,
+  non `ADMIN|EXECUTIVE|MANAGER` → `/dashboard`.

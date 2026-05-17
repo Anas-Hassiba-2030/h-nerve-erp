@@ -14,7 +14,15 @@ import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { prismaUnscoped } from "@/lib/db";
 import { Topbar } from "@/components/Topbar";
-import { formatDateTime, formatNumber, formatMoney2 } from "@/lib/utils";
+import {
+  formatDateTime,
+  formatNumber,
+  formatMoney2,
+  MOVEMENT_TYPES_AR,
+  MOVEMENT_TYPES_EN,
+  movementBadge,
+} from "@/lib/utils";
+import { AdjustStockForm } from "./AdjustStockForm";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +87,11 @@ export default async function ProductsAdminPage({
           orderBy: { createdAt: "desc" },
           take: 100,
           include: { importLog: { select: { source: true } } },
+        },
+        movements: {
+          where: { deletedAt: null },
+          orderBy: [{ occurredAt: "desc" }, { createdAt: "desc" }],
+          take: 100,
         },
       },
     }),
@@ -321,6 +334,89 @@ export default async function ProductsAdminPage({
                     })}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Phase 5 — live balance + movement ledger + manual adjust */}
+              <div
+                className="flex flex-col gap-3 px-4 py-3"
+                style={{ borderTop: "1px solid var(--border)" }}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div
+                    className="text-[11px] font-bold uppercase tracking-widest"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    {ar ? "سجل الحركات" : "Movement history"}
+                  </div>
+                  <span
+                    className="badge-emerald"
+                    title={
+                      ar
+                        ? "الرصيد الحيّ = مجموع كل الحركات"
+                        : "Live balance = SUM(delta)"
+                    }
+                  >
+                    {ar ? "الصافي" : "Net"} = {formatNumber(p.quantity)}{" "}
+                    {ar ? "وحدة" : "units"}
+                  </span>
+                </div>
+
+                <AdjustStockForm productId={p.id} sku={p.sku} ar={ar} />
+
+                {p.movements.length === 0 ? (
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                    {ar ? "لا حركات مسجّلة بعد." : "No movements recorded yet."}
+                  </p>
+                ) : (
+                  <div className="table-wrap">
+                    <table className="w-full text-start text-xs">
+                      <thead>
+                        <tr style={{ color: "var(--text-muted)" }}>
+                          <th className="px-3 py-2 text-start font-bold">{ar ? "متى" : "When"}</th>
+                          <th className="px-3 py-2 text-start font-bold">{ar ? "النوع" : "Type"}</th>
+                          <th className="px-3 py-2 text-end font-bold">{ar ? "التغيّر" : "Delta"}</th>
+                          <th className="px-3 py-2 text-start font-bold">{ar ? "السبب" : "Reason"}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {p.movements.map((m) => {
+                          const pos = m.delta > 0;
+                          return (
+                            <tr
+                              key={m.id}
+                              style={{ borderTop: "1px solid var(--border)" }}
+                            >
+                              <td
+                                className="px-3 py-2 font-mono"
+                                style={{ color: "var(--text-muted)" }}
+                              >
+                                {formatDateTime(m.occurredAt, ar ? "ar" : "en")}
+                              </td>
+                              <td className="px-3 py-2">
+                                <span className={movementBadge(m.type)}>
+                                  {(ar ? MOVEMENT_TYPES_AR : MOVEMENT_TYPES_EN)[
+                                    m.type
+                                  ] ?? m.type}
+                                </span>
+                              </td>
+                              <td
+                                className="px-3 py-2 text-end font-mono font-bold"
+                                style={{ color: pos ? "#15803d" : "#b91c1c" }}
+                              >
+                                {pos
+                                  ? `+${formatNumber(m.delta)}`
+                                  : formatNumber(m.delta)}
+                              </td>
+                              <td className="px-3 py-2" style={{ color: "var(--text)" }}>
+                                {m.reason}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </details>
           ))}

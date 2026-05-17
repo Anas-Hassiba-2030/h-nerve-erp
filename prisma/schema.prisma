@@ -1494,6 +1494,10 @@ model InventoryMovement {
   note              String?
   userId            String?
   documentRef       String?
+  // Costed inflows only (IMPORT from r.unitCost, RECEIVED from PO line).
+  // Drives weighted-average COGS (Phase 8). Null = excluded from the
+  // costing pool.
+  unitCost          Decimal?
 
   // Append-only (decision #1): no edit/delete UI. deletedAt exists for
   // exceptional admin correction only; recalc excludes soft-deleted rows.
@@ -1683,5 +1687,81 @@ model Customer {
 
   @@unique([tenantId, name])
   @@index([tenantId, deletedAt])
+}
+
+// =====================================================================
+// ACCOUNTING (Phase 8) — double-entry. Posted JournalEntries are
+// immutable (decision #2); SUM(debits)=SUM(credits) enforced in code
+// before POSTED. tenantId opaque (no Tenant FK — family precedent).
+// Money = bare Decimal (sqlite; W9 Postgres-cutover precedent).
+// =====================================================================
+model LedgerAccount {
+  id          String   @id @default(cuid())
+  tenantId    String
+  code        String // "1001", "2001"
+  name        String
+  type        String // ASSET | LIABILITY | EQUITY | REVENUE | EXPENSE | COGS
+  description String?
+  active      Boolean  @default(true)
+
+  lines       JournalLine[]
+
+  createdAt   DateTime @default(now())
+
+  @@unique([tenantId, code])
+  @@index([tenantId, type])
+}
+
+model FinancialPeriod {
+  id        String   @id @default(cuid())
+  tenantId  String
+  year      Int
+  month     Int // 1-12
+  status    String   @default("OPEN") // OPEN | CLOSED
+
+  entries   JournalEntry[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, year, month])
+  @@index([tenantId, status])
+  @@index([tenantId, year])
+}
+
+model JournalEntry {
+  id          String   @id @default(cuid())
+  tenantId    String
+  periodId    String
+  description String
+  reference   String? // PO/SO number, etc.
+  status      String   @default("POSTED") // DRAFT | POSTED
+  reversesId  String?
+
+  period      FinancialPeriod @relation(fields: [periodId], references: [id])
+  lines       JournalLine[]
+  reverses    JournalEntry?   @relation("Reversal", fields: [reversesId], references: [id])
+  reversedBy  JournalEntry[]  @relation("Reversal")
+
+  postedAt    DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId, periodId])
+  @@index([tenantId, reference])
+  @@index([tenantId, status])
+}
+
+model JournalLine {
+  id             String   @id @default(cuid())
+  journalEntryId String
+  accountId      String
+  debit          Decimal  @default(0)
+  credit         Decimal  @default(0)
+  memo           String?
+
+  entry          JournalEntry  @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+  account        LedgerAccount @relation(fields: [accountId], references: [id])
+
+  @@index([journalEntryId])
+  @@index([accountId])
 }
 

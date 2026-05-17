@@ -1455,6 +1455,8 @@ model Product {
 
   importRows      ImportRow[]
   movements       InventoryMovement[]
+  poLines         PurchaseOrderLine[]
+  soLines         SalesOrderLine[]
 
   @@unique([tenantId, sku])
   @@index([tenantId, deletedAt])
@@ -1534,5 +1536,96 @@ model TenantImportMapping {
 
   @@unique([tenantId, sourceSystem])
   @@index([tenantId, active])
+}
+
+// =====================================================================
+// PURCHASE ORDERS — procurement (Phase 6). DRAFT → SENT → PARTIAL →
+// RECEIVED → CANCELLED. Only RECEIVED/PARTIAL receipts write RECEIVED
+// inventory movements (via lib/inventory.ts). supplier is an OPAQUE
+// string (becomes an FK in Phase 7, same precedent as Product.tenantId).
+// deletedAt column only — not registered in lib/softDelete.ts (no trash
+// UI), consistent with Product / InventoryMovement.
+// =====================================================================
+model PurchaseOrder {
+  id          String   @id @default(cuid())
+  tenantId    String
+  poNumber    String   @unique
+  supplier    String   // plain string; becomes FK in Phase 7
+  // DRAFT | SENT | PARTIAL | RECEIVED | CANCELLED
+  status      String   @default("DRAFT")
+  orderedAt   DateTime @default(now())
+  expectedAt  DateTime?
+  note        String?
+
+  lines       PurchaseOrderLine[]
+
+  deletedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId, status])
+  @@index([tenantId, supplier])
+  @@index([tenantId, orderedAt])
+}
+
+model PurchaseOrderLine {
+  id          String   @id @default(cuid())
+  poId        String
+  productId   String
+  quantity    Int      // ordered
+  receivedQty Int      @default(0)
+  // Money. Bare Decimal? — @db.Decimal unsupported on sqlite (same
+  // precedent as Product.unitCost / ImportRow.unitCost; W9 cutover).
+  unitCost    Decimal?
+
+  po          PurchaseOrder @relation(fields: [poId], references: [id], onDelete: Cascade)
+  product     Product       @relation(fields: [productId], references: [id])
+
+  @@index([poId])
+  @@index([productId])
+}
+
+// =====================================================================
+// SALES ORDERS — fulfillment (Phase 6). DRAFT → CONFIRMED → PARTIAL →
+// FULFILLED → CANCELLED. Only FULFILLED/PARTIAL fulfillment writes SOLD
+// movements (negative delta). Stock availability is checked at create
+// and again at CONFIRMED. customer is an OPAQUE string (FK in Phase 7).
+// =====================================================================
+model SalesOrder {
+  id          String   @id @default(cuid())
+  tenantId    String
+  soNumber    String   @unique
+  customer    String   // plain string; becomes FK in Phase 7
+  // DRAFT | CONFIRMED | PARTIAL | FULFILLED | CANCELLED
+  status      String   @default("DRAFT")
+  orderedAt   DateTime @default(now())
+  requiredBy  DateTime?
+  note        String?
+
+  lines       SalesOrderLine[]
+
+  deletedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId, status])
+  @@index([tenantId, customer])
+  @@index([tenantId, orderedAt])
+}
+
+model SalesOrderLine {
+  id            String   @id @default(cuid())
+  soId          String
+  productId     String
+  quantity      Int      // ordered
+  fulfilledQty  Int      @default(0)
+  // Money. Bare Decimal? (same precedent as above).
+  unitPrice     Decimal?
+
+  so            SalesOrder @relation(fields: [soId], references: [id], onDelete: Cascade)
+  product       Product    @relation(fields: [productId], references: [id])
+
+  @@index([soId])
+  @@index([productId])
 }
 

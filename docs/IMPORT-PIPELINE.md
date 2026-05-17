@@ -135,6 +135,31 @@ edit/delete. Manual adjustments go through the **Adjust stock** form on
 `/admin/products` (`adjustStock` server action, attributed to the
 current user); the full ledger is at `/admin/movements`.
 
+## Phase 6 — Purchase Orders & Sales Orders
+
+`lib/orders.ts` adds the two real-world stock events. **PO** lifecycle
+`DRAFT → SENT → PARTIAL → RECEIVED → CANCELLED`; **SO** lifecycle
+`DRAFT → CONFIRMED → PARTIAL → FULFILLED → CANCELLED`. Only two
+transitions touch stock, and they reuse the Phase-5 ledger primitives —
+no new inventory logic:
+
+- **PO receipt** → `RECEIVED` movements (`+receivedQty`, `documentRef =
+  poNumber`) via `recordMovement` + `recalcProductQuantity`.
+- **SO fulfillment** → `SOLD` movements (`−fulfilledQty`, `documentRef =
+  soNumber`).
+
+`DRAFT/SENT` and `DRAFT/CONFIRMED` are planning states (no movement).
+`createSO`/`confirmSO` run a soft stock check **inside the transaction**
+(TOCTOU-safe). Partial receive/fulfil → `PARTIAL`; all lines complete →
+`RECEIVED`/`FULFILLED`. `cancelPO`/`cancelSO` refuse once stock has moved
+(`PARTIAL`/`RECEIVED`/`FULFILLED`) — reverse with a manual `ADJUSTMENT`
+first (append-only rule). Numbers via `generateNumber("PO"/"SO")`
+(`PO-YYYYMMDD-RRRR`, the codebase convention). Supplier/customer are
+opaque strings (FK in Phase 7). Admin-only, **server actions only** — no
+API route; n8n/`/api/import/test` is untouched. Surfaces:
+`/admin/purchase-orders`, `/admin/sales-orders`; `/admin/movements`
+`documentRef` deep-links back to the originating order.
+
 ## Notes / boundaries
 
 - **SKU dedup is live (Phase 3).** Re-posting the same `(tenantId, sku)`

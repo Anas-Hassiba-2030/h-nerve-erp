@@ -1352,6 +1352,42 @@ model DocClause {
 // why. No companyId → not workspace-scoped (system-level).
 // SQLite has no JSON type, so `errors` is a JSON string.
 // =====================================================================
+// =====================================================================
+// BRAIN INSIGHT — Phase 10. Rule-based intelligence findings produced
+// by lib/intelligence/engine.ts (the Brain reads operational data and
+// never writes it back). tenantId is the same OPAQUE caller label as
+// Product/ImportLog (no Tenant FK). `metadata` is JSON-encoded String —
+// Prisma's sqlite connector has no Json type (codebase convention, cf.
+// TenantImportMapping.fieldMapJson). Active insight = resolvedAt IS
+// NULL AND dismissedAt IS NULL. The @@unique drives the per-product
+// upsert dedup; import anomalies (productId NULL) dedup in-engine on
+// metadata.importLogId since SQLite treats NULLs as distinct.
+// =====================================================================
+model BrainInsight {
+  id          String    @id @default(cuid())
+  tenantId    String
+  type        String // LOW_STOCK | REORDER_RECOMMENDATION | STALE_PRODUCT | IMPORT_ANOMALY
+  severity    String // INFO | WARNING | CRITICAL
+  title       String
+  body        String
+  metadata    String    @default("{}") // JSON-encoded (SQLite has no Json type)
+
+  productId   String?
+  supplierId  String?
+  warehouseId String?
+
+  resolvedAt  DateTime?
+  dismissedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([tenantId, type, productId])
+  @@index([tenantId, type])
+  @@index([tenantId, severity])
+  @@index([tenantId, resolvedAt, dismissedAt])
+  @@index([productId])
+}
+
 model ImportLog {
   id        String   @id @default(cuid())
   // Which import endpoint produced this row ("test" for now).
@@ -1433,6 +1469,8 @@ model Product {
   sku             String
   name            String
   quantity        Int       @default(0)
+  // Phase 10: Brain low-stock threshold. Null → the engine uses 50.
+  reorderPoint    Int?
   // Money. Intended precision/scale = (12,2); the native @db.Decimal
   // attribute is unsupported on the sqlite provider (same as
   // ImportRow.unitCost) — applied on the W9 Postgres cutover.

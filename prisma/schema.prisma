@@ -1441,6 +1441,10 @@ model Product {
   // supplier field have no Supplier. All current products are linked.
   supplierId      String?
   warehouse       String?
+  // Phase 9: nullable FK alongside the legacy `warehouse` string until
+  // the backfill runs; promoted to non-null + the legacy string dropped
+  // in the second db:push (same two-step pattern as Phase 7 Supplier).
+  warehouseId     String?
 
   // Provenance / audit linkage.
   firstImportedAt DateTime  @default(now())
@@ -1460,11 +1464,13 @@ model Product {
   poLines         PurchaseOrderLine[]
   soLines         SalesOrderLine[]
   supplierRef     Supplier? @relation(fields: [supplierId], references: [id])
+  warehouseRef    Warehouse? @relation(fields: [warehouseId], references: [id])
 
   @@unique([tenantId, sku])
   @@index([tenantId, deletedAt])
   @@index([tenantId, supplierId])
   @@index([tenantId, warehouse])
+  @@index([tenantId, warehouseId])
 }
 
 // =====================================================================
@@ -1498,6 +1504,11 @@ model InventoryMovement {
   // Drives weighted-average COGS (Phase 8). Null = excluded from the
   // costing pool.
   unitCost          Decimal?
+  // Phase 9: which warehouse this movement happened at — backfilled
+  // from the product's warehouseId. transferRef links a paired
+  // TRANSFER_OUT / TRANSFER_IN created in the same transaction.
+  warehouseId       String?
+  transferRef       String?
 
   // Append-only (decision #1): no edit/delete UI. deletedAt exists for
   // exceptional admin correction only; recalc excludes soft-deleted rows.
@@ -1509,6 +1520,36 @@ model InventoryMovement {
   @@index([tenantId, productId, occurredAt])
   @@index([tenantId, type, occurredAt])
   @@index([productId, deletedAt])
+  @@index([tenantId, warehouseId])
+  @@index([transferRef])
+}
+
+// =====================================================================
+// WAREHOUSE — physical stock location (Phase 9). Tenant-scoped, opaque
+// tenantId (no Tenant FK — same precedent as Product/InventoryMovement).
+// `type` is a string enum per the CLAUDE.md SQLite rule. Soft-delete
+// column only; a warehouse with products can't be deleted (enforced in
+// the server action, not the schema). The legacy Product.warehouse
+// string is migrated into Product.warehouseId by
+// scripts/migrate-warehouses.ts (one-shot, not committed).
+// =====================================================================
+model Warehouse {
+  id        String    @id @default(cuid())
+  tenantId  String
+  code      String // "AMM-A", "ZRQ-B"
+  name      String // "Amman Main", "Zarqa Cold Storage"
+  address   String?
+  type      String    @default("MAIN") // MAIN | COLD | DRY | TRANSIT
+  active    Boolean   @default(true)
+
+  products  Product[]
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([tenantId, code])
+  @@index([tenantId, active])
 }
 
 // =====================================================================
@@ -1703,6 +1744,10 @@ model LedgerAccount {
   type        String // ASSET | LIABILITY | EQUITY | REVENUE | EXPENSE | COGS
   description String?
   active      Boolean  @default(true)
+  // Phase 9 decision #5: optional warehouse scope for a future
+  // sub-ledger. Transfers post NO journal entries (total inventory
+  // value is unchanged) — this column is forward-provisioning only.
+  warehouseId String?
 
   lines       JournalLine[]
 

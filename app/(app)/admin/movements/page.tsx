@@ -76,8 +76,23 @@ export default async function MovementsAdminPage({
   const range: Range = (RANGES as readonly string[]).includes(rawRange)
     ? (rawRange as Range)
     : "all";
+  const whFilter = str(searchParams.wh).toUpperCase();
+
+  // Phase 9: movements carry a scalar warehouseId (no relation) —
+  // resolve code↔id here for the column, the pills and the filter.
+  const allWarehouses = await prismaUnscoped.warehouse.findMany({
+    select: { id: true, code: true },
+    orderBy: { code: "asc" },
+  });
+  const whMap = new Map(allWarehouses.map((w) => [w.id, w.code]));
+  const whCodes = [...new Set(allWarehouses.map((w) => w.code))];
 
   const where: Prisma.InventoryMovementWhereInput = { deletedAt: null };
+  if (whFilter) {
+    where.warehouseId = {
+      in: allWarehouses.filter((w) => w.code === whFilter).map((w) => w.id),
+    };
+  }
   if (typeFilter && (MOVEMENT_TYPES as readonly string[]).includes(typeFilter)) {
     where.type = typeFilter;
   }
@@ -139,6 +154,7 @@ export default async function MovementsAdminPage({
     if (q) p.set("q", q);
     if (typeFilter) p.set("type", typeFilter);
     if (range !== "all") p.set("range", range);
+    if (whFilter) p.set("wh", whFilter);
     if (value) p.set(key, value);
     else p.delete(key);
     const s = p.toString();
@@ -177,6 +193,7 @@ export default async function MovementsAdminPage({
         <form method="GET" className="flex items-center gap-2">
           {typeFilter ? <input type="hidden" name="type" value={typeFilter} /> : null}
           {range !== "all" ? <input type="hidden" name="range" value={range} /> : null}
+          {whFilter ? <input type="hidden" name="wh" value={whFilter} /> : null}
           <input
             type="text"
             name="q"
@@ -188,7 +205,7 @@ export default async function MovementsAdminPage({
           <button type="submit" className="btn-secondary btn-sm">
             {ar ? "بحث" : "Search"}
           </button>
-          {(q || typeFilter || range !== "all") && (
+          {(q || typeFilter || range !== "all" || whFilter) && (
             <Link href="/admin/movements" className="btn-ghost btn-sm">
               {ar ? "مسح" : "Clear"}
             </Link>
@@ -245,6 +262,33 @@ export default async function MovementsAdminPage({
             </Link>
           ))}
         </div>
+
+        {/* Warehouse pills (Phase 9) */}
+        {whCodes.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span
+              className="text-[10px] font-bold uppercase tracking-widest"
+              style={{ color: "var(--text-muted)" }}
+            >
+              {ar ? "المستودع" : "Warehouse"}
+            </span>
+            <Link
+              href={hrefWith("wh", "")}
+              className={whFilter ? "badge-slate" : "badge-emerald"}
+            >
+              {ar ? "الكل" : "All"}
+            </Link>
+            {whCodes.map((c) => (
+              <Link
+                key={c}
+                href={hrefWith("wh", c)}
+                className={whFilter === c ? "badge-emerald" : "badge-slate"}
+              >
+                {c}
+              </Link>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       {rows.length === 0 ? (
@@ -288,6 +332,14 @@ export default async function MovementsAdminPage({
                     {relTime(mv.occurredAt, ar)}
                   </span>
                   <span className={movementBadge(mv.type)}>{movLabel(mv.type)}</span>
+                  {mv.warehouseId ? (
+                    <span
+                      className="badge-slate"
+                      title={ar ? "المستودع" : "Warehouse"}
+                    >
+                      {whMap.get(mv.warehouseId) ?? "—"}
+                    </span>
+                  ) : null}
                   <Link
                     href={`/admin/products?sku=${encodeURIComponent(mv.product.sku)}`}
                     className="font-mono text-sm font-extrabold underline decoration-dotted underline-offset-2"
@@ -345,6 +397,20 @@ export default async function MovementsAdminPage({
                   <Detail label={ar ? "المستأجر" : "Tenant"}>
                     <span className="badge-slate">{mv.tenantId}</span>
                   </Detail>
+                  <Detail label={ar ? "المستودع" : "Warehouse"}>
+                    {mv.warehouseId ? (
+                      <Link
+                        href={`/admin/warehouses?wh=${encodeURIComponent(
+                          whMap.get(mv.warehouseId) ?? "",
+                        )}`}
+                        className="badge-slate"
+                      >
+                        {whMap.get(mv.warehouseId) ?? "—"}
+                      </Link>
+                    ) : (
+                      dash
+                    )}
+                  </Detail>
                   <Detail label={ar ? "السبب" : "Reason"} wide>
                     {mv.reason}
                   </Detail>
@@ -383,6 +449,15 @@ export default async function MovementsAdminPage({
                           className="underline decoration-dotted underline-offset-2"
                           style={{ color: "var(--brand-deep)" }}
                           title={ar ? "فتح أمر البيع" : "Open sales order"}
+                        >
+                          {mv.documentRef}
+                        </Link>
+                      ) : mv.documentRef.startsWith("TRF-") ? (
+                        <Link
+                          href="/admin/transfers"
+                          className="underline decoration-dotted underline-offset-2"
+                          style={{ color: "var(--brand-deep)" }}
+                          title={ar ? "فتح التحويلات" : "Open transfers"}
                         >
                           {mv.documentRef}
                         </Link>

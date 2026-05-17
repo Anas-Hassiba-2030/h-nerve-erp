@@ -10,6 +10,8 @@ const FAMILY: { href: string; ar: string; en: string }[] = [
   { href: "/admin/imports", ar: "الاستيراد", en: "Imports" },
   { href: "/admin/products", ar: "المنتجات", en: "Products" },
   { href: "/admin/movements", ar: "الحركات", en: "Movements" },
+  { href: "/admin/warehouses", ar: "المستودعات", en: "Warehouses" },
+  { href: "/admin/transfers", ar: "التحويلات", en: "Transfers" },
   { href: "/admin/mappings", ar: "الخرائط", en: "Mappings" },
   { href: "/admin/purchase-orders", ar: "أوامر الشراء", en: "Purchase Orders" },
   { href: "/admin/sales-orders", ar: "أوامر البيع", en: "Sales Orders" },

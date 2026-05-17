@@ -15,6 +15,8 @@ const FAMILY: { href: string; ar: string; en: string }[] = [
   { href: "/admin/sales-orders", ar: "أوامر البيع", en: "Sales Orders" },
   { href: "/admin/suppliers", ar: "المورّدون", en: "Suppliers" },
   { href: "/admin/customers", ar: "العملاء", en: "Customers" },
+  { href: "/admin/journal", ar: "اليومية", en: "Journal" },
+  { href: "/admin/accounts", ar: "الحسابات", en: "Accounts" },
 ];
 
 export function AdminFamilyNav({

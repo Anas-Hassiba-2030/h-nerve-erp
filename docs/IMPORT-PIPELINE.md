@@ -212,6 +212,39 @@ retroactive JEs. Surfaces: `/admin/journal` (period ledger + balance
 check), `/admin/accounts` (CoA + P&L + Balance Sheet; Equity includes
 current-period net income since period close is Phase 11).
 
+## Phase 9 — Multi-warehouse + stock transfers
+
+`Product.warehouse` (string) was promoted to a tenant-scoped
+`Warehouse` table (`code`, `name`, `address`, `type`
+MAIN|COLD|DRY|TRANSIT, `active`, soft-delete) via the same two-step
+migration as Phase 7: add nullable `warehouseId` → backfill (one
+`Warehouse` per unique string per tenant, `UNASSIGNED` for the
+string-less) → `db push --accept-data-loss` to make it **non-null**,
+drop the legacy string, and swap the key.
+
+**Product identity is now `@@unique([tenantId, sku, warehouseId])`.**
+The same SKU in two warehouses = **two Product rows**. `Product.quantity`
+is therefore stock *at one warehouse*. The import endpoint resolves a
+row's free-text `warehouse` to a `Warehouse` (created on first sight,
+slug→`code`; no string → the tenant's oldest active warehouse, lazily
+creating `UNASSIGNED` for brand-new tenants), cached per batch, then
+upserts on `(tenantId, sku, warehouseId)`. **n8n keeps sending the
+same payload unchanged.**
+
+**Transfers** (`lib/transfers.ts`, `/admin/transfers`) are a paired,
+atomic operation: one `TRANSFER_OUT` at the source + one `TRANSFER_IN`
+at the destination, sharing a generated `TRF-…` `transferRef`, both
+via the Phase-5 ledger primitives. `createTransfer` validates positive
+int qty, same-tenant source+destination, distinct warehouses, and
+sufficient stock; it creates the destination Product row on first
+transfer there. **Transfers post NO journal entries** — total
+inventory value is unchanged (decision #5); `LedgerAccount` carries a
+forward-provisioned nullable `warehouseId` for a future sub-ledger.
+`InventoryMovement` gained scalar `warehouseId` (auto-inherited from
+the product unless `createTransfer` sets it explicitly) + `transferRef`.
+New surface `/admin/warehouses` (CRUD, per-warehouse inventory, delete
+blocked while it holds products). PO/SO lines are unchanged (Phase 11).
+
 ## Notes / boundaries
 
 - **SKU dedup is live (Phase 3).** Re-posting the same `(tenantId, sku)`

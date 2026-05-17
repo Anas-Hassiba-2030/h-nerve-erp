@@ -13,6 +13,8 @@ const FAMILY: { href: string; ar: string; en: string }[] = [
   { href: "/admin/mappings", ar: "الخرائط", en: "Mappings" },
   { href: "/admin/purchase-orders", ar: "أوامر الشراء", en: "Purchase Orders" },
   { href: "/admin/sales-orders", ar: "أوامر البيع", en: "Sales Orders" },
+  { href: "/admin/suppliers", ar: "المورّدون", en: "Suppliers" },
+  { href: "/admin/customers", ar: "العملاء", en: "Customers" },
 ];
 
 export function AdminFamilyNav({

@@ -13,7 +13,7 @@ import Link from "next/link";
 import {
   Upload, Package, ArrowLeftRight, Warehouse, Repeat, Shuffle,
   ShoppingCart, Receipt, Truck, Users, BookOpen, Landmark, Brain,
-  UsersRound, ShieldCheck,
+  UsersRound, ShieldCheck, ScrollText,
 } from "lucide-react";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
@@ -50,7 +50,7 @@ export default async function AdminSystemPage() {
   const [
     cImports, cProducts, cMovements, cWarehouses, cTransfers, cMappings,
     cPO, cSO, cSuppliers, cCustomers, cJournal, cAccounts, cBrain,
-    cUsers,
+    cUsers, cAudit,
   ] = await Promise.all([
     n(prismaUnscoped.importLog.count()),
     n(prismaUnscoped.product.count()),
@@ -66,6 +66,7 @@ export default async function AdminSystemPage() {
     n(prismaUnscoped.ledgerAccount.count()),
     n(prismaUnscoped.brainInsight.count()),
     n(prismaUnscoped.user.count()),
+    n(prismaUnscoped.activityLog.count()),
   ]);
 
   const cards: Card[] = [
@@ -84,6 +85,7 @@ export default async function AdminSystemPage() {
     { href: "/admin/brain",           titleAr: "رؤى العقل",         titleEn: "Brain Insights",     descAr: "إشارات وتحليلات الذكاء",               descEn: "AI signals and analytics",                 icon: Brain,        count: cBrain },
     { href: "/admin/users",           titleAr: "المستخدمون",        titleEn: "Users",              descAr: "الحسابات والأدوار والصلاحيات",         descEn: "Accounts, roles, and access",              icon: UsersRound,   count: cUsers },
     { href: "/admin/permissions-preview", titleAr: "معاينة الصلاحيات", titleEn: "Permissions",     descAr: "ما يصل إليه كل دور (تدقيق)",            descEn: "What each role can reach (audit)",         icon: ShieldCheck,  count: null },
+    { href: "/admin/audit",           titleAr: "سجل التدقيق",       titleEn: "Audit Log",          descAr: "من فعل ماذا ومتى",                     descEn: "Who did what, when",                       icon: ScrollText,   count: cAudit },
   ];
 
   return (
@@ -112,8 +114,8 @@ export default async function AdminSystemPage() {
           <h2 className="admin-h2">{ar ? "المسارات الإدارية" : "Admin Routes"}</h2>
           <p className="admin-section-sub">
             {ar
-              ? "١٥ مساراً — الاستيراد، المخزون، الطلبات، المحاسبة، الذكاء، المستخدمون، والصلاحيات."
-              : "15 routes — imports, inventory, orders, accounting, intelligence, users, and permissions."}
+              ? "١٦ مساراً — الاستيراد، المخزون، الطلبات، المحاسبة، الذكاء، المستخدمون، الصلاحيات، والتدقيق."
+              : "16 routes — imports, inventory, orders, accounting, intelligence, users, permissions, and audit."}
           </p>
         </div>
 

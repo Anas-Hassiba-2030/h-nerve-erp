@@ -12,7 +12,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { Building2, Settings, ArrowLeft, Crown, UsersRound } from "lucide-react";
+import { Building2, Settings, ArrowLeft, Crown, UsersRound, ShieldCheck } from "lucide-react";
 import { getLocale } from "@/lib/i18n.server";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -48,6 +48,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <Link href="/admin/users" className="admin-rail-link">
               <UsersRound className="h-3.5 w-3.5" strokeWidth={1.5} />
               {ar ? "المستخدمون" : "Users"}
+            </Link>
+            <Link href="/admin/permissions-preview" className="admin-rail-link">
+              <ShieldCheck className="h-3.5 w-3.5" strokeWidth={1.5} />
+              {ar ? "الصلاحيات" : "Permissions"}
             </Link>
             <Link href="/admin/system" className="admin-rail-link">
               <Settings className="h-3.5 w-3.5" strokeWidth={1.5} />

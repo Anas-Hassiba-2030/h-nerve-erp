@@ -24,6 +24,7 @@ import { getViewAsTenant, getTenantThemeCookie } from "@/lib/tenancy";
 import { getActiveWorkspaceId } from "@/lib/workspace";
 import { WorkspaceBanner } from "@/components/WorkspaceBanner";
 import { THEME_PRESETS, themeCssVars, type ThemeKey } from "@/lib/brand/themes";
+import { permsEnforced } from "@/lib/permissions";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getCurrentUser();
@@ -76,6 +77,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       })
     : null;
 
+  // Phase 5 — flag-gated UI hiding. OFF by default = zero change.
+  const enforcePerms = permsEnforced();
+
   return (
     <div
       className="flex min-h-screen flex-row-reverse"
@@ -103,12 +107,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         messages={messages as any}
         collapsed={sidebarCollapsed}
         unreadMessages={unreadMessages}
+        enforcePerms={enforcePerms}
       />
       <div className="flex min-h-screen flex-1 flex-col nerve-bg">
         <main className="flex-1">{children}</main>
         <Footer />
       </div>
-      <SidebarDrawer user={fullUser} locale={locale} messages={messages as any} unreadMessages={unreadMessages} />
+      <SidebarDrawer user={fullUser} locale={locale} messages={messages as any} unreadMessages={unreadMessages} enforcePerms={enforcePerms} />
       <ToastProvider initialFlash={initialFlash} />
       <OnboardingTour locale={locale} />
       <QuickAddFAB locale={locale} />

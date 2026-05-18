@@ -13,7 +13,7 @@ import Link from "next/link";
 import {
   Upload, Package, ArrowLeftRight, Warehouse, Repeat, Shuffle,
   ShoppingCart, Receipt, Truck, Users, BookOpen, Landmark, Brain,
-  UsersRound,
+  UsersRound, ShieldCheck,
 } from "lucide-react";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
@@ -83,6 +83,7 @@ export default async function AdminSystemPage() {
     { href: "/admin/accounts",        titleAr: "الحسابات",          titleEn: "Accounts",           descAr: "شجرة الحسابات (الأستاذ)",              descEn: "Chart of accounts (general ledger)",       icon: Landmark,     count: cAccounts },
     { href: "/admin/brain",           titleAr: "رؤى العقل",         titleEn: "Brain Insights",     descAr: "إشارات وتحليلات الذكاء",               descEn: "AI signals and analytics",                 icon: Brain,        count: cBrain },
     { href: "/admin/users",           titleAr: "المستخدمون",        titleEn: "Users",              descAr: "الحسابات والأدوار والصلاحيات",         descEn: "Accounts, roles, and access",              icon: UsersRound,   count: cUsers },
+    { href: "/admin/permissions-preview", titleAr: "معاينة الصلاحيات", titleEn: "Permissions",     descAr: "ما يصل إليه كل دور (تدقيق)",            descEn: "What each role can reach (audit)",         icon: ShieldCheck,  count: null },
   ];
 
   return (
@@ -111,8 +112,8 @@ export default async function AdminSystemPage() {
           <h2 className="admin-h2">{ar ? "المسارات الإدارية" : "Admin Routes"}</h2>
           <p className="admin-section-sub">
             {ar
-              ? "١٤ مساراً — الاستيراد، المخزون، الطلبات، المحاسبة، الذكاء، والمستخدمون."
-              : "14 routes — imports, inventory, orders, accounting, intelligence, and users."}
+              ? "١٥ مساراً — الاستيراد، المخزون، الطلبات، المحاسبة، الذكاء، المستخدمون، والصلاحيات."
+              : "15 routes — imports, inventory, orders, accounting, intelligence, users, and permissions."}
           </p>
         </div>
 

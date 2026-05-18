@@ -11,6 +11,7 @@ import {
   GitBranch, Map, Pin, MessageSquare, Bell, Workflow, Heart, Network, Zap, Target, Globe2, Plug, ScrollText, Sparkles as SparklesIcon, PlayCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { canAccess } from "@/lib/permissions";
 import { Logo, LogoLockup } from "./Logo";
 import { rankById, type Rank } from "@/lib/gamification";
 import { setSidebarCollapsed } from "@/app/actions/preferences";
@@ -24,6 +25,7 @@ export function Sidebar({
   collapsed = false,
   variant = "desktop",
   unreadMessages = 0,
+  enforcePerms = false,
 }: {
   user: { name: string; email: string; role: string; title?: string | null; rank?: string; xp?: number; bonusPercent?: number };
   locale: "ar" | "en";
@@ -31,6 +33,7 @@ export function Sidebar({
   collapsed?: boolean;
   variant?: "desktop" | "drawer";
   unreadMessages?: number;
+  enforcePerms?: boolean;
 }) {
   // Capped display — three-digit nav badges look ugly. Anything past 99 → "99+".
   const unreadHint =
@@ -159,6 +162,19 @@ export function Sidebar({
     const i = groups.findIndex((g) => g.label === intelLabel);
     if (i >= 0) groups.splice(i + 1, 0, adminGroup);
     else groups.push(adminGroup);
+  }
+
+  // Phase 5 — UI hiding. Only when enforcement is on (flag-OFF = the
+  // sidebar looks exactly as before). Drops links the role can't reach
+  // and any group left empty. Server-side middleware is the real gate;
+  // this just avoids showing dead links.
+  if (enforcePerms) {
+    for (let gi = groups.length - 1; gi >= 0; gi--) {
+      groups[gi].items = groups[gi].items.filter((it) =>
+        canAccess(user.role, it.href),
+      );
+      if (groups[gi].items.length === 0) groups.splice(gi, 1);
+    }
   }
 
   const rank = rankById((user.rank ?? "PAWN") as Rank);

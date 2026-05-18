@@ -13,6 +13,7 @@ import Link from "next/link";
 import {
   Upload, Package, ArrowLeftRight, Warehouse, Repeat, Shuffle,
   ShoppingCart, Receipt, Truck, Users, BookOpen, Landmark, Brain,
+  UsersRound,
 } from "lucide-react";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
@@ -49,6 +50,7 @@ export default async function AdminSystemPage() {
   const [
     cImports, cProducts, cMovements, cWarehouses, cTransfers, cMappings,
     cPO, cSO, cSuppliers, cCustomers, cJournal, cAccounts, cBrain,
+    cUsers,
   ] = await Promise.all([
     n(prismaUnscoped.importLog.count()),
     n(prismaUnscoped.product.count()),
@@ -63,6 +65,7 @@ export default async function AdminSystemPage() {
     n(prismaUnscoped.journalEntry.count()),
     n(prismaUnscoped.ledgerAccount.count()),
     n(prismaUnscoped.brainInsight.count()),
+    n(prismaUnscoped.user.count()),
   ]);
 
   const cards: Card[] = [
@@ -79,6 +82,7 @@ export default async function AdminSystemPage() {
     { href: "/admin/journal",         titleAr: "اليومية",           titleEn: "Journal",            descAr: "قيود اليومية المحاسبية",               descEn: "Accounting journal entries",               icon: BookOpen,     count: cJournal },
     { href: "/admin/accounts",        titleAr: "الحسابات",          titleEn: "Accounts",           descAr: "شجرة الحسابات (الأستاذ)",              descEn: "Chart of accounts (general ledger)",       icon: Landmark,     count: cAccounts },
     { href: "/admin/brain",           titleAr: "رؤى العقل",         titleEn: "Brain Insights",     descAr: "إشارات وتحليلات الذكاء",               descEn: "AI signals and analytics",                 icon: Brain,        count: cBrain },
+    { href: "/admin/users",           titleAr: "المستخدمون",        titleEn: "Users",              descAr: "الحسابات والأدوار والصلاحيات",         descEn: "Accounts, roles, and access",              icon: UsersRound,   count: cUsers },
   ];
 
   return (
@@ -107,8 +111,8 @@ export default async function AdminSystemPage() {
           <h2 className="admin-h2">{ar ? "المسارات الإدارية" : "Admin Routes"}</h2>
           <p className="admin-section-sub">
             {ar
-              ? "١٣ مساراً — الاستيراد، المخزون، الطلبات، المحاسبة، والذكاء."
-              : "13 routes — imports, inventory, orders, accounting, and intelligence."}
+              ? "١٤ مساراً — الاستيراد، المخزون، الطلبات، المحاسبة، الذكاء، والمستخدمون."
+              : "14 routes — imports, inventory, orders, accounting, intelligence, and users."}
           </p>
         </div>
 

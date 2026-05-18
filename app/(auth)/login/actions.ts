@@ -29,6 +29,13 @@ export async function loginAction(formData: FormData) {
     );
   }
 
+  // Phase 4 — deactivated accounts cannot sign in.
+  if (!user.active) {
+    redirect(
+      `/login?error=${encodeURIComponent("هذا الحساب معطّل. تواصل مع مدير النظام.")}&email=${encodeURIComponent(email)}`
+    );
+  }
+
   const session = await getSession();
   session.user = {
     id: user.id,

@@ -24,6 +24,8 @@ model User {
   passwordHash String
   // "ADMIN" | "EXECUTIVE" | "MANAGER" | "STAFF"
   role         String   @default("STAFF")
+  // Phase 4 — deactivated accounts cannot log in (checked in loginAction).
+  active       Boolean  @default(true)
   companyId    String?
   company      Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
   title        String?
@@ -39,6 +41,8 @@ model User {
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([active])
 
   transactions Transaction[]
   forecasts    SupplyForecast[]

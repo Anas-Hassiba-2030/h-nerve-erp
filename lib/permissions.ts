@@ -30,7 +30,7 @@ const POLICY: Record<Exclude<PermRole, "ADMIN">, string[]> = {
   EXECUTIVE: [
     "/finance", "/reports", "/analytics", "/markets", "/insights",
     "/sustainability", "/compare", "/companies", "/supply-chain",
-    "/brain", "/audit-360", "/plans", "/alerts",
+    "/brain", "/audit-360", "/plans", "/alerts", "/documents",
   ],
   // Operational + own-unit modules. No /admin/* (superadmin or the
   // org-wide admin family). Data scoping deferred to Phase 11.
@@ -42,7 +42,6 @@ const POLICY: Record<Exclude<PermRole, "ADMIN">, string[]> = {
   // Limited operational pages only. No finance/reports/analytics/admin.
   STAFF: [
     "/hotels", "/dairy", "/farms", "/education", "/documents",
-    "/employees",
   ],
 };
 

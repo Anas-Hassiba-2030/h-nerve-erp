@@ -6,7 +6,15 @@ import {
   LayoutDashboard, Building2, Hotel, Milk, Sprout, GraduationCap, Brain, Wallet,
   Sparkles, TrendingUp, Leaf, ChartLine, FlaskConical, ListChecks, Trophy, Users,
   Settings, Search, ChevronRight, Command, MessageCircle,
+  Package, Truck, Receipt, Warehouse as WarehouseIcon, BookOpen,
 } from "lucide-react";
+
+type SearchHit = { id: string; kind: string; label: string; sub: string; href: string };
+
+const HIT_ICON: Record<string, any> = {
+  product: Package, customer: Users, supplier: Truck, invoice: Receipt,
+  warehouse: WarehouseIcon, journal: BookOpen, brain: Brain,
+};
 
 type Item = {
   href: string;
@@ -69,8 +77,24 @@ export function CommandPalette({ locale = "ar" }: { locale?: "ar" | "en" }) {
   const [q, setQ] = useState("");
   const [activeIdx, setActiveIdx] = useState(0);
   const [recents, setRecents] = useState<string[]>([]);
+  const [hits, setHits] = useState<SearchHit[]>([]);
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const ar = locale === "ar";
+
+  // Debounced live entity search (Phase 10). Aborts stale requests.
+  useEffect(() => {
+    const term = q.trim();
+    if (term.length < 2) { setHits([]); return; }
+    const ctrl = new AbortController();
+    const t = setTimeout(() => {
+      fetch(`/api/search?q=${encodeURIComponent(term)}`, { signal: ctrl.signal })
+        .then((r) => (r.ok ? r.json() : { hits: [] }))
+        .then((d) => setHits(Array.isArray(d.hits) ? d.hits : []))
+        .catch(() => { /* aborted / failed → keep nav-only */ });
+    }, 220);
+    return () => { clearTimeout(t); ctrl.abort(); };
+  }, [q]);
 
   // Open on Cmd+K / Ctrl+K
   useEffect(() => {
@@ -100,13 +124,24 @@ export function CommandPalette({ locale = "ar" }: { locale?: "ar" | "en" }) {
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
     if (!term) return ENTRIES_AR;
-    return ENTRIES_AR.filter((it) =>
+    const nav = ENTRIES_AR.filter((it) =>
       it.label.includes(term) ||
       it.hint.toLowerCase().includes(term) ||
       it.group.includes(term) ||
       it.keys.some((k) => k.toLowerCase().includes(term))
     );
-  }, [q]);
+    // Live entity hits appended as navigable items under one group so
+    // the existing grouping + keyboard nav handle them unchanged.
+    const hitItems: Item[] = hits.map((h) => ({
+      href: h.href,
+      label: h.label,
+      hint: h.sub,
+      icon: HIT_ICON[h.kind] ?? Search,
+      group: ar ? "نتائج" : "Results",
+      keys: [],
+    }));
+    return [...nav, ...hitItems];
+  }, [q, hits, ar]);
 
   function go(href: string) {
     if (href === "__ask_brain__") {

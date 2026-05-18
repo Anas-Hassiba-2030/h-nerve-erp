@@ -5548,8 +5548,12 @@ html[dir="rtl"] .sidebar-drawer-panel { --drawer-from: -100%; }
 
 .tm-pill {
   position: fixed;
-  bottom: 18px;
-  inset-inline-start: 18px;   /* opposite corner from QuickAddFAB */
+  /* QuickAddFAB sits at bottom:24px, h-14 (56px) on the SAME side in
+     both directions (it uses physical ltr:left/rtl:right while this
+     pill uses logical inset-inline-start). Stack the pill clear above
+     the FAB instead of fighting over the corner. */
+  bottom: 96px;
+  inset-inline-start: 18px;
   z-index: 70;
   font-family: "Inter Tight", "Inter", "Noto Sans Arabic", system-ui, sans-serif;
 }

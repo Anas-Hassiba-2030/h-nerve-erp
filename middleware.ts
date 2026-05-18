@@ -11,6 +11,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { unsealData } from "iron-session";
 import { canAccess, isBreakGlass, permsEnforced } from "@/lib/permissions";
+import { rateLimit } from "@/lib/rateLimit";
 
 const COOKIE = "bmv2026_session";
 const DEV_FALLBACK =
@@ -23,6 +24,32 @@ function sessionPassword() {
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
+
+  // Phase 12 — brute-force guard on the login POST. Runs BEFORE the
+  // break-glass return (login is break-glass for the permission gate,
+  // but the rate cap must still apply). Fail-soft: a limiter error
+  // never blocks a legitimate sign-in.
+  if (path === "/login" && req.method === "POST") {
+    try {
+      const ip =
+        req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        (req as any).ip ||
+        "unknown";
+      const r = rateLimit(`login:${ip}`, 8, 60_000);
+      if (!r.allowed) {
+        const url = req.nextUrl.clone();
+        url.pathname = "/login";
+        url.search = `?error=${encodeURIComponent(
+          "محاولات تسجيل دخول كثيرة. انتظر دقيقة. · Too many login attempts, wait a minute.",
+        )}`;
+        const res = NextResponse.redirect(url);
+        res.headers.set("Retry-After", String(r.retryAfterSec));
+        return res;
+      }
+    } catch {
+      /* fail-soft — never lock out on a limiter hiccup */
+    }
+  }
 
   if (isBreakGlass(path)) return NextResponse.next();
   if (!permsEnforced()) return NextResponse.next();

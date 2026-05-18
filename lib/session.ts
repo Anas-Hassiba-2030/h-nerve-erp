@@ -38,14 +38,22 @@ function resolveSessionPassword(): string {
   return DEV_FALLBACK_PASSWORD;
 }
 
+// Phase 12 — sessions expire after 24h. iron-session re-issues the
+// cookie on each save, so active users roll forward; idle sessions
+// die. NOTE: shipping/raising this invalidates ALL existing sessions
+// at deploy (everyone re-logs-in once).
+const SESSION_TTL_SECONDS = 60 * 60 * 24;
+
 export const sessionOptions: SessionOptions = {
   password: resolveSessionPassword(),
   cookieName: "bmv2026_session",
+  ttl: SESSION_TTL_SECONDS,
   cookieOptions: {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
+    maxAge: SESSION_TTL_SECONDS,
   },
 };
 

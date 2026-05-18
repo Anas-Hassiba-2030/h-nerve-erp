@@ -10,6 +10,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
+import { isStrongPassword } from "@/lib/password";
 import { isRole } from "./roles";
 
 async function gate() {
@@ -44,7 +45,7 @@ export async function createUser(formData: FormData): Promise<void> {
   const password = String(formData.get("password") ?? "");
 
   if (!name || !EMAIL_RE.test(email) || !isRole(role)) return done();
-  if (password.length < 8) return done();
+  if (!isStrongPassword(password)) return done();
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) return done();
@@ -82,7 +83,7 @@ export async function resetPassword(formData: FormData): Promise<void> {
   await gate();
   const id = String(formData.get("id") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  if (!id || password.length < 8) return done();
+  if (!id || !isStrongPassword(password)) return done();
   const target = await prisma.user.findUnique({ where: { id } });
   if (!target) return done();
   await prisma.user.update({

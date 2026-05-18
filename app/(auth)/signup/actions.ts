@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
+import { passwordError } from "@/lib/password";
 import { getSession, type SessionUser } from "@/lib/session";
 
 export async function signupAction(formData: FormData) {
@@ -10,10 +11,14 @@ export async function signupAction(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
 
-  if (!name || !email || password.length < 6) {
+  if (!name || !email) {
     redirect(
-      `/signup?error=${encodeURIComponent("يرجى تعبئة كل الحقول. كلمة المرور 6 أحرف على الأقل.")}`
+      `/signup?error=${encodeURIComponent("يرجى تعبئة كل الحقول.")}`
     );
+  }
+  const pwErr = passwordError(password, true);
+  if (pwErr) {
+    redirect(`/signup?error=${encodeURIComponent(pwErr)}`);
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });

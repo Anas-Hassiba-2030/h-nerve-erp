@@ -411,11 +411,20 @@ export function NotificationCenter({
               ) : null}
             </div>
 
-            {/* Footer link */}
+            {/* Footer links */}
             <div
-              className="px-4 py-2"
+              className="flex items-center justify-between gap-3 px-4 py-2"
               style={{ borderTop: "1px solid var(--border)" }}
             >
+              <Link
+                href="/inbox"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-1 text-xs font-extrabold"
+                style={{ color: "var(--text)" }}
+              >
+                <Bell className="h-3 w-3" />
+                {ar ? "صندوق الوارد" : "Open inbox"}
+              </Link>
               <Link
                 href={
                   tab === "insights"

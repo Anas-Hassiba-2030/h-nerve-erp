@@ -131,6 +131,10 @@ model Booking {
   notes     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Phase 11 — bookings list joins hotel and sorts/filters by checkIn.
+  @@index([hotelId])
+  @@index([checkIn])
 }
 
 // =====================================================================
@@ -263,6 +267,10 @@ model Transaction {
   createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  // Phase 11 — finance lists filter by company and sort by occurredAt.
+  @@index([companyId, occurredAt])
+  @@index([createdById])
 }
 
 // =====================================================================
@@ -307,6 +315,10 @@ model Task {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   deletedAt   DateTime?
+
+  // Phase 11 — inbox queries my open tasks by assignee/status, sorts dueAt.
+  @@index([assigneeId, status])
+  @@index([dueAt])
 }
 
 // =====================================================================

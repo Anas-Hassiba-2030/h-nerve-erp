@@ -6,21 +6,26 @@ import Link from "next/link";
 import { ArrowLeft, Plus } from "lucide-react";
 import { THEME_PRESETS, PACK_CATALOG } from "@/lib/brand/themes";
 import { createTenant } from "../actions";
+import { getLocale } from "@/lib/i18n.server";
 
-export default function NewTenantPage() {
+export default async function NewTenantPage() {
+  const ar = getLocale() === "ar";
+
   return (
     <div className="admin-page admin-page-narrow">
       <Link href="/admin/tenants" className="admin-back">
         <ArrowLeft className="h-3 w-3" strokeWidth={1.5} />
-        ALL TENANTS
+        {ar ? "جميع المستأجرين" : "ALL TENANTS"}
       </Link>
 
       <header className="admin-page-head">
         <div>
           <span className="admin-eyebrow">FEDERATION · NEW TENANT</span>
-          <h1 className="admin-h1">Spin up a tenant</h1>
+          <h1 className="admin-h1">{ar ? "تشغيل مستأجر جديد" : "Spin up a tenant"}</h1>
           <p className="admin-sub">
-            Three fields, one click. Subdomain, theme, packs — everything provisions in under five seconds.
+            {ar
+              ? "ثلاثة حقول، نقرة واحدة. النطاق الفرعي والسمة والحزم — كل شيء يُجهَّز في أقل من خمس ثوانٍ."
+              : "Three fields, one click. Subdomain, theme, packs — everything provisions in under five seconds."}
           </p>
         </div>
       </header>
@@ -28,10 +33,12 @@ export default function NewTenantPage() {
       <form action={createTenant} className="admin-form">
         {/* Name + slug */}
         <fieldset className="admin-fieldset">
-          <legend className="admin-fieldset-legend">01 · Identity</legend>
+          <legend className="admin-fieldset-legend">
+            {ar ? "٠١ · الهوية" : "01 · Identity"}
+          </legend>
           <div className="admin-grid-2">
             <label className="admin-field">
-              <span className="admin-label">Tenant name</span>
+              <span className="admin-label">{ar ? "اسم المستأجر" : "Tenant name"}</span>
               <input
                 type="text"
                 name="name"
@@ -41,10 +48,12 @@ export default function NewTenantPage() {
                 placeholder="Acme Holdings"
                 className="admin-input"
               />
-              <span className="admin-hint">Display name shown in the operator UI.</span>
+              <span className="admin-hint">
+                {ar ? "الاسم المعروض في واجهة المشغّل." : "Display name shown in the operator UI."}
+              </span>
             </label>
             <label className="admin-field">
-              <span className="admin-label">Subdomain</span>
+              <span className="admin-label">{ar ? "النطاق الفرعي" : "Subdomain"}</span>
               <div className="admin-input-group">
                 <input
                   type="text"
@@ -58,11 +67,15 @@ export default function NewTenantPage() {
                 />
                 <span className="admin-input-suffix">.h-nerve.io</span>
               </div>
-              <span className="admin-hint">Lowercase letters, digits, dashes. 2–32 chars.</span>
+              <span className="admin-hint">
+                {ar
+                  ? "أحرف صغيرة وأرقام وشرطات. من 2 إلى 32 حرفاً."
+                  : "Lowercase letters, digits, dashes. 2–32 chars."}
+              </span>
             </label>
           </div>
           <label className="admin-field">
-            <span className="admin-label">Admin email</span>
+            <span className="admin-label">{ar ? "البريد الإلكتروني للمدير" : "Admin email"}</span>
             <input
               type="email"
               name="adminEmail"
@@ -70,23 +83,29 @@ export default function NewTenantPage() {
               placeholder="ceo@acme.com"
               className="admin-input"
             />
-            <span className="admin-hint">First superadmin. Receives the welcome invite.</span>
+            <span className="admin-hint">
+              {ar
+                ? "المدير العام الأول. يتلقى دعوة الترحيب."
+                : "First superadmin. Receives the welcome invite."}
+            </span>
           </label>
           <label className="admin-field">
-            <span className="admin-label">Region</span>
+            <span className="admin-label">{ar ? "المنطقة" : "Region"}</span>
             <select name="region" defaultValue="MENA" className="admin-input">
               <option value="MENA">MENA</option>
-              <option value="EU">Europe</option>
-              <option value="NA">North America</option>
+              <option value="EU">{ar ? "أوروبا" : "Europe"}</option>
+              <option value="NA">{ar ? "أمريكا الشمالية" : "North America"}</option>
               <option value="APAC">APAC</option>
-              <option value="AFR">Africa</option>
+              <option value="AFR">{ar ? "أفريقيا" : "Africa"}</option>
             </select>
           </label>
         </fieldset>
 
         {/* Theme */}
         <fieldset className="admin-fieldset">
-          <legend className="admin-fieldset-legend">02 · Theme preset</legend>
+          <legend className="admin-fieldset-legend">
+            {ar ? "٠٢ · إعداد السمة" : "02 · Theme preset"}
+          </legend>
           <div className="admin-themes">
             {Object.values(THEME_PRESETS).map((preset, i) => (
               <label key={preset.key} className="admin-theme-card">
@@ -120,9 +139,13 @@ export default function NewTenantPage() {
 
         {/* Packs */}
         <fieldset className="admin-fieldset">
-          <legend className="admin-fieldset-legend">03 · Industry packs</legend>
+          <legend className="admin-fieldset-legend">
+            {ar ? "٠٣ · الحزم الصناعية" : "03 · Industry packs"}
+          </legend>
           <p className="admin-fieldset-hint">
-            Pick which verticals to seed. The brain only loads agents for the packs you enable.
+            {ar
+              ? "اختر القطاعات لتهيئتها. العقل لا يُحمِّل إلا الوكلاء الخاصين بالحزم التي تُفعِّلها."
+              : "Pick which verticals to seed. The brain only loads agents for the packs you enable."}
           </p>
           <div className="admin-packs">
             {PACK_CATALOG.map((p) => (
@@ -142,11 +165,11 @@ export default function NewTenantPage() {
 
         <div className="admin-form-foot">
           <Link href="/admin/tenants" className="admin-btn-ghost">
-            Cancel
+            {ar ? "إلغاء" : "Cancel"}
           </Link>
           <button type="submit" className="admin-cta-primary">
             <Plus className="h-4 w-4" strokeWidth={1.5} />
-            Provision tenant
+            {ar ? "تجهيز المستأجر" : "Provision tenant"}
           </button>
         </div>
       </form>

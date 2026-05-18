@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db";
 import { ArrowLeft, Eye, Trash2, Copy, Calendar } from "lucide-react";
 import { THEME_PRESETS, PACK_CATALOG, type ThemeKey } from "@/lib/brand/themes";
 import { viewAsTenant, deleteTenant } from "../actions";
+import { getLocale } from "@/lib/i18n.server";
 
 const STATUS_COLOR: Record<string, string> = {
   PROVISIONING: "var(--admin-amber)",
@@ -21,6 +22,8 @@ export default async function TenantDetail({
 }: {
   params: { id: string };
 }) {
+  const ar = getLocale() === "ar";
+
   const tenant = await prisma.tenant.findUnique({
     where: { id: params.id },
     include: {
@@ -38,7 +41,7 @@ export default async function TenantDetail({
     <div className="admin-page admin-page-narrow">
       <Link href="/admin/tenants" className="admin-back">
         <ArrowLeft className="h-3 w-3" strokeWidth={1.5} />
-        ALL TENANTS
+        {ar ? "جميع المستأجرين" : "ALL TENANTS"}
       </Link>
 
       {/* Hero card with theme preview band */}
@@ -104,7 +107,7 @@ export default async function TenantDetail({
             <input type="hidden" name="tenantId" value={tenant.id} />
             <button type="submit" className="admin-cta-primary">
               <Eye className="h-4 w-4" strokeWidth={1.5} />
-              View dashboard as {tenant.name}
+              {ar ? `عرض لوحة التحكم بوصفك ${tenant.name}` : `View dashboard as ${tenant.name}`}
             </button>
           </form>
         ) : (
@@ -112,7 +115,7 @@ export default async function TenantDetail({
             href={`/admin/tenants/${tenant.id}/provisioning`}
             className="admin-cta-primary"
           >
-            Resume provisioning
+            {ar ? "متابعة التجهيز" : "Resume provisioning"}
           </Link>
         )}
         {tenant.inviteToken ? (
@@ -131,7 +134,7 @@ export default async function TenantDetail({
             style={{ color: "var(--admin-rose)" }}
           >
             <Trash2 className="h-3 w-3" strokeWidth={1.5} />
-            Delete tenant
+            {ar ? "حذف المستأجر" : "Delete tenant"}
           </button>
         </form>
       </section>
@@ -140,7 +143,7 @@ export default async function TenantDetail({
       <section className="admin-section">
         <header className="admin-section-head">
           <span className="admin-eyebrow">THEME</span>
-          <h2 className="admin-h2">{preset.nameEn}</h2>
+          <h2 className="admin-h2">{ar ? preset.nameAr : preset.nameEn}</h2>
           <p className="admin-section-sub">{preset.description}</p>
         </header>
         <div className="admin-theme-preview">
@@ -163,7 +166,11 @@ export default async function TenantDetail({
       <section className="admin-section">
         <header className="admin-section-head">
           <span className="admin-eyebrow">INDUSTRY PACKS</span>
-          <h2 className="admin-h2">{tenant.packs.length} pack{tenant.packs.length === 1 ? "" : "s"} enabled</h2>
+          <h2 className="admin-h2">
+            {ar
+              ? `${tenant.packs.length} ${tenant.packs.length === 1 ? "حزمة مُفعَّلة" : "حزم مُفعَّلة"}`
+              : `${tenant.packs.length} pack${tenant.packs.length === 1 ? "" : "s"} enabled`}
+          </h2>
         </header>
         <div className="admin-pack-grid">
           {PACK_CATALOG.map((p) => {
@@ -174,7 +181,7 @@ export default async function TenantDetail({
                 className="admin-pack-tile"
                 data-enabled={enabled ? "true" : "false"}
               >
-                <span className="admin-pack-key">{p.nameEn}</span>
+                <span className="admin-pack-key">{ar ? p.nameAr : p.nameEn}</span>
                 <span className="admin-pack-state">
                   {enabled ? "ENABLED" : "OFF"}
                 </span>
@@ -188,13 +195,15 @@ export default async function TenantDetail({
       <section className="admin-section">
         <header className="admin-section-head">
           <span className="admin-eyebrow">PROVISIONING TRAIL</span>
-          <h2 className="admin-h2">5 steps recorded</h2>
+          <h2 className="admin-h2">
+            {ar ? `${tenant.steps.length} خطوات مُسجَّلة` : `${tenant.steps.length} steps recorded`}
+          </h2>
         </header>
         <ol className="admin-trail">
           {tenant.steps.map((s, i) => (
             <li key={s.id} className="admin-trail-row">
               <span className="admin-trail-num">{String(i + 1).padStart(2, "0")}</span>
-              <span className="admin-trail-label">{s.labelEn}</span>
+              <span className="admin-trail-label">{ar ? s.labelAr : s.labelEn}</span>
               <span className="admin-trail-meta">
                 {s.status === "DONE" && s.durationMs != null
                   ? `${s.durationMs}ms`

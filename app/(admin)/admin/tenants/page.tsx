@@ -6,6 +6,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { Plus, Globe2, Eye } from "lucide-react";
 import { THEME_PRESETS, type ThemeKey } from "@/lib/brand/themes";
+import { getLocale } from "@/lib/i18n.server";
 
 const STATUS_COLOR: Record<string, string> = {
   PROVISIONING: "var(--admin-amber)",
@@ -15,6 +16,8 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 export default async function TenantsIndex() {
+  const ar = getLocale() === "ar";
+
   const tenants = await prisma.tenant.findMany({
     orderBy: { createdAt: "desc" },
     include: {
@@ -34,14 +37,16 @@ export default async function TenantsIndex() {
       <header className="admin-page-head">
         <div>
           <span className="admin-eyebrow">FEDERATION · TENANTS</span>
-          <h1 className="admin-h1">All tenants</h1>
+          <h1 className="admin-h1">{ar ? "جميع المستأجرين" : "All tenants"}</h1>
           <p className="admin-sub">
-            Every organization running on H-Nerve. Each one gets its own subdomain, theme, and pack set.
+            {ar
+              ? "كل مؤسسة تعمل على H-Nerve. لكل منها نطاقها الفرعي وسمتها ومجموعة حزمها الخاصة."
+              : "Every organization running on H-Nerve. Each one gets its own subdomain, theme, and pack set."}
           </p>
         </div>
         <Link href="/admin/tenants/new" className="admin-cta-primary">
           <Plus className="h-4 w-4" strokeWidth={1.5} />
-          New tenant
+          {ar ? "مستأجر جديد" : "New tenant"}
         </Link>
       </header>
 
@@ -53,10 +58,10 @@ export default async function TenantsIndex() {
 
       {tenants.length === 0 ? (
         <div className="admin-empty">
-          <p>No tenants yet.</p>
+          <p>{ar ? "لا يوجد مستأجرون بعد." : "No tenants yet."}</p>
           <Link href="/admin/tenants/new" className="admin-cta-primary">
             <Plus className="h-4 w-4" strokeWidth={1.5} />
-            Create your first tenant
+            {ar ? "أنشئ أول مستأجر" : "Create your first tenant"}
           </Link>
         </div>
       ) : (
@@ -85,7 +90,7 @@ export default async function TenantsIndex() {
                 </div>
                 <div className="admin-tenant-card-body">
                   <div className="admin-tenant-row">
-                    <span className="admin-tenant-row-label">Status</span>
+                    <span className="admin-tenant-row-label">{ar ? "الحالة" : "Status"}</span>
                     <span
                       className="admin-tenant-status"
                       style={{ color: STATUS_COLOR[t.status] }}
@@ -98,15 +103,15 @@ export default async function TenantsIndex() {
                     </span>
                   </div>
                   <div className="admin-tenant-row">
-                    <span className="admin-tenant-row-label">Theme</span>
+                    <span className="admin-tenant-row-label">{ar ? "السمة" : "Theme"}</span>
                     <span className="admin-tenant-row-value">{preset.nameEn}</span>
                   </div>
                   <div className="admin-tenant-row">
-                    <span className="admin-tenant-row-label">Packs</span>
+                    <span className="admin-tenant-row-label">{ar ? "الحزم" : "Packs"}</span>
                     <span className="admin-tenant-row-value">{t._count.packs}</span>
                   </div>
                   <div className="admin-tenant-row">
-                    <span className="admin-tenant-row-label">Region</span>
+                    <span className="admin-tenant-row-label">{ar ? "المنطقة" : "Region"}</span>
                     <span className="admin-tenant-row-value">{t.region}</span>
                   </div>
                   <div className="admin-tenant-card-foot">
@@ -122,7 +127,7 @@ export default async function TenantsIndex() {
                     {t.status === "ACTIVE" ? (
                       <span className="admin-tenant-view">
                         <Eye className="h-3 w-3" strokeWidth={1.5} />
-                        View as
+                        {ar ? "عرض بوصفه" : "View as"}
                       </span>
                     ) : null}
                   </div>

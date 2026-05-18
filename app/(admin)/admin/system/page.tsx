@@ -15,13 +15,16 @@ import {
   ShoppingCart, Receipt, Truck, Users, BookOpen, Landmark, Brain,
 } from "lucide-react";
 import { prisma, prismaUnscoped } from "@/lib/db";
+import { getLocale } from "@/lib/i18n.server";
 
 export const dynamic = "force-dynamic";
 
 type Card = {
   href: string;
-  title: string;
-  desc: string;
+  titleAr: string;
+  titleEn: string;
+  descAr: string;
+  descEn: string;
   icon: any;
   count: number | null;
 };
@@ -31,6 +34,8 @@ async function n(p: Promise<number>): Promise<number | null> {
 }
 
 export default async function AdminSystemPage() {
+  const ar = getLocale() === "ar";
+
   const [tenants, brainPatterns, iqRows, memories] = await Promise.all([
     prisma.tenant.count().catch(() => 0),
     prisma.brainPattern.count().catch(() => 0),
@@ -61,19 +66,19 @@ export default async function AdminSystemPage() {
   ]);
 
   const cards: Card[] = [
-    { href: "/admin/imports", title: "سجل الاستيراد", desc: "دفعات الاستيراد ومعاينتها", icon: Upload, count: cImports },
-    { href: "/admin/products", title: "المنتجات", desc: "كتالوج الأصناف والمخزون", icon: Package, count: cProducts },
-    { href: "/admin/movements", title: "الحركات", desc: "حركات المخزون بأنواعها", icon: ArrowLeftRight, count: cMovements },
-    { href: "/admin/warehouses", title: "المستودعات", desc: "مواقع المخزون الفعلية", icon: Warehouse, count: cWarehouses },
-    { href: "/admin/transfers", title: "التحويلات", desc: "نقل المخزون بين المستودعات", icon: Repeat, count: cTransfers },
-    { href: "/admin/mappings", title: "التخطيطات", desc: "ترجمة حقول أنظمة المصدر", icon: Shuffle, count: cMappings },
-    { href: "/admin/purchase-orders", title: "أوامر الشراء", desc: "طلبات الشراء من المورّدين", icon: ShoppingCart, count: cPO },
-    { href: "/admin/sales-orders", title: "أوامر البيع", desc: "أوامر البيع للعملاء", icon: Receipt, count: cSO },
-    { href: "/admin/suppliers", title: "الموردون", desc: "سجل المورّدين", icon: Truck, count: cSuppliers },
-    { href: "/admin/customers", title: "العملاء", desc: "سجل العملاء", icon: Users, count: cCustomers },
-    { href: "/admin/journal", title: "اليومية", desc: "قيود اليومية المحاسبية", icon: BookOpen, count: cJournal },
-    { href: "/admin/accounts", title: "الحسابات", desc: "شجرة الحسابات (الأستاذ)", icon: Landmark, count: cAccounts },
-    { href: "/admin/brain", title: "رؤى العقل", desc: "إشارات وتحليلات الذكاء", icon: Brain, count: cBrain },
+    { href: "/admin/imports",         titleAr: "سجل الاستيراد",    titleEn: "Import Log",         descAr: "دفعات الاستيراد ومعاينتها",            descEn: "Import batches and previews",              icon: Upload,       count: cImports },
+    { href: "/admin/products",        titleAr: "المنتجات",          titleEn: "Products",           descAr: "كتالوج الأصناف والمخزون",              descEn: "Item catalogue and inventory",             icon: Package,      count: cProducts },
+    { href: "/admin/movements",       titleAr: "الحركات",           titleEn: "Movements",          descAr: "حركات المخزون بأنواعها",               descEn: "All inventory movement types",             icon: ArrowLeftRight, count: cMovements },
+    { href: "/admin/warehouses",      titleAr: "المستودعات",        titleEn: "Warehouses",         descAr: "مواقع المخزون الفعلية",                descEn: "Physical stock locations",                 icon: Warehouse,    count: cWarehouses },
+    { href: "/admin/transfers",       titleAr: "التحويلات",         titleEn: "Transfers",          descAr: "نقل المخزون بين المستودعات",           descEn: "Inter-warehouse stock transfers",          icon: Repeat,       count: cTransfers },
+    { href: "/admin/mappings",        titleAr: "التخطيطات",         titleEn: "Mappings",           descAr: "ترجمة حقول أنظمة المصدر",              descEn: "Source-system field translations",         icon: Shuffle,      count: cMappings },
+    { href: "/admin/purchase-orders", titleAr: "أوامر الشراء",      titleEn: "Purchase Orders",    descAr: "طلبات الشراء من المورّدين",            descEn: "Supplier purchase requests",               icon: ShoppingCart, count: cPO },
+    { href: "/admin/sales-orders",    titleAr: "أوامر البيع",       titleEn: "Sales Orders",       descAr: "أوامر البيع للعملاء",                  descEn: "Customer sales orders",                    icon: Receipt,      count: cSO },
+    { href: "/admin/suppliers",       titleAr: "الموردون",          titleEn: "Suppliers",          descAr: "سجل المورّدين",                        descEn: "Supplier registry",                        icon: Truck,        count: cSuppliers },
+    { href: "/admin/customers",       titleAr: "العملاء",           titleEn: "Customers",          descAr: "سجل العملاء",                          descEn: "Customer registry",                        icon: Users,        count: cCustomers },
+    { href: "/admin/journal",         titleAr: "اليومية",           titleEn: "Journal",            descAr: "قيود اليومية المحاسبية",               descEn: "Accounting journal entries",               icon: BookOpen,     count: cJournal },
+    { href: "/admin/accounts",        titleAr: "الحسابات",          titleEn: "Accounts",           descAr: "شجرة الحسابات (الأستاذ)",              descEn: "Chart of accounts (general ledger)",       icon: Landmark,     count: cAccounts },
+    { href: "/admin/brain",           titleAr: "رؤى العقل",         titleEn: "Brain Insights",     descAr: "إشارات وتحليلات الذكاء",               descEn: "AI signals and analytics",                 icon: Brain,        count: cBrain },
   ];
 
   return (
@@ -81,10 +86,11 @@ export default async function AdminSystemPage() {
       <header className="admin-page-head">
         <div>
           <span className="admin-eyebrow">SUPERADMIN · SYSTEM</span>
-          <h1 className="admin-h1">نظام الإدارة</h1>
+          <h1 className="admin-h1">{ar ? "نظام الإدارة" : "System Hub"}</h1>
           <p className="admin-sub">
-            بوابة عائلة الإدارة التشغيلية — كل المسارات الإدارية في مكان واحد.
-            مع إجماليات الاتحاد عبر كل مستأجر وكل نظام عقل.
+            {ar
+              ? "بوابة عائلة الإدارة التشغيلية — كل المسارات الإدارية في مكان واحد. مع إجماليات الاتحاد عبر كل مستأجر وكل نظام عقل."
+              : "The operator admin family gateway — every admin route in one place. Federation totals across every tenant and every brain system."}
           </p>
         </div>
       </header>
@@ -98,9 +104,11 @@ export default async function AdminSystemPage() {
 
       <section className="admin-section">
         <div className="admin-section-head">
-          <h2 className="admin-h2">المسارات الإدارية</h2>
+          <h2 className="admin-h2">{ar ? "المسارات الإدارية" : "Admin Routes"}</h2>
           <p className="admin-section-sub">
-            ١٣ مساراً — الاستيراد، المخزون، الطلبات، المحاسبة، والذكاء.
+            {ar
+              ? "١٣ مساراً — الاستيراد، المخزون، الطلبات، المحاسبة، والذكاء."
+              : "13 routes — imports, inventory, orders, accounting, and intelligence."}
           </p>
         </div>
 
@@ -129,7 +137,7 @@ export default async function AdminSystemPage() {
                     <Icon className="h-4 w-4" strokeWidth={1.5} />
                   </span>
                   <span style={{ display: "grid", gap: 3, minWidth: 0, flex: 1 }}>
-                    <span className="admin-tenant-name">{c.title}</span>
+                    <span className="admin-tenant-name">{ar ? c.titleAr : c.titleEn}</span>
                     <span
                       style={{
                         fontSize: 12,
@@ -139,7 +147,7 @@ export default async function AdminSystemPage() {
                         textOverflow: "ellipsis",
                       }}
                     >
-                      {c.desc}
+                      {ar ? c.descAr : c.descEn}
                     </span>
                   </span>
                   {c.count !== null ? (

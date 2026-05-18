@@ -13,6 +13,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import { Building2, Settings, ArrowLeft, Crown } from "lucide-react";
+import { getLocale } from "@/lib/i18n.server";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getCurrentUser();
@@ -23,6 +24,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   // Logged-in non-admins are sent back to the operator dashboard.
   if (dbUser.role !== "ADMIN") redirect("/dashboard");
 
+  const ar = getLocale() === "ar";
+
   return (
     <div className="admin-shell" data-shell="admin">
       {/* Frosted top rail */}
@@ -30,26 +33,30 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div className="admin-rail-inner">
           <div className="admin-rail-brand">
             <span className="admin-rail-mark">⌗</span>
-            <span className="admin-rail-name">H-Nerve · Admin</span>
+            <span className="admin-rail-name">{ar ? "H-Nerve · إدارة" : "H-Nerve · Admin"}</span>
             <span className="admin-rail-tag">SUPERADMIN</span>
           </div>
           <nav className="admin-rail-nav">
             <Link href="/admin/empire" className="admin-rail-link">
               <Crown className="h-3.5 w-3.5" strokeWidth={1.5} />
-              Empire
+              {ar ? "الإمبراطورية" : "Empire"}
             </Link>
             <Link href="/admin/tenants" className="admin-rail-link">
               <Building2 className="h-3.5 w-3.5" strokeWidth={1.5} />
-              Tenants
+              {ar ? "المستأجرون" : "Tenants"}
             </Link>
             <Link href="/admin/system" className="admin-rail-link">
               <Settings className="h-3.5 w-3.5" strokeWidth={1.5} />
-              System
+              {ar ? "النظام" : "System"}
             </Link>
           </nav>
-          <Link href="/dashboard" className="admin-rail-exit" title="Exit to operator UI">
+          <Link
+            href="/dashboard"
+            className="admin-rail-exit"
+            title={ar ? "العودة إلى واجهة المشغّل" : "Exit to operator UI"}
+          >
             <ArrowLeft className="h-3 w-3" strokeWidth={1.5} />
-            <span>OPERATOR</span>
+            <span>{ar ? "المشغّل" : "OPERATOR"}</span>
           </Link>
         </div>
       </header>

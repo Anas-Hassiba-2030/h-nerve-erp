@@ -11,12 +11,15 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { ProvisioningClient } from "./ProvisioningClient";
+import { getLocale } from "@/lib/i18n.server";
 
 export default async function ProvisioningPage({
   params,
 }: {
   params: { id: string };
 }) {
+  const ar = getLocale() === "ar";
+
   const tenant = await prisma.tenant.findUnique({
     where: { id: params.id },
     include: {
@@ -31,9 +34,13 @@ export default async function ProvisioningPage({
       <header className="admin-page-head">
         <div>
           <span className="admin-eyebrow">PROVISIONING · {tenant.slug.toUpperCase()}</span>
-          <h1 className="admin-h1">Standing up {tenant.name}</h1>
+          <h1 className="admin-h1">
+            {ar ? `تجهيز ${tenant.name}` : `Standing up ${tenant.name}`}
+          </h1>
           <p className="admin-sub">
-            Five steps. About three seconds end-to-end. Each one runs against the database in real time.
+            {ar
+              ? "خمس خطوات. نحو ثلاث ثوانٍ من البداية إلى النهاية. كل خطوة تعمل مقابل قاعدة البيانات في الوقت الفعلي."
+              : "Five steps. About three seconds end-to-end. Each one runs against the database in real time."}
           </p>
         </div>
         <div className="admin-tenant-emblem-large">{tenant.theme?.emblem ?? "◆"}</div>
@@ -41,6 +48,7 @@ export default async function ProvisioningPage({
 
       <ProvisioningClient
         tenantId={tenant.id}
+        ar={ar}
         steps={tenant.steps.map((s) => ({
           id: s.id,
           orderIndex: s.orderIndex,

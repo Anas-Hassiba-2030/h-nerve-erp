@@ -33,9 +33,11 @@ type Step = {
 export function ProvisioningClient({
   tenantId,
   steps: initial,
+  ar,
 }: {
   tenantId: string;
   steps: Step[];
+  ar: boolean;
 }) {
   const router = useRouter();
   const [steps, setSteps] = useState<Step[]>(initial);
@@ -84,7 +86,9 @@ export function ProvisioningClient({
     <section className="admin-provisioning">
       <div className="admin-provisioning-progress">
         <span className="admin-progress-label">
-          {allDone ? "READY" : `${totalDone} / ${steps.length} COMPLETE`}
+          {allDone
+            ? (ar ? "جاهز" : "READY")
+            : (ar ? `${totalDone} / ${steps.length} مكتمل` : `${totalDone} / ${steps.length} COMPLETE`)}
         </span>
         <span
           className="admin-progress-bar"
@@ -115,15 +119,15 @@ export function ProvisioningClient({
                 <CircleDashed className="h-4 w-4" strokeWidth={1.5} />
               )}
             </span>
-            <span className="admin-check-label">{s.labelEn}</span>
+            <span className="admin-check-label">{ar ? s.labelAr : s.labelEn}</span>
             <span className="admin-check-meta">
               {s.status === "DONE" && s.durationMs != null
                 ? `${s.durationMs}ms`
                 : s.status === "RUNNING"
-                  ? "RUNNING"
+                  ? (ar ? "جارٍ" : "RUNNING")
                   : s.status === "FAILED"
-                    ? "FAILED"
-                    : "QUEUED"}
+                    ? (ar ? "فشل" : "FAILED")
+                    : (ar ? "في الانتظار" : "QUEUED")}
             </span>
           </li>
         ))}
@@ -131,7 +135,7 @@ export function ProvisioningClient({
 
       {allDone ? (
         <p className="admin-provisioning-done">
-          ✓ Tenant ready. Redirecting to console…
+          {ar ? "✓ المستأجر جاهز. جارٍ التوجيه إلى لوحة التحكم…" : "✓ Tenant ready. Redirecting to console…"}
         </p>
       ) : null}
     </section>

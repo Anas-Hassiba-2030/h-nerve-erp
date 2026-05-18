@@ -10,8 +10,8 @@ import {
   createWarehouse,
   updateWarehouse,
   deleteWarehouse,
-  WAREHOUSE_TYPES,
 } from "./actions";
+import { WAREHOUSE_TYPES } from "./warehouseTypes";
 
 type W = {
   id: string;

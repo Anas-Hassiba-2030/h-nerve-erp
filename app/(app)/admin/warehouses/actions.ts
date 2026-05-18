@@ -13,8 +13,12 @@ import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
 import { prismaUnscoped } from "@/lib/db";
 import { flashToast } from "@/lib/toast";
-
-export const WAREHOUSE_TYPES = ["MAIN", "COLD", "DRY", "TRANSIT"] as const;
+// WAREHOUSE_TYPES must NOT be declared OR re-exported in this "use server"
+// file — every export of a "use server" module becomes a server-action
+// reference, so the array would reach the client forms as a function
+// proxy. Imported here for internal validation only; the client forms
+// import it straight from ./warehouseTypes.
+import { WAREHOUSE_TYPES } from "./warehouseTypes";
 
 async function gate() {
   const user = await getCurrentUser();

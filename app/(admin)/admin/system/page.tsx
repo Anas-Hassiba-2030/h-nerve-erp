@@ -171,6 +171,26 @@ export default async function AdminSystemPage() {
           })}
         </div>
       </section>
+
+      <section className="admin-section">
+        <div className="admin-section-head">
+          <h2 className="admin-h2">
+            {ar ? "النسخ الاحتياطي والتعافي" : "Backup & disaster recovery"}
+          </h2>
+          <p className="admin-section-sub">
+            {ar
+              ? "تفريغ كامل لقاعدة البيانات (JSON) — لقطة تعافٍ تشمل صفوف المصادقة (تجزئات bcrypt). للمدير فقط. التصدير لكل مورد (CSV) متاح من صفحات الوحدات."
+              : "Full database dump (JSON) — a recovery snapshot incl. auth rows (bcrypt hashes). ADMIN only. Per-resource CSV export lives on each module page."}
+          </p>
+        </div>
+        <a
+          href="/api/export/system-dump"
+          className="admin-cta-primary"
+          style={{ width: "fit-content" }}
+        >
+          {ar ? "تنزيل التفريغ الكامل" : "Download full system dump"}
+        </a>
+      </section>
     </div>
   );
 }

@@ -102,7 +102,6 @@ export function Sidebar({
         { href: "/brain/learning", label: ar ? "ما تعلّمتُه" : "What I've learned", icon: GraduationCap, hint: "BRAIN" },
         { href: "/brain/benchmarks", label: ar ? "معايير النظراء" : "Peer benchmarks", icon: Globe2, hint: "BRAIN" },
         { href: "/brain/iq", label: ar ? "ذكاء الدماغ" : "Brain IQ", icon: Trophy, hint: "META" },
-        { href: "/admin/tenants", label: ar ? "المستأجرون" : "Tenants console", icon: Building2, hint: "ADMIN" },
         { href: "/supply-chain", label: messages["nav.supplyChain"], icon: Brain, hint: "AI" },
         { href: "/insights", label: messages["nav.insights"], icon: Sparkles },
         { href: "/alerts", label: ar ? "التنبيهات الذكية" : "Smart alerts", icon: Bell },
@@ -143,6 +142,24 @@ export function Sidebar({
       ],
     },
   ];
+
+  // Superadmin console — hard-gated to ADMIN per CLAUDE.md production
+  // rule. Inserted directly after the Intelligence group so it never
+  // drifts if groups are reordered.
+  if (user.role === "ADMIN") {
+    const intelLabel = ar ? "الذكاء التشغيلي" : "Intelligence";
+    const adminGroup = {
+      label: ar ? "الإدارة العليا" : "Admin",
+      items: [
+        { href: "/admin/tenants", label: ar ? "المستأجرون" : "Tenants", icon: Building2, hint: "ADMIN" },
+        { href: "/admin/empire", label: ar ? "الإمبراطورية" : "Empire", icon: Globe2, hint: "ADMIN" },
+        { href: "/admin/system", label: ar ? "النظام" : "System console", icon: Settings, hint: "ADMIN" },
+      ],
+    };
+    const i = groups.findIndex((g) => g.label === intelLabel);
+    if (i >= 0) groups.splice(i + 1, 0, adminGroup);
+    else groups.push(adminGroup);
+  }
 
   const rank = rankById((user.rank ?? "PAWN") as Rank);
 

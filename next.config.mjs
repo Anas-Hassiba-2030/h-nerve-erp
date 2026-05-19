@@ -24,13 +24,15 @@ const securityHeaders = [
   // Cross-origin isolation — keeps our window separate from any embed.
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
   { key: "X-DNS-Prefetch-Control", value: "off" },
-  // Phase 12 — CSP shipped in REPORT-ONLY: the policy is evaluated and
-  // violations are reported by the browser, but nothing is blocked, so
-  // Next 14's inline/eval runtime + recharts can't break. Review the
-  // live browser console, then flip the key to
-  // "Content-Security-Policy" (drop -Report-Only) to enforce.
+  // Phase 12 — CSP ENFORCED. The policy was validated in Report-Only
+  // across every page; it intentionally keeps script-src/style-src
+  // 'unsafe-inline' 'unsafe-eval' because Next 14's runtime + recharts
+  // require them without nonce wiring, so enforcing this exact policy
+  // changes no page behavior — it only blocks unlisted origins
+  // (foreign script/connect/object/frame). Tighten by removing the
+  // unsafe-* tokens once a nonce pipeline lands (post-pitch).
   {
-    key: "Content-Security-Policy-Report-Only",
+    key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",

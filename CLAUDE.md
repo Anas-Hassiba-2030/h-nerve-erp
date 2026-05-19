@@ -30,9 +30,12 @@ npm run db:seed     # run prisma/seed.ts (creates Hourani sample data + admin@ho
 npm run db:reset    # nuke + recreate + reseed
 npm run db:studio   # Prisma Studio
 npm run lint        # next lint
+npm test            # vitest run — pure unit suite (lib/**/*.test.ts)
 ```
 
-There is no test runner configured.
+Tests: **Vitest** (`vitest.config.ts`, node env). The suite is
+pure-unit — `lib/**/*.test.ts`, no DB/network/Next runtime. Run
+`npm test` before commits that touch `lib/`.
 
 ## Architecture
 

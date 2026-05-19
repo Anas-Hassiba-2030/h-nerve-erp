@@ -103,16 +103,17 @@ settings, or alias it — do not blanket-disable protection.
 
 ## 5. Scheduled Brain analysis — cron caveat
 
-`vercel.json` registers `/api/brain/cron` at `*/15 * * * *`. The route
-is auth-gated on `CRON_SECRET` (Vercel attaches
+`vercel.json` registers `/api/brain/cron` at `0 3 * * *` (daily,
+03:00 UTC). The route is auth-gated on `CRON_SECRET` (Vercel attaches
 `Authorization: Bearer $CRON_SECRET` to scheduled calls; set that env
 var or the route fail-closes with 503).
 
-Cron frequency is subject to the Vercel **plan limit** — a Hobby plan
-clamps schedules (often to once/day) regardless of the cron expression.
-If 15-minute cadence does not fire, that is the cause: upgrade the plan
-or rely on the on-demand **Run analysis** button on `/admin/brain`,
-which calls the same engine.
+The schedule is **daily because the account is on the Hobby plan**,
+which *hard-rejects the deploy* for any sub-daily cron (a `*/15`
+expression fails the build with "Hobby accounts are limited to daily
+cron jobs" — not a silent clamp). For tighter cadence, upgrade to Pro
+and change the expression, or use the on-demand **Run analysis**
+button on `/admin/brain`, which calls the same engine.
 
 ---
 

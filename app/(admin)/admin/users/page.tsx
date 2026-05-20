@@ -12,6 +12,7 @@ import {
   EditUserForm,
   ResetPasswordForm,
   ActiveToggle,
+  DeleteUserForm,
 } from "./UserForms";
 
 export const dynamic = "force-dynamic";
@@ -106,6 +107,9 @@ export default async function AdminUsersPage() {
                 <EditUserForm u={u} ar={ar} />
                 <ResetPasswordForm id={u.id} ar={ar} />
                 <ActiveToggle id={u.id} active={u.active} ar={ar} />
+                {isMe ? null : (
+                  <DeleteUserForm id={u.id} email={u.email} ar={ar} />
+                )}
               </div>
             </div>
           );

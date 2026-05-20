@@ -2625,6 +2625,30 @@ html[dir="rtl"] .sidebar-drawer-panel { --drawer-from: -100%; }
 }
 .admin-btn-ghost:hover { color: var(--admin-text); border-color: var(--admin-cyan-dim); }
 
+/* Destructive action (hard-delete). Amber-on-charcoal at rest reads as
+   the right "stop and read" colour against the cyan operator palette;
+   the hover fills red so the click intent is unmistakable. */
+.admin-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  background: transparent;
+  color: #ff6b6b;
+  border: 1px solid #b34141;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 180ms, border-color 180ms, background 180ms;
+}
+.admin-btn-danger:hover {
+  background: #ff6b6b;
+  color: var(--admin-bg);
+  border-color: #ff6b6b;
+}
+.admin-btn-danger:active { transform: translateY(1px); }
+
 /* Stats row */
 .admin-stats {
   display: grid;

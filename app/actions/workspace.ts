@@ -52,3 +52,50 @@ export async function exitWorkspace() {
   cookies().delete(TENANT_COOKIE);
   redirect("/companies");
 }
+
+// Phase F-UX — Option A. The Operations sidebar links route through
+// this action instead of plain <Link>. It atomically rebinds the
+// workspace + tenant cookies to whichever tenant owns the destination
+// path BEFORE redirecting there, so the WorkspaceBanner is never out
+// of sync with the page the user is looking at.
+//
+// Path → Company.code map. One entry per sector today. If a future
+// tenant adds a new sector path, register it here.
+const OPS_PATH_TO_COMPANY_CODE: Record<string, "HOTELS" | "MAHA" | "LORAN" | "TANK"> = {
+  "/hotels": "HOTELS",
+  "/dairy": "MAHA",
+  "/farms": "LORAN",
+  "/education": "TANK",
+};
+
+export async function enterWorkspaceByPath(formData: FormData): Promise<void> {
+  await requireUser();
+  const path = String(formData.get("path") ?? "");
+  const code = OPS_PATH_TO_COMPANY_CODE[path];
+  if (!code) redirect(path || "/dashboard");
+
+  // CROSS-TENANT INTENT: must read every Company; the user is switching
+  // workspaces, no scoping should apply.
+  const company = await prismaUnscoped.company.findFirst({
+    where: { code },
+    select: { id: true, code: true },
+  });
+  if (!company) redirect(path);
+
+  cookies().set(WORKSPACE_COOKIE, company.id, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+  });
+  const slug = COMPANY_CODE_TO_TENANT_SLUG[company.code] ?? null;
+  if (slug) {
+    cookies().set(TENANT_COOKIE, slug, {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+    });
+  } else {
+    cookies().delete(TENANT_COOKIE);
+  }
+  redirect(path);
+}

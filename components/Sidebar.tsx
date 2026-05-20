@@ -15,6 +15,13 @@ import { canAccess } from "@/lib/permissions";
 import { Logo, LogoLockup } from "./Logo";
 import { rankById, type Rank } from "@/lib/gamification";
 import { setSidebarCollapsed } from "@/app/actions/preferences";
+import { enterWorkspaceByPath } from "@/app/actions/workspace";
+
+// Phase F-UX Option A — Operations links that auto-rebind the workspace
+// cookie on click, so the WorkspaceBanner is always in sync with the
+// page the user is looking at. Mirrors OPS_PATH_TO_COMPANY_CODE in
+// app/actions/workspace.ts.
+const OPS_SWITCH_PATHS = new Set<string>(["/hotels", "/dairy", "/farms", "/education"]);
 
 type NavItem = { href: string; label: string; icon: any; hint?: string };
 
@@ -268,30 +275,23 @@ export function Sidebar({
               const Icon = item.icon;
               const active =
                 pathname === item.href || pathname.startsWith(item.href + "/");
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  title={c ? item.label : undefined}
-                  aria-label={c ? item.label : undefined}
-                  className={cn(
-                    "sidebar-link group relative flex items-center rounded-xl text-sm font-bold transition-all duration-200",
-                    c ? "justify-center p-2.5" : "gap-3 px-3 py-2",
-                    active
-                      ? "shadow-soft"
-                      : "hover:translate-x-[-2px] rtl:hover:translate-x-[2px]",
-                  )}
-                  style={
-                    active
-                      ? {
-                          background: "var(--brand-soft)",
-                          color: "var(--brand-deep)",
-                          boxShadow: "0 0 0 1px color-mix(in srgb, var(--brand) 18%, transparent)",
-                        }
-                      : { color: "var(--text-muted)" }
+              const isWorkspaceSwitch = OPS_SWITCH_PATHS.has(item.href);
+              const linkClass = cn(
+                "sidebar-link group relative flex w-full items-center rounded-xl text-sm font-bold transition-all duration-200",
+                c ? "justify-center p-2.5" : "gap-3 px-3 py-2",
+                active
+                  ? "shadow-soft"
+                  : "hover:translate-x-[-2px] rtl:hover:translate-x-[2px]",
+              );
+              const linkStyle = active
+                ? {
+                    background: "var(--brand-soft)",
+                    color: "var(--brand-deep)",
+                    boxShadow: "0 0 0 1px color-mix(in srgb, var(--brand) 18%, transparent)",
                   }
-                >
-                  {/* Active indicator bar */}
+                : { color: "var(--text-muted)" };
+              const inner = (
+                <>
                   {active && !c ? (
                     <span
                       className="absolute end-0 top-1/2 -translate-y-1/2"
@@ -312,7 +312,7 @@ export function Sidebar({
                   />
                   {!c ? (
                     <>
-                      <span className="flex-1 truncate">{item.label}</span>
+                      <span className="flex-1 truncate text-start">{item.label}</span>
                       {item.hint ? (
                         <span
                           className="rounded-md px-1.5 py-0.5 text-[9px] font-black"
@@ -334,6 +334,37 @@ export function Sidebar({
                       ) : null}
                     </span>
                   )}
+                </>
+              );
+              if (isWorkspaceSwitch) {
+                // Phase F-UX Option A: rebind workspace cookie atomically
+                // on click via a server action, then redirect. Replaces
+                // a plain <Link href={item.href}>.
+                return (
+                  <form key={item.href} action={enterWorkspaceByPath}>
+                    <input type="hidden" name="path" value={item.href} />
+                    <button
+                      type="submit"
+                      title={c ? item.label : undefined}
+                      aria-label={c ? item.label : undefined}
+                      className={linkClass}
+                      style={linkStyle}
+                    >
+                      {inner}
+                    </button>
+                  </form>
+                );
+              }
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  title={c ? item.label : undefined}
+                  aria-label={c ? item.label : undefined}
+                  className={linkClass}
+                  style={linkStyle}
+                >
+                  {inner}
                 </Link>
               );
             })}

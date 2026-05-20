@@ -48,6 +48,11 @@ export async function createUser(
   const role = String(formData.get("role") ?? "").trim().toUpperCase();
   const password = String(formData.get("password") ?? "");
   const ar = String(formData.get("__locale") ?? "en") === "ar";
+  // Phase F-UX — companyId from the picker. "" = no company (admin /
+  // cross-tenant roamer). Stored as null. The middleware does not scope
+  // User, so the picker validation lives here.
+  const rawCompanyId = String(formData.get("companyId") ?? "").trim();
+  const companyId = rawCompanyId || null;
 
   const errors: Record<string, string> = {};
   if (!name) errors.name = ar ? "الاسم مطلوب" : "Name is required";
@@ -55,6 +60,11 @@ export async function createUser(
   if (!isRole(role)) errors.role = ar ? "دور غير صالح" : "Invalid role";
   const pwErr = passwordError(password, ar);
   if (pwErr) errors.password = pwErr;
+
+  if (companyId) {
+    const exists = await prisma.company.findUnique({ where: { id: companyId } });
+    if (!exists) errors.companyId = ar ? "شركة غير موجودة" : "Company not found";
+  }
 
   if (Object.keys(errors).length) return { ok: false, errors };
 
@@ -69,7 +79,7 @@ export async function createUser(
   }
 
   await prisma.user.create({
-    data: { name, email, role, passwordHash: await hashPassword(password) },
+    data: { name, email, role, passwordHash: await hashPassword(password), companyId },
   });
   done();
   return {
@@ -85,6 +95,9 @@ export async function updateUser(formData: FormData): Promise<void> {
   const name = String(formData.get("name") ?? "").trim().slice(0, 120);
   const title = String(formData.get("title") ?? "").trim().slice(0, 120) || null;
   const role = String(formData.get("role") ?? "").trim().toUpperCase();
+  // Phase F-UX — companyId picker. "" = unassigned (null in DB).
+  const rawCompanyId = String(formData.get("companyId") ?? "").trim();
+  const companyId = rawCompanyId || null;
   if (!name || !isRole(role)) return done();
 
   const target = await prisma.user.findUnique({ where: { id } });
@@ -96,7 +109,12 @@ export async function updateUser(formData: FormData): Promise<void> {
     if (await wouldStrandAdmin(id)) return done();
   }
 
-  await prisma.user.update({ where: { id }, data: { name, title, role } });
+  if (companyId) {
+    const exists = await prisma.company.findUnique({ where: { id: companyId } });
+    if (!exists) return done(); // silently ignore invalid id
+  }
+
+  await prisma.user.update({ where: { id }, data: { name, title, role, companyId } });
   done();
 }
 

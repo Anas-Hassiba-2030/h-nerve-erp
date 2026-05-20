@@ -3,7 +3,9 @@
 // ar-ternary (Phase 3 convention). ADMIN-gated by the (admin) layout;
 // the actions self-gate too. Server actions only.
 
-import { prisma } from "@/lib/db";
+// CROSS-TENANT INTENT: the superadmin console must see every Company
+// to populate the user-assignment dropdown.
+import { prisma, prismaUnscoped } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { roleLabel } from "./roles";
@@ -21,18 +23,25 @@ export default async function AdminUsersPage() {
   const ar = getLocale() === "ar";
   const me = await getCurrentUser();
 
-  const users = await prisma.user.findMany({
-    orderBy: [{ active: "desc" }, { createdAt: "asc" }],
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      title: true,
-      active: true,
-      lastLoginAt: true,
-    },
-  });
+  const [users, companies] = await Promise.all([
+    prisma.user.findMany({
+      orderBy: [{ active: "desc" }, { createdAt: "asc" }],
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        title: true,
+        active: true,
+        lastLoginAt: true,
+        companyId: true,
+      },
+    }),
+    prismaUnscoped.company.findMany({
+      orderBy: { code: "asc" },
+      select: { id: true, code: true, name: true, nameEn: true },
+    }),
+  ]);
 
   const stats = {
     total: users.length,
@@ -60,7 +69,7 @@ export default async function AdminUsersPage() {
         <Stat label="DEACTIVATED" value={stats.inactive} accent="amber" />
       </section>
 
-      <CreateUserForm ar={ar} />
+      <CreateUserForm ar={ar} companies={companies} />
 
       <div className="admin-grid">
         {users.map((u) => {
@@ -104,7 +113,7 @@ export default async function AdminUsersPage() {
               </div>
 
               <div style={{ marginTop: 14, display: "grid", gap: 14 }}>
-                <EditUserForm u={u} ar={ar} />
+                <EditUserForm u={u} ar={ar} companies={companies} />
                 <ResetPasswordForm id={u.id} ar={ar} />
                 <ActiveToggle id={u.id} active={u.active} ar={ar} />
                 {isMe ? null : (

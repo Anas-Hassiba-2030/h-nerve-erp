@@ -44,6 +44,37 @@ function RoleSelect({ value, ar }: { value?: string; ar: boolean }) {
   );
 }
 
+// Phase F-UX — Company picker. Maps to User.companyId. Empty string =
+// "no company assigned" (cross-tenant roamer / admin). The submitting
+// action treats "" as null.
+export type CompanyOption = { id: string; code: string; name: string; nameEn: string };
+function CompanySelect({
+  value,
+  ar,
+  companies,
+}: {
+  value?: string | null;
+  ar: boolean;
+  companies: CompanyOption[];
+}) {
+  return (
+    <select
+      name="companyId"
+      defaultValue={value ?? ""}
+      className="admin-input"
+    >
+      <option value="">
+        {ar ? "بدون شركة (مدير عابر)" : "None (cross-tenant / admin)"}
+      </option>
+      {companies.map((c) => (
+        <option key={c.id} value={c.id}>
+          {ar ? c.name : c.nameEn} · {c.code}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 // Crypto-strong random password matching lib/password.ts (≥12, lower+
 // upper+digit). 16 chars, includes symbols, ambiguous chars (O/0, l/1)
 // stripped to keep the value typeable from the once-visible reveal.
@@ -164,7 +195,7 @@ function PasswordFieldWithGenerator({
   );
 }
 
-export function CreateUserForm({ ar }: { ar: boolean }) {
+export function CreateUserForm({ ar, companies }: { ar: boolean; companies: CompanyOption[] }) {
   const [state, formAction] = useFormState(createUser, initialFormState);
   const errs = state.errors ?? {};
   const fieldId = useId();
@@ -229,6 +260,11 @@ export function CreateUserForm({ ar }: { ar: boolean }) {
             <RoleSelect ar={ar} />
             {errs.role ? <FieldError msg={errs.role} /> : null}
           </label>
+          <label className="admin-field">
+            <span className="admin-label">{ar ? "الشركة (المستأجر)" : "Company (tenant)"}</span>
+            <CompanySelect ar={ar} companies={companies} />
+            {errs.companyId ? <FieldError msg={errs.companyId} /> : null}
+          </label>
           <PasswordFieldWithGenerator ar={ar} fieldId={fieldId} error={errs.password} />
         </div>
         <button type="submit" className="admin-cta-primary">
@@ -256,9 +292,9 @@ function FieldError({ msg }: { msg: string }) {
   );
 }
 
-type Row = { id: string; name: string; title: string | null; role: string };
+type Row = { id: string; name: string; title: string | null; role: string; companyId?: string | null };
 
-export function EditUserForm({ u, ar }: { u: Row; ar: boolean }) {
+export function EditUserForm({ u, ar, companies }: { u: Row; ar: boolean; companies: CompanyOption[] }) {
   return (
     <form action={updateUser} className="admin-form">
       <input type="hidden" name="id" value={u.id} />
@@ -274,6 +310,10 @@ export function EditUserForm({ u, ar }: { u: Row; ar: boolean }) {
         <label className="admin-field">
           <span className="admin-label">{ar ? "الدور" : "Role"}</span>
           <RoleSelect value={u.role} ar={ar} />
+        </label>
+        <label className="admin-field">
+          <span className="admin-label">{ar ? "الشركة (المستأجر)" : "Company (tenant)"}</span>
+          <CompanySelect value={u.companyId ?? null} ar={ar} companies={companies} />
         </label>
       </div>
       <button type="submit" className="admin-btn-ghost">

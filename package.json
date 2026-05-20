@@ -10,6 +10,7 @@
     "test": "vitest run",
     "db:push": "node scripts/guard-not-prod.js && prisma db push",
     "db:seed": "node scripts/guard-not-prod.js && tsx prisma/seed.ts",
+    "db:seed-demo": "tsx prisma/seed-demo.ts",
     "seed:prod": "tsx scripts/seed-production.ts",
     "db:reset": "node scripts/guard-not-prod.js && prisma db push --force-reset && tsx prisma/seed.ts",
     "db:studio": "prisma studio",

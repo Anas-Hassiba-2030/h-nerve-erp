@@ -39,10 +39,23 @@ const TYPE_AR: Record<string, string> = {
   STALE_PRODUCT: "مخزون راكد",
   IMPORT_ANOMALY: "شذوذ استيراد",
 };
+// Phase P2 — English labels so locale=en doesn't fall through to the
+// raw constant name (was showing "LOW_STOCK" verbatim before).
+const TYPE_EN: Record<string, string> = {
+  LOW_STOCK: "Low stock",
+  REORDER_RECOMMENDATION: "Reorder recommendation",
+  STALE_PRODUCT: "Stale product",
+  IMPORT_ANOMALY: "Import anomaly",
+};
 const SEV_AR: Record<string, string> = {
   CRITICAL: "حرج",
   WARNING: "تحذير",
   INFO: "معلومة",
+};
+const SEV_EN: Record<string, string> = {
+  CRITICAL: "Critical",
+  WARNING: "Warning",
+  INFO: "Info",
 };
 
 function linkFor(type: string, meta: Record<string, unknown>): string {
@@ -111,8 +124,8 @@ export default async function BrainPage({ searchParams }: { searchParams: SP }) 
     items: list.filter((i) => i.severity === sev),
   })).filter((g) => g.items.length > 0);
 
-  const sevLabel = (s: string) => (ar ? SEV_AR[s] ?? s : s);
-  const typeLabel = (t: string) => (ar ? TYPE_AR[t] ?? t : t);
+  const sevLabel = (s: string) => (ar ? SEV_AR[s] ?? s : SEV_EN[s] ?? s);
+  const typeLabel = (t: string) => (ar ? TYPE_AR[t] ?? t : TYPE_EN[t] ?? t);
 
   return (
     <>

@@ -17,6 +17,7 @@ import { computeIQ } from "@/lib/brain/meta.reflector";
 import { getLocale } from "@/lib/i18n.server";
 import { Cpu, Database, Trash2, ArrowRight, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { reflectNow, seedHistory, clearMetaHistory } from "./actions";
+import { ConfirmResetForm } from "./ConfirmResetForm";
 
 export default async function BrainIQPage() {
   const locale = getLocale();
@@ -233,20 +234,7 @@ export default async function BrainIQPage() {
                 </HeritagePill>
               ) : null}
               <div className="grow" />
-              <form action={clearMetaHistory}>
-                <button
-                  type="submit"
-                  className="heri-btn heri-btn-ghost"
-                  style={{
-                    padding: "6px 12px",
-                    fontSize: 11,
-                    color: "var(--heri-terracotta)",
-                  }}
-                >
-                  <Trash2 className="h-3 w-3" strokeWidth={1.5} />
-                  {ar ? "مسح المسار" : "Reset trajectory"}
-                </button>
-              </form>
+              <ConfirmResetForm ar={ar} />
             </div>
           </>
         )}

@@ -27,6 +27,12 @@ import { getLocale, getMessages } from "@/lib/i18n.server";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/utils";
 import { rankById } from "@/lib/gamification";
 
+// Phase P-Polish — explicit dynamic. The layout reads cookies so this
+// page is dynamic in practice, but declaring it removes ambiguity for
+// Next's static-analysis prerender — important once
+// H_NERVE_PERMS_ENFORCED flips and the layout-level redirect kicks in.
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage({
   searchParams,
 }: {

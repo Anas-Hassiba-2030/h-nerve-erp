@@ -15,13 +15,13 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { runBrainAnalysis } from "@/lib/intelligence/engine";
+// CROSS-TENANT INTENT: cron iterates every ACTIVE tenant so each gets
+// its own insight refresh. prismaUnscoped reaches the Tenant table
+// regardless of the (non-existent) cookie context on a cron invocation.
+import { prismaUnscoped } from "@/lib/db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-// Single live tenant today — matches the /admin/brain action default.
-// When real white-label tenants go ACTIVE, iterate the Tenant table here.
-const DEFAULT_TENANT = "hourani-hotels";
 
 export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET?.trim();
@@ -40,15 +40,26 @@ export async function GET(req: NextRequest) {
 
   const startedAt = new Date().toISOString();
   try {
-    const result = await runBrainAnalysis(DEFAULT_TENANT);
+    // Phase F-Polish — iterate every ACTIVE tenant. Each gets its own
+    // pass through the four analyzers. Aggregate counts in the response
+    // so the cron log is one line per fire.
+    const tenants = await prismaUnscoped.tenant.findMany({
+      where: { status: "ACTIVE" },
+      select: { slug: true },
+    });
+    const perTenant: Array<{ tenantId: string; generated: number; updated: number; unchanged: number }> = [];
+    let totGen = 0, totUpd = 0, totUnc = 0;
+    for (const t of tenants) {
+      const r = await runBrainAnalysis(t.slug);
+      perTenant.push({ tenantId: t.slug, generated: r.generated, updated: r.updated, unchanged: r.unchanged });
+      totGen += r.generated; totUpd += r.updated; totUnc += r.unchanged;
+    }
     return NextResponse.json({
       ok: true,
-      tenantId: DEFAULT_TENANT,
       startedAt,
       finishedAt: new Date().toISOString(),
-      generated: result.generated,
-      updated: result.updated,
-      unchanged: result.unchanged,
+      tenants: perTenant,
+      totals: { generated: totGen, updated: totUpd, unchanged: totUnc },
     });
   } catch (e) {
     return NextResponse.json(

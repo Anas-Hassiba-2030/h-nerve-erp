@@ -241,6 +241,10 @@ export async function runBrainAnalysis(
       ...(await analyzeStaleProducts(db, tenantId)),
       ...(await analyzeImportAnomalies(db, tenantId)),
     ];
+    // Phase F-Polish — Neon pooled latency can push a multi-tenant pass
+    // past the default 5s. Generous ceiling; the analyzers are bounded
+    // (~50ms each on the seeded data) so this won't accidentally hold
+    // a long lock.
 
     let generated = 0;
     let updated = 0;
@@ -316,7 +320,7 @@ export async function runBrainAnalysis(
     }
 
     return { generated, updated, unchanged, insights };
-  });
+  }, { timeout: 30_000, maxWait: 5_000 });
 }
 
 export async function dismissInsight(insightId: string): Promise<void> {

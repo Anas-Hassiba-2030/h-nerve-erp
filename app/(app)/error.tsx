@@ -50,10 +50,16 @@ export default function AppError({
               <div className="text-[11px] font-extrabold uppercase tracking-[0.22em] opacity-80">
                 {ar ? "حدث خطأ" : "Something went wrong"}
               </div>
+              {/*
+                Phase F-Polish — softened from "the nervous system caught
+                an unexpected signal" which read too dramatic for trivial
+                failures (a slow Neon connection, a stale prop). Keep the
+                technical-details accordion below for real debugging.
+              */}
               <h1 className="mt-0.5 text-xl font-black md:text-2xl">
                 {ar
-                  ? "النظام العصبي اعترض إشارة غير متوقعة"
-                  : "The nervous system caught an unexpected signal"}
+                  ? "تعذّر تحميل هذه الصفحة. حاول مرة أخرى."
+                  : "Couldn't load this page. Give it another go."}
               </h1>
             </div>
           </div>

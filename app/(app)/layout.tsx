@@ -27,7 +27,7 @@ import { getViewAsTenant, getTenantThemeCookie } from "@/lib/tenancy";
 import { getActiveWorkspaceId } from "@/lib/workspace";
 import { WorkspaceBanner } from "@/components/WorkspaceBanner";
 import { THEME_PRESETS, themeCssVars, type ThemeKey } from "@/lib/brand/themes";
-import { permsEnforced } from "@/lib/permissions";
+import { permsEnforced, effectiveCanAccess } from "@/lib/permissions";
 
 // Phase P1 — WorkspaceBanner visibility rule. Only paths that are
 // scoped to a single tenant's operations get the banner. Adding a new
@@ -65,6 +65,25 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const dbUser = await prisma.user.findUnique({ where: { id: session.id } });
   // Stale session (e.g. DB reset since login). Force a fresh sign-in.
   if (!dbUser) redirect("/logout");
+
+  // Phase P5 follow-up — layout-level enforcement layered over the
+  // interactive RolePermission editor at /admin/permissions-preview.
+  // Middleware is edge-runtime and can't read Prisma; this is where the
+  // override check lives. Only fires when H_NERVE_PERMS_ENFORCED=true so
+  // the dev/staging path stays unchanged.
+  if (permsEnforced() && session.role !== "ADMIN") {
+    const pathname = headers().get("x-pathname") ?? "";
+    const allowed = await effectiveCanAccess(
+      session.role,
+      pathname,
+      // CROSS-TENANT INTENT: RolePermission is global config.
+      () =>
+        prismaUnscoped.rolePermission.findMany({
+          select: { role: true, path: true, allowed: true },
+        }),
+    );
+    if (!allowed) redirect("/dashboard");
+  }
 
   const fullUser = {
     name: dbUser.name,

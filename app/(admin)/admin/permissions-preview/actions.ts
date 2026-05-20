@@ -6,6 +6,7 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
+import { invalidatePermsCache } from "@/lib/permissions";
 
 export async function togglePermission(formData: FormData): Promise<void> {
   const user = await getCurrentUser();
@@ -22,5 +23,9 @@ export async function togglePermission(formData: FormData): Promise<void> {
     create: { role, path, allowed, updatedBy: user.email },
     update: { allowed, updatedBy: user.email },
   });
+  // Phase P5 follow-up — invalidate the in-process cache so this admin's
+  // next navigation sees the new override immediately (other lambdas
+  // refresh on TTL expiry, ≤60s).
+  invalidatePermsCache();
   revalidatePath("/admin/permissions-preview");
 }

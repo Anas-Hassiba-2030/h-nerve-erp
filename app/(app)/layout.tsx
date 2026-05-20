@@ -29,6 +29,35 @@ import { WorkspaceBanner } from "@/components/WorkspaceBanner";
 import { THEME_PRESETS, themeCssVars, type ThemeKey } from "@/lib/brand/themes";
 import { permsEnforced } from "@/lib/permissions";
 
+// Phase P1 — WorkspaceBanner visibility rule. Only paths that are
+// scoped to a single tenant's operations get the banner. Adding a new
+// operational area? Add its prefix here.
+const OPS_PATH_PREFIXES = [
+  "/hotels",
+  "/dairy",
+  "/farms",
+  "/education",
+  "/workspace",
+  "/admin/products",
+  "/admin/suppliers",
+  "/admin/customers",
+  "/admin/warehouses",
+  "/admin/sales-orders",
+  "/admin/purchase-orders",
+  "/admin/movements",
+  "/admin/transfers",
+  "/admin/accounts",
+  "/admin/journal",
+  "/admin/imports",
+  "/admin/mappings",
+];
+function isOperationalPath(path: string): boolean {
+  if (!path) return false;
+  return OPS_PATH_PREFIXES.some(
+    (p) => path === p || path.startsWith(p + "/"),
+  );
+}
+
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getCurrentUser();
   if (!session) redirect("/login");
@@ -121,16 +150,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         />
       ) : null}
       {/*
-        WorkspaceBanner visibility rule (Phase F-UX):
-          Shown on every (app) route when an h_nerve_workspace cookie is
-          set, EXCEPT the exact /companies index — that page is the
-          "above all workspaces" view (the parent menu, not a workspace
-          itself). Sub-routes like /companies/[id] keep the banner.
-          The current pathname is forwarded from middleware.ts via the
-          x-pathname header so this layout (which is a server component
-          and has no direct path access) can branch.
+        WorkspaceBanner visibility rule (Phase P1 — final form):
+        Shown ONLY on routes that are tenant-scoped operational pages.
+        On group-level pages (/dashboard, /companies, /search, /pinned,
+        /showcase, /compare, /analytics, /admin/users, /admin/system,
+        /admin/tenants, /admin/empire, /brain/*, /insights, /alerts,
+        /finance, /reports, /markets, /sustainability, etc.) the banner
+        is HIDDEN because the user is no longer scoped to a single
+        tenant's operations — they're roaming the group.
+        Allowlist below. Path comes from middleware.ts x-pathname header.
       */}
-      {activeCompany && headers().get("x-pathname") !== "/companies" ? (
+      {activeCompany && isOperationalPath(headers().get("x-pathname") ?? "") ? (
         <WorkspaceBanner
           companyName={locale === "ar" ? activeCompany.name : activeCompany.nameEn}
           locale={locale}

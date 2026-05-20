@@ -13,6 +13,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
 import { HeritagePill } from "@/components/heritage";
 import { ArrowUpRight, Brain, Layers, Theater, Crown } from "lucide-react";
+import { getLocale } from "@/lib/i18n.server";
 
 type Phase = {
   n: number;
@@ -319,6 +320,7 @@ const WAVES: Wave[] = [
 ];
 
 export default function ShowcasePage() {
+  const ar = getLocale() === "ar";
   const totalPhases = WAVES.reduce((s, w) => s + w.phases.length, 0);
   return (
     <>
@@ -348,13 +350,11 @@ export default function ShowcasePage() {
                   WAVE {w.letter} · {w.phases.length}{" "}
                   {w.phases.length === 1 ? "PHASE" : "PHASES"}
                 </p>
+                {/* Phase P2 — single-language by locale. */}
                 <h2 className="sc-wave-title">
-                  <span>{w.titleAr}</span>
-                  <span className="sc-wave-title-sep">·</span>
-                  <span className="sc-wave-title-en">{w.title}</span>
+                  <span>{ar ? w.titleAr : w.title}</span>
                 </h2>
-                <p className="sc-wave-blurb">{w.blurbAr}</p>
-                <p className="sc-wave-blurb sc-wave-blurb-en">{w.blurb}</p>
+                <p className="sc-wave-blurb">{ar ? w.blurbAr : w.blurb}</p>
               </div>
             </header>
 
@@ -374,20 +374,17 @@ export default function ShowcasePage() {
                     />
                   </header>
 
-                  <h3 className="sc-card-name">{p.nameAr}</h3>
-                  <p className="sc-card-name-en">{p.name}</p>
-
-                  <p className="sc-card-pitch">{p.pitchAr}</p>
-
+                  {/* Phase P2 — single-language by locale. */}
+                  <h3 className="sc-card-name">{ar ? p.nameAr : p.name}</h3>
+                  <p className="sc-card-pitch">{ar ? p.pitchAr : p.pitch}</p>
                   <div className="sc-card-wow">
                     <span className="sc-card-wow-mark">★</span>
-                    <p>{p.wowAr}</p>
+                    <p>{ar ? p.wowAr : p.wow}</p>
                   </div>
-
                   <footer className="sc-card-foot">
                     <HeritagePill tone="neutral">{p.aesthetic}</HeritagePill>
                     <span className="sc-card-cta">
-                      {p.hrefLabel ?? "افتح"}
+                      {p.hrefLabel ?? (ar ? "افتح" : "Open")}
                     </span>
                   </footer>
                 </Link>
@@ -398,15 +395,16 @@ export default function ShowcasePage() {
 
         {/* Closing note */}
         <section className="sc-close">
-          <p className="sc-close-eyebrow">— نهاية الجولة</p>
+          <p className="sc-close-eyebrow">— {ar ? "نهاية الجولة" : "End of tour"}</p>
           <h2 className="sc-close-title">
-            وثائق التصميم في{" "}
-            <code>docs/DESIGN-SKILL.md</code> · خريطة المراحل في{" "}
+            {ar ? "وثائق التصميم في" : "Design docs at"}{" "}
+            <code>docs/DESIGN-SKILL.md</code> · {ar ? "خريطة المراحل في" : "Phase map at"}{" "}
             <code>docs/PHASES-INTELLIGENCE.md</code>
           </h2>
           <p className="sc-close-body">
-            ثمانية معجم بصري واحد لكل سطح. سببية لكل ادعاء. سهولة وصول لكل
-            حركة. هذه ليست شاشات منفصلة — هي خطة عمل متماسكة.
+            {ar
+              ? "ثمانية معجم بصري واحد لكل سطح. سببية لكل ادعاء. سهولة وصول لكل حركة. هذه ليست شاشات منفصلة — هي خطة عمل متماسكة."
+              : "Eight visual vocabularies, one per surface. A causal chain behind every claim. Accessibility behind every motion. Not loose screens — a coherent work plan."}
           </p>
         </section>
       </PageContainer>

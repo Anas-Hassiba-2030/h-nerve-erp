@@ -131,23 +131,33 @@ export function Sidebar({
     },
     {
       label: ar ? "الذكاء التشغيلي" : "Intelligence",
-      items: [
-        { href: "/admin/brain", label: ar ? "رؤى العقل" : "Brain insights", icon: Brain, hint: "AI" },
-        { href: "/brain/graph", label: ar ? "الرسم السببي" : "Causal graph", icon: Network, hint: "BRAIN" },
-        { href: "/brain/scenarios", label: ar ? "ماذا لو…" : "What-if simulator", icon: Zap, hint: "BRAIN" },
-        { href: "/brain/council", label: ar ? "المجلس" : "The council", icon: Users, hint: "BRAIN" },
-        { href: "/plans", label: ar ? "الخطط" : "Plans", icon: Target, hint: "BRAIN" },
-        { href: "/brain/memory", label: ar ? "بحيرة الذاكرة" : "Memory lake", icon: Heart, hint: "BRAIN" },
-        { href: "/brain/learning", label: ar ? "ما تعلّمتُه" : "What I've learned", icon: GraduationCap, hint: "BRAIN" },
-        { href: "/brain/benchmarks", label: ar ? "معايير النظراء" : "Peer benchmarks", icon: Globe2, hint: "BRAIN" },
-        { href: "/brain/iq", label: ar ? "ذكاء الدماغ" : "Brain IQ", icon: Trophy, hint: "META" },
-        { href: "/supply-chain", label: messages["nav.supplyChain"], icon: Brain, hint: "AI" },
-        { href: "/insights", label: messages["nav.insights"], icon: Sparkles },
-        { href: "/alerts", label: ar ? "التنبيهات الذكية" : "Smart alerts", icon: Bell },
-        { href: "/workflows", label: ar ? "خرائط الأتمتة" : "Workflows", icon: Workflow },
-        { href: "/integrations", label: ar ? "الموصلات" : "Integrations", icon: Plug, hint: "HUB" },
-        { href: "/documents", label: ar ? "ذكاء المستندات" : "Documents", icon: ScrollText, hint: "AI" },
-      ],
+      // Phase P3 — Brain reorg. Non-ADMIN sees only the two end-user
+      // surfaces: AI Insights (what the Brain found) + Smart Alerts
+      // (what needs attention now). Every other Brain sub-page is a
+      // developer / power-user surface and is ADMIN-only.
+      items:
+        user.role === "ADMIN"
+          ? [
+              { href: "/admin/brain", label: ar ? "رؤى العقل" : "AI Insights", icon: Brain, hint: "AI" },
+              { href: "/alerts", label: ar ? "التنبيهات الذكية" : "Smart alerts", icon: Bell },
+              { href: "/brain/graph", label: ar ? "الرسم السببي" : "Causal graph", icon: Network, hint: "BRAIN" },
+              { href: "/brain/scenarios", label: ar ? "ماذا لو…" : "What-if simulator", icon: Zap, hint: "BRAIN" },
+              { href: "/brain/council", label: ar ? "المجلس" : "The council", icon: Users, hint: "BRAIN" },
+              { href: "/plans", label: ar ? "الخطط" : "Plans", icon: Target, hint: "BRAIN" },
+              { href: "/brain/memory", label: ar ? "بحيرة الذاكرة" : "Memory lake", icon: Heart, hint: "BRAIN" },
+              { href: "/brain/learning", label: ar ? "ما تعلّمتُه" : "What I've learned", icon: GraduationCap, hint: "BRAIN" },
+              { href: "/brain/benchmarks", label: ar ? "معايير النظراء" : "Peer benchmarks", icon: Globe2, hint: "BRAIN" },
+              { href: "/brain/iq", label: ar ? "ذكاء الدماغ" : "Brain IQ", icon: Trophy, hint: "META" },
+              { href: "/supply-chain", label: messages["nav.supplyChain"], icon: Brain, hint: "AI" },
+              { href: "/insights", label: messages["nav.insights"], icon: Sparkles },
+              { href: "/workflows", label: ar ? "خرائط الأتمتة" : "Workflows", icon: Workflow },
+              { href: "/integrations", label: ar ? "الموصلات" : "Integrations", icon: Plug, hint: "HUB" },
+              { href: "/documents", label: ar ? "ذكاء المستندات" : "Documents", icon: ScrollText, hint: "AI" },
+            ]
+          : [
+              { href: "/admin/brain", label: ar ? "رؤى العقل" : "AI Insights", icon: Brain, hint: "AI" },
+              { href: "/alerts", label: ar ? "التنبيهات الذكية" : "Smart alerts", icon: Bell },
+            ],
     },
     {
       label: ar ? "النمو والاستثمار" : "Growth & Capital",

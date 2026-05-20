@@ -176,7 +176,11 @@ export async function autoGenerateForecasts(): Promise<void> {
     const occupiedRooms = hotel.bookings.reduce((acc, b) => acc + b.rooms, 0);
     if (!hotel.totalRooms) continue;
     const occupancy = Math.min(occupiedRooms / hotel.totalRooms, 1);
-    if (occupancy < 0.55) continue; // only forecast for busy hotels
+    // Phase P4 — lowered from 0.55 so the demo doesn't silently skip
+    // every hotel during off-peak windows. 0.20 still filters out
+    // genuinely-idle properties; for a denser cutoff in production,
+    // raise this back to 0.5.
+    if (occupancy < 0.2) continue;
 
     // Approx. 1.7 guests per room, 1.2 L dairy per guest per day, 7-day window
     const guests = occupiedRooms * 1.7;

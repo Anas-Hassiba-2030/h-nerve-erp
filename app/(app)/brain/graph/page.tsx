@@ -14,6 +14,7 @@ import { GraphView } from "@/components/brain/GraphView";
 import { causalGraph } from "@/lib/brain/graph.prisma";
 import { getLocale } from "@/lib/i18n.server";
 import { rebuildBrainGraph } from "./actions";
+import { ConfirmRebuildForm } from "./ConfirmRebuildForm";
 import { Brain, Network, Sparkles } from "lucide-react";
 
 export default async function BrainGraphPage() {
@@ -135,12 +136,7 @@ export default async function BrainGraphPage() {
                     : "The brain scans every entity and produces fresh nodes and edges."
                 }
               >
-                <form action={rebuildBrainGraph}>
-                  <button type="submit" className="heri-btn heri-btn-primary w-full justify-center">
-                    <Brain className="h-3.5 w-3.5" strokeWidth={1.5} />
-                    {ar ? "إعادة بناء الدماغ" : "Rebuild brain"}
-                  </button>
-                </form>
+                <ConfirmRebuildForm ar={ar} />
                 <p
                   className="mt-3"
                   style={{
@@ -150,8 +146,8 @@ export default async function BrainGraphPage() {
                   }}
                 >
                   {ar
-                    ? "آمن للتشغيل في أي وقت. التحديثات لا تكسر الحواف المُتعلَّمة."
-                    : "Safe to run anytime. Doesn't clobber learned edges."}
+                    ? "آمن للتشغيل في أي وقت. التحديثات لا تكسر الحواف المُتعلَّمة. سيُطلب تأكيد قبل البدء."
+                    : "Safe to run anytime. Doesn't clobber learned edges. Confirmation prompt before it starts."}
                 </p>
               </HeritageSection>
 

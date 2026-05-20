@@ -149,6 +149,10 @@ export async function autoGenerateForecasts(): Promise<void> {
   const user = await requireUser();
   const now = new Date();
   const horizon = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+  // Phase P4 — count newly-created forecasts so we can toast a real
+  // result number instead of leaving the user staring at a refreshed
+  // page wondering whether the click did anything.
+  let generated = 0;
 
   const [hotels, maha, loran] = await Promise.all([
     prisma.hotel.findMany({
@@ -236,7 +240,20 @@ export async function autoGenerateForecasts(): Promise<void> {
         generatedById: user.id,
       },
     });
+    generated += 2;
   }
+
+  // Phase P4 — visible result. Same flashToast shape used elsewhere in
+  // this file. Honest copy: tells the user exactly how many forecasts
+  // landed (or "no busy hotels" when the heuristic skipped everyone).
+  flashToast({
+    type: "info",
+    entity: "info",
+    label:
+      generated > 0
+        ? `${generated} forecasts generated · ${generated} توقعات`
+        : "No occupancy signal above 20% — Run engine produced no forecasts · لا إشغال يتجاوز ٢٠٪",
+  });
 
   revalidatePath("/supply-chain");
   revalidatePath("/dashboard");

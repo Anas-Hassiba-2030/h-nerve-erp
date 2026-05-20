@@ -1,18 +1,22 @@
-// /admin/permissions-preview — Phase 5 audit screen. ADMIN-only (the
-// (admin) layout hard-gates). ?as=ROLE shows, per representative route,
-// whether that role can reach it — using the SAME lib/permissions
-// canAccess the middleware uses. Read-only; works regardless of the
-// H_NERVE_PERMS_ENFORCED flag (it's hypothetical). Validate every role
-// here, THEN flip the env flag.
+// /admin/permissions-preview — Phase P5. Interactive permissions
+// editor. ADMIN-only (the (admin) layout hard-gates). Each cell is a
+// clickable ALLOW/BLOCK toggle backed by the RolePermission table.
+// The hardcoded lib/permissions canAccess() remains the runtime
+// fallback when an enforced (role, path) row is absent — so toggling
+// "on top of" the static map works incrementally without a full
+// dynamic-permissions cutover. (Full middleware DB-read is a follow-up;
+// it would couple middleware to a per-request Prisma roundtrip.)
 
 import Link from "next/link";
 import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db";
 import {
   canAccess,
   permsEnforced,
   GATED_ROLES,
   type PermRole,
 } from "@/lib/permissions";
+import { togglePermission } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +30,7 @@ const SECTIONS: { ar: string; en: string; routes: string[] }[] = [
   { ar: "عائلة الإدارة", en: "Admin family", routes: ["/admin/imports", "/admin/products", "/admin/warehouses", "/admin/journal", "/admin/accounts", "/admin/brain"] },
 ];
 
-export default function PermissionsPreview({
+export default async function PermissionsPreview({
   searchParams,
 }: {
   searchParams: { as?: string };
@@ -38,18 +42,31 @@ export default function PermissionsPreview({
       : "EXECUTIVE"
   ) as PermRole;
 
+  // Pull every row the table has — typically ~140 (35 paths × 4 roles).
+  // CROSS-TENANT INTENT: RolePermission is global config, not tenant
+  // data; reading via the scoped `prisma` client is harmless because
+  // RolePermission isn't in any TENANT_SCOPED_MODELS set.
+  const rows = await prisma.rolePermission.findMany();
+  const byKey = new Map(rows.map((r) => [`${r.role}:${r.path}`, r.allowed]));
+
+  function effective(role: string, path: string): boolean {
+    const k = `${role}:${path}`;
+    if (byKey.has(k)) return byKey.get(k)!;
+    return canAccess(role, path);
+  }
+
   return (
     <div className="admin-page">
       <header className="admin-page-head">
         <div>
-          <span className="admin-eyebrow">FEDERATION · RBAC PREVIEW</span>
+          <span className="admin-eyebrow">FEDERATION · RBAC EDITOR</span>
           <h1 className="admin-h1">
-            {ar ? "معاينة الصلاحيات" : "Permissions preview"}
+            {ar ? "محرر الصلاحيات" : "Permissions editor"}
           </h1>
           <p className="admin-sub">
             {ar
-              ? "ما يستطيع كل دور الوصول إليه (افتراضي — لا يطبّق إعادة توجيه). تحقّق من كل دور هنا ثم فعّل الإنفاذ."
-              : "What each role can reach (hypothetical — no redirect). Validate every role here, then enable enforcement."}
+              ? "اضغط على أي خلية للتبديل بين السماح والحجب. التغييرات تُحفظ مباشرة."
+              : "Click any cell to toggle ALLOW / BLOCK. Changes save immediately."}
             {" · "}
             {ar ? "الإنفاذ" : "Enforcement"}:{" "}
             <strong style={{ color: permsEnforced() ? "var(--admin-cyan)" : "var(--admin-amber)" }}>
@@ -84,26 +101,49 @@ export default function PermissionsPreview({
             </div>
             <div style={{ display: "grid", gap: 6 }}>
               {s.routes.map((route) => {
-                const ok = canAccess(asRole, route);
+                const ok = effective(asRole, route);
+                const overridden = byKey.has(`${asRole}:${route}`);
                 return (
                   <div
                     key={route}
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
+                      alignItems: "center",
                       gap: 10,
                       fontSize: 13,
                     }}
                   >
                     <code style={{ color: "var(--admin-text-muted)" }}>{route}</code>
-                    <span
-                      className="admin-stat-label"
-                      style={{
-                        color: ok ? "var(--admin-cyan)" : "var(--admin-rose, #e06c75)",
-                      }}
-                    >
-                      {ok ? (ar ? "مسموح" : "ALLOW") : (ar ? "محجوب" : "BLOCK")}
-                    </span>
+                    <form action={togglePermission}>
+                      <input type="hidden" name="role" value={asRole} />
+                      <input type="hidden" name="path" value={route} />
+                      <input type="hidden" name="allowed" value={ok ? "false" : "true"} />
+                      <button
+                        type="submit"
+                        className="admin-stat-label"
+                        title={
+                          overridden
+                            ? ar ? "مُجبر يدوياً — اضغط للتبديل" : "Manually overridden — click to toggle"
+                            : ar ? "افتراضي — اضغط للتبديل" : "Default — click to toggle"
+                        }
+                        style={{
+                          color: ok ? "var(--admin-cyan)" : "#e06c75",
+                          background: "transparent",
+                          border: `1px solid ${ok ? "var(--admin-cyan)" : "#e06c75"}`,
+                          padding: "2px 10px",
+                          cursor: "pointer",
+                          fontFamily: "JetBrains Mono, ui-monospace, monospace",
+                          fontSize: 11,
+                          letterSpacing: "0.18em",
+                          textTransform: "uppercase",
+                          opacity: overridden ? 1 : 0.7,
+                        }}
+                      >
+                        {ok ? (ar ? "مسموح" : "ALLOW") : (ar ? "محجوب" : "BLOCK")}
+                        {overridden ? " ●" : ""}
+                      </button>
+                    </form>
                   </div>
                 );
               })}
@@ -111,6 +151,15 @@ export default function PermissionsPreview({
           </div>
         ))}
       </div>
+
+      <p
+        className="admin-stat-label"
+        style={{ marginTop: 16, color: "var(--admin-text-muted)" }}
+      >
+        {ar
+          ? "● = قاعدة مُجبرة محفوظة في قاعدة البيانات. بدون نقطة = افتراضي من lib/permissions.ts."
+          : "● = explicit DB override. No dot = default from lib/permissions.ts."}
+      </p>
     </div>
   );
 }

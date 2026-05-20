@@ -1159,6 +1159,22 @@ model TenantPack {
 // the canvas can replay them on test runs.
 // =====================================================================
 
+// Phase P5 — interactive role-route permissions. Replaces the
+// hardcoded POLICY map in lib/permissions.ts when present. Seeded from
+// the hardcoded defaults via scripts/seed-role-permissions.ts; UI at
+// /admin/permissions-preview toggles cells in place.
+model RolePermission {
+  id        String   @id @default(cuid())
+  role      String   // "ADMIN" | "EXECUTIVE" | "MANAGER" | "STAFF"
+  path      String   // "/hotels", "/admin/products", ...
+  allowed   Boolean
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+
+  @@unique([role, path])
+  @@index([role])
+}
+
 model Workflow {
   id            String   @id @default(cuid())
   scope         String   @default("default")

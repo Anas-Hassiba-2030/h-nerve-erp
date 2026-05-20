@@ -18,6 +18,26 @@ import { setSidebarCollapsed } from "@/app/actions/preferences";
 
 type NavItem = { href: string; label: string; icon: any; hint?: string };
 
+// Phase F5 — Operations link kept per tenant. Mirrors the
+// COMPANY_CODE_TO_TENANT_SLUG mapping in lib/tenancy.ts.
+const OPS_LINK_BY_TENANT: Record<string, string> = {
+  "hourani-hotels": "/hotels",
+  "maha-dairy":     "/dairy",
+  "loran-agri":     "/farms",
+  "tank-incubator": "/education",
+};
+function filterOpsForTenant(
+  items: NavItem[],
+  role: string,
+  tenantSlug: string | null,
+): NavItem[] {
+  if (role === "ADMIN") return items;
+  if (!tenantSlug) return items;
+  const kept = OPS_LINK_BY_TENANT[tenantSlug];
+  if (!kept) return items; // unknown slug → show all (defensive)
+  return items.filter((i) => i.href === kept);
+}
+
 export function Sidebar({
   user,
   locale,
@@ -27,7 +47,7 @@ export function Sidebar({
   unreadMessages = 0,
   enforcePerms = false,
 }: {
-  user: { name: string; email: string; role: string; title?: string | null; rank?: string; xp?: number; bonusPercent?: number };
+  user: { name: string; email: string; role: string; title?: string | null; rank?: string; xp?: number; bonusPercent?: number; tenantSlug?: string | null };
   locale: "ar" | "en";
   messages: Record<string, string>;
   collapsed?: boolean;
@@ -86,12 +106,21 @@ export function Sidebar({
     },
     {
       label: ar ? "العمليات" : "Operations",
-      items: [
-        { href: "/hotels", label: messages["nav.hotels"], icon: Hotel },
-        { href: "/dairy", label: messages["nav.dairy"], icon: Milk },
-        { href: "/farms", label: messages["nav.farms"], icon: Sprout },
-        { href: "/education", label: messages["nav.education"], icon: GraduationCap },
-      ],
+      // Phase F5 — non-ADMIN users see only the Operations link that
+      // corresponds to their assigned tenant. ADMIN sees all 4 (the
+      // group-roamer view). Tenants without a mapping fall back to
+      // showing all (defensive — better to over-show than over-hide
+      // for a brand-new tenant slug we forgot to wire here).
+      items: filterOpsForTenant(
+        [
+          { href: "/hotels", label: messages["nav.hotels"], icon: Hotel },
+          { href: "/dairy", label: messages["nav.dairy"], icon: Milk },
+          { href: "/farms", label: messages["nav.farms"], icon: Sprout },
+          { href: "/education", label: messages["nav.education"], icon: GraduationCap },
+        ],
+        user.role,
+        user.tenantSlug ?? null,
+      ),
     },
     {
       label: ar ? "الذكاء التشغيلي" : "Intelligence",

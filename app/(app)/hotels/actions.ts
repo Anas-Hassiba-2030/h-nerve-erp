@@ -8,6 +8,7 @@ import { requireUser } from "@/lib/session";
 import { requireRole } from "@/lib/authz";
 import { generateNumber } from "@/lib/utils";
 import { logActivity } from "@/lib/activityLog";
+import { COMPANY_CODE_TO_TENANT_SLUG, SECTOR_TO_TENANT_SLUG } from "@/lib/tenancy";
 import {
   parseFormState,
   formStateFromError,
@@ -134,9 +135,20 @@ export async function createBooking(formData: FormData) {
     throw new Error("تاريخ المغادرة يجب أن يكون بعد تاريخ الوصول.");
   }
 
+  // Phase F4 — derive tenantId from the parent hotel's company.
+  const parentHotel = await prisma.hotel.findUnique({
+    where: { id: data.hotelId },
+    select: { company: { select: { code: true, sector: true } } },
+  });
+  const tenantSlug =
+    (parentHotel && COMPANY_CODE_TO_TENANT_SLUG[parentHotel.company.code]) ||
+    (parentHotel && SECTOR_TO_TENANT_SLUG[parentHotel.company.sector]) ||
+    "hourani-hotels";
+
   const booking = await prisma.booking.create({
     data: {
       hotelId: data.hotelId,
+      tenantId: tenantSlug,
       reference: generateNumber("BK"),
       guestName: data.guestName,
       roomType: data.roomType,

@@ -144,6 +144,21 @@ async function main() {
   const adminProducts = await adminClient.product.findMany({ where: { deletedAt: null } });
   console.log(`  tenantSlug=null            → product=${adminProducts.length}   (ADMIN cross-tenant)`);
   await adminClient.$disconnect();
+
+  // ---- F4 plumbing proof: Booking + Crop scoping by tenantSlug ----
+  console.log("\n--- F4 simulated middleware (Booking + Crop scoping by tenantSlug) ---");
+  for (const slug of tenantSlugs) {
+    const scoped = makeTenantScopedClient(slug);
+    const bks = await scoped.booking.findMany();
+    const cps = await scoped.crop.findMany();
+    console.log(`  tenantSlug=${slug.padEnd(15)} → booking=${bks.length}  crop=${cps.length}`);
+    await scoped.$disconnect();
+  }
+  const adminClient2 = makeTenantScopedClient(null);
+  const adminB = await adminClient2.booking.findMany();
+  const adminC = await adminClient2.crop.findMany();
+  console.log(`  tenantSlug=null            → booking=${adminB.length}  crop=${adminC.length}  (ADMIN cross-tenant)`);
+  await adminClient2.$disconnect();
 }
 
 main().catch((e) => {

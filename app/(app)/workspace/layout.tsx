@@ -10,6 +10,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { LogOut, ArrowLeftRight, Lock } from "lucide-react";
+// CROSS-TENANT INTENT: /workspace/** pages scope explicitly by companyId — see app/(app)/workspace/layout.tsx for rationale.
 import { prismaUnscoped } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/workspace";
 import { getUserIfRole } from "@/lib/authz";

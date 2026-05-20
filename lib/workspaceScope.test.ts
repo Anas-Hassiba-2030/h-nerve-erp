@@ -154,6 +154,81 @@ describe("applyWorkspaceScope — Phase F3 tenant-id scoping", () => {
   });
 });
 
+describe("applyWorkspaceScope — Phase F6 by-id write guard", () => {
+  // Custom fakeNext: returns different rows for findUnique vs the actual write.
+  function rowFakeNext(probeRow: any) {
+    const calls: any[] = [];
+    const next = async (p: any) => {
+      calls.push(JSON.parse(JSON.stringify(p)));
+      if (p.action === "findUnique") return probeRow;
+      return { ok: true };
+    };
+    return { next, calls };
+  }
+
+  it("update by-id BLOCKED when target belongs to another tenant", async () => {
+    const { next } = rowFakeNext({ id: "p1", tenantId: "loran-agri" });
+    await expect(
+      applyWorkspaceScope(
+        { model: "Product", action: "update", args: { where: { id: "p1" }, data: { name: "X" } } },
+        next,
+        null,
+        "maha-dairy",
+      ),
+    ).rejects.toThrow(/cross-tenant write/i);
+  });
+
+  it("update by-id ALLOWED when target belongs to active tenant", async () => {
+    const { next, calls } = rowFakeNext({ id: "p1", tenantId: "maha-dairy" });
+    await applyWorkspaceScope(
+      { model: "Product", action: "update", args: { where: { id: "p1" }, data: { name: "X" } } },
+      next,
+      null,
+      "maha-dairy",
+    );
+    // probe + actual update = 2 calls
+    expect(calls.length).toBe(2);
+    expect(calls[1].action).toBe("update");
+  });
+
+  it("delete by-id BLOCKED across tenants", async () => {
+    const { next } = rowFakeNext({ id: "s1", tenantId: "tank-incubator" });
+    await expect(
+      applyWorkspaceScope(
+        { model: "Supplier", action: "delete", args: { where: { id: "s1" } } },
+        next,
+        null,
+        "maha-dairy",
+      ),
+    ).rejects.toThrow(/cross-tenant write/i);
+  });
+
+  it("upsert by-id BLOCKED across tenants", async () => {
+    const { next } = rowFakeNext({ id: "c1", tenantId: "loran-agri" });
+    await expect(
+      applyWorkspaceScope(
+        { model: "Customer", action: "upsert", args: { where: { id: "c1" }, update: { name: "X" }, create: { id: "c1", name: "X" } } },
+        next,
+        null,
+        "maha-dairy",
+      ),
+    ).rejects.toThrow(/cross-tenant write/i);
+  });
+
+  it("compound-unique where (not by-id) passes through", async () => {
+    const { next, calls } = rowFakeNext(null);
+    await applyWorkspaceScope(
+      { model: "Product", action: "update", args: { where: { tenantId_sku_warehouseId: { tenantId: "maha-dairy", sku: "X", warehouseId: "w1" } }, data: { name: "X" } } },
+      next,
+      null,
+      "maha-dairy",
+    );
+    // No probe; goes straight to the underlying update.
+    expect(calls.length).toBe(1);
+    expect(calls[0].action).toBe("update");
+  });
+});
+
 describe("applyWorkspaceScope — writes cannot cross workspaces", () => {
   it("create stamps the workspace when companyId is absent", async () => {
     const { next, calls } = fakeNext();

@@ -45,11 +45,11 @@ export default async function DashboardPage({
   const next3Days = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
 
   const next28Days = new Date(now.getTime() + 28 * 24 * 60 * 60 * 1000);
-  // Phase 10: "AI signals" = active Brain insights (resolved+dismissed
-  // both null). Direct read — server component, no internal HTTP hop;
-  // /api/brain/insights is for external callers. prismaUnscoped:
-  // BrainInsight has no companyId. Global count (single-tenant group).
-  const activeInsightCount = await prismaUnscoped.brainInsight.count({
+  // Phase F7 — scoped read. BrainInsight now has tenantId (Phase F3
+  // TENANT_SCOPED_MODELS), so this count is automatically restricted
+  // to the active tenant's insights. ADMIN with no tenant cookie sees
+  // the global count (the original behaviour).
+  const activeInsightCount = await prisma.brainInsight.count({
     where: { resolvedAt: null, dismissedAt: null },
   });
   const [

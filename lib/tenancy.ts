@@ -88,9 +88,23 @@ export function isValidSlug(slug: string): boolean {
 // is the source of truth. Seed (prisma/seed-demo.ts) aligns these.
 export const COMPANY_CODE_TO_TENANT_SLUG: Record<string, string> = {
   HOTELS: "hourani-hotels",
+  // Legacy dev-seed codes (prisma/seed.ts) — kept so the dev seed
+  // doesn't break under the F4 NOT NULL tenantId constraint.
+  HH: "hourani-hotels",
+  ARENA: "hourani-hotels",
   MAHA: "maha-dairy",
   LORAN: "loran-agri",
   TANK: "tank-incubator",
+  AAU: "tank-incubator",
+};
+
+// Sector-keyed fallback for the few writes that have a Company.sector
+// in hand but not a code. Used by createBooking / createCrop.
+export const SECTOR_TO_TENANT_SLUG: Record<string, string> = {
+  HOSPITALITY: "hourani-hotels",
+  DAIRY: "maha-dairy",
+  AGRICULTURE: "loran-agri",
+  EDUCATION: "tank-incubator",
 };
 
 // Pure (dependency-injected) — keeps lib/tenancy.ts free of DB imports

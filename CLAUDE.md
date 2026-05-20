@@ -103,6 +103,7 @@ Tailwind with H-Nerve brand classes in `app/globals.css` (`.btn`, `.btn-primary`
 - **String columns over enums** for any role/status/sector/tier — SQLite + Prisma don't do enums.
 - **Don't introduce new auth providers, ORMs, or state libraries without asking** — the stack is intentionally minimal.
 - **Don't bypass the brain's read-mostly boundary.** If a brain subsystem needs to change domain data, it calls a server action; it doesn't write directly.
+- **All Prisma queries must go through `prisma` (the scoped client) unless they're explicitly cross-tenant.** `prismaUnscoped` is reserved for the Empire dashboard, the workspace switcher, the system-dump API, the brain engine running from cron, and the operator layout's banner lookups. Every `prismaUnscoped` call site must carry a `// CROSS-TENANT INTENT:` comment. New tenant-keyed models go in `TENANT_SCOPED_MODELS` (`lib/workspaceScope.ts`); see `docs/ISOLATION.md` for the full checklist.
 - **Pick ONE design vocabulary per surface.** Operator UI = Heritage Modern. Admin = Sleek Operator. Theater = its own editorial register. Never mix.
 
 ## Default credentials (seeded)

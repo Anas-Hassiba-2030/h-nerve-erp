@@ -6,6 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireRole } from "@/lib/authz";
 import { logActivity } from "@/lib/activityLog";
+import { COMPANY_CODE_TO_TENANT_SLUG, SECTOR_TO_TENANT_SLUG } from "@/lib/tenancy";
 
 const farmSchema = z.object({
   companyId: z.string().min(1),
@@ -120,9 +121,20 @@ export async function createCrop(formData: FormData) {
     expectedYieldKg: formData.get("expectedYieldKg") ?? 0,
     status: formData.get("status") || "GROWING",
   });
+  // Phase F4 — derive tenantId from the parent farm's company.
+  const parentFarm = await prisma.farm.findUnique({
+    where: { id: data.farmId },
+    select: { company: { select: { code: true, sector: true } } },
+  });
+  const tenantSlug =
+    (parentFarm && COMPANY_CODE_TO_TENANT_SLUG[parentFarm.company.code]) ||
+    (parentFarm && SECTOR_TO_TENANT_SLUG[parentFarm.company.sector]) ||
+    "loran-agri";
+
   const created = await prisma.crop.create({
     data: {
       farmId: data.farmId,
+      tenantId: tenantSlug,
       name: data.name,
       variety: data.variety || null,
       plantedAt: new Date(data.plantedAt),

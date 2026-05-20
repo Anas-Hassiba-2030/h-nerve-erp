@@ -119,6 +119,11 @@ model Booking {
   id        String   @id @default(cuid())
   hotelId   String
   hotel     Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  // Phase F4 — denormalized tenant slug. Backfilled from
+  // Hotel.companyId → Company.code via the migration in
+  // prisma/migrations/20260520_add_tenant_id_to_booking_crop.
+  // Required by the workspaceScope middleware (TENANT_SCOPED_MODELS).
+  tenantId  String
   reference String   @unique
   guestName String
   roomType  String   @default("STANDARD")
@@ -135,6 +140,7 @@ model Booking {
   // Phase 11 — bookings list joins hotel and sorts/filters by checkIn.
   @@index([hotelId])
   @@index([checkIn])
+  @@index([tenantId])
 }
 
 // =====================================================================
@@ -189,6 +195,9 @@ model Crop {
   id              String   @id @default(cuid())
   farmId          String
   farm            Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  // Phase F4 — denormalized tenant slug. Backfilled from
+  // Farm.companyId → Company.code via the same migration as Booking.
+  tenantId        String
   name            String
   variety         String?
   plantedAt       DateTime
@@ -199,6 +208,8 @@ model Crop {
   notes           String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@index([tenantId])
 }
 
 // =====================================================================

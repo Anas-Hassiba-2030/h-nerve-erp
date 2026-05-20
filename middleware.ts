@@ -25,6 +25,16 @@ function sessionPassword() {
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
+  // Phase F-UX — forward the current pathname to server components via
+  // an x-pathname request header. app/(app)/layout.tsx reads it to
+  // suppress WorkspaceBanner on the exact /companies route (which is
+  // the "above all workspaces" hub — banner there would be a paradox).
+  // Every NextResponse.next() in this middleware passes the augmented
+  // headers so the signal survives the rate-limit / perms branches.
+  const reqHeaders = new Headers(req.headers);
+  reqHeaders.set("x-pathname", path);
+  const passThrough = () => NextResponse.next({ request: { headers: reqHeaders } });
+
   // Phase 12 — brute-force guard on the login POST. Runs BEFORE the
   // break-glass return (login is break-glass for the permission gate,
   // but the rate cap must still apply). Fail-soft: a limiter error
@@ -51,11 +61,11 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  if (isBreakGlass(path)) return NextResponse.next();
-  if (!permsEnforced()) return NextResponse.next();
+  if (isBreakGlass(path)) return passThrough();
+  if (!permsEnforced()) return passThrough();
 
   const raw = req.cookies.get(COOKIE)?.value;
-  if (!raw) return NextResponse.next(); // unauthenticated → page-level auth handles /login
+  if (!raw) return passThrough(); // unauthenticated → page-level auth handles /login
 
   let role: string | undefined;
   try {
@@ -64,11 +74,11 @@ export async function middleware(req: NextRequest) {
     });
     role = data?.user?.role;
   } catch {
-    return NextResponse.next(); // bad cookie → let the auth layer deal with it
+    return passThrough(); // bad cookie → let the auth layer deal with it
   }
-  if (!role) return NextResponse.next();
+  if (!role) return passThrough();
 
-  if (canAccess(role, path)) return NextResponse.next();
+  if (canAccess(role, path)) return passThrough();
 
   const url = req.nextUrl.clone();
   url.pathname = "/dashboard";

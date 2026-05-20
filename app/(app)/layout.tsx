@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { Sidebar } from "@/components/Sidebar";
@@ -15,6 +15,9 @@ import { TimeMachineBanner } from "@/components/TimeMachineBanner";
 import { getAsOf } from "@/lib/timemachine";
 import { RealtimePresence } from "@/components/realtime/RealtimePresence";
 import { DocumentDropZone } from "@/components/DocumentDropZone";
+// CROSS-TENANT INTENT: the (app) layout looks up the workspace Company
+// for the WorkspaceBanner. The lookup must succeed for any companyId
+// the cookie points at, including from a superadmin "view as" context.
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getLocale, getMessages } from "@/lib/i18n.server";
 import { readFlash } from "@/lib/toast";
@@ -42,6 +45,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     rank: dbUser.rank ?? "PAWN",
     xp: dbUser.xp ?? 0,
     bonusPercent: dbUser.bonusPercent ?? 0,
+    // Phase F5 — drives Sidebar.filterOpsForTenant. Sourced from the
+    // session cookie written at login (lib/session.ts SessionUser).
+    tenantSlug: session.tenantSlug ?? null,
   };
 
   const locale = getLocale();
@@ -63,8 +69,28 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const viewAsTenantData = viewAsSlug
     ? await prisma.tenant.findUnique({ where: { slug: viewAsSlug } })
     : null;
+
+  // Phase F5 — auto-apply the logged-in user's tenant theme. The
+  // superadmin "view as" cookie takes priority (so an admin previewing
+  // a tenant sees that tenant's palette, not their own). When no
+  // view-as is active and the user has a tenantSlug from F1, look up
+  // their TenantTheme.preset and apply it. ADMIN with no tenantSlug
+  // falls through to Heritage Modern (the canonical default).
+  let userThemePreset: ThemeKey | null = null;
+  if (!viewAsTheme && session.tenantSlug) {
+    const t = await prisma.tenant.findUnique({
+      where: { slug: session.tenantSlug },
+      include: { theme: true },
+    });
+    const p = t?.theme?.preset as ThemeKey | undefined;
+    if (p && THEME_PRESETS[p]) userThemePreset = p;
+  }
   const themeKey: ThemeKey =
-    viewAsTheme && THEME_PRESETS[viewAsTheme] ? viewAsTheme : "heritage";
+    viewAsTheme && THEME_PRESETS[viewAsTheme]
+      ? viewAsTheme
+      : userThemePreset
+      ? userThemePreset
+      : "heritage";
   const themeStyle = themeKey !== "heritage" ? themeCssVars(themeKey) : null;
 
   // Phase C — active company workspace (cookie-driven). The banner gives a
@@ -94,7 +120,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           locale={locale}
         />
       ) : null}
-      {activeCompany ? (
+      {/*
+        WorkspaceBanner visibility rule (Phase F-UX):
+          Shown on every (app) route when an h_nerve_workspace cookie is
+          set, EXCEPT the exact /companies index — that page is the
+          "above all workspaces" view (the parent menu, not a workspace
+          itself). Sub-routes like /companies/[id] keep the banner.
+          The current pathname is forwarded from middleware.ts via the
+          x-pathname header so this layout (which is a server component
+          and has no direct path access) can branch.
+      */}
+      {activeCompany && headers().get("x-pathname") !== "/companies" ? (
         <WorkspaceBanner
           companyName={locale === "ar" ? activeCompany.name : activeCompany.nameEn}
           locale={locale}

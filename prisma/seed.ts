@@ -328,6 +328,7 @@ async function main() {
     await prisma.booking.create({
       data: {
         hotelId: hotel.id,
+        tenantId: "hourani-hotels",
         reference: ref("BK", bRef++),
         guestName: guests[i % guests.length],
         roomType: room,
@@ -439,11 +440,11 @@ async function main() {
   });
   await prisma.crop.createMany({
     data: [
-      { farmId: greenhouseLoran.id, name: "طماطم", variety: "Cherry F1", plantedAt: at(-45, 8), expectedHarvest: at(15, 8), expectedYieldKg: 8000, status: "GROWING" },
-      { farmId: greenhouseLoran.id, name: "خيار", variety: "Beit Alpha", plantedAt: at(-30, 8), expectedHarvest: at(10, 8), expectedYieldKg: 5500, status: "GROWING" },
-      { farmId: greenhouseAAU.id, name: "فلفل ملون", variety: "Bell Mix", plantedAt: at(-20, 8), expectedHarvest: at(40, 8), expectedYieldKg: 1200, status: "GROWING" },
-      { farmId: openFieldLoran.id, name: "بطاطا", variety: "Spunta", plantedAt: at(-90, 8), expectedHarvest: at(-5, 8), actualYieldKg: 22000, expectedYieldKg: 24000, status: "HARVESTED" },
-      { farmId: openFieldLoran.id, name: "بصل", variety: "Texas Grano", plantedAt: at(-60, 8), expectedHarvest: at(20, 8), expectedYieldKg: 9000, status: "GROWING" },
+      { farmId: greenhouseLoran.id, tenantId: "loran-agri", name: "طماطم", variety: "Cherry F1", plantedAt: at(-45, 8), expectedHarvest: at(15, 8), expectedYieldKg: 8000, status: "GROWING" },
+      { farmId: greenhouseLoran.id, tenantId: "loran-agri", name: "خيار", variety: "Beit Alpha", plantedAt: at(-30, 8), expectedHarvest: at(10, 8), expectedYieldKg: 5500, status: "GROWING" },
+      { farmId: greenhouseAAU.id, tenantId: "tank-incubator", name: "فلفل ملون", variety: "Bell Mix", plantedAt: at(-20, 8), expectedHarvest: at(40, 8), expectedYieldKg: 1200, status: "GROWING" },
+      { farmId: openFieldLoran.id, tenantId: "loran-agri", name: "بطاطا", variety: "Spunta", plantedAt: at(-90, 8), expectedHarvest: at(-5, 8), actualYieldKg: 22000, expectedYieldKg: 24000, status: "HARVESTED" },
+      { farmId: openFieldLoran.id, tenantId: "loran-agri", name: "بصل", variety: "Texas Grano", plantedAt: at(-60, 8), expectedHarvest: at(20, 8), expectedYieldKg: 9000, status: "GROWING" },
     ],
   });
 

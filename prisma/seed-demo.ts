@@ -710,10 +710,12 @@ async function main() {
     const checkOut = new Date(checkIn);
     checkOut.setUTCDate(checkOut.getUTCDate() + b.nights);
     const revenue = b.rooms * b.nights * b.nightly;
+    // Phase F4 — Booking now requires tenantId. All seeded hotels live
+    // under the HOTELS Company → tenant "hourani-hotels".
     await prisma.booking.upsert({
       where: { reference: b.reference },
-      create: { hotelId: b.hotelId, reference: b.reference, guestName: b.guestName, roomType: b.roomType, rooms: b.rooms, guests: b.guests, checkIn, checkOut, revenue, status: b.status },
-      update: { hotelId: b.hotelId, guestName: b.guestName, roomType: b.roomType, rooms: b.rooms, guests: b.guests, checkIn, checkOut, revenue, status: b.status },
+      create: { hotelId: b.hotelId, tenantId: "hourani-hotels", reference: b.reference, guestName: b.guestName, roomType: b.roomType, rooms: b.rooms, guests: b.guests, checkIn, checkOut, revenue, status: b.status },
+      update: { hotelId: b.hotelId, tenantId: "hourani-hotels", guestName: b.guestName, roomType: b.roomType, rooms: b.rooms, guests: b.guests, checkIn, checkOut, revenue, status: b.status },
     });
   }
 

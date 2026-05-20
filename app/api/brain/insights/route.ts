@@ -1,10 +1,16 @@
 // GET /api/brain/insights?tenantId=X
 //
+// CROSS-TENANT INTENT: external read endpoint. Callers (cron, the
+// n8n workflow, ops dashboards) pass `tenantId` explicitly in the
+// query string. Using `prismaUnscoped` is deliberate — the route
+// runs outside a session/cookie context, so the workspaceScope
+// middleware can't know which tenant to filter by. The query-string
+// param is the API contract.
+//
 // Phase 10. Returns ACTIVE BrainInsight rows (resolvedAt IS NULL AND
 // dismissedAt IS NULL) as JSON, newest-first. tenantId is optional —
-// omitted = all tenants (the single-tenant exec dashboard uses the
-// global active count). Read-only, no secrets; ungated like the other
-// read endpoints. prismaUnscoped: BrainInsight has no companyId.
+// omitted = all tenants. Read-only, no secrets; ungated like the
+// other read endpoints.
 
 import { NextRequest, NextResponse } from "next/server";
 import { prismaUnscoped } from "@/lib/db";

@@ -40,6 +40,11 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
   "JournalEntry",
   "TenantImportMapping",
   "BrainInsight",
+  // Phase F4 — Booking + Crop now carry a denormalized tenantId
+  // backfilled from their parent Hotel/Farm. See migration
+  // 20260520_add_tenant_id_to_booking_crop.
+  "Booking",
+  "Crop",
 ]);
 
 export type ScopeParams = { model?: string; action: string; args?: any };
@@ -116,6 +121,46 @@ export async function applyWorkspaceScope(
       }
       return next(params);
     }
+
+    // Phase F6 — by-id write guard. update/delete/upsert by unique
+    // {id} pass the where-clause untouched (id is a unique field, can't
+    // safely stamp tenantId on top). Verify the target row's tenantId
+    // matches before letting the write through; otherwise throw.
+    // updateMany / deleteMany are already gated above (where-clause
+    // stamping). Counts come from the matched row → 0 affected if not
+    // in tenant.
+    if (action === "update" || action === "delete" || action === "upsert") {
+      const where = params.args?.where ?? {};
+      const idValue = where.id;
+      if (typeof idValue === "string") {
+        // Read the row through `next` with a tiny passthrough findUnique
+        // so we don't recurse middleware. We send a synthetic findUnique
+        // call upstream — but `next` here only handles the current op,
+        // so use a side channel: read via Prisma raw is overkill; the
+        // simpler path is `params.args.where = { id, tenantId }` for
+        // update and delete, which silently no-ops on foreign rows.
+        // For upsert that doesn't work (where must match one unique
+        // index), so we fall back to a hard runtime check via a tagged
+        // call. To stay reliable across all three actions, we run the
+        // findUnique we already need to do, but route it through the
+        // SAME next() with a swapped params object — and restore after.
+        const savedAction = params.action;
+        const savedArgs = params.args;
+        const probe = { ...params, action: "findUnique", args: { where: { id: idValue } } } as any;
+        const row = await next(probe);
+        params.action = savedAction;
+        params.args = savedArgs;
+        if (!row || row.tenantId !== tenantSlug) {
+          throw new Error("Cross-tenant write blocked");
+        }
+        return next(params);
+      }
+      // where is not by-id (e.g. compound unique like
+      // {tenantId_sku_warehouseId}) — let it pass; the unique key
+      // either already carries tenantId or is intrinsically scoped.
+      return next(params);
+    }
+
     return next(params);
   }
 

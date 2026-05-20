@@ -117,7 +117,25 @@ button on `/admin/brain`, which calls the same engine.
 
 ---
 
-## 6. Quick health triage
+## 6. Adding a new tenant-scoped model
+
+When a new business-data model lands on `prisma/schema.prisma`:
+
+1. Add `tenantId String` (NOT NULL) and `@@index([tenantId])`.
+2. If existing rows need backfilling, follow
+   `prisma/migrations/20260520_add_tenant_id_to_booking_crop/migration.sql`
+   — add nullable → backfill from parent → verify zero NULLs → set
+   NOT NULL → index. Never set NOT NULL before backfill.
+3. Add the model name to `TENANT_SCOPED_MODELS` in
+   `lib/workspaceScope.ts`.
+4. Add a vitest case in `lib/workspaceScope.test.ts` for find/create.
+5. Make sure pages/actions use `prisma`, not `prismaUnscoped`.
+6. Append a per-tenant count to `scripts/test-isolation.ts`.
+7. If the demo seed touches this model, include `tenantId` in the upsert.
+
+Full rationale + the two scoping planes are in `docs/ISOLATION.md`.
+
+## 7. Quick health triage
 
 | Symptom | First check |
 |---------|-------------|

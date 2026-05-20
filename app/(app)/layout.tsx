@@ -29,33 +29,18 @@ import { WorkspaceBanner } from "@/components/WorkspaceBanner";
 import { THEME_PRESETS, themeCssVars, type ThemeKey } from "@/lib/brand/themes";
 import { permsEnforced, effectiveCanAccess } from "@/lib/permissions";
 
-// Phase P1 — WorkspaceBanner visibility rule. Only paths that are
-// scoped to a single tenant's operations get the banner. Adding a new
-// operational area? Add its prefix here.
-const OPS_PATH_PREFIXES = [
-  "/hotels",
-  "/dairy",
-  "/farms",
-  "/education",
-  "/workspace",
-  "/admin/products",
-  "/admin/suppliers",
-  "/admin/customers",
-  "/admin/warehouses",
-  "/admin/sales-orders",
-  "/admin/purchase-orders",
-  "/admin/movements",
-  "/admin/transfers",
-  "/admin/accounts",
-  "/admin/journal",
-  "/admin/imports",
-  "/admin/mappings",
-];
+// Phase P-Polish — WorkspaceBanner visibility rule (narrowed).
+// Original rule: show on every tenant-scoped operational page. New
+// rule per user request: banner appears ONLY on the dedicated company
+// ERP surface — /workspace and its sub-routes. Everywhere else (group
+// dashboard, sector ops pages /hotels /dairy /farms /education, admin
+// family, intelligence, etc.) the banner is HIDDEN. The user reads
+// "leaving the ERP" as "leaving /workspace/*", regardless of whether
+// the workspace cookie is still set; the cookie continues to drive
+// data scoping silently, just without the visible banner.
 function isOperationalPath(path: string): boolean {
   if (!path) return false;
-  return OPS_PATH_PREFIXES.some(
-    (p) => path === p || path.startsWith(p + "/"),
-  );
+  return path === "/workspace" || path.startsWith("/workspace/");
 }
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {

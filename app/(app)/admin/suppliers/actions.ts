@@ -11,7 +11,7 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { flashToast } from "@/lib/toast";
 
 async function gate() {
@@ -52,7 +52,7 @@ export async function createSupplier(formData: FormData): Promise<void> {
     return fail(ar ? "المستأجر والاسم مطلوبان" : "tenantId and name are required");
   }
   try {
-    await prismaUnscoped.supplier.create({ data: { tenantId, ...f } });
+    await prisma.supplier.create({ data: { tenantId, ...f } });
   } catch {
     return fail(
       ar
@@ -71,7 +71,7 @@ export async function updateSupplier(formData: FormData): Promise<void> {
   const f = fields(formData);
   if (!f.name) return fail(ar ? "الاسم مطلوب" : "name is required");
   try {
-    await prismaUnscoped.supplier.update({ where: { id }, data: f });
+    await prisma.supplier.update({ where: { id }, data: f });
   } catch {
     return fail(
       ar ? "تعذّر التحديث (اسم مكرّر؟)" : "update failed (duplicate name?)",
@@ -87,7 +87,7 @@ export async function deleteSupplier(formData: FormData): Promise<void> {
   if (!id) return;
   // Block soft-delete while non-cancelled POs still reference it — the
   // history must stay resolvable. Reverse/cancel those first.
-  const activePOs = await prismaUnscoped.purchaseOrder.count({
+  const activePOs = await prisma.purchaseOrder.count({
     where: { supplierId: id, deletedAt: null, status: { not: "CANCELLED" } },
   });
   if (activePOs > 0) {
@@ -97,7 +97,7 @@ export async function deleteSupplier(formData: FormData): Promise<void> {
         : `cannot delete: supplier has ${activePOs} non-cancelled PO(s)`,
     );
   }
-  await prismaUnscoped.supplier.update({
+  await prisma.supplier.update({
     where: { id },
     data: { deletedAt: new Date() },
   });

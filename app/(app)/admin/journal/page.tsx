@@ -1,6 +1,6 @@
 // /admin/journal — the general journal (Phase 8). Posted double-entry
 // JournalEntries, immutable. Same conventions as the admin family:
-// (app) group, Heritage Modern, Topbar, auth-gated, prismaUnscoped,
+// (app) group, Heritage Modern, Topbar, auth-gated, prisma,
 // server component. Money via formatMoney2 (2dp, no symbol).
 
 import Link from "next/link";
@@ -9,7 +9,7 @@ import { ArrowRight, BookOpenCheck } from "lucide-react";
 import { Prisma } from "@prisma/client";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { Topbar } from "@/components/Topbar";
 import { formatMoney2, formatNumber, formatDateTime } from "@/lib/utils";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
@@ -31,7 +31,7 @@ export default async function JournalPage({ searchParams }: { searchParams: SP }
   const refPrefix = str(searchParams.ref); // "PO-" | "SO-" | "ADJ:"
   const jeDeep = str(searchParams.je);
 
-  const periods = await prismaUnscoped.financialPeriod.findMany({
+  const periods = await prisma.financialPeriod.findMany({
     orderBy: [{ year: "desc" }, { month: "desc" }],
   });
   const openCount = periods.filter((p) => p.status === "OPEN").length;
@@ -45,7 +45,7 @@ export default async function JournalPage({ searchParams }: { searchParams: SP }
 
   const [entries, sums] = await Promise.all([
     active
-      ? prismaUnscoped.journalEntry.findMany({
+      ? prisma.journalEntry.findMany({
           where,
           orderBy: { createdAt: "desc" },
           take: 500,
@@ -55,7 +55,7 @@ export default async function JournalPage({ searchParams }: { searchParams: SP }
         })
       : Promise.resolve([]),
     active
-      ? prismaUnscoped.journalLine.aggregate({
+      ? prisma.journalLine.aggregate({
           _sum: { debit: true, credit: true },
           where: { entry: { status: "POSTED", periodId: active.id } },
         })

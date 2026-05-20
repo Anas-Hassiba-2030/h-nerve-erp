@@ -7,7 +7,7 @@ import { ArrowRight, Users } from "lucide-react";
 import { Prisma } from "@prisma/client";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { Topbar } from "@/components/Topbar";
 import { formatNumber, orderStatusBadge, ORDER_STATUS_AR, ORDER_STATUS_EN } from "@/lib/utils";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
@@ -37,14 +37,14 @@ export default async function CustomersPage({ searchParams }: { searchParams: SP
 
   const [allCount, activeCount, soLinked, fulfilledThisMonth, customers] =
     await Promise.all([
-      prismaUnscoped.customer.count(),
-      prismaUnscoped.customer.count({ where: { deletedAt: null } }),
+      prisma.customer.count(),
+      prisma.customer.count({ where: { deletedAt: null } }),
       // SO.customerId is non-null post-Schema-2 → every non-deleted SO is linked.
-      prismaUnscoped.salesOrder.count({ where: { deletedAt: null } }),
-      prismaUnscoped.salesOrder.count({
+      prisma.salesOrder.count({ where: { deletedAt: null } }),
+      prisma.salesOrder.count({
         where: { status: "FULFILLED", updatedAt: { gte: monthStart }, deletedAt: null },
       }),
-      prismaUnscoped.customer.findMany({
+      prisma.customer.findMany({
         where,
         orderBy: { name: "asc" },
         take: 300,

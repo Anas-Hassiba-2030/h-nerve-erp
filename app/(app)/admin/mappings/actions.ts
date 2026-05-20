@@ -12,7 +12,7 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { flashToast } from "@/lib/toast";
 
 async function gate() {
@@ -74,7 +74,7 @@ export async function createMapping(formData: FormData): Promise<void> {
   }
 
   try {
-    await prismaUnscoped.tenantImportMapping.create({
+    await prisma.tenantImportMapping.create({
       data: { tenantId, sourceSystem, description, fieldMapJson, defaultsJson },
     });
   } catch {
@@ -109,7 +109,7 @@ export async function updateMapping(formData: FormData): Promise<void> {
       return fail(ar, ar ? "الافتراضيات JSON غير صالحة" : "defaults is not valid JSON object");
     }
   }
-  await prismaUnscoped.tenantImportMapping.update({
+  await prisma.tenantImportMapping.update({
     where: { id },
     data: { description, fieldMapJson, defaultsJson },
   });
@@ -121,12 +121,12 @@ export async function toggleMappingActive(formData: FormData): Promise<void> {
   const ar = getLocale() === "ar";
   const id = String(formData.get("id") ?? "");
   if (!id) return;
-  const current = await prismaUnscoped.tenantImportMapping.findUnique({
+  const current = await prisma.tenantImportMapping.findUnique({
     where: { id },
     select: { active: true },
   });
   if (!current) return;
-  await prismaUnscoped.tenantImportMapping.update({
+  await prisma.tenantImportMapping.update({
     where: { id },
     data: { active: !current.active },
   });
@@ -143,6 +143,6 @@ export async function deleteMapping(formData: FormData): Promise<void> {
   const ar = getLocale() === "ar";
   const id = String(formData.get("id") ?? "");
   if (!id) return;
-  await prismaUnscoped.tenantImportMapping.delete({ where: { id } });
+  await prisma.tenantImportMapping.delete({ where: { id } });
   ok(ar, ar ? "تم حذف الخريطة" : "Mapping deleted");
 }

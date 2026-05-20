@@ -1,7 +1,7 @@
 // /admin/brain — Brain insights (Phase 10). Surfaces active
 // BrainInsight rows produced by lib/intelligence/engine.ts. Same
 // conventions as the admin family ((app) group, Heritage Modern,
-// Topbar, auth-gated, server component, prismaUnscoped). The engine
+// Topbar, auth-gated, server component, prisma). The engine
 // lives in lib/intelligence/, NOT lib/brain/ (parallel-owned).
 
 import Link from "next/link";
@@ -9,7 +9,7 @@ import { redirect } from "next/navigation";
 import { BrainCircuit } from "lucide-react";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { Topbar } from "@/components/Topbar";
 import { formatNumber, formatDateTime } from "@/lib/utils";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
@@ -73,15 +73,15 @@ export default async function BrainPage({ searchParams }: { searchParams: SP }) 
   const active = { resolvedAt: null, dismissedAt: null };
   const [activeCount, criticalCount, resolvedToday, lastRunAgg, list] =
     await Promise.all([
-      prismaUnscoped.brainInsight.count({ where: active }),
-      prismaUnscoped.brainInsight.count({
+      prisma.brainInsight.count({ where: active }),
+      prisma.brainInsight.count({
         where: { ...active, severity: "CRITICAL" },
       }),
-      prismaUnscoped.brainInsight.count({
+      prisma.brainInsight.count({
         where: { resolvedAt: { gte: todayStart } },
       }),
-      prismaUnscoped.brainInsight.aggregate({ _max: { updatedAt: true } }),
-      prismaUnscoped.brainInsight.findMany({
+      prisma.brainInsight.aggregate({ _max: { updatedAt: true } }),
+      prisma.brainInsight.findMany({
         where: {
           ...active,
           ...(fType ? { type: fType } : {}),

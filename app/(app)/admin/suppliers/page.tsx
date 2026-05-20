@@ -1,7 +1,7 @@
 // /admin/suppliers — Supplier entities (Phase 7). Promoted from the
 // legacy Product/PO supplier strings. Same conventions as the rest of
 // the admin family: (app) group, Heritage Modern, Topbar, auth-gated,
-// server component, prismaUnscoped (no companyId on these models).
+// server component, prisma (no companyId on these models).
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -9,7 +9,7 @@ import { ArrowRight, Factory } from "lucide-react";
 import { Prisma } from "@prisma/client";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { Topbar } from "@/components/Topbar";
 import { formatNumber } from "@/lib/utils";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
@@ -36,12 +36,12 @@ export default async function SuppliersPage({ searchParams }: { searchParams: SP
 
   const [allCount, activeCount, prodLinked, poLinked, suppliers] =
     await Promise.all([
-      prismaUnscoped.supplier.count(),
-      prismaUnscoped.supplier.count({ where: { deletedAt: null } }),
-      prismaUnscoped.product.count({ where: { supplierId: { not: null }, deletedAt: null } }),
+      prisma.supplier.count(),
+      prisma.supplier.count({ where: { deletedAt: null } }),
+      prisma.product.count({ where: { supplierId: { not: null }, deletedAt: null } }),
       // PO.supplierId is non-null post-Schema-2 → every non-deleted PO is linked.
-      prismaUnscoped.purchaseOrder.count({ where: { deletedAt: null } }),
-      prismaUnscoped.supplier.findMany({
+      prisma.purchaseOrder.count({ where: { deletedAt: null } }),
+      prisma.supplier.findMany({
         where,
         orderBy: { name: "asc" },
         take: 300,

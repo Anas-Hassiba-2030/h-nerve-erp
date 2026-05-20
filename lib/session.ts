@@ -7,6 +7,12 @@ export type SessionUser = {
   name: string;
   role: "ADMIN" | "EXECUTIVE" | "MANAGER" | "STAFF";
   title?: string | null;
+  // Phase F1 — tenant identity, threaded at login. companyId reflects
+  // User.companyId (optional; null for ADMIN/cross-tenant roamers).
+  // tenantSlug is the resolved Tenant.slug for that company, used by
+  // F3 to scope opaque-tenantId queries. Both default to null.
+  companyId?: string | null;
+  tenantSlug?: string | null;
 };
 
 export type SessionData = {

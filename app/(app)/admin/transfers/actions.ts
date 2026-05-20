@@ -9,7 +9,7 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { flashToast } from "@/lib/toast";
 import { createTransfer } from "@/lib/transfers";
 
@@ -50,7 +50,7 @@ export async function createTransferAction(
     );
   }
 
-  const src = await prismaUnscoped.product.findUnique({
+  const src = await prisma.product.findUnique({
     where: { id: fromProductId },
     select: { tenantId: true },
   });
@@ -59,7 +59,7 @@ export async function createTransferAction(
   }
 
   try {
-    const res = await prismaUnscoped.$transaction((tx) =>
+    const res = await prisma.$transaction((tx) =>
       createTransfer(tx, {
         tenantId: src.tenantId,
         fromProductId,

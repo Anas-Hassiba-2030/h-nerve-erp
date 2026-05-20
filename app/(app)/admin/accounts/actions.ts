@@ -8,7 +8,7 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { flashToast } from "@/lib/toast";
 
 const TYPES = ["ASSET", "LIABILITY", "EQUITY", "REVENUE", "EXPENSE", "COGS"];
@@ -38,7 +38,7 @@ export async function createLedgerAccount(formData: FormData): Promise<void> {
     return fail(ar ? `النوع يجب أن يكون أحد: ${TYPES.join(", ")}` : `type must be one of: ${TYPES.join(", ")}`);
   }
   try {
-    await prismaUnscoped.ledgerAccount.create({
+    await prisma.ledgerAccount.create({
       data: { tenantId, code, name, type, description },
     });
   } catch {

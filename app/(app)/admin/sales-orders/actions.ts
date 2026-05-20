@@ -10,7 +10,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
 import { flashToast } from "@/lib/toast";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import {
   createSO,
   findOrCreateCustomer,
@@ -74,7 +74,7 @@ export async function createSalesOrder(formData: FormData): Promise<void> {
       if (!customerName)
         return toast(ar ? "⚠ العميل مطلوب" : "⚠ Customer is required");
       resolvedCustomerId = (
-        await findOrCreateCustomer(prismaUnscoped, tenantId, customerName)
+        await findOrCreateCustomer(prisma, tenantId, customerName)
       ).id;
     }
     const so = await createSO({

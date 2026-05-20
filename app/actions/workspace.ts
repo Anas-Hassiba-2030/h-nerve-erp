@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/session";
 import { prismaUnscoped } from "@/lib/db";
 import { WORKSPACE_COOKIE } from "@/lib/workspace";
+import { TENANT_COOKIE, COMPANY_CODE_TO_TENANT_SLUG } from "@/lib/tenancy";
 
 export async function enterWorkspace(formData: FormData) {
   await requireUser();
@@ -17,7 +18,7 @@ export async function enterWorkspace(formData: FormData) {
   // company regardless of any active workspace.
   const company = await prismaUnscoped.company.findUnique({
     where: { id: companyId },
-    select: { id: true },
+    select: { id: true, code: true },
   });
   if (!company) redirect("/companies");
   cookies().set(WORKSPACE_COOKIE, company.id, {
@@ -25,11 +26,25 @@ export async function enterWorkspace(formData: FormData) {
     sameSite: "lax",
     path: "/",
   });
+  // Phase F3 — also bind the tenant slug. Without this, switching the
+  // workspace would scope companyId-keyed models but leave opaque-
+  // tenantId models cross-tenant.
+  const slug = COMPANY_CODE_TO_TENANT_SLUG[company.code] ?? null;
+  if (slug) {
+    cookies().set(TENANT_COOKIE, slug, {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+    });
+  } else {
+    cookies().delete(TENANT_COOKIE);
+  }
   redirect("/workspace"); // Phase G1: land on the Company Command Center
 }
 
 export async function exitWorkspace() {
   await requireUser();
   cookies().delete(WORKSPACE_COOKIE);
+  cookies().delete(TENANT_COOKIE);
   redirect("/companies");
 }

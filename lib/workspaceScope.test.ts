@@ -85,6 +85,75 @@ describe("applyWorkspaceScope — reads are constrained to the workspace", () =>
   });
 });
 
+describe("applyWorkspaceScope — Phase F3 tenant-id scoping", () => {
+  it("no tenantSlug => tenant-scoped model passes through", async () => {
+    const { next, calls } = fakeNext();
+    await applyWorkspaceScope(
+      { model: "Product", action: "findMany", args: { where: { deletedAt: null } } },
+      next,
+      null,
+      null,
+    );
+    expect(calls[0].args).toEqual({ where: { deletedAt: null } });
+  });
+
+  it("findMany on a tenant-scoped model stamps tenantId", async () => {
+    const { next, calls } = fakeNext();
+    await applyWorkspaceScope(
+      { model: "Product", action: "findMany", args: { where: { deletedAt: null } } },
+      next,
+      null,
+      "maha-dairy",
+    );
+    expect(calls[0].args.where).toEqual({ deletedAt: null, tenantId: "maha-dairy" });
+  });
+
+  it("findUnique hides a row that belongs to another tenant", async () => {
+    const { next } = fakeNext({ id: "p1", tenantId: "loran-agri" });
+    const row = await applyWorkspaceScope(
+      { model: "Product", action: "findUnique", args: { where: { id: "p1" } } },
+      next,
+      null,
+      "maha-dairy",
+    );
+    expect(row).toBeNull();
+  });
+
+  it("create stamps the tenantSlug when tenantId is absent", async () => {
+    const { next, calls } = fakeNext();
+    await applyWorkspaceScope(
+      { model: "Supplier", action: "create", args: { data: { name: "X" } } },
+      next,
+      null,
+      "maha-dairy",
+    );
+    expect(calls[0].args.data).toEqual({ name: "X", tenantId: "maha-dairy" });
+  });
+
+  it("create is BLOCKED when tenantId points at another tenant", async () => {
+    const { next } = fakeNext();
+    await expect(
+      applyWorkspaceScope(
+        { model: "Supplier", action: "create", args: { data: { name: "X", tenantId: "loran-agri" } } },
+        next,
+        null,
+        "maha-dairy",
+      ),
+    ).rejects.toThrow(/cross-tenant/i);
+  });
+
+  it("non-tenant-scoped model (Hotel) ignores tenantSlug", async () => {
+    const { next, calls } = fakeNext();
+    await applyWorkspaceScope(
+      { model: "Hotel", action: "findMany", args: {} },
+      next,
+      null,
+      "maha-dairy",
+    );
+    expect(calls[0].args ?? {}).toEqual({});
+  });
+});
+
 describe("applyWorkspaceScope — writes cannot cross workspaces", () => {
   it("create stamps the workspace when companyId is absent", async () => {
     const { next, calls } = fakeNext();

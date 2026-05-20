@@ -12,7 +12,7 @@ import { ArrowRight, PackageSearch, Search } from "lucide-react";
 import { Prisma } from "@prisma/client";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { Topbar } from "@/components/Topbar";
 import {
   formatDateTime,
@@ -76,16 +76,16 @@ export default async function ProductsAdminPage({
   // Two reads: KPI/pill aggregates over the WHOLE catalog (stable while
   // filtering), and the filtered list for the table.
   const [catalog, supplierList, products] = await Promise.all([
-    prismaUnscoped.product.findMany({
+    prisma.product.findMany({
       where: { deletedAt: null },
       select: { quantity: true, warehouseRef: { select: { code: true } } },
     }),
-    prismaUnscoped.supplier.findMany({
+    prisma.supplier.findMany({
       where: { deletedAt: null },
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),
-    prismaUnscoped.product.findMany({
+    prisma.product.findMany({
       where,
       orderBy: { lastImportedAt: "desc" },
       take: 500,

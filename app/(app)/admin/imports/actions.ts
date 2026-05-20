@@ -10,7 +10,7 @@
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { flashToast } from "@/lib/toast";
 
 export async function clearTestImports(): Promise<void> {
@@ -30,7 +30,7 @@ export async function clearTestImports(): Promise<void> {
     ],
   };
 
-  const doomed = await prismaUnscoped.importLog.findMany({
+  const doomed = await prisma.importLog.findMany({
     where,
     select: { id: true },
   });
@@ -38,9 +38,9 @@ export async function clearTestImports(): Promise<void> {
 
   // Delete children then parents in one transaction — robust regardless
   // of how SQLite handles the relation's onDelete: Cascade.
-  await prismaUnscoped.$transaction([
-    prismaUnscoped.importRow.deleteMany({ where: { importLogId: { in: ids } } }),
-    prismaUnscoped.importLog.deleteMany({ where: { id: { in: ids } } }),
+  await prisma.$transaction([
+    prisma.importRow.deleteMany({ where: { importLogId: { in: ids } } }),
+    prisma.importLog.deleteMany({ where: { id: { in: ids } } }),
   ]);
 
   flashToast({

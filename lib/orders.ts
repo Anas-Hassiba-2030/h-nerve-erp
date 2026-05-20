@@ -8,11 +8,11 @@
 //
 // Boundaries (decisions #1/#2): DRAFT/SENT and DRAFT/CONFIRMED are
 // planning states — no movements. Only PO receipt writes RECEIVED
-// (positive) and SO fulfillment writes SOLD (negative). prismaUnscoped:
+// (positive) and SO fulfillment writes SOLD (negative). prisma:
 // these models have no companyId, consistent with the import surface.
 
 import { Prisma } from "@prisma/client";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { generateNumber } from "@/lib/utils";
 import { recordMovement, recalcProductQuantity } from "@/lib/inventory";
 import {
@@ -41,7 +41,7 @@ const nonNegInt = (n: unknown): n is number =>
   typeof n === "number" && Number.isInteger(n) && n >= 0;
 
 // Any tx-capable client (real client or a $transaction callback's tx).
-type Db = Parameters<Parameters<typeof prismaUnscoped.$transaction>[0]>[0];
+type Db = Parameters<Parameters<typeof prisma.$transaction>[0]>[0];
 
 /**
  * Resolve + guard the products a PO/SO line references: every id must
@@ -114,7 +114,7 @@ export async function createPO(data: {
       throw new Error(`line ${i + 1}: quantity must be a positive whole number`);
   });
   const poNumber = generateNumber("PO");
-  return prismaUnscoped.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx) => {
     // FK must exist AND belong to this tenant (opaque-string tenancy →
     // enforce in the helper, never trust the caller).
     const sup = await tx.supplier.findFirst({
@@ -146,20 +146,20 @@ export async function createPO(data: {
 
 /** DRAFT → SENT. Procurement-only, writes no movement (decision #1). */
 export async function markPOSent(poId: string) {
-  const po = await prismaUnscoped.purchaseOrder.findFirst({
+  const po = await prisma.purchaseOrder.findFirst({
     where: { id: poId, deletedAt: null },
   });
   if (!po) throw new Error("purchase order not found");
   if (po.status !== "DRAFT")
     throw new Error(`only a DRAFT PO can be sent (current: ${po.status})`);
-  return prismaUnscoped.purchaseOrder.update({
+  return prisma.purchaseOrder.update({
     where: { id: poId },
     data: { status: "SENT" },
   });
 }
 
 export async function receivePO(poId: string, receipts: Receipt[]) {
-  return prismaUnscoped.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx) => {
     const po = await tx.purchaseOrder.findFirst({
       where: { id: poId, deletedAt: null },
       include: { lines: true },
@@ -261,7 +261,7 @@ export async function receivePO(poId: string, receipts: Receipt[]) {
  * for the same audit-integrity reason — flagged for override.
  */
 export async function cancelPO(poId: string) {
-  const po = await prismaUnscoped.purchaseOrder.findFirst({
+  const po = await prisma.purchaseOrder.findFirst({
     where: { id: poId, deletedAt: null },
   });
   if (!po) throw new Error("purchase order not found");
@@ -270,7 +270,7 @@ export async function cancelPO(poId: string) {
     throw new Error(
       `PO ${po.poNumber} has received stock — record a manual ADJUSTMENT to reverse it, then cancel`,
     );
-  return prismaUnscoped.purchaseOrder.update({
+  return prisma.purchaseOrder.update({
     where: { id: poId },
     data: { status: "CANCELLED" },
   });
@@ -298,7 +298,7 @@ export async function createSO(data: {
       throw new Error(`line ${i + 1}: quantity must be a positive whole number`);
   });
   const soNumber = generateNumber("SO");
-  return prismaUnscoped.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx) => {
     const cus = await tx.customer.findFirst({
       where: { id: customerId, tenantId, deletedAt: null },
       select: { id: true, name: true },
@@ -339,7 +339,7 @@ export async function createSO(data: {
  * every short SKU. No movement (confirmation is still planning).
  */
 export async function confirmSO(soId: string) {
-  return prismaUnscoped.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx) => {
     const so = await tx.salesOrder.findFirst({
       where: { id: soId, deletedAt: null },
       include: { lines: true },
@@ -366,7 +366,7 @@ export async function confirmSO(soId: string) {
 }
 
 export async function fulfillSO(soId: string, fulfillments: Fulfillment[]) {
-  return prismaUnscoped.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx) => {
     const so = await tx.salesOrder.findFirst({
       where: { id: soId, deletedAt: null },
       include: { lines: true },
@@ -485,7 +485,7 @@ export async function fulfillSO(soId: string, fulfillments: Fulfillment[]) {
 
 /** Mirror of cancelPO for sales orders (see that doc-comment). */
 export async function cancelSO(soId: string) {
-  const so = await prismaUnscoped.salesOrder.findFirst({
+  const so = await prisma.salesOrder.findFirst({
     where: { id: soId, deletedAt: null },
   });
   if (!so) throw new Error("sales order not found");
@@ -494,7 +494,7 @@ export async function cancelSO(soId: string) {
     throw new Error(
       `SO ${so.soNumber} has shipped stock — record a manual ADJUSTMENT to reverse it, then cancel`,
     );
-  return prismaUnscoped.salesOrder.update({
+  return prisma.salesOrder.update({
     where: { id: soId },
     data: { status: "CANCELLED" },
   });

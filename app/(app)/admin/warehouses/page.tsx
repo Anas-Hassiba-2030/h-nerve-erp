@@ -1,14 +1,14 @@
 // /admin/warehouses — physical stock locations (Phase 9). Promoted
 // from the legacy Product.warehouse string. Same conventions as the
 // rest of the admin family: (app) group, Heritage Modern, Topbar,
-// auth-gated, server component, prismaUnscoped (no companyId here).
+// auth-gated, server component, prisma (no companyId here).
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, Warehouse as WarehouseIcon } from "lucide-react";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { Topbar } from "@/components/Topbar";
 import { formatNumber, formatDateTime } from "@/lib/utils";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
@@ -50,15 +50,15 @@ export default async function WarehousesPage({
 
   const [totalWh, activeWh, totalSkus, lowStock, warehouses] =
     await Promise.all([
-      prismaUnscoped.warehouse.count({ where: { deletedAt: null } }),
-      prismaUnscoped.warehouse.count({
+      prisma.warehouse.count({ where: { deletedAt: null } }),
+      prisma.warehouse.count({
         where: { deletedAt: null, active: true },
       }),
-      prismaUnscoped.product.count({ where: { deletedAt: null } }),
-      prismaUnscoped.product.count({
+      prisma.product.count({ where: { deletedAt: null } }),
+      prisma.product.count({
         where: { deletedAt: null, quantity: { lt: LOW_STOCK } },
       }),
-      prismaUnscoped.warehouse.findMany({
+      prisma.warehouse.findMany({
         where: { deletedAt: null },
         orderBy: { code: "asc" },
         take: 300,

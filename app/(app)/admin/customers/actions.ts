@@ -7,7 +7,7 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { flashToast } from "@/lib/toast";
 
 async function gate() {
@@ -48,7 +48,7 @@ export async function createCustomer(formData: FormData): Promise<void> {
     return fail(ar ? "المستأجر والاسم مطلوبان" : "tenantId and name are required");
   }
   try {
-    await prismaUnscoped.customer.create({ data: { tenantId, ...f } });
+    await prisma.customer.create({ data: { tenantId, ...f } });
   } catch {
     return fail(
       ar
@@ -67,7 +67,7 @@ export async function updateCustomer(formData: FormData): Promise<void> {
   const f = fields(formData);
   if (!f.name) return fail(ar ? "الاسم مطلوب" : "name is required");
   try {
-    await prismaUnscoped.customer.update({ where: { id }, data: f });
+    await prisma.customer.update({ where: { id }, data: f });
   } catch {
     return fail(
       ar ? "تعذّر التحديث (اسم مكرّر؟)" : "update failed (duplicate name?)",
@@ -81,7 +81,7 @@ export async function deleteCustomer(formData: FormData): Promise<void> {
   const ar = getLocale() === "ar";
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return;
-  const openSOs = await prismaUnscoped.salesOrder.count({
+  const openSOs = await prisma.salesOrder.count({
     where: { customerId: id, deletedAt: null, status: { not: "CANCELLED" } },
   });
   if (openSOs > 0) {
@@ -91,7 +91,7 @@ export async function deleteCustomer(formData: FormData): Promise<void> {
         : `cannot delete: customer has ${openSOs} non-cancelled SO(s)`,
     );
   }
-  await prismaUnscoped.customer.update({
+  await prisma.customer.update({
     where: { id },
     data: { deletedAt: new Date() },
   });

@@ -16,7 +16,7 @@
 // reverse movement, never by editing history.
 
 import type { InventoryMovement, Prisma } from "@prisma/client";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 
 // Closed enum (decision #3), string-typed per the CLAUDE.md SQLite rule.
 // Single source of truth — the /admin/movements filter pills and the
@@ -154,7 +154,7 @@ export async function getMovementsForProduct(
   opts: { limit?: number; before?: Date } = {},
 ): Promise<InventoryMovement[]> {
   const { limit = 50, before } = opts;
-  return prismaUnscoped.inventoryMovement.findMany({
+  return prisma.inventoryMovement.findMany({
     where: {
       productId,
       deletedAt: null,

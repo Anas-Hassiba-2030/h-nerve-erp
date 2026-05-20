@@ -11,7 +11,7 @@ import { redirect } from "next/navigation";
 import { ArrowRight, Inbox } from "lucide-react";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { Topbar } from "@/components/Topbar";
 import { formatDateTime, formatNumber, formatMoney2 } from "@/lib/utils";
 import { sourceMatchesSystem } from "@/lib/importMapping";
@@ -30,7 +30,7 @@ export default async function ImportsAdminPage() {
     redirect("/dashboard");
   }
 
-  const batches = await prismaUnscoped.importLog.findMany({
+  const batches = await prisma.importLog.findMany({
     orderBy: { createdAt: "desc" },
     take: 200,
     include: { rows: { orderBy: { createdAt: "asc" } } },
@@ -44,7 +44,7 @@ export default async function ImportsAdminPage() {
   // Phase 3/4 scope), so re-derive whether an active mapping matched
   // this batch using the SAME prefix rule the endpoint used
   // (sourceMatchesSystem — shared source of truth, no drift).
-  const activeMappings = await prismaUnscoped.tenantImportMapping.findMany({
+  const activeMappings = await prisma.tenantImportMapping.findMany({
     where: { active: true },
     select: { tenantId: true, sourceSystem: true },
   });

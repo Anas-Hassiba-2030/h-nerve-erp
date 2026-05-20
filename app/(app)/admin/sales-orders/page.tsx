@@ -10,7 +10,7 @@ import { ArrowRight, Receipt as ReceiptIcon } from "lucide-react";
 import { Prisma } from "@prisma/client";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { Topbar } from "@/components/Topbar";
 import {
   formatDateTime,
@@ -65,21 +65,21 @@ export default async function SalesOrdersPage({
   if (customerF) where.customerId = customerF; // customerF is now a Customer id
 
   const [allSos, products, customerList, sos] = await Promise.all([
-    prismaUnscoped.salesOrder.findMany({
+    prisma.salesOrder.findMany({
       where: { deletedAt: null },
       select: { status: true, updatedAt: true },
     }),
-    prismaUnscoped.product.findMany({
+    prisma.product.findMany({
       where: { deletedAt: null },
       select: { id: true, sku: true, name: true, quantity: true, tenantId: true },
       orderBy: { sku: "asc" },
     }),
-    prismaUnscoped.customer.findMany({
+    prisma.customer.findMany({
       where: { deletedAt: null },
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),
-    prismaUnscoped.salesOrder.findMany({
+    prisma.salesOrder.findMany({
       where,
       orderBy: { orderedAt: "desc" },
       take: 300,

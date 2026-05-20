@@ -46,6 +46,10 @@ export async function signupAction(formData: FormData) {
     name: user.name,
     role: user.role as SessionUser["role"],
     title: user.title,
+    // Phase F1 — signup never assigns a company today, so both fields
+    // are null. Kept explicit so the shape matches login.
+    companyId: null,
+    tenantSlug: null,
   };
   await session.save();
   redirect("/dashboard");

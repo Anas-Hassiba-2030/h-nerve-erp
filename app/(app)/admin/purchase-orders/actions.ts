@@ -14,7 +14,7 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import {
   createPO,
   findOrCreateSupplier,
@@ -82,7 +82,7 @@ export async function createPurchaseOrder(formData: FormData): Promise<void> {
       if (!supplierName)
         return toast(ar ? "⚠ المورّد مطلوب" : "⚠ Supplier is required");
       resolvedSupplierId = (
-        await findOrCreateSupplier(prismaUnscoped, tenantId, supplierName)
+        await findOrCreateSupplier(prisma, tenantId, supplierName)
       ).id;
     }
     const po = await createPO({

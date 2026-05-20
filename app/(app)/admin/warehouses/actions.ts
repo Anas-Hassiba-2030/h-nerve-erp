@@ -11,7 +11,7 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { flashToast } from "@/lib/toast";
 // WAREHOUSE_TYPES must NOT be declared OR re-exported in this "use server"
 // file — every export of a "use server" module becomes a server-action
@@ -69,7 +69,7 @@ export async function createWarehouse(formData: FormData): Promise<void> {
     );
   }
   try {
-    await prismaUnscoped.warehouse.create({
+    await prisma.warehouse.create({
       data: { tenantId, code, name, address, type, active },
     });
   } catch {
@@ -96,7 +96,7 @@ export async function updateWarehouse(formData: FormData): Promise<void> {
         : `type must be one of: ${WAREHOUSE_TYPES.join(", ")}`,
     );
   }
-  await prismaUnscoped.warehouse.update({
+  await prisma.warehouse.update({
     where: { id },
     data: { name, address, type, active },
   });
@@ -111,7 +111,7 @@ export async function deleteWarehouse(formData: FormData): Promise<void> {
   // Block soft-delete while the warehouse still holds products — the
   // import resolver and transfer history must stay resolvable. Move or
   // transfer its stock out first.
-  const held = await prismaUnscoped.product.count({
+  const held = await prisma.product.count({
     where: { warehouseId: id, deletedAt: null },
   });
   if (held > 0) {
@@ -121,7 +121,7 @@ export async function deleteWarehouse(formData: FormData): Promise<void> {
         : `cannot delete: warehouse still holds ${held} product(s)`,
     );
   }
-  await prismaUnscoped.warehouse.update({
+  await prisma.warehouse.update({
     where: { id },
     data: { deletedAt: new Date() },
   });

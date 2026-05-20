@@ -4,6 +4,9 @@ import { redirect } from "next/navigation";
 import { findUserByEmail, verifyPassword } from "@/lib/auth";
 import { getSession, type SessionUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
+import { resolveTenantSlugForUser, TENANT_COOKIE } from "@/lib/tenancy";
+import { cookies } from "next/headers";
+import { WORKSPACE_COOKIE } from "@/lib/workspace";
 
 export async function loginAction(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
@@ -37,14 +40,47 @@ export async function loginAction(formData: FormData) {
   }
 
   const session = await getSession();
+  // Phase F1 — resolve the user's tenant slug at login so downstream
+  // server actions / middleware can scope queries without re-touching
+  // the DB on every request. companyId is optional on User; admins
+  // and unassigned roamers stay null and remain cross-tenant.
+  const tenantSlug = await resolveTenantSlugForUser(
+    user.companyId,
+    (id) => prisma.company.findUnique({ where: { id }, select: { code: true } }),
+  );
   session.user = {
     id: user.id,
     email: user.email,
     name: user.name,
     role: user.role as SessionUser["role"],
     title: user.title,
+    companyId: user.companyId ?? null,
+    tenantSlug,
   };
   await session.save();
+
+  // Phase F2 — bind the user to their company workspace so the
+  // workspaceScope middleware filters the scoped models from the
+  // first page load. Users without a companyId (admins, roamers)
+  // get no cookie and stay cross-tenant. The manual workspace
+  // switcher (enterWorkspace / exitWorkspace) can still override.
+  if (user.companyId) {
+    cookies().set(WORKSPACE_COOKIE, user.companyId, {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+    });
+  }
+  // Phase F3 — set the tenant cookie too. Middleware uses it to scope
+  // all opaque-tenantId models (Product, Supplier, ...). Null slug
+  // means cross-tenant; no cookie written.
+  if (tenantSlug) {
+    cookies().set(TENANT_COOKIE, tenantSlug, {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+    });
+  }
 
   // Audit trail: log the login (best-effort, never block).
   try {

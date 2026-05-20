@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { getActiveWorkspaceId } from "./workspace";
+import { getActiveTenantSlug } from "./tenancy";
 import { applyWorkspaceScope } from "./workspaceScope";
 
 // Phase C — workspace isolation.
@@ -31,7 +32,7 @@ function baseClient(): PrismaClient {
 function makeScopedClient(): PrismaClient {
   const client = baseClient();
   client.$use((params, next) =>
-    applyWorkspaceScope(params, next, getActiveWorkspaceId()),
+    applyWorkspaceScope(params, next, getActiveWorkspaceId(), getActiveTenantSlug()),
   );
   return client;
 }

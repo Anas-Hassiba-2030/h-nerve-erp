@@ -11,7 +11,7 @@ import { redirect } from "next/navigation";
 import { Landmark } from "lucide-react";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { Topbar } from "@/components/Topbar";
 import { formatMoney2, formatNumber } from "@/lib/utils";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
@@ -36,16 +36,16 @@ export default async function AccountsPage({ searchParams }: { searchParams: SP 
   const fmtP = (y: number, m: number) => `${y}-${String(m).padStart(2, "0")}`;
 
   const [periods, accounts] = await Promise.all([
-    prismaUnscoped.financialPeriod.findMany({
+    prisma.financialPeriod.findMany({
       orderBy: [{ year: "desc" }, { month: "desc" }],
     }),
-    prismaUnscoped.ledgerAccount.findMany({ orderBy: { code: "asc" } }),
+    prisma.ledgerAccount.findMany({ orderBy: { code: "asc" } }),
   ]);
   const active =
     periods.find((p) => fmtP(p.year, p.month) === periodSel) ?? periods[0] ?? null;
 
   const grouped = active
-    ? await prismaUnscoped.journalLine.groupBy({
+    ? await prisma.journalLine.groupBy({
         by: ["accountId"],
         _sum: { debit: true, credit: true },
         where: { entry: { status: "POSTED", periodId: active.id } },

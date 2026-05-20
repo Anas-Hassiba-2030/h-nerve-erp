@@ -12,7 +12,7 @@ import { redirect } from "next/navigation";
 import { ArrowRight, Plus, ListChecks } from "lucide-react";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { Topbar } from "@/components/Topbar";
 import { formatDateTime, formatNumber } from "@/lib/utils";
 import { MappingDeleteButton } from "./MappingDeleteButton";
@@ -45,7 +45,7 @@ export default async function MappingsAdminPage() {
     redirect("/dashboard");
   }
 
-  const mappings = await prismaUnscoped.tenantImportMapping.findMany({
+  const mappings = await prisma.tenantImportMapping.findMany({
     orderBy: [{ tenantId: "asc" }, { createdAt: "desc" }],
   });
 

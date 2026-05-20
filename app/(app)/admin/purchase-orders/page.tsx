@@ -11,7 +11,7 @@ import { ArrowRight, ShoppingCart } from "lucide-react";
 import { Prisma } from "@prisma/client";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { Topbar } from "@/components/Topbar";
 import {
   formatDateTime,
@@ -66,21 +66,21 @@ export default async function PurchaseOrdersPage({
   if (supplierF) where.supplierId = supplierF; // supplierF is now a Supplier id
 
   const [allPos, products, supplierList, pos] = await Promise.all([
-    prismaUnscoped.purchaseOrder.findMany({
+    prisma.purchaseOrder.findMany({
       where: { deletedAt: null },
       select: { status: true, updatedAt: true },
     }),
-    prismaUnscoped.product.findMany({
+    prisma.product.findMany({
       where: { deletedAt: null },
       select: { id: true, sku: true, name: true, quantity: true, tenantId: true },
       orderBy: { sku: "asc" },
     }),
-    prismaUnscoped.supplier.findMany({
+    prisma.supplier.findMany({
       where: { deletedAt: null },
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),
-    prismaUnscoped.purchaseOrder.findMany({
+    prisma.purchaseOrder.findMany({
       where,
       orderBy: { orderedAt: "desc" },
       take: 300,

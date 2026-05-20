@@ -14,7 +14,7 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentUser, type SessionUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { flashToast } from "@/lib/toast";
 import { recordMovement, recalcProductQuantity } from "@/lib/inventory";
 import { Prisma } from "@prisma/client";
@@ -60,7 +60,7 @@ export async function adjustStock(formData: FormData): Promise<void> {
     return toast(ar ? "⚠ السبب مطلوب" : "⚠ A reason is required");
   }
 
-  const product = await prismaUnscoped.product.findUnique({
+  const product = await prisma.product.findUnique({
     where: { id: productId },
     select: { sku: true, tenantId: true },
   });
@@ -69,7 +69,7 @@ export async function adjustStock(formData: FormData): Promise<void> {
   }
 
   try {
-    await prismaUnscoped.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       await recordMovement(tx, {
         tenantId: product.tenantId,
         productId,
@@ -141,14 +141,14 @@ export async function setReorderPoint(formData: FormData): Promise<void> {
     value = n;
   }
 
-  const product = await prismaUnscoped.product.findUnique({
+  const product = await prisma.product.findUnique({
     where: { id: productId },
     select: { sku: true },
   });
   if (!product) {
     return toast(ar ? "⚠ المنتج غير موجود" : "⚠ Product not found");
   }
-  await prismaUnscoped.product.update({
+  await prisma.product.update({
     where: { id: productId },
     data: { reorderPoint: value },
   });

@@ -17,13 +17,13 @@
 // this module never opens its own and only mutates via the existing
 // inventory primitives.
 
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { generateNumber } from "@/lib/utils";
 import { recordMovement, recalcProductQuantity } from "@/lib/inventory";
 
 // Same transaction-client alias as lib/orders.ts — the caller owns the
 // boundary; this helper never opens one.
-type Db = Parameters<Parameters<typeof prismaUnscoped.$transaction>[0]>[0];
+type Db = Parameters<Parameters<typeof prisma.$transaction>[0]>[0];
 
 export type CreateTransferInput = {
   tenantId: string;
@@ -195,7 +195,7 @@ export async function getTransfersForProduct(
   opts: { limit?: number; before?: Date } = {},
 ) {
   const { limit = 50, before } = opts;
-  const legs = await prismaUnscoped.inventoryMovement.findMany({
+  const legs = await prisma.inventoryMovement.findMany({
     where: {
       productId,
       deletedAt: null,
@@ -209,7 +209,7 @@ export async function getTransfersForProduct(
 
   const refs = [...new Set(legs.map((l) => l.transferRef as string))];
   const siblings = refs.length
-    ? await prismaUnscoped.inventoryMovement.findMany({
+    ? await prisma.inventoryMovement.findMany({
         where: { transferRef: { in: refs }, deletedAt: null },
       })
     : [];

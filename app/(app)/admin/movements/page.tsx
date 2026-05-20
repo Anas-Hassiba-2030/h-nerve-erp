@@ -12,7 +12,7 @@ import { ArrowRight, ArrowLeftRight } from "lucide-react";
 import { Prisma } from "@prisma/client";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { Topbar } from "@/components/Topbar";
 import {
   formatDateTime,
@@ -80,7 +80,7 @@ export default async function MovementsAdminPage({
 
   // Phase 9: movements carry a scalar warehouseId (no relation) —
   // resolve code↔id here for the column, the pills and the filter.
-  const allWarehouses = await prismaUnscoped.warehouse.findMany({
+  const allWarehouses = await prisma.warehouse.findMany({
     select: { id: true, code: true },
     orderBy: { code: "asc" },
   });
@@ -113,21 +113,21 @@ export default async function MovementsAdminPage({
 
   const [rows, totalAll, todayCount, todayNet, todayByType] = await Promise.all(
     [
-      prismaUnscoped.inventoryMovement.findMany({
+      prisma.inventoryMovement.findMany({
         where,
         orderBy: [{ occurredAt: "desc" }, { createdAt: "desc" }],
         take: 300,
         include: { product: { select: { sku: true, name: true } } },
       }),
-      prismaUnscoped.inventoryMovement.count({ where: { deletedAt: null } }),
-      prismaUnscoped.inventoryMovement.count({
+      prisma.inventoryMovement.count({ where: { deletedAt: null } }),
+      prisma.inventoryMovement.count({
         where: { deletedAt: null, occurredAt: { gte: todayStart } },
       }),
-      prismaUnscoped.inventoryMovement.aggregate({
+      prisma.inventoryMovement.aggregate({
         _sum: { delta: true },
         where: { deletedAt: null, occurredAt: { gte: todayStart } },
       }),
-      prismaUnscoped.inventoryMovement.groupBy({
+      prisma.inventoryMovement.groupBy({
         by: ["type"],
         where: { deletedAt: null, occurredAt: { gte: todayStart } },
         _count: { type: true },

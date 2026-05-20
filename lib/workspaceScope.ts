@@ -23,6 +23,25 @@ export const SCOPED_MODELS = new Set<string>([
   "SustainabilityScore",
 ]);
 
+// Phase F3 — models keyed by the OPAQUE `tenantId String` column (no FK
+// to Tenant). Scoped by Tenant.slug, sourced from the h_nerve_tenant
+// cookie (lib/tenancy.ts). Same pass-through invariant as SCOPED_MODELS
+// when tenantSlug is null (ADMIN / unassigned roamers).
+export const TENANT_SCOPED_MODELS = new Set<string>([
+  "Product",
+  "Supplier",
+  "Customer",
+  "Warehouse",
+  "PurchaseOrder",
+  "SalesOrder",
+  "InventoryMovement",
+  "LedgerAccount",
+  "FinancialPeriod",
+  "JournalEntry",
+  "TenantImportMapping",
+  "BrainInsight",
+]);
+
 export type ScopeParams = { model?: string; action: string; args?: any };
 
 /**
@@ -30,14 +49,76 @@ export type ScopeParams = { model?: string; action: string; args?: any };
  * params are passed through UNCHANGED — so with no workspace cookie the
  * app behaves byte-identically to pre-Phase-C. That is the pitch-safety
  * guarantee, and it is the first thing the tests assert.
+ *
+ * Phase F3 layers tenant-id scoping on top: models in
+ * `tenantScopedModels` are filtered by `tenantSlug` (opaque string;
+ * matches `tenantId String` columns). Same pass-through invariant when
+ * `tenantSlug` is null. The tenant-side runs FIRST and short-circuits
+ * before the company-id-side so the two clauses don't double-stamp.
  */
 export async function applyWorkspaceScope(
   params: ScopeParams,
   next: (p: any) => Promise<any>,
   workspaceId: string | null,
+  tenantSlug: string | null = null,
   scopedModels: Set<string> = SCOPED_MODELS,
+  tenantScopedModels: Set<string> = TENANT_SCOPED_MODELS,
 ): Promise<any> {
   const model = params.model;
+
+  // Tenant-scoped models: same shape as companyId scoping below, but
+  // keyed off the opaque tenantId column.
+  if (model && tenantScopedModels.has(model) && tenantSlug) {
+    const action = params.action;
+    if (
+      action === "findMany" ||
+      action === "findFirst" ||
+      action === "findFirstOrThrow" ||
+      action === "count" ||
+      action === "aggregate" ||
+      action === "groupBy" ||
+      action === "updateMany" ||
+      action === "deleteMany"
+    ) {
+      params.args = params.args ?? {};
+      params.args.where = { ...(params.args.where ?? {}), tenantId: tenantSlug };
+      return next(params);
+    }
+    if (action === "findUnique" || action === "findUniqueOrThrow") {
+      const row = await next(params);
+      if (row && row.tenantId !== tenantSlug) {
+        if (action === "findUniqueOrThrow") {
+          throw new Error("Record not found in the active tenant");
+        }
+        return null;
+      }
+      return row;
+    }
+    if (action === "create") {
+      params.args = params.args ?? {};
+      const data = params.args.data ?? {};
+      if (data.tenantId == null) data.tenantId = tenantSlug;
+      else if (data.tenantId !== tenantSlug) {
+        throw new Error("Cross-tenant create blocked");
+      }
+      params.args.data = data;
+      return next(params);
+    }
+    if (action === "createMany") {
+      params.args = params.args ?? {};
+      const d = params.args.data;
+      const rows = Array.isArray(d) ? d : d ? [d] : [];
+      for (const r of rows) {
+        if (r.tenantId == null) r.tenantId = tenantSlug;
+        else if (r.tenantId !== tenantSlug) {
+          throw new Error("Cross-tenant create blocked");
+        }
+      }
+      return next(params);
+    }
+    return next(params);
+  }
+
   if (!model || !scopedModels.has(model)) return next(params);
   if (!workspaceId) return next(params);
 

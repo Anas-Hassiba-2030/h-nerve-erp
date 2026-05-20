@@ -2,14 +2,14 @@
 // (Phase 9). A transfer is a paired TRANSFER_OUT + TRANSFER_IN sharing
 // a transferRef; this surface collapses the pair into one row. Same
 // conventions as the rest of the admin family ((app) group, Heritage
-// Modern, Topbar, auth-gated, prismaUnscoped).
+// Modern, Topbar, auth-gated, prisma).
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRightLeft } from "lucide-react";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
-import { prismaUnscoped } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { Topbar } from "@/components/Topbar";
 import { formatNumber, formatDateTime } from "@/lib/utils";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
@@ -53,7 +53,7 @@ export default async function TransfersPage({
 
   const [warehouses, productRows, outLegs, todayAgg, activeGroups] =
     await Promise.all([
-      prismaUnscoped.warehouse.findMany({
+      prisma.warehouse.findMany({
         select: {
           id: true,
           code: true,
@@ -63,7 +63,7 @@ export default async function TransfersPage({
         },
         orderBy: { code: "asc" },
       }),
-      prismaUnscoped.product.findMany({
+      prisma.product.findMany({
         where: { deletedAt: null },
         select: {
           id: true,
@@ -74,7 +74,7 @@ export default async function TransfersPage({
         orderBy: { sku: "asc" },
         take: 500,
       }),
-      prismaUnscoped.inventoryMovement.findMany({
+      prisma.inventoryMovement.findMany({
         where: {
           type: "TRANSFER_OUT",
           deletedAt: null,
@@ -88,7 +88,7 @@ export default async function TransfersPage({
         orderBy: [{ occurredAt: "desc" }, { createdAt: "desc" }],
         take: 300,
       }),
-      prismaUnscoped.inventoryMovement.aggregate({
+      prisma.inventoryMovement.aggregate({
         _count: { _all: true },
         _sum: { delta: true },
         where: {
@@ -97,7 +97,7 @@ export default async function TransfersPage({
           occurredAt: { gte: todayStart },
         },
       }),
-      prismaUnscoped.inventoryMovement.groupBy({
+      prisma.inventoryMovement.groupBy({
         by: ["warehouseId"],
         where: {
           type: { in: ["TRANSFER_OUT", "TRANSFER_IN"] },
@@ -117,7 +117,7 @@ export default async function TransfersPage({
     ...new Set(outLegs.map((l) => l.transferRef as string)),
   ];
   const inLegs = refs.length
-    ? await prismaUnscoped.inventoryMovement.findMany({
+    ? await prisma.inventoryMovement.findMany({
         where: {
           transferRef: { in: refs },
           type: "TRANSFER_IN",

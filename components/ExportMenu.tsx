@@ -95,21 +95,25 @@ export function ExportMenu({
 
       {open ? (
         <div
-          className="hn-anim-rise absolute end-0 z-50 mt-2 w-[min(96vw,360px)] overflow-hidden"
+          // Phase V3-NEW-3 — dropdown was clipped by parent hero's
+          // overflow-hidden and z-index conflicted with the sticky
+          // PageHeader (z-20). Bumped to z-[120], explicit width,
+          // simplified header so it doesn't spill.
+          className="absolute end-0 mt-2 w-[300px] max-w-[96vw]"
           style={{
-            background: "var(--surface-elevated)",
-            border: "1.5px solid var(--text)",
+            background: "#ffffff",
+            border: "1.5px solid #0f172a",
             borderRadius: 0,
-            boxShadow: "6px 6px 0 0 var(--text)",
+            boxShadow: "0 10px 30px -8px rgba(0,0,0,0.25)",
+            zIndex: 120,
           }}
         >
-          {/* Header — gold rail + black bg */}
+          {/* Header — solid dark with single-line caption. */}
           <div
-            className="relative flex items-center gap-2.5 px-4 py-3"
+            className="flex items-center gap-2.5 px-4 py-3"
             style={{
-              background: "#0b0d0e",
-              color: "#f5f1e8",
-              boxShadow: "inset 0 2px 0 0 #c69345",
+              background: "#0f172a",
+              color: "#fff",
             }}
           >
             <Globe2 className="h-4 w-4" style={{ color: "#c69345" }} />
@@ -118,12 +122,10 @@ export function ExportMenu({
                 {ar ? "تصدير تنفيذي" : "Executive export"}
               </div>
               <div
-                className="mt-0.5 text-[11.5px] font-bold"
-                style={{ color: "rgba(245,241,232,0.7)" }}
+                className="mt-0.5 text-[11px]"
+                style={{ color: "rgba(255,255,255,0.75)", lineHeight: 1.35 }}
               >
-                {ar
-                  ? "KPIs + اتجاهات + تعليق محلل"
-                  : "KPIs · Trends · Analyst commentary"}
+                {ar ? "KPIs · اتجاهات · تعليق محلل" : "KPIs · trends · analyst notes"}
               </div>
             </div>
           </div>

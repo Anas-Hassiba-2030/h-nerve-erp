@@ -43,3 +43,47 @@ export async function shareInsightToCouncil(formData: FormData): Promise<void> {
   revalidatePath("/brain/council");
   redirect("/brain/council");
 }
+
+// Phase V3-NEW-5 — reply on a Council discussion thread. ADMIN +
+// EXECUTIVE may post replies; other roles can read but not write.
+export async function replyToDiscussion(formData: FormData): Promise<void> {
+  const me = await requireUser();
+  if (!["ADMIN", "EXECUTIVE"].includes(me.role)) {
+    throw new Error("forbidden");
+  }
+  const discussionId = String(formData.get("discussionId") ?? "").trim();
+  const body = String(formData.get("body") ?? "").trim().slice(0, 2000);
+  if (!discussionId || !body) return;
+
+  // Resolve parent thread to inherit tenantId (denormalized for
+  // direct middleware scoping on CouncilReply).
+  const parent = await prisma.councilDiscussion.findUnique({
+    where: { id: discussionId },
+    select: { tenantId: true },
+  });
+  if (!parent) return;
+
+  await prisma.councilReply.create({
+    data: {
+      discussionId,
+      tenantId: parent.tenantId,
+      authorUserId: me.id,
+      body,
+    },
+  });
+
+  // Touch the discussion so list views can sort by recent activity.
+  await prisma.councilDiscussion.update({
+    where: { id: discussionId },
+    data: { updatedAt: new Date() },
+  });
+
+  const ar = getLocale() === "ar";
+  flashToast({
+    type: "info",
+    entity: "info",
+    label: ar ? "تم نشر الرد في المجلس" : "Reply posted to council",
+  });
+  revalidatePath(`/brain/council/discussion/${discussionId}`);
+  revalidatePath("/brain/council");
+}

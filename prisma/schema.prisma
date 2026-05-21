@@ -60,7 +60,9 @@ model User {
   reports      User[]  @relation("UserReports")
 
   // Phase V3-P5 — shared-to-Council threads authored by this user.
-  councilShares CouncilDiscussion[] @relation("CouncilShares")
+  councilShares  CouncilDiscussion[] @relation("CouncilShares")
+  // Phase V3-NEW-5 — replies posted on Council threads.
+  councilReplies CouncilReply[]      @relation("CouncilReplies")
 }
 
 // =====================================================================
@@ -686,9 +688,28 @@ model CouncilDiscussion {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  replies        CouncilReply[]
+
   @@index([tenantId])
   @@index([createdAt])
   @@index([insightId])
+}
+
+// Phase V3-NEW-5 — replies on shared CouncilDiscussion threads. Each
+// reply is tenant-scoped (inherits the parent thread's tenantId, but
+// stored denormalized for direct middleware scoping).
+model CouncilReply {
+  id            String   @id @default(cuid())
+  tenantId      String
+  discussionId  String
+  discussion    CouncilDiscussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  authorUserId  String?
+  author        User?    @relation("CouncilReplies", fields: [authorUserId], references: [id], onDelete: SetNull)
+  body          String
+  createdAt     DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([discussionId, createdAt])
 }
 
 model CouncilSession {

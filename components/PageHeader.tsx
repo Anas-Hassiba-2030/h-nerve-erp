@@ -11,7 +11,7 @@ import { ChevronLeft } from "lucide-react";
 import { LocaleSwitch } from "./LocaleSwitch";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { CommandPalette } from "./CommandPalette";
-import { StickyScrollWatcher } from "./StickyScrollWatcher";
+// Phase V3-P1-RE — StickyScrollWatcher REMOVED (was the flicker source).
 import {
   NotificationCenter,
   type NotifInsight,
@@ -124,7 +124,7 @@ export async function PageHeader({
         borderBottom: "1px solid var(--heri-rule)",
       }}
     >
-      <StickyScrollWatcher threshold={32} />
+      {/* removed P1-RE */}
       {/* Heritage hairline accent — terracotta → ochre → teal */}
       <div
         className="h-[2px] w-full"
@@ -137,7 +137,7 @@ export async function PageHeader({
       {/* Row 1 — Title block + utility controls */}
       <div data-page-header-row1 className="px-6 py-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="min-w-0 flex-1 anim-fade-up">
+          <div className="min-w-0 flex-1">
             {/* Breadcrumbs */}
             {breadcrumbs && breadcrumbs.length > 0 ? (
               <nav

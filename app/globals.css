@@ -1545,59 +1545,17 @@ html[dir="rtl"] .sidebar-drawer-panel { --drawer-from: -100%; }
 }
 
 /* ── Sticky condensed PageHeader on scroll ──────────────────────── */
+/* Phase V3-P1-RE — sticky page header. The scroll-collapse
+   transitions used to live here (data-scrolled toggled via a client
+   useEffect in StickyScrollWatcher). They were the actual flicker
+   source: each scroll past 24px restarted the .25-.35s eyebrow /
+   subtitle / breadcrumbs / metrics collapse animation, and the
+   useEffect fired AFTER hydration so the initial paint snapped from
+   not-scrolled to scrolled if the user landed past the threshold.
+   Watcher removed. Static header is stable. */
 .exec-sticky-header {
-  transition:
-    box-shadow .35s var(--ease-out-expo),
-    background .35s var(--ease-out-expo);
-}
-/* When scrolled — collapse breadcrumbs/eyebrow/subtitle into nothing.
-   The actions row (Row 2) stays. The title shrinks slightly. */
-.exec-sticky-header[data-scrolled="true"] {
-  background: color-mix(in srgb, var(--surface-elevated) 75%, transparent) !important;
-  box-shadow:
-    0 1px 0 0 var(--border),
-    0 8px 18px -10px color-mix(in srgb, var(--text) 22%, transparent);
-}
-.exec-sticky-header[data-scrolled="true"] [data-page-header-eyebrow],
-.exec-sticky-header[data-scrolled="true"] [data-page-header-subtitle],
-.exec-sticky-header[data-scrolled="true"] [data-page-header-breadcrumbs],
-.exec-sticky-header[data-scrolled="true"] [data-page-header-metrics] {
-  max-height: 0;
-  margin: 0;
-  opacity: 0;
-  overflow: hidden;
-  transform: translateY(-4px);
-  pointer-events: none;
-  transition:
-    max-height .3s var(--ease-out-expo),
-    opacity .25s ease,
-    margin .3s var(--ease-out-expo),
-    transform .3s var(--ease-out-expo);
-}
-.exec-sticky-header [data-page-header-eyebrow],
-.exec-sticky-header [data-page-header-subtitle],
-.exec-sticky-header [data-page-header-breadcrumbs],
-.exec-sticky-header [data-page-header-metrics] {
-  max-height: 80px;
-  opacity: 1;
-  transform: translateY(0);
-  transition:
-    max-height .35s var(--ease-out-expo),
-    opacity .25s ease,
-    transform .35s var(--ease-out-expo);
-}
-/* Title gets a tiny shrink */
-.exec-sticky-header[data-scrolled="true"] [data-page-header-title] {
-  font-size: 16px !important;
-  line-height: 1.15 !important;
-}
-/* Tighter outer padding when condensed */
-.exec-sticky-header[data-scrolled="true"] [data-page-header-row1] {
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-}
-.exec-sticky-header [data-page-header-row1] {
-  transition: padding .3s var(--ease-out-expo);
+  /* No transition. Sticky positioning via the className handles
+     stickiness — the appearance does not animate on scroll. */
 }
 /* Hide the actions row entirely when condensed (the page-level CTAs
    live in heroes/sections — no need to repeat them). */

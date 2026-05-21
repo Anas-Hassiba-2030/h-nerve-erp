@@ -49,6 +49,9 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
   // its own admins' shares (cross-tenant brain federation would use
   // FederationPattern, not CouncilDiscussion).
   "CouncilDiscussion",
+  // Phase V3-NEW-5 — replies on those threads. Denormalized tenantId
+  // so middleware filters without joining through the parent.
+  "CouncilReply",
 ]);
 
 export type ScopeParams = { model?: string; action: string; args?: any };

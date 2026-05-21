@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Plus, Hotel, Milk, Sprout, GraduationCap, Brain, Sparkles,
   ListChecks, FlaskConical, Wallet, Building2, X, Command,
@@ -50,6 +51,9 @@ export function QuickAddFAB({ locale }: { locale: "ar" | "en" }) {
   const ref = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const ar = locale === "ar";
+  // Phase V3-NEW-4 — hooks must run unconditionally; the visibility
+  // check happens AFTER all useEffects below.
+  const pathname = usePathname();
 
   // Cmd/Ctrl+N — toggle. Esc — close.
   useEffect(() => {
@@ -122,6 +126,12 @@ export function QuickAddFAB({ locale }: { locale: "ar" | "en" }) {
   }
 
   const filtered = filterItems(filter);
+
+  // Phase V3-NEW-4 — hide the FAB on the workflow studio so it doesn't
+  // overlap the studio's bottom Test-run strip.
+  if (pathname && pathname.startsWith("/workflows/studio")) {
+    return null;
+  }
 
   // The app sidebar uses flex-row-reverse — sidebar sits on the RIGHT in LTR
   // and on the LEFT in RTL. So the FAB needs to live on the OPPOSITE side

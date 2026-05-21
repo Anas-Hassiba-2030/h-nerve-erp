@@ -42,9 +42,12 @@ export default async function BrainCouncilIndex() {
     prisma.councilSession.count({ where: { status: "RUNNING" } }),
     Promise.resolve(llmConfig().enabled),
     prisma.councilDiscussion.findMany({
-      orderBy: { createdAt: "desc" },
+      orderBy: { updatedAt: "desc" },
       take: 10,
-      include: { sharedBy: { select: { name: true } } },
+      include: {
+        sharedBy: { select: { name: true } },
+        _count: { select: { replies: true } },
+      },
     }),
   ]);
 
@@ -222,11 +225,16 @@ export default async function BrainCouncilIndex() {
                       {d.sharedBy?.name ?? (ar ? "—" : "unknown")} ·{" "}
                       {new Date(d.createdAt).toLocaleDateString(ar ? "ar-JO" : "en-US")}
                     </span>
-                    <HeritagePill tone={d.status === "OPEN" ? "warn" : "neutral"}>
-                      {d.status === "OPEN"
-                        ? ar ? "مفتوح" : "OPEN"
-                        : ar ? "مغلق" : "CLOSED"}
-                    </HeritagePill>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <HeritagePill tone={d._count.replies > 0 ? "neutral" : "warn"}>
+                        {d._count.replies} {ar ? "رد" : d._count.replies === 1 ? "reply" : "replies"}
+                      </HeritagePill>
+                      <HeritagePill tone={d.status === "OPEN" ? "warn" : "neutral"}>
+                        {d.status === "OPEN"
+                          ? ar ? "مفتوح" : "OPEN"
+                          : ar ? "مغلق" : "CLOSED"}
+                      </HeritagePill>
+                    </div>
                   </div>
                   <div
                     style={{
@@ -243,10 +251,20 @@ export default async function BrainCouncilIndex() {
                       fontSize: 12.5,
                       lineHeight: 1.55,
                       color: "var(--heri-ink-2)",
+                      marginBottom: 8,
                     }}
                   >
                     {d.body}
                   </div>
+                  {/* Phase V3-NEW-5 — clear Open discussion CTA. */}
+                  <Link
+                    href={`/brain/council/discussion/${d.id}`}
+                    className="heri-btn heri-btn-secondary"
+                    style={{ fontSize: 11, padding: "4px 10px" }}
+                  >
+                    {ar ? "فتح النقاش" : "Open discussion"}
+                    <ChevronLeft className="h-3 w-3 rtl:rotate-180" />
+                  </Link>
                 </li>
               ))}
             </ul>

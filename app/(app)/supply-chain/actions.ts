@@ -258,3 +258,54 @@ export async function autoGenerateForecasts(): Promise<void> {
   revalidatePath("/supply-chain");
   revalidatePath("/dashboard");
 }
+
+// =================================================================
+// Phase P7-MVP — Approve / Reject a SupplyForecast draft.
+// Approve advances status DRAFT → APPROVED and stamps an audit log
+// entry. Creating a downstream PurchaseOrder requires linking to a
+// real Supplier + Product row on the target tenant — left as a
+// follow-up; documented inline so the UX is honest about what
+// Approve means today: "intent recorded, procurement flow next."
+// =================================================================
+export async function approveForecast(formData: FormData): Promise<void> {
+  await requireUser();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const f = await prisma.supplyForecast.findUnique({ where: { id } });
+  if (!f) return;
+  if (f.status !== "DRAFT") return; // idempotent — only DRAFTs advance
+  await prisma.supplyForecast.update({
+    where: { id },
+    data: { status: "APPROVED" },
+  });
+  await logActivity({
+    action: "UPDATE",
+    entity: "FORECAST",
+    entityId: id,
+    summary: `اعتماد تنبؤ: ${f.productLabel}`,
+    summaryEn: `Approved forecast: ${f.productLabel}`,
+    module: "SUPPLY",
+  });
+  flashToast({
+    type: "info",
+    entity: "info",
+    label: "تم اعتماد التنبؤ · Forecast approved",
+  });
+  revalidatePath("/supply-chain");
+}
+
+export async function rejectForecast(formData: FormData): Promise<void> {
+  await requireUser();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  await prisma.supplyForecast.update({
+    where: { id },
+    data: { status: "DISMISSED" },
+  });
+  flashToast({
+    type: "info",
+    entity: "info",
+    label: "تم رفض التنبؤ · Forecast dismissed",
+  });
+  revalidatePath("/supply-chain");
+}

@@ -30,7 +30,10 @@ export default async function BrainCouncilIndex() {
   const locale = getLocale();
   const ar = locale === "ar";
 
-  const [recentSessions, openCount, llmEnabled] = await Promise.all([
+  // Phase V3-P5 — operator-shared CouncilDiscussion threads render
+  // above the system CouncilSession deliberations. Tenant-scoped via
+  // workspaceScope middleware.
+  const [recentSessions, openCount, llmEnabled, sharedDiscussions] = await Promise.all([
     prisma.councilSession.findMany({
       orderBy: { ranAt: "desc" },
       take: 12,
@@ -38,6 +41,11 @@ export default async function BrainCouncilIndex() {
     }),
     prisma.councilSession.count({ where: { status: "RUNNING" } }),
     Promise.resolve(llmConfig().enabled),
+    prisma.councilDiscussion.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      include: { sharedBy: { select: { name: true } } },
+    }),
   ]);
 
   const topics = ar ? SUGGESTED_TOPICS_AR : SUGGESTED_TOPICS_EN;
@@ -171,6 +179,79 @@ export default async function BrainCouncilIndex() {
             </ul>
           </div>
         </section>
+
+        {/* Phase V3-P5 — operator-shared threads */}
+        <HeritageSection
+          eyebrow={ar ? "مشاركات المدراء" : "Operator shares"}
+          title={ar ? "خيوط المجلس المشتركة" : "Shared Council threads"}
+          aside={
+            ar
+              ? "ما شاركه المدراء مع المجلس من رؤى وملاحظات."
+              : "What admins have shared with the Council for group discussion."
+          }
+        >
+          {sharedDiscussions.length === 0 ? (
+            <div
+              className="py-8 text-center"
+              style={{
+                color: "var(--heri-ink-3)",
+                fontStyle: "italic",
+                fontSize: 13,
+              }}
+            >
+              {ar
+                ? "لا توجد مشاركات بعد. اضغط على زر «للمجلس» في صفحة الرؤى لمشاركة أول رؤية."
+                : "No shares yet. Click the “Council” button on any insight card to start a thread."}
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {sharedDiscussions.map((d) => (
+                <li
+                  key={d.id}
+                  className="border p-3"
+                  style={{
+                    borderColor: "var(--heri-rule)",
+                    background: "var(--heri-cream)",
+                  }}
+                >
+                  <div className="flex items-center justify-between gap-3 mb-1.5">
+                    <span
+                      className="heri-eyebrow"
+                      style={{ color: "var(--heri-ink-3)" }}
+                    >
+                      {d.sharedBy?.name ?? (ar ? "—" : "unknown")} ·{" "}
+                      {new Date(d.createdAt).toLocaleDateString(ar ? "ar-JO" : "en-US")}
+                    </span>
+                    <HeritagePill tone={d.status === "OPEN" ? "warn" : "neutral"}>
+                      {d.status === "OPEN"
+                        ? ar ? "مفتوح" : "OPEN"
+                        : ar ? "مغلق" : "CLOSED"}
+                    </HeritagePill>
+                  </div>
+                  <div
+                    style={{
+                      fontWeight: 600,
+                      fontSize: 14,
+                      color: "var(--heri-ink)",
+                      marginBottom: 4,
+                    }}
+                  >
+                    {d.title}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 12.5,
+                      lineHeight: 1.55,
+                      color: "var(--heri-ink-2)",
+                    }}
+                  >
+                    {d.body}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </HeritageSection>
 
         {/* Past sessions */}
         <HeritageSection

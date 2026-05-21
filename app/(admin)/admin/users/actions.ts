@@ -98,6 +98,9 @@ export async function updateUser(formData: FormData): Promise<void> {
   // Phase F-UX — companyId picker. "" = unassigned (null in DB).
   const rawCompanyId = String(formData.get("companyId") ?? "").trim();
   const companyId = rawCompanyId || null;
+  // Phase V3-P13 — reportsToId picker. "" = no manager (root / CEO).
+  const rawReportsTo = String(formData.get("reportsToId") ?? "").trim();
+  const reportsToId = rawReportsTo || null;
   if (!name || !isRole(role)) return done();
 
   const target = await prisma.user.findUnique({ where: { id } });
@@ -114,7 +117,13 @@ export async function updateUser(formData: FormData): Promise<void> {
     if (!exists) return done(); // silently ignore invalid id
   }
 
-  await prisma.user.update({ where: { id }, data: { name, title, role, companyId } });
+  // Phase V3-P13 — prevent self-report (would create a cycle of len 1).
+  // Deeper cycle prevention is a follow-up; UI offers a curated list.
+  const safeReportsTo = reportsToId === id ? null : reportsToId;
+  await prisma.user.update({
+    where: { id },
+    data: { name, title, role, companyId, reportsToId: safeReportsTo },
+  });
   done();
 }
 

@@ -6,6 +6,7 @@ import {
   AlertTriangle, TrendingUp, TrendingDown, ArrowLeftRight, ChevronLeft,
 } from "lucide-react";
 import type { Anomaly } from "@/lib/anomaly";
+import { ShareToCouncilButton } from "./ShareToCouncilButton";
 
 const KIND_ICON = {
   SPIKE: TrendingUp,
@@ -111,6 +112,15 @@ export function AnomalyPanel({
                 <ChevronLeft className="h-3.5 w-3.5 rtl:rotate-180" style={{ color }} />
               ) : null}
             </Wrap>
+            {/* Phase V3-P5 — Share to Council sits outside the Wrap so a
+                <form> isn't nested inside <a> (invalid HTML). */}
+            <div className="mt-1 ms-12 flex">
+              <ShareToCouncilButton
+                title={t.headline}
+                body={t.explanation}
+                ar={ar}
+              />
+            </div>
           </li>
         );
       })}

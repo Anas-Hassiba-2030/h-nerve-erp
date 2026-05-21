@@ -10,6 +10,7 @@ import { prisma } from "@/lib/db";
 import { formatNumber, formatRelative, ROLES_AR, ROLES_EN, loc } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
 import { rankById } from "@/lib/gamification";
+import { OrgTree } from "@/components/OrgTree";
 
 export default async function EmployeesPage() {
   const ar = getLocale() === "ar";
@@ -26,6 +27,17 @@ export default async function EmployeesPage() {
     prisma.task.count(),
     prisma.task.count({ where: { status: "DONE" } }),
   ]);
+
+  // Phase V3-P13 — org tree built from User.reportsToId self-relation.
+  const orgNodes = users.map((u) => ({
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    role: u.role,
+    title: u.title ?? null,
+    companyCode: u.company?.code ?? null,
+    reportsToId: u.reportsToId ?? null,
+  }));
 
   const totalXp = users.reduce((a, u) => a + u.xp, 0);
   const totalLogins = users.reduce((a, u) => a + u.loginCount, 0);
@@ -93,6 +105,30 @@ export default async function EmployeesPage() {
             tone="amber"
             hint={ar ? "وزراء وملوك" : "Queens & kings"}
           />
+        </section>
+
+        {/* Phase V3-P13 — Org tree (collapsible reportsTo chain) */}
+        <section className="space-y-3">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-extrabold" style={{ color: "var(--text)" }}>
+              {ar ? "الهيكل التنظيمي" : "Org chart"}
+            </h3>
+            <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+              · {ar
+                ? "اضغط لتوسيع أو طي أي فرع"
+                : "Click to expand or collapse a branch"}
+            </span>
+            <span className="ms-auto h-px flex-1" style={{ background: "var(--border)" }} />
+          </div>
+          <div
+            className="p-4"
+            style={{
+              background: "var(--heri-cream)",
+              border: "1px solid var(--heri-rule)",
+            }}
+          >
+            <OrgTree users={orgNodes} ar={ar} />
+          </div>
         </section>
 
         {/* Directory grouped by company */}

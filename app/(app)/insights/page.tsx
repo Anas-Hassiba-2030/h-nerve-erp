@@ -85,9 +85,14 @@ export default async function InsightsPage() {
     }),
   ]);
 
-  const open = insights.filter((i) => i.status === "OPEN").length;
-  const opportunities = insights.filter((i) => i.severity === "OPPORTUNITY").length;
-  const critical = insights.filter((i) => i.severity === "CRITICAL").length;
+  // Phase V3-NEW-1 — the KPI tiles must reflect what the user sees
+  // on the page. Originally counted ONLY AIInsight rows; the auto-
+  // detected anomalies below are computed on-the-fly so they were
+  // invisible to the count. Now: tiles aggregate both. Anomalies are
+  // always treated as OPEN since they're computed live.
+  const openFromInsights = insights.filter((i) => i.status === "OPEN").length;
+  const oppFromInsights = insights.filter((i) => i.severity === "OPPORTUNITY").length;
+  const critFromInsights = insights.filter((i) => i.severity === "CRITICAL").length;
 
   // === Auto-detected anomalies ===
   const now = new Date();
@@ -123,6 +128,18 @@ export default async function InsightsPage() {
   );
 
   const allAnomalies = [...revenueAnomalies, ...bookingAnomalies].slice(0, 8);
+
+  // Phase V3-NEW-1 — combined KPI counts. SPIKE / DIP / TREND_REVERSAL
+  // anomalies are "opportunities" or "critical" depending on direction
+  // + severity. Conservative mapping:
+  //   - CRITICAL severity → critical tile
+  //   - SPIKE → opportunity
+  const critAnomaly = allAnomalies.filter((a) => a.severity === "CRITICAL").length;
+  const oppAnomaly = allAnomalies.filter((a) => a.kind === "SPIKE").length;
+  const totalCount = insights.length + allAnomalies.length;
+  const open = openFromInsights + allAnomalies.length;
+  const opportunities = oppFromInsights + oppAnomaly;
+  const critical = critFromInsights + critAnomaly;
 
   return (
     <>
@@ -195,7 +212,7 @@ export default async function InsightsPage() {
           <div className="grid grid-cols-2 md:grid-cols-4">
             <HeroStat
               label={ar ? "إجمالي" : "Total"}
-              value={formatNumber(insights.length)}
+              value={formatNumber(totalCount)}
               icon={Sparkles}
             />
             <HeroStat

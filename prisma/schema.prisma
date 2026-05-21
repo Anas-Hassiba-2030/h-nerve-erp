@@ -43,6 +43,7 @@ model User {
   updatedAt    DateTime @updatedAt
 
   @@index([active])
+  @@index([reportsToId])
 
   transactions Transaction[]
   forecasts    SupplyForecast[]
@@ -52,6 +53,14 @@ model User {
   threads      ThreadParticipant[]
   messages     Message[]
   alertRules   AlertRule[]
+
+  // Phase V3-P13 — org-tree self-relation.
+  reportsToId  String?
+  reportsTo    User?   @relation("UserReports", fields: [reportsToId], references: [id], onDelete: SetNull)
+  reports      User[]  @relation("UserReports")
+
+  // Phase V3-P5 — shared-to-Council threads authored by this user.
+  councilShares CouncilDiscussion[] @relation("CouncilShares")
 }
 
 // =====================================================================
@@ -660,6 +669,27 @@ model BrainEdge {
 // A panel of domain agents debates each decision; a moderator synthesizes.
 // Sessions are persisted so users can replay any past deliberation.
 // =====================================================================
+
+// Phase V3-P5 — operator-shared insight threads. Users on /insights /
+// /alerts / /admin/brain click the "Share to Council" button and a row
+// lands here. /brain/council renders them as a thread list above the
+// system-generated CouncilSession deliberations.
+model CouncilDiscussion {
+  id             String   @id @default(cuid())
+  tenantId       String
+  insightId      String?
+  sharedByUserId String?
+  sharedBy       User?    @relation("CouncilShares", fields: [sharedByUserId], references: [id], onDelete: SetNull)
+  title          String
+  body           String
+  status         String   @default("OPEN") // "OPEN" | "CLOSED"
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([createdAt])
+  @@index([insightId])
+}
 
 model CouncilSession {
   id              String   @id @default(cuid())

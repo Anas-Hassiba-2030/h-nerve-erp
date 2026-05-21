@@ -292,9 +292,10 @@ function FieldError({ msg }: { msg: string }) {
   );
 }
 
-type Row = { id: string; name: string; title: string | null; role: string; companyId?: string | null };
+type Row = { id: string; name: string; title: string | null; role: string; companyId?: string | null; reportsToId?: string | null };
+type ManagerOption = { id: string; name: string; role: string };
 
-export function EditUserForm({ u, ar, companies }: { u: Row; ar: boolean; companies: CompanyOption[] }) {
+export function EditUserForm({ u, ar, companies, managers }: { u: Row; ar: boolean; companies: CompanyOption[]; managers?: ManagerOption[] }) {
   return (
     <form action={updateUser} className="admin-form">
       <input type="hidden" name="id" value={u.id} />
@@ -315,6 +316,25 @@ export function EditUserForm({ u, ar, companies }: { u: Row; ar: boolean; compan
           <span className="admin-label">{ar ? "الشركة (المستأجر)" : "Company (tenant)"}</span>
           <CompanySelect value={u.companyId ?? null} ar={ar} companies={companies} />
         </label>
+        {managers && managers.length > 1 ? (
+          <label className="admin-field">
+            <span className="admin-label">{ar ? "يتبع لـ" : "Reports to"}</span>
+            <select
+              name="reportsToId"
+              defaultValue={u.reportsToId ?? ""}
+              className="admin-input"
+            >
+              <option value="">{ar ? "بدون (جذر الهيكل)" : "None (org root)"}</option>
+              {managers
+                .filter((m) => m.id !== u.id)
+                .map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name} · {m.role}
+                  </option>
+                ))}
+            </select>
+          </label>
+        ) : null}
       </div>
       <button type="submit" className="admin-btn-ghost">
         <Save className="h-3.5 w-3.5" strokeWidth={1.5} />

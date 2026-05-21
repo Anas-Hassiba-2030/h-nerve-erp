@@ -77,6 +77,7 @@ export default async function AdminUsersPage({
         active: true,
         lastLoginAt: true,
         companyId: true,
+        reportsToId: true,
       },
       skip: (fPage - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
@@ -228,7 +229,7 @@ export default async function AdminUsersPage({
               </div>
 
               <div style={{ marginTop: 14, display: "grid", gap: 14 }}>
-                <EditUserForm u={u} ar={ar} companies={companies} />
+                <EditUserForm u={u} ar={ar} companies={companies} managers={users.map((m) => ({ id: m.id, name: m.name, role: m.role }))} />
                 <ResetPasswordForm id={u.id} ar={ar} />
                 <ActiveToggle id={u.id} active={u.active} ar={ar} />
                 {isMe ? null : (

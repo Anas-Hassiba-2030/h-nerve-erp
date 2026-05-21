@@ -45,6 +45,10 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
   // 20260520_add_tenant_id_to_booking_crop.
   "Booking",
   "Crop",
+  // Phase V3-P5 — shared-to-Council threads. Each tenant sees only
+  // its own admins' shares (cross-tenant brain federation would use
+  // FederationPattern, not CouncilDiscussion).
+  "CouncilDiscussion",
 ]);
 
 export type ScopeParams = { model?: string; action: string; args?: any };

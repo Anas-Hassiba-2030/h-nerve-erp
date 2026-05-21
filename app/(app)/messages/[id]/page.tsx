@@ -224,11 +224,29 @@ export default async function ThreadPage({ params }: { params: { id: string } })
                                 }
                           }
                         >
-                          <div
-                            className="whitespace-pre-line text-[12.5px] leading-relaxed"
-                          >
-                            {m.body}
-                          </div>
+                          {/* Phase NS-2 — inline image render when
+                              the message has a data URI attached. */}
+                          {m.imageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={m.imageUrl}
+                              alt=""
+                              style={{
+                                display: "block",
+                                maxWidth: "100%",
+                                maxHeight: 320,
+                                borderRadius: 10,
+                                marginBottom: m.body ? 6 : 0,
+                              }}
+                            />
+                          ) : null}
+                          {m.body ? (
+                            <div
+                              className="whitespace-pre-line text-[12.5px] leading-relaxed"
+                            >
+                              {m.body}
+                            </div>
+                          ) : null}
                           <div
                             className={`mt-1 text-[9.5px] font-bold ${mine ? "opacity-80" : ""}`}
                             style={{ color: mine ? "white" : "var(--text-muted)" }}

@@ -10,19 +10,36 @@ import { logActivity } from "@/lib/activityLog";
 
 const sendSchema = z.object({
   threadId: z.string().min(1),
-  body: z.string().min(1).max(4000),
+  // Phase NS-2 — body OR imageUrl is now sufficient (one or both).
+  // The composer enforces the user-facing min-1 requirement.
+  body: z.string().max(4000).default(""),
   refType: z.string().max(40).optional(),
   refId: z.string().max(80).optional(),
+  // Data URI (image/png, image/jpeg, image/webp, image/gif). Hard
+  // cap at ~1.4 MB which corresponds to ~1 MB of binary at base64
+  // overhead. Larger uploads are rejected client-side by the picker.
+  imageUrl: z
+    .string()
+    .max(1_400_000)
+    .regex(/^data:image\/(png|jpe?g|webp|gif);base64,/)
+    .optional()
+    .or(z.literal(""))
+    .transform((v) => (v && v.length > 0 ? v : undefined)),
 });
 
 export async function sendMessage(formData: FormData) {
   const user = await requireUser();
   const data = sendSchema.parse({
     threadId: formData.get("threadId"),
-    body: formData.get("body"),
+    body: formData.get("body") ?? "",
     refType: formData.get("refType") ?? undefined,
     refId: formData.get("refId") ?? undefined,
+    imageUrl: formData.get("imageUrl") ?? undefined,
   });
+  // After parse: require at least one of (body, imageUrl).
+  if (!data.body && !data.imageUrl) {
+    throw new Error("Empty message");
+  }
 
   // Verify the user is a participant of this thread
   const part = await prisma.threadParticipant.findFirst({
@@ -35,6 +52,7 @@ export async function sendMessage(formData: FormData) {
       threadId: data.threadId,
       authorId: user.id,
       body: data.body,
+      imageUrl: data.imageUrl ?? null,
       refType: data.refType ?? null,
       refId: data.refId ?? null,
     },

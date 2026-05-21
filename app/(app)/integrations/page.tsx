@@ -15,6 +15,7 @@ import { ChevronLeft, Plug, Search } from "lucide-react";
 import {
   PROVIDERS,
   CATEGORIES,
+  FUNCTIONAL_STATE_LABEL,
   type IntegrationCategory,
 } from "@/lib/integrations/catalog";
 import { connect, connectAndOpen } from "./actions";
@@ -59,8 +60,8 @@ export default async function IntegrationsHubPage({
         title={ar ? "كل التكاملات في مكان واحد" : "Every connector in one marketplace"}
         subtitle={
           ar
-            ? "اربط Slack، البنوك، المستشعرات، البريد، التقاويم، التجارة. كل سير عمل ينطلق إلى الأنظمة الحقيقية."
-            : "Connect Slack, banks, sensors, mail, calendars, commerce. Every workflow runs out to the real systems."
+            ? "٢٤ موصلاً جاهز البنية · موصلان قابلان للربط اليوم بمفتاح API · باقي مجموعة OAuth تتوسّع حسب الأولوية."
+            : "24 connectors ready · 2 connectable today via API key · full OAuth suite rolling out per priority."
         }
       />
 
@@ -144,16 +145,44 @@ export default async function IntegrationsHubPage({
                       <p className="integration-card-desc">
                         {ar ? provider.descriptionAr : provider.description}
                       </p>
+                      {/* Phase V3-NEW-7 — buildout-state badge above the
+                          connection-state pill. Honest about which
+                          connectors are actually wireable today. */}
+                      {(() => {
+                        const fs = FUNCTIONAL_STATE_LABEL[provider.functionalState];
+                        return (
+                          <div style={{ marginBottom: 6 }}>
+                            <HeritagePill tone={fs.tone}>
+                              {ar ? fs.ar : fs.en}
+                            </HeritagePill>
+                          </div>
+                        );
+                      })()}
                       <div className="integration-card-footrow">
                         <HeritagePill tone={tone}>{statusLabel}</HeritagePill>
                         {!isConnected ? (
-                          <form action={connectAndOpen} className="integration-connect-form">
-                            <input type="hidden" name="providerKey" value={provider.key} />
-                            <button type="submit" className="integration-connect-btn">
+                          provider.functionalState === "READY_FOR_SETUP" || provider.functionalState === "LIVE" ? (
+                            <form action={connectAndOpen} className="integration-connect-form">
+                              <input type="hidden" name="providerKey" value={provider.key} />
+                              <button type="submit" className="integration-connect-btn">
+                                <Plug className="h-3.5 w-3.5" strokeWidth={1.5} />
+                                {ar ? "اتصل" : "Connect"}
+                              </button>
+                            </form>
+                          ) : (
+                            <button
+                              type="button"
+                              disabled
+                              className="integration-connect-btn"
+                              title={ar
+                                ? "إعداد هذا الموصل يأتي في الإصدار القادم"
+                                : "Connector setup coming in next release"}
+                              style={{ opacity: 0.45, cursor: "not-allowed" }}
+                            >
                               <Plug className="h-3.5 w-3.5" strokeWidth={1.5} />
-                              {ar ? "اتصل" : "Connect"}
+                              {ar ? "قريباً" : "Soon"}
                             </button>
-                          </form>
+                          )
                         ) : (
                           <Link
                             href={`/integrations/${provider.key}`}

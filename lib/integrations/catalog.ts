@@ -13,6 +13,18 @@ export type IntegrationCategory =
   | "iot"
   | "commerce";
 
+// Phase V3-NEW-7 — buildout state, separate from per-tenant connection
+// status. "READY_FOR_SETUP" = OAuth/API-key flow wired today (the
+// Connect button works). "INFRASTRUCTURE_READY" = UI + DB + scopes
+// listed; OAuth/webhook wiring rolls out per priority. "COMING_SOON"
+// = roadmap only. Honest defaults below — flip to READY_FOR_SETUP /
+// LIVE per provider as wiring lands.
+export type FunctionalState =
+  | "COMING_SOON"
+  | "INFRASTRUCTURE_READY"
+  | "READY_FOR_SETUP"
+  | "LIVE";
+
 export type IntegrationProvider = {
   key: string;
   name: string;
@@ -27,8 +39,22 @@ export type IntegrationProvider = {
   description: string;
   descriptionAr: string;
   scopes: string[];
+  // Phase V3-NEW-7 — pitch-honest buildout state. Defaults below.
+  functionalState: FunctionalState;
   // Per-provider connect-flow setting fields.
   settingFields?: Array<{ key: string; label: string; type: "text" | "select"; default?: string; options?: string[] }>;
+};
+
+// Tones map to HeritagePill ("success" | "warn" | "critical" |
+// "info" | "neutral").
+export const FUNCTIONAL_STATE_LABEL: Record<
+  FunctionalState,
+  { en: string; ar: string; tone: "neutral" | "warn" | "success" | "info" }
+> = {
+  COMING_SOON:          { en: "Coming soon",          ar: "قريباً",         tone: "neutral" },
+  INFRASTRUCTURE_READY: { en: "Infrastructure ready", ar: "البنية جاهزة",   tone: "warn"    },
+  READY_FOR_SETUP:      { en: "Ready for setup",      ar: "جاهز للإعداد",  tone: "success" },
+  LIVE:                 { en: "Live",                 ar: "مفعّل",          tone: "success" },
 };
 
 export const CATEGORIES: Record<IntegrationCategory, { en: string; ar: string }> = {
@@ -52,6 +78,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Stream alerts, plans, and council recommendations into Slack channels.",
     descriptionAr: "أرسل التنبيهات والخطط وتوصيات المجلس إلى قنوات Slack.",
     scopes: ["chat:write", "channels:read", "users:read"],
+    functionalState: "INFRASTRUCTURE_READY",
     settingFields: [
       { key: "defaultChannel", label: "Default channel", type: "text", default: "procurement" },
     ],
@@ -66,6 +93,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Post adaptive cards into Teams channels with one-click acknowledgement.",
     descriptionAr: "انشر بطاقات تكيّفية في قنوات تيمز مع تأكيد بنقرة واحدة.",
     scopes: ["ChannelMessage.Send", "Team.ReadBasic.All"],
+    functionalState: "INFRASTRUCTURE_READY",
     settingFields: [
       { key: "team", label: "Team", type: "text", default: "Operations" },
     ],
@@ -80,6 +108,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Send approved templates to staff phones — works across MENA telcos.",
     descriptionAr: "أرسل قوالب معتمدة إلى هواتف الموظفين — متوافق مع شركات الاتصالات في المنطقة.",
     scopes: ["messages.send", "templates.read"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
   {
     key: "telegram",
@@ -91,6 +120,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Bot-driven group notifications for ops teams who already live in Telegram.",
     descriptionAr: "إشعارات مجموعات عبر بوت لفرق العمليات التي تعتمد تليجرام.",
     scopes: ["bot.send", "bot.read_chat"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
 
   // ── EMAIL ────────────────────────────────────────────────────────
@@ -104,6 +134,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Send digests and approval requests via Gmail with executive-grade typography.",
     descriptionAr: "أرسل الملخصات وطلبات الموافقة عبر جي ميل بتنسيق تنفيذي.",
     scopes: ["gmail.send", "gmail.compose"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
   {
     key: "outlook",
@@ -115,6 +146,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Microsoft 365 mailbox connector. Same surface as Gmail — different stack.",
     descriptionAr: "موصل صناديق بريد Microsoft 365 — نفس السطح، مكدس مختلف.",
     scopes: ["Mail.Send", "Mail.Read"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
   {
     key: "sendgrid",
@@ -126,6 +158,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Transactional email at scale with delivery analytics.",
     descriptionAr: "بريد معاملاتي بحجم كبير مع تحليلات التسليم.",
     scopes: ["mail.send"],
+    functionalState: "READY_FOR_SETUP",
     settingFields: [
       { key: "fromAddress", label: "From address", type: "text", default: "ops@hourani.jo" },
     ],
@@ -140,6 +173,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Modern API-first email — beautiful templates, first-class tracking.",
     descriptionAr: "بريد إلكتروني عصري عبر API — قوالب أنيقة وتتبّع متقدّم.",
     scopes: ["emails:send"],
+    functionalState: "READY_FOR_SETUP",
   },
 
   // ── CALENDAR ─────────────────────────────────────────────────────
@@ -153,6 +187,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Auto-schedule plan reviews and council sessions on the team calendar.",
     descriptionAr: "جدولة تلقائية لمراجعات الخطط وجلسات المجلس على تقويم الفريق.",
     scopes: ["calendar.events", "calendar.readonly"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
   {
     key: "outlook_calendar",
@@ -164,6 +199,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Mirror of Google Calendar for Microsoft 365 shops.",
     descriptionAr: "نظير تقويم جوجل للمؤسسات على Microsoft 365.",
     scopes: ["Calendars.ReadWrite"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
   {
     key: "calcom",
@@ -175,6 +211,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Self-hostable scheduling — perfect for council intake from external founders.",
     descriptionAr: "جدولة قابلة للاستضافة الذاتية — مثالية لاستقبال المؤسسين الخارجيين.",
     scopes: ["bookings.read", "bookings.write"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
   {
     key: "calendly",
@@ -186,6 +223,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Drop a Calendly link into any plan — bookings flow back into the brain.",
     descriptionAr: "أرفق رابط Calendly بأي خطة — تعود الحجوزات إلى الدماغ.",
     scopes: ["scheduled_events.read"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
 
   // ── BANKING / PAYMENTS ───────────────────────────────────────────
@@ -199,6 +237,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Bank account connectivity — read transactions, balances, and identity.",
     descriptionAr: "ربط الحسابات البنكية — قراءة المعاملات والأرصدة والهوية.",
     scopes: ["transactions", "accounts", "identity"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
   {
     key: "open_banking_jo",
@@ -210,6 +249,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Jordanian PSD-style connector for direct CBJ-licensed institutions.",
     descriptionAr: "موصل بنوك أردنية مرخّصة من البنك المركزي بنمط PSD.",
     scopes: ["accounts.read", "transactions.read"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
   {
     key: "stripe",
@@ -221,6 +261,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Card processing + subscription billing for tenant SaaS plans.",
     descriptionAr: "معالجة البطاقات والاشتراكات لخطط SaaS للمستأجرين.",
     scopes: ["read_charges", "write_charges", "read_subscriptions"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
   {
     key: "quickbooks",
@@ -232,6 +273,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Two-way sync with the canonical SMB ledger for finance closes.",
     descriptionAr: "مزامنة ثنائية مع دفتر الأستاذ القياسي للمؤسسات الصغيرة.",
     scopes: ["com.intuit.quickbooks.accounting"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
 
   // ── IOT ──────────────────────────────────────────────────────────
@@ -245,6 +287,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Subscribe to sensor topics; route into the brain's event stream.",
     descriptionAr: "اشترك بمواضيع المستشعرات وادفعها إلى تيار أحداث الدماغ.",
     scopes: ["topic.subscribe"],
+    functionalState: "INFRASTRUCTURE_READY",
     settingFields: [
       { key: "host",  label: "Broker host", type: "text", default: "mqtt://broker.local:1883" },
       { key: "topic", label: "Subscribe topic", type: "text", default: "sensors/+/moisture" },
@@ -260,6 +303,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Managed MQTT + device shadow + rules engine, hosted by AWS.",
     descriptionAr: "MQTT مُدار + ظلال أجهزة + محرك قواعد على AWS.",
     scopes: ["iot:Connect", "iot:Subscribe"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
   {
     key: "sigfox",
@@ -271,6 +315,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Low-power wide-area sensor network — for remote farm telemetry.",
     descriptionAr: "شبكة مستشعرات منخفضة الطاقة واسعة النطاق — لقياس المزارع البعيدة.",
     scopes: ["device.read"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
   {
     key: "particle",
@@ -282,6 +327,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Cellular IoT modules with OTA fleet management.",
     descriptionAr: "وحدات IoT خلوية مع إدارة أسطول عبر الهواء.",
     scopes: ["devices.read", "events.subscribe"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
 
   // ── COMMERCE ─────────────────────────────────────────────────────
@@ -295,6 +341,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Storefront orders, inventory, and customer feedback into the brain.",
     descriptionAr: "طلبات المتجر والمخزون وتقييمات العملاء إلى الدماغ.",
     scopes: ["read_orders", "read_inventory"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
   {
     key: "woocommerce",
@@ -306,6 +353,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "WordPress-native e-commerce connector — same shape as Shopify.",
     descriptionAr: "موصل تجارة إلكترونية مدمج مع ووردبريس — نفس البنية.",
     scopes: ["read", "read_write"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
   {
     key: "square",
@@ -317,6 +365,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Point-of-sale data for hospitality F&B — ties Arena tickets to dairy demand.",
     descriptionAr: "بيانات نقاط بيع للضيافة F&B — يربط فواتير أرينا بطلب المها.",
     scopes: ["MERCHANT_PROFILE_READ", "PAYMENTS_READ"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
   {
     key: "twilio",
@@ -328,6 +377,7 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "SMS, voice, and verification flows for staff and customers.",
     descriptionAr: "رسائل SMS وصوت وتحقّق للموظفين والعملاء.",
     scopes: ["messages.send", "calls.create"],
+    functionalState: "INFRASTRUCTURE_READY",
   },
 ];
 

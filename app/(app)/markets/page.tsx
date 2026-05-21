@@ -15,10 +15,33 @@ const REGION_EN: Record<string, string> = { MENA: "MENA", US: "US", EU: "EU", AS
 
 export default async function MarketsPage() {
   const ar = getLocale() === "ar";
-  const stocks = await prisma.marketStock.findMany({
-    orderBy: [{ region: "asc" }, { changePct: "desc" }],
-    include: { company: true },
-  });
+  const [stocks, companies, txns] = await Promise.all([
+    prisma.marketStock.findMany({
+      orderBy: [{ region: "asc" }, { changePct: "desc" }],
+      include: { company: true },
+    }),
+    // Phase V3-P11-finish — Hourani Group Equities cards built from
+    // /companies data (not publicly traded — internal valuation only).
+    prisma.company.findMany({
+      orderBy: { code: "asc" },
+      select: { id: true, code: true, name: true, nameEn: true, sector: true, employees: true },
+    }),
+    prisma.transaction.findMany({
+      where: { occurredAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
+      select: { companyId: true, kind: true, amount: true },
+    }),
+  ]);
+
+  // Notional valuation: trailing 30d revenue × 8 (a 30d × 12 = annualized
+  // × 8 P/E proxy = 0.667 × annual revenue). Documented inline so
+  // sales conversations can defend the math.
+  const valuationByCompany = new Map<string, number>();
+  for (const c of companies) {
+    const rev = txns
+      .filter((t) => t.companyId === c.id && t.kind === "REVENUE")
+      .reduce((a, t) => a + t.amount, 0);
+    valuationByCompany.set(c.id, rev * 12 * 8 / 12);
+  }
 
   // Group by region
   const byRegion = stocks.reduce<Record<string, typeof stocks>>((acc, s) => {
@@ -144,15 +167,89 @@ export default async function MarketsPage() {
           />
         </section>
 
-        {/* Group equities highlighted */}
+        {/* Phase V3-P11-finish — Hourani Group Equities (internal valuation) */}
         <section className="space-y-3">
-          <div className="section-title">{ar ? "أسهم مجموعة الحوراني" : "Hourani Group Equities"}</div>
-          <div className="grid gap-3 stagger lg:grid-cols-2 xl:grid-cols-3">
-            {groupStocks.map((s) => (
-              <StockCard key={s.id} stock={s} ar={ar} highlighted />
-            ))}
+          <div className="section-title">
+            {ar ? "أسهم مجموعة الحوراني (تقييم داخلي)" : "Hourani Group Equities (internal valuation)"}
+          </div>
+          <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+            {ar
+              ? "تقييم تقديري داخلي · ليست أسهماً متداولة"
+              : "Internal valuation · not publicly traded"}
+            {" · "}
+            {ar ? "حسبة: إيراد 30 يوماً × 8 (مضاعف P/E)" : "Calc: 30d revenue × 8 (P/E proxy)"}
+          </p>
+          <div className="grid gap-3 stagger md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {companies.map((c) => {
+              const valuation = valuationByCompany.get(c.id) ?? 0;
+              return (
+                <div
+                  key={c.id}
+                  className="rounded-xl p-4"
+                  style={{
+                    background: "var(--surface-elevated)",
+                    border: "1px solid var(--border)",
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="heri-eyebrow" style={{ color: "var(--heri-ink-3)" }}>
+                      {c.code}
+                    </span>
+                    <span
+                      className="font-mono text-[10px] uppercase tracking-widest"
+                      style={{ color: "var(--heri-ink-3)" }}
+                    >
+                      MENA · INTERNAL
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 700,
+                      color: "var(--text)",
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {ar ? c.name : c.nameEn}
+                  </div>
+                  <div
+                    className="font-mono"
+                    style={{
+                      fontSize: 22,
+                      fontWeight: 600,
+                      letterSpacing: "-0.01em",
+                      marginTop: 8,
+                      color: "var(--brand-deep, #0f5132)",
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    {Math.round(valuation).toLocaleString("en-US")} JOD
+                  </div>
+                  <div
+                    className="text-[10.5px] mt-1"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    {c.sector} · {formatNumber(c.employees)} {ar ? "موظف" : "staff"}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
+
+        {/* Group equities — if any MarketStock is linked to a company */}
+        {groupStocks.length > 0 ? (
+          <section className="space-y-3">
+            <div className="section-title">
+              {ar ? "أسهم متداولة مرتبطة" : "Linked tradable tickers"}
+            </div>
+            <div className="grid gap-3 stagger lg:grid-cols-2 xl:grid-cols-3">
+              {groupStocks.map((s) => (
+                <StockCard key={s.id} stock={s} ar={ar} highlighted />
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         {/* By region */}
         {Object.entries(byRegion).map(([region, list]) => {

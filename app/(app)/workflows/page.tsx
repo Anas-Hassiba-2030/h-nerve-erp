@@ -15,7 +15,9 @@ import {
   toggleWorkflow,
   seedExampleWorkflows,
   deleteWorkflow,
+  createWorkflowFromTemplate,
 } from "./actions";
+import { TEMPLATE_GALLERY } from "@/lib/workflows/templates.gallery";
 
 const KIND_TONE: Record<string, "info" | "warn" | "critical" | "success" | "neutral"> = {
   trigger: "warn",
@@ -68,23 +70,79 @@ export default async function WorkflowsPage() {
           </form>
         </section>
 
+        {/* Phase NS-3 — template gallery. Shows always, not just on
+            empty state; serves as a "starter pack" the manager can
+            clone and customise. */}
+        <HeritageSection
+          eyebrow={ar ? "قوالب جاهزة" : "Starter templates"}
+          title={ar ? "ابدأ من قالب" : "Start from a template"}
+          aside={
+            ar
+              ? `${TEMPLATE_GALLERY.length} قالب — تخصيص بنقرة واحدة`
+              : `${TEMPLATE_GALLERY.length} templates — one-click clone`
+          }
+        >
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {TEMPLATE_GALLERY.map((t) => (
+              <article
+                key={t.id}
+                className="p-4 flex flex-col gap-2"
+                style={{
+                  background: "var(--heri-cream)",
+                  border: "1px solid var(--heri-rule)",
+                }}
+              >
+                <div className="heri-eyebrow" style={{ color: "var(--heri-ink-3)" }}>
+                  {ar ? t.flowAr : t.flowEn}
+                </div>
+                <h3
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: "var(--heri-ink)",
+                    margin: 0,
+                  }}
+                >
+                  {ar ? t.nameAr : t.nameEn}
+                </h3>
+                <p
+                  style={{
+                    fontSize: 12,
+                    lineHeight: 1.5,
+                    color: "var(--heri-ink-2)",
+                    margin: 0,
+                    flex: 1,
+                  }}
+                >
+                  {ar ? t.descAr : t.descEn}
+                </p>
+                <form action={createWorkflowFromTemplate}>
+                  <input type="hidden" name="templateId" value={t.id} />
+                  <button
+                    type="submit"
+                    className="heri-btn heri-btn-secondary"
+                    style={{ fontSize: 11.5, padding: "6px 12px" }}
+                  >
+                    <Plus className="h-3 w-3" strokeWidth={1.7} />
+                    {ar ? "استخدم هذا القالب" : "Use this template"}
+                  </button>
+                </form>
+              </article>
+            ))}
+          </div>
+        </HeritageSection>
+
         {workflows.length === 0 ? (
           <HeritageSection
             eyebrow={ar ? "ابدأ" : "Start"}
             title={ar ? "لا سير عمل بعد" : "No workflows yet"}
             aside={
               ar
-                ? "ازرع مثالين جاهزين لرؤية الإمكانات."
-                : "Seed two ready-made examples to see the studio in action."
+                ? "أو ابدأ من قالب أعلاه."
+                : "Or pick a template from the gallery above."
             }
           >
             <div className="flex flex-wrap gap-3">
-              <form action={seedExampleWorkflows}>
-                <button type="submit" className="heri-btn heri-btn-primary">
-                  <Database className="h-4 w-4" strokeWidth={1.5} />
-                  {ar ? "ازرع مثالَين" : "Seed two examples"}
-                </button>
-              </form>
               <form action={createWorkflow}>
                 <input type="hidden" name="name" value="New workflow" />
                 <button type="submit" className="heri-btn heri-btn-secondary">

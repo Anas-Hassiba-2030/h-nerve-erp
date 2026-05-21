@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db";
 import { getTemplate, defaultParams } from "@/lib/workflows/templates";
 import { runWorkflow, type RunMode } from "@/lib/workflows/runtime";
 import { seedWorkflows } from "@/lib/workflows/seed";
+import { getGalleryTemplate } from "@/lib/workflows/templates.gallery";
 
 export async function createWorkflow(formData: FormData): Promise<void> {
   await requireUser();
@@ -130,4 +131,50 @@ export async function seedExampleWorkflows(): Promise<void> {
   await requireUser();
   await seedWorkflows();
   revalidatePath("/workflows");
+}
+
+// Phase NS-3 — clone a gallery template into a fresh Workflow row.
+export async function createWorkflowFromTemplate(formData: FormData): Promise<void> {
+  await requireUser();
+  const templateId = String(formData.get("templateId") ?? "");
+  if (!templateId) throw new Error("templateId required");
+  const t = getGalleryTemplate(templateId);
+  if (!t) throw new Error(`unknown template: ${templateId}`);
+
+  const nodeCreates = t.nodes.map((n, i) => {
+    const tpl = getTemplate(n.key);
+    if (!tpl) throw new Error(`missing runtime template: ${n.key}`);
+    const params = { ...defaultParams(tpl), ...(n.params ?? {}) };
+    return {
+      kind: tpl.kind,
+      templateKey: tpl.key,
+      configJson: JSON.stringify(params),
+      posX: tpl.defaultColumn,
+      posY: i,
+    };
+  });
+
+  const wf = await prisma.workflow.create({
+    data: {
+      scope: "default",
+      name: t.nameEn,
+      description: t.descEn,
+      enabled: false,
+      status: "DRAFT",
+      nodes: { create: nodeCreates },
+    },
+    include: { nodes: { orderBy: { createdAt: "asc" } } },
+  });
+
+  for (const e of t.edges) {
+    const fromNode = wf.nodes[e.from];
+    const toNode = wf.nodes[e.to];
+    if (!fromNode || !toNode) continue;
+    await prisma.workflowEdge.create({
+      data: { workflowId: wf.id, fromNodeId: fromNode.id, toNodeId: toNode.id },
+    });
+  }
+
+  revalidatePath("/workflows");
+  redirect(`/workflows/studio/${wf.id}`);
 }

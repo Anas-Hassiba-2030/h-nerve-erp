@@ -9,13 +9,14 @@ import { ExportMenu } from "@/components/ExportMenu";
 import { prisma } from "@/lib/db";
 import { formatNumber, formatPercent } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
+import { getCompanyRevenue30dMap, notionalValuationFromRevenue30d } from "@/lib/finance";
 
 const REGION_AR: Record<string, string> = { MENA: "الشرق الأوسط", US: "الولايات المتحدة", EU: "أوروبا", ASIA: "آسيا" };
 const REGION_EN: Record<string, string> = { MENA: "MENA", US: "US", EU: "EU", ASIA: "Asia" };
 
 export default async function MarketsPage() {
   const ar = getLocale() === "ar";
-  const [stocks, companies, txns] = await Promise.all([
+  const [stocks, companies] = await Promise.all([
     prisma.marketStock.findMany({
       orderBy: [{ region: "asc" }, { changePct: "desc" }],
       include: { company: true },
@@ -26,21 +27,20 @@ export default async function MarketsPage() {
       orderBy: { code: "asc" },
       select: { id: true, code: true, name: true, nameEn: true, sector: true, employees: true },
     }),
-    prisma.transaction.findMany({
-      where: { occurredAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
-      select: { companyId: true, kind: true, amount: true },
-    }),
   ]);
 
-  // Notional valuation: trailing 30d revenue × 8 (a 30d × 12 = annualized
-  // × 8 P/E proxy = 0.667 × annual revenue). Documented inline so
-  // sales conversations can defend the math.
+  // Phase BUG-3 — single source of truth for revenue 30d via
+  // lib/finance.getCompanyRevenue30dMap. Both /workspace and /markets
+  // now read the same JOD value for the same company × 30d window.
+  // Notional valuation = revenue30d × 8 (P/E proxy, documented in
+  // lib/finance.ts).
+  const revenueMap = await getCompanyRevenue30dMap(companies.map((c) => c.id));
   const valuationByCompany = new Map<string, number>();
+  const revenue30dByCompany = new Map<string, number>();
   for (const c of companies) {
-    const rev = txns
-      .filter((t) => t.companyId === c.id && t.kind === "REVENUE")
-      .reduce((a, t) => a + t.amount, 0);
-    valuationByCompany.set(c.id, rev * 12 * 8 / 12);
+    const rev = revenueMap.get(c.id) ?? 0;
+    revenue30dByCompany.set(c.id, rev);
+    valuationByCompany.set(c.id, notionalValuationFromRevenue30d(rev));
   }
 
   // Group by region

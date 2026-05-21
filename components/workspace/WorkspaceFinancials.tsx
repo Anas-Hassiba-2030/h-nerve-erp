@@ -97,11 +97,21 @@ export function WorkspaceFinancials({
         : `${formatPercent(margin, 1)} margin`,
     },
     {
+      // Phase BUG-4 — when transfer is 0, swap the hint to an
+      // explanatory copy. Bare "JOD 0 · last 30 days" reads
+      // unfinished.
       label: ar ? "تحويلات داخلية 30ي" : "Transfers 30d",
       value: formatMoney(transfer),
       delta: null,
       higherIsBetter: true,
-      hint: ar ? "آخر 30 يوم" : "last 30 days",
+      hint:
+        transfer === 0
+          ? ar
+            ? "لا تحويلات بين الشركات"
+            : "No inter-company transfers"
+          : ar
+            ? "آخر 30 يوم"
+            : "last 30 days",
     },
   ];
 

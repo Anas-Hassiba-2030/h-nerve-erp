@@ -9,6 +9,7 @@ import { requireRole } from "@/lib/authz";
 import { softDelete, softRestore, deletedLabel, restoredLabel } from "@/lib/softDelete";
 import { flashToast } from "@/lib/toast";
 import { logActivity } from "@/lib/activityLog";
+import { getLocale } from "@/lib/i18n.server";
 
 const forecastSchema = z.object({
   sourceCompanyId: z.string().min(1),
@@ -278,18 +279,22 @@ export async function approveForecast(formData: FormData): Promise<void> {
     where: { id },
     data: { status: "APPROVED" },
   });
+  const ar = getLocale() === "ar";
+  // Phase NS-FIX — toast + audit log use ar/en switch via getLocale
+  // instead of one combined "ar · en" string. Matches the rest of
+  // the codebase (see lib/toast usage in admin/users/actions.ts).
   await logActivity({
     action: "UPDATE",
     entity: "FORECAST",
     entityId: id,
-    summary: `اعتماد تنبؤ: ${f.productLabel}`,
+    summary: `اعتمد التنبؤ: ${f.productLabel}`,
     summaryEn: `Approved forecast: ${f.productLabel}`,
     module: "SUPPLY",
   });
   flashToast({
     type: "info",
     entity: "info",
-    label: "تم اعتماد التنبؤ · Forecast approved",
+    label: ar ? "اعتُمد التنبؤ" : "Forecast approved",
   });
   revalidatePath("/supply-chain");
 }
@@ -302,10 +307,11 @@ export async function rejectForecast(formData: FormData): Promise<void> {
     where: { id },
     data: { status: "DISMISSED" },
   });
+  const ar = getLocale() === "ar";
   flashToast({
     type: "info",
     entity: "info",
-    label: "تم رفض التنبؤ · Forecast dismissed",
+    label: ar ? "رُفض التنبؤ" : "Forecast dismissed",
   });
   revalidatePath("/supply-chain");
 }

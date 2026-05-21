@@ -14,8 +14,13 @@ import { exitWorkspace } from "@/app/actions/workspace";
 
 // SHOW the banner ONLY on these prefixes. Exact match OR descendant match.
 // Every other route hides the banner unconditionally.
+//
+// Phase BUG-5 — /workspace REMOVED from this list because that route
+// has its own ws-band header (the company command band rendered by
+// workspace/layout.tsx) carrying the same "Exit to all companies"
+// affordance. Showing both created the visible duplicate-header the
+// user screenshot.
 const SHOW_ON_PREFIXES = [
-  "/workspace",
   "/dairy",
   "/hotels",
   "/farms",

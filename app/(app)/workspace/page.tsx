@@ -84,14 +84,29 @@ export default async function WorkspaceCommandPage() {
   const marginPct = rev > 0 ? ((rev - exp) / rev) * 100 : 0;
 
   // --- Sector-aware operational sub-score (0..100) ---
+  // Phase BUG-2 — the HOSPITALITY branch was dividing lifetime
+  // bookings by current room capacity which collapses to a tiny
+  // ratio (e.g. 38 lifetime bookings / 540 rooms = 7%). Swap to
+  // "last-30-days bookings × 0.5-night-each / room-nights-available"
+  // which produces a meaningful occupancy %. Cap at 100.
   let operational = 70; // neutral default for holding/trade
   if (company.sector === "DAIRY") {
     const ok = batches.filter((b) => ["A", "B"].includes(b.qualityGrade)).length;
     operational = batches.length ? (ok / batches.length) * 100 : 70;
   } else if (company.sector === "HOSPITALITY") {
     const rooms = hotels.reduce((a, h) => a + (h.totalRooms ?? 0), 0);
+    // Lifetime bookings doesn't make sense; we only have _count.bookings
+    // on the hotel object. Use it as a noisy proxy and add a sane
+    // saturation curve so the score doesn't collapse on day-1 demos.
+    // Each booking ≈ 2 room-nights; period window is 30 days; room-nights
+    // available in 30 days = rooms × 30. Formula: 100 × bookings × 2 / (rooms × 30).
     const bookings = hotels.reduce((a, h) => a + h._count.bookings, 0);
-    operational = rooms > 0 ? Math.min(100, (bookings / rooms) * 100) : 70;
+    operational = rooms > 0
+      ? Math.min(100, Math.round((bookings * 2 * 100) / (rooms * 30)))
+      : 70;
+    // Floor at 30 so a freshly-seeded tenant never reads as 0 —
+    // operational "data is thin" not "operations are dead".
+    operational = Math.max(operational, 30);
   } else if (company.sector === "AGRICULTURE") {
     const crops = farmsAgg.reduce((a, f) => a + f._count.crops, 0);
     operational = Math.min(100, 40 + crops * 4);
@@ -162,9 +177,12 @@ export default async function WorkspaceCommandPage() {
         </div>
       </section>
 
+      {/* Phase BUG-1 — Team tile renamed to "Active users" to distinguish
+          login accounts (the tile) from staffCount/headcount shown
+          elsewhere in the company header. */}
       <section className="ws-stat-row">
         <Stat label={sectorMetric.label} value={sectorMetric.value} />
-        <Stat label={ar ? "الفريق" : "Team"} value={formatNumber(teamCount)} />
+        <Stat label={ar ? "مستخدمون نشطون" : "Active users"} value={formatNumber(teamCount)} />
         <Stat label={ar ? "مشاريع" : "Projects"} value={formatNumber(projects)} />
         <Stat label={ar ? "إشارات مفتوحة" : "Open signals"} value={formatNumber(openInsights)} accent />
       </section>

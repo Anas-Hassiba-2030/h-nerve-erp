@@ -158,11 +158,11 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Transactional email at scale with delivery analytics.",
     descriptionAr: "بريد معاملاتي بحجم كبير مع تحليلات التسليم.",
     scopes: ["mail.send"],
-    // Phase Pre-pitch SWEEP-2 — reverted to INFRASTRUCTURE_READY.
-    // The dedicated API-key modal + validation flow isn't built yet;
-    // clicking Connect would mark the card CONNECTED without sending
-    // a single email — that's pitch-misleading. Honest until wired.
-    functionalState: "INFRASTRUCTURE_READY",
+    // Phase NS-4 — promoted back. Connect flow now opens the dedicated
+    // API-key form at /integrations/sendgrid which calls
+    // SendGrid's /v3/user/profile to validate the key before saving.
+    // No fake CONNECTED state — only persists on real 200 OK.
+    functionalState: "READY_FOR_SETUP",
     settingFields: [
       { key: "fromAddress", label: "From address", type: "text", default: "ops@hourani.jo" },
     ],
@@ -177,8 +177,9 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Modern API-first email — beautiful templates, first-class tracking.",
     descriptionAr: "بريد إلكتروني عصري عبر API — قوالب أنيقة وتتبّع متقدّم.",
     scopes: ["emails:send"],
-    // Phase Pre-pitch SWEEP-2 — see SendGrid comment.
-    functionalState: "INFRASTRUCTURE_READY",
+    // Phase NS-4 — promoted back, same pattern as SendGrid. Form
+    // calls Resend /domains to validate the key.
+    functionalState: "READY_FOR_SETUP",
   },
 
   // ── CALENDAR ─────────────────────────────────────────────────────

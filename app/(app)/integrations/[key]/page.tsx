@@ -12,7 +12,7 @@ import { ArrowLeft, Plug, Power, Save, ShieldCheck } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { getProvider, CATEGORIES } from "@/lib/integrations/catalog";
-import { connect, disconnect, saveSettings } from "../actions";
+import { connect, disconnect, saveSettings, connectWithApiKey } from "../actions";
 
 const STATUS_TONE: Record<string, "success" | "warn" | "critical" | "neutral"> = {
   CONNECTED:     "success",
@@ -161,6 +161,15 @@ export default async function IntegrationDetail({
                 {ar ? "فصل" : "Disconnect"}
               </button>
             </form>
+          ) : provider.key === "sendgrid" || provider.key === "resend" ? (
+            // Phase NS-4 — API-key providers use a dedicated form +
+            // server-side validation (real HTTP call to provider).
+            <span
+              className="heri-eyebrow"
+              style={{ color: "var(--heri-ink-3)", fontSize: 10 }}
+            >
+              {ar ? "أدخل المفتاح أدناه" : "Paste your API key below"}
+            </span>
           ) : (
             <form action={connect}>
               <input type="hidden" name="providerKey" value={provider.key} />
@@ -211,6 +220,100 @@ export default async function IntegrationDetail({
             ))}
           </div>
         </HeritageSection>
+
+        {/* Phase NS-4 — API-key connect form for SendGrid + Resend.
+            Submits to connectWithApiKey which makes a real validation
+            call to the provider's API before persisting. */}
+        {!isConnected && (provider.key === "sendgrid" || provider.key === "resend") ? (
+          <HeritageSection
+            eyebrow={ar ? "ربط بمفتاح API" : "Connect with API key"}
+            title={ar ? "أدخل مفتاحك من " + provider.name : `Paste your ${provider.name} API key`}
+            aside={
+              ar
+                ? "نتحقق من المفتاح مع المزود قبل الحفظ. لن نخزن مفاتيح غير صالحة."
+                : "We validate the key with the provider before saving. Invalid keys are rejected."
+            }
+          >
+            <form action={connectWithApiKey} className="grid gap-3">
+              <input type="hidden" name="providerKey" value={provider.key} />
+              <label className="grid gap-1.5">
+                <span
+                  style={{
+                    fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
+                    fontSize: 10,
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    color: "var(--heri-ink-3)",
+                  }}
+                >
+                  {provider.key === "sendgrid" ? "SendGrid API Key" : "Resend API Key"}
+                </span>
+                <input
+                  type="password"
+                  name="apiKey"
+                  required
+                  placeholder={provider.key === "sendgrid" ? "SG.xxxx…" : "re_xxxx…"}
+                  style={{
+                    background: "var(--heri-cream-2)",
+                    border: "1px solid var(--heri-rule-strong)",
+                    padding: "10px 14px",
+                    fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
+                    fontSize: 13,
+                    color: "var(--heri-ink)",
+                    borderRadius: 0,
+                  }}
+                />
+              </label>
+              <label className="grid gap-1.5">
+                <span
+                  style={{
+                    fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
+                    fontSize: 10,
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    color: "var(--heri-ink-3)",
+                  }}
+                >
+                  {ar ? "عنوان المُرسِل" : "From address"}
+                </span>
+                <input
+                  type="email"
+                  name="fromAddress"
+                  defaultValue="ops@hourani.jo"
+                  style={{
+                    background: "var(--heri-cream-2)",
+                    border: "1px solid var(--heri-rule-strong)",
+                    padding: "10px 14px",
+                    fontFamily: "'Inter Tight','Inter',system-ui,sans-serif",
+                    fontSize: 13.5,
+                    color: "var(--heri-ink)",
+                    borderRadius: 0,
+                  }}
+                />
+              </label>
+              <button
+                type="submit"
+                className="heri-btn heri-btn-primary"
+                style={{ alignSelf: "flex-start" }}
+              >
+                <Plug className="h-3.5 w-3.5" strokeWidth={1.5} />
+                {ar ? "تحقق واتصل" : "Validate and connect"}
+              </button>
+              <p
+                style={{
+                  fontSize: 11,
+                  color: "var(--heri-ink-3)",
+                  margin: 0,
+                  lineHeight: 1.5,
+                }}
+              >
+                {ar
+                  ? "ملاحظة: المفاتيح تُخزّن كنص خام حالياً. تشفير IntegrationCredential.tokenBlob مدرج كـ NS-4 follow-up."
+                  : "Note: keys store as plaintext for now. Encryption of IntegrationCredential.tokenBlob is the NS-4 follow-up."}
+              </p>
+            </form>
+          </HeritageSection>
+        ) : null}
 
         {/* Settings */}
         {provider.settingFields && provider.settingFields.length > 0 ? (

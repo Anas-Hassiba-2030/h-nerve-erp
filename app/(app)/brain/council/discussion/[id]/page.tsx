@@ -13,6 +13,7 @@ import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { replyToDiscussion } from "@/app/actions/council";
+import { CouncilReplyComposer } from "./CouncilReplyComposer";
 
 export const dynamic = "force-dynamic";
 
@@ -194,38 +195,13 @@ export default async function DiscussionPage({
           )}
         </HeritageSection>
 
-        {/* Composer */}
+        {/* Composer — Phase V3-NEW-6 — controlled (clears on send). */}
         {canReply ? (
           <HeritageSection
             eyebrow={ar ? "ردك" : "Your reply"}
             title={ar ? "أضف تعليقاً" : "Add a reply"}
           >
-            <form
-              action={replyToDiscussion}
-              className="space-y-2"
-            >
-              <input type="hidden" name="discussionId" value={d.id} />
-              <textarea
-                name="body"
-                required
-                rows={3}
-                placeholder={
-                  ar
-                    ? "ما رأيك في هذا النقاش؟"
-                    : "What's your take on this thread?"
-                }
-                className="textarea w-full"
-                style={{ minHeight: 80 }}
-              />
-              <button
-                type="submit"
-                className="heri-btn heri-btn-primary"
-                style={{ alignSelf: "flex-end" }}
-              >
-                <MessagesSquare className="h-3.5 w-3.5" strokeWidth={1.5} />
-                {ar ? "نشر الرد" : "Post reply"}
-              </button>
-            </form>
+            <CouncilReplyComposer discussionId={d.id} ar={ar} />
           </HeritageSection>
         ) : (
           <div

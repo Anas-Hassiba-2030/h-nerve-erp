@@ -1,11 +1,17 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Download, FileText, FileSpreadsheet, Globe2, ChevronDown } from "lucide-react";
 
-// Reusable export dropdown — surfaces both formats (HTML + CSV) with both
-// locales, plus a quick-print option that opens HTML and triggers print.
-// Mounts on every list page through the PageHeader actions slot.
+// Phase V3-NEW-3-RE — second rebuild. Prior attempt failed because
+// the dropdown was rendered as a child of the trigger inside the
+// /finance hero card, which has overflow-hidden — clipping all but
+// the dark header strip. Fix: render the panel via React portal into
+// document.body and position it with position:fixed using the
+// trigger's bounding rect. Escapes every parent overflow + every
+// stacking context. No more clipping. Z-index 9999 to clear the
+// sticky PageHeader (z-20) and any modal/banner.
 
 export function ExportMenu({
   type,
@@ -17,66 +23,107 @@ export function ExportMenu({
   locale: "ar" | "en";
 }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number; right: number } | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const ar = locale === "ar";
 
+  useEffect(() => { setMounted(true); }, []);
+
+  // Compute position on open + on window resize/scroll.
+  useEffect(() => {
+    if (!open) return;
+    function position() {
+      const b = btnRef.current?.getBoundingClientRect();
+      if (!b) return;
+      setPos({ top: b.bottom + 6, left: b.left, right: window.innerWidth - b.right });
+    }
+    position();
+    window.addEventListener("resize", position);
+    window.addEventListener("scroll", position, true);
+    return () => {
+      window.removeEventListener("resize", position);
+      window.removeEventListener("scroll", position, true);
+    };
+  }, [open]);
+
+  // Click outside (on portal) closes.
   useEffect(() => {
     if (!open) return;
     function handle(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      const t = e.target as Node;
+      if (btnRef.current?.contains(t)) return;
+      if (panelRef.current?.contains(t)) return;
+      setOpen(false);
     }
     document.addEventListener("mousedown", handle);
     return () => document.removeEventListener("mousedown", handle);
   }, [open]);
 
+  // Esc closes.
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   const baseQs = `company=${companyCode}`;
-  const items = [
+  const items: Array<{
+    icon: any;
+    labelAr: string;
+    labelEn: string;
+    descAr: string;
+    descEn: string;
+    href: string;
+    target?: string;
+  }> = [
     {
       icon: FileText,
-      tone: "emerald",
-      labelAr: "HTML — العربية",
-      labelEn: "HTML — Arabic",
+      labelAr: "تقرير تنفيذي — HTML عربي",
+      labelEn: "Executive PDF — Arabic",
+      descAr: "KPIs · اتجاهات · تعليق محلل",
+      descEn: "KPIs, trend chart, analyst commentary",
       href: `/api/export/html/${type}?${baseQs}&locale=ar`,
       target: "_blank",
     },
     {
       icon: FileText,
-      tone: "blue",
-      labelAr: "HTML — الإنجليزية",
-      labelEn: "HTML — English",
+      labelAr: "تقرير تنفيذي — HTML إنجليزي",
+      labelEn: "Executive PDF — English",
+      descAr: "KPIs · اتجاهات · تعليق محلل",
+      descEn: "KPIs, trend chart, analyst commentary",
       href: `/api/export/html/${type}?${baseQs}&locale=en`,
       target: "_blank",
     },
     {
       icon: FileSpreadsheet,
-      tone: "emerald",
-      labelAr: "CSV — العربية (Excel)",
-      labelEn: "CSV — Arabic (Excel)",
+      labelAr: "بيانات خام — CSV عربي",
+      labelEn: "Raw data CSV — Arabic",
+      descAr: "السجل الكامل — Excel-ready",
+      descEn: "Full ledger — Excel-ready",
       href: `/api/export/${type}?${baseQs}&locale=ar`,
     },
     {
       icon: FileSpreadsheet,
-      tone: "blue",
-      labelAr: "CSV — الإنجليزية",
-      labelEn: "CSV — English",
+      labelAr: "بيانات خام — CSV إنجليزي",
+      labelEn: "Raw data CSV — English",
+      descAr: "السجل الكامل — Excel-ready",
+      descEn: "Full ledger — Excel-ready",
       href: `/api/export/${type}?${baseQs}&locale=en`,
     },
   ];
 
-  const TONE: Record<string, string> = {
-    emerald: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-    blue: "bg-blue-50 text-blue-700 ring-blue-200",
-  };
-
   return (
-    <div className="relative" ref={ref}>
+    <>
       <button
+        ref={btnRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
         className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[11px] font-extrabold uppercase tracking-[0.16em] transition"
-        // Phase V3-P11 — was transparent w/ dark text, which disappeared
-        // on the /markets blue gradient hero. Solid white BG + dark
-        // text + dark border reads against any backdrop.
         style={{
           background: open ? "#0f172a" : "#ffffff",
           color: open ? "#ffffff" : "#0f172a",
@@ -88,101 +135,130 @@ export function ExportMenu({
       >
         <Download className="h-3.5 w-3.5" />
         {ar ? "تصدير" : "Export"}
-        <ChevronDown
-          className={`h-3 w-3 transition ${open ? "rotate-180" : ""}`}
-        />
+        <ChevronDown className={`h-3 w-3 transition ${open ? "rotate-180" : ""}`} />
       </button>
 
-      {open ? (
-        <div
-          // Phase V3-NEW-3 — dropdown was clipped by parent hero's
-          // overflow-hidden and z-index conflicted with the sticky
-          // PageHeader (z-20). Bumped to z-[120], explicit width,
-          // simplified header so it doesn't spill.
-          className="absolute end-0 mt-2 w-[300px] max-w-[96vw]"
-          style={{
-            background: "#ffffff",
-            border: "1.5px solid #0f172a",
-            borderRadius: 0,
-            boxShadow: "0 10px 30px -8px rgba(0,0,0,0.25)",
-            zIndex: 120,
-          }}
-        >
-          {/* Header — solid dark with single-line caption. */}
-          <div
-            className="flex items-center gap-2.5 px-4 py-3"
-            style={{
-              background: "#0f172a",
-              color: "#fff",
-            }}
-          >
-            <Globe2 className="h-4 w-4" style={{ color: "#c69345" }} />
-            <div className="min-w-0 flex-1">
-              <div className="font-mono text-[10px] font-extrabold uppercase tracking-[0.22em]" style={{ color: "#c69345" }}>
-                {ar ? "تصدير تنفيذي" : "Executive export"}
-              </div>
-              <div
-                className="mt-0.5 text-[11px]"
-                style={{ color: "rgba(255,255,255,0.75)", lineHeight: 1.35 }}
-              >
-                {ar ? "KPIs · اتجاهات · تعليق محلل" : "KPIs · trends · analyst notes"}
-              </div>
-            </div>
-          </div>
-
-          <ul className="divide-y" style={{ borderColor: "var(--border)" }}>
-            {items.map((it, i) => {
-              const Icon = it.icon;
-              return (
-                <li key={i}>
-                  <a
-                    href={it.href}
-                    target={it.target}
-                    rel={it.target ? "noreferrer" : undefined}
-                    onClick={() => setOpen(false)}
-                    className="group flex items-center gap-3 px-4 py-2.5 transition hover:bg-[var(--brand-soft)]"
-                    style={{ color: "var(--text)" }}
-                  >
-                    <span
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center ring-1 ${TONE[it.tone] ?? TONE.emerald}`}
-                      style={{ borderRadius: 0 }}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[12px] font-extrabold">
-                        {ar ? it.labelAr : it.labelEn}
-                      </div>
-                    </div>
-                    <span
-                      className="font-mono text-[9px] font-extrabold uppercase tracking-wider opacity-0 transition group-hover:opacity-100"
-                      style={{ color: "var(--brand)" }}
-                    >
-                      ↗
-                    </span>
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-          <div
-            className="px-4 py-2.5"
-            style={{
-              background: "var(--brand-soft)",
-              borderTop: "1px solid var(--border)",
-            }}
-          >
-            <p
-              className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] leading-tight"
-              style={{ color: "var(--text-muted)" }}
+      {mounted && open && pos
+        ? createPortal(
+            <div
+              ref={panelRef}
+              style={{
+                position: "fixed",
+                top: pos.top,
+                // Anchor to whichever side of the viewport is closer.
+                ...(ar ? { left: pos.left } : { right: pos.right }),
+                width: 360,
+                maxWidth: "calc(100vw - 24px)",
+                background: "#ffffff",
+                border: "1.5px solid #0f172a",
+                borderRadius: 0,
+                boxShadow: "0 18px 40px -12px rgba(0,0,0,0.35)",
+                zIndex: 9999,
+              }}
             >
-              {ar
-                ? "Hero + KPIs + رسم + جدول كامل"
-                : "Hero · KPIs · Chart · Full table"}
-            </p>
-          </div>
-        </div>
-      ) : null}
-    </div>
+              {/* Header strip */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "12px 16px",
+                  background: "#0f172a",
+                  color: "#fff",
+                }}
+              >
+                <Globe2 className="h-4 w-4" style={{ color: "#c69345" }} />
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div
+                    className="font-mono"
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 800,
+                      letterSpacing: "0.22em",
+                      textTransform: "uppercase",
+                      color: "#c69345",
+                    }}
+                  >
+                    {ar ? "تصدير تنفيذي" : "Executive export"}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 2,
+                      fontSize: 11,
+                      color: "rgba(255,255,255,0.78)",
+                      lineHeight: 1.35,
+                    }}
+                  >
+                    {ar ? "اختر الصيغة المطلوبة" : "Choose your format"}
+                  </div>
+                </div>
+              </div>
+
+              {/* Options */}
+              <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+                {items.map((it, i) => {
+                  const Icon = it.icon;
+                  return (
+                    <li
+                      key={i}
+                      style={{
+                        borderTop: i === 0 ? "0" : "1px solid #e7e0d2",
+                      }}
+                    >
+                      <a
+                        href={it.href}
+                        target={it.target}
+                        rel={it.target ? "noreferrer" : undefined}
+                        onClick={() => setOpen(false)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 12,
+                          padding: "14px 16px",
+                          minHeight: 56,
+                          color: "#0f172a",
+                          textDecoration: "none",
+                          transition: "background 120ms",
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLAnchorElement).style.background = "#faf3eb";
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLAnchorElement).style.background = "transparent";
+                        }}
+                      >
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 32,
+                            height: 32,
+                            background: "#faf3eb",
+                            border: "1px solid #c69345",
+                            color: "#0f172a",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a" }}>
+                            {ar ? it.labelAr : it.labelEn}
+                          </div>
+                          <div style={{ fontSize: 11, color: "#5e5448", marginTop: 1 }}>
+                            {ar ? it.descAr : it.descEn}
+                          </div>
+                        </div>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>,
+            document.body,
+          )
+        : null}
+    </>
   );
 }

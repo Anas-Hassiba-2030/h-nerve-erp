@@ -10,6 +10,7 @@ import { HeritagePill } from "@/components/heritage";
 import { ChevronLeft, FileText, ScrollText, Receipt, Beaker, Table, UploadCloud } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
+import { NotifyMeButton } from "./NotifyMeButton";
 
 const KIND_LABEL: Record<string, { ar: string; en: string }> = {
   contract:    { ar: "عقد",         en: "Contract" },
@@ -53,12 +54,12 @@ export default async function DocumentsPage() {
   return (
     <>
       <PageHeader
-        eyebrow={ar ? "ذكاء المستندات" : "Document intelligence"}
-        title={ar ? "كل المستندات في مكان واحد" : "Every document, summarized"}
+        eyebrow={ar ? "ذكاء المستندات · قريباً" : "Document intelligence · coming soon"}
+        title={ar ? "ذكاء المستندات" : "Document intelligence"}
         subtitle={
           ar
-            ? "اسحب أي عقد، فاتورة، تقرير مختبر، أو جدول إلى أي شاشة. نقرأه ونلخّصه ونربطه بالخريطة."
-            : "Drop any contract, invoice, lab report, or sheet on any page. We'll read, summarize, and link it to the graph."
+            ? "قريباً: اسحب أي عقد، فاتورة، تقرير مختبر، أو جدول. سنقرؤه ونلخّصه ونربطه بشبكة الكيانات تلقائياً."
+            : "Coming soon: drop any contract, invoice, lab report, or sheet. We'll read, summarize, and auto-link it to the entity graph."
         }
       />
 
@@ -75,42 +76,108 @@ export default async function DocumentsPage() {
           ))}
         </section>
 
-        {/* Drop hint */}
+        {/* Phase Pre-pitch SWEEP-4 — honest "coming soon" hero with
+            preview cards instead of an active dropzone. */}
         <section
-          className="flex items-center gap-4 px-5 py-5"
+          className="px-5 py-5"
           style={{
             background: "var(--heri-cream)",
             border: "1px dashed var(--heri-rule-strong)",
           }}
         >
-          <span
-            className="inline-flex h-12 w-12 items-center justify-center"
-            style={{
-              background: "var(--heri-ink)",
-              color: "var(--heri-cream)",
-            }}
-          >
-            <UploadCloud className="h-5 w-5" strokeWidth={1.6} />
-          </span>
-          <div className="flex-1">
-            <p
-              className="heri-eyebrow heri-eyebrow-ink"
-              style={{ fontSize: 10, marginBottom: 4 }}
-            >
-              {ar ? "كيف نعمل" : "HOW IT WORKS"}
-            </p>
-            <p
+          <div className="flex items-center gap-4">
+            <span
+              className="inline-flex h-12 w-12 items-center justify-center"
               style={{
-                fontSize: 13.5,
-                lineHeight: 1.55,
-                color: "var(--heri-ink-2)",
-                margin: 0,
+                background: "var(--heri-ink)",
+                color: "var(--heri-cream)",
               }}
             >
-              {ar
-                ? "اسحب الملف من سطح المكتب وألقه على نافذة H-Nerve. سنقرؤه في ثوانٍ ونعرض ملخصاً وبنوداً مهمة وزراً يربطه بالسجل المناسب."
-                : "Drag a file from your desktop and drop it on the H-Nerve window. We'll read it in seconds and surface a summary, key clauses, and a button to file it under the right ledger."}
-            </p>
+              <UploadCloud className="h-5 w-5" strokeWidth={1.6} />
+            </span>
+            <div className="flex-1">
+              <p
+                className="heri-eyebrow heri-eyebrow-ink"
+                style={{ fontSize: 10, marginBottom: 4 }}
+              >
+                {ar ? "ميزة قادمة" : "COMING SOON"}
+              </p>
+              <p
+                style={{
+                  fontSize: 13.5,
+                  lineHeight: 1.55,
+                  color: "var(--heri-ink-2)",
+                  margin: 0,
+                }}
+              >
+                {ar
+                  ? "نطلق ذكاء المستندات في الإصدار القادم. ستسحب الملف، نقرؤه في ثوانٍ، ونعرض ملخصاً + كيانات مستخرجة + ربط تلقائي."
+                  : "Rolling out document intelligence in the next release. You'll drop the file, we read it in seconds, surface a summary + extracted entities + auto-linked graph nodes."}
+              </p>
+            </div>
+            <NotifyMeButton ar={ar} />
+          </div>
+
+          {/* Preview cards — what the feature will surface */}
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            {[
+              {
+                Icon: ScrollText,
+                titleAr: "العقود",
+                titleEn: "Contracts",
+                bodyAr: "الأطراف · المدة · القيمة · شروط الإلغاء · بنود المخاطر.",
+                bodyEn: "Parties · term · value · cancellation · risk clauses.",
+              },
+              {
+                Icon: Receipt,
+                titleAr: "الفواتير",
+                titleEn: "Invoices",
+                bodyAr: "المورد · الرقم · تاريخ الاستحقاق · المبالغ · ربط تلقائي بالموردين.",
+                bodyEn: "Vendor · number · due date · totals · auto-link to suppliers.",
+              },
+              {
+                Icon: Beaker,
+                titleAr: "تقارير المختبر",
+                titleEn: "Lab reports",
+                bodyAr: "المنتج · المعايير · نتائج الاختبار · المطابقة مع المعايير.",
+                bodyEn: "Product · parameters · test results · compliance flags.",
+              },
+            ].map((c, i) => {
+              const Icon = c.Icon;
+              return (
+                <div
+                  key={i}
+                  className="p-3"
+                  style={{
+                    background: "var(--heri-cream-2)",
+                    border: "1px solid var(--heri-rule)",
+                  }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <Icon className="h-4 w-4" style={{ color: "var(--heri-copper)" }} />
+                    <span
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: "var(--heri-ink)",
+                      }}
+                    >
+                      {ar ? c.titleAr : c.titleEn}
+                    </span>
+                  </div>
+                  <p
+                    style={{
+                      fontSize: 11.5,
+                      lineHeight: 1.5,
+                      color: "var(--heri-ink-3)",
+                      margin: 0,
+                    }}
+                  >
+                    {ar ? c.bodyAr : c.bodyEn}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </section>
 
@@ -127,8 +194,8 @@ export default async function DocumentsPage() {
             }}
           >
             {ar
-              ? "لا مستندات بعد. أفلِت أوّل ملف لتراه هنا."
-              : "Nothing here yet. Drop your first file to see it appear."}
+              ? "الميزة في مرحلة الإطلاق — ستظهر المستندات المعالَجة هنا فور التفعيل."
+              : "Feature launching shortly — processed documents will appear here once it's enabled."}
           </div>
         ) : (
           <ol className="grid gap-2">

@@ -60,8 +60,8 @@ export default async function IntegrationsHubPage({
         title={ar ? "كل التكاملات في مكان واحد" : "Every connector in one marketplace"}
         subtitle={
           ar
-            ? "٢٤ موصلاً جاهز البنية · موصلان قابلان للربط اليوم بمفتاح API · باقي مجموعة OAuth تتوسّع حسب الأولوية."
-            : "24 connectors ready · 2 connectable today via API key · full OAuth suite rolling out per priority."
+            ? "٢٤ موصلاً جاهز البنية · مجموعة OAuth الكاملة تتوسّع حسب الأولوية."
+            : "24 connectors ready · full integration suite rolling out per priority."
         }
       />
 

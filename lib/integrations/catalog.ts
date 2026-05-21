@@ -158,7 +158,11 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Transactional email at scale with delivery analytics.",
     descriptionAr: "بريد معاملاتي بحجم كبير مع تحليلات التسليم.",
     scopes: ["mail.send"],
-    functionalState: "READY_FOR_SETUP",
+    // Phase Pre-pitch SWEEP-2 — reverted to INFRASTRUCTURE_READY.
+    // The dedicated API-key modal + validation flow isn't built yet;
+    // clicking Connect would mark the card CONNECTED without sending
+    // a single email — that's pitch-misleading. Honest until wired.
+    functionalState: "INFRASTRUCTURE_READY",
     settingFields: [
       { key: "fromAddress", label: "From address", type: "text", default: "ops@hourani.jo" },
     ],
@@ -173,7 +177,8 @@ export const PROVIDERS: IntegrationProvider[] = [
     description: "Modern API-first email — beautiful templates, first-class tracking.",
     descriptionAr: "بريد إلكتروني عصري عبر API — قوالب أنيقة وتتبّع متقدّم.",
     scopes: ["emails:send"],
-    functionalState: "READY_FOR_SETUP",
+    // Phase Pre-pitch SWEEP-2 — see SendGrid comment.
+    functionalState: "INFRASTRUCTURE_READY",
   },
 
   // ── CALENDAR ─────────────────────────────────────────────────────

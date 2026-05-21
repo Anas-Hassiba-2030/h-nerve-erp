@@ -1,5 +1,9 @@
 # H-Nerve ERP — Pitch Rehearsal Walkthrough
 
+> **Status update 2026-05-21** — all 3 BLOCKERs from the original
+> 2026-05-15 walkthrough are closed in the current build. See
+> the "Status of original findings" section after the TL;DR table.
+>
 > Full-app dry run as an investor/leadership demo would see it.
 > **Run date:** 2026-05-15 · **Build:** Next.js 14.2.18, branch `main`, commit `f229049`
 > **Method:** gstack headless Chromium, logged in as `admin@hourani.jo`, every major screen visited at 1280px (mobile `/m` captured at 390×844 phone viewport).
@@ -21,6 +25,16 @@ Each finding is tagged:
 Every screen returned **HTTP 200** with a real Arabic `<h1>` and **no per-page console errors** (one transient dev-only RSC prefetch warning for `/showcase`, harmless). Nothing is *broken* in the crash sense. The issues below are about polish and pitch-credibility.
 
 ---
+
+## Status of original findings (2026-05-21 sweep)
+
+| # | Original finding | Status | Closed by |
+|---|---|---|---|
+| 1 | Double welcome-modal wall | ✅ Closed — both modals honour `NEXT_PUBLIC_DISABLE_INTRO=1`; env var is set on Vercel production | early polish (env-var gate already in `components/OnboardingTour.tsx` line 82 + `components/WelcomeSplash.tsx` line 102) |
+| 2 | Arena Space JOD 0 / Speed 0 cascade | ✅ Closed — V3 demo seed replaced ARENA with HOTELS (504,900 JOD/30d revenue); seed-demo-extras adds 36 Transactions across all 4 companies | `4b60360`, `6398118` |
+| 3 | "Powered by CLAUDE" claim while stub | ✅ Closed — `/brain/council` reads "Engine: stub mode (no API key)" | prior polish (`app/(app)/brain/council/page.tsx:136`) |
+| 4 | "Anas AI / Hasiba G" personal branding | ✅ Closed — strings not found anywhere in `components/` or `app/` today | prior cleanup |
+| 5 | English seeded content in Arabic-first UI | ⚠ Long-tail — many surfaces fixed via i18n ternaries; some seeded titles still English-only. Acceptable for the pitch demo. |  |
 
 ## TL;DR — the five things to fix before you pitch
 

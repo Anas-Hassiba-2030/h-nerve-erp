@@ -25,23 +25,14 @@ import { SIDEBAR_COOKIE } from "@/lib/sidebarPref";
 import { unreadCountFor } from "@/lib/messages";
 import { getViewAsTenant, getTenantThemeCookie } from "@/lib/tenancy";
 import { getActiveWorkspaceId } from "@/lib/workspace";
-import { WorkspaceBanner } from "@/components/WorkspaceBanner";
+import { WorkspaceBanner, shouldShowWorkspaceBanner } from "@/components/WorkspaceBanner";
 import { THEME_PRESETS, themeCssVars, type ThemeKey } from "@/lib/brand/themes";
 import { permsEnforced, effectiveCanAccess } from "@/lib/permissions";
 
-// Phase P-Polish — WorkspaceBanner visibility rule (narrowed).
-// Original rule: show on every tenant-scoped operational page. New
-// rule per user request: banner appears ONLY on the dedicated company
-// ERP surface — /workspace and its sub-routes. Everywhere else (group
-// dashboard, sector ops pages /hotels /dairy /farms /education, admin
-// family, intelligence, etc.) the banner is HIDDEN. The user reads
-// "leaving the ERP" as "leaving /workspace/*", regardless of whether
-// the workspace cookie is still set; the cookie continues to drive
-// data scoping silently, just without the visible banner.
-function isOperationalPath(path: string): boolean {
-  if (!path) return false;
-  return path === "/workspace" || path.startsWith("/workspace/");
-}
+// Phase V3-P1+P2 — banner visibility moved into the WorkspaceBanner
+// component itself (single source of truth: SHOW_ON_PREFIXES). The
+// allowlist is documented as a const at the top of that file so it
+// can't drift. Here we just import the predicate.
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getCurrentUser();
@@ -164,7 +155,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         tenant's operations — they're roaming the group.
         Allowlist below. Path comes from middleware.ts x-pathname header.
       */}
-      {activeCompany && isOperationalPath(headers().get("x-pathname") ?? "") ? (
+      {activeCompany && shouldShowWorkspaceBanner(headers().get("x-pathname")) ? (
         <WorkspaceBanner
           companyName={locale === "ar" ? activeCompany.name : activeCompany.nameEn}
           locale={locale}

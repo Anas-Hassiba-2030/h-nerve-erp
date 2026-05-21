@@ -135,11 +135,16 @@ export function Sidebar({
       // surfaces: AI Insights (what the Brain found) + Smart Alerts
       // (what needs attention now). Every other Brain sub-page is a
       // developer / power-user surface and is ADMIN-only.
+      // Phase V3-P4 — disambiguated the two "AI Insights" entries.
+      // User-facing surface stays at /insights as "AI Insights".
+      // The Brain-internal raw-engine output moves to "Brain Engine
+      // Output" so the two are never confused.
       items:
         user.role === "ADMIN"
           ? [
-              { href: "/admin/brain", label: ar ? "رؤى العقل" : "AI Insights", icon: Brain, hint: "AI" },
+              { href: "/insights", label: messages["nav.insights"], icon: Sparkles, hint: "AI" },
               { href: "/alerts", label: ar ? "التنبيهات الذكية" : "Smart alerts", icon: Bell },
+              { href: "/admin/brain", label: ar ? "مخرجات محرك الذكاء" : "Brain Engine Output", icon: Brain, hint: "ENGINE" },
               { href: "/brain/graph", label: ar ? "الرسم السببي" : "Causal graph", icon: Network, hint: "BRAIN" },
               { href: "/brain/scenarios", label: ar ? "ماذا لو…" : "What-if simulator", icon: Zap, hint: "BRAIN" },
               { href: "/brain/council", label: ar ? "المجلس" : "The council", icon: Users, hint: "BRAIN" },
@@ -149,13 +154,12 @@ export function Sidebar({
               { href: "/brain/benchmarks", label: ar ? "معايير النظراء" : "Peer benchmarks", icon: Globe2, hint: "BRAIN" },
               { href: "/brain/iq", label: ar ? "ذكاء الدماغ" : "Brain IQ", icon: Trophy, hint: "META" },
               { href: "/supply-chain", label: messages["nav.supplyChain"], icon: Brain, hint: "AI" },
-              { href: "/insights", label: messages["nav.insights"], icon: Sparkles },
               { href: "/workflows", label: ar ? "خرائط الأتمتة" : "Workflows", icon: Workflow },
               { href: "/integrations", label: ar ? "الموصلات" : "Integrations", icon: Plug, hint: "HUB" },
               { href: "/documents", label: ar ? "ذكاء المستندات" : "Documents", icon: ScrollText, hint: "AI" },
             ]
           : [
-              { href: "/admin/brain", label: ar ? "رؤى العقل" : "AI Insights", icon: Brain, hint: "AI" },
+              { href: "/insights", label: messages["nav.insights"], icon: Sparkles, hint: "AI" },
               { href: "/alerts", label: ar ? "التنبيهات الذكية" : "Smart alerts", icon: Bell },
             ],
     },

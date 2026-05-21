@@ -10,6 +10,7 @@ import { getLocale } from "@/lib/i18n.server";
 import { markThreadRead } from "@/lib/messages";
 import { prisma } from "@/lib/db";
 import { sendMessage } from "../actions";
+import { MessageComposer } from "./MessageComposer";
 
 const AVATAR_COLOR: Record<string, string> = {
   emerald: "#10b981", amber: "#f59e0b", blue: "#3b82f6",
@@ -243,33 +244,12 @@ export default async function ThreadPage({ params }: { params: { id: string } })
             </div>
           )}
 
-          {/* Composer */}
-          <form
-            action={sendMessage}
-            className="flex items-end gap-2 p-3"
-            style={{
-              borderTop: "1px solid var(--border)",
-              background: "var(--brand-soft)",
-            }}
-          >
-            <input type="hidden" name="threadId" value={thread.id} />
-            <textarea
-              name="body"
-              required
-              rows={2}
-              placeholder={
-                ar
-                  ? `اكتب رسالة لـ ${main?.name ?? ""}...`
-                  : `Message ${main?.name ?? ""}...`
-              }
-              className="textarea flex-1 resize-none"
-              style={{ minHeight: 46 }}
-            />
-            <button type="submit" className="btn-primary hn-hover-shine">
-              <Send className="h-4 w-4" />
-              {ar ? "أرسل" : "Send"}
-            </button>
-          </form>
+          {/* Phase V3-P12 — client composer (clears on send, Enter to send). */}
+          <MessageComposer
+            threadId={thread.id}
+            recipientName={main?.name ?? ""}
+            ar={ar}
+          />
         </section>
       </PageContainer>
     </>

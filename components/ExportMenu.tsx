@@ -74,11 +74,15 @@ export function ExportMenu({
         type="button"
         onClick={() => setOpen((o) => !o)}
         className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[11px] font-extrabold uppercase tracking-[0.16em] transition"
+        // Phase V3-P11 — was transparent w/ dark text, which disappeared
+        // on the /markets blue gradient hero. Solid white BG + dark
+        // text + dark border reads against any backdrop.
         style={{
-          background: open ? "var(--text)" : "transparent",
-          color: open ? "var(--surface-elevated)" : "var(--text)",
-          border: "1.5px solid var(--text)",
+          background: open ? "#0f172a" : "#ffffff",
+          color: open ? "#ffffff" : "#0f172a",
+          border: "1.5px solid #0f172a",
           borderRadius: 0,
+          boxShadow: "0 1px 0 rgba(0,0,0,0.06)",
         }}
         aria-expanded={open}
       >

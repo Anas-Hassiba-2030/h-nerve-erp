@@ -1966,20 +1966,17 @@ html[dir="rtl"] .sidebar-drawer-panel { --drawer-from: -100%; }
   animation-direction: reverse;
 }
 
-/* View-as banner — fixed top strip, ochre accent, terse mono copy. */
+/* Phase V3-P1 — view-as banner. Was position:fixed + slide-in animation
+   on every nav, which produced the flicker the user reported three times.
+   Now: static block in the layout flow, no animation, no layout shift.
+   The banner either renders (one block at the top of content) or it
+   doesn't — no transitions, no jumping. */
 .view-as-banner {
-  position: fixed;
-  top: 0;
-  inset-inline: 0;
-  z-index: 70;
+  position: static;
   background: var(--heri-ochre);
   color: var(--heri-ink);
   border-bottom: 1px solid var(--heri-ochre-2);
-  animation: view-as-slide 380ms cubic-bezier(0.16,1,0.3,1) both;
-}
-@keyframes view-as-slide {
-  from { transform: translateY(-100%); }
-  to   { transform: translateY(0); }
+  width: 100%;
 }
 .view-as-banner-inner {
   max-width: 1200px;
@@ -2039,11 +2036,8 @@ html[dir="rtl"] .sidebar-drawer-panel { --drawer-from: -100%; }
 }
 .view-as-banner-exit:hover { background: var(--heri-ink-2); }
 
-/* Push the rest of the app down when the banner is showing. */
-.view-as-banner ~ * { padding-top: 0; }
-[data-tenant-theme]:has(.view-as-banner) > div:not(.view-as-banner) {
-  margin-top: 38px;
-}
+/* Phase V3-P1 — no longer needed; banner is in normal flow. The old
+   :has() pseudoselector caused layout recalc on every nav. */
 
 /* =================================================================
    PHASE 12 — WORKFLOW STUDIO (Industrial Precision canvas)

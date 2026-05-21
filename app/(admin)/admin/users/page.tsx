@@ -1,14 +1,20 @@
-// /admin/users — user management for the superadmin console (Phase 4).
+// /admin/users — user management for the superadmin console.
 // Sleek Operator (DESIGN-SKILL §1.F), bilingual via getLocale() +
 // ar-ternary (Phase 3 convention). ADMIN-gated by the (admin) layout;
 // the actions self-gate too. Server actions only.
+//
+// Phase V3-P14 — filter bar: company, role, status, free-text search.
+// URL-driven so the filters persist on refresh + are linkable.
+// Pagination kicks in once total > PAGE_SIZE.
 
 // CROSS-TENANT INTENT: the superadmin console must see every Company
 // to populate the user-assignment dropdown.
+import Link from "next/link";
 import { prisma, prismaUnscoped } from "@/lib/db";
+import type { Prisma } from "@prisma/client";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
-import { roleLabel } from "./roles";
+import { roleLabel, ROLES } from "./roles";
 import {
   CreateUserForm,
   EditUserForm,
@@ -19,12 +25,48 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminUsersPage() {
+const PAGE_SIZE = 20;
+
+type SP = {
+  company?: string;
+  role?: string;
+  status?: string;
+  q?: string;
+  page?: string;
+};
+
+export default async function AdminUsersPage({
+  searchParams,
+}: {
+  searchParams: SP;
+}) {
   const ar = getLocale() === "ar";
   const me = await getCurrentUser();
 
-  const [users, companies] = await Promise.all([
+  // Read filters off the URL.
+  const fCompany = (searchParams.company ?? "").trim();
+  const fRole = (searchParams.role ?? "").trim().toUpperCase();
+  const fStatus = (searchParams.status ?? "").trim();
+  const fQ = (searchParams.q ?? "").trim();
+  const fPage = Math.max(1, parseInt(searchParams.page ?? "1", 10) || 1);
+
+  // Build the where clause.
+  const where: Prisma.UserWhereInput = {};
+  if (fCompany === "__none__") where.companyId = null;
+  else if (fCompany) where.companyId = fCompany;
+  if (fRole && (ROLES as readonly string[]).includes(fRole)) where.role = fRole;
+  if (fStatus === "active") where.active = true;
+  else if (fStatus === "inactive") where.active = false;
+  if (fQ) {
+    where.OR = [
+      { name: { contains: fQ, mode: "insensitive" } },
+      { email: { contains: fQ, mode: "insensitive" } },
+    ];
+  }
+
+  const [users, total, companies, allCount, adminCount, inactiveCount] = await Promise.all([
     prisma.user.findMany({
+      where,
       orderBy: [{ active: "desc" }, { createdAt: "asc" }],
       select: {
         id: true,
@@ -36,18 +78,22 @@ export default async function AdminUsersPage() {
         lastLoginAt: true,
         companyId: true,
       },
+      skip: (fPage - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
     }),
+    prisma.user.count({ where }),
     prismaUnscoped.company.findMany({
       orderBy: { code: "asc" },
       select: { id: true, code: true, name: true, nameEn: true },
     }),
+    prisma.user.count(),
+    prisma.user.count({ where: { role: "ADMIN", active: true } }),
+    prisma.user.count({ where: { active: false } }),
   ]);
 
-  const stats = {
-    total: users.length,
-    admins: users.filter((u) => u.role === "ADMIN" && u.active).length,
-    inactive: users.filter((u) => !u.active).length,
-  };
+  const stats = { total: allCount, admins: adminCount, inactive: inactiveCount };
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const hasFilter = fCompany || fRole || fStatus || fQ;
 
   return (
     <div className="admin-page">
@@ -68,6 +114,75 @@ export default async function AdminUsersPage() {
         <Stat label="ACTIVE ADMINS" value={stats.admins} accent="cyan" />
         <Stat label="DEACTIVATED" value={stats.inactive} accent="amber" />
       </section>
+
+      {/* Phase V3-P14 — filter bar. URL-driven (server-side). */}
+      <form
+        method="get"
+        className="admin-section"
+        style={{
+          display: "grid",
+          gap: 8,
+          gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+          alignItems: "end",
+        }}
+      >
+        <label className="admin-field">
+          <span className="admin-label">{ar ? "الشركة" : "Company"}</span>
+          <select name="company" defaultValue={fCompany} className="admin-input">
+            <option value="">{ar ? "الكل" : "All"}</option>
+            <option value="__none__">{ar ? "بدون شركة" : "None / cross-tenant"}</option>
+            {companies.map((c) => (
+              <option key={c.id} value={c.id}>
+                {ar ? c.name : c.nameEn} · {c.code}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="admin-field">
+          <span className="admin-label">{ar ? "الدور" : "Role"}</span>
+          <select name="role" defaultValue={fRole} className="admin-input">
+            <option value="">{ar ? "الكل" : "All"}</option>
+            {ROLES.map((r) => (
+              <option key={r} value={r}>
+                {roleLabel(r, ar)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="admin-field">
+          <span className="admin-label">{ar ? "الحالة" : "Status"}</span>
+          <select name="status" defaultValue={fStatus} className="admin-input">
+            <option value="">{ar ? "الكل" : "All"}</option>
+            <option value="active">{ar ? "نشط" : "Active"}</option>
+            <option value="inactive">{ar ? "معطّل" : "Inactive"}</option>
+          </select>
+        </label>
+        <label className="admin-field">
+          <span className="admin-label">{ar ? "بحث" : "Search"}</span>
+          <input
+            name="q"
+            defaultValue={fQ}
+            placeholder={ar ? "اسم أو بريد…" : "Name or email…"}
+            className="admin-input"
+          />
+        </label>
+        <div style={{ display: "flex", gap: 6 }}>
+          <button type="submit" className="admin-cta-primary">
+            {ar ? "تطبيق" : "Apply"}
+          </button>
+          {hasFilter ? (
+            <Link href="/admin/users" className="admin-btn-ghost">
+              {ar ? "مسح" : "Clear"}
+            </Link>
+          ) : null}
+        </div>
+      </form>
+
+      <p className="admin-stat-label" style={{ margin: "8px 0" }}>
+        {ar
+          ? `يعرض ${users.length} من أصل ${total} مستخدم`
+          : `Showing ${users.length} of ${total} user${total === 1 ? "" : "s"}`}
+      </p>
 
       <CreateUserForm ar={ar} companies={companies} />
 
@@ -124,6 +239,38 @@ export default async function AdminUsersPage() {
           );
         })}
       </div>
+
+      {totalPages > 1 ? (
+        <nav
+          className="admin-rail-nav"
+          style={{ marginTop: 16, justifyContent: "center", gap: 6 }}
+        >
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+            const params = new URLSearchParams();
+            if (fCompany) params.set("company", fCompany);
+            if (fRole) params.set("role", fRole);
+            if (fStatus) params.set("status", fStatus);
+            if (fQ) params.set("q", fQ);
+            if (p > 1) params.set("page", String(p));
+            const href = `/admin/users${params.toString() ? `?${params.toString()}` : ""}`;
+            const active = p === fPage;
+            return (
+              <Link
+                key={p}
+                href={href}
+                className="admin-rail-link"
+                style={
+                  active
+                    ? { color: "var(--admin-cyan)", borderColor: "var(--admin-cyan)" }
+                    : undefined
+                }
+              >
+                {p}
+              </Link>
+            );
+          })}
+        </nav>
+      ) : null}
     </div>
   );
 }

@@ -15,24 +15,17 @@ import { TimeMachineBanner } from "@/components/TimeMachineBanner";
 import { getAsOf } from "@/lib/timemachine";
 import { RealtimePresence } from "@/components/realtime/RealtimePresence";
 import { DocumentDropZone } from "@/components/DocumentDropZone";
-// CROSS-TENANT INTENT: the (app) layout looks up the workspace Company
-// for the WorkspaceBanner. The lookup must succeed for any companyId
-// the cookie points at, including from a superadmin "view as" context.
+// CROSS-TENANT INTENT: the (app) layout reads role permissions unscoped
+// (must resolve for any companyId the cookie points at, including a
+// superadmin "view as" context).
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getLocale, getMessages } from "@/lib/i18n.server";
 import { readFlash } from "@/lib/toast";
 import { SIDEBAR_COOKIE } from "@/lib/sidebarPref";
 import { unreadCountFor } from "@/lib/messages";
 import { getViewAsTenant, getTenantThemeCookie } from "@/lib/tenancy";
-import { getActiveWorkspaceId } from "@/lib/workspace";
-import { WorkspaceBanner, shouldShowWorkspaceBanner } from "@/components/WorkspaceBanner";
 import { THEME_PRESETS, themeCssVars, type ThemeKey } from "@/lib/brand/themes";
 import { permsEnforced, effectiveCanAccess } from "@/lib/permissions";
-
-// Phase V3-P1+P2 — banner visibility moved into the WorkspaceBanner
-// component itself (single source of truth: SHOW_ON_PREFIXES). The
-// allowlist is documented as a const at the top of that file so it
-// can't drift. Here we just import the predicate.
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getCurrentUser();
@@ -117,16 +110,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       : "heritage";
   const themeStyle = themeKey !== "heritage" ? themeCssVars(themeKey) : null;
 
-  // Phase C — active company workspace (cookie-driven). The banner gives a
-  // one-click exit so the user is never trapped inside a workspace.
-  const activeWorkspaceId = getActiveWorkspaceId();
-  const activeCompany = activeWorkspaceId
-    ? await prismaUnscoped.company.findUnique({
-        where: { id: activeWorkspaceId },
-        select: { name: true, nameEn: true },
-      })
-    : null;
-
   // Phase 5 — flag-gated UI hiding. OFF by default = zero change.
   const enforcePerms = permsEnforced();
 
@@ -144,23 +127,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           locale={locale}
         />
       ) : null}
-      {/*
-        WorkspaceBanner visibility rule (Phase P1 — final form):
-        Shown ONLY on routes that are tenant-scoped operational pages.
-        On group-level pages (/dashboard, /companies, /search, /pinned,
-        /showcase, /compare, /analytics, /admin/users, /admin/system,
-        /admin/tenants, /admin/empire, /brain/*, /insights, /alerts,
-        /finance, /reports, /markets, /sustainability, etc.) the banner
-        is HIDDEN because the user is no longer scoped to a single
-        tenant's operations — they're roaming the group.
-        Allowlist below. Path comes from middleware.ts x-pathname header.
-      */}
-      {activeCompany && shouldShowWorkspaceBanner(headers().get("x-pathname")) ? (
-        <WorkspaceBanner
-          companyName={locale === "ar" ? activeCompany.name : activeCompany.nameEn}
-          locale={locale}
-        />
-      ) : null}
+      {/* BUG-A — WorkspaceBanner ("Exit to all companies" tan strip)
+          removed system-wide. The sidebar "Group Companies" link
+          (/companies) is the single navigation-back path. */}
       <TimeMachineBanner locale={locale} />
       <Sidebar
         user={fullUser}

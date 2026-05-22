@@ -26,11 +26,10 @@ export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
   // Phase F-UX — forward the current pathname to server components via
-  // an x-pathname request header. app/(app)/layout.tsx reads it to
-  // suppress WorkspaceBanner on the exact /companies route (which is
-  // the "above all workspaces" hub — banner there would be a paradox).
-  // Every NextResponse.next() in this middleware passes the augmented
-  // headers so the signal survives the rate-limit / perms branches.
+  // an x-pathname request header. app/(app)/layout.tsx reads it for
+  // permission gating (effectiveCanAccess). Every NextResponse.next() in
+  // this middleware passes the augmented headers so the signal survives
+  // the rate-limit / perms branches.
   const reqHeaders = new Headers(req.headers);
   reqHeaders.set("x-pathname", path);
   const passThrough = () => NextResponse.next({ request: { headers: reqHeaders } });

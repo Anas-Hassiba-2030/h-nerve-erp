@@ -39,3 +39,6 @@ free-claude-code-main.zip
 .claude/bug-state/
 .claude/settings.local.json
 .gstack/
+
+# Obsidian vault config (local note app)
+.obsidian/

@@ -11,6 +11,7 @@ import { markThreadRead } from "@/lib/messages";
 import { prisma } from "@/lib/db";
 import { sendMessage } from "../actions";
 import { MessageComposer } from "./MessageComposer";
+import { ScrollToBottom } from "./ScrollToBottom";
 
 const AVATAR_COLOR: Record<string, string> = {
   emerald: "#10b981", amber: "#f59e0b", blue: "#3b82f6",
@@ -136,14 +137,18 @@ export default async function ThreadPage({ params }: { params: { id: string } })
           ) : null}
         </section>
 
-        {/* Messages canvas */}
+        {/* Messages canvas — BUG-B: full-height chat column. The card
+            fills the viewport (header on top, list scrolls in the middle,
+            composer pinned at the bottom) so there's no dead whitespace
+            below the input. */}
         <section
-          className="exec-card overflow-hidden p-0"
+          className="exec-card flex flex-col overflow-hidden p-0"
           data-tone="brand"
-          style={{ minHeight: 420 }}
+          style={{ height: "calc(100dvh - 15rem)", minHeight: 460 }}
         >
+          <div className="flex-1 overflow-y-auto">
           {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
+            <div className="flex h-full flex-col items-center justify-center gap-3 px-6 py-16 text-center">
               <span
                 className="flex h-14 w-14 items-center justify-center rounded-2xl"
                 style={{ background: "var(--brand-soft)", color: "var(--brand)" }}
@@ -259,8 +264,11 @@ export default async function ThreadPage({ params }: { params: { id: string } })
                   })}
                 </div>
               ))}
+              {/* BUG-B — keep the latest message in view on load + send. */}
+              <ScrollToBottom />
             </div>
           )}
+          </div>
 
           {/* Phase V3-P12 — client composer (clears on send, Enter to send). */}
           <MessageComposer

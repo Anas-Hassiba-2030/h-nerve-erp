@@ -9,7 +9,7 @@
 
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LogOut, ArrowLeftRight, Lock } from "lucide-react";
+import { ArrowLeftRight, Lock } from "lucide-react";
 // CROSS-TENANT INTENT: /workspace/** pages scope explicitly by companyId — see app/(app)/workspace/layout.tsx for rationale.
 import { prismaUnscoped } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/workspace";
@@ -17,7 +17,6 @@ import { getUserIfRole } from "@/lib/authz";
 import { getLocale } from "@/lib/i18n.server";
 import { WorkspaceNav } from "@/components/workspace/WorkspaceNav";
 import { WorkspaceSwitcher } from "@/components/workspace/WorkspaceSwitcher";
-import { exitWorkspace } from "@/app/actions/workspace";
 
 const SECTOR_GLYPH: Record<string, string> = {
   HOSPITALITY: "🏨",
@@ -140,12 +139,9 @@ export default async function WorkspaceLayout({
               <ArrowLeftRight className="h-3.5 w-3.5" strokeWidth={1.7} />
               <span>{ar ? "قارن بوحدة أخرى" : "Compare vs unit"}</span>
             </Link>
-            <form action={exitWorkspace}>
-              <button type="submit" className="ws-band-exit">
-                <LogOut className="h-3.5 w-3.5" strokeWidth={1.7} />
-                <span>{ar ? "خروج لكل الشركات" : "Exit to all companies"}</span>
-              </button>
-            </form>
+            {/* BUG-A — "Exit to all companies" affordance removed. The
+                sidebar "Group Companies" link (/companies) is the single
+                navigation-back path out of a workspace. */}
           </div>
         </div>
 

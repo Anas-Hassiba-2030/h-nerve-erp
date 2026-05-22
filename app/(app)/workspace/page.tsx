@@ -9,15 +9,16 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
-  ArrowUpRight, Factory, Wallet, Users2, GitBranch, BrainCircuit,
+  ArrowUpRight, Factory, Wallet, Users2, GitBranch, BrainCircuit, Inbox,
 } from "lucide-react";
 import { HeritageSection } from "@/components/heritage";
 import { WorkspaceFinancials } from "@/components/workspace/WorkspaceFinancials";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/workspace";
 import { getLocale } from "@/lib/i18n.server";
-import { formatMoney, formatNumber } from "@/lib/utils";
+import { formatMoney, formatNumber, formatDate } from "@/lib/utils";
 import { computeCompanyHealth } from "@/lib/workspace/health";
+import { COMPANY_CODE_TO_TENANT_SLUG } from "@/lib/tenancy";
 
 export const dynamic = "force-dynamic";
 
@@ -35,13 +36,49 @@ export default async function WorkspaceCommandPage() {
   if (!workspaceId) redirect("/companies");
   const company = await prismaUnscoped.company.findUnique({
     where: { id: workspaceId },
-    select: { sector: true, name: true, nameEn: true },
+    select: { sector: true, name: true, nameEn: true, code: true },
   });
   if (!company) redirect("/companies");
 
   const locale = getLocale();
   const ar = locale === "ar";
   const modules = SECTOR_MODULES[company.sector] ?? [];
+
+  // Phase NS-1 — incoming purchase intent. This company's tenant slug is
+  // the supplier side; surface DRAFT/SENT POs that other tenants drafted
+  // against it via the cross-tenant supply-chain bridge.
+  const currentTenantSlug = COMPANY_CODE_TO_TENANT_SLUG[company.code] ?? null;
+  const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  // CROSS-TENANT INTENT: these POs live on the BUYER's tenant, not the
+  // active one — they're surfaced here precisely because the supplier
+  // (this tenant) needs to see incoming demand. Filtered to suppliers
+  // whose linkedTenantId points back at us. Read-only.
+  const incomingIntents = currentTenantSlug
+    ? await prismaUnscoped.purchaseOrder.findMany({
+        where: {
+          deletedAt: null,
+          status: { in: ["DRAFT", "SENT"] },
+          orderedAt: { gte: since30 },
+          supplierRef: { linkedTenantId: currentTenantSlug },
+        },
+        orderBy: { orderedAt: "desc" },
+        take: 25,
+        select: {
+          id: true,
+          poNumber: true,
+          expectedAt: true,
+          sourceForecast: {
+            select: {
+              id: true,
+              productLabel: true,
+              predictedDemand: true,
+              unit: true,
+              source: { select: { name: true, nameEn: true } },
+            },
+          },
+        },
+      })
+    : [];
 
   const [
     txns, batches, hotels, farmsAgg, programs, projects, activeProjects,
@@ -196,6 +233,73 @@ export default async function WorkspaceCommandPage() {
         title={ar ? "النبض المالي" : "Financial pulse"}
       >
         <WorkspaceFinancials ar={ar} txns={txns} />
+      </HeritageSection>
+
+      {/* Phase NS-1 — Incoming Purchase Intent. Cross-tenant POs other
+          arms drafted against this company via the supply-chain bridge. */}
+      <HeritageSection
+        eyebrow={ar ? "جسر سلسلة التوريد" : "Supply-chain bridge"}
+        title={ar ? "نوايا شراء واردة" : "Incoming purchase intent"}
+        aside={
+          ar
+            ? `${formatNumber(incomingIntents.length)} أمر مسودة من وحدات أخرى`
+            : `${formatNumber(incomingIntents.length)} draft orders from other arms`
+        }
+      >
+        {incomingIntents.length === 0 ? (
+          <div
+            className="flex items-center gap-3 px-4 py-6"
+            style={{ background: "var(--heri-cream)", border: "1px solid var(--heri-rule)" }}
+          >
+            <Inbox className="h-5 w-5" style={{ color: "var(--heri-ink-3)" }} strokeWidth={1.5} />
+            <span style={{ fontSize: 13, color: "var(--heri-ink-2)" }}>
+              {ar
+                ? "لا نوايا شراء واردة خلال آخر 30 يوم."
+                : "No incoming purchase intents in the last 30 days."}
+            </span>
+          </div>
+        ) : (
+          <div className="grid gap-2">
+            {incomingIntents.map((po) => {
+              const buyer = po.sourceForecast?.source;
+              const buyerName = buyer ? (ar ? buyer.name : buyer.nameEn) : (ar ? "وحدة أخرى" : "Another arm");
+              return (
+                <div
+                  key={po.id}
+                  className="grid gap-2 md:grid-cols-[1fr_auto] md:items-center px-4 py-3"
+                  style={{ background: "var(--heri-cream)", border: "1px solid var(--heri-rule)" }}
+                >
+                  <div className="min-w-0">
+                    <div className="heri-eyebrow heri-eyebrow-ink" style={{ fontSize: 10 }}>
+                      {buyerName}
+                      <span style={{ color: "var(--heri-rule-strong)", margin: "0 8px" }}>·</span>
+                      <span className="font-mono">{po.poNumber}</span>
+                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "var(--heri-ink)", marginTop: 4 }}>
+                      {po.sourceForecast?.productLabel ?? (ar ? "طلب" : "Order")}
+                      {po.sourceForecast ? (
+                        <span style={{ color: "var(--heri-ink-2)", fontWeight: 500 }}>
+                          {" "}— {formatNumber(po.sourceForecast.predictedDemand)} {po.sourceForecast.unit}
+                        </span>
+                      ) : null}
+                    </div>
+                    <div style={{ fontSize: 11.5, color: "var(--heri-ink-3)", marginTop: 2 }}>
+                      {ar ? "تسليم متوقع: " : "Expected delivery: "}
+                      {po.expectedAt ? formatDate(po.expectedAt, ar ? "ar" : "en") : (ar ? "غير محدّد" : "unset")}
+                    </div>
+                  </div>
+                  <Link
+                    href="/supply-chain"
+                    className="heri-btn heri-btn-secondary md:justify-self-end"
+                    style={{ fontSize: 11.5, padding: "6px 12px", whiteSpace: "nowrap" }}
+                  >
+                    {ar ? "التنبؤ الأصلي ←" : "View originating forecast →"}
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </HeritageSection>
 
       <HeritageSection title={ar ? "أقسام نظام الشركة" : "Company ERP sections"}>

@@ -268,6 +268,15 @@ model SupplyForecast {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   deletedAt       DateTime?
+
+  // Phase NS-1 — cross-tenant supply-chain → purchase-order bridge.
+  // Approving a forecast whose target company maps to an in-system
+  // tenant drafts a PurchaseOrder on the BUYER's tenant. linkedPurchaseOrderId
+  // is a denormalized convenience scalar (no FK); the authoritative link
+  // is PurchaseOrder.sourceForecastId (@unique). Both are written
+  // atomically in approveForecast — never one without the other.
+  linkedPurchaseOrderId String?
+  sourcedPO             PurchaseOrder? @relation("ForecastSourcedPO")
 }
 
 // =====================================================================
@@ -1738,6 +1747,13 @@ model PurchaseOrder {
   expectedAt  DateTime?
   note        String?
 
+  // Phase NS-1 — back-link to the SupplyForecast that drafted this PO
+  // (null for manually-created POs). Authoritative side of the 1:1
+  // bridge relation. A bridge PO is intentionally line-less: product /
+  // quantity / unit / delivery read through sourceForecast.
+  sourceForecastId String?         @unique
+  sourceForecast   SupplyForecast? @relation("ForecastSourcedPO", fields: [sourceForecastId], references: [id], onDelete: SetNull)
+
   lines       PurchaseOrderLine[]
   supplierRef Supplier  @relation(fields: [supplierId], references: [id])
 
@@ -1832,6 +1848,13 @@ model Supplier {
   paymentTerms  String?  // "Net 30" | "COD" | "Prepaid" — plain string
   notes         String?
 
+  // Phase NS-1 — when this supplier IS another in-system tenant (e.g.
+  // the Hotels tenant's "Maha Dairy" supplier maps to the maha-dairy
+  // tenant), this stores that tenant's SLUG. Null for external suppliers.
+  // Opaque slug string (NOT a Tenant FK) to match the procurement
+  // schema's tenantId-as-slug convention end-to-end.
+  linkedTenantId String?
+
   products       Product[]
   purchaseOrders PurchaseOrder[]
 
@@ -1841,6 +1864,7 @@ model Supplier {
 
   @@unique([tenantId, name])
   @@index([tenantId, deletedAt])
+  @@index([linkedTenantId])
 }
 
 model Customer {

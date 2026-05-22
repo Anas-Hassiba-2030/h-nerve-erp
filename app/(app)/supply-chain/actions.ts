@@ -10,6 +10,7 @@ import { softDelete, softRestore, deletedLabel, restoredLabel } from "@/lib/soft
 import { flashToast } from "@/lib/toast";
 import { logActivity } from "@/lib/activityLog";
 import { getLocale } from "@/lib/i18n.server";
+import { draftPurchaseOrderFromForecast } from "@/lib/supply/bridge";
 
 const forecastSchema = z.object({
   sourceCompanyId: z.string().min(1),
@@ -261,12 +262,20 @@ export async function autoGenerateForecasts(): Promise<void> {
 }
 
 // =================================================================
-// Phase P7-MVP — Approve / Reject a SupplyForecast draft.
-// Approve advances status DRAFT → APPROVED and stamps an audit log
-// entry. Creating a downstream PurchaseOrder requires linking to a
-// real Supplier + Product row on the target tenant — left as a
-// follow-up; documented inline so the UX is honest about what
-// Approve means today: "intent recorded, procurement flow next."
+// Phase NS-1 — Approve a SupplyForecast draft + cross-tenant PO bridge.
+//
+// Approve advances DRAFT → APPROVED, then — if the forecast's TARGET
+// company maps to an in-system tenant — drafts a PurchaseOrder on the
+// BUYER's tenant and back-links it.
+//
+// Two coordinate systems meet here. The forecast lives in Company-space
+// (sourceCompanyId / targetCompanyId). PurchaseOrder / Supplier live in
+// Tenant-slug-space (the opaque `tenantId` column = Tenant.slug). The
+// bridge crosses both via COMPANY_CODE_TO_TENANT_SLUG. Because the PO
+// belongs on the BUYER's tenant — which is NOT necessarily the approver's
+// active tenant (a Maha manager could approve a Hotels→Maha forecast) —
+// the create runs through prismaUnscoped with an explicit tenantId, so
+// the request-scoped middleware can't mis-stamp it or block it.
 // =================================================================
 export async function approveForecast(formData: FormData): Promise<void> {
   await requireUser();
@@ -275,26 +284,47 @@ export async function approveForecast(formData: FormData): Promise<void> {
   const f = await prisma.supplyForecast.findUnique({ where: { id } });
   if (!f) return;
   if (f.status !== "DRAFT") return; // idempotent — only DRAFTs advance
+
   await prisma.supplyForecast.update({
     where: { id },
     data: { status: "APPROVED" },
   });
+
+  // --- Cross-tenant PO bridge -------------------------------------
+  // Delegated to the request-agnostic helper (lib/supply/bridge.ts) so
+  // it stays unit-testable. Returns null for external parties or an
+  // already-bridged forecast — the status flip above stands on its own.
+  const bridge = await draftPurchaseOrderFromForecast(id);
+  const poNumberCreated = bridge?.poNumber ?? null;
+  const supplierNameCreated = bridge?.supplierName ?? null;
+
   const ar = getLocale() === "ar";
-  // Phase NS-FIX — toast + audit log use ar/en switch via getLocale
-  // instead of one combined "ar · en" string. Matches the rest of
-  // the codebase (see lib/toast usage in admin/users/actions.ts).
+  // Phase NS-FIX/NS-1 — toast + audit use ar/en switch via getLocale.
+  // When a PO was drafted, append its number + supplier to both summaries.
+  const poTailAr = poNumberCreated
+    ? ` وأنشأ أمر شراء ${poNumberCreated} لـ ${supplierNameCreated}`
+    : "";
+  const poTailEn = poNumberCreated
+    ? ` and created PO ${poNumberCreated} for ${supplierNameCreated}`
+    : "";
   await logActivity({
     action: "UPDATE",
     entity: "FORECAST",
     entityId: id,
-    summary: `اعتمد التنبؤ: ${f.productLabel}`,
-    summaryEn: `Approved forecast: ${f.productLabel}`,
+    summary: `اعتمد التنبؤ: ${f.productLabel}${poTailAr}`,
+    summaryEn: `Approved forecast: ${f.productLabel}${poTailEn}`,
     module: "SUPPLY",
   });
   flashToast({
     type: "info",
     entity: "info",
-    label: ar ? "اعتُمد التنبؤ" : "Forecast approved",
+    label: poNumberCreated
+      ? ar
+        ? `اعتُمد التنبؤ — أمر شراء ${poNumberCreated}`
+        : `Forecast approved — PO ${poNumberCreated}`
+      : ar
+        ? "اعتُمد التنبؤ"
+        : "Forecast approved",
   });
   revalidatePath("/supply-chain");
 }

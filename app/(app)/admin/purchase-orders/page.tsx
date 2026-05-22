@@ -87,6 +87,11 @@ export default async function PurchaseOrdersPage({
       include: {
         lines: { include: { product: { select: { sku: true, name: true } } } },
         supplierRef: { select: { name: true, email: true, phone: true } },
+        // Phase NS-1 — bridge POs carry no lines; product/qty/date read
+        // through the SupplyForecast that drafted them.
+        sourceForecast: {
+          select: { id: true, productLabel: true, predictedDemand: true, unit: true, periodEnd: true },
+        },
       },
     }),
   ]);
@@ -225,32 +230,56 @@ export default async function PurchaseOrdersPage({
                   </span>
                 </summary>
 
-                <div className="table-wrap" style={{ borderTop: "1px solid var(--border)" }}>
-                  <table className="w-full text-start text-xs">
-                    <thead>
-                      <tr style={{ color: "var(--text-muted)" }}>
-                        <th className="px-3 py-2 text-start font-bold">SKU</th>
-                        <th className="px-3 py-2 text-start font-bold">{ar ? "المنتج" : "Product"}</th>
-                        <th className="px-3 py-2 text-end font-bold">{ar ? "المطلوب" : "Ordered"}</th>
-                        <th className="px-3 py-2 text-end font-bold">{ar ? "المُستلَم" : "Received"}</th>
-                        <th className="px-3 py-2 text-end font-bold">{ar ? "تكلفة الوحدة" : "Unit cost"}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {po.lines.map((l) => (
-                        <tr key={l.id} style={{ borderTop: "1px solid var(--border)" }}>
-                          <td className="px-3 py-2 font-mono">{l.product.sku}</td>
-                          <td className="px-3 py-2" style={{ color: "var(--text)" }}>{l.product.name}</td>
-                          <td className="px-3 py-2 text-end font-mono">{formatNumber(l.quantity)}</td>
-                          <td className="px-3 py-2 text-end font-mono">{formatNumber(l.receivedQty)}</td>
-                          <td className="px-3 py-2 text-end font-mono">
-                            {l.unitCost != null ? formatMoney2(Number(l.unitCost)) : dash}
-                          </td>
+                {/* Phase NS-1 — bridge PO provenance banner. Shows when
+                    this PO was drafted from an approved SupplyForecast. */}
+                {po.sourceForecast ? (
+                  <div
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-[11px]"
+                    style={{ borderTop: "1px solid var(--border)", background: "var(--brand-soft)" }}
+                  >
+                    <span className="font-bold uppercase tracking-widest" style={{ color: "var(--brand)" }}>
+                      {ar ? "من تنبؤ" : "From forecast"}
+                    </span>
+                    <span style={{ color: "var(--text)" }}>
+                      {po.sourceForecast.productLabel} — {formatNumber(po.sourceForecast.predictedDemand)} {po.sourceForecast.unit}
+                    </span>
+                    <span style={{ color: "var(--text-muted)" }}>
+                      {ar ? "للفترة" : "for"} {formatDateTime(po.sourceForecast.periodEnd, ar ? "ar" : "en")}
+                    </span>
+                    <Link href="/supply-chain" className="ms-auto" style={{ color: "var(--brand)", fontWeight: 700 }}>
+                      {ar ? "التنبؤ الأصلي ←" : "Originating forecast →"}
+                    </Link>
+                  </div>
+                ) : null}
+
+                {linesCount > 0 ? (
+                  <div className="table-wrap" style={{ borderTop: "1px solid var(--border)" }}>
+                    <table className="w-full text-start text-xs">
+                      <thead>
+                        <tr style={{ color: "var(--text-muted)" }}>
+                          <th className="px-3 py-2 text-start font-bold">SKU</th>
+                          <th className="px-3 py-2 text-start font-bold">{ar ? "المنتج" : "Product"}</th>
+                          <th className="px-3 py-2 text-end font-bold">{ar ? "المطلوب" : "Ordered"}</th>
+                          <th className="px-3 py-2 text-end font-bold">{ar ? "المُستلَم" : "Received"}</th>
+                          <th className="px-3 py-2 text-end font-bold">{ar ? "تكلفة الوحدة" : "Unit cost"}</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {po.lines.map((l) => (
+                          <tr key={l.id} style={{ borderTop: "1px solid var(--border)" }}>
+                            <td className="px-3 py-2 font-mono">{l.product.sku}</td>
+                            <td className="px-3 py-2" style={{ color: "var(--text)" }}>{l.product.name}</td>
+                            <td className="px-3 py-2 text-end font-mono">{formatNumber(l.quantity)}</td>
+                            <td className="px-3 py-2 text-end font-mono">{formatNumber(l.receivedQty)}</td>
+                            <td className="px-3 py-2 text-end font-mono">
+                              {l.unitCost != null ? formatMoney2(Number(l.unitCost)) : dash}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : null}
 
                 <div className="flex flex-col gap-3 px-4 py-3" style={{ borderTop: "1px solid var(--border)" }}>
                   <div className="flex flex-wrap items-center gap-3 text-[11px]" style={{ color: "var(--text-muted)" }}>

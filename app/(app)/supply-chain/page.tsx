@@ -5,7 +5,7 @@
 import Link from "next/link";
 import {
   Brain, ArrowLeftRight, Plus, CheckCircle2, XCircle, Sparkles,
-  Network, Zap, Activity,
+  Network, Zap, Activity, ShoppingCart,
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
@@ -51,7 +51,13 @@ export default async function SupplyChainPage() {
   const forecasts = await prisma.supplyForecast.findMany({
     where: { deletedAt: null },
     orderBy: [{ status: "asc" }, { periodStart: "asc" }],
-    include: { source: true, target: true, generatedBy: true },
+    include: {
+      source: true,
+      target: true,
+      generatedBy: true,
+      // Phase NS-1 — the bridge PO drafted when this forecast was approved.
+      sourcedPO: { select: { id: true, poNumber: true, supplierRef: { select: { name: true } } } },
+    },
   });
 
   const drafts = forecasts.filter((f) => f.status === "DRAFT").length;
@@ -428,6 +434,24 @@ function ForecastCard({
             <span className="line-clamp-1">{ar ? f.target.name : f.target.nameEn}</span>
           </span>
         </div>
+
+        {/* Phase NS-1 — linked purchase-order badge. Appears once an
+            approved forecast has drafted a cross-tenant PO. */}
+        {f.sourcedPO ? (
+          <Link
+            href={`/admin/purchase-orders?po=${encodeURIComponent(f.sourcedPO.poNumber)}`}
+            className="inline-flex items-center gap-1.5 self-start rounded-md px-2 py-1 text-[10.5px] font-extrabold ring-1 transition hover:brightness-95"
+            style={{
+              background: "color-mix(in srgb, var(--brand) 12%, transparent)",
+              color: "var(--brand)",
+              borderColor: "color-mix(in srgb, var(--brand) 28%, transparent)",
+            }}
+          >
+            <ShoppingCart className="h-3 w-3" />
+            <span className="font-mono">{f.sourcedPO.poNumber}</span>
+            <span>→ {f.sourcedPO.supplierRef?.name ?? (ar ? f.target.name : f.target.nameEn)}</span>
+          </Link>
+        ) : null}
 
         {/* 3 stat cells */}
         <div className="grid grid-cols-3 gap-2 pt-1">

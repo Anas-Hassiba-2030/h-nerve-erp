@@ -36,9 +36,13 @@ const securityHeaders = [
     value: [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-      "style-src 'self' 'unsafe-inline'",
+      // BUG-C — globals.css @imports the Heritage type stack from Google
+      // Fonts. Without these two origins the CSP blocks the stylesheet +
+      // woff2 files and the whole app silently falls back to system fonts
+      // (off-brand: no Reem Kufi / Cairo / Inter). See app/globals.css:3.
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob:",
-      "font-src 'self' data:",
+      "font-src 'self' data: https://fonts.gstatic.com",
       "connect-src 'self'",
       "frame-ancestors 'none'",
       "base-uri 'self'",

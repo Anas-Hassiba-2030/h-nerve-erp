@@ -6,17 +6,16 @@
 //   npx tsx scripts/test-ns1-flow.ts
 //
 // approveForecast itself is a "use server" action that calls
-// requireUser()/cookies() and can't run outside a request scope, so this
-// script exercises its two moving parts directly: the status flip (a
-// trivial update the action performs) + draftPurchaseOrderFromForecast
-// (lib/supply/bridge.ts — the request-agnostic bridge the action
-// delegates to). Every DB invariant the action produces is asserted.
+// requireRole()/cookies() and can't run outside a request scope, so this
+// script exercises its request-agnostic core, approveForecastWithBridge
+// (lib/supply/bridge.ts) — the same atomic transaction the action invokes.
+// Every DB invariant the action produces is asserted.
 //
 // Leaves the created forecast + PO in place (per spec) so the demo path
 // is warm. Re-runnable: reuses the same DEMO forecast signal.
 
 import { PrismaClient } from "@prisma/client";
-import { draftPurchaseOrderFromForecast } from "../lib/supply/bridge";
+import { approveForecastWithBridge } from "../lib/supply/bridge";
 
 const prisma = new PrismaClient();
 
@@ -70,10 +69,9 @@ async function main() {
   });
   check("Hotels supplier linked to maha-dairy exists", !!sup, sup?.name);
 
-  // --- Exercise the action's two steps ---
-  await prisma.supplyForecast.update({ where: { id: forecast.id }, data: { status: "APPROVED" } });
-  const bridge = await draftPurchaseOrderFromForecast(forecast.id);
-  console.log(`\nBridge result: ${bridge ? `PO ${bridge.poNumber} → ${bridge.supplierName}` : "null"}`);
+  // --- Exercise the real action core (atomic: flips status + drafts PO) ---
+  const bridge = await approveForecastWithBridge(forecast.id);
+  console.log(`\nBridge result: ${bridge.approved ? (bridge.po ? `PO ${bridge.po.poNumber} → ${bridge.po.supplierName}` : "approved, no PO") : "no-op"}`);
 
   // --- Verify the chain ---
   const after = await prisma.supplyForecast.findUnique({ where: { id: forecast.id } });
@@ -90,9 +88,10 @@ async function main() {
   const poSupplier = po ? await prisma.supplier.findUnique({ where: { id: po.supplierId } }) : null;
   check("PO.supplier is the Hotels→Maha supplier", poSupplier?.linkedTenantId === "maha-dairy", poSupplier?.name);
 
-  // Idempotency: re-running the bridge must NOT create a second PO.
-  const second = await draftPurchaseOrderFromForecast(forecast.id);
-  check("Bridge is idempotent (re-run returns null)", second === null);
+  // Idempotency: re-running on the now-APPROVED forecast must NOT create a
+  // second PO (status no longer DRAFT → no-op).
+  const second = await approveForecastWithBridge(forecast.id);
+  check("Bridge is idempotent (re-run is no-op)", second.approved === false);
 
   // Incoming intent query on Maha.
   const incoming = await prisma.purchaseOrder.findMany({

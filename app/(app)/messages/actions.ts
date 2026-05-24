@@ -36,8 +36,10 @@ export async function sendMessage(formData: FormData) {
     refId: formData.get("refId") ?? undefined,
     imageUrl: formData.get("imageUrl") ?? undefined,
   });
-  // After parse: require at least one of (body, imageUrl).
-  if (!data.body && !data.imageUrl) {
+  // After parse: require at least one of (trimmed body, imageUrl). A
+  // whitespace-only body ("   ") is not a message.
+  const trimmedBody = data.body.trim();
+  if (!trimmedBody && !data.imageUrl) {
     throw new Error("Empty message");
   }
 
@@ -51,7 +53,7 @@ export async function sendMessage(formData: FormData) {
     data: {
       threadId: data.threadId,
       authorId: user.id,
-      body: data.body,
+      body: trimmedBody,
       imageUrl: data.imageUrl ?? null,
       refType: data.refType ?? null,
       refId: data.refId ?? null,

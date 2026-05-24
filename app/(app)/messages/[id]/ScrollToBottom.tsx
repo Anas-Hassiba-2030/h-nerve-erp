@@ -10,8 +10,11 @@ import { useEffect, useRef } from "react";
 
 export function ScrollToBottom() {
   const ref = useRef<HTMLDivElement>(null);
+  // Mount-only: the server re-renders (and remounts this island) after each
+  // send via revalidatePath, so scrolling on mount lands the newest message
+  // in view without yanking the viewport on every unrelated re-render.
   useEffect(() => {
     ref.current?.scrollIntoView({ block: "end" });
-  });
+  }, []);
   return <div ref={ref} aria-hidden style={{ height: 1 }} />;
 }

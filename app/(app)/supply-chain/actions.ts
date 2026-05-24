@@ -10,7 +10,7 @@ import { softDelete, softRestore, deletedLabel, restoredLabel } from "@/lib/soft
 import { flashToast } from "@/lib/toast";
 import { logActivity } from "@/lib/activityLog";
 import { getLocale } from "@/lib/i18n.server";
-import { draftPurchaseOrderFromForecast } from "@/lib/supply/bridge";
+import { approveForecastWithBridge } from "@/lib/supply/bridge";
 
 const forecastSchema = z.object({
   sourceCompanyId: z.string().min(1),
@@ -278,25 +278,27 @@ export async function autoGenerateForecasts(): Promise<void> {
 // the request-scoped middleware can't mis-stamp it or block it.
 // =================================================================
 export async function approveForecast(formData: FormData): Promise<void> {
-  await requireUser();
+  // Mutating + financial side effects (drafts a cross-tenant PO) → same
+  // MANAGER floor as createForecast, not just any logged-in user.
+  await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const f = await prisma.supplyForecast.findUnique({ where: { id } });
   if (!f) return;
   if (f.status !== "DRAFT") return; // idempotent — only DRAFTs advance
 
-  await prisma.supplyForecast.update({
-    where: { id },
-    data: { status: "APPROVED" },
-  });
-
-  // --- Cross-tenant PO bridge -------------------------------------
-  // Delegated to the request-agnostic helper (lib/supply/bridge.ts) so
-  // it stays unit-testable. Returns null for external parties or an
-  // already-bridged forecast — the status flip above stands on its own.
-  const bridge = await draftPurchaseOrderFromForecast(id);
-  const poNumberCreated = bridge?.poNumber ?? null;
-  const supplierNameCreated = bridge?.supplierName ?? null;
+  // --- Atomic approve + cross-tenant PO bridge --------------------
+  // One transaction does the DRAFT→APPROVED flip, the PO insert, and the
+  // forecast back-link (lib/supply/bridge.ts). No half-applied state, and
+  // a concurrent duplicate is swallowed as an idempotent no-op.
+  const result = await approveForecastWithBridge(id);
+  if (!result.approved) {
+    // Already approved by a concurrent call — nothing more to do.
+    revalidatePath("/supply-chain");
+    return;
+  }
+  const poNumberCreated = result.po?.poNumber ?? null;
+  const supplierNameCreated = result.po?.supplierName ?? null;
 
   const ar = getLocale() === "ar";
   // Phase NS-FIX/NS-1 — toast + audit use ar/en switch via getLocale.
@@ -330,7 +332,7 @@ export async function approveForecast(formData: FormData): Promise<void> {
 }
 
 export async function rejectForecast(formData: FormData): Promise<void> {
-  await requireUser();
+  await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   await prisma.supplyForecast.update({

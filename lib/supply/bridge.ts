@@ -14,89 +14,122 @@
 // prismaUnscoped with an explicit tenantId. This is a legitimate
 // cross-tenant write per docs/ISOLATION.md (the brain/bridge proposes;
 // it does not leak reads to the wrong operator).
+//
+// ATOMICITY (review fix): the DRAFT→APPROVED flip, the PO insert, and the
+// forecast back-link all run inside ONE prismaUnscoped.$transaction. The
+// DRAFT precondition is re-checked INSIDE the transaction, so two
+// concurrent approvals can't both proceed; and PurchaseOrder.sourceForecastId
+// is @unique, so a racing second insert throws P2002 — caught here and
+// treated as the idempotent no-op the guard intends. Nothing is ever left
+// half-applied (no APPROVED-without-PO, no PO-without-back-link).
 
+import { Prisma } from "@prisma/client";
 import { prismaUnscoped } from "@/lib/db";
 import { COMPANY_CODE_TO_TENANT_SLUG } from "@/lib/tenancy";
 import { generateNumber } from "@/lib/utils";
 
-export type BridgeResult = { poNumber: string; supplierName: string } | null;
+export type BridgeResult =
+  // forecast missing or no longer DRAFT (idempotent no-op / concurrent loser)
+  | { approved: false }
+  // status flipped to APPROVED; external/self party → no PO drafted
+  | { approved: true; po: null }
+  // status flipped + a cross-tenant PO drafted on the buyer's tenant
+  | { approved: true; po: { poNumber: string; supplierName: string } };
 
 /**
- * Draft a line-less PurchaseOrder on the buyer's tenant for an approved
- * forecast, and atomically back-link it on both sides. Returns the PO
- * number + supplier name when a PO was created, or null when no bridge
- * applies (external buyer/target, or already linked).
+ * Approve a DRAFT SupplyForecast and, when both its companies map to
+ * in-system tenants, draft a line-less PurchaseOrder on the BUYER's tenant
+ * and back-link it — all atomically.
  *
- * Idempotent: if the forecast already has linkedPurchaseOrderId, no-op.
+ * Idempotent + concurrency-safe: re-checks DRAFT inside the transaction and
+ * swallows the P2002 a racing duplicate would raise (returns {approved:false}).
  */
-export async function draftPurchaseOrderFromForecast(forecastId: string): Promise<BridgeResult> {
-  // CROSS-TENANT INTENT: read the forecast + its two companies unscoped
-  // so resolution works regardless of any active tenant context.
-  const f = await prismaUnscoped.supplyForecast.findUnique({ where: { id: forecastId } });
-  if (!f) return null;
-  if (f.linkedPurchaseOrderId) return null; // already bridged — idempotent
+export async function approveForecastWithBridge(forecastId: string): Promise<BridgeResult> {
+  try {
+    // CROSS-TENANT INTENT: the whole operation runs unscoped because the PO
+    // belongs on the buyer's tenant, not the approver's active one.
+    return await prismaUnscoped.$transaction(async (tx) => {
+      const f = await tx.supplyForecast.findUnique({ where: { id: forecastId } });
+      // Re-check DRAFT inside the tx so concurrent approvals can't both win.
+      if (!f || f.status !== "DRAFT") return { approved: false };
 
-  const [buyerCompany, targetCompany] = await Promise.all([
-    prismaUnscoped.company.findUnique({
-      where: { id: f.sourceCompanyId },
-      select: { code: true },
-    }),
-    prismaUnscoped.company.findUnique({
-      where: { id: f.targetCompanyId },
-      select: { code: true, name: true },
-    }),
-  ]);
-  const buyerSlug = buyerCompany ? COMPANY_CODE_TO_TENANT_SLUG[buyerCompany.code] : null;
-  const targetSlug = targetCompany ? COMPANY_CODE_TO_TENANT_SLUG[targetCompany.code] : null;
-  // Either party is external (not an in-system tenant) → no PO to draft.
-  if (!buyerSlug || !targetSlug) return null;
+      const [buyerCompany, targetCompany] = await Promise.all([
+        tx.company.findUnique({ where: { id: f.sourceCompanyId }, select: { code: true } }),
+        tx.company.findUnique({ where: { id: f.targetCompanyId }, select: { code: true, name: true } }),
+      ]);
+      const buyerSlug = buyerCompany ? COMPANY_CODE_TO_TENANT_SLUG[buyerCompany.code] : null;
+      const targetSlug = targetCompany ? COMPANY_CODE_TO_TENANT_SLUG[targetCompany.code] : null;
 
-  // CROSS-TENANT INTENT: locate (or auto-create) the Supplier on the
-  // BUYER's tenant that represents the target tenant.
-  let supplier = await prismaUnscoped.supplier.findFirst({
-    where: { tenantId: buyerSlug, linkedTenantId: targetSlug, deletedAt: null },
-    select: { id: true, name: true },
-  });
-  if (!supplier) {
-    // Auto-upsert fallback (option a). Human marker lives in `notes`;
-    // linkedTenantId IS NOT NULL is the machine marker the Incoming
-    // Purchase Intent panel filters on. Name = target company name so it
-    // lines up with any pre-seeded row on the (tenantId, name) unique key
-    // rather than duplicating it.
-    const supName = targetCompany?.name ?? targetSlug;
-    supplier = await prismaUnscoped.supplier.upsert({
-      where: { tenantId_name: { tenantId: buyerSlug, name: supName } },
-      create: {
-        tenantId: buyerSlug,
-        name: supName,
-        linkedTenantId: targetSlug,
-        notes: `Cross-tenant link → ${targetSlug} (NS-1 auto-created on approval)`,
-      },
-      update: { linkedTenantId: targetSlug },
-      select: { id: true, name: true },
+      // External party (slug not in the map) or self-referential forecast
+      // (buyer === target) → just flip status, no PO to draft.
+      if (!buyerSlug || !targetSlug || buyerSlug === targetSlug) {
+        await tx.supplyForecast.update({ where: { id: f.id }, data: { status: "APPROVED" } });
+        return { approved: true, po: null };
+      }
+
+      // Locate the Supplier on the BUYER's tenant that represents the target.
+      let supplier = await tx.supplier.findFirst({
+        where: { tenantId: buyerSlug, linkedTenantId: targetSlug, deletedAt: null },
+        select: { id: true, name: true },
+      });
+      if (!supplier) {
+        const supName = targetCompany?.name ?? targetSlug;
+        // Don't blindly upsert on (tenantId, name): an operator may already
+        // have a real, differently-linked supplier by that name. Only adopt
+        // a row whose linkedTenantId is null (or already ours); never hijack.
+        const existing = await tx.supplier.findFirst({
+          where: { tenantId: buyerSlug, name: supName },
+          select: { id: true, name: true, linkedTenantId: true },
+        });
+        if (existing && existing.linkedTenantId && existing.linkedTenantId !== targetSlug) {
+          // Name collision with a real supplier linked elsewhere — approve the
+          // forecast but skip the PO rather than clobber operator data.
+          await tx.supplyForecast.update({ where: { id: f.id }, data: { status: "APPROVED" } });
+          return { approved: true, po: null };
+        }
+        if (existing) {
+          supplier = await tx.supplier.update({
+            where: { id: existing.id },
+            data: { linkedTenantId: targetSlug },
+            select: { id: true, name: true },
+          });
+        } else {
+          supplier = await tx.supplier.create({
+            data: {
+              tenantId: buyerSlug,
+              name: supName,
+              linkedTenantId: targetSlug,
+              notes: `Cross-tenant link → ${targetSlug} (NS-1 auto-created on approval)`,
+            },
+            select: { id: true, name: true },
+          });
+        }
+      }
+
+      const poNumber = generateNumber("PO");
+      const po = await tx.purchaseOrder.create({
+        data: {
+          tenantId: buyerSlug,
+          poNumber,
+          supplierId: supplier.id,
+          status: "DRAFT",
+          sourceForecastId: f.id, // @unique → racing duplicate throws P2002
+          expectedAt: f.periodEnd,
+          note: `${f.productLabel} — ${f.predictedDemand} ${f.unit}`,
+        },
+      });
+      await tx.supplyForecast.update({
+        where: { id: f.id },
+        data: { status: "APPROVED", linkedPurchaseOrderId: po.id },
+      });
+      return { approved: true, po: { poNumber, supplierName: supplier.name } };
     });
+  } catch (e) {
+    // A concurrent approval already bridged this forecast (unique violation
+    // on sourceForecastId, or a poNumber collision). Idempotent no-op.
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      return { approved: false };
+    }
+    throw e;
   }
-
-  const poNumber = generateNumber("PO");
-  // Atomic: create the line-less bridge PO + back-link the forecast.
-  // Never one without the other (the two link columns must agree).
-  await prismaUnscoped.$transaction(async (tx) => {
-    const po = await tx.purchaseOrder.create({
-      data: {
-        tenantId: buyerSlug,
-        poNumber,
-        supplierId: supplier!.id,
-        status: "DRAFT",
-        sourceForecastId: f.id,
-        expectedAt: f.periodEnd,
-        note: `${f.productLabel} — ${f.predictedDemand} ${f.unit}`,
-      },
-    });
-    await tx.supplyForecast.update({
-      where: { id: f.id },
-      data: { linkedPurchaseOrderId: po.id },
-    });
-  });
-
-  return { poNumber, supplierName: supplier.name };
 }

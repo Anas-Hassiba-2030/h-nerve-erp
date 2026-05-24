@@ -26,6 +26,7 @@ import {
 } from "@/lib/utils";
 import {
   autoGenerateForecasts, deleteForecast, setForecastStatus,
+  approveForecast, rejectForecast,
 } from "./actions";
 
 const CATEGORY_LABEL: Record<string, { ar: string; en: string }> = {
@@ -520,9 +521,20 @@ function ForecastCard({
         }}
       >
         <div className="flex flex-wrap gap-1">
-          {(["DRAFT", "APPROVED", "EXECUTED", "DISMISSED"] as const).map((s) =>
-            s === f.status ? null : (
-              <form key={s} action={setForecastStatus}>
+          {(["DRAFT", "APPROVED", "EXECUTED", "DISMISSED"] as const).map((s) => {
+            // NS-1 wiring fix: Approve a DRAFT routes through approveForecast
+            // (flips status AND drafts the cross-tenant PO bridge). Dismiss
+            // routes through rejectForecast. All other transitions keep the
+            // plain setForecastStatus. Without this, the bridge never ran
+            // from the UI — the Approve button hit setForecastStatus only.
+            const act =
+              s === "APPROVED" && f.status === "DRAFT"
+                ? approveForecast
+                : s === "DISMISSED"
+                  ? rejectForecast
+                  : setForecastStatus;
+            return s === f.status ? null : (
+              <form key={s} action={act}>
                 <input type="hidden" name="id" value={f.id} />
                 <input type="hidden" name="status" value={s} />
                 <button
@@ -540,8 +552,8 @@ function ForecastCard({
                   {ar ? STATUS_LABEL[s].ar : STATUS_LABEL[s].en}
                 </button>
               </form>
-            ),
-          )}
+            );
+          })}
         </div>
         <DeleteButton
           softDelete

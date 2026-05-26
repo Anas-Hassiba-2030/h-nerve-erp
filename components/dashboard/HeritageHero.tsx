@@ -16,10 +16,16 @@ import React from "react";
 import Link from "next/link";
 import { ArrowUpRight, ArrowDownRight, Minus, Sparkles, Download } from "lucide-react";
 import { Narrate } from "@/components/brain/Narrate";
+import { CountUpValue } from "@/components/CountUpValue";
 
 export type HeritageKpi = {
   label: string;
   value: string;
+  /** Optional raw number — when present the tile counts up to it on load,
+   *  formatted via the matching `valueKind`. `value` is the SSR fallback. */
+  valueRaw?: number;
+  valueKind?: "money" | "percent" | "number";
+  valueDecimals?: number;
   deltaPct?: number;
   higherIsBetter?: boolean;
   hint?: string;
@@ -71,12 +77,26 @@ export function HeritageHero({
           {/* Live status — current-color dot pattern */}
           <span className="inline-flex items-center gap-1.5">
             <span
-              className="relative inline-flex h-1.5 w-1.5 rounded-full"
-              style={{ background: "var(--heri-terracotta)" }}
+              className="relative inline-flex h-2 w-2 items-center justify-center rounded-full"
+              style={{
+                background: "var(--heri-terracotta)",
+                boxShadow: "0 0 0 2px color-mix(in srgb, var(--heri-terracotta) 22%, transparent)",
+              }}
             >
+              {/* Expanding ring — slower, eased fade reads as a heartbeat
+                  rather than a strobe. Honors reduced-motion via globals. */}
               <span
                 className="absolute inset-0 animate-ping rounded-full"
-                style={{ background: "var(--heri-terracotta)", animationDuration: "2.4s" }}
+                style={{
+                  background: "var(--heri-terracotta)",
+                  animationDuration: "2.8s",
+                  animationTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)",
+                }}
+              />
+              {/* Solid core sits above the ring so the centre never fades. */}
+              <span
+                className="relative inline-flex h-1 w-1 rounded-full"
+                style={{ background: "var(--heri-terracotta)" }}
               />
             </span>
             <span
@@ -173,7 +193,22 @@ export function HeritageHero({
         className="grid grid-cols-2 md:grid-cols-4"
         style={{ borderTop: "1px solid var(--heri-rule-strong)" }}
       >
-        {kpis.map((k, i) => (
+        {kpis.map((k, i) => {
+          // Count-up begins just after this tile's heri-rise entrance
+          // (delay 260 + i*70ms) so the slide-in and the number tick read as
+          // two sequential beats, not one busy blur.
+          const valueNode =
+            k.valueRaw != null && k.valueKind ? (
+              <CountUpValue
+                raw={k.valueRaw}
+                kind={k.valueKind}
+                decimals={k.valueDecimals ?? 0}
+                startDelayMs={260 + i * 70 + 120}
+              />
+            ) : (
+              k.value
+            );
+          return (
           <div
             key={i}
             className="relative px-6 py-7 md:px-8 md:py-8"
@@ -208,7 +243,7 @@ export function HeritageHero({
                       paddingBottom: 1,
                     }}
                   >
-                    {k.value}
+                    {valueNode}
                   </span>
                 </Narrate>
               ) : (
@@ -220,7 +255,7 @@ export function HeritageHero({
                     color: "var(--heri-ink)",
                   }}
                 >
-                  {k.value}
+                  {valueNode}
                 </span>
               )}
             </div>
@@ -248,7 +283,8 @@ export function HeritageHero({
               ) : null}
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

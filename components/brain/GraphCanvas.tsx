@@ -72,14 +72,22 @@ const GRAVITY = 0.012;
 const DAMP = 0.86;
 const MAX_VEL = 24;
 
+// Diverging fill for simulation impact: loss = terracotta, gain = teal.
+function simFill(d: number): string {
+  return d < 0 ? "#c0563a" : "#2f7d6a";
+}
+
 export function GraphCanvas({
   nodes: rawNodes,
   edges: rawEdges,
   onSelectNode,
+  impact,
 }: {
   nodes: GNode[];
   edges: GEdge[];
   onSelectNode?: (n: GNode | null) => void;
+  /** When the what-if simulator is live: nodeId → projected signed delta. */
+  impact?: Map<string, number>;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ w: 800, h: 600 });
@@ -334,6 +342,22 @@ export function GraphCanvas({
             const pulsing = isAffected && isPulsing(depth!);
             const pulseFr = isAffected ? pulseFrac(depth!) : 0;
 
+            // What-if simulation overlay.
+            const simDelta = impact?.get(n.id);
+            const inSim = impact != null && impact.size > 0;
+            const bodyFill = simDelta !== undefined ? simFill(simDelta) : fill;
+            const rOut =
+              simDelta !== undefined
+                ? n.r + Math.min(11, Math.abs(simDelta) * 22)
+                : n.r;
+            const bodyOpacity = inSim
+              ? simDelta !== undefined
+                ? 0.96
+                : 0.13
+              : selected != null && !isSel && !isAffected
+                ? 0.35
+                : 0.95;
+
             return (
               <g
                 key={n.id}
@@ -418,20 +442,21 @@ export function GraphCanvas({
                 <circle
                   cx={n.x}
                   cy={n.y}
-                  r={n.r}
-                  fill={fill}
-                  opacity={selected != null && !isSel && !isAffected ? 0.35 : 0.95}
+                  r={rOut}
+                  fill={bodyFill}
+                  opacity={bodyOpacity}
                   stroke="rgba(245,239,230,0.18)"
                   strokeWidth={1}
                 />
 
-                {/* Label — only for hub kinds, on hover, or when selected/affected.
-                    Keeps the canvas legible at 100+ nodes. */}
+                {/* Label — for hub kinds, on hover, when selected/affected, or
+                    when this node carries a simulated impact. */}
                 {((isHov || isSel || isAffected) ||
+                  simDelta !== undefined ||
                   HUB_KINDS.has(n.kind)) ? (
                   <text
                     x={n.x}
-                    y={n.y + n.r + 12}
+                    y={n.y + rOut + 12}
                     textAnchor="middle"
                     style={{
                       fill: isSel || isHov ? "#fafaf7" : "rgba(245,239,230,0.78)",
@@ -443,6 +468,26 @@ export function GraphCanvas({
                     }}
                   >
                     {truncate(n.label, 22)}
+                  </text>
+                ) : null}
+
+                {/* Simulated delta badge above the node. */}
+                {simDelta !== undefined && Math.abs(simDelta) >= 0.01 ? (
+                  <text
+                    x={n.x}
+                    y={n.y - rOut - 5}
+                    textAnchor="middle"
+                    style={{
+                      fill: simFill(simDelta),
+                      fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
+                      fontSize: 10.5,
+                      fontWeight: 700,
+                      letterSpacing: "0.04em",
+                      pointerEvents: "none",
+                      userSelect: "none",
+                    }}
+                  >
+                    {`${simDelta > 0 ? "▲ +" : "▼ "}${Math.round(simDelta * 100)}%`}
                   </text>
                 ) : null}
               </g>

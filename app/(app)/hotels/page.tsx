@@ -36,38 +36,50 @@ export default async function HotelsPage() {
   const last30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const last7 = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-  const [hotels, recentBookings, revenueAgg, activeBookings, roomsAgg] = await Promise.all([
-    prisma.hotel.findMany({
-      orderBy: { createdAt: "asc" },
-      include: {
-        company: true,
-        _count: { select: { bookings: true } },
-        bookings: {
-          where: { checkIn: { gte: last30 } },
-          select: { revenue: true, status: true, rooms: true, checkIn: true },
-        },
+  const hotels = await prisma.hotel.findMany({
+    orderBy: { createdAt: "asc" },
+    include: {
+      company: true,
+      _count: { select: { bookings: true } },
+      bookings: {
+        where: { checkIn: { gte: last30 } },
+        select: { revenue: true, status: true, rooms: true, checkIn: true },
       },
-    }),
-    prisma.booking.findMany({
-      orderBy: { checkIn: "desc" },
-      take: 12,
-      include: { hotel: true },
-    }),
-    prisma.booking.aggregate({
-      _sum: { revenue: true },
-      where: { checkIn: { gte: last30 } },
-    }),
-    prisma.booking.count({ where: { status: { in: ["CONFIRMED", "CHECKED_IN"] } } }),
-    prisma.hotel.aggregate({ _sum: { totalRooms: true } }),
-  ]);
+    },
+  });
 
-  const totalRooms = roomsAgg._sum.totalRooms ?? 0;
-  const occ = totalRooms ? Math.min(activeBookings / totalRooms, 1) : 0;
-  const revenue30 = revenueAgg._sum.revenue ?? 0;
+  // Recent-bookings table is scoped to THIS page's hotels. Booking is
+  // tenant-scoped (tenantId) while Hotel is workspace-scoped (companyId) —
+  // querying bookings independently let a tenant-mismatched workspace list
+  // bookings for hotels it can't see. Tying the table to `hotels` ids keeps
+  // it consistent with the property list (empty hotels → empty table).
+  const recentBookings = await prisma.booking.findMany({
+    where: { hotelId: { in: hotels.map((h) => h.id) } },
+    orderBy: { checkIn: "desc" },
+    take: 12,
+    include: { hotel: true },
+  });
 
-  // ADR (average daily rate) across last 30 days
-  const allRev30 = hotels.flatMap((h) => h.bookings.map((b) => b.revenue));
-  const adr30 = allRev30.length > 0 ? allRev30.reduce((a, b) => a + b, 0) / allRev30.length : 0;
+  // === Single-source KPIs ===
+  // Every headline number is derived from `hotels` (+ their included last-30d
+  // bookings), NOT from independent booking/room aggregates. That was the
+  // data-inconsistency bug: a workspace with zero hotels still showed revenue
+  // and active bookings because those aggregates read the tenant axis, not the
+  // company axis. One source → the counts always agree with the list below.
+  const allHotelBookings = hotels.flatMap((h) => h.bookings);
+  const totalRooms = hotels.reduce((a, h) => a + h.totalRooms, 0);
+  const revenue30 = allHotelBookings.reduce((a, b) => a + b.revenue, 0);
+  const occupiedRooms = hotels.reduce(
+    (a, h) =>
+      a +
+      h.bookings
+        .filter((b) => b.status === "CONFIRMED" || b.status === "CHECKED_IN")
+        .reduce((s, b) => s + b.rooms, 0),
+    0,
+  );
+  const occ = totalRooms ? Math.min(occupiedRooms / totalRooms, 1) : 0;
+  // ADR (average daily rate) across last 30 days — same booking set.
+  const adr30 = allHotelBookings.length > 0 ? revenue30 / allHotelBookings.length : 0;
 
   // 7-day per-day revenue trend per hotel (sparkline)
   const buildTrend = (bookings: { checkIn: Date; revenue: number }[]) => {
@@ -187,7 +199,7 @@ export default async function HotelsPage() {
             value={formatNumber(totalRooms)}
             icon={BedDouble}
             tone="emerald"
-            hint={`${formatNumber(activeBookings)} ${ar ? "محجوزة" : "occupied"}`}
+            hint={`${formatNumber(occupiedRooms)} ${ar ? "غرفة محجوزة" : "occupied"}`}
           />
           <MetricTile
             label={ar ? "نسبة الإشغال" : "Occupancy"}

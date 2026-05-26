@@ -59,8 +59,8 @@ export default async function AdminUsersPage({
   else if (fStatus === "inactive") where.active = false;
   if (fQ) {
     where.OR = [
-      { name: { contains: fQ, mode: "insensitive" } },
-      { email: { contains: fQ, mode: "insensitive" } },
+      { name: { contains: fQ } },
+      { email: { contains: fQ } },
     ];
   }
 

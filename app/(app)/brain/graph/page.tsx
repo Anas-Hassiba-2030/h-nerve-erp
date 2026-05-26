@@ -9,25 +9,18 @@
 
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
-import { HeritageSection } from "@/components/heritage";
-import { GraphView } from "@/components/brain/GraphView";
+import { CausalStudio } from "@/components/brain/CausalStudio";
 import { causalGraph } from "@/lib/brain/graph.prisma";
 import { getLocale } from "@/lib/i18n.server";
 import { rebuildBrainGraph } from "./actions";
 import { ConfirmRebuildForm } from "./ConfirmRebuildForm";
-import { Brain, Network, Sparkles } from "lucide-react";
+import { Brain } from "lucide-react";
 
 export default async function BrainGraphPage() {
   const locale = getLocale();
   const ar = locale === "ar";
 
   const { nodes, edges } = await causalGraph().loadAll();
-
-  // Quick stats for the side panel
-  const byKind: Record<string, number> = {};
-  for (const n of nodes) byKind[n.kind] = (byKind[n.kind] ?? 0) + 1;
-  const causalEdgeCount = edges.filter((e) => e.kind === "causal").length;
-  const structuralEdgeCount = edges.filter((e) => e.kind === "structural").length;
 
   return (
     <>
@@ -45,173 +38,27 @@ export default async function BrainGraphPage() {
         {nodes.length === 0 ? (
           <EmptyState ar={ar} />
         ) : (
-          <div className="grid gap-4 lg:grid-cols-12">
-            {/* Canvas takes the lion's share */}
-            <div className="lg:col-span-9">
-              <GraphView
-                nodes={nodes.map((n) => ({
-                  id: n.id,
-                  kind: n.kind,
-                  label: n.label,
-                  importance: (n as any).importance ?? 0.5,
-                  payload: n.payload,
-                }))}
-                edges={edges.map((e) => ({
-                  from: e.from,
-                  to: e.to,
-                  kind: e.kind,
-                  weight: e.weight,
-                  confidence: e.confidence,
-                }))}
-              />
-            </div>
-
-            {/* Side panel — Heritage Modern */}
-            <div className="lg:col-span-3 space-y-4">
-              <HeritageSection
-                eyebrow={ar ? "إحصاءات" : "Stats"}
-                title={ar ? "تكوين الرسم" : "Graph composition"}
-                aside={
-                  ar
-                    ? "العقد والحواف الحالية في الرسم"
-                    : "Current node and edge counts"
-                }
-              >
-                <div className="space-y-3">
-                  <StatRow
-                    label={ar ? "العقد" : "Nodes"}
-                    value={nodes.length}
-                    icon={<Network className="h-3 w-3" strokeWidth={1.5} />}
-                  />
-                  <StatRow
-                    label={ar ? "حواف هيكلية" : "Structural edges"}
-                    value={structuralEdgeCount}
-                  />
-                  <StatRow
-                    label={ar ? "حواف سببية" : "Causal edges"}
-                    value={causalEdgeCount}
-                    accent="ochre"
-                  />
-                </div>
-
-                <div
-                  className="mt-4 pt-3"
-                  style={{ borderTop: "1px solid var(--heri-rule)" }}
-                >
-                  <div className="heri-eyebrow heri-eyebrow-ink mb-2.5">
-                    {ar ? "حسب النوع" : "By kind"}
-                  </div>
-                  <ul className="space-y-1.5">
-                    {Object.entries(byKind)
-                      .sort((a, b) => b[1] - a[1])
-                      .map(([kind, count]) => (
-                        <li
-                          key={kind}
-                          className="flex items-center justify-between"
-                          style={{ fontSize: 12 }}
-                        >
-                          <span style={{ color: "var(--heri-ink-2)" }}>{kind}</span>
-                          <span
-                            className="heri-number-mono"
-                            style={{
-                              fontSize: 11,
-                              fontWeight: 600,
-                              color: "var(--heri-ink)",
-                            }}
-                          >
-                            {count}
-                          </span>
-                        </li>
-                      ))}
-                  </ul>
-                </div>
-              </HeritageSection>
-
-              <HeritageSection
-                eyebrow={ar ? "صيانة" : "Maintenance"}
-                title={ar ? "إعادة بناء الرسم" : "Rebuild graph"}
-                aside={
-                  ar
-                    ? "يقوم الدماغ بمسح كل الكيانات وإنشاء عقد وحواف جديدة من الصفر."
-                    : "The brain scans every entity and produces fresh nodes and edges."
-                }
-              >
-                <ConfirmRebuildForm ar={ar} />
-                <p
-                  className="mt-3"
-                  style={{
-                    fontSize: 11,
-                    color: "var(--heri-ink-3)",
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {ar
-                    ? "آمن للتشغيل في أي وقت. التحديثات لا تكسر الحواف المُتعلَّمة. سيُطلب تأكيد قبل البدء."
-                    : "Safe to run anytime. Doesn't clobber learned edges. Confirmation prompt before it starts."}
-                </p>
-              </HeritageSection>
-
-              <HeritageSection
-                eyebrow={ar ? "الخطوة التالية" : "Coming next"}
-                title={ar ? "المُحاكي" : "The simulator"}
-                aside={
-                  ar
-                    ? "المرحلة 2: اسحب أي مؤشر إلى قيمة افتراضية وشاهد التأثير ينتشر عبر الرسم في الوقت الحقيقي."
-                    : "Phase 2: drag any KPI to a hypothetical value and watch the impact propagate across the graph in real time."
-                }
-              >
-                <div
-                  className="flex items-center gap-2"
-                  style={{ color: "var(--heri-copper)" }}
-                >
-                  <Sparkles className="h-4 w-4" strokeWidth={1.5} />
-                  <span
-                    className="heri-eyebrow"
-                    style={{ color: "var(--heri-copper)" }}
-                  >
-                    {ar ? "في الطريق" : "On the way"}
-                  </span>
-                </div>
-              </HeritageSection>
-            </div>
-          </div>
+          <CausalStudio
+            ar={ar}
+            nodes={nodes.map((n) => ({
+              id: n.id,
+              kind: n.kind,
+              label: n.label,
+              importance: (n as any).importance ?? 0.5,
+              payload: n.payload,
+            }))}
+            edges={edges.map((e) => ({
+              from: e.from,
+              to: e.to,
+              kind: e.kind,
+              weight: e.weight,
+              confidence: e.confidence,
+            }))}
+            rebuildSlot={<ConfirmRebuildForm ar={ar} />}
+          />
         )}
       </PageContainer>
     </>
-  );
-}
-
-function StatRow({
-  label,
-  value,
-  accent,
-  icon,
-}: {
-  label: string;
-  value: number | string;
-  accent?: "ochre";
-  icon?: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center justify-between">
-      <span
-        className="inline-flex items-center gap-2"
-        style={{ fontSize: 12, color: "var(--heri-ink-2)" }}
-      >
-        {icon}
-        {label}
-      </span>
-      <span
-        className="heri-number"
-        style={{
-          fontSize: 18,
-          fontWeight: 500,
-          color: accent === "ochre" ? "var(--heri-ochre-2)" : "var(--heri-ink)",
-        }}
-      >
-        {value}
-      </span>
-    </div>
   );
 }
 

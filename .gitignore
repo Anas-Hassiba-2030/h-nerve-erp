@@ -29,6 +29,10 @@ prisma/dev.db-journal
 cookies.txt
 *.session
 
+# Local audit dumps (machine-specific file listings, not project work)
+audit.txt
+audit2.txt
+
 # Misc
 free-claude-code-main.zip
 *.zip

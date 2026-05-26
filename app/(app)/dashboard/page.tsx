@@ -430,6 +430,8 @@ export default async function DashboardPage({
             {
               label: ar ? `إيراد ${range.label}` : `Revenue ${range.label}`,
               value: formatMoney(revenueInRange),
+              valueRaw: revenueInRange,
+              valueKind: "money",
               deltaPct: revDelta,
               higherIsBetter: true,
               hint: ar ? `سابقاً ${formatMoney(revPrev)}` : `Prev ${formatMoney(revPrev)}`,
@@ -451,6 +453,8 @@ export default async function DashboardPage({
             {
               label: ar ? "مصاريف" : "Expenses",
               value: formatMoney(expenseInRange),
+              valueRaw: expenseInRange,
+              valueKind: "money",
               deltaPct: expDelta,
               higherIsBetter: false,
               hint: ar ? `سابقاً ${formatMoney(expPrev)}` : `Prev ${formatMoney(expPrev)}`,
@@ -472,6 +476,8 @@ export default async function DashboardPage({
             {
               label: ar ? "صافي" : "Net",
               value: formatMoney(netInRange),
+              valueRaw: netInRange,
+              valueKind: "money",
               deltaPct: netDelta,
               higherIsBetter: true,
               hint: ar
@@ -496,6 +502,8 @@ export default async function DashboardPage({
             {
               label: ar ? "إشغال أرينا" : "Arena occupancy",
               value: formatPercent(occupancyPct, 0),
+              valueRaw: occupancyPct,
+              valueKind: "percent",
               hint: ar
                 ? `${formatNumber(activeBookings)}/${formatNumber(totalRooms)} غرفة`
                 : `${formatNumber(activeBookings)}/${formatNumber(totalRooms)} rooms`,

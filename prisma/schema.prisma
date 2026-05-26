@@ -8,9 +8,8 @@ datasource db {
   // connection used only for migrations. For a fast OFFLINE pitch demo,
   // revert to SQLite per docs/OPERATING-PROTOCOL.md §6: provider="sqlite",
   // drop directUrl, DATABASE_URL="file:./dev.db", then npm run db:reset.
-  provider  = "postgresql"
+  provider  = "sqlite"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 // =====================================================================
@@ -1541,7 +1540,7 @@ model ImportRow {
   quantity    Int?
   // Money, precision/scale (12,2). Applied at the Phase 11 Postgres
   // cutover (was a bare Decimal on the sqlite provider).
-  unitCost    Decimal? @db.Decimal(12, 2)
+  unitCost    Decimal?
   supplier    String?
   warehouse   String?
   // Verbatim record JSON, kept for debugging (SQLite has no JSON type).
@@ -1580,7 +1579,7 @@ model Product {
   reorderPoint    Int?
   // Money, precision/scale (12,2). Applied at the Phase 11 Postgres
   // cutover (same precedent as ImportRow.unitCost).
-  unitCost        Decimal? @db.Decimal(12, 2)
+  unitCost        Decimal?
   // supplierId is nullable BY DESIGN (decision #7): import rows with no
   // supplier field have no Supplier. All current products are linked.
   supplierId      String?
@@ -1645,7 +1644,7 @@ model InventoryMovement {
   // Costed inflows only (IMPORT from r.unitCost, RECEIVED from PO line).
   // Drives weighted-average COGS (Phase 8). Null = excluded from the
   // costing pool. precision/scale (12,2) — Phase 11 Postgres cutover.
-  unitCost          Decimal? @db.Decimal(12, 2)
+  unitCost          Decimal?
   // Phase 9: which warehouse this movement happened at — backfilled
   // from the product's warehouseId. transferRef links a paired
   // TRANSFER_OUT / TRANSFER_IN created in the same transaction.
@@ -1774,7 +1773,7 @@ model PurchaseOrderLine {
   receivedQty Int      @default(0)
   // Money, precision/scale (12,2). Applied at the Phase 11 Postgres
   // cutover (precedent: Product.unitCost / ImportRow.unitCost).
-  unitCost    Decimal? @db.Decimal(12, 2)
+  unitCost    Decimal?
 
   po          PurchaseOrder @relation(fields: [poId], references: [id], onDelete: Cascade)
   product     Product       @relation(fields: [productId], references: [id])
@@ -1819,7 +1818,7 @@ model SalesOrderLine {
   quantity      Int      // ordered
   fulfilledQty  Int      @default(0)
   // Money, precision/scale (12,2). Phase 11 Postgres cutover (precedent above).
-  unitPrice     Decimal? @db.Decimal(12, 2)
+  unitPrice     Decimal?
 
   so            SalesOrder @relation(fields: [soId], references: [id], onDelete: Cascade)
   product       Product    @relation(fields: [productId], references: [id])
@@ -1956,8 +1955,8 @@ model JournalLine {
   id             String   @id @default(cuid())
   journalEntryId String
   accountId      String
-  debit          Decimal  @default(0) @db.Decimal(12, 2)
-  credit         Decimal  @default(0) @db.Decimal(12, 2)
+  debit          Decimal  @default(0)
+  credit         Decimal  @default(0)
   memo           String?
 
   entry          JournalEntry  @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)

@@ -133,7 +133,7 @@ export default async function BrainCouncilIndex() {
                 >
                   {llmEnabled
                     ? (ar ? (<>حالة المحرك: مُتصِل بـ <bdi dir="ltr">Claude</bdi></>) : "Engine: live · Claude")
-                    : (ar ? "حالة المحرك: وضع تجريبي (بدون مفتاح)" : "Engine: stub mode (no API key)")}
+                    : (ar ? "حالة المحرك: تحليلي محلي" : "Engine: on-device reasoning")}
                 </span>
                 {openCount > 0 ? (
                   <HeritagePill tone="warn">

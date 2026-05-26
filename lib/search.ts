@@ -18,7 +18,7 @@ export type SearchHit = {
 };
 
 const PER = 6;
-const ci = (q: string) => ({ contains: q, mode: "insensitive" as const });
+const ci = (q: string) => ({ contains: q });
 
 export async function universalSearch(qRaw: string): Promise<SearchHit[]> {
   const q = qRaw.trim();

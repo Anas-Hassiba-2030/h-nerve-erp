@@ -415,6 +415,81 @@ export async function seedBrainGraph(): Promise<{
     }
   }
 
+  // ── Pass 3.5: downstream operational causal edges ─────────────────
+  // Every structural edge points UP to the Company, so without these a
+  // Company node is a pure sink — perturbing it in the simulator can't
+  // cascade into its own units. These give the what-if simulator a real
+  // downstream wave: Company → Hotels → Bookings, Company → DairyBatches,
+  // Company → Farms → Crops, Company → Transactions.
+  for (const h of hotels) {
+    if (!h.companyId) continue;
+    edges.push({
+      fromId: nid("Company", h.companyId),
+      toId: nid("Hotel", h.id),
+      kind: "causal",
+      weight: 0.7,
+      confidence: 0.8,
+      rationale: "Company-level demand drives hotel occupancy & performance",
+    });
+  }
+  for (const b of bookings) {
+    edges.push({
+      fromId: nid("Hotel", b.hotelId),
+      toId: nid("Booking", b.id),
+      kind: "causal",
+      weight: 0.6,
+      confidence: 0.7,
+      rationale: "Hotel occupancy drives booking revenue",
+    });
+  }
+  for (const d of dairyBatches) {
+    if (!d.companyId) continue;
+    edges.push({
+      fromId: nid("Company", d.companyId),
+      toId: nid("DairyBatch", d.id),
+      kind: "causal",
+      weight: 0.6,
+      confidence: 0.72,
+      rationale: "Dairy company demand drives batch production volume",
+    });
+  }
+  for (const f of farms) {
+    if (!f.companyId) continue;
+    edges.push({
+      fromId: nid("Company", f.companyId),
+      toId: nid("Farm", f.id),
+      kind: "causal",
+      weight: 0.5,
+      confidence: 0.65,
+      rationale: "Agriculture company planning drives farm activity",
+    });
+  }
+  // Baseline Farm → Crop for healthy farms only (alerting farms already
+  // get a stronger negative edge in Pass 3 — don't clobber it).
+  for (const c of crops) {
+    const farm = farms.find((f) => f.id === c.farmId);
+    if (!farm || farm.alertLevel !== "OK") continue;
+    edges.push({
+      fromId: nid("Farm", c.farmId),
+      toId: nid("Crop", c.id),
+      kind: "causal",
+      weight: 0.45,
+      confidence: 0.6,
+      rationale: "Farm conditions drive crop yield",
+    });
+  }
+  for (const t of transactions) {
+    if (!t.companyId) continue;
+    edges.push({
+      fromId: nid("Company", t.companyId),
+      toId: nid("Transaction", t.id),
+      kind: "causal",
+      weight: 0.5,
+      confidence: 0.6,
+      rationale: "Company activity scales transaction volume",
+    });
+  }
+
   // ── Persist (idempotent upserts in batches) ───────────────────────
   for (const n of nodes) {
     await prisma.brainNode.upsert({

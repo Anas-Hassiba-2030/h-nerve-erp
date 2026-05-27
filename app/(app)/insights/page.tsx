@@ -10,7 +10,7 @@
 import Link from "next/link";
 import {
   Sparkles, Plus, Eye, CheckCircle2, AlertTriangle,
-  Lightbulb, Info, Brain,
+  Lightbulb, Info, Brain, Wand2,
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
@@ -24,7 +24,7 @@ import { buildAnomaliesFromSeries } from "@/lib/anomaly";
 import { getLocale } from "@/lib/i18n.server";
 import { prisma } from "@/lib/db";
 import { formatNumber, formatRelative } from "@/lib/utils";
-import { deleteInsight, setInsightStatus, runAiEngine } from "./actions";
+import { deleteInsight, setInsightStatus, runAiEngine, generateInsightPlan } from "./actions";
 
 const MODULE_AR: Record<string, string> = {
   HOTELS: "الفنادق",
@@ -390,6 +390,18 @@ export default async function InsightsPage() {
                               </form>
                             )
                           )}
+                          <form action={generateInsightPlan}>
+                            <input type="hidden" name="id" value={i.id} />
+                            <button
+                              type="submit"
+                              className="heri-btn heri-btn-ghost"
+                              style={{ padding: "6px 12px", fontSize: 11, color: "var(--heri-teal)" }}
+                              title={ar ? "توليد خطة عمل من هذه الإشارة" : "Generate action plan from this insight"}
+                            >
+                              <Wand2 className="h-3 w-3" strokeWidth={1.5} />
+                              {ar ? "خطة" : "Plan"}
+                            </button>
+                          </form>
                           <span
                             className="heri-eyebrow heri-eyebrow-ink"
                             style={{ fontSize: 9.5 }}

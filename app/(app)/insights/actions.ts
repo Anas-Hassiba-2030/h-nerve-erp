@@ -159,6 +159,38 @@ export async function restoreInsight(formData: FormData) {
   });
 }
 
+// === PLANNER — generate an action plan from an insight via the Brain's planner ===
+export async function generateInsightPlan(formData: FormData) {
+  const user = await requireUser();
+  const id = String(formData.get("id") ?? "");
+  const locale = getLocale();
+  const lc: "ar" | "en" = locale === "ar" ? "ar" : "en";
+  if (!id) return;
+
+  const { generatePlanFromInsight } = await import("@/lib/brain/planner.live");
+  const plan = await generatePlanFromInsight(id, lc);
+
+  await logActivity({
+    action: "INSIGHT",
+    entity: "INSIGHT",
+    entityId: plan.id,
+    summary: `خطة مولّدة من إشارة: ${plan.goal}`,
+    summaryEn: `Plan generated from insight: ${(plan as any).goalEn ?? plan.goal}`,
+  });
+
+  flashToast({
+    type: "info",
+    entity: "info",
+    id: plan.id,
+    label: lc === "ar"
+      ? `خطة جديدة: ${plan.goal}`
+      : `New plan: ${(plan as any).goalEn ?? plan.goal}`,
+  });
+
+  revalidatePath("/insights");
+  revalidatePath("/brain/scenarios");
+}
+
 // === AI ENGINE — runs heuristics across all modules and persists fresh insights ===
 export async function runAiEngine() {
   const user = await requireUser();

@@ -9,9 +9,7 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
-import { HeroPanel } from "@/components/exec/HeroPanel";
-import { MetricTile } from "@/components/exec/MetricTile";
-import { SectionBlock } from "@/components/exec/SectionBlock";
+import { HeriKpi } from "@/components/HeriKpi";
 import { EmptyState } from "@/components/EmptyState";
 import { DeleteButton } from "@/components/DeleteButton";
 import { getLocale } from "@/lib/i18n.server";
@@ -77,118 +75,54 @@ export default async function AlertsPage() {
       />
 
       <PageContainer>
-        <HeroPanel
-          gradient="linear-gradient(135deg, #7c2d12 0%, #c2410c 35%, #ea580c 70%, #fdba74 110%)"
-          accent="#ea580c"
-          height={250}
-        >
-          <div className="flex flex-wrap items-center justify-between gap-5">
-            <div className="flex items-center gap-5 hn-anim-rise">
-              <div className="hn-anim-zoom-bounce relative">
-                <span className="hn-anim-pulse-ring absolute -inset-2 rounded-3xl" aria-hidden />
-                <div
-                  className="flex h-[88px] w-[88px] items-center justify-center rounded-2xl ring-2 ring-white/40"
-                  style={{ background: "rgba(255,255,255,0.18)" }}
-                >
-                  <Bell className="h-12 w-12 text-white hn-anim-bob" />
-                </div>
-              </div>
-              <div className="min-w-0">
-                <div
-                  className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em]"
-                  style={{
-                    background: "rgba(255,255,255,0.18)",
-                    border: "1px solid rgba(255,255,255,0.28)",
-                    backdropFilter: "blur(6px)",
-                    color: "white",
-                  }}
-                >
-                  <Zap className="h-3 w-3 hn-anim-pulse-soft" />
-                  {ar ? "أتمتة ذكية" : "Smart automation"}
-                </div>
-                <h2
-                  className="mt-2.5 text-3xl font-black leading-[1.05] tracking-[-0.02em] hn-anim-rise md:text-[34px]"
-                  style={{ animationDelay: "0.08s" }}
-                >
-                  {ar ? "مركز التنبيهات" : "Alert Rules Center"}
-                </h2>
-                <p
-                  className="mt-1 max-w-xl text-[12.5px] font-bold opacity-90 hn-anim-rise"
-                  style={{ animationDelay: "0.16s" }}
-                >
-                  {ar
-                    ? "8 قواعد جاهزة + إمكانية تخصيص العتبات. النظام يراقب ويُصدر إشارات قبل أن تطلب."
-                    : "8 ready-made rules + custom thresholds. The system watches and signals before you ask."}
-                </p>
-                <div
-                  className="mt-3 flex flex-wrap gap-2 hn-anim-fall"
-                  style={{ animationDelay: "0.24s" }}
-                >
-                  {rules.length === 0 ? (
-                    <form action={seedRules}>
-                      <button
-                        type="submit"
-                        className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-extrabold transition hover:scale-105"
-                        style={{ background: "white", color: "#7c2d12" }}
-                      >
-                        <Plus className="h-3.5 w-3.5" />
-                        {ar ? "إنشاء القواعد الافتراضية" : "Seed default rules"}
-                      </button>
-                    </form>
-                  ) : (
-                    <span
-                      className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-extrabold"
-                      style={{ background: "white", color: "#7c2d12" }}
-                    >
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      {formatNumber(rules.length)} {ar ? "قاعدة جاهزة" : "rules ready"}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-2 hn-stagger sm:grid-cols-2">
-              <AlertHeroStat label={ar ? "قواعد" : "Rules"} value={formatNumber(rules.length)} icon={Bell} />
-              <AlertHeroStat label={ar ? "نشطة" : "Active"} value={formatNumber(active)} icon={CheckCircle2} />
-              <AlertHeroStat label={ar ? "انطلقت اليوم" : "Triggered today"} value={formatNumber(triggeredLast24h)} icon={Zap} />
-              <AlertHeroStat label={ar ? "إجمالي مرات" : "Total fires"} value={formatNumber(totalTriggers)} icon={TrendingUp} />
-            </div>
+        {/* Action rail */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="heri-eyebrow heri-eyebrow-ink">
+            {ar ? "الذكاء التشغيلي" : "Operational intelligence"}
           </div>
-        </HeroPanel>
+          <div className="flex items-center gap-2">
+            {rules.length === 0 ? (
+              <form action={seedRules}>
+                <button type="submit" className="heri-btn heri-btn-primary" style={{ fontSize: 13 }}>
+                  <Plus className="h-4 w-4" strokeWidth={1.5} />
+                  {ar ? "إنشاء القواعد الافتراضية" : "Seed default rules"}
+                </button>
+              </form>
+            ) : (
+              <span className="heri-eyebrow heri-eyebrow-ink">
+                <CheckCircle2 className="inline h-3.5 w-3.5 me-1" style={{ color: "var(--heri-teal, #1f4e4a)" }} />
+                {formatNumber(rules.length)} {ar ? "قاعدة جاهزة" : "rules ready"}
+              </span>
+            )}
+          </div>
+        </div>
 
-        <section className="grid gap-3 hn-stagger sm:grid-cols-2 xl:grid-cols-4">
-          <MetricTile
+        {/* KPI band */}
+        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
+          <HeriKpi
             label={ar ? "قواعد نشطة" : "Active rules"}
-            value={formatNumber(active)}
-            icon={CheckCircle2}
-            tone="emerald"
+            raw={active}
+            kind="number"
             hint={`${formatNumber(rules.length - active)} ${ar ? "موقوفة" : "paused"}`}
           />
-          <MetricTile
-            label={ar ? "إنطلاقات 24ساعة" : "Last 24h fires"}
-            value={formatNumber(triggeredLast24h)}
-            icon={Zap}
-            tone={triggeredLast24h > 0 ? "amber" : "slate"}
+          <HeriKpi
+            label={ar ? "إنطلاقات 24 ساعة" : "Last 24h fires"}
+            raw={triggeredLast24h}
+            kind="number"
+            accent={triggeredLast24h > 0 ? "var(--heri-terracotta, #b85c38)" : undefined}
             hint={ar ? "في يومنا" : "today"}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "إجمالي الانطلاقات" : "Total triggers"}
-            value={formatNumber(totalTriggers)}
-            icon={TrendingUp}
-            tone="violet"
+            raw={totalTriggers}
+            kind="number"
             hint={ar ? "كل العمر" : "all-time"}
           />
-          <MetricTile
-            label={ar ? "متوسط Cooldown" : "Avg cooldown"}
-            value={
-              rules.length > 0
-                ? `${Math.round(rules.reduce((a, r) => a + r.cooldownHours, 0) / rules.length)}h`
-                : "—"
-            }
-            icon={Clock}
-            tone="blue"
-            hint={ar ? "بين الانطلاقات" : "between fires"}
+          <HeriKpi
+            label={ar ? "متوسط الهدنة" : "Avg cooldown"}
+            raw={rules.length > 0 ? Math.round(rules.reduce((a, r) => a + r.cooldownHours, 0) / rules.length) : 0}
+            kind="number"
+            hint={ar ? "ساعة بين الانطلاقات" : "hours between fires"}
           />
         </section>
 
@@ -211,7 +145,7 @@ export default async function AlertsPage() {
             }
           />
         ) : (
-          <div className="grid gap-3 hn-stagger md:grid-cols-2">
+          <div className="grid gap-3 heri-stagger md:grid-cols-2">
             {rules.map((r) => {
               const def = ALERT_KINDS[r.kind as AlertKind];
               if (!def) return null;
@@ -220,7 +154,7 @@ export default async function AlertsPage() {
               return (
                 <article
                   key={r.id}
-                  className={`exec-card hn-anim-rise hn-hover-lift ${r.isActive ? "" : "opacity-65"}`}
+                  className={`exec-card ${r.isActive ? "" : "opacity-65"}`}
                   data-tone={def.tone}
                 >
                   <div className="space-y-3 p-5">
@@ -397,24 +331,3 @@ export default async function AlertsPage() {
   );
 }
 
-function AlertHeroStat({ label, value, icon: Icon }: { label: string; value: string; icon: any }) {
-  return (
-    <div
-      className="hn-anim-rise rounded-xl px-3 py-2"
-      style={{
-        background: "rgba(255,255,255,0.14)",
-        border: "1px solid rgba(255,255,255,0.24)",
-        backdropFilter: "blur(8px)",
-        minWidth: 110,
-      }}
-    >
-      <div className="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[0.16em] opacity-85">
-        <Icon className="h-3 w-3" />
-        {label}
-      </div>
-      <div className="exec-num mt-0.5 text-xl font-black leading-none tracking-[-0.012em]">
-        {value}
-      </div>
-    </div>
-  );
-}

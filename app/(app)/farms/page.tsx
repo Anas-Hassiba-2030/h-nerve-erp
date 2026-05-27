@@ -4,13 +4,8 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer, PageSection } from "@/components/PageContainer";
-import { HeroPanel } from "@/components/exec/HeroPanel";
-import { MetricTile } from "@/components/exec/MetricTile";
-import { CompanyLogo } from "@/components/brand/CompanyLogo";
+import { HeriKpi } from "@/components/HeriKpi";
 import { ExportMenu } from "@/components/ExportMenu";
-import { getCompanyBrand } from "@/lib/companyBrand";
-import { KpiCard } from "@/components/KpiCard";
-import { CompanyCover } from "@/components/CompanyCover";
 import { StatusBadge } from "@/components/StatusBadge";
 import { EmptyState } from "@/components/EmptyState";
 import { DeleteButton } from "@/components/DeleteButton";
@@ -66,119 +61,50 @@ export default async function FarmsPage() {
       />
 
       <PageContainer>
-        <HeroPanel
-          gradient={getCompanyBrand("LORAN").gradient}
-          accent={getCompanyBrand("LORAN").accent}
-          height={250}
-        >
-          <div className="flex flex-wrap items-center justify-between gap-5">
-            <div className="flex items-center gap-5 hn-anim-rise">
-              <div className="hn-anim-zoom-bounce relative">
-                <span className="hn-anim-pulse-ring absolute -inset-2 rounded-3xl" aria-hidden />
-                <CompanyLogo code="LORAN" size={88} light />
-              </div>
-              <div className="min-w-0">
-                <div
-                  className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em]"
-                  style={{
-                    background: "rgba(255,255,255,0.18)",
-                    border: "1px solid rgba(255,255,255,0.28)",
-                    backdropFilter: "blur(6px)",
-                    color: "white",
-                  }}
-                >
-                  <Leaf className="h-3 w-3" />
-                  {ar ? "زراعة ذكية" : "Smart agriculture"}
-                </div>
-                <h2
-                  className="mt-2.5 text-3xl font-black leading-[1.05] tracking-[-0.02em] hn-anim-rise md:text-[34px]"
-                  style={{ animationDelay: "0.08s" }}
-                >
-                  {ar ? "لوران الزراعية" : "Loran Agricultural"}
-                </h2>
-                <p
-                  className="mt-1 max-w-xl text-[12.5px] font-bold opacity-90 hn-anim-rise"
-                  style={{ animationDelay: "0.16s" }}
-                >
-                  {ar
-                    ? "أرض تنبت ثقة. زراعة تستحق الانتظار."
-                    : "Land of trust. Crops worth the wait."}
-                </p>
-                <div
-                  className="mt-3 flex flex-wrap gap-2 hn-anim-fall"
-                  style={{ animationDelay: "0.24s" }}
-                >
-                  <Link
-                    href="/farms/new"
-                    className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-extrabold transition hover:scale-105"
-                    style={{ background: "white", color: "#0a4d3a" }}
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    {ar ? "مزرعة جديدة" : "New farm"}
-                  </Link>
-                  <Link
-                    href="/farms/crops/new"
-                    className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-extrabold transition hover:scale-105"
-                    style={{
-                      background: "rgba(255,255,255,0.18)",
-                      border: "1px solid rgba(255,255,255,0.32)",
-                      backdropFilter: "blur(6px)",
-                      color: "white",
-                    }}
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    {ar ? "محصول جديد" : "New crop"}
-                  </Link>
-                  <ExportMenu type="farms" companyCode="LORAN" locale={lc} />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-2 hn-stagger sm:grid-cols-2">
-              <FarmHeroStat label={ar ? "مزارع" : "Farms"} value={formatNumber(farms.length)} icon={Sprout} />
-              <FarmHeroStat label={ar ? "دونم" : "Dunum"} value={formatNumber(totalArea)} icon={Wheat} />
-              <FarmHeroStat label={ar ? "محاصيل" : "Crops"} value={formatNumber(cropsGrowing)} icon={Leaf} />
-              <FarmHeroStat label={ar ? "تنبيهات" : "Alerts"} value={formatNumber(alerts.length)} icon={AlertTriangle} />
-            </div>
+        {/* Action rail */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="heri-eyebrow heri-eyebrow-ink">
+            {ar ? "الزراعة الذكية" : "Smart agriculture"}
           </div>
-        </HeroPanel>
+          <div className="flex items-center gap-2">
+            <Link href="/farms/new" className="heri-btn heri-btn-primary" style={{ fontSize: 13 }}>
+              <Plus className="h-4 w-4" strokeWidth={1.5} />
+              {ar ? "مزرعة جديدة" : "New farm"}
+            </Link>
+            <Link href="/farms/crops/new" className="heri-btn heri-btn-secondary" style={{ fontSize: 13 }}>
+              <Plus className="h-4 w-4" strokeWidth={1.5} />
+              {ar ? "محصول جديد" : "New crop"}
+            </Link>
+            <ExportMenu type="farms" companyCode="LORAN" locale={lc} />
+          </div>
+        </div>
 
-        <section className="grid gap-3 hn-stagger sm:grid-cols-2 xl:grid-cols-4">
-          <MetricTile
+        {/* KPI band */}
+        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
+          <HeriKpi
             label={ar ? "عدد المزارع" : "Farms"}
-            value={formatNumber(farms.length)}
-            icon={Sprout}
-            tone="emerald"
-            hint={`${formatNumber(greenhouses)} ${ar ? "دفيئة" : "GH"}`}
+            raw={farms.length}
+            kind="number"
+            hint={`${formatNumber(greenhouses)} ${ar ? "دفيئة" : "greenhouse"}`}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "إجمالي المساحة" : "Total area"}
-            value={`${formatNumber(totalArea)}`}
-            icon={Wheat}
-            tone="amber"
+            raw={totalArea}
+            kind="number"
             hint={ar ? "دونم" : "dunum"}
           />
-          <MetricTile
-            label={ar ? "محاصيل نامية" : "Growing"}
-            value={formatNumber(cropsGrowing)}
-            icon={Leaf}
-            tone="blue"
+          <HeriKpi
+            label={ar ? "محاصيل نامية" : "Growing crops"}
+            raw={cropsGrowing}
+            kind="number"
             hint={ar ? "في النمو" : "in cultivation"}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "تنبيهات" : "Alerts"}
-            value={formatNumber(alerts.length)}
-            icon={AlertTriangle}
-            tone={alerts.length > 0 ? "amber" : "emerald"}
-            hint={
-              alerts.length > 0
-                ? ar
-                  ? "تحقق من القراءات"
-                  : "Check readings"
-                : ar
-                ? "القراءات طبيعية"
-                : "All normal"
-            }
+            raw={alerts.length}
+            kind="number"
+            accent={alerts.length > 0 ? "var(--heri-terracotta, #b85c38)" : undefined}
+            hint={alerts.length > 0 ? (ar ? "تحقق من القراءات" : "Check readings") : (ar ? "القراءات طبيعية" : "All normal")}
           />
         </section>
 
@@ -374,24 +300,3 @@ function MicroSensor({ icon, label, value }: { icon: React.ReactNode; label: str
   );
 }
 
-function FarmHeroStat({ label, value, icon: Icon }: { label: string; value: string; icon: any }) {
-  return (
-    <div
-      className="hn-anim-rise rounded-xl px-3 py-2"
-      style={{
-        background: "rgba(255,255,255,0.14)",
-        border: "1px solid rgba(255,255,255,0.24)",
-        backdropFilter: "blur(8px)",
-        minWidth: 110,
-      }}
-    >
-      <div className="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[0.16em] opacity-85">
-        <Icon className="h-3 w-3" />
-        {label}
-      </div>
-      <div className="exec-num mt-0.5 text-xl font-black leading-none tracking-[-0.012em]">
-        {value}
-      </div>
-    </div>
-  );
-}

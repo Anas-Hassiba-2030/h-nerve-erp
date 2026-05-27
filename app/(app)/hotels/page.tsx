@@ -5,17 +5,13 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer, PageSection } from "@/components/PageContainer";
-import { HeroPanel } from "@/components/exec/HeroPanel";
-import { MetricTile } from "@/components/exec/MetricTile";
-import { SectionBlock } from "@/components/exec/SectionBlock";
-import { CompanyLogo } from "@/components/brand/CompanyLogo";
+import { HeriKpi } from "@/components/HeriKpi";
 import { ExportMenu } from "@/components/ExportMenu";
 import { StatusBadge } from "@/components/StatusBadge";
 import { EmptyState } from "@/components/EmptyState";
 import { DeleteButton } from "@/components/DeleteButton";
 import { Sparkline } from "@/components/Sparkline";
 import { HeatMap, HeatMapLegend, type HeatMapCell } from "@/components/charts/HeatMap";
-import { getCompanyBrand } from "@/lib/companyBrand";
 import { prisma } from "@/lib/db";
 import {
   formatMoney, formatNumber, formatPercent, formatShortDate,
@@ -107,112 +103,49 @@ export default async function HotelsPage() {
       />
 
       <PageContainer>
-        {/* Arena hero with logo */}
-        <HeroPanel
-          gradient={getCompanyBrand("ARENA").gradient}
-          accent={getCompanyBrand("ARENA").accent}
-          height={250}
-        >
-          <div className="flex flex-wrap items-center justify-between gap-5">
-            <div className="flex items-center gap-5 hn-anim-rise">
-              <div className="hn-anim-zoom-bounce relative">
-                <span className="hn-anim-pulse-ring absolute -inset-2 rounded-3xl" aria-hidden />
-                <CompanyLogo code="ARENA" size={88} light />
-              </div>
-              <div className="min-w-0">
-                <div
-                  className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em]"
-                  style={{
-                    background: "rgba(255,255,255,0.18)",
-                    border: "1px solid rgba(255,255,255,0.28)",
-                    backdropFilter: "blur(6px)",
-                    color: "white",
-                  }}
-                >
-                  <Star className="h-3 w-3" />
-                  {ar ? "ضيافة فاخرة" : "Luxury hospitality"}
-                </div>
-                <h2
-                  className="mt-2.5 text-3xl font-black leading-[1.05] tracking-[-0.02em] hn-anim-rise md:text-[34px]"
-                  style={{ animationDelay: "0.08s" }}
-                >
-                  {ar ? "أرينا سبيس للضيافة" : "Arena Space Hospitality"}
-                </h2>
-                <p
-                  className="mt-1 max-w-xl text-[12.5px] font-bold opacity-90 hn-anim-rise"
-                  style={{ animationDelay: "0.16s" }}
-                >
-                  {ar
-                    ? "ضيافة بمعايير عالمية، روح أردنية. منتجعات ذكية تربط الإشغال بسلسلة التوريد."
-                    : "World-class hospitality with Jordanian soul. Smart resorts wired to the supply chain."}
-                </p>
-                <div
-                  className="mt-3 flex flex-wrap gap-2 hn-anim-fall"
-                  style={{ animationDelay: "0.24s" }}
-                >
-                  <Link
-                    href="/hotels/bookings/new"
-                    className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-extrabold transition hover:scale-105"
-                    style={{ background: "white", color: "#5a3a1f" }}
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    {ar ? "حجز جديد" : "New booking"}
-                  </Link>
-                  <Link
-                    href="/hotels/new"
-                    className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-extrabold transition hover:scale-105"
-                    style={{
-                      background: "rgba(255,255,255,0.18)",
-                      border: "1px solid rgba(255,255,255,0.32)",
-                      backdropFilter: "blur(6px)",
-                      color: "white",
-                    }}
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    {ar ? "فندق جديد" : "New hotel"}
-                  </Link>
-                  <ExportMenu type="hotels" companyCode="ARENA" locale={lc} />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-2 hn-stagger sm:grid-cols-2">
-              <HeroStat label={ar ? "غرف" : "Rooms"} value={formatNumber(totalRooms)} icon={BedDouble} />
-              <HeroStat label={ar ? "إشغال" : "Occupancy"} value={formatPercent(occ, 0)} icon={TrendingUp} />
-              <HeroStat label={ar ? "إيراد 30ي" : "Revenue 30d"} value={formatMoney(revenue30)} icon={CircleDollarSign} />
-              <HeroStat label={ar ? "متوسط/ليلة" : "Avg ADR"} value={formatMoney(adr30)} icon={Sparkles} />
-            </div>
+        {/* Action rail */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="heri-eyebrow heri-eyebrow-ink">
+            {ar ? "آخر 30 يوماً" : "Last 30 days"}
           </div>
-        </HeroPanel>
+          <div className="flex items-center gap-2">
+            <Link href="/hotels/bookings/new" className="heri-btn heri-btn-primary" style={{ fontSize: 13 }}>
+              <Plus className="h-4 w-4" strokeWidth={1.5} />
+              {ar ? "حجز جديد" : "New booking"}
+            </Link>
+            <Link href="/hotels/new" className="heri-btn heri-btn-secondary" style={{ fontSize: 13 }}>
+              <Plus className="h-4 w-4" strokeWidth={1.5} />
+              {ar ? "فندق جديد" : "New hotel"}
+            </Link>
+            <ExportMenu type="hotels" companyCode="ARENA" locale={lc} />
+          </div>
+        </div>
 
-        {/* KPI strip with new MetricTile */}
-        <section className="grid gap-3 hn-stagger sm:grid-cols-2 xl:grid-cols-4">
-          <MetricTile
+        {/* KPI band */}
+        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
+          <HeriKpi
             label={ar ? "عقارات نشطة" : "Active properties"}
-            value={formatNumber(hotels.length)}
-            icon={HotelIcon}
-            tone="amber"
+            raw={hotels.length}
+            kind="number"
             hint={`${hotels.filter((h) => h.country === "JO").length} ${ar ? "أردن" : "JO"} · ${hotels.filter((h) => h.country === "BG").length} ${ar ? "بلغاريا" : "BG"}`}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "إجمالي الغرف" : "Total rooms"}
-            value={formatNumber(totalRooms)}
-            icon={BedDouble}
-            tone="emerald"
+            raw={totalRooms}
+            kind="number"
             hint={`${formatNumber(occupiedRooms)} ${ar ? "غرفة محجوزة" : "occupied"}`}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "نسبة الإشغال" : "Occupancy"}
-            value={formatPercent(occ, 0)}
-            icon={TrendingUp}
-            tone="blue"
+            raw={occ}
+            kind="percent"
+            accent={occ >= 0.6 ? "var(--heri-teal, #1f4e4a)" : undefined}
             hint={occ >= 0.6 ? (ar ? "أداء ممتاز" : "Excellent") : (ar ? "هامش للنمو" : "Room to grow")}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "إيرادات 30 يوم" : "Revenue 30d"}
-            value={formatMoney(revenue30)}
-            icon={CircleDollarSign}
-            tone="violet"
+            raw={revenue30}
+            kind="money"
             hint={`${ar ? "متوسط/حجز" : "Avg/booking"} ${formatMoney(adr30)}`}
           />
         </section>
@@ -437,24 +370,3 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function HeroStat({ label, value, icon: Icon }: { label: string; value: string; icon: any }) {
-  return (
-    <div
-      className="hn-anim-rise rounded-xl px-3 py-2"
-      style={{
-        background: "rgba(255,255,255,0.14)",
-        border: "1px solid rgba(255,255,255,0.24)",
-        backdropFilter: "blur(8px)",
-        minWidth: 110,
-      }}
-    >
-      <div className="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[0.16em] opacity-85">
-        <Icon className="h-3 w-3" />
-        {label}
-      </div>
-      <div className="exec-num mt-0.5 text-xl font-black leading-none tracking-[-0.012em]">
-        {value}
-      </div>
-    </div>
-  );
-}

@@ -1,6 +1,5 @@
-// /supply-chain — premium AI bridge view. Hero with breathing nerve graphic,
-// strategic narrative, KPI strip, Sankey diagram, and forecast cards.
-// Fully bilingual (ar/en). All animations from hn-anim-* library.
+// /supply-chain — predictive supply chain bridge. Heritage Modern vocabulary.
+// Phase NS-1: every approved forecast drafts a cross-tenant PO.
 
 import Link from "next/link";
 import {
@@ -9,9 +8,8 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
-import { HeroPanel } from "@/components/exec/HeroPanel";
-import { MetricTile } from "@/components/exec/MetricTile";
-import { SectionBlock } from "@/components/exec/SectionBlock";
+import { HeriKpi } from "@/components/HeriKpi";
+import { HeritageSection, HeritagePill } from "@/components/heritage";
 import { StatusBadge } from "@/components/StatusBadge";
 import { EmptyState } from "@/components/EmptyState";
 import { DeleteButton } from "@/components/DeleteButton";
@@ -22,7 +20,7 @@ import { getCompanyBrand } from "@/lib/companyBrand";
 import { getLocale } from "@/lib/i18n.server";
 import { prisma } from "@/lib/db";
 import {
-  ar as arAr, CATEGORIES_AR, formatNumber, formatPercent, formatShortDate,
+  formatNumber, formatPercent, formatShortDate,
 } from "@/lib/utils";
 import {
   autoGenerateForecasts, deleteForecast, setForecastStatus,
@@ -56,7 +54,6 @@ export default async function SupplyChainPage() {
       source: true,
       target: true,
       generatedBy: true,
-      // Phase NS-1 — the bridge PO drafted when this forecast was approved.
       sourcedPO: { select: { id: true, poNumber: true, supplierRef: { select: { name: true } } } },
     },
   });
@@ -67,9 +64,8 @@ export default async function SupplyChainPage() {
   const avgConfidence = forecasts.length > 0
     ? forecasts.reduce((acc, f) => acc + f.confidence, 0) / forecasts.length
     : 0;
-  const totalDemand = forecasts.reduce((a, f) => a + f.predictedDemand, 0);
 
-  // Sankey
+  // Sankey data
   const sourceCompanies = new Map<string, { id: string; name: string; nameEn: string; code: string }>();
   const targetCompanies = new Map<string, { id: string; name: string; nameEn: string; code: string }>();
   const categorySet = new Set<string>();
@@ -94,7 +90,7 @@ export default async function SupplyChainPage() {
       id: `cat-${cat}`,
       label: ar ? CATEGORY_LABEL[cat]?.ar ?? cat : CATEGORY_LABEL[cat]?.en ?? cat,
       column: 1,
-      color: "var(--brand)",
+      color: "var(--heri-ochre)",
     })),
     ...[...targetCompanies.values()].map((c) => ({
       id: `tgt-${c.id}`,
@@ -123,10 +119,6 @@ export default async function SupplyChainPage() {
     }),
   ];
 
-  // AI Bridge gradient — distinctive purple/violet for "intelligence"
-  const aiBridgeGradient =
-    "linear-gradient(135deg, #1e1b4b 0%, #4c1d95 35%, #7c3aed 70%, #a78bfa 110%)";
-
   return (
     <>
       <PageHeader
@@ -140,143 +132,92 @@ export default async function SupplyChainPage() {
       />
 
       <PageContainer>
-        {/* ── AI Bridge Hero ────────────────────────────────────────── */}
-        <HeroPanel gradient={aiBridgeGradient} accent="#a78bfa" height={280}>
-          <div className="grid gap-6 md:grid-cols-[1.4fr_1fr] md:items-center">
-            {/* Narrative */}
-            <div className="hn-anim-rise">
-              <div
-                className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em]"
-                style={{
-                  background: "rgba(255,255,255,0.18)",
-                  border: "1px solid rgba(255,255,255,0.28)",
-                  backdropFilter: "blur(6px)",
-                  color: "white",
-                }}
-              >
-                <Brain className="h-3 w-3 hn-anim-pulse-soft" />
-                {ar ? "جسر الذكاء" : "AI bridge"}
-              </div>
-              <h2
-                className="mt-2.5 text-3xl font-black leading-[1.05] tracking-[-0.02em] hn-anim-rise md:text-[34px]"
-                style={{ animationDelay: "0.08s" }}
-              >
-                {ar ? "من حجز فندقي … إلى أمر تصنيع." : "From booking … to production."}
-              </h2>
-              <p
-                className="mt-2 max-w-xl text-[12.5px] font-bold leading-relaxed opacity-90 hn-anim-rise"
-                style={{ animationDelay: "0.16s" }}
-              >
-                {ar
-                  ? "المحرك التنبؤي يقرأ كل حجز قادم في فنادق أرينا، يحسب توقعات استهلاك النزلاء، ويولّد إشارات شراء للمها ولوران قبل أن يصبح الطلب أزمة."
-                  : "The predictive engine reads every incoming booking at Arena hotels, models guest consumption, and pushes purchase signals to Maha and Loran before demand becomes a crisis."}
-              </p>
-              <div
-                className="mt-4 flex flex-wrap gap-2 hn-anim-fall"
-                style={{ animationDelay: "0.26s" }}
-              >
-                <form action={autoGenerateForecasts}>
-                  <button
-                    type="submit"
-                    className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-extrabold transition hover:scale-105"
-                    style={{ background: "white", color: "#4c1d95" }}
-                  >
-                    <Zap className="h-3.5 w-3.5" />
-                    {ar ? "تشغيل المحرك" : "Run engine"}
-                  </button>
-                </form>
-                <Link
-                  href="/supply-chain/new"
-                  className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-extrabold transition hover:scale-105"
-                  style={{
-                    background: "rgba(255,255,255,0.18)",
-                    border: "1px solid rgba(255,255,255,0.32)",
-                    backdropFilter: "blur(6px)",
-                    color: "white",
-                  }}
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  {ar ? "تنبؤ يدوي" : "Manual forecast"}
-                </Link>
-                <ExportMenu type="supply-chain" locale={lc} />
-              </div>
-            </div>
-
-            {/* Bridge mini-stats */}
-            <div className="grid gap-2 hn-stagger sm:grid-cols-2">
-              <BridgeStat
-                label={ar ? "تنبؤات نشطة" : "Active signals"}
-                value={formatNumber(forecasts.length)}
-                icon={Sparkles}
-              />
-              <BridgeStat
-                label={ar ? "متوسط الثقة" : "Avg confidence"}
-                value={formatPercent(avgConfidence, 0)}
-                icon={Activity}
-              />
-              <BridgeStat
-                label={ar ? "إجمالي الطلب" : "Total demand"}
-                value={formatNumber(totalDemand)}
-                icon={Network}
-              />
-              <BridgeStat
-                label={ar ? "تم تنفيذها" : "Executed"}
-                value={formatNumber(executed)}
-                icon={CheckCircle2}
-              />
-            </div>
+        {/* Bridge narrative + actions */}
+        <HeritageSection
+          eyebrow={ar ? "جسر الذكاء" : "AI bridge"}
+          title={ar ? "من حجز فندقي… إلى أمر تصنيع" : "From booking… to production order"}
+          aside={
+            ar
+              ? `${formatNumber(forecasts.length)} إشارة`
+              : `${formatNumber(forecasts.length)} signals`
+          }
+          rtl={ar}
+        >
+          <p
+            style={{
+              fontSize: 13,
+              lineHeight: 1.65,
+              color: "var(--heri-ink-2)",
+              maxWidth: 640,
+              marginBottom: 16,
+            }}
+          >
+            {ar
+              ? "المحرك التنبؤي يقرأ كل حجز قادم في فنادق أرينا، يحسب توقعات استهلاك النزلاء، ويولّد إشارات شراء للمها ولوران قبل أن يصبح الطلب أزمة."
+              : "The predictive engine reads every incoming booking at Arena hotels, models guest consumption, and pushes purchase signals to Maha and Loran before demand becomes a crisis."}
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <form action={autoGenerateForecasts}>
+              <button type="submit" className="heri-btn heri-btn-primary" style={{ fontSize: 12 }}>
+                <Zap className="h-3.5 w-3.5" strokeWidth={1.5} />
+                {ar ? "تشغيل المحرك" : "Run engine"}
+              </button>
+            </form>
+            <Link href="/supply-chain/new" className="heri-btn heri-btn-ghost" style={{ fontSize: 12, textDecoration: "none" }}>
+              <Plus className="h-3.5 w-3.5" strokeWidth={1.5} />
+              {ar ? "تنبؤ يدوي" : "Manual forecast"}
+            </Link>
+            <ExportMenu type="supply-chain" locale={lc} />
           </div>
-        </HeroPanel>
+        </HeritageSection>
 
-        {/* ── KPI strip ─────────────────────────────────────────────── */}
-        <section className="grid gap-3 hn-stagger sm:grid-cols-2 xl:grid-cols-4">
-          <MetricTile
+        {/* KPI band */}
+        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
+          <HeriKpi
             label={ar ? "مسودات معلّقة" : "Drafts pending"}
-            value={formatNumber(drafts)}
-            icon={Sparkles}
-            tone="amber"
+            raw={drafts}
+            kind="number"
+            accent={drafts > 0 ? "var(--heri-ochre)" : undefined}
             hint={ar ? "تنتظر القرار" : "awaiting decision"}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "موافق عليها" : "Approved"}
-            value={formatNumber(approved)}
-            icon={CheckCircle2}
-            tone="emerald"
+            raw={approved}
+            kind="number"
+            accent="var(--heri-teal)"
             hint={ar ? "جاهزة للتنفيذ" : "ready to execute"}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "منفّذة" : "Executed"}
-            value={formatNumber(executed)}
-            icon={ArrowLeftRight}
-            tone="blue"
+            raw={executed}
+            kind="number"
             hint={ar ? "تمت" : "completed"}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "متوسط الثقة" : "Avg confidence"}
-            value={formatPercent(avgConfidence, 0)}
-            icon={Brain}
-            tone="violet"
-            hint={ar ? "AI score" : "AI score"}
+            raw={Math.round(avgConfidence * 100)}
+            kind="number"
+            hint={ar ? "درجة AI" : "AI score"}
           />
         </section>
 
-        {/* ── Sankey ────────────────────────────────────────────────── */}
+        {/* Sankey */}
         {forecasts.length > 0 ? (
-          <SectionBlock
+          <HeritageSection
             eyebrow={ar ? "تدفق الذكاء" : "Intelligence flow"}
             title={ar ? "جسر التوريد المرئي" : "Visual supply bridge"}
-            description={
+            aside={
               ar
-                ? "من شركة المصدر ← فئة المنتج ← الشركة المستهدفة (سُمك التدفق ∝ الكمية المتوقعة)"
-                : "Source company → product category → target company (flow thickness ∝ predicted demand)"
+                ? "المصدر ← الفئة ← الهدف (السُّمك ∝ الكمية)"
+                : "Source → category → target (thickness ∝ demand)"
             }
-            tone="violet"
+            rtl={ar}
           >
             <Sankey nodes={sankeyNodes} links={sankeyLinks} width={1040} height={380} />
-          </SectionBlock>
+          </HeritageSection>
         ) : null}
 
-        {/* ── Forecast cards or empty ───────────────────────────────── */}
+        {/* Forecast cards */}
         {forecasts.length === 0 ? (
           <EmptyState
             icon={Brain}
@@ -288,213 +229,166 @@ export default async function SupplyChainPage() {
             }
             action={
               <form action={autoGenerateForecasts}>
-                <button type="submit" className="btn-primary hn-hover-shine">
-                  <Brain className="h-4 w-4" />
+                <button type="submit" className="heri-btn heri-btn-primary">
+                  <Brain className="h-4 w-4" strokeWidth={1.5} />
                   {ar ? "توليد تلقائي" : "Auto-generate"}
                 </button>
               </form>
             }
           />
         ) : (
-          <SectionBlock
+          <HeritageSection
             eyebrow={ar ? "كل الإشارات" : "All signals"}
             title={ar ? "جسر التنبؤات" : "Forecast bridge"}
-            description={
+            aside={
               ar
-                ? `${formatNumber(forecasts.length)} إشارة AI ينقلها الجسر بين الوحدات`
-                : `${formatNumber(forecasts.length)} AI signals carried across the bridge`
+                ? `${formatNumber(forecasts.length)} إشارة AI`
+                : `${formatNumber(forecasts.length)} AI signals`
             }
-            tone="violet"
+            rtl={ar}
           >
-            <div className="grid gap-3 hn-stagger md:grid-cols-2">
+            <div className="grid gap-3 heri-stagger md:grid-cols-2">
               {forecasts.map((f) => (
-                <ForecastCard
-                  key={f.id}
-                  forecast={f}
-                  ar={ar}
-                  lc={lc}
-                />
+                <ForecastCard key={f.id} forecast={f} ar={ar} lc={lc} />
               ))}
             </div>
-          </SectionBlock>
+          </HeritageSection>
         )}
       </PageContainer>
     </>
   );
 }
 
-/* ───────────────────────────────────────────── */
+/* ── Forecast card — Heritage Modern ──────────────────────────── */
 
-function BridgeStat({
-  label,
-  value,
-  icon: Icon,
-}: {
-  label: string;
-  value: string;
-  icon: any;
-}) {
-  return (
-    <div
-      className="hn-anim-rise rounded-xl px-3 py-2"
-      style={{
-        background: "rgba(255,255,255,0.14)",
-        border: "1px solid rgba(255,255,255,0.24)",
-        backdropFilter: "blur(8px)",
-      }}
-    >
-      <div className="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[0.16em] opacity-85">
-        <Icon className="h-3 w-3" />
-        {label}
-      </div>
-      <div className="exec-num mt-0.5 text-xl font-black leading-none tracking-[-0.012em]">
-        {value}
-      </div>
-    </div>
-  );
-}
+const STATUS_ACCENT: Record<string, string> = {
+  APPROVED:  "var(--heri-teal)",
+  EXECUTED:  "var(--heri-copper)",
+  DISMISSED: "var(--heri-ink-3)",
+  DRAFT:     "var(--heri-ochre)",
+};
 
-function ForecastCard({
-  forecast: f,
-  ar,
-  lc,
-}: {
-  forecast: any;
-  ar: boolean;
-  lc: "ar" | "en";
-}) {
+function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc: "ar" | "en" }) {
   const sourceBrand = getCompanyBrand(f.source.code);
   const targetBrand = getCompanyBrand(f.target.code);
   const catLabel = CATEGORY_LABEL[f.category]
-    ? ar
-      ? CATEGORY_LABEL[f.category].ar
-      : CATEGORY_LABEL[f.category].en
+    ? ar ? CATEGORY_LABEL[f.category].ar : CATEGORY_LABEL[f.category].en
     : f.category;
+  const accent = STATUS_ACCENT[f.status] ?? "var(--heri-ochre)";
 
   return (
     <article
-      className="exec-card hn-anim-rise group flex flex-col overflow-hidden"
-      data-tone="violet"
+      className="relative overflow-hidden"
+      style={{
+        background: "var(--heri-cream)",
+        border: "1px solid var(--heri-rule)",
+      }}
     >
-      {/* Header row with companies */}
-      <div className="space-y-2 p-4">
+      <span
+        aria-hidden
+        className="absolute top-0 bottom-0"
+        style={{ insetInlineStart: 0, width: 3, background: accent }}
+      />
+
+      <div className="ms-2 p-4 space-y-3">
+        {/* Header row */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span
-              className="rounded-full px-2 py-0.5 text-[9.5px] font-extrabold uppercase tracking-[0.12em]"
-              style={{
-                background: "color-mix(in srgb, #8b5cf6 14%, transparent)",
-                color: "#6d28d9",
-              }}
+              className="heri-eyebrow"
+              style={{ color: "var(--heri-ink-2)" }}
             >
               {catLabel}
             </span>
             <StatusBadge status={f.status} />
           </div>
           <span
-            className="exec-num text-[10.5px] font-extrabold"
-            style={{ color: "var(--text-muted)" }}
+            className="heri-number-mono"
+            style={{ fontSize: 10, color: "var(--heri-ink-3)", letterSpacing: "0.04em" }}
           >
             {formatShortDate(f.periodStart)} → {formatShortDate(f.periodEnd)}
           </span>
         </div>
 
         <h3
-          className="line-clamp-1 text-[15px] font-black leading-tight"
-          style={{ color: "var(--text)" }}
+          className={ar ? "" : "font-display-latin"}
+          style={{ fontSize: 15, fontWeight: 600, color: "var(--heri-ink)", lineHeight: 1.3 }}
         >
           {f.productLabel}
         </h3>
 
-        {/* Source → Target with company colors */}
-        <div className="flex items-center gap-2 text-[11.5px]">
+        {/* Source → Target flow */}
+        <div className="flex items-center gap-2" style={{ fontSize: 11.5 }}>
           <span
-            className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-extrabold ring-1"
+            className="inline-flex items-center gap-1 px-2 py-0.5 font-semibold ring-1"
             style={{
-              background: `color-mix(in srgb, ${sourceBrand.accent} 14%, transparent)`,
+              background: `color-mix(in srgb, ${sourceBrand.accent} 12%, transparent)`,
               color: sourceBrand.accent,
               borderColor: `color-mix(in srgb, ${sourceBrand.accent} 28%, transparent)`,
             }}
           >
-            <span className="text-[10px]">{sourceBrand.emblem}</span>
+            <span style={{ fontSize: 10 }}>{sourceBrand.emblem}</span>
             <span className="line-clamp-1">{ar ? f.source.name : f.source.nameEn}</span>
           </span>
-          <ArrowLeftRight
-            className="h-3 w-3 shrink-0"
-            style={{ color: "var(--text-muted)" }}
-          />
+          <ArrowLeftRight className="h-3 w-3 shrink-0" style={{ color: "var(--heri-ink-3)" }} strokeWidth={1.5} />
           <span
-            className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-extrabold ring-1"
+            className="inline-flex items-center gap-1 px-2 py-0.5 font-semibold ring-1"
             style={{
-              background: `color-mix(in srgb, ${targetBrand.accent} 14%, transparent)`,
+              background: `color-mix(in srgb, ${targetBrand.accent} 12%, transparent)`,
               color: targetBrand.accent,
               borderColor: `color-mix(in srgb, ${targetBrand.accent} 28%, transparent)`,
             }}
           >
-            <span className="text-[10px]">{targetBrand.emblem}</span>
+            <span style={{ fontSize: 10 }}>{targetBrand.emblem}</span>
             <span className="line-clamp-1">{ar ? f.target.name : f.target.nameEn}</span>
           </span>
         </div>
 
-        {/* Phase NS-1 — linked purchase-order badge. Appears once an
-            approved forecast has drafted a cross-tenant PO. */}
+        {/* Phase NS-1 — linked PO badge */}
         {f.sourcedPO ? (
           <Link
             href={`/admin/purchase-orders?po=${encodeURIComponent(f.sourcedPO.poNumber)}`}
-            className="inline-flex items-center gap-1.5 self-start rounded-md px-2 py-1 text-[10.5px] font-extrabold ring-1 transition hover:brightness-95"
+            className="inline-flex items-center gap-1.5 px-2 py-1 ring-1 transition hover:brightness-95"
             style={{
-              background: "color-mix(in srgb, var(--brand) 12%, transparent)",
-              color: "var(--brand)",
-              borderColor: "color-mix(in srgb, var(--brand) 28%, transparent)",
+              fontSize: 10.5,
+              fontWeight: 600,
+              background: "var(--heri-cream-2)",
+              color: "var(--heri-copper)",
+              borderColor: "var(--heri-rule-strong)",
+              textDecoration: "none",
             }}
           >
-            <ShoppingCart className="h-3 w-3" />
-            <span className="font-mono">{f.sourcedPO.poNumber}</span>
+            <ShoppingCart className="h-3 w-3" strokeWidth={1.5} />
+            <span style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace" }}>{f.sourcedPO.poNumber}</span>
             <span>→ {f.sourcedPO.supplierRef?.name ?? (ar ? f.target.name : f.target.nameEn)}</span>
           </Link>
         ) : null}
 
         {/* 3 stat cells */}
-        <div className="grid grid-cols-3 gap-2 pt-1">
-          <ForecastStat
-            label={ar ? "الكمية" : "Quantity"}
-            value={formatNumber(f.predictedDemand)}
-            sub={f.unit}
-          />
-          <ForecastStat
-            label={ar ? "الثقة" : "Confidence"}
-            value={formatPercent(f.confidence, 0)}
-            sub={ar ? "AI" : "AI"}
-            highlight
-          />
+        <div className="grid grid-cols-3 gap-2">
+          <ForecastStat label={ar ? "الكمية" : "Qty"} value={formatNumber(f.predictedDemand)} sub={f.unit} />
+          <ForecastStat label={ar ? "الثقة" : "Conf"} value={formatPercent(f.confidence, 0)} sub="AI" highlight />
           <ForecastStat
             label={ar ? "أيام" : "Days"}
-            value={formatNumber(
-              Math.max(
-                1,
-                Math.round(
-                  (f.periodEnd.getTime() - f.periodStart.getTime()) / 86400000,
-                ),
-              ),
-            )}
+            value={formatNumber(Math.max(1, Math.round((f.periodEnd.getTime() - f.periodStart.getTime()) / 86400000)))}
             sub={ar ? "نافذة" : "window"}
           />
         </div>
 
-        {/* Signal */}
+        {/* H-Nerve signal */}
         <div
-          className="rounded-lg p-2.5 text-[11px] leading-relaxed"
+          className="px-3 py-2.5"
           style={{
-            background: "var(--brand-soft)",
-            color: "var(--text)",
-            border: "1px dashed color-mix(in srgb, var(--brand) 25%, transparent)",
+            background: "var(--heri-cream-2)",
+            border: "1px solid var(--heri-rule)",
+            borderInlineStart: `3px solid ${accent}`,
+            fontSize: 11,
+            lineHeight: 1.6,
+            color: "var(--heri-ink-2)",
           }}
         >
-          <span
-            className="me-1 font-black"
-            style={{ color: "var(--brand)" }}
-          >
-            {ar ? "إشارة H-Nerve:" : "H-Nerve signal:"}
+          <span style={{ fontWeight: 700, color: "var(--heri-ink)" }}>
+            {ar ? "إشارة H-Nerve: " : "H-Nerve signal: "}
           </span>
           {f.signal}
         </div>
@@ -515,18 +409,10 @@ function ForecastCard({
       {/* Footer actions */}
       <div
         className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5"
-        style={{
-          borderTop: "1px solid var(--border)",
-          background: "var(--brand-soft)",
-        }}
+        style={{ borderTop: "1px solid var(--heri-rule)", background: "var(--heri-cream-2)" }}
       >
         <div className="flex flex-wrap gap-1">
           {(["DRAFT", "APPROVED", "EXECUTED", "DISMISSED"] as const).map((s) => {
-            // NS-1 wiring fix: Approve a DRAFT routes through approveForecast
-            // (flips status AND drafts the cross-tenant PO bridge). Dismiss
-            // routes through rejectForecast. All other transitions keep the
-            // plain setForecastStatus. Without this, the bridge never ran
-            // from the UI — the Approve button hit setForecastStatus only.
             const act =
               s === "APPROVED" && f.status === "DRAFT"
                 ? approveForecast
@@ -539,15 +425,15 @@ function ForecastCard({
                 <input type="hidden" name="status" value={s} />
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10.5px] font-extrabold transition hover:bg-[var(--surface-elevated)]"
-                  style={{ color: "var(--text-muted)" }}
+                  className="heri-btn heri-btn-ghost"
+                  style={{ padding: "4px 10px", fontSize: 10.5 }}
                 >
                   {s === "APPROVED" ? (
-                    <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                    <CheckCircle2 className="h-3 w-3" style={{ color: "var(--heri-teal)" }} strokeWidth={1.5} />
                   ) : s === "EXECUTED" ? (
-                    <ArrowLeftRight className="h-3 w-3 text-blue-600" />
+                    <ArrowLeftRight className="h-3 w-3" style={{ color: "var(--heri-copper)" }} strokeWidth={1.5} />
                   ) : s === "DISMISSED" ? (
-                    <XCircle className="h-3 w-3 text-rose-600" />
+                    <XCircle className="h-3 w-3" style={{ color: "var(--heri-terracotta)" }} strokeWidth={1.5} />
                   ) : null}
                   {ar ? STATUS_LABEL[s].ar : STATUS_LABEL[s].en}
                 </button>
@@ -579,30 +465,21 @@ function ForecastStat({
 }) {
   return (
     <div
-      className="rounded-lg p-2 text-center"
+      className="p-2 text-center"
       style={{
-        background: highlight ? "var(--brand-soft)" : "var(--surface)",
-        border: "1px solid var(--border)",
+        background: highlight ? "var(--heri-cream-2)" : "var(--heri-cream)",
+        border: `1px solid ${highlight ? "var(--heri-rule-strong)" : "var(--heri-rule)"}`,
+        borderTop: highlight ? `2px solid var(--heri-ochre)` : undefined,
       }}
     >
+      <div className="heri-eyebrow" style={{ fontSize: 9, letterSpacing: "0.08em" }}>{label}</div>
       <div
-        className="text-[9px] font-extrabold uppercase tracking-[0.1em]"
-        style={{ color: "var(--text-muted)" }}
-      >
-        {label}
-      </div>
-      <div
-        className="exec-num mt-0.5 text-[15px] font-black"
-        style={{ color: highlight ? "var(--brand)" : "var(--text)" }}
+        className="heri-number-mono mt-0.5"
+        style={{ fontSize: 15, fontWeight: 700, color: highlight ? "var(--heri-ochre-2)" : "var(--heri-ink)" }}
       >
         {value}
       </div>
-      <div
-        className="text-[9px] font-bold"
-        style={{ color: "var(--text-muted)" }}
-      >
-        {sub}
-      </div>
+      <div style={{ fontSize: 9, fontWeight: 600, color: "var(--heri-ink-3)" }}>{sub}</div>
     </div>
   );
 }

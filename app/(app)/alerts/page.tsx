@@ -137,8 +137,8 @@ export default async function AlertsPage() {
             }
             action={
               <form action={seedRules}>
-                <button type="submit" className="btn-primary hn-hover-shine">
-                  <Plus className="h-4 w-4" />
+                <button type="submit" className="heri-btn heri-btn-primary">
+                  <Plus className="h-4 w-4" strokeWidth={1.5} />
                   {ar ? "إنشاء القواعد الافتراضية" : "Seed default rules"}
                 </button>
               </form>
@@ -154,8 +154,8 @@ export default async function AlertsPage() {
               return (
                 <article
                   key={r.id}
-                  className={`exec-card ${r.isActive ? "" : "opacity-65"}`}
-                  data-tone={def.tone}
+                  className={r.isActive ? "" : "opacity-60"}
+                  style={{ background: "var(--heri-cream)", border: "1px solid var(--heri-rule)" }}
                 >
                   <div className="space-y-3 p-5">
                     <div className="flex items-start justify-between gap-3">
@@ -167,14 +167,14 @@ export default async function AlertsPage() {
                         </span>
                         <div className="min-w-0">
                           <h3
-                            className="text-[14px] font-black leading-tight"
-                            style={{ color: "var(--text)" }}
+                            className="text-[14px] font-semibold leading-tight"
+                            style={{ color: "var(--heri-ink)" }}
                           >
                             {ar ? def.name_ar : def.name_en}
                           </h3>
                           <p
                             className="mt-0.5 line-clamp-2 text-[11px] font-medium leading-relaxed"
-                            style={{ color: "var(--text-muted)" }}
+                            style={{ color: "var(--heri-ink-3)" }}
                           >
                             {ar ? def.description_ar : def.description_en}
                           </p>
@@ -189,8 +189,8 @@ export default async function AlertsPage() {
                           className="relative inline-flex h-6 w-11 items-center rounded-full transition"
                           style={{
                             background: r.isActive
-                              ? "linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%)"
-                              : "var(--border)",
+                              ? "var(--heri-ochre)"
+                              : "var(--heri-rule-strong)",
                           }}
                           title={r.isActive ? (ar ? "إيقاف" : "Pause") : (ar ? "تفعيل" : "Activate")}
                         >
@@ -213,7 +213,7 @@ export default async function AlertsPage() {
                         <div>
                           <label
                             className="mb-1 block text-[10px] font-extrabold uppercase tracking-wider"
-                            style={{ color: "var(--text-muted)" }}
+                            style={{ color: "var(--heri-ink-3)" }}
                           >
                             {ar ? def.thresholdLabel_ar : def.thresholdLabel_en}
                           </label>
@@ -230,7 +230,7 @@ export default async function AlertsPage() {
                             />
                             <span
                               className="text-[11px] font-bold"
-                              style={{ color: "var(--text-muted)" }}
+                              style={{ color: "var(--heri-ink-3)" }}
                             >
                               {def.thresholdSuffix}
                             </span>
@@ -239,7 +239,7 @@ export default async function AlertsPage() {
                         <div>
                           <label
                             className="mb-1 block text-[10px] font-extrabold uppercase tracking-wider"
-                            style={{ color: "var(--text-muted)" }}
+                            style={{ color: "var(--heri-ink-3)" }}
                           >
                             {ar ? "الخطورة" : "Severity"}
                           </label>
@@ -259,7 +259,7 @@ export default async function AlertsPage() {
                         <div>
                           <label
                             className="mb-1 block text-[10px] font-extrabold uppercase tracking-wider"
-                            style={{ color: "var(--text-muted)" }}
+                            style={{ color: "var(--heri-ink-3)" }}
                           >
                             {ar ? "هدنة (ساعات)" : "Cooldown (h)"}
                           </label>
@@ -281,7 +281,7 @@ export default async function AlertsPage() {
                           >
                             {ar ? sevMeta.ar : sevMeta.en}
                           </span>
-                          <span style={{ color: "var(--text-muted)" }}>
+                          <span style={{ color: "var(--heri-ink-3)" }}>
                             <span className="font-bold">
                               {ar ? "آخر إنطلاق:" : "Last fire:"}
                             </span>{" "}
@@ -289,14 +289,14 @@ export default async function AlertsPage() {
                           </span>
                           <span
                             className="font-mono"
-                            style={{ color: "var(--text-muted)" }}
+                            style={{ color: "var(--heri-ink-3)" }}
                           >
                             · {formatNumber(r.triggerCount)} {ar ? "مرة" : "fires"}
                           </span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <button type="submit" className="btn-secondary btn-sm">
-                            <Settings className="h-3 w-3" />
+                          <button type="submit" className="heri-btn heri-btn-ghost" style={{ padding: "4px 10px", fontSize: 12 }}>
+                            <Settings className="h-3 w-3" strokeWidth={1.5} />
                             {ar ? "حفظ" : "Save"}
                           </button>
                           <DeleteButton
@@ -319,10 +319,10 @@ export default async function AlertsPage() {
         )}
 
         <p
-          className="text-center text-[10.5px]"
-          style={{ color: "var(--text-muted)" }}
+          className="heri-eyebrow text-center"
+          style={{ color: "var(--heri-ink-3)" }}
         >
-          💡 {ar
+          {ar
             ? "كل قاعدة نشطة تُقيَّم تلقائياً عند تشغيل محرك الذكاء من /insights."
             : "Each active rule is auto-evaluated when you run the AI engine from /insights."}
         </p>

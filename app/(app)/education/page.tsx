@@ -109,8 +109,8 @@ export default async function EducationPage() {
                 : "Register your first startup in cohort 2026."
             }
             action={
-              <Link href="/education/new" className="btn-primary hn-hover-shine">
-                <Plus className="h-4 w-4" />
+              <Link href="/education/new" className="heri-btn heri-btn-primary">
+                <Plus className="h-4 w-4" strokeWidth={1.5} />
                 {ar ? "تسجيل مشروع" : "Register program"}
               </Link>
             }
@@ -130,8 +130,8 @@ export default async function EducationPage() {
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <h3
-                            className="text-[15px] font-black leading-tight"
-                            style={{ color: "var(--text)" }}
+                            className="text-[15px] font-semibold leading-tight"
+                            style={{ color: "var(--heri-ink)" }}
                           >
                             {ar ? p.name : p.nameEn ?? p.name}
                           </h3>
@@ -140,17 +140,17 @@ export default async function EducationPage() {
                         {p.nameEn && ar ? (
                           <div
                             className="text-[10.5px] font-bold"
-                            style={{ color: "var(--text-muted)" }}
+                            style={{ color: "var(--heri-ink-3)" }}
                             dir="ltr"
                           >
                             {p.nameEn}
                           </div>
                         ) : null}
                         <div className="mt-1.5 text-[11px] font-bold">
-                          <span style={{ color: "var(--text-muted)" }}>
+                          <span style={{ color: "var(--heri-ink-3)" }}>
                             {ar ? "المؤسس:" : "Founder:"}
                           </span>{" "}
-                          <span style={{ color: "var(--text)" }}>{p.founder}</span>
+                          <span style={{ color: "var(--heri-ink)" }}>{p.founder}</span>
                         </div>
                       </div>
                       <span className={vert.tone}>
@@ -161,17 +161,17 @@ export default async function EducationPage() {
                     {p.description ? (
                       <p
                         className="line-clamp-3 text-[12px] font-medium leading-relaxed"
-                        style={{ color: "var(--text-muted)" }}
+                        style={{ color: "var(--heri-ink-3)" }}
                       >
                         {p.description}
                       </p>
                     ) : null}
 
                     <div
-                      className="grid grid-cols-3 gap-2 rounded-lg p-2.5 text-center"
+                      className="grid grid-cols-3 gap-2 p-2.5 text-center"
                       style={{
-                        background: "var(--brand-soft)",
-                        border: "1px solid var(--border)",
+                        background: "var(--heri-cream-2)",
+                        border: "1px solid var(--heri-rule)",
                       }}
                     >
                       <ProgStat label={ar ? "كوهورت" : "Cohort"} value={p.cohort} />
@@ -182,7 +182,7 @@ export default async function EducationPage() {
 
                   <div
                     className="flex items-center justify-end gap-2 px-4 py-2.5"
-                    style={{ borderTop: "1px solid var(--border)" }}
+                    style={{ borderTop: "1px solid var(--heri-rule)" }}
                   >
                     <DeleteButton
                       action={deleteProgram}
@@ -215,13 +215,13 @@ function ProgStat({ label, value }: { label: string; value: string }) {
     <div>
       <div
         className="text-[9px] font-extrabold uppercase tracking-[0.1em]"
-        style={{ color: "var(--text-muted)" }}
+        style={{ color: "var(--heri-ink-3)" }}
       >
         {label}
       </div>
       <div
-        className="exec-num mt-0.5 text-[14px] font-black"
-        style={{ color: "var(--text)" }}
+        className="heri-number-mono mt-0.5 text-[14px] font-bold"
+        style={{ color: "var(--heri-ink)" }}
       >
         {value}
       </div>

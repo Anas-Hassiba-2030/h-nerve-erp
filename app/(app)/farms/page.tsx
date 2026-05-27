@@ -196,10 +196,10 @@ export default async function FarmsPage() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="text-base font-extrabold" style={{ color: "var(--text)" }}>{f.name}</h3>
+                            <h3 className="text-base font-semibold" style={{ color: "var(--heri-ink)" }}>{f.name}</h3>
                             <StatusBadge status={f.alertLevel} />
                           </div>
-                          <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                          <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
                             {loc(FARM_TYPES_AR, FARM_TYPES_EN, lc, f.type)} · {f.location} · {formatNumber(f.areaDunum)} {ar ? "دونم" : "dunum"}
                           </div>
                         </div>
@@ -238,25 +238,25 @@ export default async function FarmsPage() {
                       </div>
                     ) : null}
 
-                    <div className="mt-3 flex items-center justify-between text-[11px]" style={{ color: "var(--text-muted)" }}>
+                    <div className="mt-3 flex items-center justify-between text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
                       <span>{ar ? "آخر قراءة" : "Last reading"}: {formatRelative(f.lastReadAt, lc)}</span>
                       <span className="font-mono">{f.company.code}</span>
                     </div>
 
                     {f.crops.length > 0 ? (
-                      <div className="mt-4 border-t pt-3" style={{ borderColor: "var(--border)" }}>
-                        <div className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                      <div className="mt-4 border-t pt-3" style={{ borderColor: "var(--heri-rule)" }}>
+                        <div className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--heri-ink-3)" }}>
                           {ar ? "محاصيل" : "Crops"} ({f.crops.length})
                         </div>
                         <div className="space-y-1">
                           {f.crops.slice(0, 3).map((c) => (
                             <div key={c.id} className="flex items-center justify-between text-[12px]">
                               <div>
-                                <span className="font-extrabold" style={{ color: "var(--text)" }}>{c.name}</span>
-                                {c.variety ? <span style={{ color: "var(--text-muted)" }}> · {c.variety}</span> : null}
+                                <span className="font-semibold" style={{ color: "var(--heri-ink)" }}>{c.name}</span>
+                                {c.variety ? <span style={{ color: "var(--heri-ink-3)" }}> · {c.variety}</span> : null}
                               </div>
                               <div className="flex items-center gap-2">
-                                <span style={{ color: "var(--text-muted)" }}>
+                                <span style={{ color: "var(--heri-ink-3)" }}>
                                   {ar ? "حصاد" : "harvest"} {formatShortDate(c.expectedHarvest, lc)}
                                 </span>
                                 <StatusBadge status={c.status} />
@@ -279,23 +279,23 @@ export default async function FarmsPage() {
 
 function SensorTile({ icon, label, value, hint }: { icon: React.ReactNode; label: string; value: string; hint: string }) {
   return (
-    <div className="rounded-xl border p-3 text-center" style={{ borderColor: "var(--border)" }}>
-      <div className="mb-1 flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+    <div className="border p-3 text-center" style={{ borderColor: "var(--heri-rule)" }}>
+      <div className="mb-1 flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--heri-ink-3)" }}>
         {icon}
         {label}
       </div>
-      <div className="text-2xl font-black tabular-nums" style={{ color: "var(--text)" }}>{value}</div>
-      <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>{hint}</div>
+      <div className="text-2xl font-bold tabular-nums" style={{ color: "var(--heri-ink)" }}>{value}</div>
+      <div className="text-[10px]" style={{ color: "var(--heri-ink-3)" }}>{hint}</div>
     </div>
   );
 }
 
 function MicroSensor({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-lg border p-2 text-center" style={{ borderColor: "var(--border)", background: "var(--brand-soft)" }}>
+    <div className="border p-2 text-center" style={{ borderColor: "var(--heri-rule)", background: "var(--heri-cream-2)" }}>
       <div className="flex items-center justify-center">{icon}</div>
-      <div className="mt-1 text-base font-extrabold tabular-nums" style={{ color: "var(--text)" }}>{value}</div>
-      <div className="text-[9px]" style={{ color: "var(--text-muted)" }}>{label}</div>
+      <div className="mt-1 text-base font-semibold tabular-nums" style={{ color: "var(--heri-ink)" }}>{value}</div>
+      <div className="text-[9px]" style={{ color: "var(--heri-ink-3)" }}>{label}</div>
     </div>
   );
 }

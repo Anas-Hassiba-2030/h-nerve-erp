@@ -1,8 +1,8 @@
 import { TrendingUp, TrendingDown, Globe, Network, ArrowUpRight, ArrowDownRight, Download, BarChart3 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
-import { HeroPanel } from "@/components/exec/HeroPanel";
-import { MetricTile } from "@/components/exec/MetricTile";
+import { HeritageSection, HeritagePill } from "@/components/heritage";
+import { HeriKpi } from "@/components/HeriKpi";
 import { KpiCard } from "@/components/KpiCard";
 import { Sparkline } from "@/components/Sparkline";
 import { ExportMenu } from "@/components/ExportMenu";
@@ -71,59 +71,32 @@ export default async function MarketsPage() {
       />
 
       <PageContainer>
-        <HeroPanel
-          gradient="linear-gradient(135deg, #0c1424 0%, #1e3a8a 40%, #3b82f6 80%, #93c5fd 110%)"
-          accent="#3b82f6"
-          height={250}
+        <HeritageSection
+          eyebrow={ar ? "نبضات السوق" : "Market pulse"}
+          title={ar ? "الأسواق العالمية" : "Global Markets"}
+          rtl={ar}
         >
           <div className="flex flex-wrap items-center justify-between gap-5">
-            <div className="flex items-center gap-5 hn-anim-rise">
-              <div className="hn-anim-zoom-bounce relative">
-                <span className="hn-anim-pulse-ring absolute -inset-2 rounded-3xl" aria-hidden />
-                <div
-                  className="flex h-[88px] w-[88px] items-center justify-center rounded-2xl ring-2 ring-white/40"
-                  style={{ background: "rgba(255,255,255,0.18)" }}
-                >
-                  <Globe className="h-12 w-12 text-white" />
-                </div>
+            <div className="flex items-center gap-5">
+              <div>
+                <Globe className="h-12 w-12" style={{ color: "var(--heri-ochre)" }} />
               </div>
               <div className="min-w-0">
-                <div
-                  className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em]"
-                  style={{
-                    background: "rgba(255,255,255,0.18)",
-                    border: "1px solid rgba(255,255,255,0.28)",
-                    backdropFilter: "blur(6px)",
-                    color: "white",
-                  }}
-                >
-                  <BarChart3 className="h-3 w-3 hn-anim-pulse-soft" />
-                  {ar ? "نبضات السوق — حي" : "Market pulse · live"}
-                </div>
-                <h2
-                  className="mt-2.5 text-3xl font-black leading-[1.05] tracking-[-0.02em] hn-anim-rise md:text-[34px]"
-                  style={{ animationDelay: "0.08s" }}
-                >
-                  {ar ? "الأسواق العالمية" : "Global Markets"}
-                </h2>
                 <p
-                  className="mt-1 max-w-xl text-[12.5px] font-bold opacity-90 hn-anim-rise"
-                  style={{ animationDelay: "0.16s" }}
+                  className="text-[12.5px] font-semibold"
+                  style={{ color: "var(--heri-ink-2)" }}
                 >
                   {ar
                     ? "H-Nerve يجمع كل أسهم المجموعة ويقارنها بأسواق العالم — قرارات على أرضية معلومات."
                     : "H-Nerve aggregates every group equity and benchmarks against the world — decisions on data."}
                 </p>
-                <div
-                  className="mt-3 flex flex-wrap gap-2 hn-anim-fall"
-                  style={{ animationDelay: "0.24s" }}
-                >
+                <div className="mt-3 flex flex-wrap gap-2">
                   <ExportMenu type="markets" locale={ar ? "ar" : "en"} />
                 </div>
               </div>
             </div>
 
-            <div className="grid gap-2 hn-stagger sm:grid-cols-2">
+            <div className="grid gap-2 heri-stagger sm:grid-cols-2">
               <MktHeroStat label={ar ? "أسهم المجموعة" : "Group equities"} value={formatNumber(groupStocks.length)} icon={Network} />
               <MktHeroStat
                 label={ar ? "متوسط الحركة" : "Avg move"}
@@ -134,10 +107,10 @@ export default async function MarketsPage() {
               <MktHeroStat label={ar ? "هابطون" : "Decliners"} value={formatNumber(allDown)} icon={ArrowDownRight} />
             </div>
           </div>
-        </HeroPanel>
+        </HeritageSection>
 
         {/* KPI strip */}
-        <section className="grid gap-4 stagger sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
           <KpiCard
             label={ar ? "حركة أسهم المجموعة" : "Group equity move"}
             value={`${groupAvgChange >= 0 ? "+" : ""}${groupAvgChange.toFixed(2)}٪`}
@@ -172,23 +145,23 @@ export default async function MarketsPage() {
           <div className="section-title">
             {ar ? "أسهم مجموعة الحوراني (تقييم داخلي)" : "Hourani Group Equities (internal valuation)"}
           </div>
-          <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+          <p className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
             {ar
               ? "تقييم تقديري داخلي · ليست أسهماً متداولة"
               : "Internal valuation · not publicly traded"}
             {" · "}
             {ar ? "حسبة: إيراد 30 يوماً × 8 (مضاعف P/E)" : "Calc: 30d revenue × 8 (P/E proxy)"}
           </p>
-          <div className="grid gap-3 stagger md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-3 heri-stagger md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {companies.map((c) => {
               const valuation = valuationByCompany.get(c.id) ?? 0;
               return (
                 <div
                   key={c.id}
-                  className="rounded-xl p-4"
+                  className="heri-card p-4"
                   style={{
-                    background: "var(--surface-elevated)",
-                    border: "1px solid var(--border)",
+                    background: "var(--heri-cream-2)",
+                    border: "1px solid var(--heri-rule)",
                   }}
                 >
                   <div className="flex items-center justify-between mb-2">
@@ -206,14 +179,14 @@ export default async function MarketsPage() {
                     style={{
                       fontSize: 15,
                       fontWeight: 700,
-                      color: "var(--text)",
+                      color: "var(--heri-ink)",
                       lineHeight: 1.2,
                     }}
                   >
                     {ar ? c.name : c.nameEn}
                   </div>
                   <div
-                    className="font-mono"
+                    className="heri-number-mono"
                     style={{
                       fontSize: 22,
                       fontWeight: 600,
@@ -227,7 +200,7 @@ export default async function MarketsPage() {
                   </div>
                   <div
                     className="text-[10.5px] mt-1"
-                    style={{ color: "var(--text-muted)" }}
+                    style={{ color: "var(--heri-ink-3)" }}
                   >
                     {c.sector} · {formatNumber(c.employees)} {ar ? "موظف" : "staff"}
                   </div>
@@ -243,7 +216,7 @@ export default async function MarketsPage() {
             <div className="section-title">
               {ar ? "أسهم متداولة مرتبطة" : "Linked tradable tickers"}
             </div>
-            <div className="grid gap-3 stagger lg:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-3 heri-stagger lg:grid-cols-2 xl:grid-cols-3">
               {groupStocks.map((s) => (
                 <StockCard key={s.id} stock={s} ar={ar} highlighted />
               ))}
@@ -261,7 +234,7 @@ export default async function MarketsPage() {
               <div className="section-title">
                 {ar ? REGION_AR[region] ?? region : REGION_EN[region] ?? region}
               </div>
-              <div className="grid gap-3 stagger md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid gap-3 heri-stagger md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {filtered.map((s) => (
                   <StockCard key={s.id} stock={s} ar={ar} />
                 ))}
@@ -277,19 +250,18 @@ export default async function MarketsPage() {
 function MktHeroStat({ label, value, icon: Icon }: { label: string; value: string; icon: any }) {
   return (
     <div
-      className="hn-anim-rise rounded-xl px-3 py-2"
+      className="px-3 py-2"
       style={{
-        background: "rgba(255,255,255,0.14)",
-        border: "1px solid rgba(255,255,255,0.24)",
-        backdropFilter: "blur(8px)",
+        background: "var(--heri-cream)",
+        border: "1px solid var(--heri-rule)",
         minWidth: 110,
       }}
     >
-      <div className="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[0.16em] opacity-85">
+      <div className="flex items-center gap-1.5 text-[9.5px] font-semibold uppercase tracking-[0.16em]" style={{ color: "var(--heri-ink-3)" }}>
         <Icon className="h-3 w-3" />
         {label}
       </div>
-      <div className="exec-num mt-0.5 text-xl font-black leading-none tracking-[-0.012em]">
+      <div className="heri-number-mono mt-0.5 text-xl font-bold leading-none tracking-[-0.012em]" style={{ color: "var(--heri-ink)" }}>
         {value}
       </div>
     </div>
@@ -298,9 +270,9 @@ function MktHeroStat({ label, value, icon: Icon }: { label: string; value: strin
 
 function Mini({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-white/12 px-3 py-2 backdrop-blur ring-1 ring-white/20">
-      <div className="text-[10px] uppercase tracking-widest opacity-75">{label}</div>
-      <div className="mt-0.5 text-base font-extrabold">{value}</div>
+    <div className="px-3 py-2" style={{ background: "var(--heri-cream)", border: "1px solid var(--heri-rule)" }}>
+      <div className="text-[10px] uppercase tracking-widest" style={{ color: "var(--heri-ink-3)" }}>{label}</div>
+      <div className="mt-0.5 text-base font-bold" style={{ color: "var(--heri-ink)" }}>{value}</div>
     </div>
   );
 }
@@ -321,18 +293,18 @@ function StockCard({
   return (
     <div className="card card-hover card-pad relative overflow-hidden">
       {highlighted ? (
-        <div className="absolute end-0 top-0 px-3 py-1 text-[9px] font-black uppercase tracking-widest text-white"
-             style={{ background: "linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%)", borderBottomLeftRadius: 12 }}>
+        <div className="absolute end-0 top-0 px-3 py-1 text-[9px] font-bold uppercase tracking-widest text-white"
+             style={{ background: "linear-gradient(135deg, var(--heri-ochre) 0%, var(--heri-copper) 100%)", borderBottomLeftRadius: 0 }}>
           {ar ? "مجموعة الحوراني" : "Hourani Group"}
         </div>
       ) : null}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="font-mono text-xs font-bold" style={{ color: "var(--text-muted)" }}>{stock.ticker}</div>
-          <div className="line-clamp-1 text-sm font-extrabold" style={{ color: "var(--text)" }}>
+          <div className="font-mono text-xs font-bold" style={{ color: "var(--heri-ink-3)" }}>{stock.ticker}</div>
+          <div className="line-clamp-1 text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
             {ar && stock.labelAr ? stock.labelAr : stock.label}
           </div>
-          <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>{stock.exchange}</div>
+          <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>{stock.exchange}</div>
         </div>
         <span className={up ? "badge-emerald" : "badge-red"}>
           {up ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
@@ -341,10 +313,10 @@ function StockCard({
       </div>
       <div className="mt-3 flex items-end justify-between gap-3">
         <div>
-          <div className="text-2xl font-black" style={{ color: "var(--text)" }}>
+          <div className="text-2xl font-bold" style={{ color: "var(--heri-ink)" }}>
             {stock.lastPrice.toLocaleString(ar ? "ar-JO" : "en-US", { maximumFractionDigits: 2 })}
           </div>
-          <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>{stock.currency}</div>
+          <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>{stock.currency}</div>
         </div>
         <Sparkline data={history} width={120} height={42} positive={up} />
       </div>

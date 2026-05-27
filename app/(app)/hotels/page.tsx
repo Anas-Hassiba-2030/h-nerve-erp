@@ -234,7 +234,7 @@ export default async function HotelsPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="text-base font-extrabold" style={{ color: "var(--text)" }}>
+                          <h3 className="text-base font-semibold" style={{ color: "var(--heri-ink)" }}>
                             {h.name}
                           </h3>
                           <span className="badge-amber">{loc(TIERS_AR, TIERS_EN, lc, h.tier)}</span>
@@ -245,11 +245,11 @@ export default async function HotelsPage() {
                           </span>
                         </div>
                         {h.nameEn ? (
-                          <div className="text-[11px]" style={{ color: "var(--text-muted)" }} dir="ltr">
+                          <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }} dir="ltr">
                             {h.nameEn}
                           </div>
                         ) : null}
-                        <div className="mt-2 flex flex-wrap items-center gap-3 text-[12px]" style={{ color: "var(--text-muted)" }}>
+                        <div className="mt-2 flex flex-wrap items-center gap-3 text-[12px]" style={{ color: "var(--heri-ink-3)" }}>
                           <span className="inline-flex items-center gap-1">
                             <MapPin className="h-3.5 w-3.5" />
                             {h.city} · {(ar ? COUNTRY_NAMES_AR : COUNTRY_NAMES_EN)[h.country] ?? h.country}
@@ -275,7 +275,7 @@ export default async function HotelsPage() {
                     </div>
 
                     <div className="mt-3">
-                      <div className="mb-1.5 flex items-center justify-between text-[10px]" style={{ color: "var(--text-muted)" }}>
+                      <div className="mb-1.5 flex items-center justify-between text-[10px]" style={{ color: "var(--heri-ink-3)" }}>
                         <span className="font-bold uppercase tracking-widest">{ar ? "إشغال حالي" : "Current occupancy"}</span>
                         <span className="font-mono">{Math.round(occHere * 100)}%</span>
                       </div>
@@ -284,7 +284,7 @@ export default async function HotelsPage() {
 
                     {trend.some((v) => v > 0) ? (
                       <div className="mt-3 -mx-1">
-                        <div className="mb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                        <div className="mb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--heri-ink-3)" }}>
                           {ar ? "إيرادات آخر 7 أيام" : "Last 7-day revenue"}
                         </div>
                         <Sparkline data={trend} width={420} height={48} positive />
@@ -329,7 +329,7 @@ export default async function HotelsPage() {
                   {recentBookings.map((b) => (
                     <tr key={b.id}>
                       <td className="font-mono text-[11px] text-slate-500">{b.reference}</td>
-                      <td className="font-extrabold" style={{ color: "var(--text)" }}>{b.guestName}</td>
+                      <td className="font-semibold" style={{ color: "var(--heri-ink)" }}>{b.guestName}</td>
                       <td>{b.hotel.name}</td>
                       <td>{loc(ROOM_TYPES_AR, ROOM_TYPES_EN, lc, b.roomType)}</td>
                       <td className="text-[11px] tabular-nums">{formatShortDate(b.checkIn, lc)}</td>
@@ -360,10 +360,10 @@ export default async function HotelsPage() {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+      <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--heri-ink-3)" }}>
         {label}
       </div>
-      <div className="mt-0.5 text-base font-extrabold tabular-nums" style={{ color: "var(--text)" }}>
+      <div className="mt-0.5 text-base font-semibold tabular-nums" style={{ color: "var(--heri-ink)" }}>
         {value}
       </div>
     </div>

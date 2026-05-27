@@ -141,7 +141,7 @@ export default async function DairyPage() {
                 formatValue={(v) => `${formatNumber(v)} L`}
               />
             ) : (
-              <div className="py-12 text-center text-sm" style={{ color: "var(--text-muted)" }}>—</div>
+              <div className="py-12 text-center text-sm" style={{ color: "var(--heri-ink-3)" }}>—</div>
             )}
           </div>
           <div className="card card-pad flex flex-col items-center justify-center">
@@ -209,7 +209,7 @@ export default async function DairyPage() {
                     return (
                       <tr key={b.id}>
                         <td className="font-mono text-[11px]">{b.batchNumber}</td>
-                        <td className="font-extrabold" style={{ color: "var(--text)" }}>{b.productAr}</td>
+                        <td className="font-semibold" style={{ color: "var(--heri-ink)" }}>{b.productAr}</td>
                         <td className="tabular-nums">{formatNumber(b.quantityLiters)} L</td>
                         <td>
                           <span className={
@@ -224,7 +224,7 @@ export default async function DairyPage() {
                           {expSoon && b.status !== "DISTRIBUTED" ? <Clock className="me-1 inline h-3 w-3" /> : null}
                           {formatShortDate(b.expiryDate, lc)}
                         </td>
-                        <td className="text-[11px]" style={{ color: "var(--text-muted)" }}>{b.destination ?? "—"}</td>
+                        <td className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>{b.destination ?? "—"}</td>
                         <td><StatusBadge status={b.status} /></td>
                         <td>
                           <DeleteButton

@@ -1,9 +1,8 @@
 import { Trophy, Crown, Medal, Star, Check, Lock, Sparkles, Award } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
-import { HeroPanel } from "@/components/exec/HeroPanel";
-import { MetricTile } from "@/components/exec/MetricTile";
-import { KpiCard } from "@/components/KpiCard";
+import { HeriKpi } from "@/components/HeriKpi";
+import { HeritageSection, HeritagePill } from "@/components/heritage";
 import { CompanyCover } from "@/components/CompanyCover";
 import { RankBadge } from "@/components/RankBadge";
 import { prisma } from "@/lib/db";
@@ -147,99 +146,47 @@ export default async function AchievementsPage() {
       />
 
       <PageContainer>
-        <HeroPanel
-          gradient="linear-gradient(135deg, #422006 0%, #92400e 40%, #d97706 75%, #fbbf24 110%)"
-          accent="#fbbf24"
-          height={250}
+        {/* Rank + XP strip */}
+        <HeritageSection
+          eyebrow={ar ? "نظام التلعيب" : "Gamification"}
+          title={ar ? `${myRank.ar} · ${formatNumber(me?.xp ?? 0)} XP` : `${myRank.en} · ${formatNumber(me?.xp ?? 0)} XP`}
+          aside={ar ? `+${myRank.bonusPercent}% بونص` : `+${myRank.bonusPercent}% bonus`}
+          rtl={ar}
         >
-          <div className="flex flex-wrap items-center justify-between gap-5">
-            <div className="flex items-center gap-5 hn-anim-rise">
-              <div className="hn-anim-zoom-bounce relative">
-                <span className="hn-anim-pulse-ring absolute -inset-2 rounded-3xl" aria-hidden />
-                <div
-                  className="flex h-[88px] w-[88px] items-center justify-center rounded-2xl ring-2 ring-white/40"
-                  style={{ background: "rgba(255,255,255,0.18)" }}
-                >
-                  <span className="text-5xl">{myRank.symbol}</span>
-                </div>
-              </div>
-              <div className="min-w-0">
-                <div
-                  className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em]"
-                  style={{
-                    background: "rgba(255,255,255,0.18)",
-                    border: "1px solid rgba(255,255,255,0.28)",
-                    backdropFilter: "blur(6px)",
-                    color: "white",
-                  }}
-                >
-                  <Crown className="h-3 w-3" />
-                  {ar ? "نظام التلعيب" : "Gamification"}
-                </div>
-                <h2
-                  className="mt-2.5 text-3xl font-black leading-[1.05] tracking-[-0.02em] hn-anim-rise md:text-[34px]"
-                  style={{ animationDelay: "0.08s" }}
-                >
-                  {ar ? `${myRank.ar} · ${formatNumber(me?.xp ?? 0)} XP` : `${myRank.en} · ${formatNumber(me?.xp ?? 0)} XP`}
-                </h2>
-                <p
-                  className="mt-1 max-w-xl text-[12.5px] font-bold opacity-90 hn-anim-rise"
-                  style={{ animationDelay: "0.16s" }}
-                >
-                  {ar
-                    ? "شغفك يُقاس. كل تسجيل دخول، كل مهمة، كل فكرة تنتج XP — وكل XP يقربك من الملك."
-                    : "Your effort is measured. Every login, task, idea earns XP — every XP closer to the crown."}
-                </p>
-              </div>
-            </div>
+          <div className="flex items-start gap-4">
+            <span className="text-4xl" aria-label={ar ? myRank.ar : myRank.en}>{myRank.symbol}</span>
+            <p style={{ fontSize: 13, lineHeight: 1.65, color: "var(--heri-ink-2)", maxWidth: 480 }}>
+              {ar
+                ? "شغفك يُقاس. كل تسجيل دخول، كل مهمة، كل فكرة تنتج XP — وكل XP يقربك من الملك."
+                : "Your effort is measured. Every login, task, idea earns XP — every XP closer to the crown."}
+            </p>
+          </div>
+        </HeritageSection>
 
-            <div className="grid gap-2 hn-stagger sm:grid-cols-2">
-              <AchHeroStat label="XP" value={formatNumber(me?.xp ?? 0)} icon={Star} />
-              <AchHeroStat label={ar ? "إنجازات" : "Badges"} value={`${earnedCount}/${totalCount}`} icon={Trophy} />
-              <AchHeroStat label={ar ? "بونص" : "Bonus"} value={`+${(me?.bonusPercent ?? 0).toFixed(1)}%`} icon={Sparkles} />
-              <AchHeroStat label={ar ? "رتبة" : "Rank"} value={ar ? myRank.ar : myRank.en} icon={Crown} />
+        {/* KPI band */}
+        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
+          <div className="heri-card" style={{ padding: "18px 20px" }}>
+            <div className="heri-eyebrow heri-eyebrow-ink">{ar ? "رتبتك" : "Your rank"}</div>
+            <div className="mt-3 flex items-center gap-2">
+              <span style={{ fontSize: 28 }}>{myRank.symbol}</span>
+              <span className="heri-number" style={{ fontSize: 22, fontWeight: 600, color: "var(--heri-ochre-2)" }}>
+                {ar ? myRank.ar : myRank.en}
+              </span>
+            </div>
+            <div className="heri-number-mono mt-2" style={{ fontSize: 11, color: "var(--heri-ink-3)" }}>
+              +{myRank.bonusPercent}% {ar ? "بونص" : "bonus"}
             </div>
           </div>
-        </HeroPanel>
-
-        {/* KPI strip */}
-        <section className="grid gap-3 hn-stagger sm:grid-cols-2 xl:grid-cols-4">
-          <MetricTile
-            label={ar ? "رتبتك" : "Your rank"}
-            value={ar ? myRank.ar : myRank.en}
-            icon={Crown}
-            tone="amber"
-            hint={`${myRank.symbol} +${myRank.bonusPercent}%`}
-          />
-          <MetricTile
-            label="XP"
-            value={formatNumber(me?.xp ?? 0)}
-            icon={Star}
-            tone="violet"
-            hint={ar ? "نقاط الخبرة" : "experience"}
-          />
-          <div className="hn-anim-rise hn-hover-lift">
-            <KpiCard
-              label={ar ? "إنجازات مفتوحة" : "Badges unlocked"}
-              value={`${earnedCount} / ${totalCount}`}
-              icon={Trophy}
-              tone="emerald"
-            />
-          </div>
-          <div className="hn-anim-rise hn-hover-lift">
-            <KpiCard
-              label={ar ? "نسبة البونص" : "Bonus rate"}
-              value={`+${me?.bonusPercent ?? 0}٪`}
-              icon={Medal}
-              tone="amber"
-            />
-          </div>
+          <HeriKpi label="XP" raw={me?.xp ?? 0} kind="number" hint={ar ? "نقاط الخبرة" : "experience"} />
+          <HeriKpi label={ar ? "إنجازات مفتوحة" : "Badges unlocked"}
+            raw={earnedCount} kind="number" hint={`/ ${totalCount}`} accent="var(--heri-teal)" />
+          <HeriKpi label={ar ? "نسبة البونص" : "Bonus rate"}
+            raw={me?.bonusPercent ?? 0} kind="number" hint="%" accent="var(--heri-ochre)" />
         </section>
 
         {/* Rank ladder */}
-        <section className="card card-pad hn-anim-rise">
-          <div className="card-title mb-4">{ar ? "سلم الرتب" : "Rank ladder"}</div>
-          <div className="grid gap-3 hn-stagger md:grid-cols-5">
+        <HeritageSection eyebrow={ar ? "السلم" : "Ladder"} title={ar ? "سلم الرتب" : "Rank ladder"} rtl={ar}>
+          <div className="grid gap-3 heri-stagger md:grid-cols-5">
             {RANKS.map((r) => {
               const isCurrent = r.id === myRank.id;
               const xp = me?.xp ?? 0;
@@ -247,15 +194,15 @@ export default async function AchievementsPage() {
               return (
                 <div
                   key={r.id}
-                  className={`relative rounded-2xl p-4 text-center transition hn-anim-zoom hn-hover-lift ${isCurrent ? "ring-2 shadow-glow" : ""}`}
+                  className={`relative rounded-2xl p-4 text-center transition   ${isCurrent ? "ring-2 " : ""}`}
                   style={{
-                    background: reached ? "var(--brand-soft)" : "var(--surface-elevated)",
+                    background: reached ? "var(--heri-cream-2)" : "var(--heri-cream-2)",
                     border: "1px solid var(--border)",
                     [`--tw-ring-color` as any]: r.color,
                   }}
                 >
                   {isCurrent ? (
-                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-[var(--accent)] px-2 py-0.5 text-[9px] font-black text-[#1a0e02]">
+                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-[var(--heri-copper)] px-2 py-0.5 text-[9px] font-black text-[#1a0e02]">
                       {ar ? "أنت هنا" : "YOU"}
                     </span>
                   ) : null}
@@ -263,39 +210,39 @@ export default async function AchievementsPage() {
                     className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl text-4xl font-black"
                     style={{
                       background: reached
-                        ? "linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%)"
-                        : "var(--surface)",
+                        ? "linear-gradient(135deg, var(--heri-ochre) 0%, var(--heri-copper) 100%)"
+                        : "var(--heri-cream)",
                       color: reached ? "white" : r.color,
                       opacity: reached ? 1 : 0.4,
                     }}
                   >
                     {r.symbol}
                   </div>
-                  <div className="mt-2 text-base font-extrabold" style={{ color: "var(--text)" }}>
+                  <div className="mt-2 text-base font-extrabold" style={{ color: "var(--heri-ink)" }}>
                     {ar ? r.ar : r.en}
                   </div>
-                  <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                  <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
                     {formatNumber(r.minXp)} XP · +{r.bonusPercent}٪
                   </div>
                 </div>
               );
             })}
           </div>
-        </section>
+        </HeritageSection>
 
         {/* Medal catalog — grouped by tier, highest first */}
         <section className="space-y-6">
           <div className="flex items-end justify-between">
             <div>
               <h2
-                className="hn-anim-rise text-base font-extrabold"
-                style={{ color: "var(--text)" }}
+                className=" text-base font-extrabold"
+                style={{ color: "var(--heri-ink)" }}
               >
                 {ar ? "كتالوج الميداليات" : "Medal catalog"}
               </h2>
               <p
                 className="mt-0.5 text-[12px]"
-                style={{ color: "var(--text-muted)" }}
+                style={{ color: "var(--heri-ink-3)" }}
               >
                 {ar
                   ? "كل ميدالية تفتح بإنجاز محدد — اعمل، أنجز، اكسب."
@@ -304,7 +251,7 @@ export default async function AchievementsPage() {
             </div>
             <span
               className="font-mono text-xs font-bold"
-              style={{ color: "var(--text-muted)" }}
+              style={{ color: "var(--heri-ink-3)" }}
             >
               {earnedCount} / {totalCount}
             </span>
@@ -318,7 +265,7 @@ export default async function AchievementsPage() {
 
             return (
               <div key={tier} className="space-y-3">
-                <header className="flex items-center gap-3 hn-anim-rise">
+                <header className="flex items-center gap-3 ">
                   <div
                     className="flex h-10 w-10 items-center justify-center rounded-xl"
                     style={{
@@ -333,30 +280,30 @@ export default async function AchievementsPage() {
                   <div>
                     <div
                       className="text-sm font-extrabold uppercase tracking-[0.18em]"
-                      style={{ color: "var(--text)" }}
+                      style={{ color: "var(--heri-ink)" }}
                     >
                       {ar ? TIER_LABEL[tier].ar : TIER_LABEL[tier].en}
                     </div>
-                    <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                    <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
                       {tierEarned} / {items.length}{" "}
                       {ar ? "مفتوح" : "earned"}
                     </div>
                   </div>
                   <span
                     className="ms-auto h-px flex-1"
-                    style={{ background: "var(--border)" }}
+                    style={{ background: "var(--heri-rule)" }}
                     aria-hidden
                   />
                 </header>
 
-                <div className="grid gap-3 hn-stagger md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid gap-3 heri-stagger md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {items.map((a) => {
                     const earned = earnedIds.has(a.id);
                     const earnedAt = earnedAtById.get(a.id);
                     return (
                       <article
                         key={a.id}
-                        className={`hn-anim-zoom hn-hover-lift relative overflow-hidden rounded-2xl border p-4 ${earned ? "" : "grayscale"}`}
+                        className={`  relative overflow-hidden rounded-2xl border p-4 ${earned ? "" : "grayscale"}`}
                         style={{
                           background: visual.gradient,
                           color: visual.textOn,
@@ -394,7 +341,7 @@ export default async function AchievementsPage() {
                           </div>
                           {earned ? (
                             <span
-                              className="hn-anim-success inline-flex h-7 w-7 items-center justify-center rounded-full text-white"
+                              className=" inline-flex h-7 w-7 items-center justify-center rounded-full text-white"
                               style={{
                                 background: "rgba(16,185,129,0.95)",
                                 boxShadow: "0 4px 12px -4px rgba(16,185,129,0.5)",
@@ -469,24 +416,24 @@ export default async function AchievementsPage() {
           <div className="flex items-end justify-between">
             <div>
               <h2
-                className="hn-anim-rise text-base font-extrabold"
-                style={{ color: "var(--text)" }}
+                className=" text-base font-extrabold"
+                style={{ color: "var(--heri-ink)" }}
               >
                 {ar ? "لوحة الصدارة" : "Leaderboard"}
               </h2>
               <p
                 className="mt-0.5 text-[12px]"
-                style={{ color: "var(--text-muted)" }}
+                style={{ color: "var(--heri-ink-3)" }}
               >
                 {ar ? "الأعلى XP في المجموعة" : "Top XP across the group"}
               </p>
             </div>
-            <Crown className="h-5 w-5" style={{ color: "var(--accent)" }} />
+            <Crown className="h-5 w-5" style={{ color: "var(--heri-copper)" }} />
           </div>
 
           {/* Podium — top 3 */}
           {top3.length > 0 ? (
-            <div className="grid gap-3 hn-stagger md:grid-cols-3 md:items-end">
+            <div className="grid gap-3 heri-stagger md:grid-cols-3 md:items-end">
               {/* Visual order: 2nd | 1st | 3rd via DOM ordering on md+ */}
               {[1, 0, 2]
                 .map((idx) => top3[idx])
@@ -500,15 +447,15 @@ export default async function AchievementsPage() {
                   return (
                     <article
                       key={u.id}
-                      className="hn-anim-zoom hn-hover-lift relative overflow-hidden rounded-2xl p-5 text-center"
+                      className="  relative overflow-hidden rounded-2xl p-5 text-center"
                       style={{
                         background: isMe
-                          ? "linear-gradient(135deg, var(--brand-soft) 0%, var(--surface-elevated) 100%)"
-                          : "var(--surface-elevated)",
-                        border: `1px solid ${isMe ? "var(--brand)" : "var(--border)"}`,
+                          ? "linear-gradient(135deg, var(--heri-cream-2) 0%, var(--heri-cream-2) 100%)"
+                          : "var(--heri-cream-2)",
+                        border: `1px solid ${isMe ? "var(--heri-ochre)" : "var(--heri-rule)"}`,
                         boxShadow: isFirst
-                          ? "0 18px 40px -18px color-mix(in srgb, var(--accent) 60%, transparent)"
-                          : "var(--shadow-soft)",
+                          ? "0 18px 40px -18px color-mix(in srgb, var(--heri-copper) 60%, transparent)"
+                          : "var(--)",
                         minHeight: isFirst ? 240 : 200,
                         marginBottom: isFirst ? 0 : 12,
                       }}
@@ -519,7 +466,7 @@ export default async function AchievementsPage() {
                           className="pointer-events-none absolute inset-0"
                           style={{
                             background:
-                              "linear-gradient(135deg, color-mix(in srgb, var(--accent) 14%, transparent) 0%, transparent 60%)",
+                              "linear-gradient(135deg, color-mix(in srgb, var(--heri-copper) 14%, transparent) 0%, transparent 60%)",
                           }}
                         />
                       ) : null}
@@ -542,13 +489,13 @@ export default async function AchievementsPage() {
                       <div className="relative mt-3">
                         <div
                           className={`font-extrabold ${isFirst ? "text-base" : "text-sm"}`}
-                          style={{ color: "var(--text)" }}
+                          style={{ color: "var(--heri-ink)" }}
                         >
                           {u.name}
                           {isMe ? (
                             <span
                               className="ms-1.5 text-[10px] font-bold"
-                              style={{ color: "var(--brand)" }}
+                              style={{ color: "var(--heri-ochre)" }}
                             >
                               ({ar ? "أنت" : "you"})
                             </span>
@@ -557,7 +504,7 @@ export default async function AchievementsPage() {
                         {u.company?.name ? (
                           <div
                             className="text-[11px]"
-                            style={{ color: "var(--text-muted)" }}
+                            style={{ color: "var(--heri-ink-3)" }}
                           >
                             {u.company.name}
                           </div>
@@ -567,13 +514,13 @@ export default async function AchievementsPage() {
                         <RankBadge rank={u.rank as any} size="sm" showLabel={false} />
                         <span
                           className="font-mono text-sm font-black"
-                          style={{ color: "var(--text)" }}
+                          style={{ color: "var(--heri-ink)" }}
                         >
                           {formatNumber(u.xp)}
                         </span>
                         <span
                           className="text-[10px] font-bold"
-                          style={{ color: "var(--text-muted)" }}
+                          style={{ color: "var(--heri-ink-3)" }}
                         >
                           XP
                         </span>
@@ -581,8 +528,8 @@ export default async function AchievementsPage() {
                       <div
                         className="relative mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
                         style={{
-                          background: "var(--brand-soft)",
-                          color: "var(--brand-deep)",
+                          background: "var(--heri-cream-2)",
+                          color: "var(--heri-ochre-2)",
                         }}
                       >
                         <Trophy className="h-3 w-3" />
@@ -598,7 +545,7 @@ export default async function AchievementsPage() {
           {/* Rest 4-10 */}
           {rest.length > 0 ? (
             <div className="card overflow-hidden">
-              <ul className="hn-stagger divide-y divide-[var(--border)]">
+              <ul className="heri-stagger divide-y divide-[var(--border)]">
                 {rest.map((u, i) => {
                   const isMe = u.id === session.id;
                   const place = i + 4;
@@ -607,17 +554,17 @@ export default async function AchievementsPage() {
                   return (
                     <li
                       key={u.id}
-                      className="hn-anim-rise grid items-center gap-3 px-4 py-3"
+                      className=" grid items-center gap-3 px-4 py-3"
                       style={{
                         gridTemplateColumns: "32px auto 1fr auto auto auto",
                         background: isMe
-                          ? "var(--brand-soft)"
+                          ? "var(--heri-cream-2)"
                           : undefined,
                       }}
                     >
                       <span
                         className="font-mono text-sm font-black"
-                        style={{ color: "var(--text-muted)" }}
+                        style={{ color: "var(--heri-ink-3)" }}
                       >
                         {place}
                       </span>
@@ -634,13 +581,13 @@ export default async function AchievementsPage() {
                       <div className="min-w-0">
                         <div
                           className="truncate text-sm font-extrabold"
-                          style={{ color: "var(--text)" }}
+                          style={{ color: "var(--heri-ink)" }}
                         >
                           {u.name}
                           {isMe ? (
                             <span
                               className="ms-1.5 text-[10px] font-bold"
-                              style={{ color: "var(--brand)" }}
+                              style={{ color: "var(--heri-ochre)" }}
                             >
                               ({ar ? "أنت" : "you"})
                             </span>
@@ -649,7 +596,7 @@ export default async function AchievementsPage() {
                         {u.company?.name ? (
                           <div
                             className="truncate text-[11px]"
-                            style={{ color: "var(--text-muted)" }}
+                            style={{ color: "var(--heri-ink-3)" }}
                           >
                             {u.company.name}
                           </div>
@@ -658,19 +605,19 @@ export default async function AchievementsPage() {
                       <RankBadge rank={u.rank as any} size="sm" showLabel={false} />
                       <span
                         className="font-mono text-sm font-bold"
-                        style={{ color: "var(--text)" }}
+                        style={{ color: "var(--heri-ink)" }}
                       >
                         {formatNumber(u.xp)}{" "}
                         <span
                           className="text-[10px] font-bold"
-                          style={{ color: "var(--text-muted)" }}
+                          style={{ color: "var(--heri-ink-3)" }}
                         >
                           XP
                         </span>
                       </span>
                       <span
                         className="inline-flex items-center gap-1 text-[11px] font-bold"
-                        style={{ color: "var(--text-muted)" }}
+                        style={{ color: "var(--heri-ink-3)" }}
                       >
                         <Trophy className="h-3 w-3" />
                         {u._count.achievements}
@@ -687,24 +634,3 @@ export default async function AchievementsPage() {
   );
 }
 
-function AchHeroStat({ label, value, icon: Icon }: { label: string; value: string; icon: any }) {
-  return (
-    <div
-      className="hn-anim-rise rounded-xl px-3 py-2"
-      style={{
-        background: "rgba(255,255,255,0.14)",
-        border: "1px solid rgba(255,255,255,0.24)",
-        backdropFilter: "blur(8px)",
-        minWidth: 110,
-      }}
-    >
-      <div className="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[0.16em] opacity-85">
-        <Icon className="h-3 w-3" />
-        {label}
-      </div>
-      <div className="exec-num mt-0.5 text-base font-black leading-none tracking-[-0.012em]">
-        {value}
-      </div>
-    </div>
-  );
-}

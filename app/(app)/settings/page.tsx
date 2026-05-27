@@ -137,7 +137,7 @@ export default async function SettingsPage() {
         </section>
 
         {/* ── Theme picker ─────────────────────────────────────── */}
-        <section className="card card-pad hn-anim-rise" style={{ animationDelay: "0.1s" }}>
+        <section className="card card-pad" style={{ animationDelay: "0.1s" }}>
           <SectionHeader
             icon={Palette}
             title={ar ? "السمة البصرية" : "Visual theme"}
@@ -155,7 +155,7 @@ export default async function SettingsPage() {
                   <input type="hidden" name="theme" value={t.id} />
                   <button
                     type="submit"
-                    className={`group relative w-full overflow-hidden rounded-2xl text-start transition-all hn-hover-lift hn-hover-shine ${active ? "ring-2 ring-offset-1" : ""}`}
+                    className={`group relative w-full overflow-hidden rounded-2xl text-start transition-all ${active ? "ring-2 ring-offset-1" : ""}`}
                     style={{
                       background: t.surfaceElevated,
                       border: `1px solid ${t.border}`,
@@ -278,7 +278,7 @@ export default async function SettingsPage() {
         </section>
 
         {/* ── Language ─────────────────────────────────────────── */}
-        <section className="card card-pad hn-anim-rise" style={{ animationDelay: "0.16s" }}>
+        <section className="card card-pad" style={{ animationDelay: "0.16s" }}>
           <SectionHeader
             icon={Languages}
             title={ar ? "اللغة والاتجاه" : "Language & direction"}
@@ -314,7 +314,7 @@ export default async function SettingsPage() {
 
         {/* ── Exports ──────────────────────────────────────────── */}
         <section
-          className="card card-pad hn-anim-rise"
+          className="card card-pad"
           style={{ animationDelay: "0.22s" }}
         >
           <SectionHeader
@@ -330,7 +330,7 @@ export default async function SettingsPage() {
             {EXPORT_TYPES.map((e) => (
               <div
                 key={e.type}
-                className={`relative flex items-center justify-between gap-2 rounded-xl px-3 py-3 transition hn-hover-lift hn-anim-rise ${e.featured ? "ring-2" : ""}`}
+                className={`relative flex items-center justify-between gap-2 rounded-xl px-3 py-3 transition ${e.featured ? "ring-2" : ""}`}
                 style={{
                   border: "1px solid var(--border)",
                   background: e.featured ? "var(--brand-soft)" : "var(--surface-elevated)",
@@ -350,7 +350,7 @@ export default async function SettingsPage() {
                   <div className="min-w-0">
                     <div
                       className="line-clamp-1 text-[12.5px] font-extrabold"
-                      style={{ color: "var(--text)" }}
+                      style={{ color: "var(--heri-ink)" }}
                     >
                       {ar ? e.labelAr : e.labelEn}
                     </div>
@@ -397,7 +397,7 @@ export default async function SettingsPage() {
 
         {/* ── System status ────────────────────────────────────── */}
         <section
-          className="card card-pad hn-anim-rise"
+          className="card card-pad"
           style={{ animationDelay: "0.28s" }}
         >
           <SectionHeader
@@ -470,7 +470,7 @@ export default async function SettingsPage() {
         {/* ── Footer signature ─────────────────────────────────── */}
         <p
           className="text-center text-[10.5px] hn-anim-fade"
-          style={{ color: "var(--text-muted)", animationDelay: "0.4s" }}
+          style={{ color: "var(--heri-ink-3)", animationDelay: "0.4s" }}
         >
           H-Nerve ERP · {ar ? "نظام مجموعة الحوراني العصبي المركزي" : "Hourani Group's Central Nervous System"} ·{" "}
           {ar ? "بدعم من إتش-نيرف · مجموعة الحوراني" : "Powered by H-Nerve · Hourani Group"}
@@ -494,7 +494,7 @@ function SectionHeader({
   return (
     <div className="flex items-start gap-3">
       <span
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1 hn-anim-zoom-bounce"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1-bounce"
         style={{
           background: "var(--brand-soft)",
           color: "var(--brand)",
@@ -506,13 +506,13 @@ function SectionHeader({
       <div>
         <h3
           className="text-[14px] font-extrabold leading-tight"
-          style={{ color: "var(--text)" }}
+          style={{ color: "var(--heri-ink)" }}
         >
           {title}
         </h3>
         <p
           className="mt-0.5 text-[11px] font-bold leading-snug"
-          style={{ color: "var(--text-muted)" }}
+          style={{ color: "var(--heri-ink-3)" }}
         >
           {description}
         </p>
@@ -547,11 +547,11 @@ function StatTile({
     violet: "text-violet-700",
   };
   return (
-    <div className="card card-pad hn-anim-rise hn-hover-lift">
+    <div className="card card-pad">
       <div className="flex items-center justify-between">
         <span
           className="text-[10px] font-extrabold uppercase tracking-[0.16em]"
-          style={{ color: "var(--text-muted)" }}
+          style={{ color: "var(--heri-ink-3)" }}
         >
           {label}
         </span>
@@ -563,13 +563,13 @@ function StatTile({
       </div>
       <div
         className="mt-1.5 font-mono text-xl font-black leading-tight tabular-nums"
-        style={{ color: "var(--text)" }}
+        style={{ color: "var(--heri-ink)" }}
       >
         {value}
       </div>
       <div
         className="text-[10px] font-bold"
-        style={{ color: "var(--text-muted)" }}
+        style={{ color: "var(--heri-ink-3)" }}
       >
         {sub}
       </div>
@@ -601,11 +601,11 @@ function LocaleCard({
       <input type="hidden" name="locale" value={localeId} />
       <button
         type="submit"
-        className={`group relative flex w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-start transition-all hn-hover-lift hn-hover-shine ${active ? "ring-2 ring-offset-1" : ""}`}
+        className={`group relative flex w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-start transition-all ${active ? "ring-2 ring-offset-1" : ""}`}
         style={{
           border: "1px solid var(--border)",
           background: active ? "var(--brand-soft)" : "var(--surface-elevated)",
-          color: "var(--text)",
+          color: "var(--heri-ink)",
           ["--tw-ring-color" as any]: "var(--brand)",
           boxShadow: active
             ? "0 8px 24px -10px var(--brand)"
@@ -617,13 +617,13 @@ function LocaleCard({
           <div>
             <div
               className="text-sm font-extrabold"
-              style={{ color: active ? "var(--brand)" : "var(--text)" }}
+              style={{ color: active ? "var(--brand)" : "var(--heri-ink)" }}
             >
               {ar ? titleAr : titleEn}
             </div>
             <div
               className="text-[10.5px] font-bold"
-              style={{ color: "var(--text-muted)" }}
+              style={{ color: "var(--heri-ink-3)" }}
             >
               {ar ? dirLabelAr : dirLabelEn}
             </div>
@@ -674,7 +674,7 @@ function SystemRow({
   };
   return (
     <li
-      className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 transition hn-hover-lift"
+      className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 transition"
       style={{
         background: "var(--brand-soft)",
         border: "1px solid var(--border)",
@@ -683,7 +683,7 @@ function SystemRow({
       <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--brand)" }} />
       <span
         className="text-[11px] font-extrabold"
-        style={{ color: "var(--text)" }}
+        style={{ color: "var(--heri-ink)" }}
       >
         {label}
       </span>

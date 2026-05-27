@@ -78,10 +78,12 @@ export default async function LoginPage({
         </div>
       </form>
 
-      <div className="anim-fade-up rounded-xl border border-white/15 bg-white/10 p-3 text-center text-[11px] text-white/85 backdrop-blur" style={{ animationDelay: ".4s" }}>
-        <Activity className="me-1 inline h-3.5 w-3.5" />
-        {m["auth.demo"]}: <span className="font-mono" dir="ltr">admin@hourani.jo / admin123</span>
-      </div>
+      {process.env.NODE_ENV !== "production" ? (
+        <div className="anim-fade-up rounded-xl border border-white/15 bg-white/10 p-3 text-center text-[11px] text-white/85 backdrop-blur" style={{ animationDelay: ".4s" }}>
+          <Activity className="me-1 inline h-3.5 w-3.5" />
+          {m["auth.demo"]}: <span className="font-mono" dir="ltr">admin@hourani.jo / admin123</span>
+        </div>
+      ) : null}
 
       <div className="anim-fade-in text-center text-[10px] uppercase tracking-[0.25em] text-white/55" style={{ animationDelay: ".5s" }}>
         {m["auth.poweredBy"]} · {ar ? "مجموعة الحوراني · إتش-نيرف" : "Hourani Group · H-Nerve"}

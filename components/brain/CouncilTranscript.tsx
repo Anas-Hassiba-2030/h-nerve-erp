@@ -27,11 +27,31 @@ const AGENT_ACCENT: Record<string, string> = {
   moderator:            "var(--heri-ochre)",
 };
 
+// Short persona descriptor under each speaker's name — turns a label into a
+// recognisable seat at the table. Bilingual; falls back to nothing if unknown.
+const AGENT_ROLE: Record<string, { ar: string; en: string }> = {
+  "hospitality-expert": { ar: "مشغّل فنادق أول · ضيافة", en: "Senior hotel operator · hospitality" },
+  "dairy-expert":       { ar: "جودة الألبان · المها", en: "Dairy QC lead · Maha" },
+  "agri-expert":        { ar: "مهندس زراعي · لوران", en: "Agronomy lead · Loran" },
+  "finance-brain":      { ar: "الخزينة والهامش", en: "Treasury & margin" },
+  "risk-officer":       { ar: "ضابط المخاطر", en: "Risk officer" },
+  moderator:            { ar: "المُيَسّر", en: "Moderator" },
+};
+
 const POSITION_TONE: Record<string, "success" | "warn" | "critical" | "info" | "neutral"> = {
   support:  "success",
   oppose:   "critical",
   qualify:  "warn",
   moderate: "info",
+};
+
+// Debate spectrum order — support first, dissent last, so the reader rides
+// the tension up to the moderator's resolution.
+const STANCE_RANK: Record<string, number> = {
+  support: 0,
+  moderate: 1,
+  qualify: 2,
+  oppose: 3,
 };
 
 export function CouncilTranscript({
@@ -48,14 +68,37 @@ export function CouncilTranscript({
     return () => clearTimeout(t);
   }, [session.id, session.synthesis.confidence]);
 
+  const ordered = [...session.voices].sort(
+    (a, b) => (STANCE_RANK[a.position] ?? 9) - (STANCE_RANK[b.position] ?? 9)
+  );
+  const counts = session.voices.reduce<Record<string, number>>((m, v) => {
+    m[v.position] = (m[v.position] ?? 0) + 1;
+    return m;
+  }, {});
+
   return (
     <div className="space-y-6">
+      {/* ── Stance tally — the shape of the room at a glance ──────────── */}
+      <StanceTally counts={counts} total={session.voices.length} ar={ar} />
+
       {/* ── Specialist voices ────────────────────────────────────────── */}
       <section className="grid gap-4 heri-stagger md:grid-cols-2">
-        {session.voices.map((v, i) => (
-          <VoiceTile key={v.agentId + i} voice={v} ar={ar} />
+        {ordered.map((v, i) => (
+          <VoiceTile key={v.agentId + i} voice={v} ar={ar} index={i + 1} />
         ))}
       </section>
+
+      {/* ── Debate → decision transition ─────────────────────────────── */}
+      <div className="flex items-center gap-3" aria-hidden>
+        <span style={{ flex: 1, height: 1, background: "var(--heri-rule)" }} />
+        <span
+          className="heri-eyebrow heri-eyebrow-ink"
+          style={{ letterSpacing: "0.2em" }}
+        >
+          {ar ? "من النقاش إلى القرار" : "From debate to decision"}
+        </span>
+        <span style={{ flex: 1, height: 1, background: "var(--heri-rule)" }} />
+      </div>
 
       {/* ── Moderator synthesis ──────────────────────────────────────── */}
       <section className="heri-hero" style={{ position: "relative" }}>
@@ -160,10 +203,11 @@ export function CouncilTranscript({
 
 // ─────────────────────────────────────────────────────────────────────
 
-function VoiceTile({ voice, ar }: { voice: AgentVoice; ar: boolean }) {
+function VoiceTile({ voice, ar, index }: { voice: AgentVoice; ar: boolean; index: number }) {
   const accent = AGENT_ACCENT[voice.agentId] ?? "var(--heri-rule-strong)";
   const positionTone = POSITION_TONE[voice.position] ?? "neutral";
   const positionLabel = positionLabels(voice.position, ar);
+  const role = AGENT_ROLE[voice.agentId];
 
   return (
     <article
@@ -183,12 +227,46 @@ function VoiceTile({ voice, ar }: { voice: AgentVoice; ar: boolean }) {
       />
 
       <header className="ms-2 flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div
-            className="heri-eyebrow"
-            style={{ color: accent, letterSpacing: "0.18em" }}
+        <div className="min-w-0 flex items-start gap-2.5">
+          {/* Seat marker — the agent's index in the agent's accent */}
+          <span
+            aria-hidden
+            style={{
+              flex: "none",
+              width: 22,
+              height: 22,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              border: `1px solid ${accent}`,
+              color: accent,
+              fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
+              fontSize: 11,
+              fontWeight: 600,
+              marginTop: 1,
+            }}
           >
-            {ar ? voice.speakerLabel.ar : voice.speakerLabel.en}
+            {index}
+          </span>
+          <div className="min-w-0">
+            <div
+              className="heri-eyebrow"
+              style={{ color: accent, letterSpacing: "0.16em" }}
+            >
+              {ar ? voice.speakerLabel.ar : voice.speakerLabel.en}
+            </div>
+            {role ? (
+              <div
+                style={{
+                  fontSize: 10.5,
+                  color: "var(--heri-ink-3)",
+                  marginTop: 2,
+                  lineHeight: 1.35,
+                }}
+              >
+                {ar ? role.ar : role.en}
+              </div>
+            ) : null}
           </div>
         </div>
         <HeritagePill tone={positionTone}>{positionLabel}</HeritagePill>
@@ -266,4 +344,82 @@ function positionLabels(p: AgentVoice["position"], ar: boolean): string {
     : p === "oppose" ? "Oppose"
     : p === "qualify" ? "Qualify"
     : "Moderate";
+}
+
+function StanceTally({
+  counts,
+  total,
+  ar,
+}: {
+  counts: Record<string, number>;
+  total: number;
+  ar: boolean;
+}) {
+  if (total === 0) return null;
+  const order: Array<{ key: AgentVoice["position"]; color: string }> = [
+    { key: "support", color: "var(--heri-teal)" },
+    { key: "moderate", color: "var(--heri-ochre-2)" },
+    { key: "qualify", color: "var(--heri-ochre)" },
+    { key: "oppose", color: "var(--heri-terracotta)" },
+  ];
+  const present = order.filter((o) => (counts[o.key] ?? 0) > 0);
+
+  return (
+    <section
+      style={{
+        border: "1px solid var(--heri-rule)",
+        background: "var(--heri-cream-2)",
+        padding: "13px 16px",
+      }}
+    >
+      <div className="flex items-center justify-between gap-3" style={{ marginBottom: 9 }}>
+        <div className="heri-eyebrow heri-eyebrow-ink">
+          {ar ? "موقف المجلس" : "Where the council stands"}
+        </div>
+        <div
+          style={{
+            fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
+            fontSize: 10.5,
+            color: "var(--heri-ink-3)",
+            letterSpacing: "0.08em",
+          }}
+        >
+          {total} {ar ? "أصوات" : "voices"}
+        </div>
+      </div>
+
+      {/* Proportion bar */}
+      <div
+        className="flex w-full overflow-hidden"
+        style={{ height: 6, borderRadius: 2, background: "var(--heri-rule)" }}
+      >
+        {present.map((o) => (
+          <span
+            key={o.key}
+            style={{ width: `${((counts[o.key] ?? 0) / total) * 100}%`, background: o.color }}
+          />
+        ))}
+      </div>
+
+      {/* Legend */}
+      <ul className="flex flex-wrap items-center gap-x-4 gap-y-1.5" style={{ marginTop: 10 }}>
+        {present.map((o) => (
+          <li
+            key={o.key}
+            className="flex items-center gap-1.5"
+            style={{ fontSize: 11.5, color: "var(--heri-ink-2)" }}
+          >
+            <span
+              aria-hidden
+              style={{ width: 8, height: 8, background: o.color, borderRadius: "50%" }}
+            />
+            <span className="heri-number-mono" style={{ fontWeight: 600, color: "var(--heri-ink)" }}>
+              {counts[o.key]}
+            </span>
+            {positionLabels(o.key, ar)}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
 }

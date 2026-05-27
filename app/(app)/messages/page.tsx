@@ -7,8 +7,8 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
-import { HeroPanel } from "@/components/exec/HeroPanel";
-import { MetricTile } from "@/components/exec/MetricTile";
+import { HeritageSection, HeritagePill } from "@/components/heritage";
+import { HeriKpi } from "@/components/HeriKpi";
 import { EmptyState } from "@/components/EmptyState";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
@@ -64,105 +64,59 @@ export default async function MessagesPage() {
       />
 
       <PageContainer>
-        <HeroPanel
-          gradient="linear-gradient(135deg, #0c1f3d 0%, #0e7490 40%, #06b6d4 75%, #67e8f9 110%)"
-          accent="#06b6d4"
-          height={230}
+        <HeritageSection
+          eyebrow={ar ? "تواصل مباشر" : "Live chat"}
+          title={ar ? "الرسائل الداخلية" : "Internal messages"}
         >
-          <div className="flex flex-wrap items-center justify-between gap-5">
-            <div className="flex items-center gap-5 hn-anim-rise">
-              <div className="hn-anim-zoom-bounce relative">
-                <span className="hn-anim-pulse-ring absolute -inset-2 rounded-3xl" aria-hidden />
-                <div
-                  className="flex h-[88px] w-[88px] items-center justify-center rounded-2xl ring-2 ring-white/40"
-                  style={{ background: "rgba(255,255,255,0.18)" }}
-                >
-                  <MessageSquare className="h-12 w-12 text-white" />
-                </div>
-              </div>
-              <div className="min-w-0">
-                <div
-                  className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em]"
-                  style={{
-                    background: "rgba(255,255,255,0.18)",
-                    border: "1px solid rgba(255,255,255,0.28)",
-                    backdropFilter: "blur(6px)",
-                    color: "white",
-                  }}
-                >
-                  <MessageCircle className="h-3 w-3 hn-anim-pulse-soft" />
-                  {ar ? "تواصل مباشر" : "Live chat"}
-                </div>
-                <h2
-                  className="mt-2.5 text-3xl font-black leading-[1.05] tracking-[-0.02em] hn-anim-rise md:text-[34px]"
-                  style={{ animationDelay: "0.08s" }}
-                >
-                  {ar ? "الرسائل الداخلية" : "Internal messages"}
-                </h2>
-                <p
-                  className="mt-1 max-w-xl text-[12.5px] font-bold opacity-90 hn-anim-rise"
-                  style={{ animationDelay: "0.16s" }}
-                >
-                  {ar
-                    ? "اتصل بزملائك حول الأسعار، الجودة، الحجوزات، أو أي قرار يحتاج نقاشاً."
-                    : "Reach colleagues about pricing, quality, bookings, or any decision needing discussion."}
-                </p>
-              </div>
-            </div>
+          <p className="mt-1 max-w-xl text-[12.5px] font-semibold" style={{ color: "var(--heri-ink-2)" }}>
+            {ar
+              ? "اتصل بزملائك حول الأسعار، الجودة، الحجوزات، أو أي قرار يحتاج نقاشاً."
+              : "Reach colleagues about pricing, quality, bookings, or any decision needing discussion."}
+          </p>
+        </HeritageSection>
 
-            <div className="grid gap-2 hn-stagger sm:grid-cols-2">
-              <MsgHeroStat label={ar ? "محادثات" : "Threads"} value={formatNumber(totalThreads)} icon={Inbox} />
-              <MsgHeroStat label={ar ? "غير مقروء" : "Unread"} value={formatNumber(unread)} icon={MessageCircle} />
-              <MsgHeroStat label={ar ? "نشطة اليوم" : "Active today"} value={formatNumber(activeToday)} icon={Send} />
-              <MsgHeroStat label={ar ? "زملاء" : "Colleagues"} value={formatNumber(allUsers.length)} icon={Users2} />
-            </div>
-          </div>
-        </HeroPanel>
-
-        <section className="grid gap-3 hn-stagger sm:grid-cols-2 xl:grid-cols-4">
-          <MetricTile
+        <section className="grid gap-3 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
+          <HeriKpi
             label={ar ? "إجمالي محادثاتي" : "My threads"}
-            value={formatNumber(totalThreads)}
-            icon={Inbox}
-            tone="blue"
+            raw={totalThreads}
+            kind="number"
             hint={ar ? "كل المحادثات" : "all conversations"}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "غير مقروءة" : "Unread"}
-            value={formatNumber(unread)}
-            icon={MessageCircle}
-            tone={unread > 0 ? "rose" : "brand"}
+            raw={unread}
+            kind="number"
             hint={ar ? "تنتظر ردك" : "awaiting reply"}
+            accent={unread > 0 ? "var(--heri-terracotta)" : undefined}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "نشطة اليوم" : "Active today"}
-            value={formatNumber(activeToday)}
-            icon={Send}
-            tone="emerald"
+            raw={activeToday}
+            kind="number"
             hint={ar ? "آخر 24 ساعة" : "last 24h"}
+            accent="var(--heri-teal)"
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "زملاء متاحون" : "Available peers"}
-            value={formatNumber(allUsers.length)}
-            icon={Users2}
-            tone="violet"
+            raw={allUsers.length}
+            kind="number"
             hint={ar ? "في الفريق" : "in the team"}
           />
         </section>
 
         <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
           {/* Thread list */}
-          <section className="exec-card overflow-hidden p-0" data-tone="blue">
+          <section className="heri-card overflow-hidden p-0">
             <div
               className="px-5 py-3.5"
               style={{
-                borderBottom: "1px solid var(--border)",
-                background: "var(--brand-soft)",
+                borderBottom: "1px solid var(--heri-rule)",
+                background: "var(--heri-cream-2)",
               }}
             >
               <div className="flex items-center gap-2">
-                <Inbox className="h-4 w-4" style={{ color: "var(--brand)" }} />
-                <h3 className="text-[13px] font-extrabold" style={{ color: "var(--text)" }}>
+                <Inbox className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
+                <h3 className="text-[13px] font-bold" style={{ color: "var(--heri-ink)" }}>
                   {ar ? "صندوق الوارد" : "Inbox"}
                 </h3>
               </div>
@@ -180,7 +134,7 @@ export default async function MessagesPage() {
                 />
               </div>
             ) : (
-              <ul className="divide-y" style={{ borderColor: "var(--border)" }}>
+              <ul className="divide-y" style={{ borderColor: "var(--heri-rule)" }}>
                 {threads.map((t) => {
                   const others = t.thread.participants
                     .filter((p) => p.user.id !== session.id)
@@ -193,10 +147,10 @@ export default async function MessagesPage() {
                     <li key={t.thread.id}>
                       <Link
                         href={`/messages/${t.thread.id}`}
-                        className="flex items-center gap-3 px-5 py-3 transition hover:bg-[var(--brand-soft)]"
+                        className="flex items-center gap-3 px-5 py-3 transition hover:bg-[var(--heri-cream-2)]"
                       >
                         <span
-                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-black text-white ring-1 ring-white/30"
+                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white ring-1 ring-white/30"
                           style={{ background: color }}
                         >
                           {initials(main.name)}
@@ -204,15 +158,15 @@ export default async function MessagesPage() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-2">
                             <span
-                              className="line-clamp-1 text-[13px] font-extrabold"
-                              style={{ color: "var(--text)" }}
+                              className="line-clamp-1 text-[13px] font-bold"
+                              style={{ color: "var(--heri-ink)" }}
                             >
                               {main.name}
                             </span>
                             {t.last ? (
                               <span
-                                className="shrink-0 text-[10px] font-bold"
-                                style={{ color: "var(--text-muted)" }}
+                                className="shrink-0 text-[10px] font-semibold"
+                                style={{ color: "var(--heri-ink-3)" }}
                               >
                                 {formatRelative(t.last.createdAt)}
                               </span>
@@ -221,7 +175,7 @@ export default async function MessagesPage() {
                           <div className="flex items-center gap-2">
                             <span
                               className="line-clamp-1 text-[11.5px] font-medium"
-                              style={{ color: "var(--text-muted)" }}
+                              style={{ color: "var(--heri-ink-2)" }}
                             >
                               {t.last
                                 ? t.last.authorId === session.id
@@ -233,11 +187,8 @@ export default async function MessagesPage() {
                             </span>
                             {t.unread > 0 ? (
                               <span
-                                className="ms-auto shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black text-white hn-anim-pop"
-                                style={{
-                                  background:
-                                    "linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%)",
-                                }}
+                                className="ms-auto shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold text-white"
+                                style={{ background: "var(--heri-ochre)" }}
                               >
                                 {t.unread}
                               </span>
@@ -246,7 +197,7 @@ export default async function MessagesPage() {
                         </div>
                         <ArrowRight
                           className="h-3.5 w-3.5 shrink-0 transition rtl:rotate-180"
-                          style={{ color: "var(--text-muted)" }}
+                          style={{ color: "var(--heri-ink-3)" }}
                         />
                       </Link>
                     </li>
@@ -257,17 +208,17 @@ export default async function MessagesPage() {
           </section>
 
           {/* Compose new */}
-          <section className="exec-card overflow-hidden p-0" data-tone="brand">
+          <section className="heri-card overflow-hidden p-0">
             <div
               className="px-5 py-3.5"
               style={{
-                borderBottom: "1px solid var(--border)",
-                background: "var(--brand-soft)",
+                borderBottom: "1px solid var(--heri-rule)",
+                background: "var(--heri-cream-2)",
               }}
             >
               <div className="flex items-center gap-2">
-                <Plus className="h-4 w-4" style={{ color: "var(--brand)" }} />
-                <h3 className="text-[13px] font-extrabold" style={{ color: "var(--text)" }}>
+                <Plus className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
+                <h3 className="text-[13px] font-bold" style={{ color: "var(--heri-ink)" }}>
                   {ar ? "محادثة جديدة" : "New conversation"}
                 </h3>
               </div>
@@ -298,7 +249,11 @@ export default async function MessagesPage() {
                   }
                 />
               </div>
-              <button type="submit" className="btn-primary hn-hover-shine w-full">
+              <button
+                type="submit"
+                className="heri-btn heri-btn-primary w-full"
+                style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}
+              >
                 <Send className="h-4 w-4" />
                 {ar ? "ابدأ المحادثة" : "Start conversation"}
               </button>
@@ -307,11 +262,11 @@ export default async function MessagesPage() {
             {/* Peer suggestions */}
             <div
               className="px-5 py-3"
-              style={{ borderTop: "1px solid var(--border)" }}
+              style={{ borderTop: "1px solid var(--heri-rule)" }}
             >
               <div
-                className="mb-2 text-[10px] font-extrabold uppercase tracking-wider"
-                style={{ color: "var(--text-muted)" }}
+                className="heri-eyebrow mb-2"
+                style={{ color: "var(--heri-ink-3)" }}
               >
                 {ar ? "زملاء سريعون" : "Quick peers"}
               </div>
@@ -328,15 +283,14 @@ export default async function MessagesPage() {
                       <input type="hidden" name="toUserId" value={u.id} />
                       <button
                         type="submit"
-                        className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10.5px] font-bold transition hover:scale-105"
+                        className="heri-btn heri-btn-ghost inline-flex items-center gap-1.5 transition hover:scale-105"
                         style={{
-                          background: "var(--brand-soft)",
-                          color: "var(--text)",
-                          border: "1px solid var(--border)",
+                          padding: "0.25rem 0.625rem",
+                          fontSize: "0.65rem",
                         }}
                       >
                         <span
-                          className="flex h-5 w-5 items-center justify-center rounded-full text-[8.5px] font-black text-white"
+                          className="flex h-5 w-5 items-center justify-center rounded-full text-[8.5px] font-bold text-white"
                           style={{ background: color }}
                         >
                           {initials(u.name)}
@@ -352,27 +306,5 @@ export default async function MessagesPage() {
         </div>
       </PageContainer>
     </>
-  );
-}
-
-function MsgHeroStat({ label, value, icon: Icon }: { label: string; value: string; icon: any }) {
-  return (
-    <div
-      className="hn-anim-rise rounded-xl px-3 py-2"
-      style={{
-        background: "rgba(255,255,255,0.14)",
-        border: "1px solid rgba(255,255,255,0.24)",
-        backdropFilter: "blur(8px)",
-        minWidth: 110,
-      }}
-    >
-      <div className="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[0.16em] opacity-85">
-        <Icon className="h-3 w-3" />
-        {label}
-      </div>
-      <div className="exec-num mt-0.5 text-xl font-black leading-none tracking-[-0.012em]">
-        {value}
-      </div>
-    </div>
   );
 }

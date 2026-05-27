@@ -115,13 +115,13 @@ export default async function AnalyticsCompanyPage({ params }: { params: { id: s
           </div>
           <div className="mt-4 grid gap-6 md:grid-cols-2">
             <div>
-              <div className="mb-1 text-[11px] font-bold" style={{ color: "var(--text-muted)" }}>
+              <div className="mb-1 text-[11px] font-bold" style={{ color: "var(--heri-ink-3)" }}>
                 {ar ? "إيرادات" : "Revenue"}
               </div>
               <Sparkline data={revenueTrend} width={420} height={120} positive />
             </div>
             <div>
-              <div className="mb-1 text-[11px] font-bold" style={{ color: "var(--text-muted)" }}>
+              <div className="mb-1 text-[11px] font-bold" style={{ color: "var(--heri-ink-3)" }}>
                 {ar ? "مصاريف" : "Expenses"}
               </div>
               <Sparkline data={expenseTrend} width={420} height={120} positive={false} />
@@ -135,13 +135,13 @@ export default async function AnalyticsCompanyPage({ params }: { params: { id: s
             <div className="card-title mb-3">{ar ? "أعلى مصادر الإيراد" : "Top revenue sources"}</div>
             <div className="space-y-2">
               {cats.length === 0 ? (
-                <div className="text-sm" style={{ color: "var(--text-muted)" }}>—</div>
+                <div className="text-sm" style={{ color: "var(--heri-ink-3)" }}>—</div>
               ) : (
                 cats.map(([cat, val]) => (
                   <div key={cat}>
                     <div className="mb-1 flex items-center justify-between text-xs">
-                      <span className="font-bold" style={{ color: "var(--text)" }}>{cat}</span>
-                      <span className="font-mono" style={{ color: "var(--text-muted)" }}>{formatMoney(val)}</span>
+                      <span className="font-bold" style={{ color: "var(--heri-ink)" }}>{cat}</span>
+                      <span className="font-mono" style={{ color: "var(--heri-ink-3)" }}>{formatMoney(val)}</span>
                     </div>
                     <div className="bar"><div className="bar-fill" style={{ width: `${(val / catTotal) * 100}%` }} /></div>
                   </div>
@@ -154,15 +154,15 @@ export default async function AnalyticsCompanyPage({ params }: { params: { id: s
             <div className="card-title mb-3">{ar ? "ESG الأخير" : "Latest ESG"}</div>
             {lastEsg ? (
               <>
-                <div className="text-3xl font-black" style={{ color: "var(--brand)" }}>{lastEsg.overall.toFixed(1)}</div>
-                <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>{lastEsg.year} · {lastEsg.period}</div>
+                <div className="text-3xl font-bold" style={{ color: "var(--heri-ochre)" }}>{lastEsg.overall.toFixed(1)}</div>
+                <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>{lastEsg.year} · {lastEsg.period}</div>
                 <div className="mt-3 space-y-2 text-xs">
                   <Bar label={ar ? "بيئي" : "Environmental"} val={lastEsg.environmentalScore} />
                   <Bar label={ar ? "اجتماعي" : "Social"} val={lastEsg.socialScore} />
                   <Bar label={ar ? "حوكمة" : "Governance"} val={lastEsg.governanceScore} />
                 </div>
               </>
-            ) : <div className="text-sm" style={{ color: "var(--text-muted)" }}>—</div>}
+            ) : <div className="text-sm" style={{ color: "var(--heri-ink-3)" }}>—</div>}
           </div>
         </section>
 
@@ -180,15 +180,15 @@ export default async function AnalyticsCompanyPage({ params }: { params: { id: s
             <div className="card-title mb-3">{ar ? "المشاريع المستقبلية" : "Future Projects pipeline"}</div>
             <div className="space-y-3">
               {company.futureProjects.map((p) => (
-                <div key={p.id} className="rounded-xl p-3" style={{ border: "1px solid var(--border)" }}>
+                <div key={p.id} className="rounded-xl p-3" style={{ border: "1px solid var(--heri-rule)" }}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <div className="text-sm font-extrabold" style={{ color: "var(--text)" }}>{p.title}</div>
-                      <div className="line-clamp-2 text-xs" style={{ color: "var(--text-muted)" }}>{p.description}</div>
+                      <div className="text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>{p.title}</div>
+                      <div className="line-clamp-2 text-xs" style={{ color: "var(--heri-ink-3)" }}>{p.description}</div>
                     </div>
                     <span className="badge-violet">{p.stage}</span>
                   </div>
-                  <div className="mt-2 flex items-center justify-between text-[11px]" style={{ color: "var(--text-muted)" }}>
+                  <div className="mt-2 flex items-center justify-between text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
                     <span>{p.startQuarter} → {p.targetQuarter}</span>
                     <span className="font-mono">{formatMoney(p.budgetJod)}</span>
                   </div>
@@ -206,7 +206,7 @@ export default async function AnalyticsCompanyPage({ params }: { params: { id: s
 function Bar({ label, val }: { label: string; val: number }) {
   return (
     <div>
-      <div className="mb-1 flex items-center justify-between text-[11px]"><span style={{ color: "var(--text-muted)" }}>{label}</span><span className="font-mono">{val.toFixed(1)}</span></div>
+      <div className="mb-1 flex items-center justify-between text-[11px]"><span style={{ color: "var(--heri-ink-3)" }}>{label}</span><span className="font-mono">{val.toFixed(1)}</span></div>
       <div className="bar"><div className="bar-fill" style={{ width: `${val}%` }} /></div>
     </div>
   );
@@ -215,12 +215,12 @@ function Bar({ label, val }: { label: string; val: number }) {
 function Footprint({ label, value, icon: Icon }: { label: string; value: number; icon: any }) {
   return (
     <div className="card card-pad flex items-center gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "var(--brand-soft)", color: "var(--brand)" }}>
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "var(--heri-cream-2)", color: "var(--heri-ochre)" }}>
         <Icon className="h-4 w-4" />
       </div>
       <div>
-        <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>{label}</div>
-        <div className="text-lg font-black" style={{ color: "var(--text)" }}>{formatNumber(value)}</div>
+        <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>{label}</div>
+        <div className="text-lg font-bold" style={{ color: "var(--heri-ink)" }}>{formatNumber(value)}</div>
       </div>
     </div>
   );

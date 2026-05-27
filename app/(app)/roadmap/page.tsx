@@ -97,20 +97,20 @@ export default function RoadmapPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div
-                      className="text-base font-extrabold"
-                      style={{ color: "var(--text)" }}
+                      className="text-base font-semibold"
+                      style={{ color: "var(--heri-ink)" }}
                     >
                       {ar ? meta.ar : meta.en}
                     </div>
                     <div
                       className="text-[11px]"
-                      style={{ color: "var(--text-muted)" }}
+                      style={{ color: "var(--heri-ink-3)" }}
                     >
                       {ar ? meta.captionAr : meta.captionEn}
                     </div>
                   </div>
                   <div
-                    className="font-mono text-2xl font-black"
+                    className="font-mono text-2xl font-bold"
                     style={{ color: meta.tint }}
                   >
                     {items.length}
@@ -140,8 +140,8 @@ export default function RoadmapPage() {
                 <header
                   className="flex items-center gap-3 px-4 py-3"
                   style={{
-                    background: `linear-gradient(135deg, color-mix(in srgb, ${meta.tint} 18%, var(--surface-elevated)) 0%, var(--surface-elevated) 100%)`,
-                    borderBottom: "1px solid var(--border)",
+                    background: `linear-gradient(135deg, color-mix(in srgb, ${meta.tint} 18%, var(--heri-cream)) 0%, var(--heri-cream) 100%)`,
+                    borderBottom: "1px solid var(--heri-rule)",
                   }}
                 >
                   <div
@@ -153,23 +153,23 @@ export default function RoadmapPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <h2
-                      className="text-sm font-extrabold"
-                      style={{ color: "var(--text)" }}
+                      className="text-sm font-semibold"
+                      style={{ color: "var(--heri-ink)" }}
                     >
                       {ar ? meta.ar : meta.en}
                     </h2>
                     <p
                       className="text-[11px]"
-                      style={{ color: "var(--text-muted)" }}
+                      style={{ color: "var(--heri-ink-3)" }}
                     >
                       {ar ? meta.captionAr : meta.captionEn}
                     </p>
                   </div>
                   <span
-                    className="font-mono text-[12px] font-black"
+                    className="font-mono text-[12px] font-bold"
                     style={{
-                      background: "color-mix(in srgb, var(--text-muted) 12%, transparent)",
-                      color: "var(--text)",
+                      background: "color-mix(in srgb, var(--heri-ink-3) 12%, transparent)",
+                      color: "var(--heri-ink)",
                       padding: "3px 8px",
                       borderRadius: 999,
                     }}
@@ -184,10 +184,10 @@ export default function RoadmapPage() {
                     <div
                       className="rounded-xl p-4 text-center text-xs"
                       style={{
-                        color: "var(--text-muted)",
+                        color: "var(--heri-ink-3)",
                         background:
-                          "color-mix(in srgb, var(--text-muted) 6%, transparent)",
-                        border: "1px dashed var(--border)",
+                          "color-mix(in srgb, var(--heri-ink-3) 6%, transparent)",
+                        border: "1px dashed var(--heri-rule)",
                       }}
                     >
                       {ar ? "لا توجد بنود في هذا العمود." : "Nothing here yet."}
@@ -200,8 +200,8 @@ export default function RoadmapPage() {
                         style={{
                           animationDelay: `${(colIdx * 60) + i * 50}ms`,
                           background:
-                            "color-mix(in srgb, var(--surface) 50%, var(--surface-elevated))",
-                          border: "1px solid var(--border)",
+                            "color-mix(in srgb, var(--heri-cream) 50%, var(--heri-cream))",
+                          border: "1px solid var(--heri-rule)",
                         }}
                       >
                         {/* Meta row */}
@@ -218,8 +218,8 @@ export default function RoadmapPage() {
 
                         {/* Title */}
                         <h3
-                          className="mt-2 text-sm font-extrabold leading-snug"
-                          style={{ color: "var(--text)" }}
+                          className="mt-2 text-sm font-semibold leading-snug"
+                          style={{ color: "var(--heri-ink)" }}
                         >
                           {ar ? item.titleAr : item.titleEn}
                         </h3>
@@ -227,7 +227,7 @@ export default function RoadmapPage() {
                         {/* Description */}
                         <p
                           className="mt-1 text-xs leading-relaxed"
-                          style={{ color: "var(--text-muted)" }}
+                          style={{ color: "var(--heri-ink-3)" }}
                         >
                           {ar ? item.descAr : item.descEn}
                         </p>
@@ -245,14 +245,14 @@ export default function RoadmapPage() {
           className="card card-pad flex flex-wrap items-center gap-3 anim-fade-up"
           style={{
             background:
-              "linear-gradient(135deg, color-mix(in srgb, var(--brand) 6%, var(--surface-elevated)) 0%, var(--surface-elevated) 100%)",
+              "linear-gradient(135deg, color-mix(in srgb, var(--heri-ochre) 6%, var(--heri-cream)) 0%, var(--heri-cream) 100%)",
           }}
         >
           <div
             className="flex h-10 w-10 items-center justify-center rounded-xl text-white"
             style={{
               background:
-                "linear-gradient(135deg, var(--brand-deep) 0%, var(--brand) 100%)",
+                "linear-gradient(135deg, var(--brand-deep) 0%, var(--heri-ochre) 100%)",
             }}
             aria-hidden
           >
@@ -260,8 +260,8 @@ export default function RoadmapPage() {
           </div>
           <div className="min-w-0 flex-1">
             <div
-              className="text-sm font-extrabold"
-              style={{ color: "var(--text)" }}
+              className="text-sm font-semibold"
+              style={{ color: "var(--heri-ink)" }}
             >
               {ar
                 ? "كل ما هنا قابل للتعديل"
@@ -269,7 +269,7 @@ export default function RoadmapPage() {
             </div>
             <div
               className="text-[12px]"
-              style={{ color: "var(--text-muted)" }}
+              style={{ color: "var(--heri-ink-3)" }}
             >
               {ar
                 ? "الأولويات تتغير مع نبض المجموعة. شارك ملاحظاتك مع الإدارة لإعادة الترتيب."

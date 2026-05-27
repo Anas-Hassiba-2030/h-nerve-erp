@@ -51,14 +51,14 @@ function ScoreGauge({
         <defs>
           <linearGradient id={`g-${label}`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor={color} />
-            <stop offset="100%" stopColor="var(--accent)" />
+            <stop offset="100%" stopColor="var(--heri-copper)" />
           </linearGradient>
         </defs>
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="color-mix(in srgb, var(--text-muted) 14%, transparent)"
+          stroke="color-mix(in srgb, var(--heri-ink-3) 14%, transparent)"
           strokeWidth={stroke}
           fill="none"
         />
@@ -80,14 +80,14 @@ function ScoreGauge({
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <div
-          className="font-mono text-4xl font-black"
-          style={{ color: "var(--text)", letterSpacing: "-0.03em" }}
+          className="font-mono text-4xl font-bold"
+          style={{ color: "var(--heri-ink)", letterSpacing: "-0.03em" }}
         >
           {Math.round(clamped)}
         </div>
         <div
           className="text-[10px] font-bold uppercase tracking-widest"
-          style={{ color: "var(--text-muted)" }}
+          style={{ color: "var(--heri-ink-3)" }}
         >
           من 100
         </div>
@@ -197,7 +197,7 @@ export default async function SustainabilityDetailPage({
                   {score.company.name}
                 </Link>
               </div>
-              <h2 className="mt-1 text-2xl font-black md:text-3xl">
+              <h2 className="mt-1 text-2xl font-bold md:text-3xl">
                 مؤشر ESG الإجمالي
               </h2>
               <p className="text-sm opacity-90">
@@ -284,14 +284,14 @@ export default async function SustainabilityDetailPage({
                     </div>
                     <div>
                       <div
-                        className="text-sm font-extrabold"
-                        style={{ color: "var(--text)" }}
+                        className="text-sm font-semibold"
+                        style={{ color: "var(--heri-ink)" }}
                       >
                         {row.label}
                       </div>
                       <div
                         className="text-[10px] font-bold uppercase tracking-widest"
-                        style={{ color: "var(--text-muted)" }}
+                        style={{ color: "var(--heri-ink-3)" }}
                         dir="ltr"
                       >
                         {row.labelEn}
@@ -299,7 +299,7 @@ export default async function SustainabilityDetailPage({
                     </div>
                   </div>
                   <div
-                    className="font-mono text-2xl font-black"
+                    className="font-mono text-2xl font-bold"
                     style={{ color: row.color }}
                   >
                     {Math.round(row.value)}
@@ -309,14 +309,14 @@ export default async function SustainabilityDetailPage({
                   className="h-2 overflow-hidden rounded-full"
                   style={{
                     background:
-                      "color-mix(in srgb, var(--text-muted) 14%, transparent)",
+                      "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
                   }}
                 >
                   <div
                     className="h-full rounded-full anim-rise-glow"
                     style={{
                       width: `${Math.min(100, row.value)}%`,
-                      background: `linear-gradient(90deg, ${row.color} 0%, var(--accent) 100%)`,
+                      background: `linear-gradient(90deg, ${row.color} 0%, var(--heri-copper) 100%)`,
                       boxShadow: `0 0 14px ${row.color}`,
                       transition: "width .8s cubic-bezier(.21,.92,.32,1)",
                     }}
@@ -365,14 +365,14 @@ export default async function SustainabilityDetailPage({
             {score.notes ? (
               <section className="card card-pad anim-fade-up">
                 <h3
-                  className="mb-2 text-sm font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  className="mb-2 text-sm font-semibold"
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   ملاحظات الفترة
                 </h3>
                 <p
                   className="whitespace-pre-line text-sm leading-relaxed"
-                  style={{ color: "var(--text)" }}
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   {score.notes}
                 </p>
@@ -384,8 +384,8 @@ export default async function SustainabilityDetailPage({
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
                   <h3
-                    className="text-sm font-extrabold"
-                    style={{ color: "var(--text)" }}
+                    className="text-sm font-semibold"
+                    style={{ color: "var(--heri-ink)" }}
                   >
                     أداء بقية شركات المجموعة في{" "}
                     {PERIOD_AR[score.period] ?? score.period} {score.year}
@@ -400,18 +400,18 @@ export default async function SustainabilityDetailPage({
                     >
                       <Link
                         href={`/sustainability/${p.id}`}
-                        className="block rounded-xl px-2 py-1.5 transition hover:bg-[var(--brand-soft)]"
+                        className="block rounded-xl px-2 py-1.5 transition hover:bg-[var(--heri-cream-2)]"
                       >
                         <div className="mb-1 flex items-center justify-between gap-2">
                           <span
                             className="truncate text-xs font-bold"
-                            style={{ color: "var(--text)" }}
+                            style={{ color: "var(--heri-ink)" }}
                           >
                             {p.company.name}
                           </span>
                           <span
-                            className="font-mono text-xs font-black"
-                            style={{ color: "var(--text)" }}
+                            className="font-mono text-xs font-bold"
+                            style={{ color: "var(--heri-ink)" }}
                           >
                             {Math.round(p.overall)}
                           </span>
@@ -420,7 +420,7 @@ export default async function SustainabilityDetailPage({
                           className="h-1.5 overflow-hidden rounded-full"
                           style={{
                             background:
-                              "color-mix(in srgb, var(--text-muted) 14%, transparent)",
+                              "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
                           }}
                         >
                           <div
@@ -428,7 +428,7 @@ export default async function SustainabilityDetailPage({
                             style={{
                               width: `${Math.min(100, p.overall)}%`,
                               background:
-                                "linear-gradient(90deg, var(--brand) 0%, var(--accent) 100%)",
+                                "linear-gradient(90deg, var(--heri-ochre) 0%, var(--heri-copper) 100%)",
                               transition: "width .6s ease",
                             }}
                           />
@@ -444,8 +444,8 @@ export default async function SustainabilityDetailPage({
           <aside className="space-y-6">
             <section className="card card-pad anim-fade-up">
               <h3
-                className="mb-3 text-sm font-extrabold"
-                style={{ color: "var(--text)" }}
+                className="mb-3 text-sm font-semibold"
+                style={{ color: "var(--heri-ink)" }}
               >
                 البطاقة
               </h3>
@@ -481,17 +481,17 @@ function Fact({
   link?: string;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-[var(--border)] pb-1.5 last:border-b-0">
-      <dt style={{ color: "var(--text-muted)" }}>{label}</dt>
+    <div className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
+      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
       <dd
         className="text-end font-bold"
-        style={{ color: "var(--text)" }}
+        style={{ color: "var(--heri-ink)" }}
       >
         {link ? (
           <Link
             href={link}
             className="hover:underline"
-            style={{ color: "var(--brand)" }}
+            style={{ color: "var(--heri-ochre)" }}
           >
             {value}
           </Link>

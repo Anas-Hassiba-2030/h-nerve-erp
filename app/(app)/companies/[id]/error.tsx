@@ -28,14 +28,14 @@ export default function Error({
         >
           <AlertTriangle className="h-7 w-7" />
         </div>
-        <h2 className="text-xl font-black" style={{ color: "var(--text)" }}>
+        <h2 className="text-xl font-bold" style={{ color: "var(--heri-ink)" }}>
           خطأ في تحميل ملف الشركة
         </h2>
-        <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
+        <p className="mt-1 text-sm" style={{ color: "var(--heri-ink-3)" }}>
           حدث خطأ غير متوقع أثناء جلب بيانات هذه الشركة. الفريق التقني تلقّى الإشعار — يمكنك إعادة المحاولة.
         </p>
         {error.digest ? (
-          <p className="mt-2 font-mono text-[10px]" style={{ color: "var(--text-muted)" }}>
+          <p className="mt-2 font-mono text-[10px]" style={{ color: "var(--heri-ink-3)" }}>
             مرجع الخطأ: {error.digest}
           </p>
         ) : null}

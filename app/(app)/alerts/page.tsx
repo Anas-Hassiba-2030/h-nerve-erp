@@ -212,7 +212,7 @@ export default async function AlertsPage() {
                       <div className="grid gap-2 sm:grid-cols-3">
                         <div>
                           <label
-                            className="mb-1 block text-[10px] font-extrabold uppercase tracking-wider"
+                            className="mb-1 block text-[10px] font-semibold uppercase tracking-wider"
                             style={{ color: "var(--heri-ink-3)" }}
                           >
                             {ar ? def.thresholdLabel_ar : def.thresholdLabel_en}
@@ -225,7 +225,7 @@ export default async function AlertsPage() {
                               min={def.thresholdMin}
                               max={def.thresholdMax}
                               step={def.thresholdStep}
-                              className="input flex-1 font-mono text-sm font-extrabold tabular-nums"
+                              className="input flex-1 font-mono text-sm font-semibold tabular-nums"
                               style={{ height: 32 }}
                             />
                             <span
@@ -238,7 +238,7 @@ export default async function AlertsPage() {
                         </div>
                         <div>
                           <label
-                            className="mb-1 block text-[10px] font-extrabold uppercase tracking-wider"
+                            className="mb-1 block text-[10px] font-semibold uppercase tracking-wider"
                             style={{ color: "var(--heri-ink-3)" }}
                           >
                             {ar ? "الخطورة" : "Severity"}
@@ -258,7 +258,7 @@ export default async function AlertsPage() {
                         </div>
                         <div>
                           <label
-                            className="mb-1 block text-[10px] font-extrabold uppercase tracking-wider"
+                            className="mb-1 block text-[10px] font-semibold uppercase tracking-wider"
                             style={{ color: "var(--heri-ink-3)" }}
                           >
                             {ar ? "هدنة (ساعات)" : "Cooldown (h)"}
@@ -269,7 +269,7 @@ export default async function AlertsPage() {
                             defaultValue={r.cooldownHours}
                             min={1}
                             max={168}
-                            className="input w-full font-mono text-sm font-extrabold tabular-nums"
+                            className="input w-full font-mono text-sm font-semibold tabular-nums"
                             style={{ height: 32 }}
                           />
                         </div>

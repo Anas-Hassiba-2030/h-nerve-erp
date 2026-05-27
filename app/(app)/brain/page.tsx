@@ -345,7 +345,7 @@ export default async function BrainPage() {
                 style={{ background: "var(--heri-cream)" }}
               >
                 <div
-                  className="flex h-7 w-7 shrink-0 items-center justify-center text-[11px] font-black"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center text-[11px] font-bold"
                   style={{
                     border: "1px solid var(--heri-rule-strong)",
                     color: "var(--heri-ochre-2)",

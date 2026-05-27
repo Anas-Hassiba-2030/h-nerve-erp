@@ -152,7 +152,7 @@ export function BatchForm({
 
       <div
         className="flex items-center justify-between gap-3 border-t pt-4"
-        style={{ borderColor: "var(--border)" }}
+        style={{ borderColor: "var(--heri-rule)" }}
       >
         <Link href="/dairy" className="btn-ghost">
           <ArrowLeft className="h-4 w-4" /> العودة

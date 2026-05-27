@@ -77,13 +77,13 @@ export default async function ReportsIndexPage() {
                 >
                   <div className="flex items-center gap-2.5">
                     <span
-                      className="flex h-9 w-9 items-center justify-center rounded-lg text-lg font-black text-white ring-1 ring-white/30"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg text-lg font-bold text-white ring-1 ring-white/30"
                       style={{ background: "rgba(255,255,255,0.18)" }}
                     >
                       {brand.emblem}
                     </span>
                     <div className="min-w-0">
-                      <div className="line-clamp-1 text-sm font-extrabold text-white">
+                      <div className="line-clamp-1 text-sm font-semibold text-white">
                         {ar ? c.name : c.nameEn}
                       </div>
                       <div className="text-[10px] font-bold uppercase tracking-wider text-white/80">
@@ -96,22 +96,22 @@ export default async function ReportsIndexPage() {
 
                 <div className="space-y-2 p-4">
                   <div className="flex items-center justify-between text-[11px]">
-                    <span style={{ color: "var(--text-muted)" }}>
+                    <span style={{ color: "var(--heri-ink-3)" }}>
                       {ar ? "إيراد ١٢ شهر" : "12-mo revenue"}
                     </span>
                     <span
-                      className="font-mono text-[12px] font-extrabold tabular-nums"
-                      style={{ color: "var(--text)" }}
+                      className="font-mono text-[12px] font-semibold tabular-nums"
+                      style={{ color: "var(--heri-ink)" }}
                     >
                       {formatMoney(rev)}
                     </span>
                   </div>
                   {esgScore !== undefined ? (
                     <div className="flex items-center justify-between text-[11px]">
-                      <span style={{ color: "var(--text-muted)" }}>ESG</span>
+                      <span style={{ color: "var(--heri-ink-3)" }}>ESG</span>
                       <span
-                        className="font-mono text-[12px] font-extrabold tabular-nums"
-                        style={{ color: "var(--brand)" }}
+                        className="font-mono text-[12px] font-semibold tabular-nums"
+                        style={{ color: "var(--heri-ochre)" }}
                       >
                         {esgScore.toFixed(1)}/100
                       </span>
@@ -120,8 +120,8 @@ export default async function ReportsIndexPage() {
                   <div
                     className="flex items-center justify-between rounded-lg px-2 py-1.5 text-[11px] font-bold transition group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
                     style={{
-                      background: "var(--brand-soft)",
-                      color: "var(--brand)",
+                      background: "var(--heri-cream-2)",
+                      color: "var(--heri-ochre)",
                     }}
                   >
                     <span className="flex items-center gap-1.5">

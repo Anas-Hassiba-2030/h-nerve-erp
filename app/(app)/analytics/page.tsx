@@ -5,8 +5,8 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
-import { HeroPanel } from "@/components/exec/HeroPanel";
-import { MetricTile } from "@/components/exec/MetricTile";
+import { HeritageSection, HeritagePill } from "@/components/heritage";
+import { HeriKpi } from "@/components/HeriKpi";
 import { CompanyCover } from "@/components/CompanyCover";
 import { KpiCard } from "@/components/KpiCard";
 import { BarChart } from "@/components/charts/BarChart";
@@ -132,116 +132,100 @@ export default async function AnalyticsHubPage() {
       />
 
       <PageContainer>
-        <HeroPanel
-          gradient="linear-gradient(135deg, #0c1424 0%, #164e63 40%, #0891b2 75%, #67e8f9 110%)"
-          accent="#0891b2"
-          height={250}
+        {/* Heritage narrative header */}
+        <HeritageSection
+          eyebrow={ar ? "تحليلات متقدمة" : "Advanced analytics"}
+          title={ar ? "أداء المجموعة في 12 شهر" : "Group performance — 12 months"}
+          aside={
+            ar
+              ? "قراءة موحّدة عبر شركات الحوراني، مع مؤشرات هامش الربح وإشارات سلسلة التوريد."
+              : "Unified read across Hourani companies — margin signals + supply chain pulse."
+          }
         >
-          <div className="flex flex-wrap items-center justify-between gap-5">
-            <div className="flex items-center gap-5 hn-anim-rise">
-              <div className="hn-anim-zoom-bounce relative">
-                <span className="hn-anim-pulse-ring absolute -inset-2 rounded-3xl" aria-hidden />
-                <div
-                  className="flex h-[88px] w-[88px] items-center justify-center rounded-2xl ring-2 ring-white/40"
-                  style={{ background: "rgba(255,255,255,0.18)" }}
-                >
-                  <ChartLine className="h-12 w-12 text-white" />
-                </div>
-              </div>
-              <div className="min-w-0">
-                <div
-                  className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em]"
-                  style={{
-                    background: "rgba(255,255,255,0.18)",
-                    border: "1px solid rgba(255,255,255,0.28)",
-                    backdropFilter: "blur(6px)",
-                    color: "white",
-                  }}
-                >
-                  <BarChart3 className="h-3 w-3" />
-                  {ar ? "تحليلات متقدمة" : "Advanced analytics"}
-                </div>
-                <h2
-                  className="mt-2.5 text-3xl font-black leading-[1.05] tracking-[-0.02em] hn-anim-rise md:text-[34px]"
-                  style={{ animationDelay: "0.08s" }}
-                >
-                  {ar ? "أداء المجموعة في 12 شهر" : "Group performance — 12 months"}
-                </h2>
-                <p
-                  className="mt-1 max-w-xl text-[12.5px] font-bold opacity-90 hn-anim-rise"
-                  style={{ animationDelay: "0.16s" }}
-                >
-                  {ar
-                    ? "قراءة موحّدة عبر شركات الحوراني، مع مؤشرات هامش الربح وإشارات سلسلة التوريد."
-                    : "Unified read across Hourani companies — margin signals + supply chain pulse."}
-                </p>
-              </div>
-            </div>
-
-            <div className="grid gap-2 hn-stagger sm:grid-cols-2">
-              <AnaHeroStat label={ar ? "إيرادات" : "Revenue"} value={formatMoney(groupRevenue)} icon={TrendingUp} />
-              <AnaHeroStat label={ar ? "صافي" : "Net"} value={formatMoney(groupNet)} icon={Activity} />
-              <AnaHeroStat label={ar ? "هامش" : "Margin"} value={`${(groupMargin * 100).toFixed(1)}%`} icon={Target} />
-              <AnaHeroStat label={ar ? "أسرع نمو" : "Fastest grower"} value={fastest?.company.code ?? "—"} icon={Zap} />
-            </div>
+          <div className="grid gap-2 heri-stagger sm:grid-cols-2 lg:grid-cols-4">
+            <AnaHeroStat label={ar ? "إيرادات" : "Revenue"} value={formatMoney(groupRevenue)} icon={TrendingUp} />
+            <AnaHeroStat label={ar ? "صافي" : "Net"} value={formatMoney(groupNet)} icon={Activity} />
+            <AnaHeroStat label={ar ? "هامش" : "Margin"} value={`${(groupMargin * 100).toFixed(1)}%`} icon={Target} />
+            <AnaHeroStat label={ar ? "أسرع نمو" : "Fastest grower"} value={fastest?.company.code ?? "—"} icon={Zap} />
           </div>
-        </HeroPanel>
+        </HeritageSection>
 
         {/* KPI strip with animated counters */}
-        <section className="grid gap-3 hn-stagger sm:grid-cols-2 xl:grid-cols-4">
-          <MetricTile
+        <section className="grid gap-3 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
+          <HeriKpi
             label={ar ? "إيرادات المجموعة" : "Group revenue"}
-            value={formatMoney(groupRevenue)}
-            icon={TrendingUp}
-            tone="emerald"
+            raw={groupRevenue}
+            kind="money"
             hint={ar ? "آخر 12 شهر" : "last 12 months"}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "صافي" : "Net"}
-            value={formatMoney(groupNet)}
-            icon={Activity}
-            tone={groupNet >= 0 ? "emerald" : "rose"}
+            raw={groupNet}
+            kind="money"
             hint={ar ? "بعد المصاريف" : "after expenses"}
+            accent={groupNet < 0 ? "var(--heri-terracotta)" : undefined}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "هامش الربح" : "Profit margin"}
-            value={`${(groupMargin * 100).toFixed(1)}%`}
-            icon={Target}
-            tone="violet"
+            raw={groupMargin * 100}
+            kind="percent"
+            decimals={1}
             hint={ar ? "صافي/إيراد" : "net/revenue"}
           />
-          <MetricTile
-            label={ar ? "أعلى نمو" : "Fastest grower"}
-            value={fastest?.company.code ?? "—"}
-            icon={Zap}
-            tone="amber"
-            hint={fastest ? `${(fastest.margin * 100).toFixed(1)}% ${ar ? "هامش" : "margin"}` : undefined}
-          />
+          {/* Fastest grower is a text value (company code), rendered as a custom heri-card */}
+          <div className="heri-card" style={{ padding: "18px 20px" }}>
+            <div className="heri-eyebrow heri-eyebrow-ink">{ar ? "أعلى نمو" : "Fastest grower"}</div>
+            <div
+              className="mt-3 heri-number-mono"
+              style={{
+                fontSize: "clamp(24px, 2.4vw, 32px)",
+                fontWeight: 500,
+                color: "var(--heri-ink)",
+                lineHeight: 1,
+              }}
+            >
+              {fastest?.company.code ?? "—"}
+            </div>
+            {fastest ? (
+              <div
+                style={{
+                  fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
+                  fontVariantNumeric: "tabular-nums",
+                  fontSize: 11,
+                  letterSpacing: "0.04em",
+                  color: "var(--heri-ink-3)",
+                  marginTop: 8,
+                }}
+              >
+                {`${(fastest.margin * 100).toFixed(1)}% ${ar ? "هامش" : "margin"}`}
+              </div>
+            ) : null}
+          </div>
         </section>
 
         {/* Trend + Donut */}
         <section className="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
-          <div className="card card-pad">
+          <div className="heri-card" style={{ padding: "22px 24px" }}>
             <div className="flex items-center justify-between">
               <div>
-                <div className="card-title">{ar ? "اتجاه إيرادات المجموعة (12 شهر)" : "Group revenue trend (12 months)"}</div>
-                <div className="card-sub">{ar ? "مجموع كل الشركات شهرياً" : "All companies aggregated monthly"}</div>
+                <div className="heri-eyebrow mb-1">{ar ? "اتجاه إيرادات المجموعة (12 شهر)" : "Group revenue trend (12 months)"}</div>
+                <div style={{ fontSize: 12.5, color: "var(--heri-ink-3)" }}>{ar ? "مجموع كل الشركات شهرياً" : "All companies aggregated monthly"}</div>
               </div>
-              <Sparkles className="h-4 w-4" style={{ color: "var(--accent)" }} />
+              <Sparkles className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
             </div>
             <div className="mt-4">
               <AreaLineChart
                 data={groupTrend}
                 labels={monthLabels}
                 height={240}
-                color="var(--brand)"
+                color="var(--heri-ochre)"
                 formatY={(v) => formatMoney(v)}
               />
             </div>
           </div>
 
-          <div className="card card-pad">
-            <div className="card-title mb-3">
+          <div className="heri-card" style={{ padding: "22px 24px" }}>
+            <div className="heri-eyebrow mb-3">
               {ar ? "مساهمة الإيرادات" : "Revenue contribution"}
             </div>
             <DonutChart
@@ -255,11 +239,11 @@ export default async function AnalyticsHubPage() {
 
         {/* Bar charts */}
         <section className="grid gap-4 lg:grid-cols-2">
-          <div className="card card-pad">
-            <div className="card-title mb-2">
+          <div className="heri-card" style={{ padding: "22px 24px" }}>
+            <div className="heri-eyebrow mb-1">
               {ar ? "إيرادات كل شركة" : "Revenue by company"}
             </div>
-            <div className="card-sub mb-4">
+            <div style={{ fontSize: 12.5, color: "var(--heri-ink-3)", marginBottom: 16 }}>
               {ar ? "إجمالي 12 شهر بالدينار الأردني" : "12-month total, in JOD"}
             </div>
             <BarChart
@@ -268,11 +252,11 @@ export default async function AnalyticsHubPage() {
               formatValue={(v) => formatMoney(v)}
             />
           </div>
-          <div className="card card-pad">
-            <div className="card-title mb-2">
+          <div className="heri-card" style={{ padding: "22px 24px" }}>
+            <div className="heri-eyebrow mb-1">
               {ar ? "نقاط ESG لكل شركة" : "ESG scores by company"}
             </div>
-            <div className="card-sub mb-4">
+            <div style={{ fontSize: 12.5, color: "var(--heri-ink-3)", marginBottom: 16 }}>
               {ar ? "آخر تقييم متاح (من 100)" : "Latest score (out of 100)"}
             </div>
             <BarChart data={esgBar} height={220} />
@@ -281,37 +265,43 @@ export default async function AnalyticsHubPage() {
 
         {/* Per-company deep dive cards */}
         <section className="space-y-3">
-          <div className="section-title">{ar ? "اختر شركة للتحليل العميق" : "Select a company for deep dive"}</div>
-          <div className="grid gap-4 stagger lg:grid-cols-2">
+          <div
+            className="heri-eyebrow"
+            style={{ color: "var(--heri-ink-3)" }}
+          >
+            {ar ? "اختر شركة للتحليل العميق" : "Select a company for deep dive"}
+          </div>
+          <div className="grid gap-4 heri-stagger lg:grid-cols-2">
             {data.map((row) => {
               const brand = getCompanyBrand(row.company.code);
               return (
                 <Link
                   key={row.company.id}
                   href={`/analytics/${row.company.id}`}
-                  className="card card-hover card-pad block"
+                  className="heri-card block"
+                  style={{ padding: "20px 22px" }}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <div
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-base font-black text-white shadow-soft"
+                        className="flex h-10 w-10 items-center justify-center text-base font-bold text-white"
                         style={{ background: brand.gradient }}
                       >
                         {brand.emblem}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <div className="text-base font-extrabold" style={{ color: "var(--text)" }}>
+                          <div className="text-base font-semibold" style={{ color: "var(--heri-ink)" }}>
                             {row.company.name}
                           </div>
                           <SectorPill sector={row.company.sector} />
                         </div>
-                        <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                        <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
                           {row.company.nameEn}
                         </div>
                       </div>
                     </div>
-                    <ChevronLeft className="h-4 w-4 rtl:rotate-180" style={{ color: "var(--text-muted)" }} />
+                    <ChevronLeft className="h-4 w-4 rtl:rotate-180" style={{ color: "var(--heri-ink-3)" }} />
                   </div>
 
                   <div className="mt-3 grid grid-cols-4 gap-2">
@@ -331,8 +321,8 @@ export default async function AnalyticsHubPage() {
                   </div>
 
                   {/* Benchmark bars: company vs group average */}
-                  <div className="mt-3 space-y-2 border-t pt-3" style={{ borderColor: "var(--border)" }}>
-                    <div className="text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                  <div className="mt-3 space-y-2 border-t pt-3" style={{ borderColor: "var(--heri-rule)" }}>
+                    <div className="heri-eyebrow" style={{ color: "var(--heri-ink-3)" }}>
                       {ar ? "مقارنة بمعيار المجموعة" : "Vs group average"}
                     </div>
                     {avgRevenue > 0 ? (
@@ -380,19 +370,18 @@ export default async function AnalyticsHubPage() {
 function AnaHeroStat({ label, value, icon: Icon }: { label: string; value: string; icon: any }) {
   return (
     <div
-      className="hn-anim-rise rounded-xl px-3 py-2"
+      className="heri-card"
       style={{
-        background: "rgba(255,255,255,0.14)",
-        border: "1px solid rgba(255,255,255,0.24)",
-        backdropFilter: "blur(8px)",
-        minWidth: 110,
+        padding: "12px 16px",
+        background: "var(--heri-cream)",
+        border: "1px solid var(--heri-rule)",
       }}
     >
-      <div className="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[0.16em] opacity-85">
+      <div className="heri-eyebrow flex items-center gap-1.5">
         <Icon className="h-3 w-3" />
         {label}
       </div>
-      <div className="exec-num mt-0.5 text-base font-black leading-none tracking-[-0.012em]">
+      <div className="heri-number-mono mt-1 text-base font-semibold leading-none" style={{ color: "var(--heri-ink)" }}>
         {value}
       </div>
     </div>
@@ -401,13 +390,13 @@ function AnaHeroStat({ label, value, icon: Icon }: { label: string; value: strin
 
 function Mini({ label, value, positive }: { label: string; value: string; positive?: boolean }) {
   return (
-    <div className="rounded-lg p-2" style={{ background: "var(--brand-soft)" }}>
-      <div className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+    <div style={{ background: "var(--heri-cream-2)", border: "1px solid var(--heri-rule)", padding: "8px 10px" }}>
+      <div className="heri-eyebrow" style={{ color: "var(--heri-ink-3)" }}>
         {label}
       </div>
       <div
-        className="mt-0.5 text-sm font-extrabold"
-        style={{ color: positive === false ? "#c0392b" : "var(--brand-deep)" }}
+        className="mt-0.5 text-sm font-semibold heri-number-mono"
+        style={{ color: positive === false ? "var(--heri-terracotta)" : "var(--heri-ink)" }}
       >
         {value}
       </div>

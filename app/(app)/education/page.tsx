@@ -214,7 +214,7 @@ function ProgStat({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <div
-        className="text-[9px] font-extrabold uppercase tracking-[0.1em]"
+        className="text-[9px] font-semibold uppercase tracking-[0.1em]"
         style={{ color: "var(--heri-ink-3)" }}
       >
         {label}

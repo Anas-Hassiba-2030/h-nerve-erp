@@ -148,7 +148,7 @@ export default async function InsightDetailPage({
                   </span>
                   <StatusBadge status={insight.status} />
                 </div>
-                <h2 className="mt-1 text-2xl font-black md:text-3xl">
+                <h2 className="mt-1 text-2xl font-bold md:text-3xl">
                   {insight.title}
                 </h2>
                 <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
@@ -187,15 +187,15 @@ export default async function InsightDetailPage({
             {/* Body */}
             <section className="card card-pad anim-fade-up">
               <h3
-                className="mb-3 flex items-center gap-2 text-sm font-extrabold"
-                style={{ color: "var(--text)" }}
+                className="mb-3 flex items-center gap-2 text-sm font-semibold"
+                style={{ color: "var(--heri-ink)" }}
               >
-                <Brain className="h-4 w-4" style={{ color: "var(--brand)" }} />
+                <Brain className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
                 التحليل الكامل
               </h3>
               <div
                 className="whitespace-pre-line text-sm leading-relaxed"
-                style={{ color: "var(--text)" }}
+                style={{ color: "var(--heri-ink)" }}
               >
                 {insight.body}
               </div>
@@ -206,12 +206,12 @@ export default async function InsightDetailPage({
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
                   <h3
-                    className="flex items-center gap-2 text-sm font-extrabold"
-                    style={{ color: "var(--text)" }}
+                    className="flex items-center gap-2 text-sm font-semibold"
+                    style={{ color: "var(--heri-ink)" }}
                   >
                     <Sparkles
                       className="h-4 w-4"
-                      style={{ color: "var(--brand)" }}
+                      style={{ color: "var(--heri-ochre)" }}
                     />
                     إشارات أخرى من{" "}
                     {MODULE_AR[insight.module] ?? insight.module}
@@ -219,12 +219,12 @@ export default async function InsightDetailPage({
                   <Link
                     href="/insights"
                     className="text-[11px] font-bold"
-                    style={{ color: "var(--brand)" }}
+                    style={{ color: "var(--heri-ochre)" }}
                   >
                     كل الإشارات ←
                   </Link>
                 </header>
-                <ul className="divide-y divide-[var(--border)]">
+                <ul className="divide-y divide-[var(--heri-rule)]">
                   {related.map((r, i) => (
                     <li
                       key={r.id}
@@ -241,20 +241,20 @@ export default async function InsightDetailPage({
                           </span>
                           <span
                             className="truncate text-sm font-bold"
-                            style={{ color: "var(--text)" }}
+                            style={{ color: "var(--heri-ink)" }}
                           >
                             {r.title}
                           </span>
                         </div>
                         <p
                           className="mt-0.5 line-clamp-2 text-[11px]"
-                          style={{ color: "var(--text-muted)" }}
+                          style={{ color: "var(--heri-ink-3)" }}
                         >
                           {r.body}
                         </p>
                         <div
                           className="mt-1 text-[10px]"
-                          style={{ color: "var(--text-muted)" }}
+                          style={{ color: "var(--heri-ink-3)" }}
                         >
                           {formatRelative(r.createdAt)}
                         </div>
@@ -271,14 +271,14 @@ export default async function InsightDetailPage({
             {insight.author ? (
               <section className="card card-pad anim-fade-up">
                 <h3
-                  className="mb-3 text-sm font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  className="mb-3 text-sm font-semibold"
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   ناشر الإشارة
                 </h3>
                 <Link
                   href={`/users/${insight.author.id}`}
-                  className="flex items-center gap-3 rounded-xl p-2 transition hover:bg-[var(--brand-soft)]"
+                  className="flex items-center gap-3 rounded-xl p-2 transition hover:bg-[var(--heri-cream-2)]"
                 >
                   {(() => {
                     const r = rankById(insight.author.rank);
@@ -294,14 +294,14 @@ export default async function InsightDetailPage({
                   })()}
                   <div className="min-w-0 flex-1">
                     <div
-                      className="truncate text-sm font-extrabold"
-                      style={{ color: "var(--text)" }}
+                      className="truncate text-sm font-semibold"
+                      style={{ color: "var(--heri-ink)" }}
                     >
                       {insight.author.name}
                     </div>
                     <div
                       className="text-[11px]"
-                      style={{ color: "var(--text-muted)" }}
+                      style={{ color: "var(--heri-ink-3)" }}
                     >
                       {insight.author.role} •{" "}
                       <span className="font-mono">
@@ -316,12 +316,12 @@ export default async function InsightDetailPage({
             {/* Meta */}
             <section className="card card-pad anim-fade-up">
               <h3
-                className="mb-3 flex items-center gap-2 text-sm font-extrabold"
-                style={{ color: "var(--text)" }}
+                className="mb-3 flex items-center gap-2 text-sm font-semibold"
+                style={{ color: "var(--heri-ink)" }}
               >
                 <CheckCircle2
                   className="h-4 w-4"
-                  style={{ color: "var(--brand)" }}
+                  style={{ color: "var(--heri-ochre)" }}
                 />
                 البطاقة
               </h3>
@@ -356,17 +356,17 @@ function Fact({
   link?: string;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-[var(--border)] pb-1.5 last:border-b-0">
-      <dt style={{ color: "var(--text-muted)" }}>{label}</dt>
+    <div className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
+      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
       <dd
         className="text-end font-bold"
-        style={{ color: "var(--text)" }}
+        style={{ color: "var(--heri-ink)" }}
       >
         {link ? (
           <Link
             href={link}
             className="hover:underline"
-            style={{ color: "var(--brand)" }}
+            style={{ color: "var(--heri-ochre)" }}
           >
             {value}
           </Link>

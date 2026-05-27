@@ -152,7 +152,7 @@ export default async function DairyPage() {
               size={180}
               label={ar ? "ممتاز فوق 80٪" : "Excellent ≥ 80%"}
               sublabel={`${formatNumber(gradeAggA)} / ${formatNumber(totals30._count)} ${ar ? "دفعة" : "batches"}`}
-              color="var(--brand)"
+              color="var(--heri-ochre)"
             />
           </div>
         </section>

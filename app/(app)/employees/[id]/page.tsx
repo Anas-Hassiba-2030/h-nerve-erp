@@ -100,16 +100,16 @@ export default async function EmployeeProfilePage({ params }: { params: { id: st
             <div className="section-title mb-3">{ar ? "الملف الشخصي" : "Profile"}</div>
             <div className="flex flex-col items-center gap-2 text-center">
               <RankBadge rank={user.rank as any} size="xl" showLabel={false} />
-              <div className="text-lg font-black" style={{ color: "var(--text)" }}>
+              <div className="text-lg font-bold" style={{ color: "var(--heri-ink)" }}>
                 {ar ? r.ar : r.en}
               </div>
-              <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+              <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
                 {ar ? r.description : r.descriptionEn}
               </div>
             </div>
             <div className="mt-4 space-y-2 text-sm">
               <Row label={ar ? "البريد الإلكتروني" : "Email"} value={
-                <a href={`mailto:${user.email}`} dir="ltr" className="font-mono" style={{ color: "var(--brand)" }}>{user.email}</a>
+                <a href={`mailto:${user.email}`} dir="ltr" className="font-mono" style={{ color: "var(--heri-ochre)" }}>{user.email}</a>
               } />
               <Row label={ar ? "الشركة" : "Company"} value={user.company?.name ?? "—"} />
               <Row label={ar ? "الدور" : "Role"} value={loc(ROLES_AR, ROLES_EN, lc, user.role)} />
@@ -122,7 +122,7 @@ export default async function EmployeeProfilePage({ params }: { params: { id: st
           <div className="card card-pad">
             <div className="flex items-center justify-between">
               <div className="section-title">{ar ? "تقدم الرتبة" : "Rank progress"}</div>
-              <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
+              <span className="text-[11px] font-mono" style={{ color: "var(--heri-ink-3)" }}>
                 {formatNumber(user.xp)} XP
               </span>
             </div>
@@ -135,28 +135,28 @@ export default async function EmployeeProfilePage({ params }: { params: { id: st
                     key={rank.id}
                     className={`relative flex flex-col items-center gap-1 rounded-xl p-3 text-center ${isCurrent ? "shadow-glow" : ""}`}
                     style={{
-                      background: reached ? "var(--brand-soft)" : "transparent",
-                      border: `1px solid ${isCurrent ? rank.color : "var(--border)"}`,
+                      background: reached ? "var(--heri-cream-2)" : "transparent",
+                      border: `1px solid ${isCurrent ? rank.color : "var(--heri-rule)"}`,
                     }}
                   >
                     {isCurrent ? (
-                      <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-[var(--accent)] px-1.5 text-[8px] font-black text-[#1a0e02]">
+                      <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-[var(--heri-copper)] px-1.5 text-[8px] font-bold text-[#1a0e02]">
                         {ar ? "الآن" : "NOW"}
                       </span>
                     ) : null}
                     <div
                       className="text-3xl"
                       style={{
-                        color: reached ? rank.color : "var(--text-muted)",
+                        color: reached ? rank.color : "var(--heri-ink-3)",
                         opacity: reached ? 1 : 0.4,
                       }}
                     >
                       {rank.symbol}
                     </div>
-                    <div className="text-[11px] font-extrabold" style={{ color: "var(--text)" }}>
+                    <div className="text-[11px] font-semibold" style={{ color: "var(--heri-ink)" }}>
                       {ar ? rank.ar : rank.en}
                     </div>
-                    <div className="font-mono text-[9px]" style={{ color: "var(--text-muted)" }}>
+                    <div className="font-mono text-[9px]" style={{ color: "var(--heri-ink-3)" }}>
                       {rank.minXp} XP
                     </div>
                   </div>
@@ -166,10 +166,10 @@ export default async function EmployeeProfilePage({ params }: { params: { id: st
             {next ? (
               <div className="mt-4">
                 <div className="mb-1 flex items-center justify-between text-[11px]">
-                  <span style={{ color: "var(--text-muted)" }}>
+                  <span style={{ color: "var(--heri-ink-3)" }}>
                     {ar ? `إلى رتبة ${next.ar}` : `Toward ${next.en}`}
                   </span>
-                  <span className="font-mono" style={{ color: "var(--brand)" }}>
+                  <span className="font-mono" style={{ color: "var(--heri-ochre)" }}>
                     {formatNumber(progress.current)} / {formatNumber(progress.needed)} XP
                   </span>
                 </div>
@@ -244,11 +244,11 @@ export default async function EmployeeProfilePage({ params }: { params: { id: st
                   {user.achievements.length} {ar ? "إنجاز" : "badges"}
                 </div>
               </div>
-              <Trophy className="h-4 w-4" style={{ color: "var(--accent)" }} />
+              <Trophy className="h-4 w-4" style={{ color: "var(--heri-copper)" }} />
             </div>
             <div className="space-y-2 p-5">
               {user.achievements.length === 0 ? (
-                <div className="text-sm" style={{ color: "var(--text-muted)" }}>
+                <div className="text-sm" style={{ color: "var(--heri-ink-3)" }}>
                   {ar ? "لا توجد إنجازات بعد." : "No badges yet."}
                 </div>
               ) : (
@@ -256,23 +256,23 @@ export default async function EmployeeProfilePage({ params }: { params: { id: st
                   <div
                     key={ua.id}
                     className="flex items-center gap-3 rounded-xl p-2.5"
-                    style={{ background: "var(--brand-soft)" }}
+                    style={{ background: "var(--heri-cream-2)" }}
                   >
                     <div
                       className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
-                      style={{ background: "var(--surface-elevated)", color: "var(--accent)" }}
+                      style={{ background: "var(--heri-cream)", color: "var(--heri-copper)" }}
                     >
                       <Trophy className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-sm font-extrabold" style={{ color: "var(--text)" }}>
+                      <div className="text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
                         {ar ? ua.achievement.name : ua.achievement.nameEn}
                       </div>
-                      <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                      <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
                         {ua.achievement.description}
                       </div>
                     </div>
-                    <span className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
+                    <span className="text-[10px] font-mono" style={{ color: "var(--heri-ink-3)" }}>
                       {formatRelative(ua.earnedAt, lc)}
                     </span>
                   </div>
@@ -287,13 +287,13 @@ export default async function EmployeeProfilePage({ params }: { params: { id: st
                 <div className="card-title">{ar ? "المهام الحديثة" : "Recent tasks"}</div>
                 <div className="card-sub">{formatNumber(user.tasks.length)} {ar ? "إجمالي" : "total"}</div>
               </div>
-              <ListChecks className="h-4 w-4" style={{ color: "var(--text-muted)" }} />
+              <ListChecks className="h-4 w-4" style={{ color: "var(--heri-ink-3)" }} />
             </div>
-            <div className="divide-y" style={{ borderColor: "var(--border)" }}>
+            <div className="divide-y" style={{ borderColor: "var(--heri-rule)" }}>
               {user.tasks.slice(0, 8).map((t) => (
                 <div key={t.id} className="flex items-start justify-between gap-3 p-4">
                   <div className="min-w-0">
-                    <div className="text-sm font-extrabold" style={{ color: "var(--text)" }}>
+                    <div className="text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
                       {t.title}
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px]">
@@ -302,7 +302,7 @@ export default async function EmployeeProfilePage({ params }: { params: { id: st
                       <span className="badge-violet">+{Math.round(t.points * (t.kind === "SIDE" ? 1.5 : 1))} XP</span>
                     </div>
                   </div>
-                  <span className="font-mono text-[10px]" style={{ color: "var(--text-muted)" }}>
+                  <span className="font-mono text-[10px]" style={{ color: "var(--heri-ink-3)" }}>
                     {t.dueAt ? formatShortDate(t.dueAt, lc) : "—"}
                   </span>
                 </div>
@@ -318,8 +318,8 @@ export default async function EmployeeProfilePage({ params }: { params: { id: st
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-3 text-xs">
-      <dt style={{ color: "var(--text-muted)" }}>{label}</dt>
-      <dd className="font-bold" style={{ color: "var(--text)" }}>{value}</dd>
+      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
+      <dd className="font-bold" style={{ color: "var(--heri-ink)" }}>{value}</dd>
     </div>
   );
 }

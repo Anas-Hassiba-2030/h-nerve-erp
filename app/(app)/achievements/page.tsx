@@ -197,17 +197,17 @@ export default async function AchievementsPage() {
                   className={`relative rounded-2xl p-4 text-center transition   ${isCurrent ? "ring-2 " : ""}`}
                   style={{
                     background: reached ? "var(--heri-cream-2)" : "var(--heri-cream-2)",
-                    border: "1px solid var(--border)",
+                    border: "1px solid var(--heri-rule)",
                     [`--tw-ring-color` as any]: r.color,
                   }}
                 >
                   {isCurrent ? (
-                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-[var(--heri-copper)] px-2 py-0.5 text-[9px] font-black text-[#1a0e02]">
+                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-[var(--heri-copper)] px-2 py-0.5 text-[9px] font-bold text-[#1a0e02]">
                       {ar ? "أنت هنا" : "YOU"}
                     </span>
                   ) : null}
                   <div
-                    className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl text-4xl font-black"
+                    className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl text-4xl font-bold"
                     style={{
                       background: reached
                         ? "linear-gradient(135deg, var(--heri-ochre) 0%, var(--heri-copper) 100%)"
@@ -218,7 +218,7 @@ export default async function AchievementsPage() {
                   >
                     {r.symbol}
                   </div>
-                  <div className="mt-2 text-base font-extrabold" style={{ color: "var(--heri-ink)" }}>
+                  <div className="mt-2 text-base font-semibold" style={{ color: "var(--heri-ink)" }}>
                     {ar ? r.ar : r.en}
                   </div>
                   <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
@@ -235,7 +235,7 @@ export default async function AchievementsPage() {
           <div className="flex items-end justify-between">
             <div>
               <h2
-                className=" text-base font-extrabold"
+                className=" text-base font-semibold"
                 style={{ color: "var(--heri-ink)" }}
               >
                 {ar ? "كتالوج الميداليات" : "Medal catalog"}
@@ -279,7 +279,7 @@ export default async function AchievementsPage() {
                   </div>
                   <div>
                     <div
-                      className="text-sm font-extrabold uppercase tracking-[0.18em]"
+                      className="text-sm font-semibold uppercase tracking-[0.18em]"
                       style={{ color: "var(--heri-ink)" }}
                     >
                       {ar ? TIER_LABEL[tier].ar : TIER_LABEL[tier].en}
@@ -365,7 +365,7 @@ export default async function AchievementsPage() {
                         </div>
 
                         <h3
-                          className="relative mt-3 text-sm font-black leading-snug"
+                          className="relative mt-3 text-sm font-bold leading-snug"
                           style={{ color: visual.textOn }}
                         >
                           {ar ? a.name : a.nameEn}
@@ -416,7 +416,7 @@ export default async function AchievementsPage() {
           <div className="flex items-end justify-between">
             <div>
               <h2
-                className=" text-base font-extrabold"
+                className=" text-base font-semibold"
                 style={{ color: "var(--heri-ink)" }}
               >
                 {ar ? "لوحة الصدارة" : "Leaderboard"}
@@ -477,7 +477,7 @@ export default async function AchievementsPage() {
                         {PODIUM_MEDAL[placeIdx]}
                       </div>
                       <div
-                        className={`relative mx-auto mt-3 flex items-center justify-center rounded-full font-black text-white ${isFirst ? "h-20 w-20 text-2xl" : "h-16 w-16 text-xl"}`}
+                        className={`relative mx-auto mt-3 flex items-center justify-center rounded-full font-bold text-white ${isFirst ? "h-20 w-20 text-2xl" : "h-16 w-16 text-xl"}`}
                         style={{
                           background: `linear-gradient(135deg, ${color} 0%, color-mix(in srgb, ${color} 60%, #000) 100%)`,
                           boxShadow: `0 8px 22px -8px ${color}`,
@@ -488,7 +488,7 @@ export default async function AchievementsPage() {
                       </div>
                       <div className="relative mt-3">
                         <div
-                          className={`font-extrabold ${isFirst ? "text-base" : "text-sm"}`}
+                          className={`font-semibold ${isFirst ? "text-base" : "text-sm"}`}
                           style={{ color: "var(--heri-ink)" }}
                         >
                           {u.name}
@@ -513,7 +513,7 @@ export default async function AchievementsPage() {
                       <div className="relative mt-3 flex items-center justify-center gap-2">
                         <RankBadge rank={u.rank as any} size="sm" showLabel={false} />
                         <span
-                          className="font-mono text-sm font-black"
+                          className="font-mono text-sm font-bold"
                           style={{ color: "var(--heri-ink)" }}
                         >
                           {formatNumber(u.xp)}
@@ -545,7 +545,7 @@ export default async function AchievementsPage() {
           {/* Rest 4-10 */}
           {rest.length > 0 ? (
             <div className="card overflow-hidden">
-              <ul className="heri-stagger divide-y divide-[var(--border)]">
+              <ul className="heri-stagger divide-y divide-[var(--heri-rule)]">
                 {rest.map((u, i) => {
                   const isMe = u.id === session.id;
                   const place = i + 4;
@@ -563,13 +563,13 @@ export default async function AchievementsPage() {
                       }}
                     >
                       <span
-                        className="font-mono text-sm font-black"
+                        className="font-mono text-sm font-bold"
                         style={{ color: "var(--heri-ink-3)" }}
                       >
                         {place}
                       </span>
                       <span
-                        className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-black text-white"
+                        className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-white"
                         style={{
                           background: `linear-gradient(135deg, ${color} 0%, color-mix(in srgb, ${color} 60%, #000) 100%)`,
                           boxShadow: `0 4px 10px -4px ${color}`,
@@ -580,7 +580,7 @@ export default async function AchievementsPage() {
                       </span>
                       <div className="min-w-0">
                         <div
-                          className="truncate text-sm font-extrabold"
+                          className="truncate text-sm font-semibold"
                           style={{ color: "var(--heri-ink)" }}
                         >
                           {u.name}

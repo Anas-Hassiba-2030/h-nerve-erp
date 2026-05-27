@@ -110,15 +110,15 @@ export default async function EmployeesPage() {
         {/* Phase V3-P13 — Org tree (collapsible reportsTo chain) */}
         <section className="space-y-3">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-extrabold" style={{ color: "var(--text)" }}>
+            <h3 className="text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
               {ar ? "الهيكل التنظيمي" : "Org chart"}
             </h3>
-            <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+            <span className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
               · {ar
                 ? "اضغط لتوسيع أو طي أي فرع"
                 : "Click to expand or collapse a branch"}
             </span>
-            <span className="ms-auto h-px flex-1" style={{ background: "var(--border)" }} />
+            <span className="ms-auto h-px flex-1" style={{ background: "var(--heri-rule)" }} />
           </div>
           <div
             className="p-4"
@@ -136,13 +136,13 @@ export default async function EmployeesPage() {
           {[...byCompany.entries()].map(([companyName, members]) => (
             <div key={companyName}>
               <div className="mb-3 flex items-center gap-2">
-                <h3 className="text-sm font-extrabold" style={{ color: "var(--text)" }}>
+                <h3 className="text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
                   {companyName}
                 </h3>
-                <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                <span className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
                   · {members.length} {ar ? "عضو" : "members"}
                 </span>
-                <span className="ms-auto h-px flex-1" style={{ background: "var(--border)" }} />
+                <span className="ms-auto h-px flex-1" style={{ background: "var(--heri-rule)" }} />
               </div>
               <div className="grid gap-3 stagger md:grid-cols-2 xl:grid-cols-3">
                 {members.map((u) => {
@@ -163,15 +163,15 @@ export default async function EmployeesPage() {
                             {r.symbol}
                           </div>
                           <div className="min-w-0">
-                            <div className="text-base font-extrabold" style={{ color: "var(--text)" }}>
+                            <div className="text-base font-semibold" style={{ color: "var(--heri-ink)" }}>
                               {u.name}
                             </div>
-                            <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                            <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
                               {u.title ?? loc(ROLES_AR, ROLES_EN, ar ? "ar" : "en", u.role)}
                             </div>
                             <span
                               className="mt-1 inline-flex items-center gap-1 font-mono text-[10px]"
-                              style={{ color: "var(--brand)" }}
+                              style={{ color: "var(--heri-ochre)" }}
                               dir="ltr"
                             >
                               <Mail className="h-3 w-3" />
@@ -179,7 +179,7 @@ export default async function EmployeesPage() {
                             </span>
                           </div>
                         </div>
-                        <ChevronLeft className="h-4 w-4 rtl:rotate-180" style={{ color: "var(--text-muted)" }} />
+                        <ChevronLeft className="h-4 w-4 rtl:rotate-180" style={{ color: "var(--heri-ink-3)" }} />
                       </div>
 
                       <div className="mt-3 grid grid-cols-3 gap-2">
@@ -189,14 +189,14 @@ export default async function EmployeesPage() {
                       </div>
 
                       <div className="mt-3 flex flex-wrap items-center gap-2 border-t pt-3 text-[11px]"
-                           style={{ borderColor: "var(--border)" }}>
+                           style={{ borderColor: "var(--heri-rule)" }}>
                         <span className="badge-violet">
                           {ar ? r.ar : r.en}
                         </span>
                         <span className="badge-slate">
                           {formatNumber(u.loginCount)} {ar ? "دخول" : "logins"}
                         </span>
-                        <span className="ms-auto" style={{ color: "var(--text-muted)" }}>
+                        <span className="ms-auto" style={{ color: "var(--heri-ink-3)" }}>
                           {ar ? "آخر دخول" : "last login"}: {formatRelative(u.lastLoginAt, ar ? "ar" : "en")}
                         </span>
                       </div>
@@ -216,12 +216,12 @@ function Mini({ label, value }: { label: string; value: string }) {
   return (
     <div
       className="rounded-lg px-2.5 py-1.5 text-center"
-      style={{ background: "var(--brand-soft)" }}
+      style={{ background: "var(--heri-cream-2)" }}
     >
-      <div className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+      <div className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "var(--heri-ink-3)" }}>
         {label}
       </div>
-      <div className="text-sm font-extrabold" style={{ color: "var(--brand-deep)" }}>
+      <div className="text-sm font-semibold" style={{ color: "var(--brand-deep)" }}>
         {value}
       </div>
     </div>

@@ -93,7 +93,7 @@ export default async function FinanceDetailPage({
   const isIncome = tx.kind === "INCOME" || tx.kind === "REVENUE";
   const isExpense = tx.kind === "EXPENSE" || tx.kind === "COST";
   const sign = isIncome ? "+" : isExpense ? "−" : "";
-  const color = KIND_COLOR[tx.kind] ?? "var(--text)";
+  const color = KIND_COLOR[tx.kind] ?? "var(--heri-ink)";
 
   const companyIncome = companyAgg
     .filter((g) => g.kind === "INCOME" || g.kind === "REVENUE")
@@ -194,7 +194,7 @@ export default async function FinanceDetailPage({
                 </span>
               </div>
 
-              <h2 className="mt-1 text-2xl font-black md:text-3xl">
+              <h2 className="mt-1 text-2xl font-bold md:text-3xl">
                 {tx.description ?? tx.category}
               </h2>
               <p className="text-sm opacity-90">{tx.category}</p>
@@ -219,7 +219,7 @@ export default async function FinanceDetailPage({
                 المبلغ
               </div>
               <div
-                className="mt-1 font-mono text-4xl font-black md:text-5xl"
+                className="mt-1 font-mono text-4xl font-bold md:text-5xl"
                 style={{
                   textShadow: "0 2px 12px rgba(0,0,0,.25)",
                   letterSpacing: "-0.02em",
@@ -242,18 +242,18 @@ export default async function FinanceDetailPage({
             {tx.description ? (
               <section className="card card-pad anim-fade-up">
                 <h3
-                  className="mb-2 flex items-center gap-2 text-sm font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  className="mb-2 flex items-center gap-2 text-sm font-semibold"
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   <Wallet
                     className="h-4 w-4"
-                    style={{ color: "var(--brand)" }}
+                    style={{ color: "var(--heri-ochre)" }}
                   />
                   وصف الحركة
                 </h3>
                 <p
                   className="text-sm leading-relaxed"
-                  style={{ color: "var(--text)" }}
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   {tx.description}
                 </p>
@@ -265,23 +265,23 @@ export default async function FinanceDetailPage({
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
                   <h3
-                    className="flex items-center gap-2 text-sm font-extrabold"
-                    style={{ color: "var(--text)" }}
+                    className="flex items-center gap-2 text-sm font-semibold"
+                    style={{ color: "var(--heri-ink)" }}
                   >
                     <Tag
                       className="h-4 w-4"
-                      style={{ color: "var(--brand)" }}
+                      style={{ color: "var(--heri-ochre)" }}
                     />
                     حركات بنفس التصنيف
                   </h3>
                   <span
                     className="text-[11px] font-bold"
-                    style={{ color: "var(--text-muted)" }}
+                    style={{ color: "var(--heri-ink-3)" }}
                   >
                     {tx.category}
                   </span>
                 </header>
-                <ul className="divide-y divide-[var(--border)]">
+                <ul className="divide-y divide-[var(--heri-rule)]">
                   {siblingsCategory.map((s, i) => {
                     const sIsIncome =
                       s.kind === "INCOME" || s.kind === "REVENUE";
@@ -297,20 +297,20 @@ export default async function FinanceDetailPage({
                         >
                           <div
                             className="truncate text-sm font-bold"
-                            style={{ color: "var(--text)" }}
+                            style={{ color: "var(--heri-ink)" }}
                           >
                             {s.description ?? s.category}
                           </div>
                           <div
                             className="text-[11px] font-mono"
-                            style={{ color: "var(--text-muted)" }}
+                            style={{ color: "var(--heri-ink-3)" }}
                           >
                             {s.reference} • {s.company.code} •{" "}
                             {formatShortDate(s.occurredAt)}
                           </div>
                         </Link>
                         <span
-                          className="font-mono text-xs font-black"
+                          className="font-mono text-xs font-bold"
                           style={{
                             color: sIsIncome ? "#0a8e54" : "#c0392b",
                           }}
@@ -330,24 +330,24 @@ export default async function FinanceDetailPage({
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
                   <h3
-                    className="flex items-center gap-2 text-sm font-extrabold"
-                    style={{ color: "var(--text)" }}
+                    className="flex items-center gap-2 text-sm font-semibold"
+                    style={{ color: "var(--heri-ink)" }}
                   >
                     <Building2
                       className="h-4 w-4"
-                      style={{ color: "var(--brand)" }}
+                      style={{ color: "var(--heri-ochre)" }}
                     />
                     حركات أخرى من {tx.company.name}
                   </h3>
                   <Link
                     href={`/companies/${tx.company.id}`}
                     className="text-[11px] font-bold"
-                    style={{ color: "var(--brand)" }}
+                    style={{ color: "var(--heri-ochre)" }}
                   >
                     ملف الشركة ←
                   </Link>
                 </header>
-                <ul className="divide-y divide-[var(--border)]">
+                <ul className="divide-y divide-[var(--heri-rule)]">
                   {siblingsCompany.map((s, i) => {
                     const sIsIncome =
                       s.kind === "INCOME" || s.kind === "REVENUE";
@@ -363,20 +363,20 @@ export default async function FinanceDetailPage({
                         >
                           <div
                             className="truncate text-sm font-bold"
-                            style={{ color: "var(--text)" }}
+                            style={{ color: "var(--heri-ink)" }}
                           >
                             {s.description ?? s.category}
                           </div>
                           <div
                             className="text-[11px] font-mono"
-                            style={{ color: "var(--text-muted)" }}
+                            style={{ color: "var(--heri-ink-3)" }}
                           >
                             {s.reference} • {KIND_AR[s.kind] ?? s.kind} •{" "}
                             {formatShortDate(s.occurredAt)}
                           </div>
                         </Link>
                         <span
-                          className="font-mono text-xs font-black"
+                          className="font-mono text-xs font-bold"
                           style={{
                             color: sIsIncome ? "#0a8e54" : "#c0392b",
                           }}
@@ -397,8 +397,8 @@ export default async function FinanceDetailPage({
             {companyAgg.length > 0 ? (
               <section className="card card-pad anim-fade-up">
                 <h3
-                  className="mb-3 text-sm font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  className="mb-3 text-sm font-semibold"
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   أداء {tx.company.name}
                 </h3>
@@ -406,7 +406,7 @@ export default async function FinanceDetailPage({
                   <div>
                     <div
                       className="mb-1 flex items-center justify-between text-[10px] font-bold"
-                      style={{ color: "var(--text-muted)" }}
+                      style={{ color: "var(--heri-ink-3)" }}
                     >
                       <span>إيرادات</span>
                       <span style={{ color: "#0a8e54" }}>
@@ -417,7 +417,7 @@ export default async function FinanceDetailPage({
                       className="h-1.5 overflow-hidden rounded-full"
                       style={{
                         background:
-                          "color-mix(in srgb, var(--text-muted) 14%, transparent)",
+                          "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
                       }}
                     >
                       <div
@@ -433,7 +433,7 @@ export default async function FinanceDetailPage({
                   <div>
                     <div
                       className="mb-1 flex items-center justify-between text-[10px] font-bold"
-                      style={{ color: "var(--text-muted)" }}
+                      style={{ color: "var(--heri-ink-3)" }}
                     >
                       <span>مصروفات</span>
                       <span style={{ color: "#c0392b" }}>
@@ -444,7 +444,7 @@ export default async function FinanceDetailPage({
                       className="h-1.5 overflow-hidden rounded-full"
                       style={{
                         background:
-                          "color-mix(in srgb, var(--text-muted) 14%, transparent)",
+                          "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
                       }}
                     >
                       <div
@@ -465,19 +465,19 @@ export default async function FinanceDetailPage({
                     className="rounded-xl px-3 py-2 text-center"
                     style={{
                       background:
-                        "color-mix(in srgb, var(--brand) 8%, transparent)",
+                        "color-mix(in srgb, var(--heri-ochre) 8%, transparent)",
                       border:
-                        "1px solid color-mix(in srgb, var(--brand) 18%, transparent)",
+                        "1px solid color-mix(in srgb, var(--heri-ochre) 18%, transparent)",
                     }}
                   >
                     <div
                       className="text-[10px] font-bold uppercase tracking-widest"
-                      style={{ color: "var(--text-muted)" }}
+                      style={{ color: "var(--heri-ink-3)" }}
                     >
                       صافي
                     </div>
                     <div
-                      className="font-mono text-lg font-black"
+                      className="font-mono text-lg font-bold"
                       style={{
                         color:
                           companyIncome - companyExpense >= 0
@@ -496,28 +496,28 @@ export default async function FinanceDetailPage({
             {tx.createdBy ? (
               <section className="card card-pad anim-fade-up">
                 <h3
-                  className="mb-3 flex items-center gap-2 text-sm font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  className="mb-3 flex items-center gap-2 text-sm font-semibold"
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   <UserIcon
                     className="h-4 w-4"
-                    style={{ color: "var(--brand)" }}
+                    style={{ color: "var(--heri-ochre)" }}
                   />
                   مَن سجّل
                 </h3>
                 <Link
                   href={`/users/${tx.createdBy.id}`}
-                  className="block rounded-xl p-2 transition hover:bg-[var(--brand-soft)]"
+                  className="block rounded-xl p-2 transition hover:bg-[var(--heri-cream-2)]"
                 >
                   <div
-                    className="text-sm font-extrabold"
-                    style={{ color: "var(--text)" }}
+                    className="text-sm font-semibold"
+                    style={{ color: "var(--heri-ink)" }}
                   >
                     {tx.createdBy.name}
                   </div>
                   <div
                     className="text-[11px]"
-                    style={{ color: "var(--text-muted)" }}
+                    style={{ color: "var(--heri-ink-3)" }}
                   >
                     {tx.createdBy.role} •{" "}
                     <span className="font-mono">
@@ -531,8 +531,8 @@ export default async function FinanceDetailPage({
             {/* Meta */}
             <section className="card card-pad anim-fade-up">
               <h3
-                className="mb-3 text-sm font-extrabold"
-                style={{ color: "var(--text)" }}
+                className="mb-3 text-sm font-semibold"
+                style={{ color: "var(--heri-ink)" }}
               >
                 البطاقة
               </h3>
@@ -578,17 +578,17 @@ function Fact({
   color?: string;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-[var(--border)] pb-1.5 last:border-b-0">
-      <dt style={{ color: "var(--text-muted)" }}>{label}</dt>
+    <div className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
+      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
       <dd
         className={`text-end font-bold ${mono ? "font-mono" : ""}`}
-        style={{ color: color ?? "var(--text)" }}
+        style={{ color: color ?? "var(--heri-ink)" }}
       >
         {link ? (
           <Link
             href={link}
             className="hover:underline"
-            style={{ color: "var(--brand)" }}
+            style={{ color: "var(--heri-ochre)" }}
           >
             {value}
           </Link>

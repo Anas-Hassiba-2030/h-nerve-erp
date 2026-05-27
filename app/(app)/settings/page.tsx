@@ -1,6 +1,5 @@
-// Premium Settings page — animated theme preview cards, rank progression
-// hero, language toggle with smooth transitions, exports menu, and a
-// system status grid. Every section uses staggered entrance animations.
+// Settings page — theme preview cards, rank progression, language toggle,
+// exports menu, and a system status grid.
 
 import {
   Activity, Brain, Network, ShieldCheck, Palette, Globe, Download, Zap,
@@ -18,6 +17,7 @@ import { ar as arAr, ROLES_AR, formatNumber } from "@/lib/utils";
 import { rankById } from "@/lib/gamification";
 import { prisma } from "@/lib/db";
 import { getCompanyBrand } from "@/lib/companyBrand";
+import { HeritageSection, HeritagePill } from "@/components/heritage";
 
 const EXPORT_TYPES = [
   { type: "all",          labelAr: "نبض المجموعة الشامل", labelEn: "Group Pulse Combined", icon: "🌐", featured: true },
@@ -105,7 +105,7 @@ export default async function SettingsPage() {
         ) : null}
 
         {/* ── Personal stats strip ─────────────────────────────── */}
-        <section className="grid gap-3 hn-stagger md:grid-cols-4">
+        <section className="grid gap-3 heri-stagger md:grid-cols-4">
           <StatTile
             icon={Activity}
             label={ar ? "نشاطي" : "My activity"}
@@ -137,25 +137,27 @@ export default async function SettingsPage() {
         </section>
 
         {/* ── Theme picker ─────────────────────────────────────── */}
-        <section className="card card-pad" style={{ animationDelay: "0.1s" }}>
-          <SectionHeader
-            icon={Palette}
-            title={ar ? "السمة البصرية" : "Visual theme"}
-            description={
-              ar
-                ? "7 سمات مُعدّة بعناية. اختر ما يناسب عينيك — يطبق فوراً عبر كل الواجهة."
-                : "7 hand-tuned themes. Pick what suits your eyes — applies instantly site-wide."
-            }
-          />
-          <div className="mt-4 grid gap-3 hn-stagger md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <HeritageSection
+          title={ar ? "السمة البصرية" : "Visual theme"}
+          eyebrow={ar ? "المظهر" : "Appearance"}
+        >
+          <p
+            className="mb-4 text-[11px] font-semibold leading-snug"
+            style={{ color: "var(--heri-ink-3)" }}
+          >
+            {ar
+              ? "7 سمات مُعدّة بعناية. اختر ما يناسب عينيك — يطبق فوراً عبر كل الواجهة."
+              : "7 hand-tuned themes. Pick what suits your eyes — applies instantly site-wide."}
+          </p>
+          <div className="grid gap-3 heri-stagger md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {THEME_LIST.map((t) => {
               const active = currentTheme.id === t.id;
               return (
-                <form key={t.id} action={setTheme} className="hn-anim-zoom">
+                <form key={t.id} action={setTheme}>
                   <input type="hidden" name="theme" value={t.id} />
                   <button
                     type="submit"
-                    className={`group relative w-full overflow-hidden rounded-2xl text-start transition-all ${active ? "ring-2 ring-offset-1" : ""}`}
+                    className={`group relative w-full overflow-hidden text-start transition-all ${active ? "ring-2 ring-offset-1" : ""}`}
                     style={{
                       background: t.surfaceElevated,
                       border: `1px solid ${t.border}`,
@@ -169,14 +171,14 @@ export default async function SettingsPage() {
                   >
                     {/* Live preview canvas — replicates a tiny mock dashboard */}
                     <div
-                      className="relative h-24 overflow-hidden hn-theme-chip"
+                      className="relative h-24 overflow-hidden"
                       style={{
                         background: `linear-gradient(135deg, ${t.brandDeep} 0%, ${t.brand} 60%, ${t.accent} 110%)`,
                       }}
                     >
                       {/* aurora orbs */}
                       <span
-                        className="absolute hn-anim-aurora"
+                        className="absolute"
                         style={{
                           top: "-30%",
                           left: "-10%",
@@ -185,7 +187,6 @@ export default async function SettingsPage() {
                           borderRadius: "50%",
                           background:
                             "radial-gradient(circle, rgba(255,255,255,0.45) 0%, transparent 70%)",
-                          animationDelay: `-${(parseInt(t.id, 36) % 7) * 1.3}s`,
                         }}
                         aria-hidden
                       />
@@ -223,7 +224,7 @@ export default async function SettingsPage() {
                       </div>
                       {/* mode pill */}
                       <span
-                        className="absolute top-2 start-2 rounded-full px-1.5 py-0.5 text-[8px] font-extrabold uppercase tracking-wider"
+                        className="absolute top-2 start-2 rounded-full px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-wider"
                         style={{
                           background: "rgba(0,0,0,0.35)",
                           color: "white",
@@ -233,7 +234,7 @@ export default async function SettingsPage() {
                       </span>
                       {active ? (
                         <span
-                          className="absolute end-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black hn-anim-success"
+                          className="absolute end-2 top-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold"
                           style={{
                             background: "white",
                             color: t.brandDeep,
@@ -247,14 +248,14 @@ export default async function SettingsPage() {
                     {/* Body */}
                     <div className="p-3">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-sm font-extrabold">
+                        <span className="text-sm font-semibold">
                           {ar ? t.name : t.nameEn}
                         </span>
                         <div className="flex items-center gap-0.5">
                           {[t.brand, t.accent].map((c, i) => (
                             <span
                               key={i}
-                              className="h-3 w-3 rounded-full ring-1 hn-theme-chip"
+                              className="h-3 w-3 rounded-full ring-1"
                               style={{
                                 background: c,
                                 borderColor: t.border,
@@ -264,7 +265,7 @@ export default async function SettingsPage() {
                         </div>
                       </div>
                       <p
-                        className="mt-1 line-clamp-2 text-[10.5px] font-bold leading-tight"
+                        className="mt-1 line-clamp-2 text-[10.5px] font-semibold leading-tight"
                         style={{ color: t.textMuted }}
                       >
                         {ar ? t.description : t.descriptionEn}
@@ -275,20 +276,22 @@ export default async function SettingsPage() {
               );
             })}
           </div>
-        </section>
+        </HeritageSection>
 
         {/* ── Language ─────────────────────────────────────────── */}
-        <section className="card card-pad" style={{ animationDelay: "0.16s" }}>
-          <SectionHeader
-            icon={Languages}
-            title={ar ? "اللغة والاتجاه" : "Language & direction"}
-            description={
-              ar
-                ? "تنطبق على الواجهة كاملة. الأرقام دائماً en-US بصرف النظر عن اللغة."
-                : "Applies site-wide. Numbers always render en-US digits regardless of locale."
-            }
-          />
-          <div className="mt-4 grid gap-2.5 hn-stagger sm:grid-cols-2">
+        <HeritageSection
+          title={ar ? "اللغة والاتجاه" : "Language & direction"}
+          eyebrow={ar ? "الواجهة" : "Interface"}
+        >
+          <p
+            className="mb-4 text-[11px] font-semibold leading-snug"
+            style={{ color: "var(--heri-ink-3)" }}
+          >
+            {ar
+              ? "تنطبق على الواجهة كاملة. الأرقام دائماً en-US بصرف النظر عن اللغة."
+              : "Applies site-wide. Numbers always render en-US digits regardless of locale."}
+          </p>
+          <div className="grid gap-2.5 heri-stagger sm:grid-cols-2">
             <LocaleCard
               localeId="ar"
               flag="🇯🇴"
@@ -310,54 +313,54 @@ export default async function SettingsPage() {
               active={locale === "en"}
             />
           </div>
-        </section>
+        </HeritageSection>
 
         {/* ── Exports ──────────────────────────────────────────── */}
-        <section
-          className="card card-pad"
-          style={{ animationDelay: "0.22s" }}
+        <HeritageSection
+          title={ar ? "التصدير الاحترافي" : "Professional exports"}
+          eyebrow={ar ? "التقارير" : "Reports"}
         >
-          <SectionHeader
-            icon={Download}
-            title={ar ? "التصدير الاحترافي" : "Professional exports"}
-            description={
-              ar
-                ? "كل تقرير يحتوي على KPIs + رسوم اتجاه + تعليق محلل + جدول كامل، مزيّن بشعار الحوراني."
-                : "Every export ships with KPIs + trend chart + analyst note + full table, branded with Hourani."
-            }
-          />
-          <div className="mt-4 grid gap-2.5 hn-stagger md:grid-cols-2 lg:grid-cols-3">
+          <p
+            className="mb-4 text-[11px] font-semibold leading-snug"
+            style={{ color: "var(--heri-ink-3)" }}
+          >
+            {ar
+              ? "كل تقرير يحتوي على KPIs + رسوم اتجاه + تعليق محلل + جدول كامل، مزيّن بشعار الحوراني."
+              : "Every export ships with KPIs + trend chart + analyst note + full table, branded with Hourani."}
+          </p>
+          <div className="grid gap-2.5 heri-stagger md:grid-cols-2 lg:grid-cols-3">
             {EXPORT_TYPES.map((e) => (
               <div
                 key={e.type}
-                className={`relative flex items-center justify-between gap-2 rounded-xl px-3 py-3 transition ${e.featured ? "ring-2" : ""}`}
+                className="relative flex items-center justify-between gap-2 px-3 py-3 transition"
                 style={{
-                  border: "1px solid var(--border)",
-                  background: e.featured ? "var(--brand-soft)" : "var(--surface-elevated)",
-                  ["--tw-ring-color" as any]: "var(--brand)",
+                  border: "1px solid var(--heri-rule)",
+                  background: e.featured ? "var(--heri-cream-2)" : "var(--heri-cream)",
+                  outline: e.featured ? "2px solid var(--heri-ochre)" : undefined,
+                  outlineOffset: e.featured ? "-2px" : undefined,
                 }}
               >
                 <div className="flex min-w-0 items-center gap-2.5">
                   <span
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-base"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center text-base"
                     style={{
-                      background: "var(--brand-soft)",
-                      color: "var(--brand)",
+                      background: "var(--heri-cream-2)",
+                      color: "var(--heri-ochre)",
                     }}
                   >
                     {e.icon}
                   </span>
                   <div className="min-w-0">
                     <div
-                      className="line-clamp-1 text-[12.5px] font-extrabold"
+                      className="line-clamp-1 text-[12.5px] font-semibold"
                       style={{ color: "var(--heri-ink)" }}
                     >
                       {ar ? e.labelAr : e.labelEn}
                     </div>
                     {e.featured ? (
                       <div
-                        className="text-[9.5px] font-bold"
-                        style={{ color: "var(--brand)" }}
+                        className="text-[9.5px] font-semibold"
+                        style={{ color: "var(--heri-ochre)" }}
                       >
                         {ar ? "✨ تقرير شامل" : "✨ Combined"}
                       </div>
@@ -367,11 +370,7 @@ export default async function SettingsPage() {
                 <div className="flex items-center gap-1">
                   <a
                     href={`/api/export/${e.type}?locale=${locale}`}
-                    className="rounded-md px-2 py-1 text-[10px] font-extrabold transition hover:scale-105"
-                    style={{
-                      color: "var(--brand)",
-                      background: "var(--brand-soft)",
-                    }}
+                    className="heri-btn heri-btn-ghost rounded-md px-2 py-1 text-[10px]"
                     title="CSV"
                   >
                     CSV
@@ -380,11 +379,7 @@ export default async function SettingsPage() {
                     href={`/api/export/html/${e.type}?locale=${locale}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-md px-2 py-1 text-[10px] font-extrabold text-white transition hover:scale-105"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%)",
-                    }}
+                    className="heri-btn heri-btn-primary rounded-md px-2 py-1 text-[10px]"
                     title="Branded HTML / PDF"
                   >
                     PDF
@@ -393,23 +388,22 @@ export default async function SettingsPage() {
               </div>
             ))}
           </div>
-        </section>
+        </HeritageSection>
 
         {/* ── System status ────────────────────────────────────── */}
-        <section
-          className="card card-pad"
-          style={{ animationDelay: "0.28s" }}
+        <HeritageSection
+          title={ar ? "حالة النظام" : "System status"}
+          eyebrow={ar ? "البنية التحتية" : "Infrastructure"}
         >
-          <SectionHeader
-            icon={Cpu}
-            title={ar ? "حالة النظام" : "System status"}
-            description={
-              ar
-                ? "كل الأنظمة تعمل بكامل طاقتها."
-                : "All systems operating at full capacity."
-            }
-          />
-          <ul className="mt-4 grid gap-2 hn-stagger md:grid-cols-2 lg:grid-cols-3">
+          <p
+            className="mb-4 text-[11px] font-semibold leading-snug"
+            style={{ color: "var(--heri-ink-3)" }}
+          >
+            {ar
+              ? "كل الأنظمة تعمل بكامل طاقتها."
+              : "All systems operating at full capacity."}
+          </p>
+          <ul className="grid gap-2 heri-stagger md:grid-cols-2 lg:grid-cols-3">
             <SystemRow
               icon={Activity}
               label={ar ? "العقل العصبي" : "Nerve core"}
@@ -442,8 +436,8 @@ export default async function SettingsPage() {
             />
             <SystemRow
               icon={Zap}
-              label={ar ? "الأنيميشن" : "Animations"}
-              value={ar ? "v2 مفعّلة" : "v2 enabled"}
+              label={ar ? "الواجهة" : "UI Layer"}
+              value={ar ? "Heritage Modern" : "Heritage Modern"}
               tone="amber"
             />
             <SystemRow
@@ -465,12 +459,12 @@ export default async function SettingsPage() {
               tone="blue"
             />
           </ul>
-        </section>
+        </HeritageSection>
 
         {/* ── Footer signature ─────────────────────────────────── */}
         <p
-          className="text-center text-[10.5px] hn-anim-fade"
-          style={{ color: "var(--heri-ink-3)", animationDelay: "0.4s" }}
+          className="text-center text-[10.5px]"
+          style={{ color: "var(--heri-ink-3)" }}
         >
           H-Nerve ERP · {ar ? "نظام مجموعة الحوراني العصبي المركزي" : "Hourani Group's Central Nervous System"} ·{" "}
           {ar ? "بدعم من إتش-نيرف · مجموعة الحوراني" : "Powered by H-Nerve · Hourani Group"}
@@ -481,45 +475,6 @@ export default async function SettingsPage() {
 }
 
 /* ---------- Sub-components ---------- */
-
-function SectionHeader({
-  icon: Icon,
-  title,
-  description,
-}: {
-  icon: any;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="flex items-start gap-3">
-      <span
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1-bounce"
-        style={{
-          background: "var(--brand-soft)",
-          color: "var(--brand)",
-          borderColor: "var(--border)",
-        }}
-      >
-        <Icon className="h-4 w-4" />
-      </span>
-      <div>
-        <h3
-          className="text-[14px] font-extrabold leading-tight"
-          style={{ color: "var(--heri-ink)" }}
-        >
-          {title}
-        </h3>
-        <p
-          className="mt-0.5 text-[11px] font-bold leading-snug"
-          style={{ color: "var(--heri-ink-3)" }}
-        >
-          {description}
-        </p>
-      </div>
-    </div>
-  );
-}
 
 function StatTile({
   icon: Icon,
@@ -547,10 +502,16 @@ function StatTile({
     violet: "text-violet-700",
   };
   return (
-    <div className="card card-pad">
+    <div
+      className="heri-card p-4"
+      style={{
+        background: "var(--heri-cream)",
+        border: "1px solid var(--heri-rule)",
+      }}
+    >
       <div className="flex items-center justify-between">
         <span
-          className="text-[10px] font-extrabold uppercase tracking-[0.16em]"
+          className="heri-eyebrow text-[10px] uppercase tracking-[0.16em]"
           style={{ color: "var(--heri-ink-3)" }}
         >
           {label}
@@ -562,13 +523,13 @@ function StatTile({
         </span>
       </div>
       <div
-        className="mt-1.5 font-mono text-xl font-black leading-tight tabular-nums"
+        className="heri-number-mono mt-1.5 text-xl font-bold leading-tight tabular-nums"
         style={{ color: "var(--heri-ink)" }}
       >
         {value}
       </div>
       <div
-        className="text-[10px] font-bold"
+        className="text-[10px] font-semibold"
         style={{ color: "var(--heri-ink-3)" }}
       >
         {sub}
@@ -597,32 +558,32 @@ function LocaleCard({
   active: boolean;
 }) {
   return (
-    <form action={setLocale} className="hn-anim-zoom">
+    <form action={setLocale}>
       <input type="hidden" name="locale" value={localeId} />
       <button
         type="submit"
-        className={`group relative flex w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-start transition-all ${active ? "ring-2 ring-offset-1" : ""}`}
+        className={`group relative flex w-full items-center justify-between gap-3 px-4 py-3 text-start transition-all ${active ? "ring-2 ring-offset-1" : ""}`}
         style={{
-          border: "1px solid var(--border)",
-          background: active ? "var(--brand-soft)" : "var(--surface-elevated)",
+          border: "1px solid var(--heri-rule)",
+          background: active ? "var(--heri-cream-2)" : "var(--heri-cream)",
           color: "var(--heri-ink)",
-          ["--tw-ring-color" as any]: "var(--brand)",
+          ["--tw-ring-color" as any]: "var(--heri-ochre)",
           boxShadow: active
-            ? "0 8px 24px -10px var(--brand)"
+            ? "0 8px 24px -10px var(--heri-ochre)"
             : undefined,
         }}
       >
         <div className="flex items-center gap-3">
-          <span className="text-2xl hn-anim-bob">{flag}</span>
+          <span className="text-2xl">{flag}</span>
           <div>
             <div
-              className="text-sm font-extrabold"
-              style={{ color: active ? "var(--brand)" : "var(--heri-ink)" }}
+              className="text-sm font-semibold"
+              style={{ color: active ? "var(--heri-ochre)" : "var(--heri-ink)" }}
             >
               {ar ? titleAr : titleEn}
             </div>
             <div
-              className="text-[10.5px] font-bold"
+              className="text-[10.5px] font-semibold"
               style={{ color: "var(--heri-ink-3)" }}
             >
               {ar ? dirLabelAr : dirLabelEn}
@@ -630,25 +591,13 @@ function LocaleCard({
           </div>
         </div>
         {active ? (
-          <span
-            className="rounded-full px-2 py-0.5 text-[9px] font-black text-white hn-anim-success"
-            style={{
-              background:
-                "linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%)",
-            }}
-          >
+          <HeritagePill tone="success">
             ✓ {ar ? "نشط" : "Active"}
-          </span>
+          </HeritagePill>
         ) : (
-          <span
-            className="rounded-full px-2 py-0.5 text-[9px] font-black"
-            style={{
-              background: "var(--brand-soft)",
-              color: "var(--brand)",
-            }}
-          >
+          <HeritagePill tone="neutral">
             {ar ? "اختيار" : "Pick"}
-          </span>
+          </HeritagePill>
         )}
       </button>
     </form>
@@ -674,27 +623,27 @@ function SystemRow({
   };
   return (
     <li
-      className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 transition"
+      className="flex items-center gap-2.5 px-3 py-2.5 transition"
       style={{
-        background: "var(--brand-soft)",
-        border: "1px solid var(--border)",
+        background: "var(--heri-cream-2)",
+        border: "1px solid var(--heri-rule)",
       }}
     >
-      <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--brand)" }} />
+      <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--heri-ochre)" }} />
       <span
-        className="text-[11px] font-extrabold"
+        className="text-[11px] font-semibold"
         style={{ color: "var(--heri-ink)" }}
       >
         {label}
       </span>
       <span className="ms-auto flex items-center gap-1.5">
         <span
-          className="h-1.5 w-1.5 rounded-full hn-anim-pulse-soft"
+          className="h-1.5 w-1.5 rounded-full"
           style={{ background: TONE_DOT[tone] }}
         />
         <span
-          className="font-mono text-[11px] font-extrabold tabular-nums"
-          style={{ color: "var(--brand-deep)" }}
+          className="heri-number-mono text-[11px] font-semibold tabular-nums"
+          style={{ color: "var(--heri-copper)" }}
         >
           {value}
         </span>

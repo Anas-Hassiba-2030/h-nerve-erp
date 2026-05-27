@@ -207,7 +207,7 @@ export default async function CompanyDetailPage({
           <div className="relative flex flex-wrap items-start justify-between gap-6">
             <div className="flex items-center gap-4">
               <div
-                className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl text-4xl font-black anim-pop"
+                className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl text-4xl font-bold anim-pop"
                 style={{
                   background: "rgba(255,255,255,.15)",
                   border: "1px solid rgba(255,255,255,.35)",
@@ -219,13 +219,13 @@ export default async function CompanyDetailPage({
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-extrabold uppercase tracking-[0.22em] opacity-80">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.22em] opacity-80">
                     #{company.code}
                   </span>
                   <SectorPill sector={company.sector} />
                   <StatusBadge status={company.status} />
                 </div>
-                <h2 className="mt-1 text-2xl font-black md:text-3xl" style={{ letterSpacing: "-0.01em" }}>
+                <h2 className="mt-1 text-2xl font-bold md:text-3xl" style={{ letterSpacing: "-0.01em" }}>
                   {company.name}
                 </h2>
                 <p className="text-sm opacity-90" dir="ltr">
@@ -393,25 +393,25 @@ export default async function CompanyDetailPage({
             {company.hotels.length > 0 ? (
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
-                  <h3 className="flex items-center gap-2 text-sm font-extrabold" style={{ color: "var(--text)" }}>
-                    <Hotel className="h-4 w-4" style={{ color: "var(--brand)" }} />
+                  <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
+                    <Hotel className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
                     الفنادق
                   </h3>
-                  <Link href="/hotels" className="text-[11px] font-bold" style={{ color: "var(--brand)" }}>
+                  <Link href="/hotels" className="text-[11px] font-bold" style={{ color: "var(--heri-ochre)" }}>
                     عرض الكل ←
                   </Link>
                 </header>
-                <ul className="divide-y divide-[var(--border)]">
+                <ul className="divide-y divide-[var(--heri-rule)]">
                   {company.hotels.map((h) => (
                     <li key={h.id} className="flex items-center justify-between gap-3 py-2.5">
                       <div className="min-w-0">
-                        <div className="truncate text-sm font-bold" style={{ color: "var(--text)" }}>
+                        <div className="truncate text-sm font-bold" style={{ color: "var(--heri-ink)" }}>
                           {h.name}{" "}
-                          <span className="font-mono text-[10px]" style={{ color: "var(--text-muted)" }}>
+                          <span className="font-mono text-[10px]" style={{ color: "var(--heri-ink-3)" }}>
                             {"★".repeat(h.starRating)}
                           </span>
                         </div>
-                        <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                        <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
                           {h.city} • {ar(TIERS_AR, h.tier)} • {formatNumber(h.totalRooms)} غرفة
                         </div>
                       </div>
@@ -428,27 +428,27 @@ export default async function CompanyDetailPage({
             {company.dairyBatches.length > 0 ? (
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
-                  <h3 className="flex items-center gap-2 text-sm font-extrabold" style={{ color: "var(--text)" }}>
-                    <Milk className="h-4 w-4" style={{ color: "var(--brand)" }} />
+                  <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
+                    <Milk className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
                     دفعات الألبان الأخيرة
                   </h3>
-                  <Link href="/dairy" className="text-[11px] font-bold" style={{ color: "var(--brand)" }}>
+                  <Link href="/dairy" className="text-[11px] font-bold" style={{ color: "var(--heri-ochre)" }}>
                     عرض الكل ←
                   </Link>
                 </header>
-                <ul className="divide-y divide-[var(--border)]">
+                <ul className="divide-y divide-[var(--heri-rule)]">
                   {company.dairyBatches.map((b) => (
                     <li key={b.id} className="flex items-center justify-between gap-3 py-2.5">
                       <div className="min-w-0">
-                        <div className="truncate text-sm font-bold" style={{ color: "var(--text)" }}>
+                        <div className="truncate text-sm font-bold" style={{ color: "var(--heri-ink)" }}>
                           {b.productAr || b.product}
                         </div>
-                        <div className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
+                        <div className="text-[11px] font-mono" style={{ color: "var(--heri-ink-3)" }}>
                           {b.batchNumber} • {formatShortDate(b.productionDate)}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold" style={{ color: "var(--text)" }}>
+                        <span className="text-xs font-bold" style={{ color: "var(--heri-ink)" }}>
                           {formatNumber(b.quantityLiters)} لتر
                         </span>
                         <span className="badge-sky">درجة {b.qualityGrade}</span>
@@ -464,22 +464,22 @@ export default async function CompanyDetailPage({
             {company.farms.length > 0 ? (
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
-                  <h3 className="flex items-center gap-2 text-sm font-extrabold" style={{ color: "var(--text)" }}>
-                    <Sprout className="h-4 w-4" style={{ color: "var(--brand)" }} />
+                  <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
+                    <Sprout className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
                     المزارع
                   </h3>
-                  <Link href="/farms" className="text-[11px] font-bold" style={{ color: "var(--brand)" }}>
+                  <Link href="/farms" className="text-[11px] font-bold" style={{ color: "var(--heri-ochre)" }}>
                     عرض الكل ←
                   </Link>
                 </header>
-                <ul className="divide-y divide-[var(--border)]">
+                <ul className="divide-y divide-[var(--heri-rule)]">
                   {company.farms.map((f) => (
                     <li key={f.id} className="flex items-center justify-between gap-3 py-2.5">
                       <div className="min-w-0">
-                        <div className="truncate text-sm font-bold" style={{ color: "var(--text)" }}>
+                        <div className="truncate text-sm font-bold" style={{ color: "var(--heri-ink)" }}>
                           {f.name}
                         </div>
-                        <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                        <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
                           {ar(FARM_TYPES_AR, f.type)} • {f.location} • {formatNumber(f.areaDunum)} دونم
                         </div>
                       </div>
@@ -497,22 +497,22 @@ export default async function CompanyDetailPage({
             {company.programs.length > 0 ? (
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
-                  <h3 className="flex items-center gap-2 text-sm font-extrabold" style={{ color: "var(--text)" }}>
-                    <GraduationCap className="h-4 w-4" style={{ color: "var(--brand)" }} />
+                  <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
+                    <GraduationCap className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
                     البرامج والحاضنات
                   </h3>
-                  <Link href="/education" className="text-[11px] font-bold" style={{ color: "var(--brand)" }}>
+                  <Link href="/education" className="text-[11px] font-bold" style={{ color: "var(--heri-ochre)" }}>
                     عرض الكل ←
                   </Link>
                 </header>
-                <ul className="divide-y divide-[var(--border)]">
+                <ul className="divide-y divide-[var(--heri-rule)]">
                   {company.programs.map((p) => (
                     <li key={p.id} className="flex items-center justify-between gap-3 py-2.5">
                       <div className="min-w-0">
-                        <div className="truncate text-sm font-bold" style={{ color: "var(--text)" }}>
+                        <div className="truncate text-sm font-bold" style={{ color: "var(--heri-ink)" }}>
                           {p.name}
                         </div>
-                        <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                        <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
                           {ar(VERTICALS_AR, p.vertical)} • مؤسس: {p.founder} • فوج {p.cohort}
                         </div>
                       </div>
@@ -545,18 +545,18 @@ export default async function CompanyDetailPage({
             {company.forecastsOut.length > 0 || company.forecastsIn.length > 0 ? (
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
-                  <h3 className="flex items-center gap-2 text-sm font-extrabold" style={{ color: "var(--text)" }}>
-                    <Brain className="h-4 w-4" style={{ color: "var(--brand)" }} />
+                  <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
+                    <Brain className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
                     إشارات السلسلة
                   </h3>
-                  <Link href="/supply-chain" className="text-[11px] font-bold" style={{ color: "var(--brand)" }}>
+                  <Link href="/supply-chain" className="text-[11px] font-bold" style={{ color: "var(--heri-ochre)" }}>
                     عرض الكل ←
                   </Link>
                 </header>
 
                 {company.forecastsOut.length > 0 ? (
                   <div className="mb-3">
-                    <div className="mb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                    <div className="mb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--heri-ink-3)" }}>
                       صادرة منها
                     </div>
                     <ul className="space-y-1.5">
@@ -564,16 +564,16 @@ export default async function CompanyDetailPage({
                         <li
                           key={f.id}
                           className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-xs"
-                          style={{ background: "color-mix(in srgb, var(--brand) 6%, transparent)" }}
+                          style={{ background: "color-mix(in srgb, var(--heri-ochre) 6%, transparent)" }}
                         >
                           <div className="flex min-w-0 items-center gap-1.5">
                             <ArrowUpRight className="h-3 w-3 shrink-0" style={{ color: "#0a8e54" }} />
-                            <span className="truncate font-bold" style={{ color: "var(--text)" }}>
+                            <span className="truncate font-bold" style={{ color: "var(--heri-ink)" }}>
                               {f.productLabel}
                             </span>
-                            <span style={{ color: "var(--text-muted)" }}>→ {f.target.code}</span>
+                            <span style={{ color: "var(--heri-ink-3)" }}>→ {f.target.code}</span>
                           </div>
-                          <span className="font-mono text-[10px]" style={{ color: "var(--text-muted)" }}>
+                          <span className="font-mono text-[10px]" style={{ color: "var(--heri-ink-3)" }}>
                             {formatNumber(f.predictedDemand)} {f.unit}
                           </span>
                         </li>
@@ -584,7 +584,7 @@ export default async function CompanyDetailPage({
 
                 {company.forecastsIn.length > 0 ? (
                   <div>
-                    <div className="mb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                    <div className="mb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--heri-ink-3)" }}>
                       واردة إليها
                     </div>
                     <ul className="space-y-1.5">
@@ -592,16 +592,16 @@ export default async function CompanyDetailPage({
                         <li
                           key={f.id}
                           className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-xs"
-                          style={{ background: "color-mix(in srgb, var(--accent) 6%, transparent)" }}
+                          style={{ background: "color-mix(in srgb, var(--heri-copper) 6%, transparent)" }}
                         >
                           <div className="flex min-w-0 items-center gap-1.5">
                             <ArrowDownRight className="h-3 w-3 shrink-0" style={{ color: "#c0392b" }} />
-                            <span className="truncate font-bold" style={{ color: "var(--text)" }}>
+                            <span className="truncate font-bold" style={{ color: "var(--heri-ink)" }}>
                               {f.productLabel}
                             </span>
-                            <span style={{ color: "var(--text-muted)" }}>← {f.source.code}</span>
+                            <span style={{ color: "var(--heri-ink-3)" }}>← {f.source.code}</span>
                           </div>
-                          <span className="font-mono text-[10px]" style={{ color: "var(--text-muted)" }}>
+                          <span className="font-mono text-[10px]" style={{ color: "var(--heri-ink-3)" }}>
                             {formatNumber(f.predictedDemand)} {f.unit}
                           </span>
                         </li>
@@ -616,11 +616,11 @@ export default async function CompanyDetailPage({
             {company.transactions.length > 0 ? (
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
-                  <h3 className="flex items-center gap-2 text-sm font-extrabold" style={{ color: "var(--text)" }}>
-                    <Wallet className="h-4 w-4" style={{ color: "var(--brand)" }} />
+                  <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
+                    <Wallet className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
                     حركات مالية أخيرة
                   </h3>
-                  <Link href="/finance" className="text-[11px] font-bold" style={{ color: "var(--brand)" }}>
+                  <Link href="/finance" className="text-[11px] font-bold" style={{ color: "var(--heri-ochre)" }}>
                     عرض الكل ←
                   </Link>
                 </header>
@@ -633,15 +633,15 @@ export default async function CompanyDetailPage({
                         className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-xs"
                       >
                         <div className="min-w-0">
-                          <div className="truncate font-bold" style={{ color: "var(--text)" }}>
+                          <div className="truncate font-bold" style={{ color: "var(--heri-ink)" }}>
                             {t.description ?? t.category}
                           </div>
-                          <div className="font-mono text-[10px]" style={{ color: "var(--text-muted)" }}>
+                          <div className="font-mono text-[10px]" style={{ color: "var(--heri-ink-3)" }}>
                             {t.reference} • {formatShortDate(t.occurredAt)}
                           </div>
                         </div>
                         <span
-                          className="shrink-0 font-mono text-xs font-black"
+                          className="shrink-0 font-mono text-xs font-bold"
                           style={{ color: isIncome ? "#0a8e54" : "#c0392b" }}
                         >
                           {isIncome ? "+" : "−"}
@@ -658,11 +658,11 @@ export default async function CompanyDetailPage({
             {company.futureProjects.length > 0 ? (
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
-                  <h3 className="flex items-center gap-2 text-sm font-extrabold" style={{ color: "var(--text)" }}>
-                    <FlaskConical className="h-4 w-4" style={{ color: "var(--brand)" }} />
+                  <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
+                    <FlaskConical className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
                     المشاريع المستقبلية
                   </h3>
-                  <Link href="/projects" className="text-[11px] font-bold" style={{ color: "var(--brand)" }}>
+                  <Link href="/projects" className="text-[11px] font-bold" style={{ color: "var(--heri-ochre)" }}>
                     عرض الكل ←
                   </Link>
                 </header>
@@ -671,14 +671,14 @@ export default async function CompanyDetailPage({
                     <li
                       key={p.id}
                       className="rounded-lg px-2 py-2"
-                      style={{ background: "color-mix(in srgb, var(--brand) 5%, transparent)" }}
+                      style={{ background: "color-mix(in srgb, var(--heri-ochre) 5%, transparent)" }}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <div className="truncate text-xs font-bold" style={{ color: "var(--text)" }}>
+                          <div className="truncate text-xs font-bold" style={{ color: "var(--heri-ink)" }}>
                             {p.title}
                           </div>
-                          <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+                          <div className="text-[10px]" style={{ color: "var(--heri-ink-3)" }}>
                             {p.startQuarter ?? "—"} → {p.targetQuarter ?? "—"}
                           </div>
                         </div>
@@ -687,20 +687,20 @@ export default async function CompanyDetailPage({
                         </span>
                       </div>
                       {p.budgetJod > 0 ? (
-                        <div className="mt-1 text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
+                        <div className="mt-1 text-[10px] font-mono" style={{ color: "var(--heri-ink-3)" }}>
                           ميزانية {formatMoney(p.budgetJod)}
                         </div>
                       ) : null}
                       {p.progressPct > 0 ? (
                         <div
                           className="mt-1.5 h-1.5 overflow-hidden rounded-full"
-                          style={{ background: "color-mix(in srgb, var(--text-muted) 14%, transparent)" }}
+                          style={{ background: "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)" }}
                         >
                           <div
                             className="h-full rounded-full"
                             style={{
                               width: `${Math.min(100, p.progressPct)}%`,
-                              background: "linear-gradient(90deg, var(--brand) 0%, var(--accent) 100%)",
+                              background: "linear-gradient(90deg, var(--heri-ochre) 0%, var(--heri-copper) 100%)",
                               transition: "width .6s ease",
                             }}
                           />
@@ -716,11 +716,11 @@ export default async function CompanyDetailPage({
             {latestEsg ? (
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
-                  <h3 className="flex items-center gap-2 text-sm font-extrabold" style={{ color: "var(--text)" }}>
-                    <Leaf className="h-4 w-4" style={{ color: "var(--brand)" }} />
+                  <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
+                    <Leaf className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
                     الاستدامة (ESG)
                   </h3>
-                  <span className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>
+                  <span className="text-[10px] font-mono" style={{ color: "var(--heri-ink-3)" }}>
                     {latestEsg.period} {latestEsg.year}
                   </span>
                 </header>
@@ -731,13 +731,13 @@ export default async function CompanyDetailPage({
                     { label: "حوكمة", v: latestEsg.governanceScore, color: "#6d28d9" },
                   ].map((row) => (
                     <div key={row.label}>
-                      <div className="flex items-center justify-between text-[10px] font-bold" style={{ color: "var(--text-muted)" }}>
+                      <div className="flex items-center justify-between text-[10px] font-bold" style={{ color: "var(--heri-ink-3)" }}>
                         <span>{row.label}</span>
-                        <span style={{ color: "var(--text)" }}>{Math.round(row.v)}/100</span>
+                        <span style={{ color: "var(--heri-ink)" }}>{Math.round(row.v)}/100</span>
                       </div>
                       <div
                         className="h-1.5 overflow-hidden rounded-full"
-                        style={{ background: "color-mix(in srgb, var(--text-muted) 14%, transparent)" }}
+                        style={{ background: "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)" }}
                       >
                         <div
                           className="h-full rounded-full"
@@ -752,17 +752,17 @@ export default async function CompanyDetailPage({
                   ))}
                 </div>
                 {latestEsg.carbonTons > 0 || latestEsg.renewablePct > 0 ? (
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-[10px]" style={{ color: "var(--text-muted)" }}>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-[10px]" style={{ color: "var(--heri-ink-3)" }}>
                     {latestEsg.carbonTons > 0 ? (
                       <div>
-                        كربون: <span className="font-mono font-bold" style={{ color: "var(--text)" }}>
+                        كربون: <span className="font-mono font-bold" style={{ color: "var(--heri-ink)" }}>
                           {formatNumber(latestEsg.carbonTons)} طن
                         </span>
                       </div>
                     ) : null}
                     {latestEsg.renewablePct > 0 ? (
                       <div>
-                        طاقة متجددة: <span className="font-mono font-bold" style={{ color: "var(--text)" }}>
+                        طاقة متجددة: <span className="font-mono font-bold" style={{ color: "var(--heri-ink)" }}>
                           {Math.round(latestEsg.renewablePct)}٪
                         </span>
                       </div>

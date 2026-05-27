@@ -1,28 +1,28 @@
 export default function Loading() {
   const skel =
-    "rounded animate-pulse bg-[color-mix(in_srgb,var(--text-muted)_18%,transparent)]";
+    "rounded animate-pulse bg-[color-mix(in_srgb,var(--heri-ink-3)_18%,transparent)]";
   const skelLight =
-    "rounded animate-pulse bg-[color-mix(in_srgb,var(--text-muted)_12%,transparent)]";
+    "rounded animate-pulse bg-[color-mix(in_srgb,var(--heri-ink-3)_12%,transparent)]";
 
   return (
     <div className="flex-1 anim-fade-up">
       <div
         className="flex flex-wrap items-center justify-between gap-4 px-6 py-4"
-        style={{ borderBottom: "1px solid var(--border)" }}
+        style={{ borderBottom: "1px solid var(--heri-rule)" }}
       >
         <div className="space-y-2">
           <div className={`h-3 w-20 ${skelLight}`} />
           <div className={`h-7 w-64 ${skel}`} />
           <div className={`h-3 w-48 ${skelLight}`} />
         </div>
-        <div className="h-9 w-28 rounded-xl animate-pulse" style={{ background: "color-mix(in srgb, var(--brand) 14%, transparent)" }} />
+        <div className="h-9 w-28 rounded-xl animate-pulse" style={{ background: "color-mix(in srgb, var(--heri-ochre) 14%, transparent)" }} />
       </div>
 
       <div className="space-y-6 p-6">
         <div
           className="relative h-52 overflow-hidden rounded-2xl"
           style={{
-            background: "linear-gradient(135deg, color-mix(in srgb, #b06a1a 22%, transparent), color-mix(in srgb, var(--accent) 14%, transparent))",
+            background: "linear-gradient(135deg, color-mix(in srgb, #b06a1a 22%, transparent), color-mix(in srgb, var(--heri-copper) 14%, transparent))",
           }}
         >
           <div
@@ -80,7 +80,7 @@ export default function Loading() {
           <div className="card card-pad space-y-3">
             <div className={`h-4 w-44 ${skel}`} />
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-2.5 last:border-b-0">
+              <div key={i} className="flex items-center justify-between gap-3 border-b border-[var(--heri-rule)] pb-2.5 last:border-b-0">
                 <div className="space-y-1.5">
                   <div className={`h-3.5 w-48 ${skel}`} />
                   <div className={`h-2.5 w-32 ${skelLight}`} />
@@ -92,7 +92,7 @@ export default function Loading() {
           <div className="card card-pad space-y-3">
             <div className={`h-4 w-28 ${skel}`} />
             {[0, 1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex items-center justify-between border-b border-[var(--border)] pb-1.5 last:border-b-0">
+              <div key={i} className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
                 <div className={`h-3 w-20 ${skelLight}`} />
                 <div className={`h-3 w-24 ${skel}`} />
               </div>

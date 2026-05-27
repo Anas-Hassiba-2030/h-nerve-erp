@@ -28,8 +28,8 @@ export default function AppError({
       <div
         className="overflow-hidden rounded-2xl anim-rise-glow"
         style={{
-          background: "var(--surface-elevated)",
-          border: "1px solid var(--border)",
+          background: "var(--heri-cream)",
+          border: "1px solid var(--heri-rule)",
           boxShadow: "var(--shadow-glow)",
         }}
       >
@@ -38,7 +38,7 @@ export default function AppError({
           className="relative overflow-hidden p-6 text-white"
           style={{
             background:
-              "linear-gradient(135deg, #8b1f1f 0%, var(--brand-deep) 60%, var(--brand) 100%)",
+              "linear-gradient(135deg, #8b1f1f 0%, var(--brand-deep) 60%, var(--heri-ochre) 100%)",
           }}
         >
           <div className="absolute inset-0 bg-nerve-grid opacity-20" aria-hidden />
@@ -47,7 +47,7 @@ export default function AppError({
               <AlertTriangle className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-[11px] font-extrabold uppercase tracking-[0.22em] opacity-80">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.22em] opacity-80">
                 {ar ? "حدث خطأ" : "Something went wrong"}
               </div>
               {/*
@@ -56,7 +56,7 @@ export default function AppError({
                 failures (a slow Neon connection, a stale prop). Keep the
                 technical-details accordion below for real debugging.
               */}
-              <h1 className="mt-0.5 text-xl font-black md:text-2xl">
+              <h1 className="mt-0.5 text-xl font-bold md:text-2xl">
                 {ar
                   ? "تعذّر تحميل هذه الصفحة. حاول مرة أخرى."
                   : "Couldn't load this page. Give it another go."}
@@ -66,7 +66,7 @@ export default function AppError({
         </div>
 
         <div className="space-y-5 p-6">
-          <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--heri-ink-3)" }}>
             {ar
               ? "لا تقلق — البيانات والإعدادات بأمان. حاول مرة أخرى، أو ارجع إلى اللوحة التنفيذية ثم أعد المحاولة."
               : "Don't worry — your data and settings are safe. Try again, or head back to the dashboard and retry."}
@@ -93,13 +93,13 @@ export default function AppError({
             onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}
             className="rounded-xl"
             style={{
-              background: "color-mix(in srgb, var(--text-muted) 8%, transparent)",
-              border: "1px solid var(--border)",
+              background: "color-mix(in srgb, var(--heri-ink-3) 8%, transparent)",
+              border: "1px solid var(--heri-rule)",
             }}
           >
             <summary
               className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-xs font-bold"
-              style={{ color: "var(--text-muted)" }}
+              style={{ color: "var(--heri-ink-3)" }}
             >
               <span>{ar ? "تفاصيل تقنية" : "Technical details"}</span>
               <ChevronDown
@@ -110,23 +110,23 @@ export default function AppError({
             <div
               className="border-t px-3 py-3 font-mono text-[11px] leading-relaxed"
               style={{
-                color: "var(--text)",
-                borderColor: "var(--border)",
+                color: "var(--heri-ink)",
+                borderColor: "var(--heri-rule)",
                 whiteSpace: "pre-wrap",
                 wordBreak: "break-word",
               }}
             >
               <div>
-                <span style={{ color: "var(--text-muted)" }}>name:</span>{" "}
+                <span style={{ color: "var(--heri-ink-3)" }}>name:</span>{" "}
                 {error.name}
               </div>
               <div>
-                <span style={{ color: "var(--text-muted)" }}>message:</span>{" "}
+                <span style={{ color: "var(--heri-ink-3)" }}>message:</span>{" "}
                 {error.message}
               </div>
               {error.digest ? (
                 <div>
-                  <span style={{ color: "var(--text-muted)" }}>digest:</span>{" "}
+                  <span style={{ color: "var(--heri-ink-3)" }}>digest:</span>{" "}
                   {error.digest}
                 </div>
               ) : null}

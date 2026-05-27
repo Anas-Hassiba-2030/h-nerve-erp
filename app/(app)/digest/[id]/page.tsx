@@ -128,13 +128,13 @@ export default async function DigestDetailPage({
           className="relative overflow-hidden rounded-2xl p-6 text-white anim-rise-glow"
           style={{
             background:
-              "linear-gradient(135deg, var(--brand-deep) 0%, var(--brand) 60%, var(--accent) 110%)",
+              "linear-gradient(135deg, var(--brand-deep) 0%, var(--heri-ochre) 60%, var(--heri-copper) 110%)",
             minHeight: 160,
           }}
         >
           <div className="relative">
             <div
-              className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.22em]"
+              className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em]"
               style={{
                 background: "rgba(255,255,255,0.18)",
                 border: "1px solid rgba(255,255,255,0.32)",
@@ -174,7 +174,7 @@ export default async function DigestDetailPage({
         {/* Body */}
         <article
           className="card card-pad space-y-1"
-          style={{ color: "var(--text)" }}
+          style={{ color: "var(--heri-ink)" }}
         >
           <div
             className="digest-prose"
@@ -186,12 +186,12 @@ export default async function DigestDetailPage({
           dangerouslySetInnerHTML={{
             __html: `
               .digest-prose .digest-h2 { font-size: 18px; font-weight: 800; margin-top: 8px; margin-bottom: 8px; color: var(--brand-deep); letter-spacing: -0.01em; }
-              .digest-prose .digest-h3 { font-size: 14px; font-weight: 800; margin-top: 18px; margin-bottom: 6px; color: var(--text); letter-spacing: -0.005em; }
-              .digest-prose .digest-p { font-size: 14px; line-height: 1.7; margin-bottom: 12px; color: var(--text); }
+              .digest-prose .digest-h3 { font-size: 14px; font-weight: 800; margin-top: 18px; margin-bottom: 6px; color: var(--heri-ink); letter-spacing: -0.005em; }
+              .digest-prose .digest-p { font-size: 14px; line-height: 1.7; margin-bottom: 12px; color: var(--heri-ink); }
               .digest-prose .digest-list { padding-inline-start: 18px; margin-bottom: 12px; list-style: disc outside; }
-              .digest-prose .digest-list li { font-size: 13.5px; line-height: 1.7; margin-bottom: 4px; color: var(--text); }
-              .digest-prose strong { color: var(--text); font-weight: 800; }
-              .digest-prose em { color: var(--text-muted); font-style: italic; }
+              .digest-prose .digest-list li { font-size: 13.5px; line-height: 1.7; margin-bottom: 4px; color: var(--heri-ink); }
+              .digest-prose strong { color: var(--heri-ink); font-weight: 800; }
+              .digest-prose em { color: var(--heri-ink-3); font-style: italic; }
             `,
           }}
         />

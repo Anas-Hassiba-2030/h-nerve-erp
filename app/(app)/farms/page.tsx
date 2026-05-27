@@ -146,7 +146,7 @@ export default async function FarmsPage() {
                 size={170}
                 label={ar ? "مثالي 35-50%" : "Ideal 35-50%"}
                 sublabel={`${ghFarms.length} ${ar ? "دفيئة" : "greenhouses"}`}
-                color={avgMoisture < 30 ? "#c0392b" : avgMoisture < 35 ? "#d97706" : "var(--brand)"}
+                color={avgMoisture < 30 ? "#c0392b" : avgMoisture < 35 ? "#d97706" : "var(--heri-ochre)"}
               />
             </div>
           </section>

@@ -168,7 +168,7 @@ export default async function HotelDetailPage({
                     {hotel.company.name}
                   </Link>
                 </div>
-                <h2 className="mt-1 text-2xl font-black md:text-3xl">
+                <h2 className="mt-1 text-2xl font-bold md:text-3xl">
                   {hotel.name}
                 </h2>
                 {hotel.nameEn ? (
@@ -252,18 +252,18 @@ export default async function HotelDetailPage({
         <section className="card card-pad anim-fade-up">
           <header className="mb-2 flex items-center justify-between">
             <h3
-              className="flex items-center gap-2 text-sm font-extrabold"
-              style={{ color: "var(--text)" }}
+              className="flex items-center gap-2 text-sm font-semibold"
+              style={{ color: "var(--heri-ink)" }}
             >
               <BedDouble
                 className="h-4 w-4"
-                style={{ color: "var(--brand)" }}
+                style={{ color: "var(--heri-ochre)" }}
               />
               نبض الإشغال
             </h3>
             <span
               className="text-[10px] font-bold uppercase tracking-widest"
-              style={{ color: "var(--text-muted)" }}
+              style={{ color: "var(--heri-ink-3)" }}
             >
               نشط الآن
             </span>
@@ -271,10 +271,10 @@ export default async function HotelDetailPage({
           <div className="space-y-1.5">
             <div
               className="flex justify-between text-xs font-bold"
-              style={{ color: "var(--text-muted)" }}
+              style={{ color: "var(--heri-ink-3)" }}
             >
               <span>
-                <span style={{ color: "var(--text)" }}>
+                <span style={{ color: "var(--heri-ink)" }}>
                   {formatNumber(activeRooms)}
                 </span>{" "}
                 محجوز
@@ -287,7 +287,7 @@ export default async function HotelDetailPage({
               className="h-3 w-full overflow-hidden rounded-full"
               style={{
                 background:
-                  "color-mix(in srgb, var(--text-muted) 14%, transparent)",
+                  "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
               }}
             >
               <div
@@ -295,8 +295,8 @@ export default async function HotelDetailPage({
                 style={{
                   width: `${occ * 100}%`,
                   background:
-                    "linear-gradient(90deg, var(--brand) 0%, var(--accent) 100%)",
-                  boxShadow: "0 0 24px var(--brand)",
+                    "linear-gradient(90deg, var(--heri-ochre) 0%, var(--heri-copper) 100%)",
+                  boxShadow: "0 0 24px var(--heri-ochre)",
                   transition: "width .8s cubic-bezier(.21,.92,.32,1)",
                 }}
               />
@@ -311,18 +311,18 @@ export default async function HotelDetailPage({
             <section className="card card-pad anim-fade-up">
               <header className="mb-3 flex items-center justify-between">
                 <h3
-                  className="flex items-center gap-2 text-sm font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  className="flex items-center gap-2 text-sm font-semibold"
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   <ChevronsRight
                     className="h-4 w-4"
-                    style={{ color: "var(--brand)" }}
+                    style={{ color: "var(--heri-ochre)" }}
                   />
                   وصول وشيك (14 يوم)
                 </h3>
                 <span
                   className="text-[11px] font-bold"
-                  style={{ color: "var(--text-muted)" }}
+                  style={{ color: "var(--heri-ink-3)" }}
                 >
                   {formatNumber(upcoming.length)} حجز
                 </span>
@@ -330,12 +330,12 @@ export default async function HotelDetailPage({
               {upcoming.length === 0 ? (
                 <p
                   className="text-xs"
-                  style={{ color: "var(--text-muted)" }}
+                  style={{ color: "var(--heri-ink-3)" }}
                 >
                   لا توجد وصولات وشيكة في الأسبوعين القادمين.
                 </p>
               ) : (
-                <ul className="divide-y divide-[var(--border)]">
+                <ul className="divide-y divide-[var(--heri-rule)]">
                   {upcoming.map((b, i) => (
                     <li
                       key={b.id}
@@ -346,7 +346,7 @@ export default async function HotelDetailPage({
                         <div className="flex items-center gap-2">
                           <span
                             className="truncate font-bold"
-                            style={{ color: "var(--text)" }}
+                            style={{ color: "var(--heri-ink)" }}
                           >
                             {b.guestName}
                           </span>
@@ -354,7 +354,7 @@ export default async function HotelDetailPage({
                         </div>
                         <div
                           className="text-[11px] font-mono"
-                          style={{ color: "var(--text-muted)" }}
+                          style={{ color: "var(--heri-ink-3)" }}
                         >
                           {b.reference} • {ar(ROOM_TYPES_AR, b.roomType)} •{" "}
                           {b.rooms} غرفة • {b.guests} ضيف
@@ -363,13 +363,13 @@ export default async function HotelDetailPage({
                       <div className="text-end">
                         <div
                           className="text-xs font-bold"
-                          style={{ color: "var(--text)" }}
+                          style={{ color: "var(--heri-ink)" }}
                         >
                           {formatShortDate(b.checkIn)}
                         </div>
                         <div
                           className="text-[10px]"
-                          style={{ color: "var(--text-muted)" }}
+                          style={{ color: "var(--heri-ink-3)" }}
                         >
                           → {formatShortDate(b.checkOut)}
                         </div>
@@ -384,12 +384,12 @@ export default async function HotelDetailPage({
             <section className="card card-pad anim-fade-up">
               <header className="mb-3 flex items-center justify-between">
                 <h3
-                  className="flex items-center gap-2 text-sm font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  className="flex items-center gap-2 text-sm font-semibold"
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   <Clock
                     className="h-4 w-4"
-                    style={{ color: "var(--brand)" }}
+                    style={{ color: "var(--heri-ochre)" }}
                   />
                   أحدث الحجوزات (30 يوم)
                 </h3>
@@ -397,12 +397,12 @@ export default async function HotelDetailPage({
               {recentBookings.length === 0 ? (
                 <p
                   className="text-xs"
-                  style={{ color: "var(--text-muted)" }}
+                  style={{ color: "var(--heri-ink-3)" }}
                 >
                   لا توجد حجوزات في آخر 30 يوم.
                 </p>
               ) : (
-                <ul className="divide-y divide-[var(--border)]">
+                <ul className="divide-y divide-[var(--heri-rule)]">
                   {recentBookings.map((b, i) => (
                     <li
                       key={b.id}
@@ -413,7 +413,7 @@ export default async function HotelDetailPage({
                         <div className="flex items-center gap-2">
                           <span
                             className="truncate font-bold"
-                            style={{ color: "var(--text)" }}
+                            style={{ color: "var(--heri-ink)" }}
                           >
                             {b.guestName}
                           </span>
@@ -421,15 +421,15 @@ export default async function HotelDetailPage({
                         </div>
                         <div
                           className="text-[11px] font-mono"
-                          style={{ color: "var(--text-muted)" }}
+                          style={{ color: "var(--heri-ink-3)" }}
                         >
                           {b.reference} • {formatShortDate(b.checkIn)} →{" "}
                           {formatShortDate(b.checkOut)}
                         </div>
                       </div>
                       <span
-                        className="font-mono text-xs font-black"
-                        style={{ color: "var(--text)" }}
+                        className="font-mono text-xs font-bold"
+                        style={{ color: "var(--heri-ink)" }}
                       >
                         {formatMoney(b.revenue)}
                       </span>
@@ -445,8 +445,8 @@ export default async function HotelDetailPage({
             {statusBreakdown.length > 0 ? (
               <section className="card card-pad anim-fade-up">
                 <h3
-                  className="mb-3 text-sm font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  className="mb-3 text-sm font-semibold"
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   توزيع الحجوزات حسب الحالة
                 </h3>
@@ -460,7 +460,7 @@ export default async function HotelDetailPage({
                       <div key={g.status}>
                         <div className="mb-0.5 flex items-center justify-between text-[10px] font-bold">
                           <StatusBadge status={g.status} />
-                          <span style={{ color: "var(--text)" }}>
+                          <span style={{ color: "var(--heri-ink)" }}>
                             {formatNumber(g._count)}
                           </span>
                         </div>
@@ -468,7 +468,7 @@ export default async function HotelDetailPage({
                           className="h-1.5 overflow-hidden rounded-full"
                           style={{
                             background:
-                              "color-mix(in srgb, var(--text-muted) 14%, transparent)",
+                              "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
                           }}
                         >
                           <div
@@ -476,7 +476,7 @@ export default async function HotelDetailPage({
                             style={{
                               width: `${pct}%`,
                               background:
-                                "linear-gradient(90deg, var(--brand) 0%, var(--accent) 100%)",
+                                "linear-gradient(90deg, var(--heri-ochre) 0%, var(--heri-copper) 100%)",
                               transition: "width .6s ease",
                             }}
                           />
@@ -491,8 +491,8 @@ export default async function HotelDetailPage({
             {/* Quick facts */}
             <section className="card card-pad anim-fade-up">
               <h3
-                className="mb-3 text-sm font-extrabold"
-                style={{ color: "var(--text)" }}
+                className="mb-3 text-sm font-semibold"
+                style={{ color: "var(--heri-ink)" }}
               >
                 بطاقة العقار
               </h3>
@@ -535,17 +535,17 @@ function Fact({
   link?: string;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-[var(--border)] pb-1.5 last:border-b-0">
-      <dt style={{ color: "var(--text-muted)" }}>{label}</dt>
+    <div className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
+      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
       <dd
         className="text-end font-bold"
-        style={{ color: "var(--text)" }}
+        style={{ color: "var(--heri-ink)" }}
       >
         {link ? (
           <Link
             href={link}
             className="hover:underline"
-            style={{ color: "var(--brand)" }}
+            style={{ color: "var(--heri-ochre)" }}
           >
             {value}
           </Link>

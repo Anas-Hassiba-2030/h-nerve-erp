@@ -138,7 +138,7 @@ export default async function DairyDetailPage({
                     {batch.company.name}
                   </Link>
                 </div>
-                <h2 className="mt-1 text-2xl font-black md:text-3xl">
+                <h2 className="mt-1 text-2xl font-bold md:text-3xl">
                   {batch.productAr || batch.product}
                 </h2>
                 {batch.productAr && batch.product !== batch.productAr ? (
@@ -220,10 +220,10 @@ export default async function DairyDetailPage({
         <section className="card card-pad anim-fade-up">
           <header className="mb-3 flex items-center justify-between">
             <h3
-              className="flex items-center gap-2 text-sm font-extrabold"
-              style={{ color: "var(--text)" }}
+              className="flex items-center gap-2 text-sm font-semibold"
+              style={{ color: "var(--heri-ink)" }}
             >
-              <Clock className="h-4 w-4" style={{ color: "var(--brand)" }} />
+              <Clock className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
               دورة الحياة
             </h3>
             <span
@@ -241,26 +241,26 @@ export default async function DairyDetailPage({
             <div>
               <div
                 className="text-[10px] font-bold uppercase tracking-widest"
-                style={{ color: "var(--text-muted)" }}
+                style={{ color: "var(--heri-ink-3)" }}
               >
                 إنتاج
               </div>
-              <div className="font-bold" style={{ color: "var(--text)" }}>
+              <div className="font-bold" style={{ color: "var(--heri-ink)" }}>
                 {formatShortDate(batch.productionDate)}
               </div>
             </div>
             <ArrowRight
               className="h-4 w-4"
-              style={{ color: "var(--text-muted)" }}
+              style={{ color: "var(--heri-ink-3)" }}
             />
             <div className="text-end">
               <div
                 className="text-[10px] font-bold uppercase tracking-widest"
-                style={{ color: "var(--text-muted)" }}
+                style={{ color: "var(--heri-ink-3)" }}
               >
                 صلاحية
               </div>
-              <div className="font-bold" style={{ color: "var(--text)" }}>
+              <div className="font-bold" style={{ color: "var(--heri-ink)" }}>
                 {formatShortDate(batch.expiryDate)}
               </div>
             </div>
@@ -269,7 +269,7 @@ export default async function DairyDetailPage({
             className="h-3 w-full overflow-hidden rounded-full"
             style={{
               background:
-                "color-mix(in srgb, var(--text-muted) 14%, transparent)",
+                "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
             }}
           >
             <div
@@ -277,7 +277,7 @@ export default async function DairyDetailPage({
               style={{
                 width: `${lifePct * 100}%`,
                 background: `linear-gradient(90deg, ${freshnessColor} 0%, ${
-                  expired ? "#c0392b" : "var(--accent)"
+                  expired ? "#c0392b" : "var(--heri-copper)"
                 } 100%)`,
                 boxShadow: `0 0 18px ${freshnessColor}`,
                 transition: "width .8s cubic-bezier(.21,.92,.32,1)",
@@ -286,7 +286,7 @@ export default async function DairyDetailPage({
           </div>
           <div
             className="mt-1 text-[10px]"
-            style={{ color: "var(--text-muted)" }}
+            style={{ color: "var(--heri-ink-3)" }}
           >
             {Math.round(lifePct * 100)}٪ من الفترة منقضية
           </div>
@@ -299,19 +299,19 @@ export default async function DairyDetailPage({
             <section className="card card-pad anim-fade-up">
               <header className="mb-3 flex items-center justify-between">
                 <h3
-                  className="flex items-center gap-2 text-sm font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  className="flex items-center gap-2 text-sm font-semibold"
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   <Package2
                     className="h-4 w-4"
-                    style={{ color: "var(--brand)" }}
+                    style={{ color: "var(--heri-ochre)" }}
                   />
                   دفعات سابقة لنفس المنتج
                 </h3>
                 <Link
                   href="/dairy"
                   className="text-[11px] font-bold"
-                  style={{ color: "var(--brand)" }}
+                  style={{ color: "var(--heri-ochre)" }}
                 >
                   عرض الكل ←
                 </Link>
@@ -319,12 +319,12 @@ export default async function DairyDetailPage({
               {siblings.length === 0 ? (
                 <p
                   className="text-xs"
-                  style={{ color: "var(--text-muted)" }}
+                  style={{ color: "var(--heri-ink-3)" }}
                 >
                   لا توجد دفعات أخرى من هذا المنتج.
                 </p>
               ) : (
-                <ul className="divide-y divide-[var(--border)]">
+                <ul className="divide-y divide-[var(--heri-rule)]">
                   {siblings.map((s, i) => (
                     <li
                       key={s.id}
@@ -338,7 +338,7 @@ export default async function DairyDetailPage({
                         <div className="flex items-center gap-2">
                           <span
                             className="font-mono text-xs font-bold"
-                            style={{ color: "var(--text)" }}
+                            style={{ color: "var(--heri-ink)" }}
                           >
                             {s.batchNumber}
                           </span>
@@ -349,15 +349,15 @@ export default async function DairyDetailPage({
                         </div>
                         <div
                           className="text-[11px]"
-                          style={{ color: "var(--text-muted)" }}
+                          style={{ color: "var(--heri-ink-3)" }}
                         >
                           {formatShortDate(s.productionDate)} →{" "}
                           {formatShortDate(s.expiryDate)}
                         </div>
                       </Link>
                       <span
-                        className="font-mono text-xs font-black"
-                        style={{ color: "var(--text)" }}
+                        className="font-mono text-xs font-bold"
+                        style={{ color: "var(--heri-ink)" }}
                       >
                         {formatNumber(s.quantityLiters)} لتر
                       </span>
@@ -372,8 +372,8 @@ export default async function DairyDetailPage({
             {/* Quick facts */}
             <section className="card card-pad anim-fade-up">
               <h3
-                className="mb-3 text-sm font-extrabold"
-                style={{ color: "var(--text)" }}
+                className="mb-3 text-sm font-semibold"
+                style={{ color: "var(--heri-ink)" }}
               >
                 البطاقة الفنية
               </h3>
@@ -414,16 +414,16 @@ export default async function DairyDetailPage({
             {batch.destination ? (
               <section className="card card-pad anim-fade-up">
                 <h3
-                  className="mb-2 flex items-center gap-2 text-sm font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  className="mb-2 flex items-center gap-2 text-sm font-semibold"
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   <Truck
                     className="h-4 w-4"
-                    style={{ color: "var(--brand)" }}
+                    style={{ color: "var(--heri-ochre)" }}
                   />
                   وجهة التوزيع
                 </h3>
-                <p className="text-sm" style={{ color: "var(--text)" }}>
+                <p className="text-sm" style={{ color: "var(--heri-ink)" }}>
                   {batch.destination}
                 </p>
               </section>
@@ -447,17 +447,17 @@ function Fact({
   mono?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-[var(--border)] pb-1.5 last:border-b-0">
-      <dt style={{ color: "var(--text-muted)" }}>{label}</dt>
+    <div className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
+      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
       <dd
         className={`text-end font-bold ${mono ? "font-mono" : ""}`}
-        style={{ color: "var(--text)" }}
+        style={{ color: "var(--heri-ink)" }}
       >
         {link ? (
           <Link
             href={link}
             className="hover:underline"
-            style={{ color: "var(--brand)" }}
+            style={{ color: "var(--heri-ochre)" }}
           >
             {value}
           </Link>

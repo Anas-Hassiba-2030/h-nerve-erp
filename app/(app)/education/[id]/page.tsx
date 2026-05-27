@@ -136,7 +136,7 @@ export default async function EducationDetailPage({
                     {program.company.name}
                   </Link>
                 </div>
-                <h2 className="mt-1 text-2xl font-black md:text-3xl">
+                <h2 className="mt-1 text-2xl font-bold md:text-3xl">
                   {program.name}
                 </h2>
                 {program.nameEn ? (
@@ -213,12 +213,12 @@ export default async function EducationDetailPage({
         <section className="card card-pad anim-fade-up">
           <header className="mb-4 flex items-center justify-between">
             <h3
-              className="flex items-center gap-2 text-sm font-extrabold"
-              style={{ color: "var(--text)" }}
+              className="flex items-center gap-2 text-sm font-semibold"
+              style={{ color: "var(--heri-ink)" }}
             >
               <ChevronsRight
                 className="h-4 w-4"
-                style={{ color: "var(--brand)" }}
+                style={{ color: "var(--heri-ochre)" }}
               />
               مسيرة المشروع
             </h3>
@@ -228,7 +228,7 @@ export default async function EducationDetailPage({
           {stalled ? (
             <p
               className="text-xs"
-              style={{ color: "var(--text-muted)" }}
+              style={{ color: "var(--heri-ink-3)" }}
             >
               المشروع في حالة تعثر — يحتاج تدخل من فريق الحاضنة لإعادته للمسار.
             </p>
@@ -243,17 +243,17 @@ export default async function EducationDetailPage({
                     className="relative flex flex-1 flex-col items-center"
                   >
                     <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-black transition ${
+                      className={`flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-bold transition ${
                         reached ? "anim-pop" : ""
                       }`}
                       style={{
                         background: reached
-                          ? "linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%)"
-                          : "color-mix(in srgb, var(--text-muted) 14%, transparent)",
-                        color: reached ? "white" : "var(--text-muted)",
+                          ? "linear-gradient(135deg, var(--heri-ochre) 0%, var(--heri-copper) 100%)"
+                          : "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
+                        color: reached ? "white" : "var(--heri-ink-3)",
                         transform: isCurrent ? "scale(1.1)" : undefined,
                         boxShadow: isCurrent
-                          ? "0 14px 36px -10px var(--brand)"
+                          ? "0 14px 36px -10px var(--heri-ochre)"
                           : undefined,
                       }}
                     >
@@ -262,7 +262,7 @@ export default async function EducationDetailPage({
                     <div
                       className="mt-2 text-center text-[11px] font-bold"
                       style={{
-                        color: reached ? "var(--text)" : "var(--text-muted)",
+                        color: reached ? "var(--heri-ink)" : "var(--heri-ink-3)",
                       }}
                     >
                       {ar(STATUS_AR, stage)}
@@ -276,8 +276,8 @@ export default async function EducationDetailPage({
                           height: "2px",
                           background:
                             stageIdx >= 0 && i < stageIdx
-                              ? "linear-gradient(90deg, var(--brand) 0%, var(--accent) 100%)"
-                              : "color-mix(in srgb, var(--text-muted) 18%, transparent)",
+                              ? "linear-gradient(90deg, var(--heri-ochre) 0%, var(--heri-copper) 100%)"
+                              : "color-mix(in srgb, var(--heri-ink-3) 18%, transparent)",
                           transition: "background .6s ease",
                         }}
                       />
@@ -295,14 +295,14 @@ export default async function EducationDetailPage({
             {program.description ? (
               <section className="card card-pad anim-fade-up">
                 <h3
-                  className="mb-2 text-sm font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  className="mb-2 text-sm font-semibold"
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   نظرة عامة
                 </h3>
                 <p
                   className="text-sm leading-relaxed"
-                  style={{ color: "var(--text)" }}
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   {program.description}
                 </p>
@@ -313,24 +313,24 @@ export default async function EducationDetailPage({
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
                   <h3
-                    className="flex items-center gap-2 text-sm font-extrabold"
-                    style={{ color: "var(--text)" }}
+                    className="flex items-center gap-2 text-sm font-semibold"
+                    style={{ color: "var(--heri-ink)" }}
                   >
                     <GraduationCap
                       className="h-4 w-4"
-                      style={{ color: "var(--brand)" }}
+                      style={{ color: "var(--heri-ochre)" }}
                     />
                     برامج زميلة
                   </h3>
                   <Link
                     href="/education"
                     className="text-[11px] font-bold"
-                    style={{ color: "var(--brand)" }}
+                    style={{ color: "var(--heri-ochre)" }}
                   >
                     كل البرامج ←
                   </Link>
                 </header>
-                <ul className="divide-y divide-[var(--border)]">
+                <ul className="divide-y divide-[var(--heri-rule)]">
                   {related.map((r, i) => (
                     <li
                       key={r.id}
@@ -344,7 +344,7 @@ export default async function EducationDetailPage({
                         <div className="flex items-center gap-2">
                           <span
                             className="truncate font-bold"
-                            style={{ color: "var(--text)" }}
+                            style={{ color: "var(--heri-ink)" }}
                           >
                             {r.name}
                           </span>
@@ -358,7 +358,7 @@ export default async function EducationDetailPage({
                         </div>
                         <div
                           className="text-[11px]"
-                          style={{ color: "var(--text-muted)" }}
+                          style={{ color: "var(--heri-ink-3)" }}
                         >
                           {r.founder} • فوج {r.cohort} •{" "}
                           {formatNumber(r.teamSize)} فرد
@@ -367,7 +367,7 @@ export default async function EducationDetailPage({
                       <div className="flex items-center gap-2">
                         <span
                           className="font-mono text-xs font-bold"
-                          style={{ color: "var(--text)" }}
+                          style={{ color: "var(--heri-ink)" }}
                         >
                           {formatMoney(r.fundingJod)}
                         </span>
@@ -383,8 +383,8 @@ export default async function EducationDetailPage({
           <aside className="space-y-6">
             <section className="card card-pad anim-fade-up">
               <h3
-                className="mb-3 text-sm font-extrabold"
-                style={{ color: "var(--text)" }}
+                className="mb-3 text-sm font-semibold"
+                style={{ color: "var(--heri-ink)" }}
               >
                 بطاقة المشروع
               </h3>
@@ -431,17 +431,17 @@ function Fact({
   link?: string;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-[var(--border)] pb-1.5 last:border-b-0">
-      <dt style={{ color: "var(--text-muted)" }}>{label}</dt>
+    <div className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
+      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
       <dd
         className="text-end font-bold"
-        style={{ color: "var(--text)" }}
+        style={{ color: "var(--heri-ink)" }}
       >
         {link ? (
           <Link
             href={link}
             className="hover:underline"
-            style={{ color: "var(--brand)" }}
+            style={{ color: "var(--heri-ochre)" }}
           >
             {value}
           </Link>

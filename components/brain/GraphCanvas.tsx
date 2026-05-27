@@ -65,10 +65,10 @@ type SimNode = GNode & {
   dragging?: boolean;
 };
 
-const REPEL = 4500;
+const REPEL = 5400;
 const SPRING_K = 0.025;
-const SPRING_REST = 110;
-const GRAVITY = 0.012;
+const SPRING_REST = 124;
+const GRAVITY = 0.011;
 const DAMP = 0.86;
 const MAX_VEL = 24;
 
@@ -82,12 +82,14 @@ export function GraphCanvas({
   edges: rawEdges,
   onSelectNode,
   impact,
+  ar = false,
 }: {
   nodes: GNode[];
   edges: GEdge[];
   onSelectNode?: (n: GNode | null) => void;
   /** When the what-if simulator is live: nodeId → projected signed delta. */
   impact?: Map<string, number>;
+  ar?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ w: 800, h: 600 });
@@ -119,6 +121,21 @@ export function GraphCanvas({
       const list = m.get(e.from) ?? [];
       list.push({ to: e.to, weight: e.weight });
       m.set(e.from, list);
+    }
+    return m;
+  }, [rawEdges]);
+
+  // Undirected neighbour set — powers hover-to-trace (highlight everything
+  // one edge away from the node under the cursor, dim the rest).
+  const neighbors = useMemo(() => {
+    const m = new Map<string, Set<string>>();
+    const link = (a: string, b: string) => {
+      if (!m.has(a)) m.set(a, new Set());
+      m.get(a)!.add(b);
+    };
+    for (const e of rawEdges) {
+      link(e.from, e.to);
+      link(e.to, e.from);
     }
     return m;
   }, [rawEdges]);
@@ -307,13 +324,26 @@ export function GraphCanvas({
               selected != null && !(aDepth !== undefined && bDepth !== undefined);
             const causal = e.kind === "causal";
             const baseOpacity = causal ? 0.42 : 0.18;
-            const opacity = onPath ? 1 : dimmed ? 0.06 : baseOpacity;
-            const stroke = onPath
+            let opacity = onPath ? 1 : dimmed ? 0.06 : baseOpacity;
+            let stroke = onPath
               ? "#c69345"
               : causal
                 ? "rgba(198,147,69,0.55)"
                 : "rgba(245,239,230,0.32)";
-            const strokeWidth = onPath ? 2.2 : causal ? 1.0 : 0.6;
+            let strokeWidth = onPath ? 2.2 : causal ? 1.0 : 0.6;
+
+            // Hover-to-trace: when nothing is clicked, hovering a node lights
+            // its incident edges and fades everything else.
+            if (hoveredId != null && selected == null) {
+              const incident = e.from === hoveredId || e.to === hoveredId;
+              if (incident) {
+                opacity = causal ? 0.95 : 0.6;
+                stroke = "#c69345";
+                strokeWidth = causal ? 1.8 : 1.0;
+              } else {
+                opacity = 0.05;
+              }
+            }
             return (
               <line
                 key={i}
@@ -326,6 +356,7 @@ export function GraphCanvas({
                 opacity={opacity}
                 strokeLinecap="round"
                 strokeDasharray={causal ? "0" : "3 4"}
+                style={{ transition: "opacity 150ms ease, stroke-width 150ms ease" }}
               />
             );
           })}
@@ -350,13 +381,26 @@ export function GraphCanvas({
               simDelta !== undefined
                 ? n.r + Math.min(11, Math.abs(simDelta) * 22)
                 : n.r;
+
+            // Hover-to-trace: the hovered node and its direct neighbours stay
+            // lit; everyone else recedes. Only active when nothing is clicked
+            // and the simulator isn't running.
+            const hovering = hoveredId != null && selected == null && !inSim;
+            const isHoverNeighbor =
+              hovering &&
+              (n.id === hoveredId || (neighbors.get(hoveredId!)?.has(n.id) ?? false));
+
             const bodyOpacity = inSim
               ? simDelta !== undefined
                 ? 0.96
                 : 0.13
-              : selected != null && !isSel && !isAffected
-                ? 0.35
-                : 0.95;
+              : hovering
+                ? isHoverNeighbor
+                  ? 0.98
+                  : 0.18
+                : selected != null && !isSel && !isAffected
+                  ? 0.35
+                  : 0.95;
 
             return (
               <g
@@ -447,11 +491,13 @@ export function GraphCanvas({
                   opacity={bodyOpacity}
                   stroke="rgba(245,239,230,0.18)"
                   strokeWidth={1}
+                  style={{ transition: "opacity 150ms ease, r 200ms ease" }}
                 />
 
-                {/* Label — for hub kinds, on hover, when selected/affected, or
-                    when this node carries a simulated impact. */}
-                {((isHov || isSel || isAffected) ||
+                {/* Label — for hub kinds, on hover, when selected/affected, a
+                    hovered node's neighbour, or when this node carries a
+                    simulated impact. */}
+                {((isHov || isSel || isAffected || isHoverNeighbor) ||
                   simDelta !== undefined ||
                   HUB_KINDS.has(n.kind)) ? (
                   <text
@@ -538,7 +584,9 @@ export function GraphCanvas({
           border: "1px solid rgba(255,255,255,0.08)",
         }}
       >
-        click node · drag to move
+        {ar
+          ? "مرّر للتتبّع · اضغط للأثر · اسحب للتحريك"
+          : "hover to trace · click for impact · drag to move"}
       </div>
     </div>
   );

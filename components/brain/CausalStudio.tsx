@@ -68,6 +68,76 @@ export function CausalStudio({ nodes, edges, ar, rebuildSlot }: Props) {
     [nodes]
   );
 
+  const nodeById = useMemo(() => {
+    const m = new Map<string, GNode>();
+    for (const n of nodes) m.set(n.id, n);
+    return m;
+  }, [nodes]);
+
+  // Structural inspect — what drives the selected node (inbound edges) and
+  // what it affects (outbound edges). Independent of the slider.
+  const drivers = useMemo(() => {
+    if (!sourceId) return [];
+    return edges
+      .filter((e) => e.to === sourceId)
+      .map((e) => ({ node: nodeById.get(e.from), edge: e }))
+      .filter((x): x is { node: GNode; edge: GEdge } => Boolean(x.node))
+      .sort((a, b) => Math.abs(b.edge.weight) - Math.abs(a.edge.weight));
+  }, [sourceId, edges, nodeById]);
+
+  const effects = useMemo(() => {
+    if (!sourceId) return [];
+    return edges
+      .filter((e) => e.from === sourceId)
+      .map((e) => ({ node: nodeById.get(e.to), edge: e }))
+      .filter((x): x is { node: GNode; edge: GEdge } => Boolean(x.node))
+      .sort((a, b) => Math.abs(b.edge.weight) - Math.abs(a.edge.weight));
+  }, [sourceId, edges, nodeById]);
+
+  // One-paragraph editorial read of the live simulation (stub narrator —
+  // fully client-side, no API call).
+  const summary = useMemo(() => {
+    if (!sourceNode || delta === 0 || rows.length === 0) return null;
+    const rising = delta > 0;
+    const pct = Math.round(Math.abs(delta) * 100);
+    const top = rows[0];
+    const topPct = Math.round(Math.abs(top.projectedDelta) * 100);
+    let money = 0;
+    for (const r of rows) {
+      const pm = primaryMetric(r.node as any);
+      if (pm && pm.unit === "JOD") money += pm.value * r.projectedDelta;
+    }
+    const moneyTxt =
+      Math.abs(money) >= 1
+        ? ar
+          ? `، بأثر مالي تقديري يقارب ${money > 0 ? "+" : "−"}${num.format(Math.round(Math.abs(money)))} د.أ`
+          : `, with an estimated monetary swing near ${money > 0 ? "+" : "−"}${num.format(Math.round(Math.abs(money)))} JOD`
+        : "";
+    if (ar) {
+      return `${rising ? "ارتفاعٌ" : "انخفاضٌ"} افتراضي بنسبة ${pct}% في «${sourceNode.label}» ينتشر إلى ${rows.length} كيانًا أسفل التيار${moneyTxt}. أوضح أثر يقع على «${top.node.label}» بتغيّر ${top.projectedDelta > 0 ? "+" : "−"}${topPct}%. الأرقام تقديرية تنتشر عبر الحواف السببية المُتعلَّمة وتخفت مع كل قفزة.`;
+    }
+    return `A hypothetical ${rising ? "rise" : "drop"} of ${pct}% in "${sourceNode.label}" propagates to ${rows.length} downstream ${rows.length === 1 ? "entity" : "entities"}${moneyTxt}. The sharpest landing is on "${top.node.label}" at ${top.projectedDelta > 0 ? "+" : "−"}${topPct}%. Figures are estimates carried along learned causal edges, fading with every hop.`;
+  }, [sourceNode, delta, rows, ar]);
+
+  // Scenario presets — resolved against whatever the seeded graph actually
+  // contains, so a chip only shows when a matching entity exists.
+  const presets = useMemo(() => {
+    const firstOf = (kind: string) => sortedNodes.find((n) => n.kind === kind);
+    const defs: Array<{ node?: GNode; delta: number; ar: string; en: string }> = [
+      { node: firstOf("Hotel"), delta: -0.2, ar: "−20% إشغال", en: "−20% occupancy" },
+      { node: firstOf("DairyBatch"), delta: 0.15, ar: "+15% ألبان", en: "+15% dairy yield" },
+      {
+        node: firstOf("Farm") ?? firstOf("Forecast"),
+        delta: -0.1,
+        ar: "−10% مزارع",
+        en: "−10% farm output",
+      },
+    ];
+    return defs.filter((d): d is { node: GNode; delta: number; ar: string; en: string } =>
+      Boolean(d.node)
+    );
+  }, [sortedNodes]);
+
   return (
     <div className="grid gap-4 lg:grid-cols-12">
       {/* ── Canvas ── */}
@@ -76,6 +146,7 @@ export function CausalStudio({ nodes, edges, ar, rebuildSlot }: Props) {
           nodes={nodes}
           edges={edges}
           impact={impact}
+          ar={ar}
           onSelectNode={(n) => setSourceId(n ? n.id : null)}
         />
 
@@ -212,11 +283,78 @@ export function CausalStudio({ nodes, edges, ar, rebuildSlot }: Props) {
                 : "Pick a node — or click one in the graph — then drag the slider."}
             </p>
           )}
+
+          {presets.length > 0 ? (
+            <div style={{ marginTop: 13, borderTop: "1px solid rgba(245,239,230,0.12)", paddingTop: 11 }}>
+              <div
+                style={{
+                  fontSize: 9,
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                  color: "rgba(245,239,230,0.5)",
+                  fontFamily: "'JetBrains Mono',ui-monospace,monospace",
+                  marginBottom: 8,
+                }}
+              >
+                {ar ? "سيناريوهات جاهزة" : "Scenario presets"}
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {presets.map((p, i) => {
+                  const active = sourceId === p.node.id && delta === p.delta;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => {
+                        setSourceId(p.node.id);
+                        setDelta(p.delta);
+                      }}
+                      title={p.node.label}
+                      style={{
+                        fontSize: 10,
+                        fontFamily: "'JetBrains Mono',ui-monospace,monospace",
+                        letterSpacing: "0.04em",
+                        color: active ? "#0e0e10" : "rgba(245,239,230,0.85)",
+                        background: active ? "#c69345" : "rgba(245,239,230,0.06)",
+                        border: "1px solid rgba(245,239,230,0.2)",
+                        padding: "4px 8px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {ar ? p.ar : p.en}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
 
       {/* ── Right rail ── */}
       <div className="lg:col-span-3 space-y-4">
+        {/* Inspect — what drives / what it affects (shows on node click) */}
+        {sourceNode ? (
+          <Panel
+            eyebrow={`${ar ? "تفصيل" : "Inspect"} · ${sourceNode.kind}`}
+            title={sourceNode.label}
+          >
+            <InspectList
+              ar={ar}
+              heading={ar ? "ما الذي يحرّكها" : "What drives it"}
+              empty={ar ? "لا مدخلات — هذه عقدة مصدر." : "No inbound drivers — a source node."}
+              rows={drivers}
+            />
+            <div className="mt-3.5 pt-3" style={{ borderTop: "1px solid var(--heri-rule)" }}>
+              <InspectList
+                ar={ar}
+                heading={ar ? "ما الذي تؤثّر فيه" : "What it affects"}
+                empty={ar ? "لا مخرجات — هذه عقدة طرفية." : "No downstream effects — a leaf node."}
+                rows={effects}
+              />
+            </div>
+          </Panel>
+        ) : null}
+
         {/* Impact list */}
         <Panel
           eyebrow={ar ? "محاكاة" : "Simulation"}
@@ -231,6 +369,23 @@ export function CausalStudio({ nodes, edges, ar, rebuildSlot }: Props) {
                 : "Drag the slider to watch the impact propagate."
           }
         >
+          {summary ? (
+            <p
+              style={{
+                fontFamily: ar
+                  ? "'Reem Kufi','IBM Plex Sans Arabic',serif"
+                  : "'Fraunces','Tiempos Headline',Georgia,serif",
+                fontSize: 12.5,
+                lineHeight: 1.6,
+                color: "var(--heri-ink)",
+                marginBottom: 13,
+                paddingBottom: 12,
+                borderBottom: "1px solid var(--heri-rule)",
+              }}
+            >
+              {summary}
+            </p>
+          ) : null}
           {rows.length === 0 ? (
             <p style={{ fontSize: 11.5, color: "var(--heri-ink-3)", lineHeight: 1.55 }}>
               {ar
@@ -472,5 +627,79 @@ function Explain({ term, body }: { term: string; body: string }) {
     <li>
       <span style={{ color: "var(--heri-ink)", fontWeight: 600 }}>{term}.</span> {body}
     </li>
+  );
+}
+
+function InspectList({
+  ar,
+  heading,
+  empty,
+  rows,
+}: {
+  ar: boolean;
+  heading: string;
+  empty: string;
+  rows: Array<{ node: GNode; edge: GEdge }>;
+}) {
+  return (
+    <div>
+      <div className="heri-eyebrow heri-eyebrow-ink" style={{ marginBottom: 8 }}>
+        {heading}
+      </div>
+      {rows.length === 0 ? (
+        <p style={{ fontSize: 11, color: "var(--heri-ink-3)", lineHeight: 1.5 }}>{empty}</p>
+      ) : (
+        <ul className="space-y-2">
+          {rows.slice(0, 6).map(({ node, edge }, i) => {
+            const causal = edge.kind === "causal";
+            return (
+              <li key={i} className="flex items-center justify-between gap-2">
+                <span className="min-w-0 flex items-center gap-2">
+                  <span
+                    aria-hidden
+                    style={{
+                      width: 5,
+                      height: 5,
+                      borderRadius: causal ? "50%" : 0,
+                      background: causal ? "var(--heri-ochre)" : "var(--heri-ink-3)",
+                      flex: "none",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: 12,
+                      color: "var(--heri-ink)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                    title={`${node.label} · ${node.kind}`}
+                  >
+                    {node.label}
+                  </span>
+                </span>
+                <span
+                  className="heri-number-mono"
+                  style={{
+                    fontSize: 10.5,
+                    color: causal ? "var(--heri-ochre-2)" : "var(--heri-ink-3)",
+                    fontVariantNumeric: "tabular-nums",
+                    flex: "none",
+                  }}
+                  title={ar ? "وزن الحافة" : "edge weight"}
+                >
+                  {Math.round(Math.abs(edge.weight) * 100)}%
+                </span>
+              </li>
+            );
+          })}
+          {rows.length > 6 ? (
+            <li style={{ fontSize: 10, color: "var(--heri-ink-3)" }}>
+              +{rows.length - 6} {ar ? "أخرى" : "more"}
+            </li>
+          ) : null}
+        </ul>
+      )}
+    </div>
   );
 }

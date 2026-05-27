@@ -131,32 +131,14 @@ export function Sidebar({
     },
     {
       label: ar ? "الذكاء التشغيلي" : "Intelligence",
-      // Phase P3 — Brain reorg. Non-ADMIN sees only the two end-user
-      // surfaces: AI Insights (what the Brain found) + Smart Alerts
-      // (what needs attention now). Every other Brain sub-page is a
-      // developer / power-user surface and is ADMIN-only.
-      // Phase V3-P4 — disambiguated the two "AI Insights" entries.
-      // User-facing surface stays at /insights as "AI Insights".
-      // The Brain-internal raw-engine output moves to "Brain Engine
-      // Output" so the two are never confused.
       items:
         user.role === "ADMIN"
           ? [
               { href: "/brain", label: ar ? "مركز الدماغ" : "Brain hub", icon: Brain, hint: "HOME" },
               { href: "/insights", label: messages["nav.insights"], icon: Sparkles, hint: "AI" },
               { href: "/alerts", label: ar ? "التنبيهات الذكية" : "Smart alerts", icon: Bell },
-              { href: "/admin/brain", label: ar ? "مخرجات محرك الذكاء" : "Brain Engine Output", icon: Cpu, hint: "ENGINE" },
-              { href: "/brain/graph", label: ar ? "الرسم السببي" : "Causal graph", icon: Network, hint: "BRAIN" },
-              { href: "/brain/scenarios", label: ar ? "ماذا لو…" : "What-if simulator", icon: Zap, hint: "BRAIN" },
-              { href: "/brain/council", label: ar ? "المجلس" : "The council", icon: Users, hint: "BRAIN" },
-              { href: "/plans", label: ar ? "الخطط" : "Plans", icon: Target, hint: "BRAIN" },
-              { href: "/brain/memory", label: ar ? "بحيرة الذاكرة" : "Memory lake", icon: Heart, hint: "BRAIN" },
-              { href: "/brain/learning", label: ar ? "ما تعلّمتُه" : "What I've learned", icon: GraduationCap, hint: "BRAIN" },
-              { href: "/brain/benchmarks", label: ar ? "معايير النظراء" : "Peer benchmarks", icon: Globe2, hint: "BRAIN" },
-              { href: "/brain/iq", label: ar ? "ذكاء الدماغ" : "Brain IQ", icon: Trophy, hint: "META" },
+              { href: "/plans", label: ar ? "الخطط" : "Plans", icon: Target },
               { href: "/supply-chain", label: messages["nav.supplyChain"], icon: Brain, hint: "AI" },
-              { href: "/workflows", label: ar ? "خرائط الأتمتة" : "Workflows", icon: Workflow },
-              { href: "/integrations", label: ar ? "الموصلات" : "Integrations", icon: Plug, hint: "HUB" },
               { href: "/documents", label: ar ? "ذكاء المستندات" : "Documents", icon: ScrollText, hint: "AI" },
             ]
           : [
@@ -164,6 +146,25 @@ export function Sidebar({
               { href: "/alerts", label: ar ? "التنبيهات الذكية" : "Smart alerts", icon: Bell },
             ],
     },
+    ...(user.role === "ADMIN"
+      ? [
+          {
+            label: ar ? "محرك الدماغ" : "Brain engine",
+            items: [
+              { href: "/brain/graph", label: ar ? "الرسم السببي" : "Causal graph", icon: Network, hint: "BRAIN" },
+              { href: "/brain/scenarios", label: ar ? "ماذا لو…" : "What-if", icon: Zap, hint: "BRAIN" },
+              { href: "/brain/council", label: ar ? "المجلس" : "Council", icon: Users, hint: "BRAIN" },
+              { href: "/brain/memory", label: ar ? "بحيرة الذاكرة" : "Memory lake", icon: Heart, hint: "BRAIN" },
+              { href: "/brain/learning", label: ar ? "ما تعلّمتُه" : "Learning", icon: GraduationCap, hint: "BRAIN" },
+              { href: "/brain/benchmarks", label: ar ? "معايير النظراء" : "Benchmarks", icon: Globe2, hint: "BRAIN" },
+              { href: "/brain/iq", label: ar ? "ذكاء الدماغ" : "Brain IQ", icon: Trophy, hint: "META" },
+              { href: "/admin/brain", label: ar ? "مخرجات المحرك" : "Engine output", icon: Cpu, hint: "RAW" },
+              { href: "/workflows", label: ar ? "خرائط الأتمتة" : "Workflows", icon: Workflow },
+              { href: "/integrations", label: ar ? "الموصلات" : "Integrations", icon: Plug, hint: "HUB" },
+            ],
+          },
+        ]
+      : []),
     {
       label: ar ? "النمو والاستثمار" : "Growth & Capital",
       items: [

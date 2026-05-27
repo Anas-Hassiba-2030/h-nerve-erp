@@ -4,7 +4,7 @@
 
 import Link from "next/link";
 import {
-  Hotel, Milk, Sprout, GraduationCap, TrendingUp, Trophy, Building2,
+  Hotel, Milk, Sprout, GraduationCap, TrendingUp, Trophy, Building2, Brain,
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
@@ -20,12 +20,14 @@ import { UpcomingCalendar, type CalendarEvent } from "@/components/dashboard/Upc
 import { TodayActivity, type ActivityLogLite } from "@/components/dashboard/TodayActivity";
 import { HeritageHero } from "@/components/dashboard/HeritageHero";
 import { HeritageSection, HeritagePill, HeritageQuickLink } from "@/components/heritage";
+import { BrainStatusBadge } from "@/components/BrainStatusBadge";
 import { listPins } from "@/lib/pins";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale, getMessages } from "@/lib/i18n.server";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/utils";
 import { rankById } from "@/lib/gamification";
+import { computeIQ } from "@/lib/brain/meta.reflector";
 
 // Phase P-Polish — explicit dynamic. The layout reads cookies so this
 // page is dynamic in practice, but declaring it removes ambiguity for
@@ -58,6 +60,7 @@ export default async function DashboardPage({
   const activeInsightCount = await prisma.brainInsight.count({
     where: { resolvedAt: null, dismissedAt: null },
   });
+  const brainIQ = await computeIQ("default").catch(() => null);
   const [
     me, companies, totalRoomsAgg, activeBookings, bookingsAgg,
     dairyVolumeAgg, expiringDairy, farms, programs, forecasts, recentInsights,
@@ -418,11 +421,11 @@ export default async function DashboardPage({
           personalLine={personalLine}
           subtitle={
             ar
-              ? `${formatNumber(companies.length)} شركات · ${formatNumber(farms.length)} مزرعة · ${formatNumber(activeInsightCount)} إشارة AI · ${formatPercent(occupancyPct, 0)} إشغال`
-              : `${formatNumber(companies.length)} companies · ${formatNumber(farms.length)} farms · ${formatNumber(activeInsightCount)} AI signals · ${formatPercent(occupancyPct, 0)} occupancy.`
+              ? `${formatNumber(companies.length)} شركات · ${formatNumber(farms.length)} مزرعة · ${formatNumber(activeInsightCount)} إشارة AI · ${formatPercent(occupancyPct, 0)} إشغال${brainIQ ? ` · IQ ${Math.round(brainIQ.score * 100)}` : ""}`
+              : `${formatNumber(companies.length)} companies · ${formatNumber(farms.length)} farms · ${formatNumber(activeInsightCount)} AI signals · ${formatPercent(occupancyPct, 0)} occupancy${brainIQ ? ` · Brain IQ ${Math.round(brainIQ.score * 100)}` : ""}.`
           }
-          primaryCta={ar ? "الإشارات" : "Insights"}
-          primaryCtaHref="/admin/brain"
+          primaryCta={ar ? "مركز الدماغ" : "Brain hub"}
+          primaryCtaHref="/brain"
           secondaryCta={ar ? "تقرير المجموعة" : "Group report"}
           secondaryCtaHref={`/api/export/html/all?locale=${lc}`}
           reportLabel="report"
@@ -672,22 +675,53 @@ export default async function DashboardPage({
           <div className="lg:col-span-4">
             <HeritageSection
               eyebrow={ar ? "ذكاء" : "Intelligence"}
-              title={ar ? "جسر الذكاء التنبؤي" : "AI Bridge"}
-              aside={ar ? "توقعات سلسلة التوريد" : "Supply chain forecasts"}
-              href="/supply-chain"
-              hrefLabel={ar ? "كل التوقعات" : "All forecasts"}
+              title={ar ? "طبقة الذكاء" : "Intelligence layer"}
+              aside={
+                brainIQ
+                  ? (ar ? `IQ ${Math.round(brainIQ.score * 100)} · ${brainIQ.trend === "rising" ? "↑" : brainIQ.trend === "falling" ? "↓" : "→"}` : `IQ ${Math.round(brainIQ.score * 100)} · ${brainIQ.trend}`)
+                  : (ar ? "توقعات سلسلة التوريد" : "Supply chain forecasts")
+              }
+              href="/brain"
+              hrefLabel={ar ? "مركز الدماغ" : "Brain hub"}
               rtl={ar}
             >
+              {/* Brain IQ strip */}
+              {brainIQ ? (
+                <Link
+                  href="/brain/iq"
+                  className="mb-2 flex items-center justify-between px-3 py-2.5 transition"
+                  style={{
+                    background: "var(--heri-cream-2)",
+                    border: "1px solid var(--heri-rule-strong)",
+                    borderInlineStart: "3px solid var(--heri-ochre)",
+                    textDecoration: "none",
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <Brain className="h-3.5 w-3.5" style={{ color: "var(--heri-ochre)" }} strokeWidth={1.5} />
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "var(--heri-ink)" }}>
+                      {ar ? "ذكاء الدماغ" : "Brain IQ"}
+                    </span>
+                    <BrainStatusBadge />
+                  </div>
+                  <span
+                    className="heri-number-mono"
+                    style={{ fontSize: 18, fontWeight: 700, color: "var(--heri-ochre-2)", letterSpacing: "-0.02em" }}
+                  >
+                    {Math.round(brainIQ.score * 100)}
+                  </span>
+                </Link>
+              ) : null}
               {forecasts.length === 0 ? (
                 <div
-                  className="py-6 text-center"
+                  className="py-4 text-center"
                   style={{ color: "var(--heri-ink-3)", fontSize: 12.5, fontStyle: "italic" }}
                 >
                   {ar ? "لا توقعات نشطة" : "No active forecasts"}
                 </div>
               ) : (
                 <ul className="space-y-2">
-                  {forecasts.slice(0, 3).map((f) => (
+                  {forecasts.slice(0, 2).map((f) => (
                     <li
                       key={f.id}
                       className="px-3 py-2.5"

@@ -26,10 +26,11 @@ export default async function BrainPage() {
   const ar = locale === "ar";
   const cfg = llmConfig();
 
-  const [iq, totalInsights, totalPlans, totalMemories, totalSessions, drafts] = await Promise.all([
+  const [iq, totalInsights, totalPlans, plansDone, totalMemories, totalSessions, drafts] = await Promise.all([
     computeIQ("default").catch(() => null),
     prisma.aIInsight.count({ where: { deletedAt: null } }),
     prisma.plan.count(),
+    prisma.plan.count({ where: { status: "DONE" } }),
     prisma.memory.count(),
     prisma.councilSession.count({ where: { status: "DONE" } }),
     prisma.selfTuningReport.count({ where: { status: "DRAFT" } }),
@@ -149,7 +150,6 @@ export default async function BrainPage() {
   };
 
   const liveCnt  = subsystems.filter((s) => s.status === "live").length;
-  const plansDone = await prisma.plan.count({ where: { status: "DONE" } });
 
   return (
     <>

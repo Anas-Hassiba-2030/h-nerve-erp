@@ -8,7 +8,7 @@ import {
   Brain, Wallet, Sparkles, TrendingUp, Leaf, ChartLine, FlaskConical,
   ListChecks, Trophy, Users, Settings, LogOut, Activity, ChevronLeft,
   ChevronRight, UserSquare2, ArrowLeftRight, Search, FileText, HelpCircle,
-  GitBranch, Map, Pin, MessageSquare, Bell, Workflow, Heart, Network, Zap, Target, Globe2, Plug, ScrollText, Sparkles as SparklesIcon, PlayCircle,
+  GitBranch, Map, Pin, MessageSquare, Bell, Workflow, Heart, Network, Zap, Target, Globe2, Plug, ScrollText, Sparkles as SparklesIcon, PlayCircle, Cpu,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { canAccess } from "@/lib/permissions";
@@ -142,9 +142,10 @@ export function Sidebar({
       items:
         user.role === "ADMIN"
           ? [
+              { href: "/brain", label: ar ? "مركز الدماغ" : "Brain hub", icon: Brain, hint: "HOME" },
               { href: "/insights", label: messages["nav.insights"], icon: Sparkles, hint: "AI" },
               { href: "/alerts", label: ar ? "التنبيهات الذكية" : "Smart alerts", icon: Bell },
-              { href: "/admin/brain", label: ar ? "مخرجات محرك الذكاء" : "Brain Engine Output", icon: Brain, hint: "ENGINE" },
+              { href: "/admin/brain", label: ar ? "مخرجات محرك الذكاء" : "Brain Engine Output", icon: Cpu, hint: "ENGINE" },
               { href: "/brain/graph", label: ar ? "الرسم السببي" : "Causal graph", icon: Network, hint: "BRAIN" },
               { href: "/brain/scenarios", label: ar ? "ماذا لو…" : "What-if simulator", icon: Zap, hint: "BRAIN" },
               { href: "/brain/council", label: ar ? "المجلس" : "The council", icon: Users, hint: "BRAIN" },

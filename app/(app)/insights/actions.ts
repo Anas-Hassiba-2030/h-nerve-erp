@@ -188,7 +188,7 @@ export async function generateInsightPlan(formData: FormData) {
   });
 
   revalidatePath("/insights");
-  revalidatePath("/brain/scenarios");
+  revalidatePath("/plans");
 }
 
 // === AI ENGINE — runs heuristics across all modules and persists fresh insights ===

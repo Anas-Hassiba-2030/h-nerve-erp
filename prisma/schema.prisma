@@ -3,9 +3,9 @@ generator client {
 }
 
 datasource db {
-  // PRODUCTION: PostgreSQL on Neon (pooled + direct URLs).
-  // LOCAL DEV: revert to provider="sqlite", drop directUrl,
-  // DATABASE_URL="file:./dev.db", then npm run db:reset.
+  // PRODUCTION: Railway injects DATABASE_URL automatically (no DIRECT_URL needed).
+  // Neon users: set DIRECT_URL to the non-pooled connection string for migrations.
+  // LOCAL DEV: provider="sqlite", remove directUrl line, DATABASE_URL="file:./dev.db".
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")

@@ -1,0 +1,11 @@
+[build]
+builder = "nixpacks"
+# DIRECT_URL defaults to DATABASE_URL on Railway (no pgBouncer pooling needed).
+buildCommand = "export DIRECT_URL=${DIRECT_URL:-$DATABASE_URL} && npm install && prisma generate && prisma migrate deploy && next build"
+
+[deploy]
+startCommand = "next start -p ${PORT:-3000}"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3

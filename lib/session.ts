@@ -50,21 +50,26 @@ function resolveSessionPassword(): string {
 // at deploy (everyone re-logs-in once).
 const SESSION_TTL_SECONDS = 60 * 60 * 24;
 
-export const sessionOptions: SessionOptions = {
-  password: resolveSessionPassword(),
-  cookieName: "bmv2026_session",
-  ttl: SESSION_TTL_SECONDS,
-  cookieOptions: {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: SESSION_TTL_SECONDS,
-  },
-};
+// Built lazily so a missing/short SESSION_PASSWORD only crashes a real
+// request — not the build itself (Next collects page data at build time
+// and would otherwise refuse to compile when the env var is wrong).
+function buildSessionOptions(): SessionOptions {
+  return {
+    password: resolveSessionPassword(),
+    cookieName: "bmv2026_session",
+    ttl: SESSION_TTL_SECONDS,
+    cookieOptions: {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: SESSION_TTL_SECONDS,
+    },
+  };
+}
 
 export async function getSession() {
-  return getIronSession<SessionData>(cookies(), sessionOptions);
+  return getIronSession<SessionData>(cookies(), buildSessionOptions());
 }
 
 export async function getCurrentUser(): Promise<SessionUser | null> {

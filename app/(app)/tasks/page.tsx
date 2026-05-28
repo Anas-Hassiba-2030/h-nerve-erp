@@ -8,13 +8,13 @@ import { HeriKpi } from "@/components/HeriKpi";
 import { HeritageSection, HeritagePill } from "@/components/heritage";
 import { RankBadge } from "@/components/RankBadge";
 import { EmptyState } from "@/components/EmptyState";
-import { DeleteButton } from "@/components/DeleteButton";
+import { TaskTable } from "@/components/tasks/TaskTable";
 import { prisma } from "@/lib/db";
-import { formatNumber, formatShortDate } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
 import { rankById, progressToNext, nextRank } from "@/lib/gamification";
-import { setTaskStatus, deleteTask } from "./actions";
+import { hasRole } from "@/lib/authz";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +47,7 @@ export default async function TasksPage() {
   const rank = rankById(me?.rank ?? "PAWN");
   const progress = progressToNext(me?.xp ?? 0);
   const next = nextRank(me?.xp ?? 0);
+  const canManage = hasRole(session, "MANAGER");
 
   const grouped = STATUS_ORDER.map((s) => ({ status: s, items: tasks.filter((t) => t.status === s) }));
 
@@ -133,16 +134,16 @@ export default async function TasksPage() {
             }
           />
         ) : (
-          <section className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-4">
-            {grouped.map((g) => (
-              <div key={g.status} className="space-y-2">
-                {/* Column header */}
+          <section className="grid gap-5">
+            {grouped.filter((g) => g.items.length > 0).map((g) => (
+              <div key={g.status}>
+                {/* Section header */}
                 <div
-                  className="flex items-center justify-between px-3 py-2"
+                  className="mb-2 flex items-center justify-between px-3 py-2"
                   style={{ background: "var(--heri-cream-2)", border: "1px solid var(--heri-rule)" }}
                 >
                   <HeritagePill tone={STATUS_TONE[g.status]}>
-                    {ar ? STATUS_AR[g.status] : g.status}
+                    {ar ? STATUS_AR[g.status] : g.status.replace("_", " ")}
                   </HeritagePill>
                   <span
                     className="heri-number-mono"
@@ -151,86 +152,11 @@ export default async function TasksPage() {
                     {g.items.length}
                   </span>
                 </div>
-
-                <div className="space-y-2 heri-stagger">
-                  {g.items.map((t) => (
-                    <div
-                      key={t.id}
-                      className="heri-card"
-                      style={{ padding: "12px 14px" }}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 style={{ fontSize: 13, fontWeight: 600, color: "var(--heri-ink)" }}>{t.title}</h3>
-                        {t.kind === "SIDE" ? (
-                          <HeritagePill tone="warn">{ar ? "جانبية" : "Side"}</HeritagePill>
-                        ) : null}
-                      </div>
-                      {t.description ? (
-                        <p className="mt-1 line-clamp-2 text-[12px]" style={{ color: "var(--heri-ink-3)" }}>
-                          {t.description}
-                        </p>
-                      ) : null}
-                      <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                        <HeritagePill tone={PRIO_TONE[t.priority]}>
-                          {ar ? PRIO_AR[t.priority] : t.priority}
-                        </HeritagePill>
-                        <span
-                          className="heri-eyebrow"
-                          style={{ fontSize: 9, color: "var(--heri-ink-3)" }}
-                        >
-                          {t.module}
-                        </span>
-                        <span
-                          className="heri-number-mono"
-                          style={{ fontSize: 10, color: "var(--heri-teal)", fontWeight: 700 }}
-                        >
-                          +{Math.round(t.points * (t.kind === "SIDE" ? 1.5 : 1))} XP
-                        </span>
-                        {t.dueAt ? (
-                          <span style={{ fontSize: 11, color: "var(--heri-ink-3)" }}>
-                            {ar ? "حتى" : "due"} {formatShortDate(t.dueAt)}
-                          </span>
-                        ) : null}
-                      </div>
-                      <div
-                        className="mt-3 flex flex-wrap items-center gap-1 pt-3"
-                        style={{ borderTop: "1px solid var(--heri-rule)" }}
-                      >
-                        {STATUS_ORDER.filter((s) => s !== g.status).map((s) => (
-                          <form key={s} action={setTaskStatus}>
-                            <input type="hidden" name="id" value={t.id} />
-                            <input type="hidden" name="status" value={s} />
-                            <button
-                              type="submit"
-                              className="heri-btn heri-btn-ghost"
-                              style={{ padding: "3px 8px", fontSize: 10.5 }}
-                            >
-                              {s === "DONE" ? <CheckCircle2 className="h-3 w-3" style={{ color: "var(--heri-teal)" }} strokeWidth={1.5} /> :
-                               s === "BLOCKED" ? <AlertTriangle className="h-3 w-3" style={{ color: "var(--heri-ochre)" }} strokeWidth={1.5} /> :
-                               <Clock className="h-3 w-3" strokeWidth={1.5} />}
-                              {ar ? STATUS_AR[s] : s}
-                            </button>
-                          </form>
-                        ))}
-                        <div className="ms-auto">
-                          <DeleteButton softDelete action={deleteTask} payload={{ id: t.id }} label={ar ? `حذف "${t.title}"` : `Delete "${t.title}"`} />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {g.items.length === 0 ? (
-                    <div
-                      className="py-6 text-center"
-                      style={{
-                        border: "1px dashed var(--heri-rule-strong)",
-                        fontSize: 11,
-                        color: "var(--heri-ink-3)",
-                      }}
-                    >
-                      —
-                    </div>
-                  ) : null}
-                </div>
+                <TaskTable
+                  tasks={g.items}
+                  ar={ar}
+                  canManage={canManage}
+                />
               </div>
             ))}
           </section>

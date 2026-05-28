@@ -149,6 +149,62 @@ export async function deleteTask(formData: FormData) {
   });
 }
 
+export async function bulkSetTaskStatus(ids: string[], status: string) {
+  const user = await requireUser();
+  if (!ids.length || !["TODO", "IN_PROGRESS", "DONE", "BLOCKED"].includes(status)) return;
+
+  const tasks = await prisma.task.findMany({ where: { id: { in: ids } } });
+
+  for (const task of tasks) {
+    const wasDone = task.status === "DONE";
+    const willBeDone = status === "DONE";
+    await prisma.task.update({
+      where: { id: task.id },
+      data: { status, completedAt: willBeDone ? new Date() : null },
+    });
+    if (task.assigneeId && willBeDone && !wasDone) {
+      const sideMul = task.kind === "SIDE" ? 1.5 : 1;
+      const xpDelta = Math.round(task.points * sideMul);
+      const u = await prisma.user.findUnique({ where: { id: task.assigneeId } });
+      if (u) {
+        const newXp = u.xp + xpDelta;
+        await prisma.user.update({
+          where: { id: u.id },
+          data: { xp: newXp, rank: rankFor(newXp).id, bonusPercent: bonusFor(newXp) },
+        });
+      }
+    }
+  }
+
+  await logActivity({
+    action: "UPDATE",
+    entity: "TASK",
+    entityId: ids[0],
+    summary: `تحديث جماعي لـ ${ids.length} مهام → ${status}`,
+    summaryEn: `Bulk update ${ids.length} tasks → ${status}`,
+    meta: { ids, status },
+  });
+  revalidatePath("/tasks");
+  revalidatePath("/dashboard");
+}
+
+export async function bulkDeleteTasks(ids: string[]) {
+  await requireRole("MANAGER");
+  if (!ids.length) return;
+  for (const id of ids) {
+    await softDelete("task", id);
+  }
+  await logActivity({
+    action: "DELETE",
+    entity: "TASK",
+    entityId: ids[0],
+    summary: `حذف جماعي لـ ${ids.length} مهام`,
+    summaryEn: `Bulk deleted ${ids.length} tasks`,
+    meta: { ids },
+  });
+  revalidatePath("/tasks");
+}
+
 export async function restoreTask(formData: FormData) {
   await requireUser();
   const id = String(formData.get("id") ?? "");

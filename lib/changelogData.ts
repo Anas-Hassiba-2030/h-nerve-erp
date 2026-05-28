@@ -19,6 +19,36 @@ export type ChangelogEntry = {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-05-28",
+    version: "1.5",
+    category: "fix",
+    modules: ["auth", "session", "deploy"],
+    ar: {
+      title: "إصلاح البناء الإنتاجي — كلمة مرور الجلسة وإعادة التوليد الثابت",
+      desc:
+        "إصلاح خطأ كان يمنع بناء Vercel من الاكتمال بسبب التحقق المبكر من SESSION_PASSWORD أثناء تحليل الوحدات الثابتة، وإصلاح 31 صفحة كانت تُولَّد ثابتة رغم استعلامها قاعدة البيانات.",
+      bullets: [
+        "تأجيل التحقق من SESSION_PASSWORD إلى وقت الطلب — البناء لا يفشل بعد الآن عند غياب المتغير",
+        "إضافة force-dynamic لـ 31 صفحة تستعلم Prisma لضمان عرض البيانات الحية",
+        "الانتقال من SQLite إلى PostgreSQL عبر Prisma Postgres على Vercel",
+        "تشغيل seed الإنتاج تلقائياً عند كل نشر لضمان وجود بيانات المستخدم الأساسية",
+        "إخفاء تلميح بيانات الاعتماد التجريبية في بيئة الإنتاج",
+      ],
+    },
+    en: {
+      title: "Production build fix — session password + static rendering",
+      desc:
+        "Fixed a crash that prevented Vercel builds from completing due to early SESSION_PASSWORD validation during module parsing, and fixed 31 pages that were statically generated despite querying the database.",
+      bullets: [
+        "Defer SESSION_PASSWORD validation to request-time — build no longer fails if env var is absent",
+        "Added force-dynamic to 31 Prisma-querying pages so they always render live data",
+        "Migrated from SQLite to PostgreSQL via Prisma Postgres on Vercel",
+        "Auto-run production seed on every deploy to guarantee baseline user data",
+        "Demo credentials hint hidden in production to avoid misleading users",
+      ],
+    },
+  },
+  {
     date: "2026-04-30",
     version: "1.3",
     category: "feature",

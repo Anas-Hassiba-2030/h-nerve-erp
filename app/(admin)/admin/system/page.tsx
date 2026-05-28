@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
+import { SeedDemoButton } from "@/components/SeedDemoButton";
 
 export const dynamic = "force-dynamic";
 
@@ -99,6 +100,7 @@ export default async function AdminSystemPage() {
               ? "بوابة عائلة الإدارة التشغيلية — كل المسارات الإدارية في مكان واحد. مع إجماليات الاتحاد عبر كل مستأجر وكل نظام عقل."
               : "The operator admin family gateway — every admin route in one place. Federation totals across every tenant and every brain system."}
           </p>
+          <SeedDemoButton ar={ar} />
         </div>
       </header>
 

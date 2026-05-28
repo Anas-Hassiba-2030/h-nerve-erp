@@ -17,6 +17,8 @@ import { formatNumber, formatShortDate } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
 import { deleteBatch } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 export default async function DairyPage() {
   const locale = getLocale();
   const ar = locale === "ar";

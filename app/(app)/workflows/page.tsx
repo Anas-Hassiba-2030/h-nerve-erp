@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // /workflows — Heritage Modern list of all workflows.
 //
 // Phase 12 of docs/PHASES-INTELLIGENCE.md. (Replaces the prior alert-rule

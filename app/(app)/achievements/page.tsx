@@ -12,6 +12,8 @@ import { RANKS, rankById, progressToNext } from "@/lib/gamification";
 import { formatNumber } from "@/lib/utils";
 import { Confetti } from "@/components/Confetti";
 
+export const dynamic = "force-dynamic";
+
 // Tier visual identity — these are recognizable medal colors so they stay
 // constant across themes (avoid theme tokens here on purpose).
 const TIER_VISUAL: Record<

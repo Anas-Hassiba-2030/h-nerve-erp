@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // /alerts — Alert Rule Center. Threshold-based monitors that auto-create
 // AIInsights when conditions are met. Each rule has a toggle, severity,
 // threshold slider, cooldown, and last-triggered stamp.

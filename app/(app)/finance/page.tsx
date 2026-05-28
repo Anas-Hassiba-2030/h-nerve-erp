@@ -12,6 +12,8 @@ import { prisma } from "@/lib/db";
 import { formatMoney, formatNumber, formatShortDate } from "@/lib/utils";
 import { deleteTransaction } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 const KIND_LABEL: Record<string, { ar: string; en: string; tone: string }> = {
   REVENUE:  { ar: "إيراد",  en: "Revenue",  tone: "badge-emerald" },
   EXPENSE:  { ar: "مصروف",  en: "Expense",  tone: "badge-red" },

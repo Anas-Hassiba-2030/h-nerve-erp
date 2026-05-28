@@ -2,6 +2,8 @@ import { Topbar } from "@/components/Topbar";
 import { prisma } from "@/lib/db";
 import { ar, formatDate, ROLES_AR } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 const ROLE_TONE: Record<string, string> = {
   ADMIN: "badge-violet",
   EXECUTIVE: "badge-gold",

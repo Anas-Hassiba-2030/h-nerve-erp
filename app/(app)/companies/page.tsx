@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // /companies — Heritage Modern showcase. Cream plinth hero + hairline tiles
 // for each business unit. Single accent rail per company (drawn from the
 // Heritage palette), display-serif headings, mono uppercase eyebrows. No

@@ -11,6 +11,8 @@ import { prisma } from "@/lib/db";
 import { formatNumber, formatPercent } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
 
+export const dynamic = "force-dynamic";
+
 const PERIODS = ["Q1", "Q2", "Q3", "Q4"] as const;
 
 export default async function SustainabilityPage({

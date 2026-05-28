@@ -12,6 +12,8 @@ import { getLocale } from "@/lib/i18n.server";
 import { rankById } from "@/lib/gamification";
 import { OrgTree } from "@/components/OrgTree";
 
+export const dynamic = "force-dynamic";
+
 export default async function EmployeesPage() {
   const ar = getLocale() === "ar";
 

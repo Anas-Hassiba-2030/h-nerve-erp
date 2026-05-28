@@ -11,6 +11,8 @@ import { formatNumber, formatPercent } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
 import { getCompanyRevenue30dMap, notionalValuationFromRevenue30d } from "@/lib/finance";
 
+export const dynamic = "force-dynamic";
+
 const REGION_AR: Record<string, string> = { MENA: "الشرق الأوسط", US: "الولايات المتحدة", EU: "أوروبا", ASIA: "آسيا" };
 const REGION_EN: Record<string, string> = { MENA: "MENA", US: "US", EU: "EU", ASIA: "Asia" };
 

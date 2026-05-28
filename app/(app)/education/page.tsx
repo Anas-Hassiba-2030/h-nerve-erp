@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // /education — The Tank Incubator at Al-Ahliyya Amman University.
 // AAU brand identity (indigo/violet gradient + university shield logo).
 // Fully bilingual.

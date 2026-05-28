@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // /supply-chain — predictive supply chain bridge. Heritage Modern vocabulary.
 // Phase NS-1: every approved forecast drafts a cross-tenant PO.
 

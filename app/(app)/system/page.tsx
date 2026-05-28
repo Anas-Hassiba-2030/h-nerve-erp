@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // /system — health dashboard. Database stats, AI engine status, recent
 // errors, table counts, last activity per module. Admin-only "is the
 // nervous system breathing?" screen.

@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // Settings page — theme preview cards, rank progression, language toggle,
 // exports menu, and a system status grid.
 

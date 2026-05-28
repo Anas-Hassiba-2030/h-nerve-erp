@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // Executive Reports — index page listing per-company one-pagers.
 // Each report is print-friendly (ctrl+P → PDF) with the Hourani brand banner.
 

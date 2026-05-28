@@ -16,6 +16,8 @@ import { getLocale } from "@/lib/i18n.server";
 import { getCompanyBrand } from "@/lib/companyBrand";
 import { deleteProject, setProjectStage } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 const STAGE_ORDER = ["IDEA", "RESEARCH", "PLANNED", "APPROVED", "IN_PROGRESS", "ON_HOLD", "DONE"] as const;
 const STAGE_AR: Record<string, string> = {
   IDEA: "فكرة",

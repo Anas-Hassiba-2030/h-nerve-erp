@@ -17,6 +17,8 @@ import {
 import { getLocale } from "@/lib/i18n.server";
 import { deleteFarm } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 const TYPE_ICON: Record<string, typeof Sprout> = {
   GREENHOUSE: Sprout,
   OPEN_FIELD: Wheat,

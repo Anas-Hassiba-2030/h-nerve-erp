@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // /insights — Heritage Modern intelligence layer.
 //
 // Cream plinth + ochre rail hero, hairline KPI tiles, anomaly section as a

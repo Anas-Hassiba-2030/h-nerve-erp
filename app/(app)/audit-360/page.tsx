@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // /audit-360 — single-record cross-module trace.
 //
 // URL contract: ?entity=<TYPE>&id=<id>

@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // Global Search — full cross-entity deep search across the entire H-Nerve ERP.
 // Searches: Companies, Hotels, Bookings, Dairy batches, Farms, Crops, Programs,
 // Forecasts, Insights, Tasks, Projects, Transactions, Markets, Users.

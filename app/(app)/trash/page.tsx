@@ -10,6 +10,8 @@ import type { SoftEntity } from "@/lib/softDelete";
 import { TrashClient, type TrashItem } from "./TrashClient";
 import { purgeAllExpired } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 // Items past this age are recoverable but flagged as "pending purge". Mirrors
 // SOFT_DELETE_GRACE_MS in lib/cleanupSoftDeletes.ts.
 const GRACE_MS = 24 * 60 * 60 * 1000;

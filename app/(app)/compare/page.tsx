@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // Side-by-side company comparison view.
 // Pick 2 companies via search-param and see their metrics, ESG, trend, and
 // operational footprint laid out in matched columns for at-a-glance contrast.

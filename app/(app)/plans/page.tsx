@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // /plans — list every plan, grouped by status. Heritage Modern.
 //
 // Phase 5 of docs/PHASES-INTELLIGENCE.md.

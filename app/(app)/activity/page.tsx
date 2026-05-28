@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // Activity Log — system-wide audit trail.
 // Filters by entity, action, actor. Bilingual summaries with icons + relative time.
 

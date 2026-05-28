@@ -20,6 +20,8 @@ import { formatMoney, formatNumber, formatPercent } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
 import { getCompanyBrand } from "@/lib/companyBrand";
 
+export const dynamic = "force-dynamic";
+
 export default async function AnalyticsHubPage() {
   const ar = getLocale() === "ar";
   const now = new Date();

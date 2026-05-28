@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // /brain — The Brain Intelligence Hub.
 //
 // Command center showing all subsystem status, Brain IQ, mode badge,

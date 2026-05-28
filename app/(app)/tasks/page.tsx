@@ -16,6 +16,8 @@ import { getLocale } from "@/lib/i18n.server";
 import { rankById, progressToNext, nextRank } from "@/lib/gamification";
 import { setTaskStatus, deleteTask } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 const STATUS_ORDER = ["TODO", "IN_PROGRESS", "DONE", "BLOCKED"] as const;
 const STATUS_AR: Record<string, string> = { TODO: "للتنفيذ", IN_PROGRESS: "جارية", DONE: "منجزة", BLOCKED: "متعثرة" };
 const STATUS_TONE: Record<string, "info" | "success" | "critical" | "neutral"> = {

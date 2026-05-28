@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // /messages — internal peer-to-peer messaging between officials.
 // Index view: composer to start a new chat + list of active threads.
 

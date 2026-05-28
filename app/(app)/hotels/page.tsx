@@ -20,6 +20,8 @@ import {
 import { getLocale } from "@/lib/i18n.server";
 import { deleteHotel, deleteBooking } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 const COUNTRY_NAMES_AR: Record<string, string> = { JO: "الأردن", BG: "بلغاريا" };
 const COUNTRY_NAMES_EN: Record<string, string> = { JO: "Jordan", BG: "Bulgaria" };
 

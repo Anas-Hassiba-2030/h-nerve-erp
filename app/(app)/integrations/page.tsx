@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // /integrations — Heritage Modern marketplace grid.
 //
 // 24 provider cards across 6 categories. Each tile flips on Y-axis when

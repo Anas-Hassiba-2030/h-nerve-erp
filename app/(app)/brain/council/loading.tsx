@@ -1,14 +1,16 @@
-import { PageSkeleton, CardSkeleton } from "@/components/skeletons";
+import { PageSkeleton, CardSkeleton, KpiSkeleton } from "@/components/skeletons";
 
-// Mirrors /brain/council: PageHeader, the convene hero plinth, then the
-// grid of past council sessions.
+// Mirrors /brain/council: PageHeader, the convene hero plinth, 4-up KPI
+// strip, operator-shares section, then the list of past council sessions.
 export default function BrainCouncilLoading() {
   return (
     <PageSkeleton>
-      <CardSkeleton height={150} showHeader={false} />
-      <div className="grid gap-4 md:grid-cols-2">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <CardSkeleton key={i} lines={4} />
+      <CardSkeleton height={220} showHeader={false} />
+      <KpiSkeleton count={4} />
+      <CardSkeleton lines={4} />
+      <div className="space-y-2">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="skel" style={{ height: 64 }} />
         ))}
       </div>
     </PageSkeleton>

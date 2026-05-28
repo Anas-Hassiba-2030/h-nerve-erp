@@ -1,8 +1,8 @@
-import { KpiSkeleton, CardSkeleton } from "@/components/skeletons";
+import { KpiSkeleton, CardSkeleton, TableSkeleton } from "@/components/skeletons";
 
-// Mirrors dairy/[id]/page.tsx exactly so the detail surface doesn't jump on
-// hydration: Topbar row, Heritage hero plinth, 4-up HeriKpi strip, lifecycle
-// card, then the two-column body (1fr siblings | 320px aside).
+// Mirrors farms/[id]/page.tsx exactly so the detail surface doesn't jump on
+// hydration: Topbar row, Heritage hero plinth, 4-up HeriKpi strip, sensors +
+// about two-column, then the crops table.
 export default function Loading() {
   return (
     <div className="flex-1 anim-fade-up">
@@ -14,10 +14,10 @@ export default function Loading() {
         <div className="space-y-2">
           <div className="skel skel-eyebrow" />
           <div className="skel skel-title" style={{ width: 240 }} />
-          <div className="skel skel-line" style={{ width: 180 }} />
+          <div className="skel skel-line" style={{ width: 200 }} />
         </div>
         <div className="flex items-center gap-2">
-          <div className="skel" style={{ width: 90, height: 32, borderRadius: 0 }} />
+          <div className="skel" style={{ width: 80, height: 32, borderRadius: 0 }} />
           <div className="skel" style={{ width: 110, height: 32, borderRadius: 0 }} />
         </div>
       </div>
@@ -34,11 +34,11 @@ export default function Loading() {
             <div className="flex-1 space-y-2">
               <div className="skel skel-eyebrow" style={{ width: 140 }} />
               <div className="skel skel-title" style={{ width: "min(360px, 55%)" }} />
-              <div className="skel skel-line" style={{ width: "min(300px, 48%)" }} />
+              <div className="skel skel-line" style={{ width: "min(280px, 45%)" }} />
               <div className="mt-2 flex gap-3">
+                <div className="skel skel-pill" style={{ width: 110 }} />
+                <div className="skel skel-pill" style={{ width: 130 }} />
                 <div className="skel skel-pill" style={{ width: 90 }} />
-                <div className="skel skel-pill" style={{ width: 80 }} />
-                <div className="skel skel-pill" style={{ width: 100 }} />
               </div>
             </div>
           </div>
@@ -47,17 +47,14 @@ export default function Loading() {
         {/* 4-up KPI strip */}
         <KpiSkeleton count={4} />
 
-        {/* Lifecycle bar card */}
-        <CardSkeleton height={90} />
-
-        {/* Two-column body */}
-        <div className="grid gap-6 lg:grid-cols-[1fr,320px]">
-          <CardSkeleton lines={6} />
-          <div className="space-y-6">
-            <CardSkeleton lines={6} />
-            <CardSkeleton lines={3} />
-          </div>
+        {/* Sensors + about two-column */}
+        <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+          <CardSkeleton lines={5} height={220} />
+          <CardSkeleton lines={5} />
         </div>
+
+        {/* Crops table */}
+        <TableSkeleton rows={5} cols={8} caption />
       </div>
     </div>
   );

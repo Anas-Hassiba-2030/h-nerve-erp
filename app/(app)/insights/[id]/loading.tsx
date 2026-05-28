@@ -1,88 +1,31 @@
-export default function Loading() {
-  const skel =
-    "rounded animate-pulse bg-[color-mix(in_srgb,var(--heri-ink-3)_18%,transparent)]";
-  const skelLight =
-    "rounded animate-pulse bg-[color-mix(in_srgb,var(--heri-ink-3)_12%,transparent)]";
+import { PageSkeleton, CardSkeleton } from "@/components/skeletons";
 
+// Mirrors /insights/[id]: PageHeader, back rail, Heritage hero plinth (single
+// severity rail), then 2-col grid — body + related on the left, author +
+// meta on the right.
+export default function InsightDetailLoading() {
   return (
-    <div className="flex-1 anim-fade-up">
-      <div
-        className="flex flex-wrap items-center justify-between gap-4 px-6 py-4"
-        style={{ borderBottom: "1px solid var(--heri-rule)" }}
-      >
-        <div className="space-y-2">
-          <div className={`h-3 w-20 ${skelLight}`} />
-          <div className={`h-7 w-64 ${skel}`} />
-          <div className={`h-3 w-48 ${skelLight}`} />
-        </div>
-        <div className="h-9 w-28 rounded-xl animate-pulse" style={{ background: "color-mix(in srgb, var(--heri-ochre) 14%, transparent)" }} />
+    <PageSkeleton withActions={false}>
+      {/* Back rail */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="skel" style={{ width: 160, height: 14 }} />
+        <div className="skel" style={{ width: 96, height: 28 }} />
       </div>
 
-      <div className="space-y-6 p-6">
-        <div
-          className="relative h-44 overflow-hidden rounded-2xl"
-          style={{
-            background:
-              "linear-gradient(135deg, color-mix(in srgb, #1c5fbe 22%, transparent), color-mix(in srgb, var(--heri-copper) 12%, transparent))",
-          }}
-        >
-          <div
-            className="absolute inset-0 anim-grad opacity-60"
-            style={{ background: "linear-gradient(120deg, transparent 0%, color-mix(in srgb, white 35%, transparent) 50%, transparent 100%)", backgroundSize: "200% 200%" }}
-            aria-hidden
-          />
-          <div className="absolute inset-6 flex items-center gap-4">
-            <div className="h-20 w-20 animate-pulse rounded-2xl" style={{ background: "rgba(255,255,255,.25)" }} />
-            <div className="space-y-2">
-              <div className="h-3 w-20 animate-pulse rounded" style={{ background: "rgba(255,255,255,.3)" }} />
-              <div className="h-8 w-72 animate-pulse rounded" style={{ background: "rgba(255,255,255,.3)" }} />
-              <div className="h-3 w-56 animate-pulse rounded" style={{ background: "rgba(255,255,255,.2)" }} />
-            </div>
-          </div>
-        </div>
+      {/* Heritage hero plinth */}
+      <CardSkeleton height={180} showHeader={false} />
 
-        <div className="grid gap-6 lg:grid-cols-[1fr,320px]">
-          <div className="space-y-6">
-            <div className="card card-pad space-y-2">
-              <div className={`h-4 w-40 ${skel}`} />
-              <div className={`h-3 w-full ${skelLight}`} />
-              <div className={`h-3 w-full ${skelLight}`} />
-              <div className={`h-3 w-full ${skelLight}`} />
-              <div className={`h-3 w-3/4 ${skelLight}`} />
-            </div>
-            <div className="card card-pad space-y-3">
-              <div className={`h-4 w-44 ${skel}`} />
-              {[0, 1, 2, 3].map((i) => (
-                <div key={i} className="space-y-1.5 border-b border-[var(--heri-rule)] pb-2 last:border-b-0">
-                  <div className={`h-3.5 w-56 ${skel}`} />
-                  <div className={`h-2.5 w-3/4 ${skelLight}`} />
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="space-y-4">
-            <div className="card card-pad space-y-2">
-              <div className={`h-4 w-28 ${skel}`} />
-              <div className="flex items-center gap-3">
-                <div className={`h-10 w-10 ${skelLight}`} />
-                <div className="flex-1 space-y-1.5">
-                  <div className={`h-3 w-32 ${skel}`} />
-                  <div className={`h-2.5 w-24 ${skelLight}`} />
-                </div>
-              </div>
-            </div>
-            <div className="card card-pad space-y-3">
-              <div className={`h-4 w-32 ${skel}`} />
-              {[0, 1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
-                  <div className={`h-3 w-20 ${skelLight}`} />
-                  <div className={`h-3 w-24 ${skel}`} />
-                </div>
-              ))}
-            </div>
-          </div>
+      {/* 2-col grid */}
+      <div className="grid gap-6 lg:grid-cols-[1fr,320px]">
+        <div className="space-y-6">
+          <CardSkeleton lines={6} />
+          <CardSkeleton lines={5} />
+        </div>
+        <div className="space-y-6">
+          <CardSkeleton lines={3} />
+          <CardSkeleton lines={5} />
         </div>
       </div>
-    </div>
+    </PageSkeleton>
   );
 }

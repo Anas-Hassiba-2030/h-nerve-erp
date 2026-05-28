@@ -223,7 +223,7 @@ export default async function HotelsPage() {
               }
             />
           ) : (
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 heri-stagger lg:grid-cols-2">
               {hotels.map((h) => {
                 const hotelRevenue = h.bookings.reduce((acc, b) => acc + b.revenue, 0);
                 const occRoomsHere = h.bookings.filter(

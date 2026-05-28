@@ -156,10 +156,22 @@ export default async function AlertsPage() {
               return (
                 <article
                   key={r.id}
-                  className={r.isActive ? "" : "opacity-60"}
-                  style={{ background: "var(--heri-cream)", border: "1px solid var(--heri-rule)" }}
+                  className={`heri-card ${r.isActive ? "" : "opacity-60"}`}
+                  style={{
+                    background: "var(--heri-cream)",
+                    padding: 20,
+                    borderInlineStart: `3px solid ${
+                      sevMeta.tone === "rose"
+                        ? "var(--heri-terracotta)"
+                        : sevMeta.tone === "amber"
+                          ? "var(--heri-ochre)"
+                          : sevMeta.tone === "emerald"
+                            ? "var(--heri-teal)"
+                            : "var(--heri-copper)"
+                    }`,
+                  }}
                 >
-                  <div className="space-y-3 p-5">
+                  <div className="space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3">
                         <span

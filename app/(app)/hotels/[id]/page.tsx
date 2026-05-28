@@ -4,16 +4,12 @@ import {
   ArrowLeft,
   Hotel as HotelIcon,
   BedDouble,
-  TrendingUp,
-  CircleDollarSign,
-  Calendar,
   MapPin,
   Clock,
   ChevronsRight,
-  Sparkles,
 } from "lucide-react";
 import { Topbar } from "@/components/Topbar";
-import { KpiCard } from "@/components/KpiCard";
+import { HeriKpi } from "@/components/HeriKpi";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PinButton } from "@/components/PinButton";
 import { prisma } from "@/lib/db";
@@ -22,12 +18,10 @@ import {
   ar,
   formatMoney,
   formatNumber,
-  formatPercent,
   formatShortDate,
   ROOM_TYPES_AR,
   TIERS_AR,
 } from "@/lib/utils";
-import { getCompanyBrand } from "@/lib/companyBrand";
 
 const COUNTRY_NAMES: Record<string, string> = { JO: "الأردن", BG: "بلغاريا" };
 
@@ -89,10 +83,9 @@ export default async function HotelDetailPage({
 
   const totalAllBookings = statusBreakdown.reduce(
     (acc, g) => acc + g._count,
-    0
+    0,
   );
 
-  const brand = getCompanyBrand(hotel.company.code);
   const pinned = await isPinned("HOTEL", hotel.id);
 
   return (
@@ -106,8 +99,8 @@ export default async function HotelDetailPage({
         }
         actions={
           <div className="flex items-center gap-2">
-            <Link href="/hotels" className="btn-ghost">
-              <ArrowLeft className="h-4 w-4" />
+            <Link href="/hotels" className="heri-btn heri-btn-ghost" style={{ fontSize: 13 }}>
+              <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
               الفنادق
             </Link>
             <PinButton
@@ -126,130 +119,92 @@ export default async function HotelDetailPage({
       />
 
       <div className="flex-1 space-y-6 p-6">
-        {/* Brand cover */}
-        <section
-          className="relative overflow-hidden rounded-2xl p-6 text-white anim-fade-up"
-          style={{ background: brand.gradient, minHeight: "180px" }}
-        >
-          <div
-            className="absolute inset-0 opacity-20 anim-grad"
-            style={{
-              background:
-                "linear-gradient(120deg, transparent 0%, white 50%, transparent 100%)",
-            }}
-            aria-hidden
-          />
-          <div className="relative flex flex-wrap items-start justify-between gap-6">
+        {/* Heritage hero plinth — cream surface, ochre rail, ink type */}
+        <section className="heri-hero p-6">
+          <div className="flex flex-wrap items-start justify-between gap-6">
             <div className="flex items-center gap-4">
               <div
-                className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl anim-pop"
+                className="flex h-16 w-16 shrink-0 items-center justify-center"
                 style={{
-                  background: "rgba(255,255,255,.15)",
-                  border: "1px solid rgba(255,255,255,.35)",
-                  backdropFilter: "blur(6px)",
+                  background: "var(--heri-cream-2)",
+                  border: "1px solid var(--heri-rule-strong)",
                 }}
               >
-                <HotelIcon className="h-10 w-10" />
+                <HotelIcon className="h-8 w-8" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
               </div>
               <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="badge-amber">{ar(TIERS_AR, hotel.tier)}</span>
-                  <span className="font-mono text-xs opacity-90">
-                    {"★".repeat(hotel.starRating)}
-                  </span>
-                  <Link
-                    href={`/companies/${hotel.companyId}`}
-                    className="rounded-full px-2 py-0.5 text-[10px] font-bold transition hover:opacity-100"
-                    style={{
-                      background: "rgba(255,255,255,.2)",
-                      border: "1px solid rgba(255,255,255,.3)",
-                    }}
-                  >
-                    {hotel.company.name}
-                  </Link>
+                <div className="heri-eyebrow heri-eyebrow-ink mb-1.5">
+                  {ar(TIERS_AR, hotel.tier)} · {"★".repeat(hotel.starRating)}
                 </div>
-                <h2 className="mt-1 text-2xl font-bold md:text-3xl">
+                <h2
+                  className="text-2xl font-semibold md:text-3xl"
+                  style={{ color: "var(--heri-ink)", letterSpacing: "-0.01em", lineHeight: 1.15 }}
+                >
                   {hotel.name}
                 </h2>
                 {hotel.nameEn ? (
-                  <p className="text-sm opacity-90" dir="ltr">
+                  <p className="mt-0.5 text-sm" style={{ color: "var(--heri-ink-3)" }} dir="ltr">
                     {hotel.nameEn}
                   </p>
                 ) : null}
-                <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
-                  <span
-                    className="flex items-center gap-1.5 rounded-full px-3 py-1 font-bold"
-                    style={{
-                      background: "rgba(255,255,255,.15)",
-                      border: "1px solid rgba(255,255,255,.25)",
-                    }}
-                  >
-                    <MapPin className="h-3 w-3" />
-                    {hotel.city} •{" "}
-                    {COUNTRY_NAMES[hotel.country] ?? hotel.country}
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px]" style={{ color: "var(--heri-ink-3)" }}>
+                  <span className="inline-flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    {hotel.city} · {COUNTRY_NAMES[hotel.country] ?? hotel.country}
                   </span>
-                  <span
-                    className="flex items-center gap-1.5 rounded-full px-3 py-1 font-bold"
-                    style={{
-                      background: "rgba(255,255,255,.15)",
-                      border: "1px solid rgba(255,255,255,.25)",
-                    }}
-                  >
-                    <BedDouble className="h-3 w-3" />
+                  <span className="inline-flex items-center gap-1.5">
+                    <BedDouble className="h-3.5 w-3.5" strokeWidth={1.5} />
                     {formatNumber(hotel.totalRooms)} غرفة
                   </span>
-                  <span
-                    className="flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-xs"
-                    style={{
-                      background: "rgba(255,255,255,.18)",
-                      border: "1px solid rgba(255,255,255,.3)",
-                    }}
+                  <Link
+                    href={`/companies/${hotel.companyId}`}
+                    className="hover:underline"
+                    style={{ color: "var(--heri-ochre)" }}
                   >
-                    ADR {formatMoney(hotel.baselineADR)}
-                  </span>
+                    {hotel.company.name}
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
           {hotel.description ? (
-            <p className="relative mt-4 max-w-3xl text-sm opacity-95">
+            <p className="mt-4 max-w-3xl text-sm" style={{ color: "var(--heri-ink-2)", lineHeight: 1.55 }}>
               {hotel.description}
             </p>
           ) : null}
         </section>
 
-        {/* KPI strip */}
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <KpiCard
+        {/* KPI strip — HeriKpi with CountUpValue */}
+        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
+          <HeriKpi
             label="إشغال حالي"
-            value={formatPercent(occ, 0)}
-            icon={TrendingUp}
-            tone="emerald"
-            hint={`${formatNumber(activeRooms)} من ${formatNumber(hotel.totalRooms)} غرفة`}
+            raw={occ}
+            kind="percent"
+            accent={occ >= 0.6 ? "var(--heri-teal, #1f4e4a)" : undefined}
+            hint={`${formatNumber(activeRooms)} / ${formatNumber(hotel.totalRooms)} غرفة`}
           />
-          <KpiCard
+          <HeriKpi
             label="إيرادات 30 يوم"
-            value={formatMoney(revenue30)}
-            icon={CircleDollarSign}
-            tone="amber"
+            raw={revenue30}
+            kind="money"
             hint={`${formatNumber(bookings30)} حجز`}
           />
-          <KpiCard
+          <HeriKpi
             label="متوسط إيراد/حجز"
-            value={formatMoney(avgRevenuePerBooking)}
-            icon={Sparkles}
-            tone="violet"
+            raw={avgRevenuePerBooking}
+            kind="money"
+            hint="آخر 30 يوم"
           />
-          <KpiCard
+          <HeriKpi
             label="إجمالي الحجوزات"
-            value={formatNumber(hotel._count.bookings)}
-            icon={Calendar}
-            tone="indigo"
+            raw={hotel._count.bookings}
+            kind="number"
+            hint="منذ الانطلاق"
           />
         </section>
 
         {/* Live occupancy bar */}
-        <section className="card card-pad anim-fade-up">
+        <section className="heri-card">
           <header className="mb-2 flex items-center justify-between">
             <h3
               className="flex items-center gap-2 text-sm font-semibold"
@@ -258,15 +213,11 @@ export default async function HotelDetailPage({
               <BedDouble
                 className="h-4 w-4"
                 style={{ color: "var(--heri-ochre)" }}
+                strokeWidth={1.5}
               />
               نبض الإشغال
             </h3>
-            <span
-              className="text-[10px] font-bold uppercase tracking-widest"
-              style={{ color: "var(--heri-ink-3)" }}
-            >
-              نشط الآن
-            </span>
+            <span className="heri-eyebrow heri-eyebrow-ink">نشط الآن</span>
           </header>
           <div className="space-y-1.5">
             <div
@@ -291,7 +242,7 @@ export default async function HotelDetailPage({
               }}
             >
               <div
-                className="h-full rounded-full anim-rise-glow"
+                className="h-full rounded-full"
                 style={{
                   width: `${occ * 100}%`,
                   background:
@@ -304,11 +255,11 @@ export default async function HotelDetailPage({
           </div>
         </section>
 
-        {/* Two columns */}
-        <div className="grid gap-6 lg:grid-cols-[1fr,360px]">
+        {/* Two columns — staggered cascade */}
+        <div className="grid gap-6 heri-stagger lg:grid-cols-[1fr,360px]">
           <div className="space-y-6">
             {/* Upcoming arrivals */}
-            <section className="card card-pad anim-fade-up">
+            <section className="heri-card">
               <header className="mb-3 flex items-center justify-between">
                 <h3
                   className="flex items-center gap-2 text-sm font-semibold"
@@ -317,6 +268,7 @@ export default async function HotelDetailPage({
                   <ChevronsRight
                     className="h-4 w-4"
                     style={{ color: "var(--heri-ochre)" }}
+                    strokeWidth={1.5}
                   />
                   وصول وشيك (14 يوم)
                 </h3>
@@ -336,11 +288,10 @@ export default async function HotelDetailPage({
                 </p>
               ) : (
                 <ul className="divide-y divide-[var(--heri-rule)]">
-                  {upcoming.map((b, i) => (
+                  {upcoming.map((b) => (
                     <li
                       key={b.id}
-                      className="flex items-center justify-between gap-3 py-2.5 anim-fade-up"
-                      style={{ animationDelay: `${i * 30}ms` }}
+                      className="flex items-center justify-between gap-3 py-2.5"
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
@@ -381,7 +332,7 @@ export default async function HotelDetailPage({
             </section>
 
             {/* Recent bookings */}
-            <section className="card card-pad anim-fade-up">
+            <section className="heri-card">
               <header className="mb-3 flex items-center justify-between">
                 <h3
                   className="flex items-center gap-2 text-sm font-semibold"
@@ -390,6 +341,7 @@ export default async function HotelDetailPage({
                   <Clock
                     className="h-4 w-4"
                     style={{ color: "var(--heri-ochre)" }}
+                    strokeWidth={1.5}
                   />
                   أحدث الحجوزات (30 يوم)
                 </h3>
@@ -403,11 +355,10 @@ export default async function HotelDetailPage({
                 </p>
               ) : (
                 <ul className="divide-y divide-[var(--heri-rule)]">
-                  {recentBookings.map((b, i) => (
+                  {recentBookings.map((b) => (
                     <li
                       key={b.id}
-                      className="flex items-center justify-between gap-3 py-2.5 anim-fade-up"
-                      style={{ animationDelay: `${i * 25}ms` }}
+                      className="flex items-center justify-between gap-3 py-2.5"
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
@@ -443,7 +394,7 @@ export default async function HotelDetailPage({
           <aside className="space-y-6">
             {/* Status breakdown */}
             {statusBreakdown.length > 0 ? (
-              <section className="card card-pad anim-fade-up">
+              <section className="heri-card">
                 <h3
                   className="mb-3 text-sm font-semibold"
                   style={{ color: "var(--heri-ink)" }}
@@ -489,7 +440,7 @@ export default async function HotelDetailPage({
             ) : null}
 
             {/* Quick facts */}
-            <section className="card card-pad anim-fade-up">
+            <section className="heri-card">
               <h3
                 className="mb-3 text-sm font-semibold"
                 style={{ color: "var(--heri-ink)" }}

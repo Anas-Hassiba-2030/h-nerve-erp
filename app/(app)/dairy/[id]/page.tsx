@@ -4,15 +4,13 @@ import {
   ArrowLeft,
   Milk,
   Beaker,
-  ShieldCheck,
   Package2,
   Truck,
-  AlertTriangle,
   Clock,
   ArrowRight,
 } from "lucide-react";
 import { Topbar } from "@/components/Topbar";
-import { KpiCard } from "@/components/KpiCard";
+import { HeriKpi } from "@/components/HeriKpi";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PinButton } from "@/components/PinButton";
 import { prisma } from "@/lib/db";
@@ -22,7 +20,6 @@ import {
   formatShortDate,
   formatRelative,
 } from "@/lib/utils";
-import { getCompanyBrand } from "@/lib/companyBrand";
 
 export default async function DairyDetailPage({
   params,
@@ -51,21 +48,15 @@ export default async function DairyDetailPage({
   const elapsedMs = Math.max(0, now.getTime() - batch.productionDate.getTime());
   const lifePct = totalLifeMs > 0 ? Math.min(1, elapsedMs / totalLifeMs) : 0;
   const daysUntilExpiry = Math.ceil(
-    (batch.expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    (batch.expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
   );
   const expired = now > batch.expiryDate;
-  const freshnessTone: "red" | "amber" | "emerald" = expired
-    ? "red"
-    : lifePct > 0.8
-      ? "amber"
-      : "emerald";
   const freshnessColor = expired
-    ? "#c0392b"
+    ? "var(--heri-terracotta, #b85c38)"
     : lifePct > 0.8
-      ? "#b06a1a"
-      : "#0a8e54";
+      ? "var(--heri-ochre-2)"
+      : "var(--heri-teal, #1f4e4a)";
 
-  const brand = getCompanyBrand(batch.company.code);
   const pinned = await isPinned("DAIRY", batch.id);
 
   return (
@@ -76,8 +67,8 @@ export default async function DairyDetailPage({
         subtitle={`دفعة ${batch.batchNumber}`}
         actions={
           <div className="flex items-center gap-2">
-            <Link href="/dairy" className="btn-ghost">
-              <ArrowLeft className="h-4 w-4" />
+            <Link href="/dairy" className="heri-btn heri-btn-ghost" style={{ fontSize: 13 }}>
+              <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
               الدفعات
             </Link>
             <PinButton
@@ -96,138 +87,118 @@ export default async function DairyDetailPage({
       />
 
       <div className="flex-1 space-y-6 p-6">
-        {/* Brand cover */}
-        <section
-          className="relative overflow-hidden rounded-2xl p-6 text-white anim-fade-up"
-          style={{ background: brand.gradient, minHeight: "180px" }}
-        >
-          <div
-            className="absolute inset-0 opacity-20 anim-grad"
-            style={{
-              background:
-                "linear-gradient(120deg, transparent 0%, white 50%, transparent 100%)",
-            }}
-            aria-hidden
-          />
-          <div className="relative flex flex-wrap items-start justify-between gap-6">
+        {/* Heritage hero plinth */}
+        <section className="heri-hero p-6">
+          <div className="flex flex-wrap items-start justify-between gap-6">
             <div className="flex items-center gap-4">
               <div
-                className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl anim-pop"
+                className="flex h-16 w-16 shrink-0 items-center justify-center"
                 style={{
-                  background: "rgba(255,255,255,.15)",
-                  border: "1px solid rgba(255,255,255,.35)",
-                  backdropFilter: "blur(6px)",
+                  background: "var(--heri-cream-2)",
+                  border: "1px solid var(--heri-rule-strong)",
                 }}
               >
-                <Milk className="h-10 w-10" />
+                <Milk className="h-8 w-8" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
               </div>
               <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="badge-sky">
-                    درجة {batch.qualityGrade}
-                  </span>
+                <div className="heri-eyebrow heri-eyebrow-ink mb-1.5 flex items-center gap-2">
+                  <span>درجة {batch.qualityGrade}</span>
+                  <span style={{ color: "var(--heri-rule-strong)" }}>·</span>
                   <StatusBadge status={batch.status} />
-                  <Link
-                    href={`/companies/${batch.companyId}`}
-                    className="rounded-full px-2 py-0.5 text-[10px] font-bold"
-                    style={{
-                      background: "rgba(255,255,255,.2)",
-                      border: "1px solid rgba(255,255,255,.3)",
-                    }}
-                  >
-                    {batch.company.name}
-                  </Link>
                 </div>
-                <h2 className="mt-1 text-2xl font-bold md:text-3xl">
+                <h2
+                  className="text-2xl font-semibold md:text-3xl"
+                  style={{ color: "var(--heri-ink)", letterSpacing: "-0.01em", lineHeight: 1.15 }}
+                >
                   {batch.productAr || batch.product}
                 </h2>
                 {batch.productAr && batch.product !== batch.productAr ? (
-                  <p className="text-sm opacity-90" dir="ltr">
+                  <p className="mt-0.5 text-sm" style={{ color: "var(--heri-ink-3)" }} dir="ltr">
                     {batch.product}
                   </p>
                 ) : null}
-                <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px]" style={{ color: "var(--heri-ink-3)" }}>
                   <span
-                    className="flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-xs"
-                    style={{
-                      background: "rgba(255,255,255,.18)",
-                      border: "1px solid rgba(255,255,255,.3)",
-                    }}
+                    className="font-mono"
+                    style={{ color: "var(--heri-ink-2)" }}
                   >
                     {batch.batchNumber}
                   </span>
-                  <span
-                    className="flex items-center gap-1.5 rounded-full px-3 py-1 font-bold"
-                    style={{
-                      background: "rgba(255,255,255,.15)",
-                      border: "1px solid rgba(255,255,255,.25)",
-                    }}
-                  >
-                    <Beaker className="h-3 w-3" />
+                  <span className="inline-flex items-center gap-1.5">
+                    <Beaker className="h-3.5 w-3.5" strokeWidth={1.5} />
                     {batch.fatContent}٪ دسم
                   </span>
-                  <span
-                    className="flex items-center gap-1.5 rounded-full px-3 py-1 font-bold"
-                    style={{
-                      background: "rgba(255,255,255,.15)",
-                      border: "1px solid rgba(255,255,255,.25)",
-                    }}
-                  >
-                    <Package2 className="h-3 w-3" />
+                  <span className="inline-flex items-center gap-1.5">
+                    <Package2 className="h-3.5 w-3.5" strokeWidth={1.5} />
                     {formatNumber(batch.quantityLiters)} لتر
                   </span>
+                  <Link
+                    href={`/companies/${batch.companyId}`}
+                    className="hover:underline"
+                    style={{ color: "var(--heri-ochre)" }}
+                  >
+                    {batch.company.name}
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
           {batch.notes ? (
-            <p className="relative mt-4 max-w-3xl text-sm opacity-95">
+            <p className="mt-4 max-w-3xl text-sm" style={{ color: "var(--heri-ink-2)", lineHeight: 1.55 }}>
               {batch.notes}
             </p>
           ) : null}
         </section>
 
         {/* KPI strip */}
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <KpiCard
+        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
+          <HeriKpi
             label="حجم الإنتاج"
-            value={`${formatNumber(batch.quantityLiters)} لتر`}
-            icon={Package2}
-            tone="sky"
+            raw={batch.quantityLiters}
+            kind="number"
+            hint="لتر"
           />
-          <KpiCard
+          <HeriKpi
             label="نسبة الدسم"
-            value={`${batch.fatContent}٪`}
-            icon={Beaker}
-            tone="amber"
+            raw={batch.fatContent}
+            kind="number"
+            decimals={1}
+            hint="٪ من الحجم"
           />
-          <KpiCard
+          <HeriKpi
             label="درجة الجودة"
-            value={batch.qualityGrade}
-            icon={ShieldCheck}
-            tone={batch.qualityGrade === "A" ? "emerald" : "amber"}
+            raw={batch.qualityGrade === "A" ? 100 : batch.qualityGrade === "B" ? 75 : 50}
+            kind="percent"
+            accent={
+              batch.qualityGrade === "A"
+                ? "var(--heri-teal, #1f4e4a)"
+                : batch.qualityGrade === "B"
+                  ? "var(--heri-ochre-2)"
+                  : "var(--heri-terracotta, #b85c38)"
+            }
+            hint={`فئة ${batch.qualityGrade}`}
           />
-          <KpiCard
-            label={expired ? "منتهي الصلاحية" : "أيام للصلاحية"}
-            value={expired ? "—" : `${Math.max(0, daysUntilExpiry)}`}
-            icon={expired ? AlertTriangle : Clock}
-            tone={freshnessTone}
+          <HeriKpi
+            label={expired ? "تجاوز الصلاحية" : "أيام للصلاحية"}
+            raw={expired ? 0 : Math.max(0, daysUntilExpiry)}
+            kind="number"
+            accent={expired || lifePct > 0.8 ? "var(--heri-terracotta, #b85c38)" : undefined}
             hint={formatRelative(batch.expiryDate)}
           />
         </section>
 
         {/* Lifecycle timeline */}
-        <section className="card card-pad anim-fade-up">
+        <section className="heri-card">
           <header className="mb-3 flex items-center justify-between">
             <h3
               className="flex items-center gap-2 text-sm font-semibold"
               style={{ color: "var(--heri-ink)" }}
             >
-              <Clock className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
+              <Clock className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
               دورة الحياة
             </h3>
             <span
-              className="text-[10px] font-bold uppercase tracking-widest"
+              className="heri-eyebrow"
               style={{ color: freshnessColor }}
             >
               {expired
@@ -239,28 +210,19 @@ export default async function DairyDetailPage({
           </header>
           <div className="mb-2 flex items-center justify-between text-xs">
             <div>
-              <div
-                className="text-[10px] font-bold uppercase tracking-widest"
-                style={{ color: "var(--heri-ink-3)" }}
-              >
-                إنتاج
-              </div>
-              <div className="font-bold" style={{ color: "var(--heri-ink)" }}>
+              <div className="heri-eyebrow heri-eyebrow-ink">إنتاج</div>
+              <div className="mt-0.5 font-bold" style={{ color: "var(--heri-ink)" }}>
                 {formatShortDate(batch.productionDate)}
               </div>
             </div>
             <ArrowRight
               className="h-4 w-4"
               style={{ color: "var(--heri-ink-3)" }}
+              strokeWidth={1.5}
             />
             <div className="text-end">
-              <div
-                className="text-[10px] font-bold uppercase tracking-widest"
-                style={{ color: "var(--heri-ink-3)" }}
-              >
-                صلاحية
-              </div>
-              <div className="font-bold" style={{ color: "var(--heri-ink)" }}>
+              <div className="heri-eyebrow heri-eyebrow-ink">صلاحية</div>
+              <div className="mt-0.5 font-bold" style={{ color: "var(--heri-ink)" }}>
                 {formatShortDate(batch.expiryDate)}
               </div>
             </div>
@@ -273,30 +235,27 @@ export default async function DairyDetailPage({
             }}
           >
             <div
-              className="h-full rounded-full anim-rise-glow"
+              className="h-full rounded-full"
               style={{
                 width: `${lifePct * 100}%`,
                 background: `linear-gradient(90deg, ${freshnessColor} 0%, ${
-                  expired ? "#c0392b" : "var(--heri-copper)"
+                  expired ? "var(--heri-terracotta, #b85c38)" : "var(--heri-copper)"
                 } 100%)`,
                 boxShadow: `0 0 18px ${freshnessColor}`,
                 transition: "width .8s cubic-bezier(.21,.92,.32,1)",
               }}
             />
           </div>
-          <div
-            className="mt-1 text-[10px]"
-            style={{ color: "var(--heri-ink-3)" }}
-          >
+          <div className="mt-1 text-[10px]" style={{ color: "var(--heri-ink-3)" }}>
             {Math.round(lifePct * 100)}٪ من الفترة منقضية
           </div>
         </section>
 
         {/* Two columns */}
-        <div className="grid gap-6 lg:grid-cols-[1fr,320px]">
+        <div className="grid gap-6 heri-stagger lg:grid-cols-[1fr,320px]">
           <div className="space-y-6">
             {/* Sibling batches */}
-            <section className="card card-pad anim-fade-up">
+            <section className="heri-card">
               <header className="mb-3 flex items-center justify-between">
                 <h3
                   className="flex items-center gap-2 text-sm font-semibold"
@@ -304,6 +263,7 @@ export default async function DairyDetailPage({
                 >
                   <Package2
                     className="h-4 w-4"
+                    strokeWidth={1.5}
                     style={{ color: "var(--heri-ochre)" }}
                   />
                   دفعات سابقة لنفس المنتج
@@ -325,11 +285,10 @@ export default async function DairyDetailPage({
                 </p>
               ) : (
                 <ul className="divide-y divide-[var(--heri-rule)]">
-                  {siblings.map((s, i) => (
+                  {siblings.map((s) => (
                     <li
                       key={s.id}
-                      className="flex items-center justify-between gap-3 py-2.5 anim-fade-up"
-                      style={{ animationDelay: `${i * 30}ms` }}
+                      className="flex items-center justify-between gap-3 py-2.5"
                     >
                       <Link
                         href={`/dairy/${s.id}`}
@@ -370,7 +329,7 @@ export default async function DairyDetailPage({
 
           <aside className="space-y-6">
             {/* Quick facts */}
-            <section className="card card-pad anim-fade-up">
+            <section className="heri-card">
               <h3
                 className="mb-3 text-sm font-semibold"
                 style={{ color: "var(--heri-ink)" }}
@@ -412,13 +371,14 @@ export default async function DairyDetailPage({
             </section>
 
             {batch.destination ? (
-              <section className="card card-pad anim-fade-up">
+              <section className="heri-card">
                 <h3
                   className="mb-2 flex items-center gap-2 text-sm font-semibold"
                   style={{ color: "var(--heri-ink)" }}
                 >
                   <Truck
                     className="h-4 w-4"
+                    strokeWidth={1.5}
                     style={{ color: "var(--heri-ochre)" }}
                   />
                   وجهة التوزيع

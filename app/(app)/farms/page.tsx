@@ -186,7 +186,7 @@ export default async function FarmsPage() {
               }
             />
           ) : (
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 heri-stagger lg:grid-cols-2">
               {farms.map((f) => {
                 const Icon = TYPE_ICON[f.type] ?? Sprout;
                 return (

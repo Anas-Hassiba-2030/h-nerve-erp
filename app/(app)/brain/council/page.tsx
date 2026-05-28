@@ -5,6 +5,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
 import { HeritageSection, HeritagePill } from "@/components/heritage";
+import { HeriKpi } from "@/components/HeriKpi";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { llmConfig } from "@/lib/brain/llm";
@@ -33,7 +34,7 @@ export default async function BrainCouncilIndex() {
   // Phase V3-P5 — operator-shared CouncilDiscussion threads render
   // above the system CouncilSession deliberations. Tenant-scoped via
   // workspaceScope middleware.
-  const [recentSessions, openCount, llmEnabled, sharedDiscussions] = await Promise.all([
+  const [recentSessions, openCount, llmEnabled, sharedDiscussions, totalSessions, avgConfRaw] = await Promise.all([
     prisma.councilSession.findMany({
       orderBy: { ranAt: "desc" },
       take: 12,
@@ -49,7 +50,14 @@ export default async function BrainCouncilIndex() {
         _count: { select: { replies: true } },
       },
     }),
+    prisma.councilSession.count(),
+    prisma.councilSession.aggregate({
+      _avg: { confidence: true },
+      where: { confidence: { not: null } },
+    }),
   ]);
+  const avgConfidence = avgConfRaw._avg.confidence ?? 0;
+  const openSharedCount = sharedDiscussions.filter((d) => d.status === "OPEN").length;
 
   const topics = ar ? SUGGESTED_TOPICS_AR : SUGGESTED_TOPICS_EN;
 
@@ -183,6 +191,36 @@ export default async function BrainCouncilIndex() {
           </div>
         </section>
 
+        {/* KPI strip — the council's footprint at a glance. */}
+        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
+          <HeriKpi
+            label={ar ? "مجموع الجلسات" : "Total sessions"}
+            raw={totalSessions}
+            kind="number"
+            hint={ar ? "كل الجلسات" : "all-time"}
+          />
+          <HeriKpi
+            label={ar ? "جلسات قيد التشغيل" : "Running"}
+            raw={openCount}
+            kind="number"
+            accent={openCount > 0 ? "var(--heri-ochre)" : undefined}
+            hint={ar ? "تتداول الآن" : "live now"}
+          />
+          <HeriKpi
+            label={ar ? "متوسط الثقة" : "Avg confidence"}
+            raw={avgConfidence}
+            kind="percent"
+            decimals={0}
+            hint={ar ? "عبر التوصيات" : "across recs"}
+          />
+          <HeriKpi
+            label={ar ? "خيوط مفتوحة" : "Open threads"}
+            raw={openSharedCount}
+            kind="number"
+            hint={ar ? "مشاركات المدراء" : "operator shares"}
+          />
+        </section>
+
         {/* Phase V3-P5 — operator-shared threads */}
         <HeritageSection
           eyebrow={ar ? "مشاركات المدراء" : "Operator shares"}
@@ -207,14 +245,14 @@ export default async function BrainCouncilIndex() {
                 : "No shares yet. Click the “Council” button on any insight card to start a thread."}
             </div>
           ) : (
-            <ul className="space-y-2">
+            <ul className="space-y-2 heri-stagger">
               {sharedDiscussions.map((d) => (
                 <li
                   key={d.id}
-                  className="border p-3"
+                  className="heri-card"
                   style={{
-                    borderColor: "var(--heri-rule)",
                     background: "var(--heri-cream)",
+                    padding: "14px 16px",
                   }}
                 >
                   <div className="flex items-center justify-between gap-3 mb-1.5">
@@ -293,7 +331,7 @@ export default async function BrainCouncilIndex() {
               {ar ? "لم تُعقد جلسات بعد." : "No sessions yet."}
             </div>
           ) : (
-            <ul className="space-y-2">
+            <ul className="space-y-2 heri-stagger">
               {recentSessions.map((s) => (
                 <li key={s.id}>
                   <Link

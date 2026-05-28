@@ -6,11 +6,12 @@ import { HeriKpi } from "@/components/HeriKpi";
 import { ExportMenu } from "@/components/ExportMenu";
 import { SectorPill } from "@/components/SectorPill";
 import { EmptyState } from "@/components/EmptyState";
-import { DeleteButton } from "@/components/DeleteButton";
+import { TransactionTable } from "@/components/finance/TransactionTable";
 import { getLocale } from "@/lib/i18n.server";
+import { getCurrentUser } from "@/lib/session";
+import { hasRole } from "@/lib/authz";
 import { prisma } from "@/lib/db";
 import { formatMoney, formatNumber, formatShortDate } from "@/lib/utils";
-import { deleteTransaction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,8 @@ export default async function FinancePage() {
   const locale = getLocale();
   const ar = locale === "ar";
   const lc: "ar" | "en" = ar ? "ar" : "en";
+  const session = await getCurrentUser();
+  const canManage = hasRole(session, "MANAGER");
   const last30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const last90 = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
 
@@ -187,56 +190,7 @@ export default async function FinancePage() {
               }
             />
           ) : (
-            <div className="heri-card" style={{ padding: 0 }}>
-              <div className="table-wrap rounded-none border-0 shadow-none">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>{ar ? "المرجع" : "Ref"}</th>
-                      <th>{ar ? "التاريخ" : "Date"}</th>
-                      <th>{ar ? "الشركة" : "Company"}</th>
-                      <th>{ar ? "النوع" : "Type"}</th>
-                      <th>{ar ? "التصنيف" : "Category"}</th>
-                      <th>{ar ? "المبلغ" : "Amount"}</th>
-                      <th>{ar ? "سُجّلت بواسطة" : "Logged by"}</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {transactions.map((t) => (
-                      <tr key={t.id}>
-                        <td className="font-mono text-xs" style={{ color: "var(--heri-ink-3)" }}>{t.reference}</td>
-                        <td className="text-xs">{formatShortDate(t.occurredAt)}</td>
-                        <td className="font-bold" style={{ color: "var(--heri-ink)" }}>{t.company.name}</td>
-                        <td>
-                          <span className={KIND_LABEL[t.kind]?.tone ?? "badge-slate"}>
-                            {ar ? KIND_LABEL[t.kind]?.ar ?? t.kind : KIND_LABEL[t.kind]?.en ?? t.kind}
-                          </span>
-                        </td>
-                        <td style={{ color: "var(--heri-ink-2)" }}>{t.category}</td>
-                        <td
-                          className="font-mono font-bold"
-                          style={{
-                            color:
-                              t.kind === "REVENUE"
-                                ? "var(--heri-teal, #1f4e4a)"
-                                : t.kind === "EXPENSE"
-                                  ? "var(--heri-terracotta, #b85c38)"
-                                  : "var(--heri-ochre-2, #a87a32)",
-                          }}
-                        >
-                          {formatMoney(t.amount, t.currency)}
-                        </td>
-                        <td className="text-xs" style={{ color: "var(--heri-ink-3)" }}>{t.createdBy?.name ?? "—"}</td>
-                        <td>
-                          <DeleteButton action={deleteTransaction} payload={{ id: t.id }} label={`${ar ? "حذف العملية" : "Delete"} ${t.reference}؟`} description={ar ? "سيتم حذف هذه الحركة المالية من السجل." : "This entry will be removed from the ledger."} />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <TransactionTable transactions={transactions} ar={ar} canManage={canManage} />
           )}
           <div style={{ fontSize: 11, color: "var(--heri-ink-3)" }}>
             {ar

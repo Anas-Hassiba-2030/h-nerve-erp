@@ -136,6 +136,42 @@ export async function deleteInsight(formData: FormData) {
   });
 }
 
+export async function bulkResolveInsights(ids: string[]) {
+  const me = await requireRole("MANAGER");
+  if (!ids.length) return;
+  await prisma.aIInsight.updateMany({
+    where: { id: { in: ids } },
+    data: { status: "RESOLVED" },
+  });
+  await logActivity({
+    action: "UPDATE",
+    entity: "INSIGHT",
+    entityId: ids[0],
+    summary: `حل جماعي لـ ${ids.length} إشارات`,
+    summaryEn: `Bulk resolved ${ids.length} insights`,
+    meta: { ids, count: ids.length },
+  });
+  revalidatePath("/insights");
+  revalidatePath("/dashboard");
+}
+
+export async function bulkDeleteInsights(ids: string[]) {
+  const me = await requireRole("MANAGER");
+  if (!ids.length) return;
+  for (const id of ids) {
+    await softDelete("insight", id);
+  }
+  await logActivity({
+    action: "DELETE",
+    entity: "INSIGHT",
+    entityId: ids[0],
+    summary: `حذف جماعي لـ ${ids.length} إشارات`,
+    summaryEn: `Bulk deleted ${ids.length} insights`,
+    meta: { ids, count: ids.length },
+  });
+  revalidatePath("/insights");
+}
+
 export async function restoreInsight(formData: FormData) {
   await requireUser();
   const id = String(formData.get("id") ?? "");

@@ -75,3 +75,23 @@ export async function deleteTransaction(formData: FormData) {
   }
   revalidatePath("/finance");
 }
+
+export async function bulkDeleteTransactions(ids: string[]) {
+  await requireRole("MANAGER");
+  if (!ids.length) return;
+  const before = await prisma.transaction.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, reference: true, amount: true, currency: true },
+  });
+  await prisma.transaction.deleteMany({ where: { id: { in: ids } } });
+  await logActivity({
+    action: "DELETE",
+    entity: "TRANSACTION",
+    entityId: ids[0],
+    summary: `حذف جماعي لـ ${before.length} معاملة`,
+    summaryEn: `Bulk deleted ${before.length} transactions`,
+    module: "FINANCE",
+    meta: { ids, count: before.length },
+  });
+  revalidatePath("/finance");
+}

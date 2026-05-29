@@ -10,6 +10,7 @@ import {
   visionEnabled,
   isVisionEligible,
 } from "@/lib/docintel/parser";
+import { matchDocumentEntities, type Match } from "@/lib/docintel/match";
 
 // Phase 18 of docs/PHASES-INTELLIGENCE.md.
 // Server actions for the Document Intelligence flow.
@@ -45,6 +46,9 @@ export type UploadResult = {
     note?: string;
     noteEn?: string;
   }>;
+  // Phase NS-8 — the Supplier/Customer this document auto-linked to (or null).
+  matchedSupplier: { id: string; name: string; score: number } | null;
+  matchedCustomer: { id: string; name: string; score: number } | null;
 };
 
 export async function uploadDocument(formData: FormData): Promise<UploadResult> {
@@ -113,6 +117,38 @@ export async function uploadDocument(formData: FormData): Promise<UploadResult> 
     include: { clauses: true },
   });
 
+  // 4. Phase NS-8 — Document → Graph. Fuzzy-match the extracted vendor /
+  // party names against THIS tenant's suppliers + customers (prisma is the
+  // scoped client, so this never reads another tenant's entities) and
+  // persist the best link. Best-effort: a match failure must never break
+  // the upload, so any error is swallowed and the document still lands.
+  let matchedSupplier: Match | null = null;
+  let matchedCustomer: Match | null = null;
+  try {
+    const [suppliers, customers] = await Promise.all([
+      prisma.supplier.findMany({ where: { deletedAt: null }, select: { id: true, name: true } }),
+      prisma.customer.findMany({ where: { deletedAt: null }, select: { id: true, name: true } }),
+    ]);
+    const m = matchDocumentEntities(parsed.fields, suppliers, customers);
+    matchedSupplier = m.supplier;
+    matchedCustomer = m.customer;
+    if (matchedSupplier || matchedCustomer) {
+      await prisma.document.update({
+        where: { id: doc.id },
+        data: {
+          matchedSupplierId: matchedSupplier?.id ?? null,
+          matchedSupplierName: matchedSupplier?.name ?? null,
+          matchedCustomerId: matchedCustomer?.id ?? null,
+          matchedCustomerName: matchedCustomer?.name ?? null,
+          matchConfidence:
+            Math.max(matchedSupplier?.score ?? 0, matchedCustomer?.score ?? 0) || null,
+        },
+      });
+    }
+  } catch (e) {
+    console.error("[docintel] entity match failed:", e);
+  }
+
   revalidatePath("/documents");
 
   return {
@@ -140,6 +176,8 @@ export async function uploadDocument(formData: FormData): Promise<UploadResult> 
         note: c.note ?? undefined,
         noteEn: c.noteEn ?? undefined,
       })),
+    matchedSupplier,
+    matchedCustomer,
   };
 }
 

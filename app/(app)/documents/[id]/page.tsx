@@ -112,6 +112,42 @@ export default async function DocumentDetail({ params }: { params: { id: string 
           </p>
         </article>
 
+        {/* Phase NS-8 — Document → Graph: the auto-linked entity */}
+        {doc.matchedSupplierName || doc.matchedCustomerName ? (
+          <HeritageSection
+            eyebrow={ar ? "ربط الشبكة" : "Graph link"}
+            title={ar ? "رُبط تلقائياً بكيان" : "Auto-linked to an entity"}
+          >
+            <div
+              className="inline-flex items-center gap-3 px-4 py-3"
+              style={{ background: "var(--heri-cream)", border: "1px solid var(--heri-rule)" }}
+            >
+              <span
+                className="heri-eyebrow heri-eyebrow-ink"
+                style={{ fontSize: 10 }}
+              >
+                {doc.matchedSupplierName ? (ar ? "مورّد" : "Supplier") : (ar ? "عميل" : "Customer")}
+              </span>
+              <span style={{ fontSize: 14, fontWeight: 600, color: "var(--heri-ink)" }}>
+                {doc.matchedSupplierName ?? doc.matchedCustomerName}
+              </span>
+              {doc.matchConfidence != null ? (
+                <span
+                  style={{
+                    fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
+                    fontSize: 10,
+                    letterSpacing: "0.08em",
+                    color: "var(--heri-copper)",
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {(doc.matchConfidence * 100).toFixed(0)}% {ar ? "تطابق" : "match"}
+                </span>
+              ) : null}
+            </div>
+          </HeritageSection>
+        ) : null}
+
         {/* Extracted fields */}
         {Object.keys(fields).length > 0 ? (
           <HeritageSection

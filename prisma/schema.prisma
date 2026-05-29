@@ -1400,6 +1400,20 @@ model Document {
   status       String   @default("PARSING")
   // What module / company this got linked to ("LORAN", "MAHA", "ARENA", etc).
   linkedTo     String?
+
+  // Phase NS-8 — Document → Graph. After parse, the extracted vendor/party
+  // names are fuzzy-matched against the tenant's Supplier/Customer rows
+  // (lib/docintel/match.ts). These denormalized scalars hold the best
+  // match (id + name) plus the match score; null when nothing cleared the
+  // threshold. Opaque ids (NO FK relation) — matches the codebase's
+  // opaque-supplier precedent, keeps the migration additive, and keeps the
+  // auto-link advisory rather than a hard constraint the operator can't undo.
+  matchedSupplierId   String?
+  matchedSupplierName String?
+  matchedCustomerId   String?
+  matchedCustomerName String?
+  matchConfidence     Float?
+
   // ms it took to parse — informational only.
   parsedMs     Int?
   uploadedById String?

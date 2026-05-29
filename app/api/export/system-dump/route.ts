@@ -5,9 +5,9 @@
 // Fail-soft: a failing table records an error and the dump still
 // completes, so one bad model can't sink the whole backup.
 //
-// NOTE: includes User.passwordHash — required for a TRUE restorable
-// backup (bcrypt hashes, not plaintext). ADMIN-only + no-store. If you
-// want a hash-free variant, drop `user` from TABLES or strip the field.
+// NOTE: User rows are included for restore, but the bcrypt passwordHash
+// is STRIPPED before serialization — auth secrets must not travel in an
+// HTTP response body. A restored user is re-credentialed out-of-band.
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
@@ -20,7 +20,9 @@ const CAP = 20000; // per-table row cap — guards a runaway dump.
 // Each entry: [key, () => findMany]. Wrapped in try/catch at call time
 // so an unknown/renamed model degrades to an error note, never a 500.
 const TABLES: Array<[string, () => Promise<unknown[]>]> = [
-  ["user", () => prisma.user.findMany({ take: CAP })],
+  // SECURITY: strip the bcrypt passwordHash — a backup must never ship
+  // password hashes over an HTTP response body (see export audit).
+  ["user", async () => (await prisma.user.findMany({ take: CAP })).map(({ passwordHash, ...safe }) => { void passwordHash; return safe; })],
   ["tenant", () => prisma.tenant.findMany({ take: CAP })],
   ["company", () => prisma.company.findMany({ take: CAP })],
   ["hotel", () => prisma.hotel.findMany({ take: CAP })],

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireUser } from "@/lib/session";
+import { getCurrentUser } from "@/lib/session";
 import { hasRole, isSafeId } from "@/lib/authz";
 import { softRestore, type SoftEntity } from "@/lib/softDelete";
 import { prisma } from "@/lib/db";
@@ -64,7 +64,10 @@ async function authorizeRestore(
 }
 
 export async function POST(req: NextRequest) {
-  const user = await requireUser();
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
+  }
 
   const body = await req
     .json()

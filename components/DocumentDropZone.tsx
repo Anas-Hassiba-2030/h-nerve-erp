@@ -260,6 +260,27 @@ export function DocumentDropZone({ locale = "ar" }: { locale?: "ar" | "en" }) {
                 {ar ? result.headline : result.headlineEn}
               </p>
 
+              {/* Phase NS-8 — auto-linked entity (Document → Graph) */}
+              {result.matchedSupplier || result.matchedCustomer ? (
+                <p
+                  style={{
+                    margin: "10px 0 0",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    letterSpacing: "0.02em",
+                    color: "var(--heri-copper)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
+                  <span aria-hidden style={{ fontSize: 14 }}>⇲</span>
+                  {result.matchedSupplier
+                    ? `${ar ? "رُبط تلقائياً بالمورّد" : "Auto-linked to supplier"}: ${result.matchedSupplier.name}`
+                    : `${ar ? "رُبط تلقائياً بالعميل" : "Auto-linked to customer"}: ${result.matchedCustomer?.name}`}
+                </p>
+              ) : null}
+
               <p className="di-modal-summary">
                 {ar ? result.summary : result.summaryEn}
               </p>

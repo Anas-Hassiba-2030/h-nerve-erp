@@ -9,10 +9,9 @@ import Link from "next/link";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
 import { HeritagePill } from "@/components/heritage";
-import { ChevronLeft, FileText, ScrollText, Receipt, Beaker, Table, UploadCloud } from "lucide-react";
+import { ChevronLeft, FileText, ScrollText, Receipt, Beaker, Table, UploadCloud, Link2 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
-import { NotifyMeButton } from "./NotifyMeButton";
 
 const KIND_LABEL: Record<string, { ar: string; en: string }> = {
   contract:    { ar: "عقد",         en: "Contract" },
@@ -56,12 +55,12 @@ export default async function DocumentsPage() {
   return (
     <>
       <PageHeader
-        eyebrow={ar ? "ذكاء المستندات · قريباً" : "Document intelligence · coming soon"}
+        eyebrow={ar ? "ذكاء المستندات" : "Document intelligence"}
         title={ar ? "ذكاء المستندات" : "Document intelligence"}
         subtitle={
           ar
-            ? "قريباً: اسحب أي عقد، فاتورة، تقرير مختبر، أو جدول. سنقرؤه ونلخّصه ونربطه بشبكة الكيانات تلقائياً."
-            : "Coming soon: drop any contract, invoice, lab report, or sheet. We'll read, summarize, and auto-link it to the entity graph."
+            ? "اسحب أي عقد، فاتورة، تقرير مختبر، أو جدول في أي مكان بالتطبيق. نقرؤه، نلخّصه، ونربطه تلقائياً بالمورّد أو العميل في شبكة الكيانات."
+            : "Drop any contract, invoice, lab report, or sheet anywhere in the app. We read it, summarize it, and auto-link it to the matching supplier or customer in the entity graph."
         }
       />
 
@@ -78,8 +77,9 @@ export default async function DocumentsPage() {
           ))}
         </section>
 
-        {/* Phase Pre-pitch SWEEP-4 — honest "coming soon" hero with
-            preview cards instead of an active dropzone. */}
+        {/* Active intake panel — the drop zone is mounted globally in the
+            (app) layout, so a file dropped ANYWHERE runs uploadDocument.
+            This panel states that affordance and what gets extracted. */}
         <section
           className="px-5 py-5"
           style={{
@@ -102,7 +102,7 @@ export default async function DocumentsPage() {
                 className="heri-eyebrow heri-eyebrow-ink"
                 style={{ fontSize: 10, marginBottom: 4 }}
               >
-                {ar ? "ميزة قادمة" : "COMING SOON"}
+                {ar ? "اسحب وأفلت — في أي مكان" : "DROP ANYWHERE"}
               </p>
               <p
                 style={{
@@ -113,14 +113,13 @@ export default async function DocumentsPage() {
                 }}
               >
                 {ar
-                  ? "نطلق ذكاء المستندات في الإصدار القادم. ستسحب الملف، نقرؤه في ثوانٍ، ونعرض ملخصاً + كيانات مستخرجة + ربط تلقائي."
-                  : "Rolling out document intelligence in the next release. You'll drop the file, we read it in seconds, surface a summary + extracted entities + auto-linked graph nodes."}
+                  ? "أفلت ملفاً في أي شاشة. نقرؤه في ثوانٍ، نعرض ملخصاً + البنود المهمّة، ونطابق المورّد/العميل تلقائياً بشبكة الكيانات."
+                  : "Drop a file on any screen. We read it in seconds, surface a summary + the clauses that matter, and auto-match the supplier/customer into the entity graph."}
               </p>
             </div>
-            <NotifyMeButton ar={ar} />
           </div>
 
-          {/* Preview cards — what the feature will surface */}
+          {/* What gets extracted per document kind */}
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             {[
               {
@@ -196,8 +195,8 @@ export default async function DocumentsPage() {
             }}
           >
             {ar
-              ? "الميزة في مرحلة الإطلاق — ستظهر المستندات المعالَجة هنا فور التفعيل."
-              : "Feature launching shortly — processed documents will appear here once it's enabled."}
+              ? "لا مستندات بعد — أفلت أول عقد أو فاتورة في أي مكان بالتطبيق وسيظهر هنا فور قراءته."
+              : "No documents yet — drop your first contract or invoice anywhere in the app and it'll appear here once read."}
           </div>
         ) : (
           <ol className="grid gap-2">
@@ -261,6 +260,25 @@ export default async function DocumentsPage() {
                           </>
                         ) : null}
                       </div>
+                      {/* Phase NS-8 — auto-linked entity chip */}
+                      {d.matchedSupplierName || d.matchedCustomerName ? (
+                        <div
+                          className="inline-flex items-center gap-1.5 mt-1.5"
+                          style={{
+                            fontSize: 10.5,
+                            letterSpacing: "0.04em",
+                            color: "var(--heri-copper)",
+                            fontWeight: 600,
+                          }}
+                        >
+                          <Link2 className="h-3 w-3" strokeWidth={1.7} />
+                          <span>
+                            {d.matchedSupplierName
+                              ? `${ar ? "مورّد" : "Supplier"}: ${d.matchedSupplierName}`
+                              : `${ar ? "عميل" : "Customer"}: ${d.matchedCustomerName}`}
+                          </span>
+                        </div>
+                      ) : null}
                     </div>
                     <HeritagePill tone={d.status === "READY" ? "success" : "warn"}>
                       {d.status === "READY"

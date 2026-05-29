@@ -13,10 +13,11 @@ import Link from "next/link";
 import {
   Upload, Package, ArrowLeftRight, Warehouse, Repeat, Shuffle,
   ShoppingCart, Receipt, Truck, Users, BookOpen, Landmark, Brain,
-  UsersRound, ShieldCheck, ScrollText,
+  UsersRound, ShieldCheck, ScrollText, Database,
 } from "lucide-react";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
+import { listModels } from "@/lib/db.introspect";
 import { SeedDemoButton } from "@/components/SeedDemoButton";
 
 export const dynamic = "force-dynamic";
@@ -70,7 +71,10 @@ export default async function AdminSystemPage() {
     n(prismaUnscoped.activityLog.count()),
   ]);
 
+  const dbModelCount = listModels().length;
+
   const cards: Card[] = [
+    { href: "/admin/db",              titleAr: "متصفّح البيانات",   titleEn: "Data Browser",       descAr: "كل جداول قاعدة البيانات — للقراءة",     descEn: "Every database table — read-only",         icon: Database,     count: dbModelCount },
     { href: "/admin/imports",         titleAr: "سجل الاستيراد",    titleEn: "Import Log",         descAr: "دفعات الاستيراد ومعاينتها",            descEn: "Import batches and previews",              icon: Upload,       count: cImports },
     { href: "/admin/products",        titleAr: "المنتجات",          titleEn: "Products",           descAr: "كتالوج الأصناف والمخزون",              descEn: "Item catalogue and inventory",             icon: Package,      count: cProducts },
     { href: "/admin/movements",       titleAr: "الحركات",           titleEn: "Movements",          descAr: "حركات المخزون بأنواعها",               descEn: "All inventory movement types",             icon: ArrowLeftRight, count: cMovements },
@@ -116,8 +120,8 @@ export default async function AdminSystemPage() {
           <h2 className="admin-h2">{ar ? "المسارات الإدارية" : "Admin Routes"}</h2>
           <p className="admin-section-sub">
             {ar
-              ? "١٦ مساراً — الاستيراد، المخزون، الطلبات، المحاسبة، الذكاء، المستخدمون، الصلاحيات، والتدقيق."
-              : "16 routes — imports, inventory, orders, accounting, intelligence, users, permissions, and audit."}
+              ? "١٧ مساراً — متصفّح البيانات، الاستيراد، المخزون، الطلبات، المحاسبة، الذكاء، المستخدمون، الصلاحيات، والتدقيق."
+              : "17 routes — data browser, imports, inventory, orders, accounting, intelligence, users, permissions, and audit."}
           </p>
         </div>
 

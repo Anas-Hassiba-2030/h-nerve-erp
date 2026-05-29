@@ -210,6 +210,22 @@ export function loc(
   return d[key] ?? key;
 }
 
+// Pick the locale-correct value of a PAIRED bilingual DB field (e.g.
+// Plan.goal + Plan.goalEn, Document.title + Document.titleEn). Distinct
+// from `loc` above (which keys into a static enum dictionary): this picks
+// between two stored free-text values. Either side may be null — the base
+// column is usually populated and the *En column optional, so we fall back
+// to whichever exists rather than ever showing "—" or an empty string.
+export function pickLocale(
+  isAr: boolean,
+  base: string | null | undefined,
+  en: string | null | undefined,
+): string {
+  const b = base ?? "";
+  const e = en ?? "";
+  return isAr ? (b || e) : (e || b);
+}
+
 export function statusBadgeClass(status: string): string {
   const map: Record<string, string> = {
     ACTIVE: "badge-emerald", READY: "badge-emerald", DISTRIBUTED: "badge-emerald",

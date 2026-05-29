@@ -19,6 +19,7 @@ import { CouncilTranscript } from "@/components/brain/CouncilTranscript";
 import { council } from "@/lib/brain/council.live";
 import { getLocale } from "@/lib/i18n.server";
 import { prisma } from "@/lib/db";
+import { pickLocale } from "@/lib/utils";
 import { ArrowLeft, Target, ArrowRight, BookOpen } from "lucide-react";
 import { deleteSession } from "../actions";
 import { generateFromCouncil } from "@/app/(app)/plans/actions";
@@ -154,7 +155,7 @@ async function CouncilToPlanCta({
               color: "var(--heri-ink)",
             }}
           >
-            {existing.goal}
+            {pickLocale(ar, existing.goal, existing.goalEn)}
           </div>
         </div>
         <Link

@@ -11,6 +11,7 @@ import { PageContainer } from "@/components/PageContainer";
 import { HeritageSection, HeritagePill } from "@/components/heritage";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
+import { pickLocale } from "@/lib/utils";
 
 const STATUS_TONE: Record<string, "success" | "warn" | "critical" | "info" | "neutral"> = {
   ACTIVE: "info",
@@ -241,7 +242,7 @@ function PlanCard({
               textWrap: "balance" as any,
             }}
           >
-            {plan.goal}
+            {pickLocale(ar, plan.goal, plan.goalEn)}
           </h3>
           <div
             className="mt-2.5 flex flex-wrap items-center gap-2"

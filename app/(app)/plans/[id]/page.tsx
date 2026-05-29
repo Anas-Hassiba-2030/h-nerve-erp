@@ -23,6 +23,7 @@ import { HeritagePill } from "@/components/heritage";
 import { PlanGantt } from "@/components/plans/PlanGantt";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
+import { pickLocale } from "@/lib/utils";
 import { commit, abandon, deletePlan } from "../actions";
 
 const METRIC_LABEL: Record<string, { ar: string; en: string }> = {
@@ -74,6 +75,12 @@ export default async function PlanDetailPage({
   const progress = stepsTotal > 0 ? stepsDone / stepsTotal : 0;
   const m = METRIC_LABEL[plan.targetMetric] ?? { ar: plan.targetMetric, en: plan.targetMetric };
 
+  // Phase NS-6 — honor the existing paired *En columns at render so the
+  // English UI shows English plan text (Arabic base, En fallback).
+  const goalText = pickLocale(ar, plan.goal, plan.goalEn);
+  const rationaleText = pickLocale(ar, plan.rationale, plan.rationaleEn);
+  const rollbackText = pickLocale(ar, plan.rollbackCondition, plan.rollbackConditionEn);
+
   const sourceCouncilSession = plan.sourceCouncilSessionId
     ? await prisma.councilSession.findUnique({ where: { id: plan.sourceCouncilSessionId } })
     : null;
@@ -85,7 +92,7 @@ export default async function PlanDetailPage({
     <>
       <PageHeader
         eyebrow={ar ? "الدماغ · خطة" : "Brain · Plan"}
-        title={plan.goal.length > 90 ? plan.goal.slice(0, 88) + "…" : plan.goal}
+        title={goalText.length > 90 ? goalText.slice(0, 88) + "…" : goalText}
         subtitle={
           ar
             ? `أُنشئت بتاريخ ${formatDate(plan.createdAt, "ar")}`
@@ -146,7 +153,7 @@ export default async function PlanDetailPage({
                 maxWidth: "26em",
               }}
             >
-              {plan.goal}
+              {goalText}
             </h2>
             {plan.rationale ? (
               <p
@@ -158,7 +165,7 @@ export default async function PlanDetailPage({
                   fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
                 }}
               >
-                {plan.rationale}
+                {rationaleText}
               </p>
             ) : null}
             {/* Source */}
@@ -310,7 +317,7 @@ export default async function PlanDetailPage({
                 maxWidth: "65ch",
               }}
             >
-              "{plan.rollbackCondition}"
+              "{rollbackText}"
             </p>
           </section>
         ) : null}

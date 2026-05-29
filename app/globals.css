@@ -9442,5 +9442,198 @@ html[dir="rtl"] .sidebar-drawer-panel { --drawer-from: -100%; }
   }
 }
 
+/* =================================================================
+   PHASE 20 — THE LIVING PROTOCOL (the constitution at /protocol)
+   Refined Editorial: a manifesto. Warm paper, deep ink, a serif/
+   display title, one readable column, hairline-separated clauses,
+   a single ochre accent. Distinct from the /dev portal vocabulary.
+   See docs/PHASES-INTELLIGENCE.md Phase 20.
+   ================================================================= */
+
+.proto-root {
+  --proto-paper: #f5f1e8;
+  --proto-paper-2: #ebe5d6;
+  --proto-ink: #1b1813;
+  --proto-ink-2: #46402f;
+  --proto-ink-3: #8a8068;
+  --proto-rule: #ddd5c2;
+  --proto-rule-strong: #b6ab8c;
+  --proto-accent: #9a6a2f; /* aged ochre — the single accent */
+  background: var(--proto-paper);
+  color: var(--proto-ink);
+  min-height: 100vh;
+  padding: 48px 24px 96px;
+  font-variant-numeric: tabular-nums;
+}
+
+.proto-doc {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.proto-head {
+  border-bottom: 1px solid var(--proto-rule);
+  padding-bottom: 28px;
+  margin-bottom: 36px;
+}
+.proto-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--proto-accent);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.proto-title {
+  margin: 0;
+  font-family: "Aref Ruqaa", "Reem Kufi", "Söhne", Georgia, "Times New Roman", serif;
+  font-size: clamp(30px, 4.4vw, 48px);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.012em;
+  color: var(--proto-ink);
+}
+.proto-lede {
+  margin: 16px 0 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--proto-ink-2);
+  max-width: 60ch;
+}
+.proto-role-note {
+  margin: 14px 0 0;
+  font-size: 12px;
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.04em;
+  color: var(--proto-ink-3);
+}
+.proto-role-note[data-role="admin"] { color: var(--proto-accent); }
+
+.proto-clauses {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.proto-clause {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--proto-rule);
+}
+.proto-clause:last-child { border-bottom: none; }
+.proto-clause-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.proto-clause-num {
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 13px;
+  color: var(--proto-accent);
+  font-weight: 600;
+}
+.proto-clause-title {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-family: "Aref Ruqaa", "Reem Kufi", "Söhne", Georgia, serif;
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--proto-ink);
+}
+.proto-clause-ver {
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--proto-ink-3);
+  border: 1px solid var(--proto-rule-strong);
+  border-radius: 2px;
+  padding: 1px 6px;
+}
+.proto-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--proto-accent);
+  background: transparent;
+  border: 1px solid var(--proto-rule-strong);
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background-color 160ms var(--ease-out-quart, ease-out);
+}
+.proto-edit-btn:hover { background: var(--proto-paper-2); }
+.proto-clause-body {
+  margin: 12px 0 0;
+  font-size: 15.5px;
+  line-height: 1.85;
+  color: var(--proto-ink-2);
+  white-space: pre-wrap;
+}
+
+.proto-edit { margin-top: 14px; }
+.proto-edit-area {
+  width: 100%;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--proto-ink);
+  background: var(--proto-paper-2);
+  border: 1px solid var(--proto-rule-strong);
+  padding: 12px 14px;
+  resize: vertical;
+}
+.proto-edit-area:focus {
+  outline: 2px solid var(--proto-accent);
+  outline-offset: 1px;
+}
+.proto-edit-error {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  color: #8a3531;
+}
+.proto-edit-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.proto-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 14px;
+  border: 1px solid var(--proto-rule-strong);
+  cursor: pointer;
+  transition: opacity 160ms var(--ease-out-quart, ease-out);
+}
+.proto-btn:disabled { opacity: 0.55; cursor: default; }
+.proto-btn-save {
+  background: var(--proto-accent);
+  color: var(--proto-paper);
+  border-color: var(--proto-accent);
+}
+.proto-btn-cancel {
+  background: transparent;
+  color: var(--proto-ink-2);
+}
+.proto-foot {
+  margin: 36px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--proto-rule);
+  font-size: 12px;
+  font-style: italic;
+  color: var(--proto-ink-3);
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proto-edit-btn, .proto-btn { transition: none !important; }
+}
+
 
 

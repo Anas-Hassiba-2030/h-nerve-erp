@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { DEFAULT_PROTOCOL_CLAUSES } from "../lib/protocol/clauses";
 
 const prisma = new PrismaClient();
 
@@ -16,6 +17,7 @@ const randF = (min: number, max: number) => +(min + Math.random() * (max - min))
 
 async function main() {
   // -- Wipe (FK-safe order)
+  await prisma.protocolClause.deleteMany();
   await prisma.userAchievement.deleteMany();
   await prisma.achievement.deleteMany();
   await prisma.task.deleteMany();
@@ -897,6 +899,20 @@ async function main() {
       confidence: 0.65,
       status: "DRAFT",
     },
+  });
+
+  // -- Phase 20: the Living Protocol constitution (group-wide, tenantId="default")
+  await prisma.protocolClause.createMany({
+    data: DEFAULT_PROTOCOL_CLAUSES.map((c) => ({
+      tenantId: "default",
+      key: c.key,
+      title: c.title,
+      titleEn: c.titleEn,
+      body: c.body,
+      bodyEn: c.bodyEn,
+      orderIndex: c.orderIndex,
+      version: 1,
+    })),
   });
 
   console.log("\n✓ تم زرع بيانات H-Nerve ERP الكاملة بنجاح.\n");

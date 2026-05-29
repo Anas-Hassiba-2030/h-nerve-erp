@@ -52,6 +52,9 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
   // Phase V3-NEW-5 — replies on those threads. Denormalized tenantId
   // so middleware filters without joining through the parent.
   "CouncilReply",
+  // Phase 20 — the Living Protocol. Each tenant's constitution clauses
+  // are scoped by the opaque tenantId slug like Product/BrainInsight.
+  "ProtocolClause",
 ]);
 
 export type ScopeParams = { model?: string; action: string; args?: any };

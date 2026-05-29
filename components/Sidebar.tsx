@@ -8,7 +8,7 @@ import {
   Brain, Wallet, Sparkles, TrendingUp, Leaf, ChartLine, FlaskConical,
   ListChecks, Trophy, Users, Settings, LogOut, Activity, ChevronLeft,
   ChevronRight, UserSquare2, ArrowLeftRight, Search, FileText, HelpCircle,
-  GitBranch, Map, Pin, MessageSquare, Bell, Workflow, Heart, Network, Zap, Target, Globe2, Plug, ScrollText, Sparkles as SparklesIcon, PlayCircle, Cpu,
+  GitBranch, Map, Pin, MessageSquare, Bell, Workflow, Heart, Network, Zap, Target, Globe2, Plug, ScrollText, Sparkles as SparklesIcon, PlayCircle, Cpu, Palette,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { canAccess } from "@/lib/permissions";
@@ -214,6 +214,19 @@ export function Sidebar({
     const i = groups.findIndex((g) => g.label === intelLabel);
     if (i >= 0) groups.splice(i + 1, 0, adminGroup);
     else groups.push(adminGroup);
+
+    // Design — the component library / design-system gallery. ADMIN-only
+    // link (the page itself stays reachable by URL, mirroring the demo-gate
+    // on the admin console). Sits just below the Admin group.
+    const designGroup = {
+      label: ar ? "التصميم" : "Design",
+      items: [
+        { href: "/design-system", label: ar ? "مكتبة المكونات" : "Component library", icon: Palette, hint: "UI" },
+      ],
+    };
+    const j = groups.findIndex((g) => g.label === adminGroup.label);
+    if (j >= 0) groups.splice(j + 1, 0, designGroup);
+    else groups.push(designGroup);
   }
 
   // Phase 5 — UI hiding. Only when enforcement is on (flag-OFF = the

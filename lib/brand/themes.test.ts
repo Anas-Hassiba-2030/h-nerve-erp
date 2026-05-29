@@ -5,10 +5,13 @@
 import { describe, it, expect } from "vitest";
 import { THEME_PRESETS, PACK_CATALOG, themeCssVars, type ThemeKey } from "./themes";
 
-const KEYS: ThemeKey[] = ["heritage", "ocean", "ember", "forest", "monolith", "pearl"];
+const KEYS: ThemeKey[] = [
+  "heritage", "ocean", "ember", "forest", "monolith", "pearl",
+  "midnight-nerve", "desert-gold", "obsidian",
+];
 
 describe("THEME_PRESETS — registry integrity", () => {
-  it("ships exactly the 6 documented presets", () => {
+  it("ships exactly the 9 documented presets", () => {
     expect(Object.keys(THEME_PRESETS).sort()).toEqual([...KEYS].sort());
   });
 

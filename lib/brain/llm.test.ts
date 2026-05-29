@@ -28,7 +28,7 @@ describe("llmConfig — the stub/live decision", () => {
     const c = llmConfig();
     expect(c.enabled).toBe(false);
     expect(c.apiKey).toBeNull();
-    expect(c.model).toBe("claude-sonnet-4-5");
+    expect(c.model).toBe("claude-sonnet-4-6");
   });
   it("a blank / whitespace key still counts as DISABLED (pitch-critical)", () => {
     process.env[KEY] = "   ";

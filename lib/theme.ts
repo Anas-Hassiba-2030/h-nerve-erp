@@ -7,7 +7,10 @@ export type ThemeId =
   | "amber"
   | "ocean"
   | "carbon"
-  | "rose";
+  | "rose"
+  | "midnight-nerve"
+  | "desert-gold"
+  | "obsidian";
 
 export const THEME_COOKIE = "h_nerve_theme";
 
@@ -148,6 +151,57 @@ export const THEMES: Record<ThemeId, ThemeDef> = {
     brandSoft: "#f9e3eb",
     accent: "#c89b6a",
     isDark: false,
+  },
+  "midnight-nerve": {
+    id: "midnight-nerve",
+    name: "نيرف الليلي",
+    nameEn: "Midnight Nerve",
+    description: "كحلي عميق + سماوي كهربائي — نبض الذكاء ليلاً.",
+    descriptionEn: "Deep navy + electric cyan — the intelligence layer at night.",
+    surface: "#070b16",
+    surfaceElevated: "#0e1428",
+    text: "#e8edfb",
+    textMuted: "#8a97c2",
+    border: "#1b2447",
+    brand: "#1a1f4e",
+    brandDeep: "#0f1234",
+    brandSoft: "rgba(0,212,255,0.13)",
+    accent: "#00d4ff",
+    isDark: true,
+  },
+  "desert-gold": {
+    id: "desert-gold",
+    name: "ذهب الصحراء",
+    nameEn: "Desert Gold",
+    description: "رمل دافئ + طين أحمر + ذهب غني — تراث المكان بثقة.",
+    descriptionEn: "Warm sand + deep terracotta + rich gold — heritage with conviction.",
+    surface: "#f5ede0",
+    surfaceElevated: "#fffaf2",
+    text: "#2a1a10",
+    textMuted: "#7a6149",
+    border: "#e6d8c2",
+    brand: "#8b3a1c",
+    brandDeep: "#5e2510",
+    brandSoft: "#f3e2d0",
+    accent: "#d4962a",
+    isDark: false,
+  },
+  obsidian: {
+    id: "obsidian",
+    name: "السبج",
+    nameEn: "Obsidian",
+    description: "أسود نقي + زمرّدي كهربائي + ذهب خافت — تركيز مطلق.",
+    descriptionEn: "Pure black + electric emerald + muted gold — absolute focus.",
+    surface: "#0d0d0d",
+    surfaceElevated: "#161616",
+    text: "#ffffff",
+    textMuted: "#9a9a9a",
+    border: "#262626",
+    brand: "#00ff88",
+    brandDeep: "#00b35f",
+    brandSoft: "rgba(0,255,136,0.14)",
+    accent: "#b8962e",
+    isDark: true,
   },
 };
 

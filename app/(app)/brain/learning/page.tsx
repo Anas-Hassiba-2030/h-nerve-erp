@@ -13,6 +13,7 @@ import { Brain, Database, Cpu, Trash2 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { digest } from "@/lib/brain/feedback.live";
+import { LearningTrend } from "@/components/brain/LearningTrend";
 import {
   learnNow,
   seedFeedback,
@@ -75,6 +76,11 @@ export default async function BrainLearningPage() {
             value={`${monthDigest.accepted}/${monthDigest.rejected}`}
           />
         </section>
+
+        {/* Phase 7 — weekly learning curve (accepted vs rejected signal) */}
+        <div className="mt-3">
+          <LearningTrend ar={ar} weeks={12} />
+        </div>
 
         {/* Action rail */}
         <div

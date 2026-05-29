@@ -3,12 +3,12 @@ generator client {
 }
 
 datasource db {
-  // PRODUCTION: Railway injects DATABASE_URL automatically (no DIRECT_URL needed).
-  // Neon users: set DIRECT_URL to the non-pooled connection string for migrations.
-  // LOCAL DEV: provider="sqlite", remove directUrl line, DATABASE_URL="file:./dev.db".
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  // PRODUCTION: Railway injects DATABASE_URL automatically. No DIRECT_URL needed.
+  // Neon users: append `?pgbouncer=true&connection_limit=1` to DATABASE_URL and
+  // run migrations against the non-pooled connection separately.
+  // LOCAL DEV: provider="sqlite", DATABASE_URL="file:./dev.db".
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // =====================================================================

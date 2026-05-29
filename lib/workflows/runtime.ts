@@ -53,12 +53,7 @@ export async function runWorkflow(
   if (!wf) throw new Error("workflow not found");
 
   // Build adjacency from each node id to the nodes it points to.
-  const adj = new Map<string, string[]>();
-  for (const e of wf.edges) {
-    const list = adj.get(e.fromNodeId) ?? [];
-    list.push(e.toNodeId);
-    adj.set(e.fromNodeId, list);
-  }
+  const adj = buildAdjacency(wf.edges);
 
   const nodes = new Map<string, RuntimeNode>();
   for (const n of wf.nodes) {
@@ -84,17 +79,32 @@ export async function runWorkflow(
   const trace: TraceEvent[] = [];
   let failedAny = false;
 
-  // 1. Walk every trigger; if it fires, BFS its outbound chain.
-  const triggers = [...nodes.values()].filter((n) => n.kind === "trigger");
-  for (const trig of triggers) {
-    const tev = await evalNode(trig, mode);
-    trace.push(tev);
-    if (tev.status === "fired") {
-      await walkFrom(trig.id, nodes, adj, mode, trace, () => {
-        failedAny = true;
-      });
-    }
-  }
+  // Walk the graph from every trigger. evaluationWalk owns traversal + the
+  // visited guard (so a cycle can't loop forever and a diamond can't
+  // double-fire an action); this callback owns evaluation, the trace, and
+  // the descend decision (trigger fired / condition passed / action always).
+  const triggerIds = [...nodes.values()]
+    .filter((n) => n.kind === "trigger")
+    .map((n) => n.id);
+
+  await evaluationWalk({
+    triggerIds,
+    adjacency: adj,
+    evaluate: async (id) => {
+      const n = nodes.get(id);
+      if (!n) return { descend: false };
+      const ev = await evalNode(n, mode);
+      trace.push(ev);
+      if (ev.status === "failed") failedAny = true;
+      const descend =
+        n.kind === "trigger"
+          ? ev.status === "fired"
+          : n.kind === "condition"
+            ? ev.status === "passed"
+            : true; // action — always continue the chain
+      return { descend };
+    },
+  });
 
   const ms = Date.now() - t0;
   const finalStatus: "SUCCESS" | "FAILED" | "DRY_RUN" =
@@ -119,25 +129,48 @@ export async function runWorkflow(
   return { runId: run.id, status: finalStatus, trace, durationMs: ms };
 }
 
-async function walkFrom(
-  fromId: string,
-  nodes: Map<string, RuntimeNode>,
-  adj: Map<string, string[]>,
-  mode: RunMode,
-  trace: TraceEvent[],
-  onFail: () => void
-) {
-  const next = adj.get(fromId) ?? [];
-  for (const nextId of next) {
-    const n = nodes.get(nextId);
-    if (!n) continue;
-    const ev = await evalNode(n, mode);
-    trace.push(ev);
-    if (ev.status === "failed") onFail();
-    // Conditions short-circuit when they don't pass.
-    if (n.kind === "condition" && ev.status !== "passed") continue;
-    // Actions: even if fired, walk the rest in case downstream actions chain.
-    await walkFrom(nextId, nodes, adj, mode, trace, onFail);
+// Build an id→[childIds] adjacency map from the workflow's edges.
+export function buildAdjacency(
+  edges: Array<{ fromNodeId: string; toNodeId: string }>,
+): Map<string, string[]> {
+  const adj = new Map<string, string[]>();
+  for (const e of edges) {
+    const list = adj.get(e.fromNodeId) ?? [];
+    list.push(e.toNodeId);
+    adj.set(e.fromNodeId, list);
+  }
+  return adj;
+}
+
+// Pure traversal core shared by runWorkflow. Visits every trigger, then
+// descends each node's outbound edges depth-first. A `visited` set makes
+// each node evaluate AT MOST ONCE — so a diamond (two paths re-converging)
+// never double-fires an action, and a cycle terminates instead of
+// overflowing the stack. `evaluate` returns `descend:false` to prune a
+// branch (a trigger that didn't fire, a condition that didn't pass). The
+// function is DB-free and side-effect-free itself — every effect lives in
+// the injected `evaluate` — which is what makes it unit-testable with no DB.
+export async function evaluationWalk(opts: {
+  triggerIds: string[];
+  adjacency: Map<string, string[]>;
+  evaluate: (id: string) => Promise<{ descend: boolean }>;
+}): Promise<void> {
+  const visited = new Set<string>();
+
+  async function descendFrom(id: string): Promise<void> {
+    for (const nextId of opts.adjacency.get(id) ?? []) {
+      if (visited.has(nextId)) continue;
+      visited.add(nextId);
+      const { descend } = await opts.evaluate(nextId);
+      if (descend) await descendFrom(nextId);
+    }
+  }
+
+  for (const tid of opts.triggerIds) {
+    if (visited.has(tid)) continue;
+    visited.add(tid);
+    const { descend } = await opts.evaluate(tid);
+    if (descend) await descendFrom(tid);
   }
 }
 
@@ -283,7 +316,7 @@ async function evalTrigger(tpl: Template, params: any): Promise<{ fired: boolean
 // Condition evaluators — pure-functional, no DB.
 // ─────────────────────────────────────────────────────────────────────
 
-function evalCondition(tpl: Template, params: any): { passed: boolean; message: string } {
+export function evalCondition(tpl: Template, params: any): { passed: boolean; message: string } {
   switch (tpl.key) {
     case "filter.business_hours": {
       const h = new Date().getHours();
@@ -359,11 +392,13 @@ async function evalAction(tpl: Template, params: any, mode: RunMode): Promise<{ 
   }
 }
 
-function safeJson(s: string | null | undefined): Record<string, any> {
+export function safeJson(s: string | null | undefined): Record<string, any> {
   if (!s) return {};
   try {
     const v = JSON.parse(s);
-    return typeof v === "object" && v !== null ? v : {};
+    // Config must be an object map — reject arrays and primitives so a
+    // malformed configJson never reaches an evaluator as the wrong shape.
+    return typeof v === "object" && v !== null && !Array.isArray(v) ? v : {};
   } catch {
     return {};
   }

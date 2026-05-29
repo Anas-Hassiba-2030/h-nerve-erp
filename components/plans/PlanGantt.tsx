@@ -11,6 +11,7 @@
 import { CheckCircle2, AlertOctagon, Clock, Hourglass } from "lucide-react";
 import { HeritagePill } from "@/components/heritage";
 import { markStepBlocked, markStepDone } from "@/app/(app)/plans/actions";
+import { pickLocale } from "@/lib/utils";
 
 const STATUS_ACCENT: Record<string, string> = {
   PENDING:     "var(--heri-rule-strong)",
@@ -44,6 +45,7 @@ type Step = {
   id: string;
   orderIndex: number;
   action: string;
+  actionEn: string | null;
   ownerRole: string;
   durationDays: number;
   status: string;
@@ -147,7 +149,7 @@ function StepTile({
             maxWidth: "62ch",
           }}
         >
-          {step.action}
+          {pickLocale(ar, step.action, step.actionEn)}
         </p>
         <div
           className="mt-2.5 flex flex-wrap items-center gap-2"

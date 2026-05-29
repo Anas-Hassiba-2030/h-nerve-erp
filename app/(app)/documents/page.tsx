@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // /documents — Document Intelligence ledger.
 //
 // Heritage Modern list. Drop anything anywhere on the app to add to it.

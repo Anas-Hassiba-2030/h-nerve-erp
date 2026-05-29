@@ -221,7 +221,7 @@ export default async function MarketDetailPage({
                   </Link>
                 ) : null}
               </div>
-              <h2 className="mt-1 text-3xl font-black md:text-4xl">
+              <h2 className="mt-1 text-3xl font-bold md:text-4xl">
                 {stock.labelAr ?? stock.label}
               </h2>
               {stock.labelAr ? (
@@ -237,7 +237,7 @@ export default async function MarketDetailPage({
                 آخر سعر
               </div>
               <div
-                className="font-mono text-5xl font-black md:text-6xl"
+                className="font-mono text-5xl font-bold md:text-6xl"
                 style={{
                   textShadow: "0 2px 14px rgba(0,0,0,.3)",
                   letterSpacing: "-0.02em",
@@ -246,7 +246,7 @@ export default async function MarketDetailPage({
                 {stock.lastPrice.toFixed(2)}
               </div>
               <div
-                className="mt-1 inline-flex items-center gap-1 rounded-full px-3 py-1 font-mono text-sm font-black anim-pop"
+                className="mt-1 inline-flex items-center gap-1 rounded-full px-3 py-1 font-mono text-sm font-bold anim-pop"
                 style={{
                   background: isUp
                     ? "rgba(34,197,94,.25)"
@@ -271,37 +271,37 @@ export default async function MarketDetailPage({
           <section className="card card-pad anim-fade-up">
             <header className="mb-3 flex items-center justify-between">
               <h3
-                className="flex items-center gap-2 text-sm font-extrabold"
-                style={{ color: "var(--text)" }}
+                className="flex items-center gap-2 text-sm font-semibold"
+                style={{ color: "var(--heri-ink)" }}
               >
                 <Activity
                   className="h-4 w-4"
-                  style={{ color: "var(--brand)" }}
+                  style={{ color: "var(--heri-ochre)" }}
                 />
                 الحركة السعرية
               </h3>
               <div className="flex items-center gap-3 text-[11px]">
-                <span style={{ color: "var(--text-muted)" }}>
+                <span style={{ color: "var(--heri-ink-3)" }}>
                   أعلى:{" "}
                   <span
-                    className="font-mono font-black"
-                    style={{ color: "var(--text)" }}
+                    className="font-mono font-bold"
+                    style={{ color: "var(--heri-ink)" }}
                   >
                     {high.toFixed(2)}
                   </span>
                 </span>
-                <span style={{ color: "var(--text-muted)" }}>
+                <span style={{ color: "var(--heri-ink-3)" }}>
                   أدنى:{" "}
                   <span
-                    className="font-mono font-black"
-                    style={{ color: "var(--text)" }}
+                    className="font-mono font-bold"
+                    style={{ color: "var(--heri-ink)" }}
                   >
                     {low.toFixed(2)}
                   </span>
                 </span>
-                <span style={{ color: "var(--text-muted)" }}>
+                <span style={{ color: "var(--heri-ink-3)" }}>
                   مدى:{" "}
-                  <span className="font-mono font-black" style={{ color: trendColor }}>
+                  <span className="font-mono font-bold" style={{ color: trendColor }}>
                     {sessionRange.toFixed(2)}
                   </span>
                 </span>
@@ -346,12 +346,12 @@ export default async function MarketDetailPage({
             <section className="card card-pad anim-fade-up">
               <header className="mb-3 flex items-center justify-between">
                 <h3
-                  className="flex items-center gap-2 text-sm font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  className="flex items-center gap-2 text-sm font-semibold"
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   <TrendingUp
                     className="h-4 w-4"
-                    style={{ color: "var(--brand)" }}
+                    style={{ color: "var(--heri-ochre)" }}
                   />
                   أسهم أخرى من{" "}
                   {EXCHANGE_AR[stock.exchange] ?? stock.exchange}
@@ -359,12 +359,12 @@ export default async function MarketDetailPage({
                 <Link
                   href="/markets"
                   className="text-[11px] font-bold"
-                  style={{ color: "var(--brand)" }}
+                  style={{ color: "var(--heri-ochre)" }}
                 >
                   كل الأسواق ←
                 </Link>
               </header>
-              <ul className="divide-y divide-[var(--border)]">
+              <ul className="divide-y divide-[var(--heri-rule)]">
                 {peers.map((p, i) => {
                   const pUp = p.changePct >= 0;
                   return (
@@ -380,14 +380,14 @@ export default async function MarketDetailPage({
                         <div className="flex items-center gap-2">
                           <span
                             className="font-mono text-xs font-bold"
-                            style={{ color: "var(--text)" }}
+                            style={{ color: "var(--heri-ink)" }}
                             dir="ltr"
                           >
                             {p.ticker}
                           </span>
                           <span
                             className="truncate text-sm font-bold"
-                            style={{ color: "var(--text)" }}
+                            style={{ color: "var(--heri-ink)" }}
                           >
                             {p.labelAr ?? p.label}
                           </span>
@@ -395,8 +395,8 @@ export default async function MarketDetailPage({
                       </Link>
                       <div className="flex items-center gap-3 text-end">
                         <span
-                          className="font-mono text-xs font-black"
-                          style={{ color: "var(--text)" }}
+                          className="font-mono text-xs font-bold"
+                          style={{ color: "var(--heri-ink)" }}
                         >
                           {p.lastPrice.toFixed(2)}
                         </span>
@@ -420,8 +420,8 @@ export default async function MarketDetailPage({
           <aside className="space-y-6">
             <section className="card card-pad anim-fade-up">
               <h3
-                className="mb-3 text-sm font-extrabold"
-                style={{ color: "var(--text)" }}
+                className="mb-3 text-sm font-semibold"
+                style={{ color: "var(--heri-ink)" }}
               >
                 البطاقة
               </h3>
@@ -469,17 +469,17 @@ function Fact({
   mono?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-[var(--border)] pb-1.5 last:border-b-0">
-      <dt style={{ color: "var(--text-muted)" }}>{label}</dt>
+    <div className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
+      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
       <dd
         className={`text-end font-bold ${mono ? "font-mono" : ""}`}
-        style={{ color: "var(--text)" }}
+        style={{ color: "var(--heri-ink)" }}
       >
         {link ? (
           <Link
             href={link}
             className="hover:underline"
-            style={{ color: "var(--brand)" }}
+            style={{ color: "var(--heri-ochre)" }}
           >
             {value}
           </Link>

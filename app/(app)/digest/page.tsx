@@ -96,7 +96,7 @@ export default async function DigestListPage() {
                         <span
                           className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[11px] font-bold"
                           style={{
-                            background: "var(--brand-soft)",
+                            background: "var(--heri-cream-2)",
                             color: "var(--brand-deep)",
                           }}
                         >
@@ -107,8 +107,8 @@ export default async function DigestListPage() {
                         <span
                           className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold"
                           style={{
-                            background: "color-mix(in srgb, var(--accent) 14%, transparent)",
-                            color: "var(--accent)",
+                            background: "color-mix(in srgb, var(--heri-copper) 14%, transparent)",
+                            color: "var(--heri-copper)",
                           }}
                         >
                           <Brain className="h-3 w-3" />
@@ -117,21 +117,21 @@ export default async function DigestListPage() {
                         </span>
                         <span
                           className="text-[11px]"
-                          style={{ color: "var(--text-muted)" }}
+                          style={{ color: "var(--heri-ink-3)" }}
                         >
                           {ar ? "صدر" : "Issued"} {dateFmt.format(d.createdAt)}
                         </span>
                       </div>
                       <p
                         className="mt-2 text-sm leading-relaxed"
-                        style={{ color: "var(--text)" }}
+                        style={{ color: "var(--heri-ink)" }}
                       >
                         {d.summary}
                       </p>
                     </div>
                     <ArrowUpRight
                       className="h-4 w-4 shrink-0 rtl:-scale-x-100"
-                      style={{ color: "var(--text-muted)" }}
+                      style={{ color: "var(--heri-ink-3)" }}
                     />
                   </div>
                 </Link>

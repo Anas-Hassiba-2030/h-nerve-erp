@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // /system — health dashboard. Database stats, AI engine status, recent
 // errors, table counts, last activity per module. Admin-only "is the
 // nervous system breathing?" screen.
@@ -11,9 +13,8 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
-import { HeroPanel } from "@/components/exec/HeroPanel";
-import { MetricTile } from "@/components/exec/MetricTile";
-import { SectionBlock } from "@/components/exec/SectionBlock";
+import { HeritageSection, HeritagePill } from "@/components/heritage";
+import { HeriKpi } from "@/components/HeriKpi";
 import { getLocale } from "@/lib/i18n.server";
 import { prisma } from "@/lib/db";
 import { formatNumber } from "@/lib/utils";
@@ -122,40 +123,32 @@ export default async function SystemPage() {
     count: number;
     lastAt: Date | null;
     href: string;
-    tone: string;
+    accent: string;
   }> = [
-    { key: "companies",  label_ar: "الشركات",       label_en: "Companies",   icon: Building2,    count: counts.companies ?? 0,    lastAt: null, href: "/companies",  tone: "emerald" },
-    { key: "users",      label_ar: "المستخدمون",    label_en: "Users",        icon: ShieldCheck,  count: counts.users ?? 0,        lastAt: null, href: "/users",      tone: "rose" },
-    { key: "hotels",     label_ar: "الفنادق",        label_en: "Hotels",       icon: Hotel,        count: counts.hotels ?? 0,       lastAt: null, href: "/hotels",     tone: "amber" },
-    { key: "bookings",   label_ar: "الحجوزات",      label_en: "Bookings",     icon: Hotel,        count: counts.bookings ?? 0,     lastAt: lastBooking?.createdAt ?? null, href: "/hotels", tone: "amber" },
-    { key: "dairy",      label_ar: "دفعات الألبان",  label_en: "Dairy",        icon: Milk,         count: counts.dairy ?? 0,        lastAt: lastBatch?.createdAt ?? null,   href: "/dairy",      tone: "blue" },
-    { key: "farms",      label_ar: "المزارع",         label_en: "Farms",        icon: Sprout,       count: counts.farms ?? 0,        lastAt: null, href: "/farms",      tone: "emerald" },
-    { key: "programs",   label_ar: "برامج Tank",     label_en: "Programs",     icon: GraduationCap,count: counts.programs ?? 0,     lastAt: null, href: "/education",  tone: "violet" },
-    { key: "forecasts",  label_ar: "تنبؤات AI",       label_en: "Forecasts",    icon: Brain,        count: counts.forecasts ?? 0,    lastAt: null, href: "/supply-chain", tone: "violet" },
-    { key: "insights",   label_ar: "إشارات AI",       label_en: "Insights",     icon: Sparkles,     count: counts.insights ?? 0,     lastAt: lastInsight?.createdAt ?? null, href: "/insights",   tone: "amber" },
-    { key: "transactions",label_ar: "المعاملات",     label_en: "Transactions", icon: Wallet,       count: counts.transactions ?? 0, lastAt: null, href: "/finance",    tone: "emerald" },
-    { key: "marketStocks",label_ar: "أسهم",           label_en: "Stocks",       icon: TrendingUp,   count: counts.marketStocks ?? 0, lastAt: null, href: "/markets",    tone: "blue" },
-    { key: "esg",        label_ar: "ESG",            label_en: "ESG",          icon: Leaf,         count: counts.esg ?? 0,          lastAt: null, href: "/sustainability", tone: "emerald" },
-    { key: "projects",   label_ar: "مشاريع",          label_en: "Projects",     icon: FlaskConical, count: counts.projects ?? 0,     lastAt: null, href: "/projects",   tone: "violet" },
-    { key: "tasks",      label_ar: "مهام",            label_en: "Tasks",        icon: ListChecks,   count: counts.tasks ?? 0,        lastAt: null, href: "/tasks",      tone: "blue" },
-    { key: "achievements",label_ar: "إنجازات",       label_en: "Achievements", icon: Trophy,       count: counts.achievements ?? 0, lastAt: null, href: "/achievements", tone: "amber" },
-    { key: "alertRules", label_ar: "قواعد تنبيه",    label_en: "Alert rules",  icon: Bell,         count: counts.alertRules ?? 0,   lastAt: null, href: "/alerts",     tone: "rose" },
-    { key: "threads",    label_ar: "محادثات",         label_en: "Threads",      icon: MessageSquare,count: counts.threads ?? 0,      lastAt: null, href: "/messages",   tone: "blue" },
-    { key: "messages",   label_ar: "رسائل",           label_en: "Messages",     icon: MessageSquare,count: counts.messages ?? 0,     lastAt: null, href: "/messages",   tone: "blue" },
-    { key: "pins",       label_ar: "مفضلة",           label_en: "Pins",         icon: Pin,          count: counts.pins ?? 0,         lastAt: null, href: "/pinned",     tone: "amber" },
-    { key: "activityLog",label_ar: "سجل النشاط",     label_en: "Activity log", icon: Activity,     count: counts.activityLog ?? 0,  lastAt: lastActivity?.createdAt ?? null, href: "/activity",   tone: "violet" },
-    { key: "crops",      label_ar: "محاصيل",          label_en: "Crops",        icon: Sprout,       count: counts.crops ?? 0,        lastAt: null, href: "/farms",      tone: "emerald" },
+    { key: "companies",   label_ar: "الشركات",       label_en: "Companies",    icon: Building2,    count: counts.companies ?? 0,    lastAt: null,                           href: "/companies",    accent: "var(--heri-teal)" },
+    { key: "users",       label_ar: "المستخدمون",    label_en: "Users",         icon: ShieldCheck,  count: counts.users ?? 0,        lastAt: null,                           href: "/users",        accent: "var(--heri-terracotta)" },
+    { key: "hotels",      label_ar: "الفنادق",        label_en: "Hotels",        icon: Hotel,        count: counts.hotels ?? 0,       lastAt: null,                           href: "/hotels",       accent: "var(--heri-ochre)" },
+    { key: "bookings",    label_ar: "الحجوزات",      label_en: "Bookings",      icon: Hotel,        count: counts.bookings ?? 0,     lastAt: lastBooking?.createdAt ?? null,  href: "/hotels",       accent: "var(--heri-ochre)" },
+    { key: "dairy",       label_ar: "دفعات الألبان", label_en: "Dairy",         icon: Milk,         count: counts.dairy ?? 0,        lastAt: lastBatch?.createdAt ?? null,    href: "/dairy",        accent: "var(--heri-teal)" },
+    { key: "farms",       label_ar: "المزارع",        label_en: "Farms",         icon: Sprout,       count: counts.farms ?? 0,        lastAt: null,                           href: "/farms",        accent: "var(--heri-teal)" },
+    { key: "programs",    label_ar: "برامج Tank",    label_en: "Programs",      icon: GraduationCap,count: counts.programs ?? 0,     lastAt: null,                           href: "/education",    accent: "var(--heri-copper)" },
+    { key: "forecasts",   label_ar: "تنبؤات AI",      label_en: "Forecasts",     icon: Brain,        count: counts.forecasts ?? 0,    lastAt: null,                           href: "/supply-chain", accent: "var(--heri-copper)" },
+    { key: "insights",    label_ar: "إشارات AI",      label_en: "Insights",      icon: Sparkles,     count: counts.insights ?? 0,     lastAt: lastInsight?.createdAt ?? null,  href: "/insights",     accent: "var(--heri-ochre)" },
+    { key: "transactions",label_ar: "المعاملات",     label_en: "Transactions",  icon: Wallet,       count: counts.transactions ?? 0, lastAt: null,                           href: "/finance",      accent: "var(--heri-teal)" },
+    { key: "marketStocks",label_ar: "أسهم",           label_en: "Stocks",        icon: TrendingUp,   count: counts.marketStocks ?? 0, lastAt: null,                           href: "/markets",      accent: "var(--heri-teal)" },
+    { key: "esg",         label_ar: "ESG",           label_en: "ESG",           icon: Leaf,         count: counts.esg ?? 0,          lastAt: null,                           href: "/sustainability",accent: "var(--heri-teal)" },
+    { key: "projects",    label_ar: "مشاريع",         label_en: "Projects",      icon: FlaskConical, count: counts.projects ?? 0,     lastAt: null,                           href: "/projects",     accent: "var(--heri-copper)" },
+    { key: "tasks",       label_ar: "مهام",           label_en: "Tasks",         icon: ListChecks,   count: counts.tasks ?? 0,        lastAt: null,                           href: "/tasks",        accent: "var(--heri-teal)" },
+    { key: "achievements",label_ar: "إنجازات",       label_en: "Achievements",  icon: Trophy,       count: counts.achievements ?? 0, lastAt: null,                           href: "/achievements", accent: "var(--heri-ochre)" },
+    { key: "alertRules",  label_ar: "قواعد تنبيه",   label_en: "Alert rules",   icon: Bell,         count: counts.alertRules ?? 0,   lastAt: null,                           href: "/alerts",       accent: "var(--heri-terracotta)" },
+    { key: "threads",     label_ar: "محادثات",        label_en: "Threads",       icon: MessageSquare,count: counts.threads ?? 0,      lastAt: null,                           href: "/messages",     accent: "var(--heri-teal)" },
+    { key: "messages",    label_ar: "رسائل",          label_en: "Messages",      icon: MessageSquare,count: counts.messages ?? 0,     lastAt: null,                           href: "/messages",     accent: "var(--heri-teal)" },
+    { key: "pins",        label_ar: "مفضلة",          label_en: "Pins",          icon: Pin,          count: counts.pins ?? 0,         lastAt: null,                           href: "/pinned",       accent: "var(--heri-ochre)" },
+    { key: "activityLog", label_ar: "سجل النشاط",    label_en: "Activity log",  icon: Activity,     count: counts.activityLog ?? 0,  lastAt: lastActivity?.createdAt ?? null, href: "/activity",     accent: "var(--heri-copper)" },
+    { key: "crops",       label_ar: "محاصيل",         label_en: "Crops",         icon: Sprout,       count: counts.crops ?? 0,        lastAt: null,                           href: "/farms",        accent: "var(--heri-teal)" },
   ];
 
   const totalRecords = Object.values(counts).reduce((a, b) => a + b, 0);
-  const TONE_BG: Record<string, string> = {
-    emerald: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-    amber:   "bg-amber-50 text-amber-700 ring-amber-200",
-    blue:    "bg-blue-50 text-blue-700 ring-blue-200",
-    violet:  "bg-violet-50 text-violet-700 ring-violet-200",
-    rose:    "bg-rose-50 text-rose-700 ring-rose-200",
-    slate:   "bg-slate-100 text-slate-700 ring-slate-200",
-  };
 
   return (
     <>
@@ -170,168 +163,129 @@ export default async function SystemPage() {
       />
 
       <PageContainer>
-        <HeroPanel
-          gradient={
-            dbHealthy
-              ? "linear-gradient(135deg, #064e3b 0%, #047857 35%, #10b981 70%, #6ee7b7 110%)"
-              : "linear-gradient(135deg, #7f1d1d 0%, #b91c1c 35%, #ef4444 70%, #fca5a5 110%)"
+        <HeritageSection
+          eyebrow={ar ? "النبض الحيوي" : "System pulse"}
+          title={ar ? "النظام يتنفس" : "The system is breathing"}
+          aside={
+            <HeritagePill tone={dbHealthy ? "success" : "critical"}>
+              {dbHealthy
+                ? (ar ? "كل الأنظمة صحية" : "All systems healthy")
+                : (ar ? "خلل في النظام" : "System fault")}
+            </HeritagePill>
           }
-          accent={dbHealthy ? "#10b981" : "#ef4444"}
-          height={250}
         >
-          <div className="flex flex-wrap items-center justify-between gap-5">
-            <div className="flex items-center gap-5 hn-anim-rise">
-              <div className="hn-anim-zoom-bounce relative">
-                <span className="hn-anim-pulse-ring absolute -inset-2 rounded-3xl" aria-hidden />
-                <div
-                  className="flex h-[88px] w-[88px] items-center justify-center rounded-2xl ring-2 ring-white/40"
-                  style={{ background: "rgba(255,255,255,0.18)" }}
-                >
-                  <Heart className="h-12 w-12 text-white hn-anim-pulse-soft" />
-                </div>
-              </div>
-              <div className="min-w-0">
-                <div
-                  className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em]"
-                  style={{
-                    background: "rgba(255,255,255,0.18)",
-                    border: "1px solid rgba(255,255,255,0.28)",
-                    backdropFilter: "blur(6px)",
-                    color: "white",
-                  }}
-                >
-                  <Server className="h-3 w-3" />
-                  {dbHealthy
-                    ? ar ? "كل الأنظمة صحية" : "All systems healthy"
-                    : ar ? "خلل في النظام" : "System fault"}
-                </div>
-                <h2
-                  className="mt-2.5 text-3xl font-black leading-[1.05] tracking-[-0.02em] hn-anim-rise md:text-[34px]"
-                  style={{ animationDelay: "0.08s" }}
-                >
-                  {ar ? "النظام يتنفس" : "The system is breathing"}
-                </h2>
-                <p
-                  className="mt-1 max-w-xl text-[12.5px] font-bold opacity-90 hn-anim-rise"
-                  style={{ animationDelay: "0.16s" }}
-                >
-                  {ar
-                    ? `${formatNumber(totalRecords)} سجل · ${formatNumber(activeAlertRules)} قاعدة تنبيه نشطة · ${formatNumber(last24hActivity)} حدث آخر 24س.`
-                    : `${formatNumber(totalRecords)} records · ${formatNumber(activeAlertRules)} active alerts · ${formatNumber(last24hActivity)} events in 24h.`}
-                </p>
-              </div>
-            </div>
-
-            <div className="grid gap-2 hn-stagger sm:grid-cols-2">
-              <SysHeroStat
-                label={ar ? "زمن الاستجابة" : "DB latency"}
-                value={`${dbLatency}ms`}
-                icon={Clock}
-              />
-              <SysHeroStat
-                label={ar ? "وقت التشغيل" : "Uptime"}
-                value={formatDuration(uptime, ar)}
-                icon={Activity}
-              />
-              <SysHeroStat
-                label={ar ? "إجمالي السجلات" : "Total records"}
-                value={formatNumber(totalRecords)}
-                icon={Database}
-              />
-              <SysHeroStat
-                label={ar ? "نشاط/ساعة" : "Events/hour"}
-                value={formatNumber(Math.round(activityPerHour))}
-                icon={Zap}
-              />
-            </div>
+          <p className="mt-1 max-w-xl text-[12.5px] font-semibold" style={{ color: "var(--heri-ink-2)" }}>
+            {ar
+              ? `${formatNumber(totalRecords)} سجل · ${formatNumber(activeAlertRules)} قاعدة تنبيه نشطة · ${formatNumber(last24hActivity)} حدث آخر 24س.`
+              : `${formatNumber(totalRecords)} records · ${formatNumber(activeAlertRules)} active alerts · ${formatNumber(last24hActivity)} events in 24h.`}
+          </p>
+          <div className="mt-4 grid gap-2 heri-stagger sm:grid-cols-2 lg:grid-cols-4">
+            <SysHeroStat
+              label={ar ? "زمن الاستجابة" : "DB latency"}
+              value={`${dbLatency}ms`}
+              icon={Clock}
+            />
+            <SysHeroStat
+              label={ar ? "وقت التشغيل" : "Uptime"}
+              value={formatDuration(uptime, ar)}
+              icon={Activity}
+            />
+            <SysHeroStat
+              label={ar ? "إجمالي السجلات" : "Total records"}
+              value={formatNumber(totalRecords)}
+              icon={Database}
+            />
+            <SysHeroStat
+              label={ar ? "نشاط/ساعة" : "Events/hour"}
+              value={formatNumber(Math.round(activityPerHour))}
+              icon={Zap}
+            />
           </div>
-        </HeroPanel>
+        </HeritageSection>
 
-        <section className="grid gap-3 hn-stagger sm:grid-cols-2 xl:grid-cols-4">
-          <MetricTile
+        <section className="grid gap-3 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
+          <HeriKpi
             label={ar ? "حالة قاعدة البيانات" : "Database"}
-            value={dbHealthy ? (ar ? "صحية" : "Healthy") : (ar ? "عطل" : "Fault")}
-            icon={Database}
-            tone={dbHealthy ? "emerald" : "rose"}
+            raw={dbHealthy ? 1 : 0}
+            kind="number"
             hint={`SQLite · ${dbLatency}ms`}
+            accent={dbHealthy ? "var(--heri-teal)" : "var(--heri-terracotta)"}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "محرك الذكاء" : "AI engine"}
-            value={ar ? "جاهز" : "Ready"}
-            icon={Brain}
-            tone="violet"
+            raw={counts.insights ?? 0}
+            kind="number"
             hint={
               lastInsight
                 ? `${ar ? "آخر:" : "Last:"} ${formatRel(lastInsight.createdAt, ar)}`
                 : ar ? "لم يُشغّل" : "never run"
             }
+            accent="var(--heri-copper)"
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "محرك التنبيهات" : "Alert engine"}
-            value={`${formatNumber(activeAlertRules)} ${ar ? "نشط" : "active"}`}
-            icon={Bell}
-            tone={activeAlertRules > 0 ? "amber" : "slate"}
+            raw={activeAlertRules}
+            kind="number"
             hint={ar ? "قواعد تراقب البيانات" : "rules watching data"}
+            accent={activeAlertRules > 0 ? "var(--heri-ochre)" : undefined}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "نشاط 24س" : "24h activity"}
-            value={formatNumber(last24hActivity)}
-            icon={Activity}
-            tone="blue"
+            raw={last24hActivity}
+            kind="number"
             hint={`${formatNumber(last24hInsights)} ${ar ? "إشارة" : "insights"}`}
           />
         </section>
 
         {/* Module table */}
-        <SectionBlock
+        <HeritageSection
           eyebrow={ar ? "كل الجداول" : "All tables"}
           title={ar ? "إحصاءات السجلات لكل وحدة" : "Per-module record stats"}
-          description={
-            ar
-              ? `${formatNumber(modules.length)} جدول · ${formatNumber(totalRecords)} سجل إجمالي`
-              : `${formatNumber(modules.length)} tables · ${formatNumber(totalRecords)} records total`
-          }
-          tone="brand"
         >
-          <div className="grid gap-2 hn-stagger md:grid-cols-2 lg:grid-cols-3">
+          <p className="mb-3 text-[12px] font-semibold" style={{ color: "var(--heri-ink-3)" }}>
+            {ar
+              ? `${formatNumber(modules.length)} جدول · ${formatNumber(totalRecords)} سجل إجمالي`
+              : `${formatNumber(modules.length)} tables · ${formatNumber(totalRecords)} records total`}
+          </p>
+          <div className="grid gap-2 heri-stagger md:grid-cols-2 lg:grid-cols-3">
             {modules.map((m) => {
               const Icon = m.icon;
               return (
                 <Link
                   key={m.key}
                   href={m.href}
-                  className="hn-anim-rise hn-hover-lift flex items-center gap-3 rounded-xl px-3 py-2.5 transition"
+                  className="flex items-center gap-3 px-3 py-2.5 transition hover:bg-[var(--heri-cream-2)]"
                   style={{
-                    background: "var(--surface-elevated)",
-                    border: "1px solid var(--border)",
+                    background: "var(--heri-cream)",
+                    border: "1px solid var(--heri-rule)",
                   }}
                 >
                   <span
-                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ring-1 ${TONE_BG[m.tone]}`}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center"
+                    style={{ background: "var(--heri-cream)", border: "1px solid var(--heri-rule)", color: m.accent }}
                   >
                     <Icon className="h-4 w-4" />
                   </span>
                   <div className="min-w-0 flex-1">
                     <div
-                      className="line-clamp-1 text-[12px] font-extrabold"
-                      style={{ color: "var(--text)" }}
+                      className="line-clamp-1 text-[12px] font-bold"
+                      style={{ color: "var(--heri-ink)" }}
                     >
                       {ar ? m.label_ar : m.label_en}
                     </div>
                     {m.lastAt ? (
                       <div
-                        className="line-clamp-1 text-[10px] font-bold"
-                        style={{ color: "var(--text-muted)" }}
+                        className="line-clamp-1 text-[10px] font-semibold"
+                        style={{ color: "var(--heri-ink-3)" }}
                       >
                         {ar ? "آخر:" : "Last:"} {formatRel(m.lastAt, ar)}
                       </div>
                     ) : null}
                   </div>
                   <span
-                    className="exec-num shrink-0 rounded-md px-2 py-0.5 font-mono text-[12px] font-black tabular-nums"
+                    className="heri-number-mono shrink-0 px-2 py-0.5 text-[12px] tabular-nums"
                     style={{
-                      background: m.count > 0 ? "var(--brand-soft)" : "var(--surface)",
-                      color: m.count > 0 ? "var(--brand)" : "var(--text-muted)",
+                      color: m.count > 0 ? "var(--heri-ochre)" : "var(--heri-ink-3)",
                     }}
                   >
                     {formatNumber(m.count)}
@@ -340,62 +294,31 @@ export default async function SystemPage() {
               );
             })}
           </div>
-        </SectionBlock>
+        </HeritageSection>
 
         {/* Live signals */}
-        <SectionBlock
+        <HeritageSection
           eyebrow={ar ? "الإشارات الحية" : "Live signals"}
           title={ar ? "ماذا يحدث الآن" : "What's happening now"}
-          description={
-            ar
-              ? "آخر نشاط لكل قناة في النظام."
-              : "Latest activity across every channel."
-          }
-          tone="emerald"
         >
+          <p className="mb-3 text-[12px] font-semibold" style={{ color: "var(--heri-ink-3)" }}>
+            {ar
+              ? "آخر نشاط لكل قناة في النظام."
+              : "Latest activity across every channel."}
+          </p>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            <LiveRow
-              label={ar ? "آخر إشارة AI" : "Last AI insight"}
-              value={formatRel(lastInsight?.createdAt ?? null, ar)}
-              icon={Sparkles}
-              tone="amber"
-            />
-            <LiveRow
-              label={ar ? "آخر سجل نشاط" : "Last activity log"}
-              value={formatRel(lastActivity?.createdAt ?? null, ar)}
-              icon={Activity}
-              tone="violet"
-            />
-            <LiveRow
-              label={ar ? "آخر حجز" : "Last booking"}
-              value={formatRel(lastBooking?.createdAt ?? null, ar)}
-              icon={Hotel}
-              tone="amber"
-            />
-            <LiveRow
-              label={ar ? "آخر دفعة ألبان" : "Last dairy batch"}
-              value={formatRel(lastBatch?.createdAt ?? null, ar)}
-              icon={Milk}
-              tone="blue"
-            />
-            <LiveRow
-              label={ar ? "إشارات مفتوحة" : "Open insights"}
-              value={`${formatNumber(openInsights)} ${ar ? "تنتظر" : "pending"}`}
-              icon={Brain}
-              tone="violet"
-            />
-            <LiveRow
-              label={ar ? "رسائل آخر 24س" : "Messages 24h"}
-              value={formatNumber(last24hMessages)}
-              icon={MessageSquare}
-              tone="blue"
-            />
+            <LiveRow label={ar ? "آخر إشارة AI" : "Last AI insight"} value={formatRel(lastInsight?.createdAt ?? null, ar)} icon={Sparkles} accent="var(--heri-ochre)" />
+            <LiveRow label={ar ? "آخر سجل نشاط" : "Last activity log"} value={formatRel(lastActivity?.createdAt ?? null, ar)} icon={Activity} accent="var(--heri-copper)" />
+            <LiveRow label={ar ? "آخر حجز" : "Last booking"} value={formatRel(lastBooking?.createdAt ?? null, ar)} icon={Hotel} accent="var(--heri-ochre)" />
+            <LiveRow label={ar ? "آخر دفعة ألبان" : "Last dairy batch"} value={formatRel(lastBatch?.createdAt ?? null, ar)} icon={Milk} accent="var(--heri-teal)" />
+            <LiveRow label={ar ? "إشارات مفتوحة" : "Open insights"} value={`${formatNumber(openInsights)} ${ar ? "تنتظر" : "pending"}`} icon={Brain} accent="var(--heri-copper)" />
+            <LiveRow label={ar ? "رسائل آخر 24س" : "Messages 24h"} value={formatNumber(last24hMessages)} icon={MessageSquare} accent="var(--heri-teal)" />
           </div>
-        </SectionBlock>
+        </HeritageSection>
 
         <p
           className="text-center text-[10.5px]"
-          style={{ color: "var(--text-muted)" }}
+          style={{ color: "var(--heri-ink-3)" }}
         >
           {ar
             ? `H-Nerve ERP v1.5 · جاهز للقيادة · ${now.toISOString().slice(11, 19)} UTC`
@@ -409,19 +332,23 @@ export default async function SystemPage() {
 function SysHeroStat({ label, value, icon: Icon }: { label: string; value: string; icon: any }) {
   return (
     <div
-      className="hn-anim-rise rounded-xl px-3 py-2"
+      className="px-3 py-2"
       style={{
-        background: "rgba(255,255,255,0.14)",
-        border: "1px solid rgba(255,255,255,0.24)",
-        backdropFilter: "blur(8px)",
+        background: "var(--heri-cream-2)",
+        border: "1px solid var(--heri-rule-strong)",
         minWidth: 110,
       }}
     >
-      <div className="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[0.16em] opacity-85">
+      <div
+        className="flex items-center gap-1.5 heri-eyebrow"
+        style={{ color: "var(--heri-ink-3)" }}
+      >
         <Icon className="h-3 w-3" />
         {label}
       </div>
-      <div className="exec-num mt-0.5 text-base font-black leading-none tracking-[-0.012em]">
+      <div className="heri-number-mono mt-0.5 text-base font-bold leading-none tracking-[-0.012em]"
+        style={{ color: "var(--heri-ink)" }}
+      >
         {value}
       </div>
     </div>
@@ -429,46 +356,31 @@ function SysHeroStat({ label, value, icon: Icon }: { label: string; value: strin
 }
 
 function LiveRow({
-  label,
-  value,
-  icon: Icon,
-  tone,
+  label, value, icon: Icon, accent,
 }: {
-  label: string;
-  value: string;
-  icon: any;
-  tone: string;
+  label: string; value: string; icon: any; accent: string;
 }) {
-  const TONE_BG: Record<string, string> = {
-    emerald: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-    amber:   "bg-amber-50 text-amber-700 ring-amber-200",
-    blue:    "bg-blue-50 text-blue-700 ring-blue-200",
-    violet:  "bg-violet-50 text-violet-700 ring-violet-200",
-    rose:    "bg-rose-50 text-rose-700 ring-rose-200",
-  };
   return (
     <div
-      className="hn-anim-rise hn-hover-lift flex items-center gap-3 rounded-xl px-3 py-2.5"
-      style={{
-        background: "var(--surface-elevated)",
-        border: "1px solid var(--border)",
-      }}
+      className="flex items-center gap-3 px-3 py-2.5"
+      style={{ background: "var(--heri-cream)", border: "1px solid var(--heri-rule)" }}
     >
       <span
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ring-1 ${TONE_BG[tone] ?? TONE_BG.emerald}`}
+        className="flex h-8 w-8 shrink-0 items-center justify-center"
+        style={{ background: "var(--heri-cream-2)", border: "1px solid var(--heri-rule)", color: accent }}
       >
         <Icon className="h-4 w-4" />
       </span>
       <div className="min-w-0 flex-1">
         <div
-          className="line-clamp-1 text-[10px] font-extrabold uppercase tracking-wider"
-          style={{ color: "var(--text-muted)" }}
+          className="heri-eyebrow line-clamp-1"
+          style={{ color: "var(--heri-ink-3)" }}
         >
           {label}
         </div>
         <div
-          className="exec-num text-[13px] font-black"
-          style={{ color: "var(--text)" }}
+          className="heri-number-mono text-[13px] font-semibold"
+          style={{ color: "var(--heri-ink)" }}
         >
           {value}
         </div>

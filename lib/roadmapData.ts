@@ -28,6 +28,34 @@ export type RoadmapItem = {
 export const ROADMAP: RoadmapItem[] = [
   // ============== NOW ==============
   {
+    id: "postgresql-deploy",
+    status: "now",
+    tone: "emerald",
+    eta: "v1.5 ✓",
+    areaAr: "بنية تحتية",
+    areaEn: "Infrastructure",
+    titleAr: "نشر PostgreSQL + Vercel",
+    titleEn: "PostgreSQL on Vercel + stable build",
+    descAr:
+      "الانتقال من SQLite إلى PostgreSQL عبر Prisma Postgres، إصلاح البناء الإنتاجي، وضمان عرض بيانات حية عبر 31 صفحة.",
+    descEn:
+      "Migrated from SQLite to PostgreSQL via Prisma Postgres, fixed production build crashes, and guaranteed live data across 31 pages.",
+  },
+  {
+    id: "bulk-actions",
+    status: "now",
+    tone: "blue",
+    eta: "v1.5",
+    areaAr: "إنتاجية",
+    areaEn: "Productivity",
+    titleAr: "إجراءات جماعية على الجداول",
+    titleEn: "Bulk actions on list tables",
+    descAr:
+      "تحديد عدة صفوف وتنفيذ موافقة/رفض/حذف في طلب واحد عبر كل وحدات العمل.",
+    descEn:
+      "Multi-select rows and approve / reject / delete in one round trip across every module.",
+  },
+  {
     id: "trash-bin",
     status: "now",
     tone: "emerald",

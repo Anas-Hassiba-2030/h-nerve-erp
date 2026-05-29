@@ -125,11 +125,11 @@ export default async function HelpPage() {
           <div className="mb-3 flex items-center gap-2">
             <Keyboard
               className="h-4 w-4"
-              style={{ color: "var(--brand)" }}
+              style={{ color: "var(--heri-ochre)" }}
             />
             <h2
-              className="text-[13px] font-extrabold"
-              style={{ color: "var(--text)" }}
+              className="text-[13px] font-semibold"
+              style={{ color: "var(--heri-ink)" }}
             >
               {ar ? "اختصارات لوحة المفاتيح" : "Keyboard shortcuts"}
             </h2>
@@ -138,12 +138,12 @@ export default async function HelpPage() {
             {SHORTCUTS.map((s, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 transition hover:bg-[var(--brand-soft)]"
-                style={{ border: "1px solid var(--border)" }}
+                className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 transition hover:bg-[var(--heri-cream-2)]"
+                style={{ border: "1px solid var(--heri-rule)" }}
               >
                 <span
                   className="text-[12px] font-bold"
-                  style={{ color: "var(--text)" }}
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   {ar ? s.ar : s.en}
                 </span>
@@ -151,12 +151,12 @@ export default async function HelpPage() {
                   {s.keys.map((k, j) => (
                     <kbd
                       key={j}
-                      className="rounded-md px-2 py-1 font-mono text-[10px] font-extrabold ring-1"
+                      className="rounded-md px-2 py-1 font-mono text-[10px] font-semibold ring-1"
                       style={{
-                        background: "var(--surface)",
-                        color: "var(--text)",
-                        borderColor: "var(--border)",
-                        boxShadow: "0 1px 0 0 var(--border)",
+                        background: "var(--heri-cream)",
+                        color: "var(--heri-ink)",
+                        borderColor: "var(--heri-rule)",
+                        boxShadow: "0 1px 0 0 var(--heri-rule)",
                       }}
                     >
                       {k}
@@ -173,11 +173,11 @@ export default async function HelpPage() {
           <div className="mb-3 flex items-center gap-2">
             <Command
               className="h-4 w-4"
-              style={{ color: "var(--brand)" }}
+              style={{ color: "var(--heri-ochre)" }}
             />
             <h2
-              className="text-[13px] font-extrabold"
-              style={{ color: "var(--text)" }}
+              className="text-[13px] font-semibold"
+              style={{ color: "var(--heri-ink)" }}
             >
               {ar ? "جولة في الوحدات" : "Module tour"}
             </h2>
@@ -198,14 +198,14 @@ export default async function HelpPage() {
                   </span>
                   <div className="min-w-0">
                     <div
-                      className="text-[12.5px] font-extrabold"
-                      style={{ color: "var(--text)" }}
+                      className="text-[12.5px] font-semibold"
+                      style={{ color: "var(--heri-ink)" }}
                     >
                       {ar ? m.ar : m.en}
                     </div>
                     <div
                       className="line-clamp-2 text-[10.5px]"
-                      style={{ color: "var(--text-muted)" }}
+                      style={{ color: "var(--heri-ink-3)" }}
                     >
                       {ar ? m.desc_ar : m.desc_en}
                     </div>
@@ -221,11 +221,11 @@ export default async function HelpPage() {
           <div className="mb-3 flex items-center gap-2">
             <Sparkles
               className="h-4 w-4"
-              style={{ color: "var(--brand)" }}
+              style={{ color: "var(--heri-ochre)" }}
             />
             <h2
-              className="text-[13px] font-extrabold"
-              style={{ color: "var(--text)" }}
+              className="text-[13px] font-semibold"
+              style={{ color: "var(--heri-ink)" }}
             >
               {ar ? "الأسئلة الشائعة" : "Frequently asked"}
             </h2>
@@ -237,20 +237,20 @@ export default async function HelpPage() {
                 className="card group p-0 transition"
               >
                 <summary
-                  className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3 text-[12.5px] font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3 text-[12.5px] font-semibold"
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   <span>{ar ? f.q_ar : f.q_en}</span>
                   <span
                     className="text-[10px] transition group-open:rotate-180"
-                    style={{ color: "var(--text-muted)" }}
+                    style={{ color: "var(--heri-ink-3)" }}
                   >
                     ▾
                   </span>
                 </summary>
                 <div
                   className="px-4 pb-3 text-[11.5px] leading-relaxed"
-                  style={{ color: "var(--text-muted)" }}
+                  style={{ color: "var(--heri-ink-3)" }}
                 >
                   {ar ? f.a_ar : f.a_en}
                 </div>
@@ -262,7 +262,7 @@ export default async function HelpPage() {
         {/* Footer credit */}
         <p
           className="text-center text-[10.5px]"
-          style={{ color: "var(--text-muted)" }}
+          style={{ color: "var(--heri-ink-3)" }}
         >
           H-Nerve ERP · {ar ? "نظام الحوراني العصبي المركزي" : "Hourani Group's Central Nervous System"}
         </p>

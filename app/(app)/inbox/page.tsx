@@ -59,8 +59,8 @@ export default async function InboxPage() {
 
       {items.length === 0 ? (
         <div className="card card-pad mt-3 flex flex-col items-center gap-3 py-16 text-center">
-          <InboxIcon className="h-10 w-10" style={{ color: "var(--text-muted)" }} />
-          <p className="text-sm font-bold" style={{ color: "var(--text)" }}>
+          <InboxIcon className="h-10 w-10" style={{ color: "var(--heri-ink-3)" }} />
+          <p className="text-sm font-bold" style={{ color: "var(--heri-ink)" }}>
             {ar ? "لا شيء يحتاج انتباهك الآن 🎉" : "Nothing needs your attention 🎉"}
           </p>
         </div>
@@ -76,22 +76,22 @@ export default async function InboxPage() {
               >
                 <span
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
-                  style={{ background: "var(--brand-soft)", color: "var(--brand-deep)" }}
+                  style={{ background: "var(--heri-cream-2)", color: "var(--brand-deep)" }}
                 >
                   <Icon className="h-4 w-4" />
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-extrabold" style={{ color: "var(--text)" }}>
+                    <span className="text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
                       {it.title}
                     </span>
                     <span className={SEV_BADGE[it.severity]}>{it.severity}</span>
                     <span className="badge-slate">{ar ? KIND_AR[it.kind] : it.kind}</span>
                   </div>
-                  <div className="mt-0.5 line-clamp-2 text-xs" style={{ color: "var(--text-muted)" }}>
+                  <div className="mt-0.5 line-clamp-2 text-xs" style={{ color: "var(--heri-ink-3)" }}>
                     {it.body}
                   </div>
-                  <div className="mt-1 font-mono text-[10px]" style={{ color: "var(--text-muted)" }}>
+                  <div className="mt-1 font-mono text-[10px]" style={{ color: "var(--heri-ink-3)" }}>
                     {formatDateTime(it.at, ar ? "ar" : "en")}
                   </div>
                 </div>

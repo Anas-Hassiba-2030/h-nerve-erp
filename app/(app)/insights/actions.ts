@@ -136,6 +136,42 @@ export async function deleteInsight(formData: FormData) {
   });
 }
 
+export async function bulkResolveInsights(ids: string[]) {
+  const me = await requireRole("MANAGER");
+  if (!ids.length) return;
+  await prisma.aIInsight.updateMany({
+    where: { id: { in: ids } },
+    data: { status: "RESOLVED" },
+  });
+  await logActivity({
+    action: "UPDATE",
+    entity: "INSIGHT",
+    entityId: ids[0],
+    summary: `حل جماعي لـ ${ids.length} إشارات`,
+    summaryEn: `Bulk resolved ${ids.length} insights`,
+    meta: { ids, count: ids.length },
+  });
+  revalidatePath("/insights");
+  revalidatePath("/dashboard");
+}
+
+export async function bulkDeleteInsights(ids: string[]) {
+  const me = await requireRole("MANAGER");
+  if (!ids.length) return;
+  for (const id of ids) {
+    await softDelete("insight", id);
+  }
+  await logActivity({
+    action: "DELETE",
+    entity: "INSIGHT",
+    entityId: ids[0],
+    summary: `حذف جماعي لـ ${ids.length} إشارات`,
+    summaryEn: `Bulk deleted ${ids.length} insights`,
+    meta: { ids, count: ids.length },
+  });
+  revalidatePath("/insights");
+}
+
 export async function restoreInsight(formData: FormData) {
   await requireUser();
   const id = String(formData.get("id") ?? "");
@@ -157,6 +193,38 @@ export async function restoreInsight(formData: FormData) {
     id,
     label: restoredLabel("insight"),
   });
+}
+
+// === PLANNER — generate an action plan from an insight via the Brain's planner ===
+export async function generateInsightPlan(formData: FormData) {
+  const user = await requireUser();
+  const id = String(formData.get("id") ?? "");
+  const locale = getLocale();
+  const lc: "ar" | "en" = locale === "ar" ? "ar" : "en";
+  if (!id) return;
+
+  const { generatePlanFromInsight } = await import("@/lib/brain/planner.live");
+  const plan = await generatePlanFromInsight(id, lc);
+
+  await logActivity({
+    action: "INSIGHT",
+    entity: "INSIGHT",
+    entityId: plan.id,
+    summary: `خطة مولّدة من إشارة: ${plan.goal}`,
+    summaryEn: `Plan generated from insight: ${(plan as any).goalEn ?? plan.goal}`,
+  });
+
+  flashToast({
+    type: "info",
+    entity: "info",
+    id: plan.id,
+    label: lc === "ar"
+      ? `خطة جديدة: ${plan.goal}`
+      : `New plan: ${(plan as any).goalEn ?? plan.goal}`,
+  });
+
+  revalidatePath("/insights");
+  revalidatePath("/plans");
 }
 
 // === AI ENGINE — runs heuristics across all modules and persists fresh insights ===

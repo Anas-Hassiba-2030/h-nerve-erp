@@ -10,6 +10,7 @@
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
 import { CausalStudio } from "@/components/brain/CausalStudio";
+import { HeriKpi } from "@/components/HeriKpi";
 import { causalGraph } from "@/lib/brain/graph.prisma";
 import { getLocale } from "@/lib/i18n.server";
 import { rebuildBrainGraph } from "./actions";
@@ -21,6 +22,14 @@ export default async function BrainGraphPage() {
   const ar = locale === "ar";
 
   const { nodes, edges } = await causalGraph().loadAll();
+
+  // KPI strip — node/edge density at a glance. Distinct node kinds proxies
+  // for the breadth of the brain's domain understanding.
+  const distinctKinds = new Set(nodes.map((n) => n.kind)).size;
+  const avgEdgeConfidence =
+    edges.length > 0
+      ? edges.reduce((a, e) => a + (e.confidence ?? 0), 0) / edges.length
+      : 0;
 
   return (
     <>
@@ -38,24 +47,55 @@ export default async function BrainGraphPage() {
         {nodes.length === 0 ? (
           <EmptyState ar={ar} />
         ) : (
-          <CausalStudio
-            ar={ar}
-            nodes={nodes.map((n) => ({
-              id: n.id,
-              kind: n.kind,
-              label: n.label,
-              importance: (n as any).importance ?? 0.5,
-              payload: n.payload,
-            }))}
-            edges={edges.map((e) => ({
-              from: e.from,
-              to: e.to,
-              kind: e.kind,
-              weight: e.weight,
-              confidence: e.confidence,
-            }))}
-            rebuildSlot={<ConfirmRebuildForm ar={ar} />}
-          />
+          <div className="space-y-6">
+            {/* KPI strip — the brain's footprint at a glance. */}
+            <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
+              <HeriKpi
+                label={ar ? "العقد" : "Nodes"}
+                raw={nodes.length}
+                kind="number"
+                hint={ar ? "كيان في الدماغ" : "entities in the brain"}
+              />
+              <HeriKpi
+                label={ar ? "الروابط السببية" : "Causal edges"}
+                raw={edges.length}
+                kind="number"
+                hint={ar ? "علاقة موزونة" : "weighted relations"}
+              />
+              <HeriKpi
+                label={ar ? "أنواع الكيانات" : "Entity kinds"}
+                raw={distinctKinds}
+                kind="number"
+                hint={ar ? "وحدة من المجال" : "distinct domains"}
+              />
+              <HeriKpi
+                label={ar ? "متوسط الثقة" : "Avg confidence"}
+                raw={avgEdgeConfidence}
+                kind="percent"
+                decimals={0}
+                hint={ar ? "ثقة الروابط" : "edge confidence"}
+              />
+            </section>
+
+            <CausalStudio
+              ar={ar}
+              nodes={nodes.map((n) => ({
+                id: n.id,
+                kind: n.kind,
+                label: n.label,
+                importance: (n as any).importance ?? 0.5,
+                payload: n.payload,
+              }))}
+              edges={edges.map((e) => ({
+                from: e.from,
+                to: e.to,
+                kind: e.kind,
+                weight: e.weight,
+                confidence: e.confidence,
+              }))}
+              rebuildSlot={<ConfirmRebuildForm ar={ar} />}
+            />
+          </div>
         )}
       </PageContainer>
     </>

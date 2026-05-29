@@ -5,20 +5,19 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer, PageSection } from "@/components/PageContainer";
-import { HeroPanel } from "@/components/exec/HeroPanel";
-import { MetricTile } from "@/components/exec/MetricTile";
-import { CompanyLogo } from "@/components/brand/CompanyLogo";
+import { HeriKpi } from "@/components/HeriKpi";
 import { ExportMenu } from "@/components/ExportMenu";
 import { StatusBadge } from "@/components/StatusBadge";
 import { EmptyState } from "@/components/EmptyState";
 import { DeleteButton } from "@/components/DeleteButton";
 import { BarChart } from "@/components/charts/BarChart";
 import { GaugeChart } from "@/components/charts/GaugeChart";
-import { getCompanyBrand } from "@/lib/companyBrand";
 import { prisma } from "@/lib/db";
 import { formatNumber, formatShortDate } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
 import { deleteBatch } from "./actions";
+
+export const dynamic = "force-dynamic";
 
 export default async function DairyPage() {
   const locale = getLocale();
@@ -88,105 +87,46 @@ export default async function DairyPage() {
       />
 
       <PageContainer>
-        <HeroPanel
-          gradient={getCompanyBrand("MAHA").gradient}
-          accent={getCompanyBrand("MAHA").accent}
-          height={250}
-        >
-          <div className="flex flex-wrap items-center justify-between gap-5">
-            <div className="flex items-center gap-5 hn-anim-rise">
-              <div className="hn-anim-zoom-bounce relative">
-                <span className="hn-anim-pulse-ring absolute -inset-2 rounded-3xl" aria-hidden />
-                <CompanyLogo code="MAHA" size={88} light />
-              </div>
-              <div className="min-w-0">
-                <div
-                  className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em]"
-                  style={{
-                    background: "rgba(255,255,255,0.18)",
-                    border: "1px solid rgba(255,255,255,0.28)",
-                    backdropFilter: "blur(6px)",
-                    color: "white",
-                  }}
-                >
-                  <Droplets className="h-3 w-3" />
-                  {ar ? "صناعات الألبان" : "Dairy industries"}
-                </div>
-                <h2
-                  className="mt-2.5 text-3xl font-black leading-[1.05] tracking-[-0.02em] hn-anim-rise md:text-[34px]"
-                  style={{ animationDelay: "0.08s" }}
-                >
-                  {ar ? "المها للألبان" : "Maha Dairy"}
-                </h2>
-                <p
-                  className="mt-1 max-w-xl text-[12.5px] font-bold opacity-90 hn-anim-rise"
-                  style={{ animationDelay: "0.16s" }}
-                >
-                  {ar
-                    ? "طازج كل يوم، من المزرعة إلى مائدتك. خط إنتاج ذكي مرتبط بسلسلة التوريد."
-                    : "Fresh every day, from farm to table. A smart line wired into the supply chain."}
-                </p>
-                <div
-                  className="mt-3 flex flex-wrap gap-2 hn-anim-fall"
-                  style={{ animationDelay: "0.24s" }}
-                >
-                  <Link
-                    href="/dairy/new"
-                    className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-extrabold transition hover:scale-105"
-                    style={{ background: "white", color: "#084d6e" }}
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    {ar ? "دفعة جديدة" : "New batch"}
-                  </Link>
-                  <ExportMenu type="dairy" companyCode="MAHA" locale={lc} />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-2 hn-stagger sm:grid-cols-2">
-              <DairyHeroStat label={ar ? "إنتاج 30ي" : "Output 30d"} value={`${formatNumber(total30Volume)}L`} icon={Milk} />
-              <DairyHeroStat label={ar ? "جاهز" : "Ready"} value={`${formatNumber(readyVolume)}L`} icon={Package2} />
-              <DairyHeroStat label={ar ? "درجة A" : "Grade A"} value={`${Math.round(gradeAPct * 100)}%`} icon={ShieldCheck} />
-              <DairyHeroStat label={ar ? "صلاحية" : "Expiring"} value={formatNumber(expiringSoon.length)} icon={Snowflake} />
-            </div>
+        {/* Action rail */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="heri-eyebrow heri-eyebrow-ink">
+            {ar ? "آخر 30 يوماً" : "Last 30 days"}
           </div>
-        </HeroPanel>
+          <div className="flex items-center gap-2">
+            <Link href="/dairy/new" className="heri-btn heri-btn-primary" style={{ fontSize: 13 }}>
+              <Plus className="h-4 w-4" strokeWidth={1.5} />
+              {ar ? "دفعة جديدة" : "New batch"}
+            </Link>
+            <ExportMenu type="dairy" companyCode="MAHA" locale={lc} />
+          </div>
+        </div>
 
-        <section className="grid gap-3 hn-stagger sm:grid-cols-2 xl:grid-cols-4">
-          <MetricTile
+        {/* KPI band */}
+        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
+          <HeriKpi
             label={ar ? "حجم الإنتاج 30ي" : "Output 30d"}
-            value={`${formatNumber(total30Volume)} L`}
-            icon={Milk}
-            tone="blue"
+            raw={total30Volume}
+            kind="number"
             hint={`${formatNumber(totals30._count)} ${ar ? "دفعة" : "batches"}`}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "جاهز للتوزيع" : "Ready"}
-            value={`${formatNumber(readyVolume)} L`}
-            icon={Package2}
-            tone="emerald"
-            hint={ar ? "في المخزن" : "in storage"}
+            raw={readyVolume}
+            kind="number"
+            hint={ar ? "لتر في المخزن" : "liters in storage"}
           />
-          <MetricTile
-            label={ar ? "درجة A" : "Grade A"}
-            value={`${Math.round(gradeAPct * 100)}%`}
-            icon={ShieldCheck}
-            tone="emerald"
-            hint={
-              gradeAPct >= 0.8
-                ? ar
-                  ? "ضمن الهدف"
-                  : "On target"
-                : ar
-                ? "تحت المعيار"
-                : "Below benchmark"
-            }
+          <HeriKpi
+            label={ar ? "درجة A ٪" : "Grade A %"}
+            raw={gradeAPct}
+            kind="percent"
+            accent="var(--heri-teal, #1f4e4a)"
+            hint={gradeAPct >= 0.8 ? (ar ? "ضمن الهدف" : "On target") : (ar ? "تحت المعيار" : "Below benchmark")}
           />
-          <MetricTile
-            label={ar ? "قرب الصلاحية" : "Expiring"}
-            value={formatNumber(expiringSoon.length)}
-            icon={AlertTriangle}
-            tone={expiringSoon.length > 0 ? "amber" : "brand"}
+          <HeriKpi
+            label={ar ? "قرب الصلاحية" : "Expiring soon"}
+            raw={expiringSoon.length}
+            kind="number"
+            accent={expiringSoon.length > 0 ? "var(--heri-terracotta, #b85c38)" : undefined}
             hint={ar ? "خلال 72 ساعة" : "within 72h"}
           />
         </section>
@@ -203,7 +143,7 @@ export default async function DairyPage() {
                 formatValue={(v) => `${formatNumber(v)} L`}
               />
             ) : (
-              <div className="py-12 text-center text-sm" style={{ color: "var(--text-muted)" }}>—</div>
+              <div className="py-12 text-center text-sm" style={{ color: "var(--heri-ink-3)" }}>—</div>
             )}
           </div>
           <div className="card card-pad flex flex-col items-center justify-center">
@@ -214,7 +154,7 @@ export default async function DairyPage() {
               size={180}
               label={ar ? "ممتاز فوق 80٪" : "Excellent ≥ 80%"}
               sublabel={`${formatNumber(gradeAggA)} / ${formatNumber(totals30._count)} ${ar ? "دفعة" : "batches"}`}
-              color="var(--brand)"
+              color="var(--heri-ochre)"
             />
           </div>
         </section>
@@ -271,7 +211,7 @@ export default async function DairyPage() {
                     return (
                       <tr key={b.id}>
                         <td className="font-mono text-[11px]">{b.batchNumber}</td>
-                        <td className="font-extrabold" style={{ color: "var(--text)" }}>{b.productAr}</td>
+                        <td className="font-semibold" style={{ color: "var(--heri-ink)" }}>{b.productAr}</td>
                         <td className="tabular-nums">{formatNumber(b.quantityLiters)} L</td>
                         <td>
                           <span className={
@@ -286,7 +226,7 @@ export default async function DairyPage() {
                           {expSoon && b.status !== "DISTRIBUTED" ? <Clock className="me-1 inline h-3 w-3" /> : null}
                           {formatShortDate(b.expiryDate, lc)}
                         </td>
-                        <td className="text-[11px]" style={{ color: "var(--text-muted)" }}>{b.destination ?? "—"}</td>
+                        <td className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>{b.destination ?? "—"}</td>
                         <td><StatusBadge status={b.status} /></td>
                         <td>
                           <DeleteButton
@@ -309,24 +249,3 @@ export default async function DairyPage() {
   );
 }
 
-function DairyHeroStat({ label, value, icon: Icon }: { label: string; value: string; icon: any }) {
-  return (
-    <div
-      className="hn-anim-rise rounded-xl px-3 py-2"
-      style={{
-        background: "rgba(255,255,255,0.14)",
-        border: "1px solid rgba(255,255,255,0.24)",
-        backdropFilter: "blur(8px)",
-        minWidth: 110,
-      }}
-    >
-      <div className="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[0.16em] opacity-85">
-        <Icon className="h-3 w-3" />
-        {label}
-      </div>
-      <div className="exec-num mt-0.5 text-xl font-black leading-none tracking-[-0.012em]">
-        {value}
-      </div>
-    </div>
-  );
-}

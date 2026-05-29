@@ -172,7 +172,7 @@ export default async function CropDetailPage({
                   {crop.farm.company.name}
                 </Link>
               </div>
-              <h2 className="mt-1 text-3xl font-black md:text-4xl">
+              <h2 className="mt-1 text-3xl font-bold md:text-4xl">
                 {crop.name}
               </h2>
               {crop.variety ? (
@@ -276,10 +276,10 @@ export default async function CropDetailPage({
         <section className="card card-pad anim-fade-up">
           <header className="mb-3 flex items-center justify-between">
             <h3
-              className="flex items-center gap-2 text-sm font-extrabold"
-              style={{ color: "var(--text)" }}
+              className="flex items-center gap-2 text-sm font-semibold"
+              style={{ color: "var(--heri-ink)" }}
             >
-              <Clock className="h-4 w-4" style={{ color: "var(--brand)" }} />
+              <Clock className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
               دورة المحصول
             </h3>
             <span
@@ -299,26 +299,26 @@ export default async function CropDetailPage({
             <div>
               <div
                 className="text-[10px] font-bold uppercase tracking-widest"
-                style={{ color: "var(--text-muted)" }}
+                style={{ color: "var(--heri-ink-3)" }}
               >
                 زُرع
               </div>
-              <div className="font-bold" style={{ color: "var(--text)" }}>
+              <div className="font-bold" style={{ color: "var(--heri-ink)" }}>
                 {formatShortDate(crop.plantedAt)}
               </div>
             </div>
             <ArrowRight
               className="h-4 w-4"
-              style={{ color: "var(--text-muted)" }}
+              style={{ color: "var(--heri-ink-3)" }}
             />
             <div className="text-end">
               <div
                 className="text-[10px] font-bold uppercase tracking-widest"
-                style={{ color: "var(--text-muted)" }}
+                style={{ color: "var(--heri-ink-3)" }}
               >
                 حصاد متوقع
               </div>
-              <div className="font-bold" style={{ color: "var(--text)" }}>
+              <div className="font-bold" style={{ color: "var(--heri-ink)" }}>
                 {formatShortDate(crop.expectedHarvest)}
               </div>
             </div>
@@ -327,14 +327,14 @@ export default async function CropDetailPage({
             className="h-3 w-full overflow-hidden rounded-full"
             style={{
               background:
-                "color-mix(in srgb, var(--text-muted) 14%, transparent)",
+                "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
             }}
           >
             <div
               className="h-full rounded-full anim-rise-glow"
               style={{
                 width: `${Math.min(100, harvested ? 100 : lifePct * 100)}%`,
-                background: `linear-gradient(90deg, ${lifecycleColor} 0%, var(--accent) 100%)`,
+                background: `linear-gradient(90deg, ${lifecycleColor} 0%, var(--heri-copper) 100%)`,
                 boxShadow: `0 0 14px ${lifecycleColor}`,
                 transition: "width .8s cubic-bezier(.21,.92,.32,1)",
               }}
@@ -346,10 +346,10 @@ export default async function CropDetailPage({
         {harvested && crop.actualYieldKg != null && crop.expectedYieldKg > 0 ? (
           <section className="card card-pad anim-fade-up">
             <h3
-              className="mb-3 flex items-center gap-2 text-sm font-extrabold"
-              style={{ color: "var(--text)" }}
+              className="mb-3 flex items-center gap-2 text-sm font-semibold"
+              style={{ color: "var(--heri-ink)" }}
             >
-              <Scale className="h-4 w-4" style={{ color: "var(--brand)" }} />
+              <Scale className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
               مقارنة الغلة
             </h3>
             {(() => {
@@ -361,10 +361,10 @@ export default async function CropDetailPage({
                   <div>
                     <div
                       className="mb-1 flex items-center justify-between text-[11px] font-bold"
-                      style={{ color: "var(--text-muted)" }}
+                      style={{ color: "var(--heri-ink-3)" }}
                     >
                       <span>متوقع</span>
-                      <span style={{ color: "var(--text)" }} className="font-mono">
+                      <span style={{ color: "var(--heri-ink)" }} className="font-mono">
                         {formatNumber(crop.expectedYieldKg)} كغم
                       </span>
                     </div>
@@ -372,7 +372,7 @@ export default async function CropDetailPage({
                       className="h-2 overflow-hidden rounded-full"
                       style={{
                         background:
-                          "color-mix(in srgb, var(--text-muted) 14%, transparent)",
+                          "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
                       }}
                     >
                       <div
@@ -380,7 +380,7 @@ export default async function CropDetailPage({
                         style={{
                           width: `${expectedPct}%`,
                           background:
-                            "linear-gradient(90deg, var(--brand) 0%, var(--accent) 100%)",
+                            "linear-gradient(90deg, var(--heri-ochre) 0%, var(--heri-copper) 100%)",
                           opacity: 0.55,
                           transition: "width .6s ease",
                         }}
@@ -390,7 +390,7 @@ export default async function CropDetailPage({
                   <div>
                     <div
                       className="mb-1 flex items-center justify-between text-[11px] font-bold"
-                      style={{ color: "var(--text-muted)" }}
+                      style={{ color: "var(--heri-ink-3)" }}
                     >
                       <span>فعلي</span>
                       <span
@@ -407,7 +407,7 @@ export default async function CropDetailPage({
                       className="h-2 overflow-hidden rounded-full"
                       style={{
                         background:
-                          "color-mix(in srgb, var(--text-muted) 14%, transparent)",
+                          "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
                       }}
                     >
                       <div
@@ -416,7 +416,7 @@ export default async function CropDetailPage({
                           width: `${actualPct}%`,
                           background:
                             (yieldDelta ?? 0) >= 0
-                              ? "linear-gradient(90deg, #0a8e54 0%, var(--accent) 100%)"
+                              ? "linear-gradient(90deg, #0a8e54 0%, var(--heri-copper) 100%)"
                               : "linear-gradient(90deg, #c0392b 0%, #f5b341 100%)",
                           boxShadow:
                             (yieldDelta ?? 0) >= 0
@@ -453,14 +453,14 @@ export default async function CropDetailPage({
             {crop.notes ? (
               <section className="card card-pad anim-fade-up">
                 <h3
-                  className="mb-2 text-sm font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  className="mb-2 text-sm font-semibold"
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   ملاحظات الحقل
                 </h3>
                 <p
                   className="whitespace-pre-line text-sm leading-relaxed"
-                  style={{ color: "var(--text)" }}
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   {crop.notes}
                 </p>
@@ -471,20 +471,20 @@ export default async function CropDetailPage({
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
                   <h3
-                    className="text-sm font-extrabold"
-                    style={{ color: "var(--text)" }}
+                    className="text-sm font-semibold"
+                    style={{ color: "var(--heri-ink)" }}
                   >
                     محاصيل أخرى في {crop.farm.name}
                   </h3>
                   <Link
                     href={`/farms/${crop.farm.id}`}
                     className="text-[11px] font-bold"
-                    style={{ color: "var(--brand)" }}
+                    style={{ color: "var(--heri-ochre)" }}
                   >
                     ملف المزرعة ←
                   </Link>
                 </header>
-                <ul className="divide-y divide-[var(--border)]">
+                <ul className="divide-y divide-[var(--heri-rule)]">
                   {sameFarm.map((c, i) => (
                     <li
                       key={c.id}
@@ -498,7 +498,7 @@ export default async function CropDetailPage({
                         <div className="flex items-center gap-2">
                           <span
                             className="truncate text-sm font-bold"
-                            style={{ color: "var(--text)" }}
+                            style={{ color: "var(--heri-ink)" }}
                           >
                             {c.name}
                           </span>
@@ -509,14 +509,14 @@ export default async function CropDetailPage({
                         </div>
                         <div
                           className="text-[11px]"
-                          style={{ color: "var(--text-muted)" }}
+                          style={{ color: "var(--heri-ink-3)" }}
                         >
                           حصاد متوقع {formatShortDate(c.expectedHarvest)}
                         </div>
                       </Link>
                       <span
-                        className="font-mono text-xs font-black"
-                        style={{ color: "var(--text)" }}
+                        className="font-mono text-xs font-bold"
+                        style={{ color: "var(--heri-ink)" }}
                       >
                         {formatNumber(c.expectedYieldKg)} كغم
                       </span>
@@ -529,12 +529,12 @@ export default async function CropDetailPage({
             {sameVariety.length > 0 ? (
               <section className="card card-pad anim-fade-up">
                 <h3
-                  className="mb-3 text-sm font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  className="mb-3 text-sm font-semibold"
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   نفس الصنف ({crop.variety}) في مزارع أخرى
                 </h3>
-                <ul className="divide-y divide-[var(--border)]">
+                <ul className="divide-y divide-[var(--heri-rule)]">
                   {sameVariety.map((c, i) => (
                     <li
                       key={c.id}
@@ -547,13 +547,13 @@ export default async function CropDetailPage({
                       >
                         <div
                           className="truncate text-sm font-bold"
-                          style={{ color: "var(--text)" }}
+                          style={{ color: "var(--heri-ink)" }}
                         >
                           {c.farm.name}
                         </div>
                         <div
                           className="text-[11px]"
-                          style={{ color: "var(--text-muted)" }}
+                          style={{ color: "var(--heri-ink-3)" }}
                         >
                           {formatShortDate(c.plantedAt)} →{" "}
                           {formatShortDate(c.expectedHarvest)}
@@ -570,8 +570,8 @@ export default async function CropDetailPage({
           <aside className="space-y-6">
             <section className="card card-pad anim-fade-up">
               <h3
-                className="mb-3 text-sm font-extrabold"
-                style={{ color: "var(--text)" }}
+                className="mb-3 text-sm font-semibold"
+                style={{ color: "var(--heri-ink)" }}
               >
                 البطاقة الزراعية
               </h3>
@@ -631,17 +631,17 @@ function Fact({
   link?: string;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-[var(--border)] pb-1.5 last:border-b-0">
-      <dt style={{ color: "var(--text-muted)" }}>{label}</dt>
+    <div className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
+      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
       <dd
         className="text-end font-bold"
-        style={{ color: "var(--text)" }}
+        style={{ color: "var(--heri-ink)" }}
       >
         {link ? (
           <Link
             href={link}
             className="hover:underline"
-            style={{ color: "var(--brand)" }}
+            style={{ color: "var(--heri-ochre)" }}
           >
             {value}
           </Link>

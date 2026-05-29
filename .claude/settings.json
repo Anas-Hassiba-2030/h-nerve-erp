@@ -1,5 +1,17 @@
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "statusMessage": "Ensuring graphify CLI is installed\u2026",
+            "timeout": 120,
+            "command": "if ! command -v graphify >/dev/null 2>&1; then if command -v uv >/dev/null 2>&1; then uv tool install graphifyy --quiet 2>&1 | tail -2; elif command -v pipx >/dev/null 2>&1; then pipx install graphifyy --quiet 2>&1 | tail -2; elif command -v pip >/dev/null 2>&1; then pip install --user --quiet graphifyy 2>&1 | tail -2; fi; fi; if command -v graphify >/dev/null 2>&1 && [ -f graphify-out/graph.json ]; then echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"graphify CLI ready. Knowledge graph at graphify-out/graph.json. For codebase questions, prefer `graphify query \\\"<question>\\\"` over grep \u2014 returns a scoped subgraph using ~5x fewer tokens. Use `graphify path \\\"A\\\" \\\"B\\\"` for relationships, `graphify explain \\\"X\\\"` for concepts.\"}}'; fi"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [

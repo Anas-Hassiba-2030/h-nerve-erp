@@ -7,7 +7,7 @@
 //
 // Phase 3 of docs/PHASES-INTELLIGENCE.md.
 
-const DEFAULT_MODEL = "claude-sonnet-4-5";
+const DEFAULT_MODEL = "claude-sonnet-4-6";
 const ANTHROPIC_VERSION = "2023-06-01";
 
 export type LlmRequest = {

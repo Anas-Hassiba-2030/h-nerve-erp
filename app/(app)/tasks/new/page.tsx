@@ -71,7 +71,7 @@ export default async function NewTaskPage() {
               </select>
             </div>
           </div>
-          <div className="flex items-center justify-between gap-3 border-t pt-4" style={{ borderColor: "var(--border)" }}>
+          <div className="flex items-center justify-between gap-3 border-t pt-4" style={{ borderColor: "var(--heri-rule)" }}>
             <Link href="/tasks" className="btn-ghost"><ArrowLeft className="h-4 w-4" /> {ar ? "العودة" : "Back"}</Link>
             <button type="submit" className="btn-primary"><Save className="h-4 w-4" /> {ar ? "حفظ" : "Save"}</button>
           </div>

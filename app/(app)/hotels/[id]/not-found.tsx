@@ -9,16 +9,16 @@ export default function NotFound() {
           className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
           style={{
             background:
-              "linear-gradient(135deg, color-mix(in srgb, #b06a1a 22%, transparent) 0%, color-mix(in srgb, var(--accent) 22%, transparent) 100%)",
+              "linear-gradient(135deg, color-mix(in srgb, #b06a1a 22%, transparent) 0%, color-mix(in srgb, var(--heri-copper) 22%, transparent) 100%)",
             color: "#b06a1a",
           }}
         >
           <HotelIcon className="h-7 w-7" />
         </div>
-        <h2 className="text-xl font-black" style={{ color: "var(--text)" }}>
+        <h2 className="text-xl font-bold" style={{ color: "var(--heri-ink)" }}>
           العقار غير موجود
         </h2>
-        <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
+        <p className="mt-1 text-sm" style={{ color: "var(--heri-ink-3)" }}>
           هذا الفندق إما تمّت إزالته أو أن المعرّف خاطئ. تصفّح كامل شبكة فنادق المجموعة من السجل.
         </p>
         <div className="mt-5 flex items-center justify-center gap-2">

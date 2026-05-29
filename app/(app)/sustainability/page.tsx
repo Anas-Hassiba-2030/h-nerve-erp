@@ -1,8 +1,8 @@
 import { Leaf, Wind, Droplet, ShieldCheck, BarChart3, Sparkles, Download, TreePine } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
-import { HeroPanel } from "@/components/exec/HeroPanel";
-import { MetricTile } from "@/components/exec/MetricTile";
+import { HeritageSection, HeritagePill } from "@/components/heritage";
+import { HeriKpi } from "@/components/HeriKpi";
 import { KpiCard } from "@/components/KpiCard";
 import { CompanyCover } from "@/components/CompanyCover";
 import { SectorPill } from "@/components/SectorPill";
@@ -10,6 +10,8 @@ import { ExportMenu } from "@/components/ExportMenu";
 import { prisma } from "@/lib/db";
 import { formatNumber, formatPercent } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
+
+export const dynamic = "force-dynamic";
 
 const PERIODS = ["Q1", "Q2", "Q3", "Q4"] as const;
 
@@ -67,70 +69,42 @@ export default async function SustainabilityPage({
       />
 
       <PageContainer>
-        <HeroPanel
-          gradient="linear-gradient(135deg, #022c22 0%, #064e3b 35%, #15803d 70%, #84cc16 110%)"
-          accent="#84cc16"
-          height={250}
+        <HeritageSection
+          eyebrow={ar ? "بصمة المجموعة" : "Group footprint"}
+          title={ar ? "الاستدامة و ESG" : "Sustainability & ESG"}
+          rtl={ar}
         >
           <div className="flex flex-wrap items-center justify-between gap-5">
-            <div className="flex items-center gap-5 hn-anim-rise">
-              <div className="hn-anim-zoom-bounce relative">
-                <span className="hn-anim-pulse-ring absolute -inset-2 rounded-3xl" aria-hidden />
-                <div
-                  className="flex h-[88px] w-[88px] items-center justify-center rounded-2xl ring-2 ring-white/40"
-                  style={{ background: "rgba(255,255,255,0.18)" }}
-                >
-                  <TreePine className="h-12 w-12 text-white hn-anim-bob" />
-                </div>
+            <div className="flex items-center gap-5">
+              <div>
+                <TreePine className="h-12 w-12" style={{ color: "var(--heri-teal)" }} />
               </div>
               <div className="min-w-0">
-                <div
-                  className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em]"
-                  style={{
-                    background: "rgba(255,255,255,0.18)",
-                    border: "1px solid rgba(255,255,255,0.28)",
-                    backdropFilter: "blur(6px)",
-                    color: "white",
-                  }}
-                >
-                  <Leaf className="h-3 w-3" />
-                  {ar ? "بصمة المجموعة" : "Group footprint"}
-                </div>
-                <h2
-                  className="mt-2.5 text-3xl font-black leading-[1.05] tracking-[-0.02em] hn-anim-rise md:text-[34px]"
-                  style={{ animationDelay: "0.08s" }}
-                >
-                  {ar ? "الاستدامة و ESG" : "Sustainability & ESG"}
-                </h2>
                 <p
-                  className="mt-1 max-w-xl text-[12.5px] font-bold opacity-90 hn-anim-rise"
-                  style={{ animationDelay: "0.16s" }}
+                  className="mt-1 max-w-xl text-[12.5px] font-semibold"
+                  style={{ color: "var(--heri-ink-2)" }}
                 >
                   {ar
                     ? "كل قرار توسعي يدخل في حسابنا الأخضر — نقيس ما لا يقاس عادة."
                     : "Every expansion enters our green ledger — we measure the unmeasured."}
                 </p>
-                <div
-                  className="mt-3 flex flex-wrap gap-2 hn-anim-fall"
-                  style={{ animationDelay: "0.24s" }}
-                >
+                <div className="mt-3 flex flex-wrap gap-2">
                   <div
-                    className="inline-flex rounded-xl p-0.5"
+                    className="inline-flex p-0.5"
                     style={{
-                      background: "rgba(255,255,255,0.15)",
-                      border: "1px solid rgba(255,255,255,0.28)",
-                      backdropFilter: "blur(6px)",
+                      background: "var(--heri-cream-2)",
+                      border: "1px solid var(--heri-rule)",
                     }}
                   >
                     {(["3M", "6M", "12M"] as const).map((r) => (
                       <a
                         key={r}
                         href={`/sustainability?range=${r}`}
-                        className="rounded-lg px-2.5 py-1 text-[11px] font-extrabold transition"
+                        className="px-2.5 py-1 text-[11px] font-semibold transition"
                         style={
                           range === r
-                            ? { background: "white", color: "#15803d" }
-                            : { color: "white" }
+                            ? { background: "var(--heri-ochre)", color: "var(--heri-cream)" }
+                            : { color: "var(--heri-ink-3)" }
                         }
                       >
                         {r}
@@ -142,48 +116,20 @@ export default async function SustainabilityPage({
               </div>
             </div>
 
-            <div className="grid gap-2 hn-stagger sm:grid-cols-2">
+            <div className="grid gap-2 heri-stagger sm:grid-cols-2">
               <EsgHeroStat label={ar ? "ESG العام" : "Group ESG"} value={groupOverall.toFixed(1)} icon={ShieldCheck} />
               <EsgHeroStat label={ar ? "كربون (طن)" : "Carbon (t)"} value={formatNumber(groupCarbon)} icon={Wind} />
               <EsgHeroStat label={ar ? "مياه (م³)" : "Water (m³)"} value={formatNumber(groupWater)} icon={Droplet} />
               <EsgHeroStat label={ar ? "متجدد %" : "Renewable %"} value={`${groupRenew.toFixed(1)}%`} icon={Leaf} />
             </div>
           </div>
-        </HeroPanel>
+        </HeritageSection>
 
-        <section className="grid gap-3 hn-stagger sm:grid-cols-2 xl:grid-cols-4">
-          <MetricTile
-            label={ar ? "متوسط ESG" : "Group ESG"}
-            value={groupOverall.toFixed(1)}
-            icon={ShieldCheck}
-            tone="emerald"
-            hint={ar ? "من 100" : "out of 100"}
-          />
-          <MetricTile
-            label={ar ? "انبعاثات كربون" : "Carbon"}
-            value={`${formatNumber(groupCarbon)} t`}
-            icon={Wind}
-            tone="brand"
-            hint={ar ? `نافذة ${range}` : `Window ${range}`}
-          />
-          <MetricTile
-            label={ar ? "استهلاك المياه" : "Water usage"}
-            value={`${formatNumber(groupWater)} m³`}
-            icon={Droplet}
-            tone="blue"
-            hint={ar ? "إجمالي تراكمي" : "cumulative"}
-          />
-          <MetricTile
-            label={ar ? "متجدد %" : "Renewable mix"}
-            value={`${groupRenew.toFixed(1)}%`}
-            icon={Leaf}
-            tone="emerald"
-            hint={
-              groupRenew >= 25
-                ? ar ? "ضمن الهدف" : "On target"
-                : ar ? "تحت الهدف" : "Below target"
-            }
-          />
+        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
+          <HeriKpi label={ar ? "متوسط ESG" : "Group ESG"} raw={parseFloat(groupOverall.toFixed(1))} kind="number" decimals={1} hint={ar ? "من 100" : "out of 100"} accent="var(--heri-teal)" />
+          <HeriKpi label={ar ? "انبعاثات كربون" : "Carbon"} raw={groupCarbon} kind="number" hint={ar ? `نافذة ${range} · t CO₂` : `Window ${range} · t CO₂`} />
+          <HeriKpi label={ar ? "استهلاك المياه" : "Water usage"} raw={groupWater} kind="number" hint={ar ? "م³ تراكمي" : "m³ cumulative"} />
+          <HeriKpi label={ar ? "متجدد %" : "Renewable mix"} raw={parseFloat(groupRenew.toFixed(1))} kind="percent" decimals={1} accent="var(--heri-teal)" hint={groupRenew >= 25 ? (ar ? "ضمن الهدف" : "On target") : (ar ? "تحت الهدف" : "Below target")} />
         </section>
 
         {/* Per-company table */}
@@ -195,7 +141,7 @@ export default async function SustainabilityPage({
                 {ar ? `نافذة ${range} — متوسط على ${limit} ربع.` : `${range} window — averaged over ${limit} quarter(s).`}
               </div>
             </div>
-            <BarChart3 className="h-4 w-4" style={{ color: "var(--text-muted)" }} />
+            <BarChart3 className="h-4 w-4" style={{ color: "var(--heri-ink-3)" }} />
           </div>
           <div className="table-scroll">
             <table className="table">
@@ -216,11 +162,11 @@ export default async function SustainabilityPage({
               <tbody>
                 {byCompany.map((row) => (
                   <tr key={row.company.id}>
-                    <td className="font-extrabold" style={{ color: "var(--text)" }}>{row.company.name}</td>
+                    <td className="font-bold" style={{ color: "var(--heri-ink)" }}>{row.company.name}</td>
                     <td><SectorPill sector={row.company.sector} /></td>
                     <td>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold" style={{ color: "var(--text)" }}>{row.avg.toFixed(1)}</span>
+                        <span className="heri-number-mono font-bold" style={{ color: "var(--heri-ink)" }}>{row.avg.toFixed(1)}</span>
                         <div className="bar w-24"><div className="bar-fill" style={{ width: `${row.avg}%` }} /></div>
                       </div>
                     </td>
@@ -243,13 +189,13 @@ export default async function SustainabilityPage({
         </section>
 
         {/* Cards per company with breakdown */}
-        <section className="grid gap-4 stagger lg:grid-cols-2 xl:grid-cols-3">
+        <section className="grid gap-4 heri-stagger lg:grid-cols-2 xl:grid-cols-3">
           {byCompany.map((row) => (
-            <div key={row.company.id} className="card card-hover card-pad">
+            <div key={row.company.id} className="heri-card p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-base font-extrabold" style={{ color: "var(--text)" }}>{row.company.name}</div>
-                  <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>{row.company.nameEn}</div>
+                  <div className="text-base font-bold" style={{ color: "var(--heri-ink)" }}>{row.company.name}</div>
+                  <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>{row.company.nameEn}</div>
                 </div>
                 <span className="badge-emerald">{row.avg.toFixed(1)} / 100</span>
               </div>
@@ -259,10 +205,10 @@ export default async function SustainabilityPage({
                 <PillarBar label={ar ? "حوكمة (G)" : "Governance"} value={row.gov} icon={ShieldCheck} />
               </div>
               <div className="mt-3 grid grid-cols-3 gap-2 border-t pt-3 text-[11px]"
-                   style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
-                <div><span className="font-bold" style={{ color: "var(--text)" }}>{formatNumber(row.carbon)}t</span> {ar ? "كربون" : "carbon"}</div>
-                <div><span className="font-bold" style={{ color: "var(--text)" }}>{formatNumber(row.water)}</span> m³ {ar ? "ماء" : "water"}</div>
-                <div><span className="font-bold" style={{ color: "var(--accent)" }}>{row.renew.toFixed(1)}٪</span> {ar ? "متجدد" : "renew."}</div>
+                   style={{ borderColor: "var(--heri-rule)", color: "var(--heri-ink-3)" }}>
+                <div><span className="font-bold" style={{ color: "var(--heri-ink)" }}>{formatNumber(row.carbon)}t</span> {ar ? "كربون" : "carbon"}</div>
+                <div><span className="font-bold" style={{ color: "var(--heri-ink)" }}>{formatNumber(row.water)}</span> m³ {ar ? "ماء" : "water"}</div>
+                <div><span className="font-bold" style={{ color: "var(--heri-teal)" }}>{row.renew.toFixed(1)}٪</span> {ar ? "متجدد" : "renew."}</div>
               </div>
             </div>
           ))}
@@ -275,19 +221,18 @@ export default async function SustainabilityPage({
 function EsgHeroStat({ label, value, icon: Icon }: { label: string; value: string; icon: any }) {
   return (
     <div
-      className="hn-anim-rise rounded-xl px-3 py-2"
+      className="px-3 py-2"
       style={{
-        background: "rgba(255,255,255,0.14)",
-        border: "1px solid rgba(255,255,255,0.24)",
-        backdropFilter: "blur(8px)",
+        background: "var(--heri-cream)",
+        border: "1px solid var(--heri-rule)",
         minWidth: 110,
       }}
     >
-      <div className="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[0.16em] opacity-85">
+      <div className="flex items-center gap-1.5 text-[9.5px] font-semibold uppercase tracking-[0.16em]" style={{ color: "var(--heri-ink-3)" }}>
         <Icon className="h-3 w-3" />
         {label}
       </div>
-      <div className="exec-num mt-0.5 text-xl font-black leading-none tracking-[-0.012em]">
+      <div className="heri-number-mono mt-0.5 text-xl font-bold leading-none tracking-[-0.012em]" style={{ color: "var(--heri-ink)" }}>
         {value}
       </div>
     </div>
@@ -298,11 +243,11 @@ function PillarBar({ label, value, icon: Icon }: { label: string; value: number;
   return (
     <div>
       <div className="mb-1 flex items-center justify-between text-[11px]">
-        <span className="flex items-center gap-1.5 font-bold" style={{ color: "var(--text)" }}>
+        <span className="flex items-center gap-1.5 font-bold" style={{ color: "var(--heri-ink)" }}>
           <Icon className="h-3 w-3" />
           {label}
         </span>
-        <span className="font-mono" style={{ color: "var(--text-muted)" }}>{value.toFixed(1)}</span>
+        <span className="heri-number-mono" style={{ color: "var(--heri-ink-3)" }}>{value.toFixed(1)}</span>
       </div>
       <div className="bar"><div className="bar-fill" style={{ width: `${Math.min(100, value)}%` }} /></div>
     </div>

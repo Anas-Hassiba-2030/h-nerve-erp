@@ -143,7 +143,7 @@ export default async function CompanyReportPage({
               <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/80">
                 H-NERVE ERP · {ar ? "تقرير تنفيذي رسمي" : "Official Executive Report"}
               </div>
-              <h1 className="mt-1 text-2xl font-black">
+              <h1 className="mt-1 text-2xl font-bold">
                 {ar ? company.name : company.nameEn}
               </h1>
               <div className="mt-1 text-[11px] text-white/80">
@@ -151,7 +151,7 @@ export default async function CompanyReportPage({
               </div>
             </div>
             <span
-              className="flex h-14 w-14 items-center justify-center rounded-2xl text-2xl font-black ring-1 ring-white/30"
+              className="flex h-14 w-14 items-center justify-center rounded-2xl text-2xl font-bold ring-1 ring-white/30"
               style={{ background: "rgba(255,255,255,0.18)" }}
             >
               {brand.emblem}
@@ -179,7 +179,7 @@ export default async function CompanyReportPage({
         </header>
 
         {/* KPI ROW */}
-        <section className="grid grid-cols-4 gap-0 border-b" style={{ borderColor: "var(--border)" }}>
+        <section className="grid grid-cols-4 gap-0 border-b" style={{ borderColor: "var(--heri-rule)" }}>
           <KPI label={ar ? "إيراد ١٢ شهر" : "12-mo revenue"} value={formatMoney(totalRevenue)} accent={brand.accent} />
           <KPI label={ar ? "مصاريف" : "Expenses"} value={formatMoney(totalExpense)} accent="#9ca3af" />
           <KPI label={ar ? "صافي" : "Net"} value={formatMoney(net)} accent={net >= 0 ? "#10b981" : "#ef4444"} />
@@ -189,7 +189,7 @@ export default async function CompanyReportPage({
         {/* TREND CHART */}
         <section className="p-6">
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-sm font-extrabold" style={{ color: "#0f172a" }}>
+            <h2 className="text-sm font-semibold" style={{ color: "#0f172a" }}>
               {ar ? "النبض المالي — آخر ١٢ شهر" : "Financial pulse — last 12 months"}
             </h2>
             <div className="flex items-center gap-3 text-[10px] font-bold" style={{ color: "#64748b" }}>
@@ -217,8 +217,8 @@ export default async function CompanyReportPage({
         </section>
 
         {/* OPERATIONS BREAKDOWN — sector specific */}
-        <section className="border-t border-b px-6 py-4" style={{ borderColor: "var(--border)" }}>
-          <h2 className="mb-3 text-sm font-extrabold" style={{ color: "#0f172a" }}>
+        <section className="border-t border-b px-6 py-4" style={{ borderColor: "var(--heri-rule)" }}>
+          <h2 className="mb-3 text-sm font-semibold" style={{ color: "#0f172a" }}>
             {ar ? "ملخص العمليات" : "Operations summary"}
           </h2>
           <div className="grid grid-cols-3 gap-3">
@@ -313,9 +313,9 @@ export default async function CompanyReportPage({
         </section>
 
         {/* TOP REVENUE & ESG */}
-        <section className="grid grid-cols-2 gap-0 border-b" style={{ borderColor: "var(--border)" }}>
-          <div className="border-e p-6" style={{ borderColor: "var(--border)" }}>
-            <h2 className="mb-3 text-sm font-extrabold" style={{ color: "#0f172a" }}>
+        <section className="grid grid-cols-2 gap-0 border-b" style={{ borderColor: "var(--heri-rule)" }}>
+          <div className="border-e p-6" style={{ borderColor: "var(--heri-rule)" }}>
+            <h2 className="mb-3 text-sm font-semibold" style={{ color: "#0f172a" }}>
               {ar ? "أعلى الإيرادات" : "Top revenue"}
             </h2>
             {topRevenue.length === 0 ? (
@@ -341,7 +341,7 @@ export default async function CompanyReportPage({
                       </div>
                     </div>
                     <span
-                      className="font-mono font-extrabold tabular-nums"
+                      className="font-mono font-semibold tabular-nums"
                       style={{ color: brand.accent }}
                     >
                       {formatMoney(t.amount, t.currency)}
@@ -352,14 +352,14 @@ export default async function CompanyReportPage({
             )}
           </div>
           <div className="p-6">
-            <h2 className="mb-3 text-sm font-extrabold" style={{ color: "#0f172a" }}>
+            <h2 className="mb-3 text-sm font-semibold" style={{ color: "#0f172a" }}>
               {ar ? "الاستدامة (ESG)" : "Sustainability (ESG)"}
             </h2>
             {latestEsg ? (
               <div className="space-y-2">
                 <div className="flex items-baseline justify-between">
                   <span
-                    className="font-mono text-3xl font-black tabular-nums"
+                    className="font-mono text-3xl font-bold tabular-nums"
                     style={{ color: brand.accent }}
                   >
                     {latestEsg.overall.toFixed(1)}
@@ -436,7 +436,7 @@ function KPI({ label, value, accent }: { label: string; value: string; accent: s
   return (
     <div
       className="border-e p-4 last:border-e-0"
-      style={{ borderColor: "var(--border)" }}
+      style={{ borderColor: "var(--heri-rule)" }}
     >
       <div
         className="text-[10px] font-bold uppercase tracking-wider"
@@ -445,7 +445,7 @@ function KPI({ label, value, accent }: { label: string; value: string; accent: s
         {label}
       </div>
       <div
-        className="mt-1 font-mono text-lg font-black tabular-nums"
+        className="mt-1 font-mono text-lg font-bold tabular-nums"
         style={{ color: accent }}
       >
         {value}
@@ -470,7 +470,7 @@ function Stat({ label, value }: { label: string; value: string }) {
         {label}
       </div>
       <div
-        className="mt-0.5 font-mono text-base font-extrabold tabular-nums"
+        className="mt-0.5 font-mono text-base font-semibold tabular-nums"
         style={{ color: "#0f172a" }}
       >
         {value}

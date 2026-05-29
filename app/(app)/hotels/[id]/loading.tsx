@@ -1,122 +1,64 @@
-export default function Loading() {
-  const skel =
-    "rounded animate-pulse bg-[color-mix(in_srgb,var(--text-muted)_18%,transparent)]";
-  const skelLight =
-    "rounded animate-pulse bg-[color-mix(in_srgb,var(--text-muted)_12%,transparent)]";
+import { KpiSkeleton, CardSkeleton } from "@/components/skeletons";
 
+// Mirrors hotels/[id]/page.tsx so the detail surface doesn't jump on
+// hydration: Topbar row, Heritage hero plinth, 4-up HeriKpi strip, occupancy
+// bar card, then the two-column body (1fr arrivals + recent | 360px aside).
+export default function Loading() {
   return (
     <div className="flex-1 anim-fade-up">
+      {/* Topbar row */}
       <div
         className="flex flex-wrap items-center justify-between gap-4 px-6 py-4"
-        style={{ borderBottom: "1px solid var(--border)" }}
+        style={{ borderBottom: "1px solid var(--heri-rule)" }}
       >
         <div className="space-y-2">
-          <div className={`h-3 w-20 ${skelLight}`} />
-          <div className={`h-7 w-64 ${skel}`} />
-          <div className={`h-3 w-48 ${skelLight}`} />
+          <div className="skel skel-eyebrow" />
+          <div className="skel skel-title" style={{ width: 280 }} />
+          <div className="skel skel-line" style={{ width: 200 }} />
         </div>
-        <div
-          className="h-9 w-28 rounded-xl animate-pulse"
-          style={{
-            background: "color-mix(in srgb, var(--brand) 14%, transparent)",
-          }}
-        />
+        <div className="flex items-center gap-2">
+          <div className="skel" style={{ width: 90, height: 32, borderRadius: 0 }} />
+          <div className="skel" style={{ width: 110, height: 32, borderRadius: 0 }} />
+        </div>
       </div>
 
       <div className="space-y-6 p-6">
+        {/* Heritage hero plinth */}
         <div
-          className="relative h-44 overflow-hidden rounded-2xl"
-          style={{
-            background:
-              "linear-gradient(135deg, color-mix(in srgb, var(--brand) 12%, transparent), color-mix(in srgb, var(--accent) 12%, transparent))",
-          }}
+          className="heri-hero relative p-6"
+          style={{ minHeight: 170 }}
+          aria-busy="true"
         >
-          <div
-            className="absolute inset-0 anim-grad opacity-60"
-            style={{
-              background:
-                "linear-gradient(120deg, transparent 0%, color-mix(in srgb, white 35%, transparent) 50%, transparent 100%)",
-              backgroundSize: "200% 200%",
-            }}
-            aria-hidden
-          />
-          <div className="absolute inset-6 flex items-center gap-4">
-            <div
-              className="h-20 w-20 animate-pulse rounded-2xl"
-              style={{ background: "rgba(255,255,255,.25)" }}
-            />
-            <div className="space-y-2">
-              <div
-                className="h-3 w-20 animate-pulse rounded"
-                style={{ background: "rgba(255,255,255,.3)" }}
-              />
-              <div
-                className="h-8 w-72 animate-pulse rounded"
-                style={{ background: "rgba(255,255,255,.3)" }}
-              />
-              <div
-                className="h-3 w-56 animate-pulse rounded"
-                style={{ background: "rgba(255,255,255,.2)" }}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="kpi">
-              <div className={`h-3 w-20 ${skelLight}`} />
-              <div className={`mt-2 h-7 w-32 ${skel}`} />
-              <div className={`mt-2 h-2.5 w-28 ${skelLight}`} />
-            </div>
-          ))}
-        </div>
-
-        {/* Occupancy bar placeholder */}
-        <div className="card card-pad space-y-2">
-          <div className={`h-4 w-32 ${skel}`} />
-          <div
-            className="h-3 w-full rounded-full animate-pulse"
-            style={{
-              background:
-                "color-mix(in srgb, var(--brand) 16%, transparent)",
-            }}
-          />
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-[1fr,320px]">
-          <div className="space-y-6">
-            {[0, 1].map((s) => (
-              <div key={s} className="card card-pad space-y-3">
-                <div className={`h-4 w-44 ${skel}`} />
-                {[0, 1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-2.5 last:border-b-0"
-                  >
-                    <div className="space-y-1.5">
-                      <div className={`h-3.5 w-48 ${skel}`} />
-                      <div className={`h-2.5 w-32 ${skelLight}`} />
-                    </div>
-                    <div className={`h-3 w-16 ${skelLight}`} />
-                  </div>
-                ))}
+          <div className="flex items-start gap-4">
+            <div className="skel" style={{ width: 64, height: 64, borderRadius: 0 }} />
+            <div className="flex-1 space-y-2">
+              <div className="skel skel-eyebrow" style={{ width: 120 }} />
+              <div className="skel skel-title" style={{ width: "min(420px, 60%)" }} />
+              <div className="skel skel-line" style={{ width: "min(320px, 50%)" }} />
+              <div className="mt-2 flex gap-3">
+                <div className="skel skel-pill" style={{ width: 110 }} />
+                <div className="skel skel-pill" style={{ width: 90 }} />
+                <div className="skel skel-pill" style={{ width: 80 }} />
               </div>
-            ))}
-          </div>
-          <div className="space-y-4">
-            <div className="card card-pad space-y-3">
-              <div className={`h-4 w-32 ${skel}`} />
-              {[0, 1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between border-b border-[var(--border)] pb-1.5 last:border-b-0"
-                >
-                  <div className={`h-3 w-20 ${skelLight}`} />
-                  <div className={`h-3 w-24 ${skel}`} />
-                </div>
-              ))}
             </div>
+          </div>
+        </div>
+
+        {/* 4-up KPI strip */}
+        <KpiSkeleton count={4} />
+
+        {/* Occupancy bar card */}
+        <CardSkeleton height={80} />
+
+        {/* Two-column body */}
+        <div className="grid gap-6 lg:grid-cols-[1fr,360px]">
+          <div className="space-y-6">
+            <CardSkeleton lines={5} />
+            <CardSkeleton lines={6} />
+          </div>
+          <div className="space-y-6">
+            <CardSkeleton lines={4} />
+            <CardSkeleton lines={6} />
           </div>
         </div>
       </div>

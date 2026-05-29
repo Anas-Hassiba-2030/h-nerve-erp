@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // Activity Log — system-wide audit trail.
 // Filters by entity, action, actor. Bilingual summaries with icons + relative time.
 
@@ -180,8 +182,8 @@ export default async function ActivityLogPage({
         <div className="card card-pad space-y-3">
           <div>
             <div
-              className="mb-1.5 text-[11px] font-extrabold uppercase tracking-wider"
-              style={{ color: "var(--text-muted)" }}
+              className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider"
+              style={{ color: "var(--heri-ink-3)" }}
             >
               {ar ? "حسب نوع الكيان" : "By entity"}
             </div>
@@ -215,8 +217,8 @@ export default async function ActivityLogPage({
           </div>
           <div>
             <div
-              className="mb-1.5 text-[11px] font-extrabold uppercase tracking-wider"
-              style={{ color: "var(--text-muted)" }}
+              className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider"
+              style={{ color: "var(--heri-ink-3)" }}
             >
               {ar ? "حسب الإجراء" : "By action"}
             </div>
@@ -258,12 +260,12 @@ export default async function ActivityLogPage({
           <div className="card card-pad py-16 text-center">
             <Activity
               className="mx-auto mb-3 h-10 w-10"
-              style={{ color: "var(--text-muted)" }}
+              style={{ color: "var(--heri-ink-3)" }}
             />
-            <h3 className="text-base font-extrabold" style={{ color: "var(--text)" }}>
+            <h3 className="text-base font-semibold" style={{ color: "var(--heri-ink)" }}>
               {ar ? "لا توجد إجراءات مسجلة" : "No activity yet"}
             </h3>
-            <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
+            <p className="mt-1 text-xs" style={{ color: "var(--heri-ink-3)" }}>
               {ar
                 ? "ستظهر هنا كل عمليات الإنشاء والتعديل والحذف فور حدوثها."
                 : "Create, update and delete actions will show here as they happen."}
@@ -278,20 +280,20 @@ export default async function ActivityLogPage({
                     className="h-[2px] flex-1 rounded-full"
                     style={{
                       background:
-                        "linear-gradient(90deg, var(--border) 0%, transparent 100%)",
+                        "linear-gradient(90deg, var(--heri-rule) 0%, transparent 100%)",
                     }}
                   />
                   <span
-                    className="text-[11px] font-extrabold uppercase tracking-[0.16em]"
-                    style={{ color: "var(--text-muted)" }}
+                    className="text-[11px] font-semibold uppercase tracking-[0.16em]"
+                    style={{ color: "var(--heri-ink-3)" }}
                   >
                     {label}
                   </span>
                   <span
                     className="rounded-full px-2 py-0.5 text-[10px] font-bold"
                     style={{
-                      background: "var(--brand-soft)",
-                      color: "var(--brand)",
+                      background: "var(--heri-cream-2)",
+                      color: "var(--heri-ochre)",
                     }}
                   >
                     {formatNumber(items.length)}
@@ -300,7 +302,7 @@ export default async function ActivityLogPage({
                     className="h-[2px] flex-1 rounded-full"
                     style={{
                       background:
-                        "linear-gradient(270deg, var(--border) 0%, transparent 100%)",
+                        "linear-gradient(270deg, var(--heri-rule) 0%, transparent 100%)",
                     }}
                   />
                 </div>
@@ -309,7 +311,7 @@ export default async function ActivityLogPage({
                   {/* vertical line */}
                   <span
                     className="absolute top-3 bottom-3 w-px ltr:left-[15px] rtl:right-[15px]"
-                    style={{ background: "var(--border)" }}
+                    style={{ background: "var(--heri-rule)" }}
                   />
                   {items.map((log) => {
                     const meta = ACTION_META[log.action];
@@ -329,33 +331,33 @@ export default async function ActivityLogPage({
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-1.5">
                             <span
-                              className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-extrabold uppercase ring-1 ${TONE_CLASS[tone]}`}
+                              className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase ring-1 ${TONE_CLASS[tone]}`}
                             >
                               {ar ? meta?.ar ?? log.action : meta?.en ?? log.action}
                             </span>
                             <span
                               className="text-[10px] font-bold uppercase"
-                              style={{ color: "var(--text-muted)" }}
+                              style={{ color: "var(--heri-ink-3)" }}
                             >
                               {ar ? ENTITY_AR[log.entity] ?? log.entity : log.entity}
                             </span>
                             <span
                               className="ms-auto font-mono text-[10px]"
-                              style={{ color: "var(--text-muted)" }}
+                              style={{ color: "var(--heri-ink-3)" }}
                             >
                               {relativeTime(log.createdAt, ar)}
                             </span>
                           </div>
                           <div
                             className="mt-1 text-[12.5px] font-bold leading-snug"
-                            style={{ color: "var(--text)" }}
+                            style={{ color: "var(--heri-ink)" }}
                           >
                             {ar ? log.summary : log.summaryEn ?? log.summary}
                           </div>
                           {log.actorName ? (
                             <div
                               className="mt-1 text-[10.5px]"
-                              style={{ color: "var(--text-muted)" }}
+                              style={{ color: "var(--heri-ink-3)" }}
                             >
                               <span className="font-bold">
                                 {ar ? "بواسطة" : "by"}
@@ -376,7 +378,7 @@ export default async function ActivityLogPage({
         {logs.length >= 200 ? (
           <p
             className="text-center text-[11px]"
-            style={{ color: "var(--text-muted)" }}
+            style={{ color: "var(--heri-ink-3)" }}
           >
             {ar
               ? "عرض آخر 200 إجراء — يتم تنظيف السجل تلقائياً للحفاظ على آخر 5000."

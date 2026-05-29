@@ -4,13 +4,8 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer, PageSection } from "@/components/PageContainer";
-import { HeroPanel } from "@/components/exec/HeroPanel";
-import { MetricTile } from "@/components/exec/MetricTile";
-import { CompanyLogo } from "@/components/brand/CompanyLogo";
+import { HeriKpi } from "@/components/HeriKpi";
 import { ExportMenu } from "@/components/ExportMenu";
-import { getCompanyBrand } from "@/lib/companyBrand";
-import { KpiCard } from "@/components/KpiCard";
-import { CompanyCover } from "@/components/CompanyCover";
 import { StatusBadge } from "@/components/StatusBadge";
 import { EmptyState } from "@/components/EmptyState";
 import { DeleteButton } from "@/components/DeleteButton";
@@ -21,6 +16,8 @@ import {
 } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
 import { deleteFarm } from "./actions";
+
+export const dynamic = "force-dynamic";
 
 const TYPE_ICON: Record<string, typeof Sprout> = {
   GREENHOUSE: Sprout,
@@ -66,119 +63,50 @@ export default async function FarmsPage() {
       />
 
       <PageContainer>
-        <HeroPanel
-          gradient={getCompanyBrand("LORAN").gradient}
-          accent={getCompanyBrand("LORAN").accent}
-          height={250}
-        >
-          <div className="flex flex-wrap items-center justify-between gap-5">
-            <div className="flex items-center gap-5 hn-anim-rise">
-              <div className="hn-anim-zoom-bounce relative">
-                <span className="hn-anim-pulse-ring absolute -inset-2 rounded-3xl" aria-hidden />
-                <CompanyLogo code="LORAN" size={88} light />
-              </div>
-              <div className="min-w-0">
-                <div
-                  className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em]"
-                  style={{
-                    background: "rgba(255,255,255,0.18)",
-                    border: "1px solid rgba(255,255,255,0.28)",
-                    backdropFilter: "blur(6px)",
-                    color: "white",
-                  }}
-                >
-                  <Leaf className="h-3 w-3" />
-                  {ar ? "زراعة ذكية" : "Smart agriculture"}
-                </div>
-                <h2
-                  className="mt-2.5 text-3xl font-black leading-[1.05] tracking-[-0.02em] hn-anim-rise md:text-[34px]"
-                  style={{ animationDelay: "0.08s" }}
-                >
-                  {ar ? "لوران الزراعية" : "Loran Agricultural"}
-                </h2>
-                <p
-                  className="mt-1 max-w-xl text-[12.5px] font-bold opacity-90 hn-anim-rise"
-                  style={{ animationDelay: "0.16s" }}
-                >
-                  {ar
-                    ? "أرض تنبت ثقة. زراعة تستحق الانتظار."
-                    : "Land of trust. Crops worth the wait."}
-                </p>
-                <div
-                  className="mt-3 flex flex-wrap gap-2 hn-anim-fall"
-                  style={{ animationDelay: "0.24s" }}
-                >
-                  <Link
-                    href="/farms/new"
-                    className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-extrabold transition hover:scale-105"
-                    style={{ background: "white", color: "#0a4d3a" }}
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    {ar ? "مزرعة جديدة" : "New farm"}
-                  </Link>
-                  <Link
-                    href="/farms/crops/new"
-                    className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-extrabold transition hover:scale-105"
-                    style={{
-                      background: "rgba(255,255,255,0.18)",
-                      border: "1px solid rgba(255,255,255,0.32)",
-                      backdropFilter: "blur(6px)",
-                      color: "white",
-                    }}
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    {ar ? "محصول جديد" : "New crop"}
-                  </Link>
-                  <ExportMenu type="farms" companyCode="LORAN" locale={lc} />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-2 hn-stagger sm:grid-cols-2">
-              <FarmHeroStat label={ar ? "مزارع" : "Farms"} value={formatNumber(farms.length)} icon={Sprout} />
-              <FarmHeroStat label={ar ? "دونم" : "Dunum"} value={formatNumber(totalArea)} icon={Wheat} />
-              <FarmHeroStat label={ar ? "محاصيل" : "Crops"} value={formatNumber(cropsGrowing)} icon={Leaf} />
-              <FarmHeroStat label={ar ? "تنبيهات" : "Alerts"} value={formatNumber(alerts.length)} icon={AlertTriangle} />
-            </div>
+        {/* Action rail */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="heri-eyebrow heri-eyebrow-ink">
+            {ar ? "الزراعة الذكية" : "Smart agriculture"}
           </div>
-        </HeroPanel>
+          <div className="flex items-center gap-2">
+            <Link href="/farms/new" className="heri-btn heri-btn-primary" style={{ fontSize: 13 }}>
+              <Plus className="h-4 w-4" strokeWidth={1.5} />
+              {ar ? "مزرعة جديدة" : "New farm"}
+            </Link>
+            <Link href="/farms/crops/new" className="heri-btn heri-btn-secondary" style={{ fontSize: 13 }}>
+              <Plus className="h-4 w-4" strokeWidth={1.5} />
+              {ar ? "محصول جديد" : "New crop"}
+            </Link>
+            <ExportMenu type="farms" companyCode="LORAN" locale={lc} />
+          </div>
+        </div>
 
-        <section className="grid gap-3 hn-stagger sm:grid-cols-2 xl:grid-cols-4">
-          <MetricTile
+        {/* KPI band */}
+        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
+          <HeriKpi
             label={ar ? "عدد المزارع" : "Farms"}
-            value={formatNumber(farms.length)}
-            icon={Sprout}
-            tone="emerald"
-            hint={`${formatNumber(greenhouses)} ${ar ? "دفيئة" : "GH"}`}
+            raw={farms.length}
+            kind="number"
+            hint={`${formatNumber(greenhouses)} ${ar ? "دفيئة" : "greenhouse"}`}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "إجمالي المساحة" : "Total area"}
-            value={`${formatNumber(totalArea)}`}
-            icon={Wheat}
-            tone="amber"
+            raw={totalArea}
+            kind="number"
             hint={ar ? "دونم" : "dunum"}
           />
-          <MetricTile
-            label={ar ? "محاصيل نامية" : "Growing"}
-            value={formatNumber(cropsGrowing)}
-            icon={Leaf}
-            tone="blue"
+          <HeriKpi
+            label={ar ? "محاصيل نامية" : "Growing crops"}
+            raw={cropsGrowing}
+            kind="number"
             hint={ar ? "في النمو" : "in cultivation"}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "تنبيهات" : "Alerts"}
-            value={formatNumber(alerts.length)}
-            icon={AlertTriangle}
-            tone={alerts.length > 0 ? "amber" : "emerald"}
-            hint={
-              alerts.length > 0
-                ? ar
-                  ? "تحقق من القراءات"
-                  : "Check readings"
-                : ar
-                ? "القراءات طبيعية"
-                : "All normal"
-            }
+            raw={alerts.length}
+            kind="number"
+            accent={alerts.length > 0 ? "var(--heri-terracotta, #b85c38)" : undefined}
+            hint={alerts.length > 0 ? (ar ? "تحقق من القراءات" : "Check readings") : (ar ? "القراءات طبيعية" : "All normal")}
           />
         </section>
 
@@ -220,7 +148,7 @@ export default async function FarmsPage() {
                 size={170}
                 label={ar ? "مثالي 35-50%" : "Ideal 35-50%"}
                 sublabel={`${ghFarms.length} ${ar ? "دفيئة" : "greenhouses"}`}
-                color={avgMoisture < 30 ? "#c0392b" : avgMoisture < 35 ? "#d97706" : "var(--brand)"}
+                color={avgMoisture < 30 ? "#c0392b" : avgMoisture < 35 ? "#d97706" : "var(--heri-ochre)"}
               />
             </div>
           </section>
@@ -258,7 +186,7 @@ export default async function FarmsPage() {
               }
             />
           ) : (
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 heri-stagger lg:grid-cols-2">
               {farms.map((f) => {
                 const Icon = TYPE_ICON[f.type] ?? Sprout;
                 return (
@@ -270,10 +198,10 @@ export default async function FarmsPage() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="text-base font-extrabold" style={{ color: "var(--text)" }}>{f.name}</h3>
+                            <h3 className="text-base font-semibold" style={{ color: "var(--heri-ink)" }}>{f.name}</h3>
                             <StatusBadge status={f.alertLevel} />
                           </div>
-                          <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                          <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
                             {loc(FARM_TYPES_AR, FARM_TYPES_EN, lc, f.type)} · {f.location} · {formatNumber(f.areaDunum)} {ar ? "دونم" : "dunum"}
                           </div>
                         </div>
@@ -312,25 +240,25 @@ export default async function FarmsPage() {
                       </div>
                     ) : null}
 
-                    <div className="mt-3 flex items-center justify-between text-[11px]" style={{ color: "var(--text-muted)" }}>
+                    <div className="mt-3 flex items-center justify-between text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
                       <span>{ar ? "آخر قراءة" : "Last reading"}: {formatRelative(f.lastReadAt, lc)}</span>
                       <span className="font-mono">{f.company.code}</span>
                     </div>
 
                     {f.crops.length > 0 ? (
-                      <div className="mt-4 border-t pt-3" style={{ borderColor: "var(--border)" }}>
-                        <div className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                      <div className="mt-4 border-t pt-3" style={{ borderColor: "var(--heri-rule)" }}>
+                        <div className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--heri-ink-3)" }}>
                           {ar ? "محاصيل" : "Crops"} ({f.crops.length})
                         </div>
                         <div className="space-y-1">
                           {f.crops.slice(0, 3).map((c) => (
                             <div key={c.id} className="flex items-center justify-between text-[12px]">
                               <div>
-                                <span className="font-extrabold" style={{ color: "var(--text)" }}>{c.name}</span>
-                                {c.variety ? <span style={{ color: "var(--text-muted)" }}> · {c.variety}</span> : null}
+                                <span className="font-semibold" style={{ color: "var(--heri-ink)" }}>{c.name}</span>
+                                {c.variety ? <span style={{ color: "var(--heri-ink-3)" }}> · {c.variety}</span> : null}
                               </div>
                               <div className="flex items-center gap-2">
-                                <span style={{ color: "var(--text-muted)" }}>
+                                <span style={{ color: "var(--heri-ink-3)" }}>
                                   {ar ? "حصاد" : "harvest"} {formatShortDate(c.expectedHarvest, lc)}
                                 </span>
                                 <StatusBadge status={c.status} />
@@ -353,45 +281,24 @@ export default async function FarmsPage() {
 
 function SensorTile({ icon, label, value, hint }: { icon: React.ReactNode; label: string; value: string; hint: string }) {
   return (
-    <div className="rounded-xl border p-3 text-center" style={{ borderColor: "var(--border)" }}>
-      <div className="mb-1 flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+    <div className="border p-3 text-center" style={{ borderColor: "var(--heri-rule)" }}>
+      <div className="mb-1 flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--heri-ink-3)" }}>
         {icon}
         {label}
       </div>
-      <div className="text-2xl font-black tabular-nums" style={{ color: "var(--text)" }}>{value}</div>
-      <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>{hint}</div>
+      <div className="text-2xl font-bold tabular-nums" style={{ color: "var(--heri-ink)" }}>{value}</div>
+      <div className="text-[10px]" style={{ color: "var(--heri-ink-3)" }}>{hint}</div>
     </div>
   );
 }
 
 function MicroSensor({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-lg border p-2 text-center" style={{ borderColor: "var(--border)", background: "var(--brand-soft)" }}>
+    <div className="border p-2 text-center" style={{ borderColor: "var(--heri-rule)", background: "var(--heri-cream-2)" }}>
       <div className="flex items-center justify-center">{icon}</div>
-      <div className="mt-1 text-base font-extrabold tabular-nums" style={{ color: "var(--text)" }}>{value}</div>
-      <div className="text-[9px]" style={{ color: "var(--text-muted)" }}>{label}</div>
+      <div className="mt-1 text-base font-semibold tabular-nums" style={{ color: "var(--heri-ink)" }}>{value}</div>
+      <div className="text-[9px]" style={{ color: "var(--heri-ink-3)" }}>{label}</div>
     </div>
   );
 }
 
-function FarmHeroStat({ label, value, icon: Icon }: { label: string; value: string; icon: any }) {
-  return (
-    <div
-      className="hn-anim-rise rounded-xl px-3 py-2"
-      style={{
-        background: "rgba(255,255,255,0.14)",
-        border: "1px solid rgba(255,255,255,0.24)",
-        backdropFilter: "blur(8px)",
-        minWidth: 110,
-      }}
-    >
-      <div className="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[0.16em] opacity-85">
-        <Icon className="h-3 w-3" />
-        {label}
-      </div>
-      <div className="exec-num mt-0.5 text-xl font-black leading-none tracking-[-0.012em]">
-        {value}
-      </div>
-    </div>
-  );
-}

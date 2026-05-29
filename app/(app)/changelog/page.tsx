@@ -115,13 +115,13 @@ export default function ChangelogPage({
               >
                 <span>{ar ? p.ar : p.en}</span>
                 <span
-                  className="ms-1 inline-flex items-center justify-center rounded-full px-1.5 text-[10px] font-mono font-black"
+                  className="ms-1 inline-flex items-center justify-center rounded-full px-1.5 text-[10px] font-mono font-bold"
                   style={{
                     minWidth: 18,
                     background: active
                       ? "rgba(255,255,255,0.22)"
-                      : "color-mix(in srgb, var(--text-muted) 14%, transparent)",
-                    color: active ? "#fff" : "var(--text-muted)",
+                      : "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
+                    color: active ? "#fff" : "var(--heri-ink-3)",
                   }}
                 >
                   {counts[p.id]}
@@ -131,7 +131,7 @@ export default function ChangelogPage({
           })}
           <span
             className="ms-auto inline-flex items-center gap-1.5 text-[11px] font-bold"
-            style={{ color: "var(--text-muted)" }}
+            style={{ color: "var(--heri-ink-3)" }}
           >
             <GitBranch className="h-3.5 w-3.5" />
             {visible.length} / {CHANGELOG.length} {ar ? "إدخال" : "entries"}
@@ -151,7 +151,7 @@ export default function ChangelogPage({
               bottom: 8,
               width: 2,
               background:
-                "linear-gradient(180deg, color-mix(in srgb, var(--brand) 35%, transparent) 0%, var(--border) 30%, var(--border) 70%, color-mix(in srgb, var(--accent) 35%, transparent) 100%)",
+                "linear-gradient(180deg, color-mix(in srgb, var(--heri-ochre) 35%, transparent) 0%, var(--heri-rule) 30%, var(--heri-rule) 70%, color-mix(in srgb, var(--heri-copper) 35%, transparent) 100%)",
               borderRadius: 999,
             }}
           />
@@ -176,7 +176,7 @@ export default function ChangelogPage({
                       top: 6,
                       background: dot,
                       color: "#fff",
-                      boxShadow: `0 0 0 4px var(--surface), 0 0 0 5px color-mix(in srgb, ${dot} 35%, transparent), 0 6px 16px -4px color-mix(in srgb, ${dot} 60%, transparent)`,
+                      boxShadow: `0 0 0 4px var(--heri-cream), 0 0 0 5px color-mix(in srgb, ${dot} 35%, transparent), 0 6px 16px -4px color-mix(in srgb, ${dot} 60%, transparent)`,
                     }}
                   >
                     <Icon className="h-5 w-5" />
@@ -188,7 +188,7 @@ export default function ChangelogPage({
                       <span
                         className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[11px] font-bold"
                         style={{
-                          background: "var(--brand-soft)",
+                          background: "var(--heri-cream-2)",
                           color: "var(--brand-deep)",
                         }}
                       >
@@ -196,10 +196,10 @@ export default function ChangelogPage({
                         {entry.date}
                       </span>
                       <span
-                        className="rounded-md px-2 py-0.5 font-mono text-[11px] font-black"
+                        className="rounded-md px-2 py-0.5 font-mono text-[11px] font-bold"
                         style={{
-                          background: "var(--text)",
-                          color: "var(--surface-elevated)",
+                          background: "var(--heri-ink)",
+                          color: "var(--heri-cream)",
                         }}
                       >
                         v{entry.version}
@@ -216,14 +216,14 @@ export default function ChangelogPage({
 
                     {/* Title + description */}
                     <h2
-                      className="mt-3 text-base font-extrabold leading-snug md:text-[17px]"
-                      style={{ color: "var(--text)", letterSpacing: "-0.005em" }}
+                      className="mt-3 text-base font-semibold leading-snug md:text-[17px]"
+                      style={{ color: "var(--heri-ink)", letterSpacing: "-0.005em" }}
                     >
                       {t.title}
                     </h2>
                     <p
                       className="mt-1.5 text-sm leading-relaxed"
-                      style={{ color: "var(--text-muted)" }}
+                      style={{ color: "var(--heri-ink-3)" }}
                     >
                       {t.desc}
                     </p>
@@ -235,7 +235,7 @@ export default function ChangelogPage({
                           <li
                             key={j}
                             className="flex items-start gap-2 text-[12.5px] leading-relaxed"
-                            style={{ color: "var(--text-muted)" }}
+                            style={{ color: "var(--heri-ink-3)" }}
                           >
                             <span
                               aria-hidden
@@ -257,7 +257,7 @@ export default function ChangelogPage({
           {visible.length === 0 ? (
             <div
               className="card card-pad mt-4 text-center text-sm"
-              style={{ color: "var(--text-muted)" }}
+              style={{ color: "var(--heri-ink-3)" }}
             >
               {ar
                 ? "لا توجد إدخالات تطابق هذا الفلتر — جرّب فلتراً آخر."

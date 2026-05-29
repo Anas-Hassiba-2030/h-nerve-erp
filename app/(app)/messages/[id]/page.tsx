@@ -91,13 +91,13 @@ export default async function ThreadPage({ params }: { params: { id: string } })
       <PageContainer width="narrow">
         {/* Thread header card */}
         <section
-          className="exec-card flex items-center gap-4 p-4"
+          className="flex items-center gap-4 p-4" style={{ background: "var(--heri-cream)", border: "1px solid var(--heri-rule)" }}
           data-tone="blue"
         >
           <Link
             href="/messages"
-            className="rounded-md p-1.5 transition hover:bg-[var(--brand-soft)]"
-            style={{ color: "var(--text-muted)" }}
+            className="rounded-md p-1.5 transition hover:bg-[var(--heri-cream-2)]"
+            style={{ color: "var(--heri-ink-3)" }}
             aria-label={ar ? "العودة" : "Back"}
           >
             <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
@@ -105,30 +105,30 @@ export default async function ThreadPage({ params }: { params: { id: string } })
           {main ? (
             <>
               <span
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-base font-black text-white ring-1 ring-white/30"
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-base font-bold text-white ring-1 ring-white/30"
                 style={{ background: mainColor }}
               >
                 {initials(main.name)}
               </span>
               <div className="min-w-0 flex-1">
                 <div
-                  className="line-clamp-1 text-[15px] font-black"
-                  style={{ color: "var(--text)" }}
+                  className="line-clamp-1 text-[15px] font-bold"
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   {main.name}
                 </div>
                 <div
                   className="line-clamp-1 text-[11px] font-bold"
-                  style={{ color: "var(--text-muted)" }}
+                  style={{ color: "var(--heri-ink-3)" }}
                 >
                   {main.title ?? main.role} · {main.email}
                 </div>
               </div>
               <span
-                className="rounded-full px-2 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider"
+                className="rounded-full px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-wider"
                 style={{
-                  background: "var(--brand-soft)",
-                  color: "var(--brand)",
+                  background: "var(--heri-cream-2)",
+                  color: "var(--heri-ochre)",
                 }}
               >
                 {ar ? "مباشر" : "Direct"}
@@ -142,28 +142,28 @@ export default async function ThreadPage({ params }: { params: { id: string } })
             composer pinned at the bottom) so there's no dead whitespace
             below the input. */}
         <section
-          className="exec-card flex flex-col overflow-hidden p-0"
+          className="flex flex-col overflow-hidden p-0"
           data-tone="brand"
-          style={{ height: "calc(100dvh - 15rem)", minHeight: 460 }}
+          style={{ background: "var(--heri-cream)", border: "1px solid var(--heri-rule)", height: "calc(100dvh - 15rem)", minHeight: 460 }}
         >
           <div className="flex-1 overflow-y-auto">
           {messages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center gap-3 px-6 py-16 text-center">
               <span
                 className="flex h-14 w-14 items-center justify-center rounded-2xl"
-                style={{ background: "var(--brand-soft)", color: "var(--brand)" }}
+                style={{ background: "var(--heri-cream-2)", color: "var(--heri-ochre)" }}
               >
                 <MessageSquare className="h-7 w-7" />
               </span>
               <div
-                className="text-[14px] font-extrabold"
-                style={{ color: "var(--text)" }}
+                className="text-[14px] font-semibold"
+                style={{ color: "var(--heri-ink)" }}
               >
                 {ar ? "لم تبدأ المحادثة بعد" : "Conversation hasn't started"}
               </div>
               <p
                 className="max-w-sm text-[12px]"
-                style={{ color: "var(--text-muted)" }}
+                style={{ color: "var(--heri-ink-3)" }}
               >
                 {ar
                   ? "اكتب أول رسالة لكسر الجليد. ستظهر هنا فوراً."
@@ -178,11 +178,11 @@ export default async function ThreadPage({ params }: { params: { id: string } })
                   <div className="flex items-center gap-3">
                     <span
                       className="h-px flex-1"
-                      style={{ background: "var(--border)" }}
+                      style={{ background: "var(--heri-rule)" }}
                     />
                     <span
-                      className="text-[10px] font-extrabold uppercase tracking-[0.18em]"
-                      style={{ color: "var(--text-muted)" }}
+                      className="text-[10px] font-semibold uppercase tracking-[0.18em]"
+                      style={{ color: "var(--heri-ink-3)" }}
                     >
                       {new Intl.DateTimeFormat(ar ? "ar-JO-u-nu-latn" : "en-US", {
                         day: "numeric",
@@ -192,7 +192,7 @@ export default async function ThreadPage({ params }: { params: { id: string } })
                     </span>
                     <span
                       className="h-px flex-1"
-                      style={{ background: "var(--border)" }}
+                      style={{ background: "var(--heri-rule)" }}
                     />
                   </div>
 
@@ -204,10 +204,10 @@ export default async function ThreadPage({ params }: { params: { id: string } })
                     return (
                       <div
                         key={m.id}
-                        className={`flex items-end gap-2 hn-anim-rise ${mine ? "flex-row-reverse" : ""}`}
+                        className={`flex items-end gap-2 ${mine ? "flex-row-reverse" : ""}`}
                       >
                         <span
-                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-black text-white"
+                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
                           style={{ background: color }}
                         >
                           {initials(m.author.name)}
@@ -218,14 +218,14 @@ export default async function ThreadPage({ params }: { params: { id: string } })
                             mine
                               ? {
                                   background:
-                                    "linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%)",
+                                    "linear-gradient(135deg, var(--heri-ochre) 0%, var(--heri-copper) 100%)",
                                   color: "white",
-                                  boxShadow: "0 6px 14px -8px var(--brand)",
+                                  boxShadow: "0 6px 14px -8px var(--heri-ochre)",
                                 }
                               : {
-                                  background: "var(--surface-elevated)",
-                                  color: "var(--text)",
-                                  border: "1px solid var(--border)",
+                                  background: "var(--heri-cream)",
+                                  color: "var(--heri-ink)",
+                                  border: "1px solid var(--heri-rule)",
                                 }
                           }
                         >
@@ -254,7 +254,7 @@ export default async function ThreadPage({ params }: { params: { id: string } })
                           ) : null}
                           <div
                             className={`mt-1 text-[9.5px] font-bold ${mine ? "opacity-80" : ""}`}
-                            style={{ color: mine ? "white" : "var(--text-muted)" }}
+                            style={{ color: mine ? "white" : "var(--heri-ink-3)" }}
                           >
                             {formatTime(m.createdAt, ar)}
                           </div>

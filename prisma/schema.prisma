@@ -3,13 +3,12 @@ generator client {
 }
 
 datasource db {
-  // PRODUCTION (Phase 11) = PostgreSQL on Neon. `url` is the POOLED
-  // (pgbouncer) connection used at runtime; `directUrl` is the DIRECT
-  // connection used only for migrations. For a fast OFFLINE pitch demo,
-  // revert to SQLite per docs/OPERATING-PROTOCOL.md §6: provider="sqlite",
-  // drop directUrl, DATABASE_URL="file:./dev.db", then npm run db:reset.
-  provider  = "sqlite"
-  url       = env("DATABASE_URL")
+  // PRODUCTION: Railway injects DATABASE_URL automatically. No DIRECT_URL needed.
+  // Neon users: append `?pgbouncer=true&connection_limit=1` to DATABASE_URL and
+  // run migrations against the non-pooled connection separately.
+  // LOCAL DEV: provider="sqlite", DATABASE_URL="file:./dev.db".
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // =====================================================================

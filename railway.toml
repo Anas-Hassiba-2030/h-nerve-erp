@@ -1,0 +1,15 @@
+[build]
+builder = "nixpacks"
+# Build phase: install deps, validate schema, build Next.
+# No DB connection needed here — `prisma generate` only reads the schema file.
+buildCommand = "npm install && prisma generate && next build"
+
+[deploy]
+# Migrate runs in the deploy phase where DATABASE_URL is live.
+# This is also where Railway injects all linked service variables.
+preDeployCommand = "prisma migrate deploy"
+startCommand = "next start -p ${PORT:-3000}"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3

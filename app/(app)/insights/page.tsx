@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // /insights — Heritage Modern intelligence layer.
 //
 // Cream plinth + ochre rail hero, hairline KPI tiles, anomaly section as a
@@ -10,7 +12,7 @@
 import Link from "next/link";
 import {
   Sparkles, Plus, Eye, CheckCircle2, AlertTriangle,
-  Lightbulb, Info, Brain,
+  Lightbulb, Info, Brain, Wand2,
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
@@ -20,11 +22,12 @@ import { DeleteButton } from "@/components/DeleteButton";
 import { AnomalyPanel } from "@/components/AnomalyPanel";
 import { HeritageSection, HeritagePill } from "@/components/heritage";
 import { MemoryRecall } from "@/components/brain/MemoryRecall";
+import { CountUpValue } from "@/components/CountUpValue";
 import { buildAnomaliesFromSeries } from "@/lib/anomaly";
 import { getLocale } from "@/lib/i18n.server";
 import { prisma } from "@/lib/db";
 import { formatNumber, formatRelative } from "@/lib/utils";
-import { deleteInsight, setInsightStatus, runAiEngine } from "./actions";
+import { deleteInsight, setInsightStatus, runAiEngine, generateInsightPlan } from "./actions";
 
 const MODULE_AR: Record<string, string> = {
   HOTELS: "الفنادق",
@@ -208,30 +211,30 @@ export default async function InsightsPage() {
             </div>
           </div>
 
-          {/* KPI grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4">
+          {/* KPI grid — animated count-ups inside the hero plinth */}
+          <div className="grid grid-cols-2 md:grid-cols-4 heri-stagger">
             <HeroStat
               label={ar ? "إجمالي" : "Total"}
-              value={formatNumber(totalCount)}
+              raw={totalCount}
               icon={Sparkles}
             />
             <HeroStat
               label={ar ? "مفتوحة" : "Open"}
-              value={formatNumber(open)}
+              raw={open}
               icon={Eye}
               divider
               accent="copper"
             />
             <HeroStat
               label={ar ? "فرص" : "Opportunities"}
-              value={formatNumber(opportunities)}
+              raw={opportunities}
               icon={Lightbulb}
               divider
               accent="teal"
             />
             <HeroStat
               label={ar ? "حرجة" : "Critical"}
-              value={formatNumber(critical)}
+              raw={critical}
               icon={AlertTriangle}
               divider
               accent={critical > 0 ? "terracotta" : "ink"}
@@ -390,6 +393,18 @@ export default async function InsightsPage() {
                               </form>
                             )
                           )}
+                          <form action={generateInsightPlan}>
+                            <input type="hidden" name="id" value={i.id} />
+                            <button
+                              type="submit"
+                              className="heri-btn heri-btn-ghost"
+                              style={{ padding: "6px 12px", fontSize: 11, color: "var(--heri-teal)" }}
+                              title={ar ? "توليد خطة عمل من هذه الإشارة" : "Generate action plan from this insight"}
+                            >
+                              <Wand2 className="h-3 w-3" strokeWidth={1.5} />
+                              {ar ? "خطة" : "Plan"}
+                            </button>
+                          </form>
                           <span
                             className="heri-eyebrow heri-eyebrow-ink"
                             style={{ fontSize: 9.5 }}
@@ -425,13 +440,13 @@ export default async function InsightsPage() {
 
 function HeroStat({
   label,
-  value,
+  raw,
   icon: Icon,
   divider = false,
   accent = "ochre",
 }: {
   label: string;
-  value: string;
+  raw: number;
   icon: any;
   divider?: boolean;
   accent?: "ochre" | "copper" | "teal" | "terracotta" | "ink";
@@ -458,7 +473,7 @@ function HeroStat({
         className="heri-number mt-3"
         style={{ fontSize: "clamp(22px, 2.4vw, 32px)", fontWeight: 500, color: "var(--heri-ink)" }}
       >
-        {value}
+        <CountUpValue raw={raw} kind="number" startDelayMs={300} />
       </div>
     </div>
   );

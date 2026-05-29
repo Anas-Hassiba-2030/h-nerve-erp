@@ -74,17 +74,17 @@ export default async function PinnedPage() {
           <div className="card card-pad py-16 text-center">
             <Pin
               className="mx-auto mb-3 h-12 w-12"
-              style={{ color: "var(--text-muted)" }}
+              style={{ color: "var(--heri-ink-3)" }}
             />
             <h3
-              className="text-base font-extrabold"
-              style={{ color: "var(--text)" }}
+              className="text-base font-semibold"
+              style={{ color: "var(--heri-ink)" }}
             >
               {ar ? "لا عناصر مثبتة بعد" : "Nothing pinned yet"}
             </h3>
             <p
               className="mx-auto mt-1 max-w-md text-xs"
-              style={{ color: "var(--text-muted)" }}
+              style={{ color: "var(--heri-ink-3)" }}
             >
               {ar
                 ? "اضغط على أيقونة الدبوس في صفحة أي شركة، فندق، مشروع، أو مهمة لتثبيتها هنا للوصول السريع."
@@ -116,14 +116,14 @@ export default async function PinnedPage() {
                     </span>
                     <div>
                       <h3
-                        className="text-[13px] font-extrabold"
-                        style={{ color: "var(--text)" }}
+                        className="text-[13px] font-semibold"
+                        style={{ color: "var(--heri-ink)" }}
                       >
                         {ar ? meta?.ar ?? entityType : meta?.en ?? entityType}
                       </h3>
                       <p
                         className="text-[10.5px]"
-                        style={{ color: "var(--text-muted)" }}
+                        style={{ color: "var(--heri-ink-3)" }}
                       >
                         {ar
                           ? `${formatNumber(items.length)} عنصر`
@@ -143,21 +143,21 @@ export default async function PinnedPage() {
                           >
                             <div className="min-w-0">
                               <div
-                                className="line-clamp-1 text-[12.5px] font-extrabold"
-                                style={{ color: "var(--text)" }}
+                                className="line-clamp-1 text-[12.5px] font-semibold"
+                                style={{ color: "var(--heri-ink)" }}
                               >
                                 {ar ? p.label : p.labelEn ?? p.label}
                               </div>
                               <div
                                 className="text-[10px]"
-                                style={{ color: "var(--text-muted)" }}
+                                style={{ color: "var(--heri-ink-3)" }}
                               >
                                 {formatDate(p.createdAt, ar ? "ar" : "en")}
                               </div>
                             </div>
                             <ArrowRight
                               className="ms-auto h-3.5 w-3.5 shrink-0 transition group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
-                              style={{ color: "var(--text-muted)" }}
+                              style={{ color: "var(--heri-ink-3)" }}
                             />
                           </Link>
                           <PinButton
@@ -183,7 +183,7 @@ export default async function PinnedPage() {
 
         <p
           className="text-center text-[10.5px]"
-          style={{ color: "var(--text-muted)" }}
+          style={{ color: "var(--heri-ink-3)" }}
         >
           {ar
             ? "💡 لتثبيت عنصر — افتح صفحته واضغط أيقونة الدبوس"

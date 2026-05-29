@@ -195,7 +195,7 @@ export default async function UserDetailPage({
                   {currentRank.en}
                 </div>
                 <div
-                  className="text-lg font-black"
+                  className="text-lg font-bold"
                   style={{ color: "white", textShadow: "0 1px 4px rgba(0,0,0,.2)" }}
                 >
                   {currentRank.ar}
@@ -228,7 +228,7 @@ export default async function UserDetailPage({
                   </Link>
                 ) : null}
               </div>
-              <h2 className="mt-1 text-3xl font-black" style={{ letterSpacing: "-0.01em" }}>
+              <h2 className="mt-1 text-3xl font-bold" style={{ letterSpacing: "-0.01em" }}>
                 {user.name}
               </h2>
               {user.title ? (
@@ -381,18 +381,18 @@ export default async function UserDetailPage({
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
                   <h3
-                    className="flex items-center gap-2 text-sm font-extrabold"
-                    style={{ color: "var(--text)" }}
+                    className="flex items-center gap-2 text-sm font-semibold"
+                    style={{ color: "var(--heri-ink)" }}
                   >
                     <ListChecks
                       className="h-4 w-4"
-                      style={{ color: "var(--brand)" }}
+                      style={{ color: "var(--heri-ochre)" }}
                     />
                     المهام
                   </h3>
                   <span
                     className="text-[11px] font-bold"
-                    style={{ color: "var(--text-muted)" }}
+                    style={{ color: "var(--heri-ink-3)" }}
                   >
                     {formatNumber(totalTasks)} إجمالي
                   </span>
@@ -406,10 +406,10 @@ export default async function UserDetailPage({
                       className="rounded-full px-2.5 py-1 text-[11px] font-bold"
                       style={{
                         background:
-                          "color-mix(in srgb, var(--brand) 8%, transparent)",
+                          "color-mix(in srgb, var(--heri-ochre) 8%, transparent)",
                         border:
-                          "1px solid color-mix(in srgb, var(--brand) 18%, transparent)",
-                        color: "var(--text)",
+                          "1px solid color-mix(in srgb, var(--heri-ochre) 18%, transparent)",
+                        color: "var(--heri-ink)",
                       }}
                     >
                       {TASK_STATUS_AR[status] ?? status}: {formatNumber(count)}
@@ -417,7 +417,7 @@ export default async function UserDetailPage({
                   ))}
                 </div>
 
-                <ul className="divide-y divide-[var(--border)]">
+                <ul className="divide-y divide-[var(--heri-rule)]">
                   {recentTasks.map((t, i) => (
                     <li
                       key={t.id}
@@ -428,7 +428,7 @@ export default async function UserDetailPage({
                         <div className="flex items-center gap-2">
                           <span
                             className="truncate text-sm font-bold"
-                            style={{ color: "var(--text)" }}
+                            style={{ color: "var(--heri-ink)" }}
                           >
                             {t.title}
                           </span>
@@ -444,7 +444,7 @@ export default async function UserDetailPage({
                         </div>
                         <div
                           className="text-[11px]"
-                          style={{ color: "var(--text-muted)" }}
+                          style={{ color: "var(--heri-ink-3)" }}
                         >
                           {TASK_STATUS_AR[t.status] ?? t.status} •{" "}
                           {t.dueAt ? `استحقاق ${formatShortDate(t.dueAt)}` : "بدون موعد"}
@@ -463,24 +463,24 @@ export default async function UserDetailPage({
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
                   <h3
-                    className="flex items-center gap-2 text-sm font-extrabold"
-                    style={{ color: "var(--text)" }}
+                    className="flex items-center gap-2 text-sm font-semibold"
+                    style={{ color: "var(--heri-ink)" }}
                   >
                     <Sparkles
                       className="h-4 w-4"
-                      style={{ color: "var(--brand)" }}
+                      style={{ color: "var(--heri-ochre)" }}
                     />
                     إشارات منشورة
                   </h3>
                   <Link
                     href="/insights"
                     className="text-[11px] font-bold"
-                    style={{ color: "var(--brand)" }}
+                    style={{ color: "var(--heri-ochre)" }}
                   >
                     عرض الكل ←
                   </Link>
                 </header>
-                <ul className="divide-y divide-[var(--border)]">
+                <ul className="divide-y divide-[var(--heri-rule)]">
                   {insights.map((ins) => (
                     <li
                       key={ins.id}
@@ -490,14 +490,14 @@ export default async function UserDetailPage({
                         <StatusBadge status={ins.severity} />
                         <span
                           className="truncate text-sm font-bold"
-                          style={{ color: "var(--text)" }}
+                          style={{ color: "var(--heri-ink)" }}
                         >
                           {ins.title}
                         </span>
                       </div>
                       <div
                         className="mt-0.5 text-[11px]"
-                        style={{ color: "var(--text-muted)" }}
+                        style={{ color: "var(--heri-ink-3)" }}
                       >
                         {ins.module} • {formatRelative(ins.createdAt)}
                       </div>
@@ -514,18 +514,18 @@ export default async function UserDetailPage({
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
                   <h3
-                    className="flex items-center gap-2 text-sm font-extrabold"
-                    style={{ color: "var(--text)" }}
+                    className="flex items-center gap-2 text-sm font-semibold"
+                    style={{ color: "var(--heri-ink)" }}
                   >
                     <Trophy
                       className="h-4 w-4"
-                      style={{ color: "var(--brand)" }}
+                      style={{ color: "var(--heri-ochre)" }}
                     />
                     الأوسمة
                   </h3>
                   <span
                     className="text-[11px] font-mono"
-                    style={{ color: "var(--text-muted)" }}
+                    style={{ color: "var(--heri-ink-3)" }}
                   >
                     {earnedCount}/{totalCount}
                   </span>
@@ -541,11 +541,11 @@ export default async function UserDetailPage({
                         }`}
                         style={{
                           background: earned
-                            ? "linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%)"
-                            : "color-mix(in srgb, var(--text-muted) 12%, transparent)",
-                          color: earned ? "white" : "var(--text-muted)",
+                            ? "linear-gradient(135deg, var(--heri-ochre) 0%, var(--heri-copper) 100%)"
+                            : "color-mix(in srgb, var(--heri-ink-3) 12%, transparent)",
+                          color: earned ? "white" : "var(--heri-ink-3)",
                           boxShadow: earned
-                            ? "0 8px 24px -8px var(--brand)"
+                            ? "0 8px 24px -8px var(--heri-ochre)"
                             : undefined,
                           opacity: earned ? 1 : 0.5,
                         }}
@@ -565,7 +565,7 @@ export default async function UserDetailPage({
                       >
                         <span
                           className="truncate font-bold"
-                          style={{ color: "var(--text)" }}
+                          style={{ color: "var(--heri-ink)" }}
                         >
                           {e.achievement.name}
                         </span>
@@ -588,12 +588,12 @@ export default async function UserDetailPage({
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
                   <h3
-                    className="flex items-center gap-2 text-sm font-extrabold"
-                    style={{ color: "var(--text)" }}
+                    className="flex items-center gap-2 text-sm font-semibold"
+                    style={{ color: "var(--heri-ink)" }}
                   >
                     <Brain
                       className="h-4 w-4"
-                      style={{ color: "var(--brand)" }}
+                      style={{ color: "var(--heri-ochre)" }}
                     />
                     توقعات منشورة
                   </h3>
@@ -604,23 +604,23 @@ export default async function UserDetailPage({
                       key={f.id}
                       className="rounded-lg px-2 py-1.5 text-[11px]"
                       style={{
-                        background: "color-mix(in srgb, var(--brand) 5%, transparent)",
+                        background: "color-mix(in srgb, var(--heri-ochre) 5%, transparent)",
                       }}
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span
                           className="truncate font-bold"
-                          style={{ color: "var(--text)" }}
+                          style={{ color: "var(--heri-ink)" }}
                         >
                           {f.productLabel}
                         </span>
-                        <span className="font-mono text-[10px]" style={{ color: "var(--text-muted)" }}>
+                        <span className="font-mono text-[10px]" style={{ color: "var(--heri-ink-3)" }}>
                           {Math.round(f.confidence * 100)}٪
                         </span>
                       </div>
                       <div
                         className="font-mono text-[10px]"
-                        style={{ color: "var(--text-muted)" }}
+                        style={{ color: "var(--heri-ink-3)" }}
                       >
                         {f.source.code} → {f.target.code}
                       </div>
@@ -635,12 +635,12 @@ export default async function UserDetailPage({
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
                   <h3
-                    className="flex items-center gap-2 text-sm font-extrabold"
-                    style={{ color: "var(--text)" }}
+                    className="flex items-center gap-2 text-sm font-semibold"
+                    style={{ color: "var(--heri-ink)" }}
                   >
                     <Wallet
                       className="h-4 w-4"
-                      style={{ color: "var(--brand)" }}
+                      style={{ color: "var(--heri-ochre)" }}
                     />
                     حركات مالية
                   </h3>
@@ -656,19 +656,19 @@ export default async function UserDetailPage({
                         <div className="min-w-0">
                           <div
                             className="truncate font-bold"
-                            style={{ color: "var(--text)" }}
+                            style={{ color: "var(--heri-ink)" }}
                           >
                             {t.description ?? t.category}
                           </div>
                           <div
                             className="font-mono text-[10px]"
-                            style={{ color: "var(--text-muted)" }}
+                            style={{ color: "var(--heri-ink-3)" }}
                           >
                             {t.company.code} • {formatShortDate(t.occurredAt)}
                           </div>
                         </div>
                         <span
-                          className="font-mono font-black"
+                          className="font-mono font-bold"
                           style={{ color: isIncome ? "#0a8e54" : "#c0392b" }}
                         >
                           {isIncome ? "+" : "−"}
@@ -684,12 +684,12 @@ export default async function UserDetailPage({
             {/* Quick facts */}
             <section className="card card-pad anim-fade-up">
               <h3
-                className="mb-3 flex items-center gap-2 text-sm font-extrabold"
-                style={{ color: "var(--text)" }}
+                className="mb-3 flex items-center gap-2 text-sm font-semibold"
+                style={{ color: "var(--heri-ink)" }}
               >
                 <Building2
                   className="h-4 w-4"
-                  style={{ color: "var(--brand)" }}
+                  style={{ color: "var(--heri-ochre)" }}
                 />
                 البطاقة الوظيفية
               </h3>
@@ -735,17 +735,17 @@ function Fact({
   link?: string;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-[var(--border)] pb-1.5 last:border-b-0">
-      <dt style={{ color: "var(--text-muted)" }}>{label}</dt>
+    <div className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
+      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
       <dd
         className="text-end font-bold"
-        style={{ color: "var(--text)" }}
+        style={{ color: "var(--heri-ink)" }}
       >
         {link ? (
           <Link
             href={link}
             className="hover:underline"
-            style={{ color: "var(--brand)" }}
+            style={{ color: "var(--heri-ochre)" }}
           >
             {value}
           </Link>

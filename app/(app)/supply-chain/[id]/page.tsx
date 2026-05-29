@@ -134,7 +134,7 @@ export default async function ForecastDetailPage({
                 <div className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-80">
                   المصدر
                 </div>
-                <div className="mt-1 text-2xl font-black">
+                <div className="mt-1 text-2xl font-bold">
                   {f.source.name}
                 </div>
                 <div className="font-mono text-xs opacity-90">
@@ -147,34 +147,34 @@ export default async function ForecastDetailPage({
             <div className="flex flex-col items-center justify-center px-2">
               <div
                 className="mb-1 text-[10px] font-bold uppercase tracking-widest"
-                style={{ color: "var(--text-muted)" }}
+                style={{ color: "var(--heri-ink-3)" }}
               >
                 الطلب المتوقع
               </div>
               <div
-                className="font-mono text-2xl font-black"
-                style={{ color: "var(--text)" }}
+                className="font-mono text-2xl font-bold"
+                style={{ color: "var(--heri-ink)" }}
               >
                 {formatNumber(f.predictedDemand)}
               </div>
               <div
                 className="text-xs font-bold"
-                style={{ color: "var(--accent)" }}
+                style={{ color: "var(--heri-copper)" }}
               >
                 {f.unit}
               </div>
               <div className="my-2 flex items-center gap-1">
                 <span
                   className="h-2 w-2 rounded-full anim-pulse-ring"
-                  style={{ background: "var(--brand)" }}
+                  style={{ background: "var(--heri-ochre)" }}
                 />
                 <ArrowRight
                   className="h-8 w-8 anim-fade-up"
-                  style={{ color: "var(--brand)" }}
+                  style={{ color: "var(--heri-ochre)" }}
                 />
                 <span
                   className="h-2 w-2 rounded-full anim-pulse-ring"
-                  style={{ background: "var(--accent)" }}
+                  style={{ background: "var(--heri-copper)" }}
                 />
               </div>
               <StatusBadge status={f.status} />
@@ -198,7 +198,7 @@ export default async function ForecastDetailPage({
                 <div className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-80">
                   الوجهة
                 </div>
-                <div className="mt-1 text-2xl font-black">
+                <div className="mt-1 text-2xl font-bold">
                   {f.target.name}
                 </div>
                 <div className="font-mono text-xs opacity-90">
@@ -242,17 +242,17 @@ export default async function ForecastDetailPage({
         <section className="card card-pad anim-fade-up">
           <header className="mb-2 flex items-center justify-between">
             <h3
-              className="flex items-center gap-2 text-sm font-extrabold"
-              style={{ color: "var(--text)" }}
+              className="flex items-center gap-2 text-sm font-semibold"
+              style={{ color: "var(--heri-ink)" }}
             >
               <Target
                 className="h-4 w-4"
-                style={{ color: "var(--brand)" }}
+                style={{ color: "var(--heri-ochre)" }}
               />
               مؤشر ثقة المحرك
             </h3>
             <span
-              className="text-xs font-mono font-black"
+              className="text-xs font-mono font-bold"
               style={{
                 color:
                   confTone === "emerald"
@@ -269,7 +269,7 @@ export default async function ForecastDetailPage({
             className="h-3 w-full overflow-hidden rounded-full"
             style={{
               background:
-                "color-mix(in srgb, var(--text-muted) 14%, transparent)",
+                "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
             }}
           >
             <div
@@ -278,7 +278,7 @@ export default async function ForecastDetailPage({
                 width: `${conf * 100}%`,
                 background:
                   confTone === "emerald"
-                    ? "linear-gradient(90deg, #0a8e54 0%, var(--accent) 100%)"
+                    ? "linear-gradient(90deg, #0a8e54 0%, var(--heri-copper) 100%)"
                     : confTone === "amber"
                       ? "linear-gradient(90deg, #b06a1a 0%, #f5b341 100%)"
                       : "linear-gradient(90deg, #c0392b 0%, #fca5a5 100%)",
@@ -294,7 +294,7 @@ export default async function ForecastDetailPage({
           </div>
           <div
             className="mt-1 text-[10px]"
-            style={{ color: "var(--text-muted)" }}
+            style={{ color: "var(--heri-ink-3)" }}
           >
             {confTone === "emerald"
               ? "ثقة عالية — يوصى بالاعتماد المباشر"
@@ -310,18 +310,18 @@ export default async function ForecastDetailPage({
             {/* Signal */}
             <section className="card card-pad anim-fade-up">
               <h3
-                className="mb-2 flex items-center gap-2 text-sm font-extrabold"
-                style={{ color: "var(--text)" }}
+                className="mb-2 flex items-center gap-2 text-sm font-semibold"
+                style={{ color: "var(--heri-ink)" }}
               >
                 <Brain
                   className="h-4 w-4"
-                  style={{ color: "var(--brand)" }}
+                  style={{ color: "var(--heri-ochre)" }}
                 />
                 الإشارة المحفّزة
               </h3>
               <p
                 className="whitespace-pre-line text-sm leading-relaxed"
-                style={{ color: "var(--text)" }}
+                style={{ color: "var(--heri-ink)" }}
               >
                 {f.signal}
               </p>
@@ -332,12 +332,12 @@ export default async function ForecastDetailPage({
               <section className="card card-pad anim-fade-up">
                 <header className="mb-3 flex items-center justify-between">
                   <h3
-                    className="flex items-center gap-2 text-sm font-extrabold"
-                    style={{ color: "var(--text)" }}
+                    className="flex items-center gap-2 text-sm font-semibold"
+                    style={{ color: "var(--heri-ink)" }}
                   >
                     <TrendingUp
                       className="h-4 w-4"
-                      style={{ color: "var(--brand)" }}
+                      style={{ color: "var(--heri-ochre)" }}
                     />
                     توقعات أخرى من تصنيف{" "}
                     {CATEGORY_AR[f.category] ?? f.category}
@@ -345,12 +345,12 @@ export default async function ForecastDetailPage({
                   <Link
                     href="/supply-chain"
                     className="text-[11px] font-bold"
-                    style={{ color: "var(--brand)" }}
+                    style={{ color: "var(--heri-ochre)" }}
                   >
                     كل التوقعات ←
                   </Link>
                 </header>
-                <ul className="divide-y divide-[var(--border)]">
+                <ul className="divide-y divide-[var(--heri-rule)]">
                   {related.map((r, i) => (
                     <li
                       key={r.id}
@@ -365,22 +365,22 @@ export default async function ForecastDetailPage({
                           <div className="flex min-w-0 items-center gap-2">
                             <span
                               className="truncate text-sm font-bold"
-                              style={{ color: "var(--text)" }}
+                              style={{ color: "var(--heri-ink)" }}
                             >
                               {r.productLabel}
                             </span>
                             <StatusBadge status={r.status} />
                           </div>
                           <span
-                            className="font-mono text-xs font-black"
-                            style={{ color: "var(--text)" }}
+                            className="font-mono text-xs font-bold"
+                            style={{ color: "var(--heri-ink)" }}
                           >
                             {formatNumber(r.predictedDemand)} {r.unit}
                           </span>
                         </div>
                         <div
                           className="text-[11px] font-mono"
-                          style={{ color: "var(--text-muted)" }}
+                          style={{ color: "var(--heri-ink-3)" }}
                         >
                           {r.source.code} → {r.target.code} •{" "}
                           {Math.round(r.confidence * 100)}٪ ثقة
@@ -397,12 +397,12 @@ export default async function ForecastDetailPage({
             {/* Period */}
             <section className="card card-pad anim-fade-up">
               <h3
-                className="mb-3 flex items-center gap-2 text-sm font-extrabold"
-                style={{ color: "var(--text)" }}
+                className="mb-3 flex items-center gap-2 text-sm font-semibold"
+                style={{ color: "var(--heri-ink)" }}
               >
                 <Calendar
                   className="h-4 w-4"
-                  style={{ color: "var(--brand)" }}
+                  style={{ color: "var(--heri-ochre)" }}
                 />
                 الفترة الزمنية
               </h3>
@@ -410,31 +410,31 @@ export default async function ForecastDetailPage({
                 <div>
                   <div
                     className="text-[10px] font-bold uppercase tracking-widest"
-                    style={{ color: "var(--text-muted)" }}
+                    style={{ color: "var(--heri-ink-3)" }}
                   >
                     من
                   </div>
                   <div
                     className="font-bold"
-                    style={{ color: "var(--text)" }}
+                    style={{ color: "var(--heri-ink)" }}
                   >
                     {formatShortDate(f.periodStart)}
                   </div>
                 </div>
                 <ArrowRight
                   className="h-4 w-4"
-                  style={{ color: "var(--text-muted)" }}
+                  style={{ color: "var(--heri-ink-3)" }}
                 />
                 <div className="text-end">
                   <div
                     className="text-[10px] font-bold uppercase tracking-widest"
-                    style={{ color: "var(--text-muted)" }}
+                    style={{ color: "var(--heri-ink-3)" }}
                   >
                     إلى
                   </div>
                   <div
                     className="font-bold"
-                    style={{ color: "var(--text)" }}
+                    style={{ color: "var(--heri-ink)" }}
                   >
                     {formatShortDate(f.periodEnd)}
                   </div>
@@ -442,7 +442,7 @@ export default async function ForecastDetailPage({
               </div>
               <div
                 className="text-[11px] text-center"
-                style={{ color: "var(--text-muted)" }}
+                style={{ color: "var(--heri-ink-3)" }}
               >
                 {formatNumber(periodDays)} يوم • متوسط{" "}
                 {formatNumber(f.predictedDemand / periodDays)} {f.unit}/يوم
@@ -453,18 +453,18 @@ export default async function ForecastDetailPage({
             {f.generatedBy ? (
               <section className="card card-pad anim-fade-up">
                 <h3
-                  className="mb-3 flex items-center gap-2 text-sm font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  className="mb-3 flex items-center gap-2 text-sm font-semibold"
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   <UserIcon
                     className="h-4 w-4"
-                    style={{ color: "var(--brand)" }}
+                    style={{ color: "var(--heri-ochre)" }}
                   />
                   مَن أصدر التوقع
                 </h3>
                 <Link
                   href={`/users/${f.generatedBy.id}`}
-                  className="flex items-center gap-3 rounded-xl p-2 transition hover:bg-[var(--brand-soft)]"
+                  className="flex items-center gap-3 rounded-xl p-2 transition hover:bg-[var(--heri-cream-2)]"
                 >
                   {(() => {
                     const r = rankById(f.generatedBy.rank);
@@ -480,14 +480,14 @@ export default async function ForecastDetailPage({
                   })()}
                   <div className="min-w-0 flex-1">
                     <div
-                      className="truncate text-sm font-extrabold"
-                      style={{ color: "var(--text)" }}
+                      className="truncate text-sm font-semibold"
+                      style={{ color: "var(--heri-ink)" }}
                     >
                       {f.generatedBy.name}
                     </div>
                     <div
                       className="text-[11px]"
-                      style={{ color: "var(--text-muted)" }}
+                      style={{ color: "var(--heri-ink-3)" }}
                     >
                       {f.generatedBy.role} •{" "}
                       <span className="font-mono">
@@ -500,18 +500,18 @@ export default async function ForecastDetailPage({
             ) : (
               <section className="card card-pad anim-fade-up">
                 <h3
-                  className="mb-2 flex items-center gap-2 text-sm font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  className="mb-2 flex items-center gap-2 text-sm font-semibold"
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   <Brain
                     className="h-4 w-4"
-                    style={{ color: "var(--brand)" }}
+                    style={{ color: "var(--heri-ochre)" }}
                   />
                   محرك تلقائي
                 </h3>
                 <p
                   className="text-[11px]"
-                  style={{ color: "var(--text-muted)" }}
+                  style={{ color: "var(--heri-ink-3)" }}
                 >
                   هذا التوقع صادر عن المحرك التنبؤي للنظام دون تدخل بشري.
                 </p>
@@ -521,8 +521,8 @@ export default async function ForecastDetailPage({
             {/* Meta */}
             <section className="card card-pad anim-fade-up">
               <h3
-                className="mb-3 text-sm font-extrabold"
-                style={{ color: "var(--text)" }}
+                className="mb-3 text-sm font-semibold"
+                style={{ color: "var(--heri-ink)" }}
               >
                 البطاقة
               </h3>
@@ -557,17 +557,17 @@ function Fact({
   link?: string;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-[var(--border)] pb-1.5 last:border-b-0">
-      <dt style={{ color: "var(--text-muted)" }}>{label}</dt>
+    <div className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
+      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
       <dd
         className="text-end font-bold"
-        style={{ color: "var(--text)" }}
+        style={{ color: "var(--heri-ink)" }}
       >
         {link ? (
           <Link
             href={link}
             className="hover:underline"
-            style={{ color: "var(--brand)" }}
+            style={{ color: "var(--heri-ochre)" }}
           >
             {value}
           </Link>

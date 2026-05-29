@@ -10,8 +10,9 @@ import {
   Calendar,
   ChevronsRight,
 } from "lucide-react";
-import { Topbar } from "@/components/Topbar";
-import { KpiCard } from "@/components/KpiCard";
+import { PageHeader } from "@/components/PageHeader";
+import { PageContainer } from "@/components/PageContainer";
+import { HeriKpi } from "@/components/HeriKpi";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PinButton } from "@/components/PinButton";
 import { prisma } from "@/lib/db";
@@ -23,7 +24,6 @@ import {
   STATUS_AR,
   VERTICALS_AR,
 } from "@/lib/utils";
-import { getCompanyBrand } from "@/lib/companyBrand";
 
 const STAGE_FLOW = ["INTAKE", "ACCELERATING", "GRADUATED"] as const;
 
@@ -59,12 +59,11 @@ export default async function EducationDetailPage({
   const stageIdx = STAGE_FLOW.indexOf(program.stage as (typeof STAGE_FLOW)[number]);
   const stalled = program.stage === "STALLED";
 
-  const brand = getCompanyBrand(program.company.code);
   const pinned = await isPinned("PROGRAM", program.id);
 
   return (
     <>
-      <Topbar
+      <PageHeader
         eyebrow="حاضنة The Tank"
         title={program.name}
         subtitle={
@@ -72,8 +71,8 @@ export default async function EducationDetailPage({
         }
         actions={
           <div className="flex items-center gap-2">
-            <Link href="/education" className="btn-ghost">
-              <ArrowLeft className="h-4 w-4" />
+            <Link href="/education" className="heri-btn heri-btn-ghost" style={{ fontSize: 13 }}>
+              <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
               البرامج
             </Link>
             <PinButton
@@ -91,145 +90,120 @@ export default async function EducationDetailPage({
         }
       />
 
-      <div className="flex-1 space-y-6 p-6">
-        {/* Brand cover */}
-        <section
-          className="relative overflow-hidden rounded-2xl p-6 text-white anim-fade-up"
-          style={{ background: brand.gradient, minHeight: "180px" }}
-        >
-          <div
-            className="absolute inset-0 opacity-20 anim-grad"
-            style={{
-              background:
-                "linear-gradient(120deg, transparent 0%, white 50%, transparent 100%)",
-            }}
-            aria-hidden
-          />
-          <div className="relative flex flex-wrap items-start justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div
-                className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl anim-pop"
+      <PageContainer>
+        {/* Hero strip — Heritage Modern cream plinth */}
+        <section className="heri-hero" style={{ padding: "20px 24px" }}>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={VERTICAL_TONE[program.vertical] ?? "badge-slate"}>
+                  {ar(VERTICALS_AR, program.vertical)}
+                </span>
+                <StatusBadge status={program.stage} />
+                <Link
+                  href={`/companies/${program.companyId}`}
+                  className="heri-pill heri-pill-info"
+                  style={{ textDecoration: "none" }}
+                >
+                  {program.company.name}
+                </Link>
+              </div>
+              <h2
+                className="mt-2"
                 style={{
-                  background: "rgba(255,255,255,.15)",
-                  border: "1px solid rgba(255,255,255,.35)",
-                  backdropFilter: "blur(6px)",
+                  fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
+                  fontSize: "clamp(22px,2vw,30px)",
+                  fontWeight: 500,
+                  color: "var(--heri-ink)",
+                  letterSpacing: "-0.012em",
+                  lineHeight: 1.15,
                 }}
               >
-                <Rocket className="h-10 w-10" />
+                {program.name}
+              </h2>
+              {program.nameEn ? (
+                <p
+                  className="mt-1"
+                  dir="ltr"
+                  style={{ fontSize: 12.5, color: "var(--heri-ink-3)" }}
+                >
+                  {program.nameEn}
+                </p>
+              ) : null}
+              <div className="mt-3 flex flex-wrap gap-3 heri-number-mono" style={{ fontSize: 11.5, color: "var(--heri-ink-3)" }}>
+                <span className="inline-flex items-center gap-1.5">
+                  <Users2 className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
+                  {program.founder}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
+                  فوج {program.cohort}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Users2 className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
+                  {formatNumber(program.teamSize)} فرد
+                </span>
               </div>
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className={VERTICAL_TONE[program.vertical] ?? "badge-slate"}
-                  >
-                    {ar(VERTICALS_AR, program.vertical)}
-                  </span>
-                  <StatusBadge status={program.stage} />
-                  <Link
-                    href={`/companies/${program.companyId}`}
-                    className="rounded-full px-2 py-0.5 text-[10px] font-bold"
-                    style={{
-                      background: "rgba(255,255,255,.2)",
-                      border: "1px solid rgba(255,255,255,.3)",
-                    }}
-                  >
-                    {program.company.name}
-                  </Link>
-                </div>
-                <h2 className="mt-1 text-2xl font-black md:text-3xl">
-                  {program.name}
-                </h2>
-                {program.nameEn ? (
-                  <p className="text-sm opacity-90" dir="ltr">
-                    {program.nameEn}
-                  </p>
-                ) : null}
-                <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
-                  <span
-                    className="flex items-center gap-1.5 rounded-full px-3 py-1 font-bold"
-                    style={{
-                      background: "rgba(255,255,255,.15)",
-                      border: "1px solid rgba(255,255,255,.25)",
-                    }}
-                  >
-                    <Users2 className="h-3 w-3" />
-                    {program.founder}
-                  </span>
-                  <span
-                    className="flex items-center gap-1.5 rounded-full px-3 py-1 font-bold"
-                    style={{
-                      background: "rgba(255,255,255,.15)",
-                      border: "1px solid rgba(255,255,255,.25)",
-                    }}
-                  >
-                    <Calendar className="h-3 w-3" />
-                    فوج {program.cohort}
-                  </span>
-                  <span
-                    className="flex items-center gap-1.5 rounded-full px-3 py-1 font-bold"
-                    style={{
-                      background: "rgba(255,255,255,.15)",
-                      border: "1px solid rgba(255,255,255,.25)",
-                    }}
-                  >
-                    <Users2 className="h-3 w-3" />
-                    {formatNumber(program.teamSize)} فرد
-                  </span>
-                </div>
-              </div>
+            </div>
+            <div
+              className="flex h-16 w-16 shrink-0 items-center justify-center"
+              style={{
+                background: "var(--heri-cream-2)",
+                border: "1px solid var(--heri-rule-strong)",
+                color: "var(--heri-ochre)",
+              }}
+            >
+              <Rocket className="h-8 w-8" strokeWidth={1.4} />
             </div>
           </div>
         </section>
 
-        {/* KPIs */}
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <KpiCard
+        {/* KPI band */}
+        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-3">
+          <HeriKpi
             label="التمويل"
-            value={formatMoney(program.fundingJod)}
-            icon={Banknote}
-            tone="amber"
+            raw={program.fundingJod}
+            kind="money"
+            hint={`فوج ${program.cohort}`}
           />
-          <KpiCard
+          <HeriKpi
             label="حجم الفريق"
-            value={formatNumber(program.teamSize)}
-            icon={Users2}
-            tone="indigo"
+            raw={program.teamSize}
+            kind="number"
+            hint="أفراد"
           />
-          <KpiCard
-            label="القطاع"
-            value={ar(VERTICALS_AR, program.vertical)}
-            icon={Sparkles}
-            tone="violet"
-          />
-          <KpiCard
-            label="المرحلة"
-            value={ar(STATUS_AR, program.stage)}
-            icon={Rocket}
-            tone={stalled ? "red" : "emerald"}
+          <HeriKpi
+            label="نسبة الإنجاز"
+            raw={stalled ? 0 : (Math.max(0, stageIdx + 1) / STAGE_FLOW.length)}
+            kind="percent"
+            accent={stalled ? "var(--heri-terracotta)" : "var(--heri-teal)"}
+            hint={ar(STATUS_AR, program.stage)}
           />
         </section>
 
         {/* Stage progression */}
-        <section className="card card-pad anim-fade-up">
+        <section className="heri-card">
           <header className="mb-4 flex items-center justify-between">
-            <h3
-              className="flex items-center gap-2 text-sm font-extrabold"
-              style={{ color: "var(--text)" }}
-            >
-              <ChevronsRight
-                className="h-4 w-4"
-                style={{ color: "var(--brand)" }}
-              />
-              مسيرة المشروع
-            </h3>
-            {stalled ? <span className="badge-red">متعثر</span> : null}
+            <div>
+              <div className="heri-eyebrow heri-eyebrow-ink">المسيرة</div>
+              <h3
+                className="mt-1 flex items-center gap-2"
+                style={{
+                  fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
+                  fontSize: 16,
+                  fontWeight: 500,
+                  color: "var(--heri-ink)",
+                }}
+              >
+                <ChevronsRight className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
+                مسيرة المشروع
+              </h3>
+            </div>
+            {stalled ? <span className="heri-pill heri-pill-critical">متعثر</span> : null}
           </header>
 
           {stalled ? (
-            <p
-              className="text-xs"
-              style={{ color: "var(--text-muted)" }}
-            >
+            <p className="text-xs" style={{ color: "var(--heri-ink-3)" }}>
               المشروع في حالة تعثر — يحتاج تدخل من فريق الحاضنة لإعادته للمسار.
             </p>
           ) : (
@@ -243,26 +217,25 @@ export default async function EducationDetailPage({
                     className="relative flex flex-1 flex-col items-center"
                   >
                     <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-black transition ${
-                        reached ? "anim-pop" : ""
-                      }`}
+                      className="flex h-12 w-12 items-center justify-center heri-number-mono"
                       style={{
                         background: reached
-                          ? "linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%)"
-                          : "color-mix(in srgb, var(--text-muted) 14%, transparent)",
-                        color: reached ? "white" : "var(--text-muted)",
-                        transform: isCurrent ? "scale(1.1)" : undefined,
-                        boxShadow: isCurrent
-                          ? "0 14px 36px -10px var(--brand)"
-                          : undefined,
+                          ? "var(--heri-ochre)"
+                          : "var(--heri-cream-2)",
+                        border: `1px solid ${reached ? "var(--heri-ochre)" : "var(--heri-rule-strong)"}`,
+                        color: reached ? "var(--heri-ink)" : "var(--heri-ink-3)",
+                        fontSize: 16,
+                        fontWeight: 600,
+                        transform: isCurrent ? "scale(1.08)" : undefined,
+                        transition: "transform .25s var(--ease-out-quart)",
                       }}
                     >
                       {i + 1}
                     </div>
                     <div
-                      className="mt-2 text-center text-[11px] font-bold"
+                      className="mt-2 text-center text-[11px] font-semibold"
                       style={{
-                        color: reached ? "var(--text)" : "var(--text-muted)",
+                        color: reached ? "var(--heri-ink)" : "var(--heri-ink-3)",
                       }}
                     >
                       {ar(STATUS_AR, stage)}
@@ -273,11 +246,11 @@ export default async function EducationDetailPage({
                         style={{
                           insetInlineStart: "calc(50% + 1.5rem)",
                           width: "calc(100% - 3rem)",
-                          height: "2px",
+                          height: "1px",
                           background:
                             stageIdx >= 0 && i < stageIdx
-                              ? "linear-gradient(90deg, var(--brand) 0%, var(--accent) 100%)"
-                              : "color-mix(in srgb, var(--text-muted) 18%, transparent)",
+                              ? "var(--heri-ochre)"
+                              : "var(--heri-rule)",
                           transition: "background .6s ease",
                         }}
                       />
@@ -290,19 +263,25 @@ export default async function EducationDetailPage({
         </section>
 
         {/* Two columns */}
-        <div className="grid gap-6 lg:grid-cols-[1fr,320px]">
+        <div className="grid gap-6 lg:grid-cols-[1fr,320px] heri-stagger">
           <div className="space-y-6">
             {program.description ? (
-              <section className="card card-pad anim-fade-up">
+              <section className="heri-card">
+                <div className="heri-eyebrow heri-eyebrow-ink">نظرة عامة</div>
                 <h3
-                  className="mb-2 text-sm font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  className="mt-1 mb-2"
+                  style={{
+                    fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
+                    fontSize: 16,
+                    fontWeight: 500,
+                    color: "var(--heri-ink)",
+                  }}
                 >
-                  نظرة عامة
+                  المشروع باختصار
                 </h3>
                 <p
                   className="text-sm leading-relaxed"
-                  style={{ color: "var(--text)" }}
+                  style={{ color: "var(--heri-ink)" }}
                 >
                   {program.description}
                 </p>
@@ -310,32 +289,36 @@ export default async function EducationDetailPage({
             ) : null}
 
             {related.length > 0 ? (
-              <section className="card card-pad anim-fade-up">
+              <section className="heri-card">
                 <header className="mb-3 flex items-center justify-between">
-                  <h3
-                    className="flex items-center gap-2 text-sm font-extrabold"
-                    style={{ color: "var(--text)" }}
-                  >
-                    <GraduationCap
-                      className="h-4 w-4"
-                      style={{ color: "var(--brand)" }}
-                    />
-                    برامج زميلة
-                  </h3>
+                  <div>
+                    <div className="heri-eyebrow heri-eyebrow-ink">برامج زميلة</div>
+                    <h3
+                      className="mt-1 flex items-center gap-2"
+                      style={{
+                        fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
+                        fontSize: 16,
+                        fontWeight: 500,
+                        color: "var(--heri-ink)",
+                      }}
+                    >
+                      <GraduationCap className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
+                      من نفس المظلة
+                    </h3>
+                  </div>
                   <Link
                     href="/education"
-                    className="text-[11px] font-bold"
-                    style={{ color: "var(--brand)" }}
+                    className="heri-eyebrow"
+                    style={{ color: "var(--heri-ochre)", textDecoration: "none" }}
                   >
                     كل البرامج ←
                   </Link>
                 </header>
-                <ul className="divide-y divide-[var(--border)]">
-                  {related.map((r, i) => (
+                <ul className="divide-y divide-[var(--heri-rule)]">
+                  {related.map((r) => (
                     <li
                       key={r.id}
-                      className="flex items-center justify-between gap-3 py-2.5 anim-fade-up"
-                      style={{ animationDelay: `${i * 30}ms` }}
+                      className="flex items-center justify-between gap-3 py-2.5"
                     >
                       <Link
                         href={`/education/${r.id}`}
@@ -343,31 +326,26 @@ export default async function EducationDetailPage({
                       >
                         <div className="flex items-center gap-2">
                           <span
-                            className="truncate font-bold"
-                            style={{ color: "var(--text)" }}
+                            className="truncate font-semibold"
+                            style={{ color: "var(--heri-ink)", fontSize: 13 }}
                           >
                             {r.name}
                           </span>
-                          <span
-                            className={
-                              VERTICAL_TONE[r.vertical] ?? "badge-slate"
-                            }
-                          >
+                          <span className={VERTICAL_TONE[r.vertical] ?? "badge-slate"}>
                             {ar(VERTICALS_AR, r.vertical)}
                           </span>
                         </div>
                         <div
-                          className="text-[11px]"
-                          style={{ color: "var(--text-muted)" }}
+                          className="heri-number-mono mt-0.5"
+                          style={{ fontSize: 10.5, color: "var(--heri-ink-3)" }}
                         >
-                          {r.founder} • فوج {r.cohort} •{" "}
-                          {formatNumber(r.teamSize)} فرد
+                          {r.founder} • فوج {r.cohort} • {formatNumber(r.teamSize)} فرد
                         </div>
                       </Link>
                       <div className="flex items-center gap-2">
                         <span
-                          className="font-mono text-xs font-bold"
-                          style={{ color: "var(--text)" }}
+                          className="heri-number-mono font-semibold"
+                          style={{ color: "var(--heri-ink)", fontSize: 12 }}
                         >
                           {formatMoney(r.fundingJod)}
                         </span>
@@ -381,32 +359,26 @@ export default async function EducationDetailPage({
           </div>
 
           <aside className="space-y-6">
-            <section className="card card-pad anim-fade-up">
+            <section className="heri-card">
+              <div className="heri-eyebrow heri-eyebrow-ink">البطاقة</div>
               <h3
-                className="mb-3 text-sm font-extrabold"
-                style={{ color: "var(--text)" }}
+                className="mt-1 mb-3"
+                style={{
+                  fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
+                  fontSize: 16,
+                  fontWeight: 500,
+                  color: "var(--heri-ink)",
+                }}
               >
                 بطاقة المشروع
               </h3>
               <dl className="space-y-2 text-xs">
                 <Fact label="المؤسس" value={program.founder} />
-                <Fact
-                  label="القطاع"
-                  value={ar(VERTICALS_AR, program.vertical)}
-                />
-                <Fact
-                  label="المرحلة"
-                  value={ar(STATUS_AR, program.stage)}
-                />
+                <Fact label="القطاع" value={ar(VERTICALS_AR, program.vertical)} />
+                <Fact label="المرحلة" value={ar(STATUS_AR, program.stage)} />
                 <Fact label="الفوج" value={program.cohort} />
-                <Fact
-                  label="حجم الفريق"
-                  value={`${formatNumber(program.teamSize)} فرد`}
-                />
-                <Fact
-                  label="التمويل"
-                  value={formatMoney(program.fundingJod)}
-                />
+                <Fact label="حجم الفريق" value={`${formatNumber(program.teamSize)} فرد`} />
+                <Fact label="التمويل" value={formatMoney(program.fundingJod)} />
                 <Fact
                   label="مظلة الجامعة"
                   value={program.company.name}
@@ -416,7 +388,7 @@ export default async function EducationDetailPage({
             </section>
           </aside>
         </div>
-      </div>
+      </PageContainer>
     </>
   );
 }
@@ -431,17 +403,17 @@ function Fact({
   link?: string;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-[var(--border)] pb-1.5 last:border-b-0">
-      <dt style={{ color: "var(--text-muted)" }}>{label}</dt>
+    <div className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
+      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
       <dd
-        className="text-end font-bold"
-        style={{ color: "var(--text)" }}
+        className="text-end font-semibold"
+        style={{ color: "var(--heri-ink)" }}
       >
         {link ? (
           <Link
             href={link}
             className="hover:underline"
-            style={{ color: "var(--brand)" }}
+            style={{ color: "var(--heri-ochre)" }}
           >
             {value}
           </Link>

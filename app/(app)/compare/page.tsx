@@ -1,3 +1,5 @@
+
+export const dynamic = "force-dynamic";
 // Side-by-side company comparison view.
 // Pick 2 companies via search-param and see their metrics, ESG, trend, and
 // operational footprint laid out in matched columns for at-a-glance contrast.
@@ -106,7 +108,7 @@ export default async function ComparePage({
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <CompanyPicker companies={companies} current={aId} other={bId} otherKey="b" mineKey="a" label={ar ? "الشركة A" : "Company A"} />
-            <ArrowLeftRight className="h-4 w-4" style={{ color: "var(--text-muted)" }} />
+            <ArrowLeftRight className="h-4 w-4" style={{ color: "var(--heri-ink-3)" }} />
             <CompanyPicker companies={companies} current={bId} other={aId} otherKey="a" mineKey="b" label={ar ? "الشركة B" : "Company B"} />
           </div>
         }
@@ -114,7 +116,7 @@ export default async function ComparePage({
 
       <div className="mx-auto max-w-[1440px] space-y-6 px-6 py-6">
         {!A || !B || !dA || !dB || !brandA || !brandB ? (
-          <div className="card card-pad text-center text-sm" style={{ color: "var(--text-muted)" }}>
+          <div className="card card-pad text-center text-sm" style={{ color: "var(--heri-ink-3)" }}>
             {ar ? "اختر شركتين لرؤية المقارنة." : "Pick two companies to see the comparison."}
           </div>
         ) : (
@@ -143,10 +145,10 @@ export default async function ComparePage({
             <section className="card card-pad">
               <div className="mb-3 flex items-center justify-between">
                 <div>
-                  <h3 className="text-[14px] font-extrabold" style={{ color: "var(--text)" }}>
+                  <h3 className="text-[14px] font-semibold" style={{ color: "var(--heri-ink)" }}>
                     {ar ? "اتجاه الإيرادات (12 شهر)" : "Revenue trend (12 months)"}
                   </h3>
-                  <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                  <p className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
                     {ar ? "تراكب لمنحنيي الشركتين" : "Overlay of both companies' curves"}
                   </p>
                 </div>
@@ -158,7 +160,7 @@ export default async function ComparePage({
                       className="block h-2 w-4 rounded-full"
                       style={{ background: brandA.accent }}
                     />
-                    <span style={{ color: "var(--text)" }}>{A.name}</span>
+                    <span style={{ color: "var(--heri-ink)" }}>{A.name}</span>
                   </div>
                   <AreaLineChart
                     data={dA.trend}
@@ -173,7 +175,7 @@ export default async function ComparePage({
                       className="block h-2 w-4 rounded-full"
                       style={{ background: brandB.accent }}
                     />
-                    <span style={{ color: "var(--text)" }}>{B.name}</span>
+                    <span style={{ color: "var(--heri-ink)" }}>{B.name}</span>
                   </div>
                   <AreaLineChart
                     data={dB.trend}
@@ -195,7 +197,7 @@ export default async function ComparePage({
                   </div>
                 </div>
               </div>
-              <div className="divide-y" style={{ borderColor: "var(--border)" }}>
+              <div className="divide-y" style={{ borderColor: "var(--heri-rule)" }}>
                 <CompareRow
                   label={ar ? "القطاع" : "Sector"}
                   a={loc(SECTORS_AR, SECTORS_EN, lc, A.sector)}
@@ -271,16 +273,16 @@ export default async function ComparePage({
             {/* Quick links */}
             <div className="grid gap-3 md:grid-cols-2">
               <Link href={`/companies/${A.id}`} className="card card-hover card-pad flex items-center justify-between">
-                <span className="text-[12px] font-extrabold" style={{ color: "var(--text)" }}>
+                <span className="text-[12px] font-semibold" style={{ color: "var(--heri-ink)" }}>
                   {ar ? `ملف ${A.name} الكامل` : `${A.name} full profile`}
                 </span>
-                <ChevronLeft className="h-4 w-4 rtl:rotate-180" style={{ color: "var(--brand)" }} />
+                <ChevronLeft className="h-4 w-4 rtl:rotate-180" style={{ color: "var(--heri-ochre)" }} />
               </Link>
               <Link href={`/companies/${B.id}`} className="card card-hover card-pad flex items-center justify-between">
-                <span className="text-[12px] font-extrabold" style={{ color: "var(--text)" }}>
+                <span className="text-[12px] font-semibold" style={{ color: "var(--heri-ink)" }}>
                   {ar ? `ملف ${B.name} الكامل` : `${B.name} full profile`}
                 </span>
-                <ChevronLeft className="h-4 w-4 rtl:rotate-180" style={{ color: "var(--brand)" }} />
+                <ChevronLeft className="h-4 w-4 rtl:rotate-180" style={{ color: "var(--heri-ochre)" }} />
               </Link>
             </div>
           </>
@@ -301,7 +303,7 @@ function CompanyPicker({
   return (
     <form className="inline-flex items-center gap-1.5" method="get" action="/compare">
       {other ? <input type="hidden" name={otherKey} value={other} /> : null}
-      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--heri-ink-3)" }}>
         {label}
       </span>
       <select
@@ -339,8 +341,8 @@ function CompareRow({
     <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-5 py-2.5">
       <div className="text-end">
         <span
-          className={`font-mono text-[13px] tabular-nums ${winnerA ? "font-extrabold" : ""}`}
-          style={{ color: winnerA ? (brandA ?? "var(--brand)") : "var(--text)" }}
+          className={`font-mono text-[13px] tabular-nums ${winnerA ? "font-semibold" : ""}`}
+          style={{ color: winnerA ? (brandA ?? "var(--heri-ochre)") : "var(--heri-ink)" }}
         >
           {a}
         </span>
@@ -348,7 +350,7 @@ function CompareRow({
           <span className="ms-1.5 inline-flex h-1.5 w-1.5 rounded-full" style={{ background: brandA }} />
         ) : null}
       </div>
-      <span className="text-center text-[10px] font-extrabold uppercase tracking-[0.2em]" style={{ color: "var(--text-muted)" }}>
+      <span className="text-center text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--heri-ink-3)" }}>
         {label}
       </span>
       <div className="text-start">
@@ -356,8 +358,8 @@ function CompareRow({
           <span className="me-1.5 inline-flex h-1.5 w-1.5 rounded-full" style={{ background: brandB }} />
         ) : null}
         <span
-          className={`font-mono text-[13px] tabular-nums ${winnerB ? "font-extrabold" : ""}`}
-          style={{ color: winnerB ? (brandB ?? "var(--brand)") : "var(--text)" }}
+          className={`font-mono text-[13px] tabular-nums ${winnerB ? "font-semibold" : ""}`}
+          style={{ color: winnerB ? (brandB ?? "var(--heri-ochre)") : "var(--heri-ink)" }}
         >
           {b}
         </span>

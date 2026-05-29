@@ -1,20 +1,19 @@
 import Link from "next/link";
-import {
-  Wallet, Plus, Trash2, TrendingUp, TrendingDown, ArrowLeftRight,
-  Building2, Download, CircleDollarSign, Landmark,
-} from "lucide-react";
+import { Wallet, Plus } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageContainer } from "@/components/PageContainer";
-import { HeroPanel } from "@/components/exec/HeroPanel";
-import { MetricTile } from "@/components/exec/MetricTile";
+import { HeriKpi } from "@/components/HeriKpi";
 import { ExportMenu } from "@/components/ExportMenu";
 import { SectorPill } from "@/components/SectorPill";
 import { EmptyState } from "@/components/EmptyState";
-import { DeleteButton } from "@/components/DeleteButton";
+import { TransactionTable } from "@/components/finance/TransactionTable";
 import { getLocale } from "@/lib/i18n.server";
+import { getCurrentUser } from "@/lib/session";
+import { hasRole } from "@/lib/authz";
 import { prisma } from "@/lib/db";
 import { formatMoney, formatNumber, formatShortDate } from "@/lib/utils";
-import { deleteTransaction } from "./actions";
+
+export const dynamic = "force-dynamic";
 
 const KIND_LABEL: Record<string, { ar: string; en: string; tone: string }> = {
   REVENUE:  { ar: "إيراد",  en: "Revenue",  tone: "badge-emerald" },
@@ -26,6 +25,8 @@ export default async function FinancePage() {
   const locale = getLocale();
   const ar = locale === "ar";
   const lc: "ar" | "en" = ar ? "ar" : "en";
+  const session = await getCurrentUser();
+  const canManage = hasRole(session, "MANAGER");
   const last30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const last90 = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
 
@@ -75,128 +76,77 @@ export default async function FinancePage() {
       />
 
       <PageContainer>
-        <HeroPanel
-          gradient="linear-gradient(135deg, #064e3b 0%, #047857 45%, #10b981 100%)"
-          accent="#10b981"
-          height={250}
-        >
-          <div className="flex flex-wrap items-center justify-between gap-5">
-            <div className="flex items-center gap-5 hn-anim-rise">
-              <div className="hn-anim-zoom-bounce relative">
-                <span className="hn-anim-pulse-ring absolute -inset-2 rounded-3xl" aria-hidden />
-                <div
-                  className="flex h-[88px] w-[88px] items-center justify-center rounded-2xl ring-2 ring-white/40"
-                  style={{ background: "rgba(255,255,255,0.18)" }}
-                >
-                  <Landmark className="h-12 w-12 text-white" />
-                </div>
-              </div>
-              <div className="min-w-0">
-                <div
-                  className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.22em]"
-                  style={{
-                    background: "rgba(255,255,255,0.18)",
-                    border: "1px solid rgba(255,255,255,0.28)",
-                    backdropFilter: "blur(6px)",
-                    color: "white",
-                  }}
-                >
-                  <CircleDollarSign className="h-3 w-3" />
-                  {ar ? "النمو والاستثمار" : "Growth & Capital"}
-                </div>
-                <h2
-                  className="mt-2.5 text-3xl font-black leading-[1.05] tracking-[-0.02em] hn-anim-rise md:text-[34px]"
-                  style={{ animationDelay: "0.08s" }}
-                >
-                  {ar ? "المركز المالي" : "Finance Center"}
-                </h2>
-                <p
-                  className="mt-1 max-w-xl text-[12.5px] font-bold opacity-90 hn-anim-rise"
-                  style={{ animationDelay: "0.16s" }}
-                >
-                  {ar
-                    ? "السجل المالي الموحّد عبر كل شركات الحوراني — صورة واحدة، حقيقة واحدة."
-                    : "One unified ledger across every Hourani company — one picture, one truth."}
-                </p>
-                <div
-                  className="mt-3 flex flex-wrap gap-2 hn-anim-fall"
-                  style={{ animationDelay: "0.24s" }}
-                >
-                  <Link
-                    href="/finance/new"
-                    className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[12px] font-extrabold transition hover:scale-105"
-                    style={{ background: "white", color: "#047857" }}
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    {ar ? "عملية جديدة" : "New transaction"}
-                  </Link>
-                  <ExportMenu type="finance" locale={lc} />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-2 hn-stagger sm:grid-cols-2">
-              <FinHeroStat label={ar ? "إيراد 30ي" : "Revenue 30d"} value={formatMoney(revenue30)} icon={TrendingUp} />
-              <FinHeroStat label={ar ? "مصاريف 30ي" : "Expenses 30d"} value={formatMoney(expense30)} icon={TrendingDown} />
-              <FinHeroStat label={ar ? "صافي" : "Net"} value={formatMoney(net30)} icon={Wallet} />
-              <FinHeroStat label={ar ? "تحويلات" : "Transfers"} value={formatMoney(transfer30)} icon={ArrowLeftRight} />
-            </div>
+        {/* Action rail */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="heri-eyebrow heri-eyebrow-ink">
+            {ar ? "آخر 30 يوماً" : "Last 30 days"}
           </div>
-        </HeroPanel>
+          <div className="flex items-center gap-2">
+            <Link href="/finance/new" className="heri-btn heri-btn-primary" style={{ fontSize: 13 }}>
+              <Plus className="h-4 w-4" strokeWidth={1.5} />
+              {ar ? "عملية جديدة" : "New transaction"}
+            </Link>
+            <ExportMenu type="finance" locale={lc} />
+          </div>
+        </div>
 
-        <section className="grid gap-3 hn-stagger sm:grid-cols-2 xl:grid-cols-4">
-          <MetricTile
+        {/* KPI band — Heritage tiles with count-up */}
+        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
+          <HeriKpi
             label={ar ? "إيرادات 30 يوم" : "Revenue 30d"}
-            value={formatMoney(revenue30)}
-            icon={TrendingUp}
-            tone="emerald"
-            hint={`${formatMoney(revenue90)} ${ar ? "في 90ي" : "90d total"}`}
+            raw={revenue30}
+            kind="money"
+            hint={`${formatMoney(revenue90)} ${ar ? "في 90ي" : "90d"}`}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "مصاريف 30 يوم" : "Expenses 30d"}
-            value={formatMoney(expense30)}
-            icon={TrendingDown}
-            tone="rose"
-            hint={`${formatMoney(expense90)} ${ar ? "في 90ي" : "90d total"}`}
+            raw={expense30}
+            kind="money"
+            accent="var(--heri-terracotta, #b85c38)"
+            hint={`${formatMoney(expense90)} ${ar ? "في 90ي" : "90d"}`}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "صافي الربح 30ي" : "Net 30d"}
-            value={formatMoney(net30)}
-            icon={Wallet}
-            tone={net30 >= 0 ? "emerald" : "rose"}
-            hint={
-              net30 >= 0
-                ? ar ? "ربح إيجابي" : "Positive"
-                : ar ? "خسارة" : "Loss"
-            }
+            raw={net30}
+            kind="money"
+            accent={net30 >= 0 ? "var(--heri-teal, #1f4e4a)" : "var(--heri-terracotta, #b85c38)"}
+            hint={net30 >= 0 ? (ar ? "ربح إيجابي" : "Positive") : (ar ? "خسارة" : "Loss")}
           />
-          <MetricTile
+          <HeriKpi
             label={ar ? "تحويلات داخلية" : "Internal transfers"}
-            value={formatMoney(transfer30)}
-            icon={ArrowLeftRight}
-            tone="blue"
+            raw={transfer30}
+            kind="money"
             hint={ar ? "آخر 30 يوم" : "last 30 days"}
           />
         </section>
 
         {/* Per-company breakdown */}
-        <section className="card">
-          <div className="card-header">
-            <div>
-              <div className="card-title">توزيع الأداء على شركات المجموعة (30 يوم)</div>
-              <div className="card-sub">إيرادات، مصاريف، وصافي لكل وحدة</div>
+        <section className="heri-card" style={{ padding: 0 }}>
+          <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--heri-rule)" }}>
+            <div className="heri-eyebrow heri-eyebrow-ink">
+              {ar ? "حسب الشركة" : "By company"}
             </div>
-            <Building2 className="h-4 w-4 text-slate-400" />
+            <div
+              style={{
+                fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
+                fontSize: 16,
+                fontWeight: 500,
+                color: "var(--heri-ink)",
+                marginTop: 2,
+              }}
+            >
+              {ar ? "توزيع الأداء (30 يوم)" : "Performance by company (30d)"}
+            </div>
           </div>
           <div className="table-wrap rounded-none border-0 shadow-none">
             <table className="table">
               <thead>
                 <tr>
-                  <th>الشركة</th>
-                  <th>القطاع</th>
-                  <th>إيرادات</th>
-                  <th>مصاريف</th>
-                  <th>الصافي</th>
+                  <th>{ar ? "الشركة" : "Company"}</th>
+                  <th>{ar ? "القطاع" : "Sector"}</th>
+                  <th>{ar ? "إيرادات" : "Revenue"}</th>
+                  <th>{ar ? "مصاريف" : "Expenses"}</th>
+                  <th>{ar ? "الصافي" : "Net"}</th>
                 </tr>
               </thead>
               <tbody>
@@ -205,11 +155,14 @@ export default async function FinancePage() {
                   const net = v.revenue - v.expense;
                   return (
                     <tr key={c.id}>
-                      <td className="font-bold text-brand-900">{c.name}</td>
+                      <td className="font-bold" style={{ color: "var(--heri-ink)" }}>{c.name}</td>
                       <td><SectorPill sector={c.sector} /></td>
-                      <td className="font-mono text-emerald-700">{formatMoney(v.revenue)}</td>
-                      <td className="font-mono text-red-600">{formatMoney(v.expense)}</td>
-                      <td className={`font-mono font-bold ${net >= 0 ? "text-emerald-700" : "text-red-600"}`}>
+                      <td className="font-mono" style={{ color: "var(--heri-teal, #1f4e4a)" }}>{formatMoney(v.revenue)}</td>
+                      <td className="font-mono" style={{ color: "var(--heri-terracotta, #b85c38)" }}>{formatMoney(v.expense)}</td>
+                      <td
+                        className="font-mono font-bold"
+                        style={{ color: net >= 0 ? "var(--heri-teal, #1f4e4a)" : "var(--heri-terracotta, #b85c38)" }}
+                      >
                         {formatMoney(net)}
                       </td>
                     </tr>
@@ -222,67 +175,24 @@ export default async function FinancePage() {
 
         {/* Transactions list */}
         <section className="space-y-3">
-          <div className="section-title">العمليات الأخيرة</div>
+          <div className="heri-eyebrow heri-eyebrow-ink">
+            {ar ? "العمليات الأخيرة" : "Recent transactions"}
+          </div>
           {transactions.length === 0 ? (
             <EmptyState
               icon={Wallet}
-              title="لا توجد عمليات مالية بعد"
+              title={ar ? "لا توجد عمليات مالية بعد" : "No transactions yet"}
               action={
-                <Link href="/finance/new" className="btn-primary">
-                  <Plus className="h-4 w-4" />
-                  أضف أول عملية
+                <Link href="/finance/new" className="heri-btn heri-btn-primary">
+                  <Plus className="h-4 w-4" strokeWidth={1.5} />
+                  {ar ? "أضف أول عملية" : "Add the first transaction"}
                 </Link>
               }
             />
           ) : (
-            <div className="table-wrap">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>المرجع</th>
-                    <th>التاريخ</th>
-                    <th>الشركة</th>
-                    <th>النوع</th>
-                    <th>التصنيف</th>
-                    <th>المبلغ</th>
-                    <th>سُجّلت بواسطة</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {transactions.map((t) => (
-                    <tr key={t.id}>
-                      <td className="font-mono text-xs text-slate-500">{t.reference}</td>
-                      <td className="text-xs">{formatShortDate(t.occurredAt)}</td>
-                      <td className="font-bold text-brand-900">{t.company.name}</td>
-                      <td>
-                        <span className={KIND_LABEL[t.kind]?.tone ?? "badge-slate"}>
-                          {ar ? KIND_LABEL[t.kind]?.ar ?? t.kind : KIND_LABEL[t.kind]?.en ?? t.kind}
-                        </span>
-                      </td>
-                      <td className="text-slate-700">{t.category}</td>
-                      <td
-                        className={`font-mono font-bold ${
-                          t.kind === "REVENUE"
-                            ? "text-emerald-700"
-                            : t.kind === "EXPENSE"
-                              ? "text-red-600"
-                              : "text-blue-700"
-                        }`}
-                      >
-                        {formatMoney(t.amount, t.currency)}
-                      </td>
-                      <td className="text-xs text-slate-500">{t.createdBy?.name ?? "—"}</td>
-                      <td>
-                        <DeleteButton action={deleteTransaction} payload={{ id: t.id }} label={`حذف العملية ${t.reference}؟`} description="سيتم حذف هذه الحركة المالية من السجل." />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <TransactionTable transactions={transactions} ar={ar} canManage={canManage} />
           )}
-          <div className="text-xs text-slate-400">
+          <div style={{ fontSize: 11, color: "var(--heri-ink-3)" }}>
             {ar
               ? `عرض آخر ${formatNumber(transactions.length)} عملية`
               : `Showing last ${formatNumber(transactions.length)} transactions`}
@@ -290,27 +200,5 @@ export default async function FinancePage() {
         </section>
       </PageContainer>
     </>
-  );
-}
-
-function FinHeroStat({ label, value, icon: Icon }: { label: string; value: string; icon: any }) {
-  return (
-    <div
-      className="hn-anim-rise rounded-xl px-3 py-2"
-      style={{
-        background: "rgba(255,255,255,0.14)",
-        border: "1px solid rgba(255,255,255,0.24)",
-        backdropFilter: "blur(8px)",
-        minWidth: 110,
-      }}
-    >
-      <div className="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[0.16em] opacity-85">
-        <Icon className="h-3 w-3" />
-        {label}
-      </div>
-      <div className="exec-num mt-0.5 text-base font-black leading-none tracking-[-0.012em]">
-        {value}
-      </div>
-    </div>
   );
 }

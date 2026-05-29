@@ -19,7 +19,7 @@ function SendButton({ ar, disabled }: { ar: boolean; disabled: boolean }) {
   return (
     <button
       type="submit"
-      className="btn-primary hn-hover-shine"
+      className="heri-btn heri-btn-primary"
       disabled={pending || disabled}
       title={
         disabled
@@ -97,8 +97,8 @@ export function MessageComposer({
       action={sendMessage}
       className="flex flex-col gap-2 p-3"
       style={{
-        borderTop: "1px solid var(--border)",
-        background: "var(--brand-soft)",
+        borderTop: "1px solid var(--heri-rule)",
+        background: "var(--heri-cream-2)",
       }}
     >
       <input type="hidden" name="threadId" value={threadId} />
@@ -109,10 +109,9 @@ export function MessageComposer({
         <div
           className="flex items-center gap-2 self-start"
           style={{
-            background: "var(--surface-elevated)",
-            border: "1px solid var(--border)",
+            background: "var(--heri-cream)",
+            border: "1px solid var(--heri-rule)",
             padding: "6px 10px",
-            borderRadius: 6,
             maxWidth: "100%",
           }}
         >
@@ -128,7 +127,7 @@ export function MessageComposer({
             }}
           />
           <span
-            style={{ fontSize: 11, color: "var(--text-muted)" }}
+            style={{ fontSize: 11, color: "var(--heri-ink-3)" }}
           >
             {ar ? "صورة جاهزة للإرسال" : "Image ready"}
           </span>
@@ -140,7 +139,7 @@ export function MessageComposer({
               border: "none",
               background: "transparent",
               cursor: "pointer",
-              color: "var(--text-muted)",
+              color: "var(--heri-ink-3)",
               padding: 2,
             }}
           >
@@ -174,9 +173,9 @@ export function MessageComposer({
             justifyContent: "center",
             width: 38,
             height: 38,
-            border: "1px solid var(--border)",
-            background: "var(--surface-elevated)",
-            color: "var(--text-muted)",
+            border: "1px solid var(--heri-rule)",
+            background: "var(--heri-cream)",
+            color: "var(--heri-ink-3)",
             cursor: "pointer",
             borderRadius: 6,
             flexShrink: 0,

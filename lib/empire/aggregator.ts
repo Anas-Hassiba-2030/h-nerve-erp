@@ -266,18 +266,18 @@ function synthSpark(slug: string, base: number): SparkPoint[] {
 }
 
 // ---------------------------------------------------------------------------
-// Helpers
+// Helpers — exported for unit testing (pure, deterministic, no DB).
 // ---------------------------------------------------------------------------
-function clampIq(v: number): number {
+export function clampIq(v: number): number {
   return Math.max(70, Math.min(180, Math.round(v)));
 }
-function hashOffset(seed: string, lo: number, hi: number): number {
+export function hashOffset(seed: string, lo: number, hi: number): number {
   let h = 5381;
   for (let i = 0; i < seed.length; i++) h = ((h << 5) + h + seed.charCodeAt(i)) | 0;
   const span = hi - lo;
   return lo + Math.abs(h) % (span + 1);
 }
-function industryGuess(name: string): { ar: string; en: string } {
+export function industryGuess(name: string): { ar: string; en: string } {
   const n = name.toLowerCase();
   if (/dairy|milk|cheese|maha/.test(n)) return { ar: "ألبان", en: "Dairy" };
   if (/farm|agri|crops|loran/.test(n)) return { ar: "زراعة", en: "Agriculture" };

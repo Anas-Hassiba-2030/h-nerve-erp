@@ -1,10 +1,10 @@
 // lib/empire/aggregator.test.ts — Phase 19 Empire grid (/admin/empire).
 //
-// getEmpireTiles() reads four tables through the scoped `prisma` client, so we
-// mock @/lib/db: each model method is a vi.fn() scripted per test. No DB, no
-// network — fits the pure-unit suite. We assert the AGGREGATION logic: the
-// self tile, real tenant tiles, deterministic synthetic padding to 8, the
-// real-first / IQ-desc ordering, the IQ clamp, and industry inference.
+// Two test surfaces:
+//  1. getEmpireTiles() — DB-mocked, exercises aggregation logic (self tile,
+//     real tenant tiles, synthetic padding to 8, real-first/IQ-desc ordering).
+//  2. Pure helpers (clampIq, hashOffset, industryGuess) — no DB, fully
+//     deterministic; a bug here shows wrong IQ numbers / industry labels.
 
 import { vi, describe, it, expect, beforeEach } from "vitest";
 
@@ -19,7 +19,16 @@ const { prisma } = vi.hoisted(() => ({
 
 vi.mock("@/lib/db", () => ({ prisma }));
 
-import { getEmpireTiles } from "./aggregator";
+import {
+  getEmpireTiles,
+  clampIq,
+  hashOffset,
+  industryGuess,
+} from "./aggregator";
+
+// ─────────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────────
 
 /** ISO-snapped weekly IQ history, oldest → newest. */
 function iqHistory(values: number[]): Array<{ iq: number; snappedAt: Date }> {
@@ -29,12 +38,14 @@ function iqHistory(values: number[]): Array<{ iq: number; snappedAt: Date }> {
 }
 
 /** Default empty wiring; individual tests override what they care about. */
-function wire(opts: {
-  tenants?: any[];
-  iq?: Array<{ iq: number; snappedAt: Date }>;
-  plans?: any[];
-  insights?: number;
-} = {}) {
+function wire(
+  opts: {
+    tenants?: any[];
+    iq?: Array<{ iq: number; snappedAt: Date }>;
+    plans?: any[];
+    insights?: number;
+  } = {},
+) {
   prisma.tenant.findMany.mockResolvedValue(opts.tenants ?? []);
   prisma.brainIQHistory.findMany.mockResolvedValue(opts.iq ?? []);
   prisma.plan.findMany.mockResolvedValue(opts.plans ?? []);
@@ -44,6 +55,10 @@ function wire(opts: {
 beforeEach(() => {
   vi.clearAllMocks();
 });
+
+// ─────────────────────────────────────────────────────────────────────
+// getEmpireTiles — shape & padding
+// ─────────────────────────────────────────────────────────────────────
 
 describe("getEmpireTiles — shape & padding", () => {
   it("always returns exactly 8 tiles, padded with synthetic siblings", async () => {
@@ -57,7 +72,6 @@ describe("getEmpireTiles — shape & padding", () => {
     const tiles = await getEmpireTiles();
     expect(tiles[0].synthetic).toBe(false);
     expect(tiles[0].key).toBe("self:hourani");
-    // Exactly one real tile (self) + 7 synthetic fillers.
     expect(tiles.filter((t) => !t.synthetic)).toHaveLength(1);
     expect(tiles.filter((t) => t.synthetic)).toHaveLength(7);
   });
@@ -71,16 +85,19 @@ describe("getEmpireTiles — shape & padding", () => {
   });
 });
 
+// ─────────────────────────────────────────────────────────────────────
+// getEmpireTiles — the self tile
+// ─────────────────────────────────────────────────────────────────────
+
 describe("getEmpireTiles — the self tile", () => {
   it("derives live IQ + 1-week delta + an 8-point sparkline from default history", async () => {
     wire({ iq: iqHistory([110, 112, 118, 120, 121, 119, 125, 130, 133]) });
     const tiles = await getEmpireTiles();
     const self = tiles.find((t) => t.key === "self:hourani")!;
-    expect(self.iq).toBe(133); // newest
-    expect(self.iqDelta1w).toBe(133 - 130); // newest minus one week ago (prev point)
-    expect(self.spark).toHaveLength(8); // last 8 only
+    expect(self.iq).toBe(133);
+    expect(self.iqDelta1w).toBe(133 - 130);
+    expect(self.spark).toHaveLength(8);
     expect(self.spark[self.spark.length - 1].iq).toBe(133);
-    // Sparkline timestamps serialize to ISO.
     expect(self.spark[0].snappedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
   });
 
@@ -129,6 +146,10 @@ describe("getEmpireTiles — the self tile", () => {
   });
 });
 
+// ─────────────────────────────────────────────────────────────────────
+// getEmpireTiles — real tenant tiles
+// ─────────────────────────────────────────────────────────────────────
+
 describe("getEmpireTiles — real tenant tiles", () => {
   const tenant = {
     id: "t1",
@@ -157,7 +178,6 @@ describe("getEmpireTiles — real tenant tiles", () => {
   });
 
   it("clamps jittered tenant IQ into the [70,180] band", async () => {
-    // Extreme history; whatever the per-slug offset is, the result stays clamped.
     wire({ tenants: [tenant], iq: iqHistory([500, 500, 500]) });
     const t = (await getEmpireTiles()).find((x) => x.key === "tenant:maha-dairy")!;
     expect(t.iq).toBeLessThanOrEqual(180);
@@ -174,9 +194,7 @@ describe("getEmpireTiles — real tenant tiles", () => {
     const tiles = await getEmpireTiles();
     const firstSyntheticIdx = tiles.findIndex((t) => t.synthetic);
     const reals = tiles.slice(0, firstSyntheticIdx);
-    // All reals come before any synthetic.
     expect(tiles.slice(firstSyntheticIdx).every((t) => t.synthetic)).toBe(true);
-    // Reals are sorted by IQ desc.
     for (let i = 1; i < reals.length; i++) {
       expect(reals[i - 1].iq).toBeGreaterThanOrEqual(reals[i].iq);
     }
@@ -196,6 +214,10 @@ describe("getEmpireTiles — real tenant tiles", () => {
   });
 });
 
+// ─────────────────────────────────────────────────────────────────────
+// getEmpireTiles — synthetic siblings
+// ─────────────────────────────────────────────────────────────────────
+
 describe("getEmpireTiles — synthetic siblings", () => {
   it("span varied industries with sane IQ/pulse values and 8-point sparks", async () => {
     wire();
@@ -209,7 +231,111 @@ describe("getEmpireTiles — synthetic siblings", () => {
       expect(s.plansActive).toBeGreaterThanOrEqual(0);
       expect(s.key.startsWith("synth:")).toBe(true);
     }
-    // The grid demos more than one industry.
     expect(new Set(synth.map((s) => s.industry)).size).toBeGreaterThan(1);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// clampIq — pure helper
+// ─────────────────────────────────────────────────────────────────────
+
+describe("clampIq", () => {
+  it("clamps below the floor up to 70", () => {
+    expect(clampIq(0)).toBe(70);
+    expect(clampIq(-50)).toBe(70);
+    expect(clampIq(69.9)).toBe(70);
+  });
+  it("clamps above the ceiling down to 180", () => {
+    expect(clampIq(200)).toBe(180);
+    expect(clampIq(180.4)).toBe(180);
+  });
+  it("rounds in-range values to the nearest integer", () => {
+    expect(clampIq(120.4)).toBe(120);
+    expect(clampIq(120.5)).toBe(121);
+    expect(clampIq(142)).toBe(142);
+  });
+  it("boundaries map to themselves", () => {
+    expect(clampIq(70)).toBe(70);
+    expect(clampIq(180)).toBe(180);
+  });
+  it("always returns an integer in [70,180] across a hostile range", () => {
+    for (let v = -100; v <= 400; v += 7) {
+      const r = clampIq(v);
+      expect(Number.isInteger(r)).toBe(true);
+      expect(r).toBeGreaterThanOrEqual(70);
+      expect(r).toBeLessThanOrEqual(180);
+    }
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// hashOffset — pure helper
+// ─────────────────────────────────────────────────────────────────────
+
+describe("hashOffset", () => {
+  it("is deterministic — same seed + range yields the same value", () => {
+    expect(hashOffset("blue-meadow", -6, 6)).toBe(hashOffset("blue-meadow", -6, 6));
+    expect(hashOffset("kasbah", 0, 4)).toBe(hashOffset("kasbah", 0, 4));
+  });
+  it("stays within the inclusive [lo, hi] range", () => {
+    for (const seed of ["a", "loran-agri", "x:i", "highland-mfg", "", "ω"]) {
+      for (const [lo, hi] of [[-6, 6], [0, 4], [1, 6], [-3, 5]] as const) {
+        const v = hashOffset(seed, lo, hi);
+        expect(v, `${seed} in [${lo},${hi}]`).toBeGreaterThanOrEqual(lo);
+        expect(v).toBeLessThanOrEqual(hi);
+        expect(Number.isInteger(v)).toBe(true);
+      }
+    }
+  });
+  it("a zero-width range (lo === hi) always returns that single value", () => {
+    expect(hashOffset("anything", 5, 5)).toBe(5);
+    expect(hashOffset("else", 0, 0)).toBe(0);
+  });
+  it("different seeds generally spread across the range (not all identical)", () => {
+    const seeds = Array.from({ length: 40 }, (_, i) => `tenant-${i}`);
+    const values = new Set(seeds.map((s) => hashOffset(s, 0, 9)));
+    expect(values.size).toBeGreaterThan(1);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// industryGuess — pure helper
+// ─────────────────────────────────────────────────────────────────────
+
+describe("industryGuess", () => {
+  it("classifies dairy names (incl. the Maha brand) → Dairy", () => {
+    expect(industryGuess("Blue Meadow Dairy").en).toBe("Dairy");
+    expect(industryGuess("Maha Foods").en).toBe("Dairy");
+    expect(industryGuess("Mountain Cheese Co").en).toBe("Dairy");
+  });
+  it("classifies agriculture names (incl. Loran) → Agriculture", () => {
+    expect(industryGuess("Loran Farms").en).toBe("Agriculture");
+    expect(industryGuess("Sahara Agri Co.").en).toBe("Agriculture");
+  });
+  it("classifies hospitality names (incl. Arena) → Hospitality", () => {
+    expect(industryGuess("Kasbah Resorts").en).toBe("Hospitality");
+    expect(industryGuess("Arena Amman").en).toBe("Hospitality");
+  });
+  it("classifies education names (incl. Tank) → Education", () => {
+    expect(industryGuess("Olive Tree Schools").en).toBe("Education");
+    expect(industryGuess("Tank Incubator").en).toBe("Education");
+  });
+  it("classifies logistics names → Logistics", () => {
+    expect(industryGuess("Northbay Logistics").en).toBe("Logistics");
+  });
+  it("is case-insensitive", () => {
+    expect(industryGuess("BLUE MEADOW DAIRY").en).toBe("Dairy");
+    expect(industryGuess("loran").en).toBe("Agriculture");
+  });
+  it("falls back to Diversified for an unrecognized name", () => {
+    expect(industryGuess("Rivermint Retail").en).toBe("Diversified");
+    expect(industryGuess("").en).toBe("Diversified");
+  });
+  it("always returns a non-empty Arabic + English pair", () => {
+    for (const name of ["Dairy X", "Agri Y", "Hotel Z", "School W", "Logistics V", "Unknown"]) {
+      const g = industryGuess(name);
+      expect(g.ar).toBeTruthy();
+      expect(g.en).toBeTruthy();
+    }
   });
 });

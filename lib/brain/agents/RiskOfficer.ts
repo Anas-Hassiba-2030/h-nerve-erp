@@ -14,7 +14,7 @@ Speak with calm precision. Quote concrete failure modes. Suggest mitigations.
   stubVoice: (input) => {
     const isAr = input.locale === "ar";
     return {
-      position: "qualify",
+      position: "oppose",
       thesis: isAr
         ? `الخطر الأول: تركّز التوريد. إذا حصلنا على 70% من احتياجات F&B من المها فإن أي توقف ليوم واحد في خط الإنتاج يضرب الفنادق مباشرة. الخطر الثاني: نزاع المتعاقدين الموسميين. الخطر الثالث: الضوابط الصحية في الأردن قد تتغيّر في الربع القادم. أوصي بمسار توريد بديل + هامش أمان 15% في الإنتاج، وعقد بنود طوارئ مع أرينا.`
         : `Primary risk: supplier concentration. If we route 70% of F&B through Maha, any single-day production halt hits the hotels directly. Secondary: seasonal contractor disputes. Tertiary: Jordanian food-safety regulations may shift next quarter. I recommend a parallel supply path + 15% production safety margin, and contingency clauses in Arena's procurement contracts.`,

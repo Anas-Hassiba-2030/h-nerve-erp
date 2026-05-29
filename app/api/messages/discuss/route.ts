@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireUser } from "@/lib/session";
+import { getCurrentUser } from "@/lib/session";
 import { isSafeId } from "@/lib/authz";
 import { prisma } from "@/lib/db";
 
@@ -23,7 +23,10 @@ const VALID_ENTITIES = [
 type EntityType = (typeof VALID_ENTITIES)[number];
 
 export async function POST(req: NextRequest) {
-  const user = await requireUser();
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
+  }
 
   const body = await req.json().catch(() => ({} as Record<string, unknown>));
   const entityType = String(

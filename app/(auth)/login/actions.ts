@@ -64,7 +64,15 @@ export async function loginAction(formData: FormData) {
   // first page load. Users without a companyId (admins, roamers)
   // get no cookie and stay cross-tenant. The manual workspace
   // switcher (enterWorkspace / exitWorkspace) can still override.
-  if (user.companyId) {
+  // ADMIN is a cross-tenant superadmin: do NOT pin them to a single
+  // company workspace. Pinning scopes the executive dashboard (and every
+  // module) to their home company and zeroes out the group-wide metrics
+  // when that home company owns no operational rows. Admins start
+  // group-wide and can still drill into any company via the workspace
+  // switcher. Non-admins are pinned to their company exactly as before.
+  const pinWorkspace = (user.role as string) !== "ADMIN";
+
+  if (pinWorkspace && user.companyId) {
     cookies().set(WORKSPACE_COOKIE, user.companyId, {
       httpOnly: true,
       sameSite: "lax",
@@ -74,7 +82,7 @@ export async function loginAction(formData: FormData) {
   // Phase F3 — set the tenant cookie too. Middleware uses it to scope
   // all opaque-tenantId models (Product, Supplier, ...). Null slug
   // means cross-tenant; no cookie written.
-  if (tenantSlug) {
+  if (pinWorkspace && tenantSlug) {
     cookies().set(TENANT_COOKIE, tenantSlug, {
       httpOnly: true,
       sameSite: "lax",

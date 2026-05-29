@@ -120,7 +120,7 @@ export async function seedBrainGraph(): Promise<{
       id: nid("DairyBatch", d.id),
       kind: "DairyBatch",
       refId: d.id,
-      label: `${d.product} · ${d.batchNumber}`,
+      label: `${d.productAr || d.product} · ${d.batchNumber}`,
       payload: {
         liters: d.quantityLiters,
         grade: d.qualityGrade,

@@ -47,3 +47,12 @@ free-claude-code-main.zip
 
 # Obsidian vault config (local note app)
 .obsidian/
+
+# Nested full-ERP snapshot copied for cloud handoff — NOT part of the
+# root project's build/typecheck. Lives here only as a local artifact.
+h-nerve-erp/
+
+# Generational-run screenshot harness scratch (temp, never committed)
+__genrun_shots.mjs
+__council_detail.mjs
+__diag.mts

@@ -15,7 +15,6 @@ import { Plus, ChevronLeft, Workflow as WorkflowIcon, Database, Trash2 } from "l
 import {
   createWorkflow,
   toggleWorkflow,
-  seedExampleWorkflows,
   deleteWorkflow,
   createWorkflowFromTemplate,
 } from "./actions";

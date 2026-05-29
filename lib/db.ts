@@ -23,10 +23,18 @@ const globalForPrisma = globalThis as unknown as {
   prismaRaw: PrismaClient | undefined;
 };
 
+// Log levels: errors always, warnings in dev. Set PRISMA_LOG=query to also
+// echo every SQL statement — useful when debugging the /admin/db browser or
+// a slow query, without editing code.
+function logLevels(): ("query" | "info" | "warn" | "error")[] {
+  const base: ("query" | "info" | "warn" | "error")[] =
+    process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"];
+  if (process.env.PRISMA_LOG === "query") base.push("query");
+  return base;
+}
+
 function baseClient(): PrismaClient {
-  return new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
-  });
+  return new PrismaClient({ log: logLevels() });
 }
 
 function makeScopedClient(): PrismaClient {

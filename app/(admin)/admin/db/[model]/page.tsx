@@ -8,7 +8,7 @@
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import { prismaUnscoped } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { getModel, formatCell } from "@/lib/db.introspect";
@@ -45,6 +45,12 @@ export default async function AdminDbModelPage({
   const q = s(searchParams.q);
   const page = Math.max(1, parseInt(s(searchParams.page) || "1", 10) || 1);
 
+  // Sort: validate the requested column against the DMMF; fall back to the
+  // model's default order field. Direction defaults to DESC.
+  const reqSort = s(searchParams.sort);
+  const sortField = meta.columns.some((c) => c.name === reqSort) ? reqSort : meta.orderField;
+  const sortDir: "asc" | "desc" = s(searchParams.dir) === "asc" ? "asc" : "desc";
+
   const where =
     q && meta.searchable.length
       ? { OR: meta.searchable.map((f) => ({ [f]: { contains: q } })) }
@@ -58,7 +64,7 @@ export default async function AdminDbModelPage({
       db[meta.prop].count(where ? { where } : undefined),
       db[meta.prop].findMany({
         ...(where ? { where } : {}),
-        orderBy: { [meta.orderField]: "desc" },
+        orderBy: { [sortField]: sortDir },
         take: PER,
         skip: (page - 1) * PER,
       }),
@@ -71,9 +77,26 @@ export default async function AdminDbModelPage({
   const qs = (p: number) => {
     const u = new URLSearchParams();
     if (q) u.set("q", q);
+    if (reqSort) u.set("sort", sortField);
+    if (sortDir === "asc") u.set("dir", "asc");
     u.set("page", String(p));
     return `/admin/db/${meta.prop}?${u.toString()}`;
   };
+  // Header link: sort by `col`; clicking the active column flips direction.
+  const sortHref = (col: string) => {
+    const u = new URLSearchParams();
+    if (q) u.set("q", q);
+    u.set("sort", col);
+    if (!(col === sortField && sortDir === "desc")) u.set("dir", "asc");
+    return `/admin/db/${meta.prop}?${u.toString()}`;
+  };
+  const csvHref = (() => {
+    const u = new URLSearchParams();
+    if (q) u.set("q", q);
+    u.set("sort", sortField);
+    u.set("dir", sortDir);
+    return `/api/admin/db/${meta.prop}/export?${u.toString()}`;
+  })();
 
   return (
     <div className="admin-page">
@@ -90,10 +113,16 @@ export default async function AdminDbModelPage({
             {meta.dbName ? ` · @@map ${meta.dbName}` : ""}
           </p>
         </div>
-        <Link href="/admin/db" className="admin-btn-ghost" style={{ alignSelf: "start" }}>
-          <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.5} style={{ display: "inline", marginInlineEnd: 6 }} />
-          {ar ? "كل الجداول" : "All models"}
-        </Link>
+        <div style={{ display: "flex", gap: 10, alignSelf: "start" }}>
+          <a href={csvHref} className="admin-btn-ghost">
+            <Download className="h-3.5 w-3.5" strokeWidth={1.5} style={{ display: "inline", marginInlineEnd: 6 }} />
+            CSV
+          </a>
+          <Link href="/admin/db" className="admin-btn-ghost">
+            <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.5} style={{ display: "inline", marginInlineEnd: 6 }} />
+            {ar ? "كل الجداول" : "All models"}
+          </Link>
+        </div>
       </header>
 
       {meta.searchable.length > 0 ? (
@@ -137,28 +166,46 @@ export default async function AdminDbModelPage({
           <table className="admin-table">
             <thead>
               <tr>
-                {meta.columns.map((c) => (
-                  <th key={c.name}>
-                    <span>{c.name}</span>
-                    <span className="admin-table-type">{c.type}{c.isId ? " · id" : ""}</span>
-                  </th>
-                ))}
+                {meta.columns.map((c) => {
+                  const active = c.name === sortField;
+                  return (
+                    <th key={c.name}>
+                      <Link href={sortHref(c.name)}>
+                        <span>
+                          {c.name}
+                          {active ? (
+                            <span className="admin-table-sort">{sortDir === "asc" ? "▲" : "▼"}</span>
+                          ) : null}
+                        </span>
+                        <span className="admin-table-type">{c.type}{c.isId ? " · id" : ""}</span>
+                      </Link>
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, ri) => (
-                <tr key={(row[meta.idField ?? "id"] as string) ?? ri}>
-                  {meta.columns.map((c) => {
-                    const text = formatCell(row[c.name]);
-                    const clipped = text.length > CELL_MAX ? text.slice(0, CELL_MAX) + "…" : text;
-                    return (
-                      <td key={c.name} title={text === clipped ? undefined : text}>
-                        {clipped}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
+              {rows.map((row, ri) => {
+                const rowId = meta.idField ? row[meta.idField] : undefined;
+                const detailHref =
+                  meta.idField && rowId != null
+                    ? `/admin/db/${meta.prop}/${encodeURIComponent(String(rowId))}`
+                    : null;
+                return (
+                  <tr key={(rowId as string) ?? ri}>
+                    {meta.columns.map((c) => {
+                      const text = formatCell(row[c.name]);
+                      const clipped = text.length > CELL_MAX ? text.slice(0, CELL_MAX) + "…" : text;
+                      const linkCell = detailHref && c.name === meta.idField;
+                      return (
+                        <td key={c.name} title={text === clipped ? undefined : text}>
+                          {linkCell ? <Link href={detailHref}>{clipped}</Link> : clipped}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

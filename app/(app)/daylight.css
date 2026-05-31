@@ -104,3 +104,17 @@
 .dl-page .reveal:nth-child(4) { animation-delay: .18s; }
 @keyframes dl-reveal { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .dl-page .reveal { animation: none; } }
+
+/* ════════════════════════════════════════════════════════════════
+   FULL-BLEED daylight pages — the pure Orrery vision: no old sidebar.
+   When a .dl-page is on screen, hide the (app) sidebar + its mobile
+   drawer/footer and let content span the full width. Navigation on
+   these pages happens via the Orrery hub + the fixed ↺ Orbit pill.
+   Scoped with :has() so non-daylight pages keep the sidebar untouched.
+   ════════════════════════════════════════════════════════════════ */
+body:has(.dl-page) aside { display: none !important; }
+body:has(.dl-page) .flex.min-h-screen.flex-1.flex-col.nerve-bg { flex: 1 1 100% !important; }
+/* give the page comfortable margins now that the rail is gone */
+.dl-page { max-width: 1240px; margin-inline: auto; padding-inline: clamp(16px, 3vw, 34px); }
+/* the fixed ↺ Orbit pill is the nav home on full-bleed pages — lift it above content */
+body:has(.dl-page) .orbit-return { z-index: 70; }

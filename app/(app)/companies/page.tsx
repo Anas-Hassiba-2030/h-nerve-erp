@@ -68,8 +68,8 @@ export default async function CompaniesPage() {
                   <div className="flex items-center gap-3">
                     <div className="flex h-12 w-12 items-center justify-center text-white" style={{ background: brand.gradient, borderRadius: 12 }}><Icon className="h-6 w-6" /></div>
                     <div>
-                      <h3 style={{ fontWeight: 700, color: "var(--ink)" }}>{c.name}</h3>
-                      <div style={{ fontSize: 11, color: "var(--ink-muted)" }}>{c.nameEn}</div>
+                      <h3 style={{ fontWeight: 700, color: "var(--ink)" }}>{ar ? c.name : c.nameEn}</h3>
+                      <div style={{ fontSize: 11, color: "var(--ink-muted)" }}>{ar ? c.nameEn : c.name}</div>
                     </div>
                   </div>
                   <ArrowUpRight className="h-4 w-4" style={{ color: "var(--ink-muted)" }} />

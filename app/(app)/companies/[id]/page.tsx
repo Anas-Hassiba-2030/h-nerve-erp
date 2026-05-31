@@ -243,7 +243,7 @@ export default async function CompanyDetailPage({
                   <StatusBadge status={company.status} />
                 </div>
                 <h2 className="mt-1 text-2xl font-bold md:text-3xl" style={{ letterSpacing: "-0.01em" }}>
-                  {company.name}
+                  {getLocale() === "en" ? company.nameEn : company.name}
                 </h2>
                 <p className="text-sm opacity-90" dir="ltr">
                   {brand.mottoEn}

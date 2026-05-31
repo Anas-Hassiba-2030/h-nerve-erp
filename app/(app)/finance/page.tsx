@@ -90,7 +90,7 @@ export default async function FinancePage() {
                 const net = v.revenue - v.expense;
                 return (
                   <tr key={c.id}>
-                    <td style={{ fontWeight: 700, color: "var(--ink)" }}>{c.name}</td>
+                    <td style={{ fontWeight: 700, color: "var(--ink)" }}>{ar ? c.name : c.nameEn}</td>
                     <td><SectorPill sector={c.sector} /></td>
                     <td className="num" style={{ fontFamily: "monospace", color: "var(--emerald)" }}>{formatMoney(v.revenue)}</td>
                     <td className="num" style={{ fontFamily: "monospace", color: "var(--brick)" }}>{formatMoney(v.expense)}</td>

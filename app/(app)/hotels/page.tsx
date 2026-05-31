@@ -13,7 +13,7 @@ import {
 } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
 import { deleteHotel, deleteBooking } from "./actions";
-import "./daylight.css";
+import "../daylight.css";
 
 export const dynamic = "force-dynamic";
 

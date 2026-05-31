@@ -37,6 +37,11 @@ export function OrreryFrame({ identity }: { identity: OrreryIdentity }) {
           "sections/insights.html": "/insights",
           "sections/alerts.html": "/alerts",
           "sections/plans.html": "/plans",
+          "sections/messages.html": "/messages",
+          "sections/inbox.html": "/inbox",
+          "sections/digest.html": "/digest",
+          "sections/tasks.html": "/tasks",
+          "sections/documents.html": "/documents",
           "sections/employees.html": "/employees",
           "sections/team.html": "/employees",
         };

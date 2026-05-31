@@ -50,7 +50,7 @@ export default async function EmployeesPage() {
         status={`${formatNumber(totalUsers)} ${ar ? "عضو" : "members"}`}
         actions={
           <>
-            <Link href="/users/new" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "عضو جديد" : "New member"}</Link>
+            <Link href="/admin/users" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "عضو جديد" : "New member"}</Link>
             <ExportMenu type="employees" locale={lc} />
           </>
         }

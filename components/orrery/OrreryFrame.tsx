@@ -34,6 +34,8 @@ export function OrreryFrame({ identity }: { identity: OrreryIdentity }) {
           "sections/analytics.html": "/analytics",
           "sections/markets.html": "/markets",
           "sections/compare.html": "/compare",
+          "sections/employees.html": "/employees",
+          "sections/team.html": "/employees",
         };
         window.location.assign(REAL_DATA_PAGES[href] ?? "/design/" + href);
       }

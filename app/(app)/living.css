@@ -154,3 +154,19 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 @media (prefers-reduced-motion:reduce){
   .hn-reveal-root.hn-dive, .hn-reveal-root.hn-pagein{ animation:none; }
 }
+
+/* ── daylight top controls: Orbit pill + language toggle together ── */
+.dl-topctl{
+  position:fixed; top:14px; inset-inline-start:16px; z-index:70;
+  display:inline-flex; align-items:center; gap:10px;
+}
+.dl-topctl .orbit-return{ position:static; } /* it's positioned by the wrapper now */
+.dl-langwrap{
+  display:inline-flex; align-items:center; min-height:40px; padding:2px 6px; border-radius:999px;
+  background:rgba(31,77,63,.92); border:1px solid rgba(194,163,90,.55);
+  box-shadow:0 2px 10px rgba(13,31,26,.18);
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+}
+/* make the toggle legible on the emerald pill */
+.dl-langwrap button[aria-pressed="false"]{ color:#DCC38A !important; }
+.dl-langwrap button[aria-pressed="true"]{ background:#C2A35A !important; color:#1F4D3F !important; }

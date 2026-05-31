@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-living="work">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-Nerve · قسم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../living-bg.css">
+<link rel="stylesheet" href="_section.css">
+<link rel="stylesheet" href="../interactions.css">
+<link rel="stylesheet" href="../ambient.css">
+<style>
+.ph-note{display:flex;align-items:flex-start;gap:16px;background:var(--cream);border:1px solid var(--line);border-radius:18px;padding:24px 26px}
+.ph-mark{width:46px;height:46px;flex:0 0 46px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#2E6B57,#1F4D3F 55%,#0c2019);box-shadow:inset 0 1px 10px rgba(220,195,138,.3)}
+.ph-note h3{font-family:var(--display);font-size:22px;font-weight:600;color:var(--emerald);margin-bottom:6px}
+.ph-note p{font-size:14px;color:var(--ink-muted);line-height:1.6;max-width:60ch}
+.ph-meta{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.ph-chip{font-size:12px;font-weight:600;color:var(--ink-muted);background:var(--ivory);border:1px solid var(--line);border-radius:999px;padding:7px 14px}
+</style>
+<link rel="stylesheet" href="../app-layer.css?v=nav3"><link rel="stylesheet" href="../states.css"></head>
+<body>
+<header id="topbar">
+  <div class="tb-brand">
+    <svg class="tb-mark" viewBox="0 0 100 100" fill="none"><defs><radialGradient id="ngsec" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FBF3DC"/><stop offset="50%" stop-color="#DCC38A"/><stop offset="100%" stop-color="#C2A35A" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="42" stroke="#C2A35A" stroke-width="1.4" opacity=".6"/><ellipse cx="50" cy="50" rx="42" ry="17" stroke="#C2A35A" stroke-width="1.2" opacity=".45"/><g stroke="#DCC38A" stroke-width="6.5" stroke-linecap="round"><line x1="31" y1="26" x2="31" y2="74"/><line x1="69" y1="26" x2="69" y2="74"/><line x1="31" y1="50" x2="69" y2="50"/></g><circle cx="50" cy="50" r="15" fill="url(#ngsec)"/><circle cx="50" cy="50" r="4.5" fill="#FBF3DC"/></svg>
+    <span class="tb-word">H‑Nerve <span class="erp">ERP</span></span>
+  </div>
+  <a class="tb-orbit" href="/orrery">↺ العودة إلى المدار</a>
+  <button class="tb-user"><span class="tb-avatar">أ</span><span class="tb-uinfo"><span class="tb-uname">أ. الحوراني</span><span class="tb-urole">رئيس مجلس الإدارة</span></span></button>
+</header>
+
+<div class="wrap">
+  <div class="sec-head reveal">
+    <div>
+      <div class="sec-eyebrow"><span class="tick"></span><span id="eyebrow">قسم</span></div>
+      <h1 class="sec-title" id="title">القسم</h1>
+      <p class="sec-sub" id="sub">هذه الواجهة جزء من نظام H‑Nerve وتُربط حالياً بالدماغ المركزي.</p>
+    </div>
+    <div class="sec-head-aside"><span class="sec-status"><span class="dot"></span>قيد الربط</span></div>
+  </div>
+
+  <div class="panel reveal">
+    <div class="ph-note">
+      <span class="ph-mark"></span>
+      <div>
+        <h3 id="note-title">قيد الربط بالدماغ</h3>
+        <p>هذه الشاشة محجوزة ضمن مدار H‑Nerve وسيتم تفعيل محتواها التشغيلي قريباً. التنقّل والمدار والخلفيات الحيّة تعمل بالكامل — المحتوى التفصيلي لهذا القسم هو الخطوة التالية.</p>
+        <div class="ph-meta">
+          <span class="ph-chip" id="chip-group">المجموعة</span>
+          <span class="ph-chip">ضمن مدار H‑Nerve</span>
+          <span class="ph-chip">الدماغ نشط</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel reveal" style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+    <div><div class="panel-title">العودة إلى المدار</div><div class="panel-aside">اختر قسماً آخر من النظام الشمسي</div></div>
+    <a class="btn btn-primary" href="/orrery">↺ المدار</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  var p = new URLSearchParams(location.search);
+  var s = p.get("s") || "القسم";
+  var g = p.get("g") || "H‑Nerve";
+  var a = p.get("a");
+  document.title = "H-Nerve · " + s;
+  document.getElementById("title").textContent = s;
+  document.getElementById("eyebrow").textContent = g;
+  document.getElementById("chip-group").textContent = g;
+  document.getElementById("note-title").textContent = s + " — قيد الربط";
+  if (a) document.documentElement.setAttribute("data-ambient", a);
+})();
+</script>
+<script src="../living-bg.js" defer></script>
+<script src="../ambient.js" defer></script>
+<script src="section.js" defer></script>
+<script src="../app-layer.js?v=nav3" defer></script><script src="../states.js" defer></script></body>
+</html>

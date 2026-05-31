@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-living="night" data-ambient="cosmic">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-Nerve · ذكاء الدماغ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../living-bg.css"><link rel="stylesheet" href="_section.css"><link rel="stylesheet" href="../interactions.css"><link rel="stylesheet" href="../ambient.css"><link rel="stylesheet" href="../brain.css">
+<link rel="stylesheet" href="../app-layer.css?v=nav3"><link rel="stylesheet" href="../states.css"></head>
+<body><header id="topbar">
+  <div class="tb-brand"><svg class="tb-mark" viewBox="0 0 100 100" fill="none"><defs><radialGradient id="ngbiq" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FBF3DC"/><stop offset="50%" stop-color="#DCC38A"/><stop offset="100%" stop-color="#C2A35A" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="42" stroke="#C2A35A" stroke-width="1.4" opacity=".6"/><ellipse cx="50" cy="50" rx="42" ry="17" stroke="#C2A35A" stroke-width="1.2" opacity=".45"/><g stroke="#DCC38A" stroke-width="6.5" stroke-linecap="round"><line x1="31" y1="26" x2="31" y2="74"/><line x1="69" y1="26" x2="69" y2="74"/><line x1="31" y1="50" x2="69" y2="50"/></g><circle cx="50" cy="50" r="15" fill="url(#ngbiq)"/><circle cx="50" cy="50" r="4.5" fill="#FBF3DC"/></svg>
+    <span class="tb-word">H‑Nerve <span class="erp">ERP</span></span></div>
+  <a class="tb-orbit" href="/orrery">↺ العودة إلى المدار</a>
+  <button class="tb-user"><span class="tb-avatar">أ</span><span class="tb-uinfo"><span class="tb-uname">أ. الحوراني</span><span class="tb-urole">رئيس مجلس الإدارة</span></span></button>
+</header>
+<div class="br-wrap">
+  <div class="br-ribbon">
+    <div class="br-title-box"><span class="eb"><span class="tick"></span data-i18n="br.eyebrow.intel">الذكاء التشغيلي</span><h1 data-i18n="br.title.brainiq">ذكاء الدماغ</h1></div>
+    <div class="br-intro" data-i18n="br.intro.brainiq">يتأمّل الدماغ في قراراته السابقة ويقيس دقّته. راجِع التقرير الذاتي واعتمده.</div>
+  </div>
+<div class="br-kpis">
+    <div class="br-kpi"><div class="v" id="iqVal">٩٢</div><div class="k" data-i18n="br.kpi.iqScore">مؤشّر الذكاء</div></div>
+    <div class="br-kpi"><div class="v">٨٤٪</div><div class="k" data-i18n="br.kpi.accuracy">الدقّة</div></div>
+    <div class="br-kpi"><div class="v">٧٩٪</div><div class="k" data-i18n="br.kpi.confidence">الثقة</div></div>
+    <div class="br-kpi"><div class="v" id="pending">١</div><div class="k" data-i18n="br.kpi.pendingReview">بانتظار المراجعة</div></div></div>
+  <div class="br-controls"><button class="br-btn br-btn-primary" id="reflect" data-i18n="br.btn.reflect">✦ تأمّل الآن</button><span class="br-thinking" id="thinking" style="display:none">يتأمّل الدماغ <span class="dots"><span></span><span></span><span></span></span></span></div>
+  <div class="br-panel" id="metaCard"><h2>التقرير الذاتي الأخير</h2><div class="sub">٣٠ أيار ٢٠٢٦</div>
+    <div style="font-size:14px;line-height:1.7;color:var(--mist)">راجعتُ ١٢٤ قراراً في آخر ٣٠ يوماً. دقّة التوقّع <b style="color:var(--gold-soft)">٨٤٪</b> — تحسّن بمقدار نقطتين. أكبر مصدر خطأ: تقديرات الطلب الموسمي في الضيافة. أقترح زيادة وزن بيانات المؤتمرات.</div>
+    <div class="br-controls" style="margin-top:16px"><button class="br-btn br-btn-primary" id="approveMeta" data-i18n="br.btn.approve">اعتمد</button><button class="br-btn danger" id="rejectMeta" data-i18n="br.btn.reject">ارفض</button></div>
+  </div>
+</div>
+<div class="br-toast" id="toast"></div>
+<script src="../living-bg.js" defer></script><script src="../ambient.js" defer></script><script src="brainiq-ops.js" defer></script>
+<script src="../app-layer.js?v=nav3" defer></script><script src="../states.js" defer></script></body>
+</html>

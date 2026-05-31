@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-living="work" data-ambient="hospitality">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-Nerve · مساحة الشركة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="living-bg.css"><link rel="stylesheet" href="colors_and_type.css"><link rel="stylesheet" href="company.css">
+<style>:root{--ivory:#F6F1E7;--cream:#FEFCF7;--ink:#2A2A26;--ink-muted:#6B6459;--line:#E4DCCB;--display:"Cormorant Garamond",serif;--ui:"Cairo",sans-serif}</style>
+<link rel="stylesheet" href="states.css"></head>
+<body>
+<div id="co-dive"><div class="orb"></div></div>
+<header id="co-bar">
+  <div class="co-logo" id="coLogo">أ</div>
+  <div class="co-id"><div class="nm" id="coName">—</div><div class="crumb"><span data-i18n="co.crumbPrefix">المجموعة</span> › <b id="coCrumb">—</b></div></div>
+  <span class="co-iq-badge" id="coIqBadge" style="margin-inline-start:auto"><span data-i18n="co.iqBadge">ذكاء الشركة</span> <b id="coIqMini">—</b></span>
+  <button id="co-ascend" data-i18n="co.ascend">↑ العودة إلى المجموعة</button>
+</header>
+<nav id="co-nav">
+  <button class="co-tab on" data-tab="dash" data-i18n="co.tab.dash">لوحة الشركة</button>
+  <button class="co-tab" data-tab="ops" data-i18n="co.tab.ops">العمليات</button>
+  <button class="co-tab" data-tab="fin" data-i18n="co.tab.fin">المالية</button>
+  <button class="co-tab" data-tab="team" data-i18n="co.tab.team">الفريق</button>
+  <button class="co-tab" data-tab="brain" data-i18n="co.tab.brain">الذكاء</button>
+</nav>
+<main id="co-main">
+  <div class="co-panel on" data-panel="dash" id="p_dash"></div>
+  <div class="co-panel" data-panel="ops" id="p_ops"></div>
+  <div class="co-panel" data-panel="fin" id="p_fin"></div>
+  <div class="co-panel" data-panel="team" id="p_team"></div>
+  <div class="co-panel" data-panel="brain" id="p_brain"></div>
+</main>
+<script src="living-bg.js" defer></script>
+<script src="charts.js" defer></script>
+<script src="sections/group-data.js" defer></script>
+<script src="company.js" defer></script>
+<script src="i18n.js" defer></script>
+<script src="states.js" defer></script></body>
+</html>

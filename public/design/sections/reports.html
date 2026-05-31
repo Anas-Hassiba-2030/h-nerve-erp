@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-living="work" data-ambient="finance">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-Nerve · التقارير</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../living-bg.css">
+<link rel="stylesheet" href="_section.css">
+<link rel="stylesheet" href="../interactions.css">
+<link rel="stylesheet" href="../ambient.css">
+<link rel="stylesheet" href="../ops.css">
+<style>
+.rp-layout{display:grid;grid-template-columns:300px 1fr;gap:16px}
+@media(max-width:820px){.rp-layout{grid-template-columns:1fr}}
+.rp-list{display:flex;flex-direction:column;gap:8px}
+.rp-item{display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:13px;cursor:pointer;background:var(--cream);border:1px solid var(--line);transition:border-color .2s,transform .2s}
+.rp-item:hover{border-color:var(--gold);transform:translateX(-2px)}
+.rp-item.on{border-color:var(--emerald);box-shadow:inset 0 0 0 1px var(--emerald)}
+.rp-item .lg{width:36px;height:36px;flex:0 0 36px;border-radius:9px;display:grid;place-items:center;font-family:var(--display);font-size:16px;font-weight:600;color:#fff;background:linear-gradient(140deg,var(--emerald-soft),var(--emerald))}
+.rp-item .rt{font-size:13px;font-weight:700;color:var(--ink)}
+.rp-item .rd{font-size:11px;color:var(--ink-muted)}
+/* the one-pager */
+.report{background:#fffdf8;border:1px solid var(--line);border-radius:18px;padding:34px 38px;box-shadow:0 18px 50px -30px rgba(31,77,63,.3)}
+.report .rp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;border-bottom:2px solid var(--emerald);padding-bottom:18px;margin-bottom:22px}
+.report .rp-brand{display:flex;align-items:center;gap:11px}
+.report .rp-brand .nm{font-size:15px;font-weight:800;color:var(--ink)}.report .rp-brand .nm b{color:var(--gold)}
+.report h2{font-family:var(--display);font-size:34px;font-weight:600;color:var(--emerald);line-height:1.1}
+.report .rp-sub{font-size:13px;color:var(--ink-muted);margin-top:4px}
+.report .rp-date{font-size:12px;color:var(--ink-muted);text-align:end}
+.rp-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.rp-kpi{border:1px solid var(--line);border-radius:12px;padding:14px}
+.rp-kpi .v{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:24px;font-weight:600;color:var(--emerald)}
+.rp-kpi .k{font-size:11px;color:var(--ink-muted);margin-top:3px}
+.rp-sec-t{font-family:var(--display);font-size:18px;font-weight:600;color:var(--ink);margin:0 0 12px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+.rp-narr{font-size:14px;line-height:1.7;color:var(--ink);margin-bottom:22px}
+.rp-narr b{color:var(--emerald)}
+@media print{
+  body * {visibility:hidden}
+  #report,#report * {visibility:visible}
+  #report{position:absolute;inset:0;margin:0;border:0;box-shadow:none;border-radius:0}
+  #topbar,#living-bg,#ambient-bg,.rp-list,.sec-head,.rp-toolbar{display:none!important}
+}
+</style>
+<link rel="stylesheet" href="../app-layer.css?v=nav3"><link rel="stylesheet" href="../states.css"></head>
+<body><header id="topbar">
+  <div class="tb-brand">
+    <svg class="tb-mark" viewBox="0 0 100 100" fill="none"><defs><radialGradient id="ngrp" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FBF3DC"/><stop offset="50%" stop-color="#DCC38A"/><stop offset="100%" stop-color="#C2A35A" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="42" stroke="#C2A35A" stroke-width="1.4" opacity=".6"/><ellipse cx="50" cy="50" rx="42" ry="17" stroke="#C2A35A" stroke-width="1.2" opacity=".45"/><g stroke="#DCC38A" stroke-width="6.5" stroke-linecap="round"><line x1="31" y1="26" x2="31" y2="74"/><line x1="69" y1="26" x2="69" y2="74"/><line x1="31" y1="50" x2="69" y2="50"/></g><circle cx="50" cy="50" r="15" fill="url(#ngrp)"/><circle cx="50" cy="50" r="4.5" fill="#FBF3DC"/></svg>
+    <span class="tb-word">H‑Nerve <span class="erp">ERP</span></span>
+  </div>
+  <a class="tb-orbit" href="/orrery">↺ العودة إلى المدار</a>
+  <button class="tb-user"><span class="tb-avatar">أ</span><span class="tb-uinfo"><span class="tb-uname">أ. الحوراني</span><span class="tb-urole">رئيس مجلس الإدارة</span></span></button>
+</header>
+<div class="wrap">
+  <div class="sec-head reveal">
+    <div>
+      <div class="sec-eyebrow"><span class="tick"></span data-i18n="b4.gc.eyebrowReports">النمو ورأس المال · التقارير</div>
+      <h1 class="sec-title" data-i18n="b4.title.reports">التقارير</h1>
+      <p class="sec-sub">تقرير تنفيذي من صفحة واحدة لكل وحدة — جاهز للطباعة أو الحفظ كـ PDF.</p>
+    </div>
+    <div class="sec-head-aside rp-toolbar"><span class="sec-status"><span class="dot"></span>رسمي · مُدقّق</span>
+      <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+        <button class="btn btn-primary" id="printBtn">اطبع / احفظ PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="rp-layout">
+    <div class="rp-list reveal" id="rpList"></div>
+    <div id="report" class="report reveal"></div>
+  </div>
+</div>
+<script src="../living-bg.js" defer></script>
+<script src="../ambient.js" defer></script>
+<script src="../charts.js?v=i18n2" defer></script>
+<script src="group-data.js" defer></script>
+<script src="../ops.js?v=i18n2" defer></script>
+<script src="section.js" defer></script>
+<script src="reports-ops.js" defer></script>
+<script src="../app-layer.js?v=nav3" defer></script><script src="../states.js" defer></script></body>
+</html>

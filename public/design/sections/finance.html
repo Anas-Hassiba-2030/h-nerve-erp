@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-living="work" data-section="finance" data-ambient="finance">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-Nerve · المالية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../living-bg.css">
+<link rel="stylesheet" href="_section.css">
+<link rel="stylesheet" href="../interactions.css">
+<link rel="stylesheet" href="../ambient.css">
+<link rel="stylesheet" href="../app-layer.css?v=nav3"><link rel="stylesheet" href="../states.css"></head>
+<body>
+<header id="topbar">
+  <div class="tb-brand">
+    <svg class="tb-mark" viewBox="0 0 100 100" fill="none"><defs><radialGradient id="ngfin" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FBF3DC"/><stop offset="50%" stop-color="#DCC38A"/><stop offset="100%" stop-color="#C2A35A" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="42" stroke="#C2A35A" stroke-width="1.4" opacity=".6"/><ellipse cx="50" cy="50" rx="42" ry="17" stroke="#C2A35A" stroke-width="1.2" opacity=".45"/><g stroke="#DCC38A" stroke-width="6.5" stroke-linecap="round"><line x1="31" y1="26" x2="31" y2="74"/><line x1="69" y1="26" x2="69" y2="74"/><line x1="31" y1="50" x2="69" y2="50"/></g><circle cx="50" cy="50" r="15" fill="url(#ngfin)"/><circle cx="50" cy="50" r="4.5" fill="#FBF3DC"/></svg>
+    <span class="tb-word">H‑Nerve <span class="erp">ERP</span></span>
+  </div>
+  <a class="tb-orbit" href="/orrery">↺ العودة إلى المدار</a>
+  <button class="tb-user">
+    <span class="tb-avatar">أ</span>
+    <span class="tb-uinfo"><span class="tb-uname">أ. الحوراني</span><span class="tb-urole">رئيس مجلس الإدارة</span></span>
+  </button>
+</header>
+
+<div class="wrap">
+  <div class="sec-head reveal">
+    <div>
+      <div class="sec-eyebrow"><span class="tick"></span>النمو ورأس المال · المالية</div>
+      <h1 class="sec-title">المالية</h1>
+      <p class="sec-sub">الصورة المالية الموحّدة لمجموعة الحوراني — الإيراد، التدفق النقدي، والهامش عبر الوحدات.</p>
+    </div>
+    <div class="sec-head-aside">
+      <span class="sec-status"><span class="dot"></span>مباشر · مُدقّق</span>
+      <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+        <a class="btn btn-ghost" href="../ui_kits/theater/index.html">مسرح القرار</a>
+        <button class="btn btn-gold">تصدير القوائم</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-grid reveal reveal-stagger">
+    <div class="kpi-card">
+      <div class="kpi-label">إيراد المجموعة ٣٠ي</div>
+      <div class="kpi-val"><span data-count="137465" data-ar="1">١٣٧٬٤٦٥</span></div>
+      <div class="kpi-foot"><span class="kpi-hint">دينار · سابقاً ٩٦٬٢١٠</span><span class="delta up">▲ ‎+١٢٫٤٪‎</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">صافي الربح</div>
+      <div class="kpi-val"><span data-count="97643" data-ar="1">٩٧٬٦٤٣</span></div>
+      <div class="kpi-foot"><span class="kpi-hint">دينار · هامش ٧١٪</span><span class="delta up">▲ ‎+١٨٫٢٪‎</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">التدفق النقدي</div>
+      <div class="kpi-val"><span data-count="62.4" data-dec="1" data-suffix="٪" data-ar="1">٦٢٫٤</span></div>
+      <div class="kpi-foot"><span class="kpi-hint">من الإيراد</span><span class="delta up">▲ ‎+٣٫١٪‎</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">المصاريف</div>
+      <div class="kpi-val"><span data-count="39822" data-ar="1">٣٩٬٨٢٢</span></div>
+      <div class="kpi-foot"><span class="kpi-hint">دينار · سابقاً ٤٤٬١٨٠</span><span class="delta down">▼ ‎−٩٫٩٪‎</span></div>
+    </div>
+  </div>
+
+  <div class="panel reveal">
+    <div class="panel-head">
+      <span class="panel-title">الإيراد مقابل المصاريف</span>
+      <div class="seg">
+        <span class="seg-ind"></span>
+        <button>شهري</button>
+        <button class="active">ربعي</button>
+        <button>سنوي</button>
+      </div>
+    </div>
+    <div class="bars">
+      <div class="bar-col"><div class="bar-stack"><div class="bar rev" style="height:48%"></div><div class="bar exp" style="height:16%"></div></div><span class="bar-x">ر١</span></div>
+      <div class="bar-col"><div class="bar-stack"><div class="bar rev" style="height:56%"></div><div class="bar exp" style="height:18%"></div></div><span class="bar-x">ر٢</span></div>
+      <div class="bar-col"><div class="bar-stack"><div class="bar rev" style="height:64%"></div><div class="bar exp" style="height:19%"></div></div><span class="bar-x">ر٣</span></div>
+      <div class="bar-col"><div class="bar-stack"><div class="bar rev" style="height:72%"></div><div class="bar exp" style="height:21%"></div></div><span class="bar-x">ر٤</span></div>
+      <div class="bar-col"><div class="bar-stack"><div class="bar rev" style="height:84%"></div><div class="bar exp" style="height:23%"></div></div><span class="bar-x">ر١</span></div>
+      <div class="bar-col"><div class="bar-stack"><div class="bar rev" style="height:94%"></div><div class="bar exp" style="height:25%"></div></div><span class="bar-x">ر٢</span></div>
+    </div>
+  </div>
+
+  <div class="panel reveal">
+    <div class="panel-head">
+      <span class="panel-title">الإيراد حسب الوحدة</span>
+      <span class="panel-aside">٥ شركات · آخر ٣٠ يوماً</span>
+    </div>
+    <table>
+      <thead><tr><th>الوحدة</th><th>القطاع</th><th class="num">إيراد ٣٠ي</th><th class="num">الهامش</th><th class="num">التغيّر</th><th>الحالة</th></tr></thead>
+      <tbody>
+        <tr><td>أرينا للضيافة</td><td>فنادق</td><td class="num">٨٨٬٢١٠</td><td class="num">٤٢٪</td><td class="num">‎+١١٪‎</td><td><span class="tag ok">نمو</span></td></tr>
+        <tr><td>الأهلية عمّان</td><td>تعليم</td><td class="num">٥٥٬٢١٦</td><td class="num">١٠٠٪</td><td class="num">‎−٦٤٪‎</td><td><span class="tag crit">حرج</span></td></tr>
+        <tr><td>المها للألبان</td><td>ألبان</td><td class="num">٣١٬٥٤٠</td><td class="num">٣٨٪</td><td class="num">‎+٤٤٪‎</td><td><span class="tag ok">نمو</span></td></tr>
+        <tr><td>لوران الزراعية</td><td>زراعة</td><td class="num">١٧٬٣٦٩</td><td class="num">٢٩٪</td><td class="num">‎+٨٪‎</td><td><span class="tag warn">مراقبة</span></td></tr>
+        <tr><td>الحوراني القابضة</td><td>حوكمة</td><td class="num">٠</td><td class="num">—</td><td class="num">—</td><td><span class="tag ok">مستقر</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="../living-bg.js" defer></script>
+<script src="../ambient.js" defer></script>
+<script src="section.js" defer></script>
+<script src="../app-layer.js?v=nav3" defer></script><script src="../states.js" defer></script></body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-living="night">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-Nerve · بحيرة الذاكرة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../living-bg.css">
+<link rel="stylesheet" href="_section.css">
+<link rel="stylesheet" href="../interactions.css">
+<style>
+/* ── بحيرة الذاكرة · Memory Lake — contemplative episodic recall ── */
+html,body{height:100%}
+body{background:transparent;color:var(--mist)}
+/* water-like flowing lake background (light, CSS-only) */
+#lake{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  background:radial-gradient(ellipse 100% 80% at 50% 30%,#0e2620 0%,#0a1c17 60%,#071310 100%)}
+#lake .wave{position:absolute;inset:-30%;border-radius:45%;mix-blend-mode:screen;opacity:.5}
+#lake .w1{background:radial-gradient(ellipse 50% 40% at 40% 60%,rgba(31,77,63,.5),transparent 65%);animation:lake1 32s ease-in-out infinite}
+#lake .w2{background:radial-gradient(ellipse 45% 38% at 65% 45%,rgba(46,107,87,.35),transparent 62%);animation:lake2 40s ease-in-out infinite}
+#lake .w3{background:radial-gradient(ellipse 55% 30% at 50% 75%,rgba(126,155,134,.18),transparent 70%);animation:lake1 48s ease-in-out infinite reverse}
+@keyframes lake1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(3%,-2%) scale(1.06)}}
+@keyframes lake2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-4%,3%) scale(1.08)}}
+
+.ml-wrap{max-width:1080px;margin:0 auto;padding:14px 24px 80px;position:relative;z-index:1}
+/* slim ribbon + search */
+.ml-ribbon{display:flex;align-items:stretch;gap:18px;margin-bottom:16px;flex-wrap:wrap}
+.ml-title-box{display:flex;flex-direction:column;justify-content:center;padding-inline-end:18px;border-inline-end:1px solid rgba(194,163,90,.2);min-width:180px}
+.ml-title-box .eb{display:inline-flex;align-items:center;gap:7px;font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--gold-soft);text-transform:uppercase;margin-bottom:4px}
+.ml-title-box .eb .tick{width:18px;height:1.5px;background:var(--gold-soft)}
+.ml-title-box h1{font-family:var(--display);font-size:38px;font-weight:600;color:#fff;line-height:1}
+.ml-search{flex:1;min-width:260px;display:flex;align-items:center;gap:12px;
+  background:linear-gradient(160deg,rgba(20,46,38,.55),rgba(13,31,26,.5));border:1px solid rgba(194,163,90,.24);border-radius:16px;padding:0 18px}
+.ml-search .ic{font-size:18px;color:var(--gold-soft);opacity:.8}
+.ml-search input{flex:1;background:none;border:0;outline:none;color:#fff;font-family:var(--ui);font-size:15px;padding:16px 0}
+.ml-search input::placeholder{color:var(--mist);opacity:.5}
+.ml-search .cnt{font-size:12px;color:var(--mist);opacity:.6;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* filter pills */
+.ml-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.ml-fgroup{display:flex;gap:5px;align-items:center;padding:4px;border-radius:999px;background:rgba(13,31,26,.4);border:1px solid rgba(194,163,90,.16)}
+.ml-fgroup .glbl{font-size:10px;color:var(--mist);opacity:.5;padding:0 8px;letter-spacing:.06em}
+.pill{padding:6px 14px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--mist);opacity:.7;cursor:pointer;transition:all .25s cubic-bezier(.22,1,.36,1);background:none;border:0;font-family:var(--ui)}
+.pill:hover{opacity:1}
+.pill.on{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#241b06;opacity:1;font-weight:700}
+
+/* timeline */
+.ml-timeline{position:relative;margin-top:28px;padding:10px 0}
+.ml-timeline::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%);
+  background:linear-gradient(180deg,transparent,rgba(194,163,90,.5) 8%,rgba(194,163,90,.5) 92%,transparent)}
+#recallSvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:4;overflow:visible}
+.mem{position:relative;width:50%;padding:14px 34px;box-sizing:border-box;margin-bottom:10px;opacity:0;transform:translateY(20px)}
+.mem.in{opacity:1;transform:none;transition:opacity .6s cubic-bezier(.22,1,.36,1),transform .6s cubic-bezier(.22,1,.36,1)}
+.mem.right{margin-inline-start:50%;text-align:start}
+.mem.left{text-align:start}
+.mem .node{position:absolute;top:24px;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#FBF3DC,#C2A35A);
+  box-shadow:0 0 12px rgba(220,195,138,.7);z-index:5;transition:transform .3s,box-shadow .3s}
+.mem.left .node{inset-inline-end:-7px}
+.mem.right .node{inset-inline-start:-7px}
+.mcard{background:linear-gradient(160deg,rgba(20,46,38,.7),rgba(13,31,26,.62));backdrop-filter:blur(10px);
+  border:1px solid rgba(194,163,90,.2);border-radius:16px;padding:16px 18px;cursor:default;transition:border-color .3s,box-shadow .3s,transform .3s}
+.mem:hover .mcard,.mem.related .mcard{border-color:rgba(194,163,90,.5);box-shadow:0 14px 40px -20px rgba(0,0,0,.6)}
+.mem:hover .mcard{transform:translateY(-2px)}
+.mem.related .node{transform:scale(1.4);box-shadow:0 0 18px rgba(126,155,134,.9)}
+.mem.dim{opacity:.28}
+.mcard .date{font-family:var(--font-mono,monospace);font-size:11px;color:var(--gold-soft);letter-spacing:.06em;margin-bottom:6px}
+.mcard .sit{font-family:var(--display);font-size:18px;font-weight:600;color:#fff;line-height:1.35;margin-bottom:9px}
+.mcard .dec{font-size:13px;color:var(--mist);opacity:.82;line-height:1.5;margin-bottom:10px}
+.mcard .dec b{color:var(--gold-soft);font-weight:600}
+.mcard .foot{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mcard .badge{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:999px}
+.mcard .badge.good{color:var(--sage);background:rgba(126,155,134,.18)}
+.mcard .badge.bad{color:#cf9384;background:rgba(168,106,92,.2)}
+.mcard .dom{font-size:11px;color:var(--mist);opacity:.55}
+.mem.hidden{display:none}
+.ml-empty{text-align:center;padding:40px;color:var(--mist);opacity:.6;font-family:var(--display);font-size:20px}
+@media (prefers-reduced-motion:reduce){#lake .wave{animation:none}.mem{opacity:1;transform:none}}
+@media(max-width:720px){
+  .ml-timeline::before{left:14px}
+  .mem,.mem.right{width:100%;margin-inline-start:0;padding:10px 0 10px 36px}
+  .mem .node,.mem.left .node,.mem.right .node{inset-inline-start:7px;inset-inline-end:auto}
+}
+</style>
+<link rel="stylesheet" href="../app-layer.css?v=nav3"><link rel="stylesheet" href="../states.css"></head>
+<body>
+<div id="lake"><div class="wave w1"></div><div class="wave w2"></div><div class="wave w3"></div></div>
+
+<header id="topbar">
+  <div class="tb-brand">
+    <svg class="tb-mark" viewBox="0 0 100 100" fill="none"><defs><radialGradient id="ngm" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FBF3DC"/><stop offset="50%" stop-color="#DCC38A"/><stop offset="100%" stop-color="#C2A35A" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="42" stroke="#C2A35A" stroke-width="1.4" opacity=".6"/><ellipse cx="50" cy="50" rx="42" ry="17" stroke="#C2A35A" stroke-width="1.2" opacity=".45"/><g stroke="#DCC38A" stroke-width="6.5" stroke-linecap="round"><line x1="31" y1="26" x2="31" y2="74"/><line x1="69" y1="26" x2="69" y2="74"/><line x1="31" y1="50" x2="69" y2="50"/></g><circle cx="50" cy="50" r="15" fill="url(#ngm)"/><circle cx="50" cy="50" r="4.5" fill="#FBF3DC"/></svg>
+    <span class="tb-word">H‑Nerve <span class="erp">ERP</span></span>
+  </div>
+  <a class="tb-orbit" href="/orrery">↺ العودة إلى المدار</a>
+  <button class="tb-user"><span class="tb-avatar">أ</span><span class="tb-uinfo"><span class="tb-uname">أ. الحوراني</span><span class="tb-urole">رئيس مجلس الإدارة</span></span></button>
+</header>
+
+<div class="ml-wrap">
+  <div class="ml-ribbon">
+    <div class="ml-title-box">
+      <span class="eb"><span class="tick"></span data-i18n="br.eyebrow.intel">الذكاء التشغيلي</span>
+      <h1 data-i18n="br.title.memory">بحيرة الذاكرة</h1>
+    </div>
+    <div class="ml-search">
+      <span class="ic">⌕</span>
+      <input id="ask" type="text" placeholder="اسأل الذاكرة… (مثال: هبوط إيراد، توسّع إنتاج، خطر هدر)">
+      <span class="cnt" id="cnt"></span>
+    </div>
+  </div>
+
+  <div class="ml-filters">
+    <div class="ml-fgroup"><span class="glbl">القطاع</span>
+      <button class="pill on" data-f="dom" data-v="all">الكل</button>
+      <button class="pill" data-f="dom" data-v="ضيافة">ضيافة</button>
+      <button class="pill" data-f="dom" data-v="ألبان">ألبان</button>
+      <button class="pill" data-f="dom" data-v="زراعة">زراعة</button>
+      <button class="pill" data-f="dom" data-v="تعليم">تعليم</button>
+      <button class="pill" data-f="dom" data-v="مالية">مالية</button>
+    </div>
+    <div class="ml-fgroup"><span class="glbl">النتيجة</span>
+      <button class="pill on" data-f="out" data-v="all">الكل</button>
+      <button class="pill" data-f="out" data-v="good">ناجحة</button>
+      <button class="pill" data-f="out" data-v="bad">متعثّرة</button>
+    </div>
+    <div class="ml-fgroup"><span class="glbl">السنة</span>
+      <button class="pill on" data-f="yr" data-v="all">الكل</button>
+      <button class="pill" data-f="yr" data-v="2024">٢٠٢٤</button>
+      <button class="pill" data-f="yr" data-v="2025">٢٠٢٥</button>
+      <button class="pill" data-f="yr" data-v="2026">٢٠٢٦</button>
+    </div>
+  </div>
+
+  <div class="ml-timeline" id="timeline">
+    <svg id="recallSvg"></svg>
+  </div>
+  <div class="ml-empty" id="empty" style="display:none">لا ذكريات مطابقة. جرّب بحثاً آخر.</div>
+</div>
+
+<script src="../living-bg.js" defer></script>
+<script src="memory.js" defer></script>
+<script src="../app-layer.js?v=nav3" defer></script><script src="../states.js" defer></script></body>
+</html>

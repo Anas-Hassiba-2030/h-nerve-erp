@@ -27,6 +27,7 @@ import { SectorPill } from "@/components/SectorPill";
 import { StatusBadge } from "@/components/StatusBadge";
 import { EmptyState } from "@/components/EmptyState";
 import { PinButton } from "@/components/PinButton";
+import { enterWorkspace } from "@/app/actions/workspace";
 import { prisma } from "@/lib/db";
 import { isPinned } from "@/lib/pins";
 import {
@@ -166,14 +167,25 @@ export default async function CompanyDetailPage({
   return (
     <>
       <Topbar
-        eyebrow="ملف الشركة"
-        title={company.name}
-        subtitle={company.nameEn}
+        eyebrow={getLocale() === "en" ? "Company profile" : "ملف الشركة"}
+        title={getLocale() === "en" ? company.nameEn : company.name}
+        subtitle={getLocale() === "en" ? company.name : company.nameEn}
         actions={
           <div className="flex items-center gap-2">
+            {/* The descent: enter THIS company's scoped ERP back-office. Sets
+                the workspace + tenant cookies (enterWorkspace) and lands on
+                /workspace — every query then auto-scopes to this company. */}
+            <form action={enterWorkspace}>
+              <input type="hidden" name="companyId" value={company.id} />
+              <button type="submit" className="btn-primary">
+                <Building2 className="h-4 w-4" />
+                {getLocale() === "en" ? "Open back-office" : "دخول نظام الشركة"}
+                <ArrowUpRight className="h-4 w-4" />
+              </button>
+            </form>
             <Link href="/companies" className="btn-ghost">
               <ArrowLeft className="h-4 w-4" />
-              السجل
+              {getLocale() === "en" ? "Register" : "السجل"}
             </Link>
             <PinButton
               entityType="COMPANY"
@@ -186,9 +198,9 @@ export default async function CompanyDetailPage({
               tone="default"
               locale="ar"
             />
-            <Link href={`/companies/${company.id}/edit`} className="btn-primary">
+            <Link href={`/companies/${company.id}/edit`} className="btn-ghost">
               <Pencil className="h-4 w-4" />
-              تعديل
+              {getLocale() === "en" ? "Edit" : "تعديل"}
             </Link>
           </div>
         }

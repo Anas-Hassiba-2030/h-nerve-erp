@@ -3,30 +3,41 @@ import { getLocale } from "@/lib/i18n.server";
 
 // BILINGUAL: rank name + bonus suffix flip AR/EN. Locale from the optional
 // `locale` prop or the h_nerve_locale cookie (server component). Previously the
-// rank name + "٪ بونص" suffix were hardcoded Arabic.
+// rank name (r.ar) + "٪ بونص" suffix were hardcoded Arabic.
 export function RankBadge({
   rank,
-  showBonus = true,
+  size = "md",
+  showLabel = true,
   locale,
 }: {
-  rank: Rank;
-  showBonus?: boolean;
+  rank: Rank | string;
+  size?: "sm" | "md" | "lg" | "xl";
+  showLabel?: boolean;
   locale?: "ar" | "en";
 }) {
-  const lc = locale ?? getLocale();
-  const ar = lc === "ar";
+  const ar = (locale ?? getLocale()) === "ar";
   const r = rankById(rank);
+  const cls =
+    size === "xl" ? "rank-piece rank-piece-xl" :
+    size === "lg" ? "rank-piece rank-piece-lg" :
+    size === "sm" ? "rank-piece text-base h-7 w-7 rounded-md" :
+    "rank-piece text-2xl";
+
   return (
-    <span className="inline-flex items-center gap-1.5">
-      <span className="rank-piece" style={{ color: r.color }}>{r.symbol}</span>
-      <span className="text-sm font-semibold" style={{ color: r.color }}>
-        {ar ? r.ar : r.en}
+    <span className="inline-flex items-center gap-2">
+      <span className={`${cls} anim-pop`} style={{ color: r.color }} aria-label={r.en}>
+        {r.symbol}
       </span>
-      {showBonus && (
-        <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-          +{r.bonusPercent}{ar ? "٪ بونص" : "% bonus"}
+      {showLabel ? (
+        <span className="flex flex-col leading-tight">
+          <span className="text-xs font-extrabold" style={{ color: "var(--text)" }}>
+            {ar ? r.ar : r.en}
+          </span>
+          <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+            +{r.bonusPercent}{ar ? "٪ بونص" : "% bonus"}
+          </span>
         </span>
-      )}
+      ) : null}
     </span>
   );
 }

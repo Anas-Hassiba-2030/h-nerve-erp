@@ -1,8 +1,12 @@
 // SectorPill — Heritage Modern variant. Uses the current-color dot pattern
 // from `.heri-pill` so each sector gets a single chromatic accent drawn from
 // the Heritage palette (no pastel rainbow). See docs/DESIGN-SKILL.md §5.2.
+//
+// BILINGUAL: flips AR/EN via loc(); locale from the optional `locale` prop or
+// the h_nerve_locale cookie (server component). Previously rendered Arabic only.
 
-import { ar, SECTORS_AR } from "@/lib/utils";
+import { loc, SECTORS_AR, SECTORS_EN } from "@/lib/utils";
+import { getLocale } from "@/lib/i18n.server";
 
 const TONE: Record<string, string> = {
   HOSPITALITY: "var(--heri-ochre)",      // gold — hospitality
@@ -13,11 +17,12 @@ const TONE: Record<string, string> = {
   TRADE:       "var(--heri-rose)",       // rose
 };
 
-export function SectorPill({ sector }: { sector: string }) {
+export function SectorPill({ sector, locale }: { sector: string; locale?: "ar" | "en" }) {
+  const lc = locale ?? getLocale();
   const color = TONE[sector] ?? TONE.INVESTMENT;
   return (
     <span className="heri-pill" style={{ color }}>
-      {ar(SECTORS_AR, sector)}
+      {loc(SECTORS_AR, SECTORS_EN, lc, sector)}
     </span>
   );
 }

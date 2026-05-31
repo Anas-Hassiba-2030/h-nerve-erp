@@ -1,8 +1,14 @@
 // StatusBadge — Heritage Modern variant.
 // Maps every domain status onto one of 5 Heritage tones using the current-color
 // dot pattern from `.heri-pill`. See docs/DESIGN-SKILL.md §5.2.
+//
+// BILINGUAL: the label flips AR/EN. Locale comes from the optional `locale`
+// prop; when omitted it reads the h_nerve_locale cookie (server component) so
+// the label is correct on every page without touching call sites. Previously it
+// always rendered Arabic via ar(), which leaked Arabic in English mode.
 
-import { ar, STATUS_AR } from "@/lib/utils";
+import { loc, STATUS_AR, STATUS_EN } from "@/lib/utils";
+import { getLocale } from "@/lib/i18n.server";
 
 type Tone = "success" | "warn" | "critical" | "info" | "neutral";
 
@@ -24,7 +30,8 @@ const STATUS_TONE: Record<string, Tone> = {
   ARCHIVED: "neutral", CLOSED: "neutral",
 };
 
-export function StatusBadge({ status }: { status: string }) {
+export function StatusBadge({ status, locale }: { status: string; locale?: "ar" | "en" }) {
+  const lc = locale ?? getLocale();
   const tone: Tone = STATUS_TONE[status] ?? "neutral";
   const color: Record<Tone, string> = {
     success:  "var(--heri-teal)",
@@ -35,7 +42,7 @@ export function StatusBadge({ status }: { status: string }) {
   };
   return (
     <span className="heri-pill" style={{ color: color[tone] }}>
-      {ar(STATUS_AR, status)}
+      {loc(STATUS_AR, STATUS_EN, lc, status)}
     </span>
   );
 }

@@ -31,6 +31,7 @@ export function OrreryFrame({ identity }: { identity: OrreryIdentity }) {
           "sections/ahliyya.html": "/education",
           "sections/finance.html": "/finance",
           "sections/reports.html": "/reports",
+          "sections/analytics.html": "/analytics",
           "sections/markets.html": "/markets",
           "sections/compare.html": "/compare",
         };

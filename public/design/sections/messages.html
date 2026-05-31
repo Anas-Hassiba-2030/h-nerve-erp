@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-living="night" data-ambient="cosmic">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-Nerve · المراسلات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../living-bg.css">
+<link rel="stylesheet" href="_section.css">
+<link rel="stylesheet" href="../interactions.css">
+<link rel="stylesheet" href="../ambient.css">
+<style>
+/* ── المراسلات · Messages — functional internal chat ── */
+html,body{height:100%;overflow:hidden}
+body{background:transparent;color:var(--mist);display:flex;flex-direction:column}
+#topbar{flex:0 0 56px}
+.ms-wrap{flex:1;min-height:0;display:flex;flex-direction:column;padding:12px 22px 14px;width:100%;max-width:1340px;margin:0 auto}
+
+/* slim ribbon + KPIs */
+.ms-ribbon{display:flex;align-items:stretch;gap:16px;margin-bottom:12px;flex-wrap:wrap}
+.ms-title-box{display:flex;flex-direction:column;justify-content:center;padding-inline-end:16px;border-inline-end:1px solid rgba(194,163,90,.2);min-width:160px}
+.ms-title-box .eb{display:inline-flex;align-items:center;gap:7px;font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--gold-soft);text-transform:uppercase;margin-bottom:4px}
+.ms-title-box .eb .tick{width:18px;height:1.5px;background:var(--gold-soft)}
+.ms-title-box h1{font-family:var(--display);font-size:34px;font-weight:600;color:#fff;line-height:1}
+.ms-kpis{display:flex;gap:12px;flex:1}
+.ms-kpi{flex:1;min-width:110px;background:linear-gradient(160deg,rgba(20,46,38,.5),rgba(13,31,26,.46));border:1px solid rgba(194,163,90,.2);border-radius:14px;padding:11px 16px;display:flex;flex-direction:column;justify-content:center}
+.ms-kpi .v{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:26px;font-weight:600;color:#fff;line-height:1}
+.ms-kpi .k{font-size:11px;color:var(--mist);opacity:.7;margin-top:4px}
+
+/* chat layout */
+.ms-chat{flex:1;min-height:0;display:grid;grid-template-columns:320px 1fr;gap:14px}
+@media(max-width:820px){.ms-chat{grid-template-columns:1fr}.ms-threads{display:none}.ms-threads.show{display:flex}}
+.panel{background:linear-gradient(160deg,rgba(17,42,35,.55),rgba(13,31,26,.5));backdrop-filter:blur(12px);border:1px solid rgba(194,163,90,.2);border-radius:18px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+
+/* thread list */
+.ms-threads{}
+.ms-threads-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 16px 12px;border-bottom:1px solid rgba(194,163,90,.14)}
+.ms-threads-head h2{font-family:var(--display);font-size:19px;font-weight:600;color:#fff}
+.ms-new{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#241b06;background:linear-gradient(135deg,var(--gold-soft),var(--gold));border:0;border-radius:999px;padding:7px 13px;cursor:pointer}
+.ms-thread-list{flex:1;overflow-y:auto;padding:6px}
+.thr{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:13px;cursor:pointer;transition:background .2s;position:relative}
+.thr:hover{background:rgba(194,163,90,.07)}
+.thr.active{background:rgba(46,107,87,.4);box-shadow:inset 0 0 0 1px rgba(194,163,90,.3)}
+.thr .av{width:42px;height:42px;flex:0 0 42px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-size:18px;font-weight:600;color:#fff;background:linear-gradient(140deg,rgba(46,107,87,.95),rgba(13,31,26,.95));border:1.5px solid rgba(194,163,90,.3);position:relative}
+.thr .av .pres{position:absolute;bottom:1px;inset-inline-end:1px;width:10px;height:10px;border-radius:50%;background:var(--sage);border:2px solid #0d1f1a}
+.thr .meta{flex:1;min-width:0}
+.thr .row1{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.thr .nm{font-size:13.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thr .tm{font-size:10px;color:var(--mist);opacity:.5;white-space:nowrap}
+.thr .ro{font-size:10.5px;color:var(--gold-soft);opacity:.8;margin-bottom:2px}
+.thr .prev{font-size:12px;color:var(--mist);opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thr .unread{flex:0 0 auto;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--gold);color:#241b06;font-size:11px;font-weight:800;display:grid;place-items:center;animation:unreadpulse 2.4s ease-in-out infinite}
+@keyframes unreadpulse{0%,100%{box-shadow:0 0 0 0 rgba(220,195,138,.5)}50%{box-shadow:0 0 0 5px rgba(220,195,138,0)}}
+
+/* conversation */
+.ms-convo{}
+.ms-convo-head{display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid rgba(194,163,90,.14)}
+.ms-convo-head .av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-size:17px;font-weight:600;color:#fff;background:linear-gradient(140deg,rgba(46,107,87,.95),rgba(13,31,26,.95));border:1.5px solid rgba(194,163,90,.3)}
+.ms-convo-head .who{flex:1;min-width:0}
+.ms-convo-head .nm{font-size:15px;font-weight:700;color:#fff}
+.ms-convo-head .st{font-size:11px;color:var(--sage)}
+.ms-brain-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--gold-soft);background:rgba(194,163,90,.12);border:1px solid rgba(194,163,90,.3);border-radius:999px;padding:7px 13px;cursor:pointer;transition:all .25s}
+.ms-brain-btn:hover{background:rgba(194,163,90,.22);color:#fff}
+.ms-msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:74%;display:flex;flex-direction:column;gap:4px;animation:msgin .4s cubic-bezier(.22,1,.36,1)}
+@keyframes msgin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.msg.mine{align-self:flex-start}
+.msg.theirs{align-self:flex-end}
+.msg .bub{padding:11px 15px;border-radius:16px;font-size:14px;line-height:1.5;color:#fff;word-wrap:break-word}
+.msg.mine .bub{background:linear-gradient(135deg,var(--emerald-soft),var(--emerald));border-bottom-left-radius:5px}
+.msg.theirs .bub{background:rgba(20,46,38,.85);border:1px solid rgba(194,163,90,.18);border-bottom-right-radius:5px}
+.msg .bub img{display:block;max-width:240px;width:100%;border-radius:11px;margin-top:4px}
+.msg .meta{font-size:10px;color:var(--mist);opacity:.5;padding:0 6px}
+.msg.mine .meta{text-align:start}.msg.theirs .meta{text-align:end}
+.typing{align-self:flex-end;display:flex;align-items:center;gap:6px;padding:10px 15px;border-radius:16px;background:rgba(20,46,38,.85);border:1px solid rgba(194,163,90,.18);opacity:0;transition:opacity .3s}
+.typing.show{opacity:1}
+.typing span{width:6px;height:6px;border-radius:50%;background:var(--gold-soft);animation:think 1.3s ease-in-out infinite}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes think{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
+
+/* composer */
+.ms-composer{border-top:1px solid rgba(194,163,90,.14);padding:12px 14px}
+.ms-attach-preview{display:none;align-items:center;gap:10px;padding:8px;margin-bottom:8px;background:rgba(13,31,26,.6);border:1px solid rgba(194,163,90,.2);border-radius:12px}
+.ms-attach-preview.show{display:flex}
+.ms-attach-preview img{width:48px;height:48px;object-fit:cover;border-radius:8px}
+.ms-attach-preview .nm{flex:1;font-size:12px;color:var(--mist);opacity:.8}
+.ms-attach-preview .rm{cursor:pointer;color:#cf9384;font-size:18px;background:none;border:0}
+.ms-composer-row{display:flex;align-items:flex-end;gap:9px}
+.ms-iconbtn{width:42px;height:42px;flex:0 0 42px;border-radius:50%;display:grid;place-items:center;font-size:18px;color:var(--gold-soft);background:rgba(194,163,90,.1);border:1px solid rgba(194,163,90,.25);cursor:pointer;transition:all .2s}
+.ms-iconbtn:hover{background:rgba(194,163,90,.22);color:#fff}
+.ms-input{flex:1;background:rgba(13,31,26,.6);border:1px solid rgba(194,163,90,.22);border-radius:18px;color:#fff;font-family:var(--ui);font-size:14px;line-height:1.4;padding:11px 16px;resize:none;outline:none;max-height:110px;min-height:44px}
+.ms-input::placeholder{color:var(--mist);opacity:.5}
+.ms-send{width:44px;height:44px;flex:0 0 44px;border-radius:50%;display:grid;place-items:center;font-size:18px;color:#241b06;background:linear-gradient(135deg,var(--gold-soft),var(--gold));border:0;cursor:pointer;transition:transform .2s}
+.ms-send:hover{transform:scale(1.06)}
+.ms-send:active{transform:scale(.94)}
+@media (prefers-reduced-motion:reduce){.msg{animation:none}.thr .unread{animation:none}.typing span{animation:none}}
+</style>
+<link rel="stylesheet" href="../app-layer.css?v=nav3"><link rel="stylesheet" href="../states.css"></head>
+<body>
+<header id="topbar">
+  <div class="tb-brand">
+    <svg class="tb-mark" viewBox="0 0 100 100" fill="none"><defs><radialGradient id="ngms" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FBF3DC"/><stop offset="50%" stop-color="#DCC38A"/><stop offset="100%" stop-color="#C2A35A" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="42" stroke="#C2A35A" stroke-width="1.4" opacity=".6"/><ellipse cx="50" cy="50" rx="42" ry="17" stroke="#C2A35A" stroke-width="1.2" opacity=".45"/><g stroke="#DCC38A" stroke-width="6.5" stroke-linecap="round"><line x1="31" y1="26" x2="31" y2="74"/><line x1="69" y1="26" x2="69" y2="74"/><line x1="31" y1="50" x2="69" y2="50"/></g><circle cx="50" cy="50" r="15" fill="url(#ngms)"/><circle cx="50" cy="50" r="4.5" fill="#FBF3DC"/></svg>
+    <span class="tb-word">H‑Nerve <span class="erp">ERP</span></span>
+  </div>
+  <a class="tb-orbit" href="/orrery">↺ العودة إلى المدار</a>
+  <button class="tb-user"><span class="tb-avatar">أ</span><span class="tb-uinfo"><span class="tb-uname">أ. الحوراني</span><span class="tb-urole">رئيس مجلس الإدارة</span></span></button>
+</header>
+
+<div class="ms-wrap">
+  <div class="ms-ribbon">
+    <div class="ms-title-box">
+      <span class="eb"><span class="tick"></span data-i18n="b4.eyebrow.people">الأفراد</span>
+      <h1 data-i18n="b4.title.messages">المراسلات</h1>
+    </div>
+    <div class="ms-kpis">
+      <div class="ms-kpi"><div class="v" id="kp_threads">٥</div><div class="k" data-i18n="b4.msg.kpiMine">محادثاتي</div></div>
+      <div class="ms-kpi"><div class="v" id="kp_24h">١٢</div><div class="k" data-i18n="b4.msg.kpi24h">رسائل آخر ٢٤ ساعة</div></div>
+      <div class="ms-kpi"><div class="v" id="kp_unread">٣</div><div class="k" data-i18n="b4.msg.kpiUnread">غير مقروء</div></div>
+    </div>
+  </div>
+
+  <div class="ms-chat">
+    <div class="panel ms-threads">
+      <div class="ms-threads-head"><h2 data-i18n="b4.msg.threads">المحادثات</h2><button class="ms-new" id="newThread" data-i18n="b4.msg.newThread">＋ محادثة جديدة</button></div>
+      <div class="ms-thread-list" id="threadList"></div>
+    </div>
+    <div class="panel ms-convo">
+      <div class="ms-convo-head">
+        <div class="av" id="cv_av">ل</div>
+        <div class="who"><div class="nm" id="cv_nm">—</div><div class="st" id="cv_st" data-i18n="b4.msg.online">متصل الآن</div></div>
+        <button class="ms-brain-btn" id="brainBtn" data-i18n="b4.msg.discussBrain">✦ ناقش مع الدماغ</button>
+      </div>
+      <div class="ms-msgs" id="msgs"></div>
+      <div class="ms-composer">
+        <div class="ms-attach-preview" id="attachPreview"><img id="attachImg" alt=""><span class="nm" id="attachName"></span><button class="rm" id="attachRm">×</button></div>
+        <div class="ms-composer-row">
+          <button class="ms-iconbtn" id="attachBtn" title="إرفاق صورة">📎</button>
+          <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+          <textarea class="ms-input" id="input" rows="1" placeholder="اكتب رسالة… (Enter للإرسال)"></textarea>
+          <button class="ms-send" id="sendBtn" title="إرسال">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../living-bg.js" defer></script>
+<script src="../ambient.js" defer></script>
+<script src="messages.js" defer></script>
+<script src="../app-layer.js?v=nav3" defer></script><script src="../states.js" defer></script></body>
+</html>

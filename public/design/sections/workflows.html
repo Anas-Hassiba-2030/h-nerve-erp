@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-living="night" data-ambient="holding">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-Nerve · الأتمتة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../living-bg.css"><link rel="stylesheet" href="_section.css"><link rel="stylesheet" href="../interactions.css"><link rel="stylesheet" href="../ambient.css"><link rel="stylesheet" href="../brain.css">
+<style>
+html,body{height:100%}body{background:transparent;color:var(--mist)}
+.wf-studio{display:grid;grid-template-columns:180px 1fr 230px;gap:14px;height:480px}
+@media(max-width:900px){.wf-studio{grid-template-columns:1fr;height:auto}}
+.wf-pal,.wf-insp{background:linear-gradient(160deg,rgba(17,42,35,.55),rgba(13,31,26,.5));border:1px solid rgba(194,163,90,.2);border-radius:16px;padding:14px;overflow:auto}
+.wf-pal h3,.wf-insp h3{font-family:var(--display);font-size:15px;color:#fff;margin-bottom:10px}
+.pal-node{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:10px;background:rgba(13,31,26,.5);border:1px solid rgba(194,163,90,.2);margin-bottom:8px;cursor:grab;font-size:12.5px;color:var(--mist);transition:border-color .2s}
+.pal-node:hover{border-color:var(--gold)}
+.pal-node .pi{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-size:13px;flex:0 0 26px}
+.pi.trigger{background:rgba(126,155,134,.2);color:var(--sage)}.pi.cond{background:rgba(194,163,90,.18);color:var(--gold-soft)}.pi.action{background:rgba(46,107,87,.3);color:#9cc6b4}
+.wf-canvas{position:relative;background:radial-gradient(rgba(194,163,90,.07) 1px,transparent 1.4px);background-size:22px 22px;background-color:rgba(8,18,14,.4);border:1px solid rgba(194,163,90,.2);border-radius:16px;overflow:hidden}
+.wf-canvas svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.wnode{position:absolute;min-width:120px;padding:11px 13px;border-radius:11px;background:linear-gradient(160deg,rgba(31,77,63,.92),rgba(13,31,26,.92));border:1.5px solid rgba(194,163,90,.4);cursor:grab;user-select:none;z-index:2}
+.wnode.sel{border-color:var(--gold);box-shadow:0 0 18px rgba(220,195,138,.5)}
+.wnode .wt{font-size:12.5px;font-weight:700;color:#fff}.wnode .wk{font-size:10px;color:var(--gold-soft);margin-top:2px}
+.wf-runstrip{display:flex;align-items:center;gap:10px;margin-top:12px;padding:11px 15px;border-radius:12px;background:rgba(13,31,26,.5);border:1px solid rgba(194,163,90,.2);font-size:13px;color:var(--mist)}
+.wf-runstrip .step{display:flex;align-items:center;gap:6px;opacity:.4;transition:opacity .3s,color .3s}
+.wf-runstrip .step.on{opacity:1;color:var(--sage)}
+.insp-field{margin-bottom:12px}.insp-field label{display:block;font-size:11px;color:var(--mist);opacity:.7;margin-bottom:4px}
+.insp-field input,.insp-field select{width:100%;background:rgba(13,31,26,.6);border:1px solid rgba(194,163,90,.25);border-radius:9px;color:#fff;font-family:var(--ui);font-size:12.5px;padding:8px 10px;outline:none}
+</style>
+<link rel="stylesheet" href="../app-layer.css?v=nav3"><link rel="stylesheet" href="../states.css"></head>
+<body><header id="topbar">
+  <div class="tb-brand"><svg class="tb-mark" viewBox="0 0 100 100" fill="none"><defs><radialGradient id="ngwf" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FBF3DC"/><stop offset="50%" stop-color="#DCC38A"/><stop offset="100%" stop-color="#C2A35A" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="42" stroke="#C2A35A" stroke-width="1.4" opacity=".6"/><ellipse cx="50" cy="50" rx="42" ry="17" stroke="#C2A35A" stroke-width="1.2" opacity=".45"/><g stroke="#DCC38A" stroke-width="6.5" stroke-linecap="round"><line x1="31" y1="26" x2="31" y2="74"/><line x1="69" y1="26" x2="69" y2="74"/><line x1="31" y1="50" x2="69" y2="50"/></g><circle cx="50" cy="50" r="15" fill="url(#ngwf)"/><circle cx="50" cy="50" r="4.5" fill="#FBF3DC"/></svg>
+    <span class="tb-word">H‑Nerve <span class="erp">ERP</span></span></div>
+  <a class="tb-orbit" href="/orrery">↺ العودة إلى المدار</a>
+  <button class="tb-user"><span class="tb-avatar">أ</span><span class="tb-uinfo"><span class="tb-uname">أ. الحوراني</span><span class="tb-urole">رئيس مجلس الإدارة</span></span></button>
+</header>
+<div class="br-wrap">
+  <div class="br-ribbon"><div class="br-title-box"><span class="eb"><span class="tick"></span>النظام</span><h1 data-i18n="b4.title.workflows">الأتمتة</h1></div>
+    <div class="br-intro">صمّم مسارات عمل تلقائية بالسحب والإفلات. محفّز ← شرط ← إجراء — ودع الدماغ ينفّذها.</div></div>
+  <div class="br-controls">
+    <button class="br-btn br-btn-primary" id="newWf" data-i18n="b4.wf.newScratch">＋ مسار من الصفر</button>
+    <button class="br-btn br-btn-ghost" id="tmpl" data-i18n="b4.wf.fromTemplate">من قالب</button>
+    <button class="br-btn br-btn-ghost" id="testRun" data-i18n="b4.wf.testRun">▶ تشغيل تجريبي</button>
+    <button class="br-btn br-btn-ghost" id="addNode">＋ عقدة</button>
+  </div>
+  <div class="wf-studio">
+    <div class="wf-pal"><h3>اللوحة</h3>
+      <div class="pal-node" data-kind="trigger"><span class="pi trigger">⚡</span>محفّز</div>
+      <div class="pal-node" data-kind="cond"><span class="pi cond">◆</span>شرط</div>
+      <div class="pal-node" data-kind="action"><span class="pi action">▶</span>إجراء</div>
+      <div style="font-size:11px;color:var(--mist);opacity:.5;margin-top:10px;line-height:1.5">انقر عقدة لإضافتها للوحة، ثم اسحبها لترتيبها.</div>
+    </div>
+    <div class="wf-canvas" id="canvas"><svg id="wires"></svg></div>
+    <div class="wf-insp"><h3>الخصائص</h3><div id="inspector"><div style="font-size:12px;color:var(--mist);opacity:.55">اختر عقدة لتحرير إعداداتها.</div></div></div>
+  </div>
+  <div class="wf-runstrip" id="runstrip"><span style="font-weight:700;color:var(--gold-soft)">التشغيل:</span><span class="step" data-s="0">⚡ محفّز</span>→<span class="step" data-s="1">◆ شرط</span>→<span class="step" data-s="2">▶ إجراء</span></div>
+</div>
+<div class="br-toast" id="toast"></div>
+<script src="../living-bg.js" defer></script><script src="../ambient.js" defer></script><script src="workflows-ops.js?v=2" defer></script>
+<script src="../app-layer.js?v=nav3" defer></script><script src="../states.js" defer></script></body>
+</html>

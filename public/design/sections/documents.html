@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-living="night" data-ambient="cosmic">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-Nerve · الوثائق</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../living-bg.css"><link rel="stylesheet" href="_section.css"><link rel="stylesheet" href="../interactions.css"><link rel="stylesheet" href="../ambient.css"><link rel="stylesheet" href="../brain.css">
+<style>
+html,body{height:100%}body{background:transparent;color:var(--mist)}
+.dz{border:2px dashed rgba(194,163,90,.4);border-radius:18px;padding:32px;text-align:center;transition:all .25s;cursor:pointer;background:rgba(13,31,26,.3);margin-bottom:18px}
+.dz.over{border-color:var(--gold);background:rgba(194,163,90,.1)}
+.dz .ic{font-size:38px;opacity:.6;margin-bottom:8px}
+.dz .t{font-size:15px;font-weight:700;color:#fff}.dz .s{font-size:12px;color:var(--mist);opacity:.65;margin-top:4px}
+.doc-group{margin-bottom:18px}
+.doc-group h3{font-family:var(--display);font-size:18px;font-weight:600;color:var(--gold-soft);margin-bottom:10px;display:flex;align-items:center;gap:9px}
+.doc-group h3 .ct{font-size:11px;color:var(--mist);opacity:.6;background:rgba(13,31,26,.5);border:1px solid rgba(194,163,90,.2);padding:2px 9px;border-radius:999px}
+.doc{display:flex;align-items:center;gap:13px;padding:12px 15px;border-radius:12px;background:rgba(13,31,26,.4);border:1px solid rgba(194,163,90,.14);margin-bottom:8px}
+.doc .fic{width:38px;height:38px;flex:0 0 38px;border-radius:9px;display:grid;place-items:center;font-size:17px;background:rgba(194,163,90,.14);color:var(--gold-soft)}
+.doc .dt{flex:1;min-width:0}.doc .dn{font-size:13.5px;font-weight:700;color:#fff}.doc .dm{font-size:11px;color:var(--mist);opacity:.65}
+</style>
+<link rel="stylesheet" href="../app-layer.css?v=nav3"><link rel="stylesheet" href="../states.css"></head>
+<body><header id="topbar">
+  <div class="tb-brand"><svg class="tb-mark" viewBox="0 0 100 100" fill="none"><defs><radialGradient id="ngdoc" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FBF3DC"/><stop offset="50%" stop-color="#DCC38A"/><stop offset="100%" stop-color="#C2A35A" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="42" stroke="#C2A35A" stroke-width="1.4" opacity=".6"/><ellipse cx="50" cy="50" rx="42" ry="17" stroke="#C2A35A" stroke-width="1.2" opacity=".45"/><g stroke="#DCC38A" stroke-width="6.5" stroke-linecap="round"><line x1="31" y1="26" x2="31" y2="74"/><line x1="69" y1="26" x2="69" y2="74"/><line x1="31" y1="50" x2="69" y2="50"/></g><circle cx="50" cy="50" r="15" fill="url(#ngdoc)"/><circle cx="50" cy="50" r="4.5" fill="#FBF3DC"/></svg>
+    <span class="tb-word">H‑Nerve <span class="erp">ERP</span></span></div>
+  <a class="tb-orbit" href="/orrery">↺ العودة إلى المدار</a>
+  <button class="tb-user"><span class="tb-avatar">أ</span><span class="tb-uinfo"><span class="tb-uname">أ. الحوراني</span><span class="tb-urole">رئيس مجلس الإدارة</span></span></button>
+</header>
+<div class="br-wrap">
+  <div class="br-ribbon">
+    <div class="br-title-box"><span class="eb"><span class="tick"></span>الذكاء التشغيلي</span><h1>الوثائق</h1></div>
+    <div class="br-intro">يقرأ الدماغ وثائق الأعمال ويستخلص منها الإشارات. أفلت ملفاتك هنا — مجمّعةً حسب الشركة.</div>
+  </div>
+  <div class="dz" id="dz"><div class="ic">⬆</div><div class="t">أفلت الملفات هنا أو انقر للرفع</div><div class="s">PDF · DOCX · XLSX · صور · حتى ٢٠ ميغابايت</div>
+    <input type="file" id="fileInput" hidden multiple></div>
+  <div id="groups"></div>
+</div>
+<div class="br-toast" id="toast"></div>
+<script src="../living-bg.js" defer></script><script src="../ambient.js" defer></script><script src="documents-ops.js" defer></script>
+<script src="../app-layer.js?v=nav3" defer></script><script src="../states.js" defer></script></body>
+</html>

@@ -1,0 +1,15 @@
+<svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="H-Nerve logomark">
+  <defs>
+    <radialGradient id="ng" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FBF3DC"></stop><stop offset="45%" stop-color="#DCC38A"></stop><stop offset="100%" stop-color="#C2A35A" stop-opacity="0"></stop></radialGradient>
+    <linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#DCC38A"></stop><stop offset="100%" stop-color="#C2A35A"></stop></linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="82" stroke="url(#sg)" stroke-width="1.1" opacity=".55"></circle>
+  <ellipse cx="100" cy="100" rx="82" ry="34" stroke="url(#sg)" stroke-width="1" opacity=".4"></ellipse>
+  <path d="M58 52 L58 148" stroke="url(#sg)" stroke-width="6" stroke-linecap="round"></path>
+  <path d="M142 52 L142 148" stroke="url(#sg)" stroke-width="6" stroke-linecap="round"></path>
+  <path d="M58 100 L142 100" stroke="url(#sg)" stroke-width="6" stroke-linecap="round"></path>
+  <circle cx="58" cy="52" r="4" fill="#DCC38A"></circle><circle cx="142" cy="52" r="4" fill="#DCC38A"></circle>
+  <circle cx="58" cy="148" r="4" fill="#DCC38A"></circle><circle cx="142" cy="148" r="4" fill="#DCC38A"></circle>
+  <circle cx="100" cy="100" r="34" fill="url(#ng)"></circle>
+  <circle cx="100" cy="100" r="9" fill="#FBF3DC"></circle>
+</svg>

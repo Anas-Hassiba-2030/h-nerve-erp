@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-living="night" data-ambient="holding">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-Nerve · المجلس</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../living-bg.css">
+<link rel="stylesheet" href="_section.css">
+<link rel="stylesheet" href="../interactions.css">
+<link rel="stylesheet" href="../ambient.css">
+<style>
+/* ── المجلس · Council Debate — theatrical editorial register ── */
+html,body{height:100%}
+body{background:transparent;color:var(--mist)}
+.co-wrap{max-width:1180px;margin:0 auto;padding:14px 24px 70px}
+
+/* slim ribbon */
+.co-ribbon{display:flex;align-items:stretch;gap:18px;margin-bottom:18px}
+.co-title-box{display:flex;flex-direction:column;justify-content:center;padding-inline-end:18px;border-inline-end:1px solid rgba(194,163,90,.2);min-width:170px}
+.co-title-box .eb{display:inline-flex;align-items:center;gap:7px;font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--gold-soft);text-transform:uppercase;margin-bottom:4px}
+.co-title-box .eb .tick{width:18px;height:1.5px;background:var(--gold-soft)}
+.co-title-box h1{font-family:var(--display);font-size:38px;font-weight:600;color:#fff;line-height:1}
+.co-intro{display:flex;align-items:center;flex:1;font-size:14px;line-height:1.5;color:var(--mist);opacity:.82;
+  background:linear-gradient(160deg,rgba(20,46,38,.5),rgba(13,31,26,.46));border:1px solid rgba(194,163,90,.2);border-radius:16px;padding:14px 20px}
+
+/* the question */
+.co-question{position:relative;text-align:center;margin:8px 0 22px}
+.co-question .lbl{font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--gold-soft);text-transform:uppercase;margin-bottom:8px}
+.co-question h2{font-family:var(--display);font-size:clamp(24px,3.2vw,38px);font-weight:600;color:#fff;line-height:1.25;max-width:22ch;margin:0 auto;text-wrap:balance}
+.co-question .q-glow{position:absolute;inset:-20% 20%;z-index:-1;background:radial-gradient(ellipse 60% 100% at 50% 50%,rgba(194,163,90,.12),transparent 70%);animation:qpulse 4s ease-in-out infinite}
+@keyframes qpulse{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* round table */
+.co-table{position:relative;height:300px;margin:0 auto 8px;max-width:680px}
+.co-table .ring-c{position:absolute;left:50%;top:50%;width:220px;height:220px;transform:translate(-50%,-50%);border-radius:50%;
+  border:1px solid rgba(194,163,90,.28);background:radial-gradient(circle,rgba(31,77,63,.3),transparent 70%)}
+.co-table .ring-c::after{content:"";position:absolute;inset:30px;border-radius:50%;border:1px solid rgba(194,163,90,.16)}
+.co-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:128px;height:128px;border-radius:50%;display:grid;place-items:center;text-align:center;
+  background:radial-gradient(circle at 40% 35%,#2E6B57,#1F4D3F 52%,#0c2019);box-shadow:inset 0 2px 16px rgba(220,195,138,.25),0 0 40px rgba(31,77,63,.6)}
+.co-center .ttl{font-family:var(--display);font-size:15px;color:var(--gold-soft);line-height:1.2}
+.co-center .ttl b{display:block;font-size:13px;color:#fff;opacity:.8;font-weight:500;margin-top:3px}
+.seat{position:absolute;width:118px;transform:translate(-50%,-50%);text-align:center;cursor:default;z-index:3;transition:transform .3s}
+.seat .av{width:54px;height:54px;border-radius:50%;margin:0 auto 6px;display:grid;place-items:center;font-family:var(--display);font-size:24px;font-weight:600;color:#fff;
+  background:linear-gradient(140deg,rgba(46,107,87,.9),rgba(13,31,26,.95));border:2px solid rgba(194,163,90,.3);position:relative;transition:border-color .3s,box-shadow .3s}
+.seat .av::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:1.5px solid var(--gold);opacity:0;transition:opacity .3s}
+.seat .nm{font-size:12px;font-weight:700;color:var(--mist);line-height:1.2}
+.seat .ro{font-size:10px;color:var(--mist);opacity:.6;margin-top:1px}
+.seat .think{position:absolute;top:46px;left:50%;transform:translateX(-50%);display:flex;gap:3px;opacity:0;transition:opacity .3s}
+.seat .think span{width:4px;height:4px;border-radius:50%;background:var(--gold-soft);animation:think 1.4s ease-in-out infinite}
+.seat .think span:nth-child(2){animation-delay:.2s}.seat .think span:nth-child(3){animation-delay:.4s}
+@keyframes think{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+.seat.thinking .think{opacity:1}
+.seat.thinking .av{border-color:var(--gold);box-shadow:0 0 22px rgba(220,195,138,.6)}
+.seat.spoke .av::after{opacity:1}
+.seat.support .av{border-color:var(--sage)} .seat.oppose .av{border-color:var(--brick)} .seat.qualify .av{border-color:var(--gold)}
+#coSvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible}
+
+/* debate feed */
+.co-feed{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:12px;min-height:120px}
+.dbt{display:flex;gap:14px;align-items:flex-start;padding:15px 18px;border-radius:16px;opacity:0;transform:translateY(14px);
+  background:linear-gradient(160deg,rgba(20,46,38,.6),rgba(13,31,26,.55));backdrop-filter:blur(10px);border:1px solid rgba(194,163,90,.18);position:relative;overflow:hidden}
+.dbt.in{opacity:1;transform:none;transition:opacity .5s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1)}
+.dbt::before{content:"";position:absolute;inset-inline-start:0;top:0;bottom:0;width:3px}
+.dbt.support::before{background:var(--sage)} .dbt.oppose::before{background:var(--brick)} .dbt.qualify::before{background:var(--gold)}
+.dbt .dav{width:40px;height:40px;flex:0 0 40px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-size:18px;font-weight:600;color:#fff;background:linear-gradient(140deg,rgba(46,107,87,.9),rgba(13,31,26,.95));border:1.5px solid rgba(194,163,90,.3)}
+.dbt .dbody{flex:1;min-width:0}
+.dbt .dhead{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+.dbt .dnm{font-size:13.5px;font-weight:700;color:#fff}
+.dbt .stance{font-size:10px;font-weight:700;letter-spacing:.04em;padding:2px 9px;border-radius:999px}
+.dbt.support .stance{color:var(--sage);background:rgba(126,155,134,.18)}
+.dbt.oppose .stance{color:#cf9384;background:rgba(168,106,92,.2)}
+.dbt.qualify .stance{color:var(--gold-soft);background:rgba(194,163,90,.18)}
+.dbt .dtext{font-size:14px;line-height:1.55;color:var(--mist)}
+.dbt .dtext b{color:var(--gold-soft);font-weight:600}
+
+/* moderator synthesis */
+.co-mod{max-width:760px;margin:24px auto 0;opacity:0;transform:translateY(16px)}
+.co-mod.in{opacity:1;transform:none;transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s}
+.mod-card{display:flex;gap:22px;align-items:center;flex-wrap:wrap;padding:24px 26px;border-radius:20px;
+  background:linear-gradient(160deg,rgba(31,77,63,.55),rgba(13,31,26,.6));border:1px solid rgba(194,163,90,.34);box-shadow:0 22px 60px -24px rgba(0,0,0,.6)}
+.ring-wrap{position:relative;width:104px;height:104px;flex:0 0 104px}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-wrap .rtxt{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.ring-wrap .rtxt b{font-family:var(--display);font-size:30px;font-weight:600;color:#fff;line-height:1}
+.ring-wrap .rtxt span{font-size:9px;color:var(--gold-soft);letter-spacing:.08em}
+.mod-body{flex:1;min-width:240px}
+.mod-body .mlbl{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--gold-soft);text-transform:uppercase;margin-bottom:8px}
+.mod-body h3{font-family:var(--display);font-size:23px;font-weight:600;color:#fff;line-height:1.3;margin-bottom:6px}
+.mod-body p{font-size:13.5px;line-height:1.55;color:var(--mist);opacity:.85}
+.mod-actions{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap}
+.co-replay{display:block;margin:22px auto 0}
+@media (prefers-reduced-motion:reduce){.co-question .q-glow,.seat .think span{animation:none}.dbt,.co-mod{opacity:1;transform:none}}
+@media(max-width:760px){.co-table{height:340px;max-width:380px}}
+</style>
+<link rel="stylesheet" href="../app-layer.css?v=nav3"><link rel="stylesheet" href="../states.css"></head>
+<body>
+<header id="topbar">
+  <div class="tb-brand">
+    <svg class="tb-mark" viewBox="0 0 100 100" fill="none"><defs><radialGradient id="ngc" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FBF3DC"/><stop offset="50%" stop-color="#DCC38A"/><stop offset="100%" stop-color="#C2A35A" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="42" stroke="#C2A35A" stroke-width="1.4" opacity=".6"/><ellipse cx="50" cy="50" rx="42" ry="17" stroke="#C2A35A" stroke-width="1.2" opacity=".45"/><g stroke="#DCC38A" stroke-width="6.5" stroke-linecap="round"><line x1="31" y1="26" x2="31" y2="74"/><line x1="69" y1="26" x2="69" y2="74"/><line x1="31" y1="50" x2="69" y2="50"/></g><circle cx="50" cy="50" r="15" fill="url(#ngc)"/><circle cx="50" cy="50" r="4.5" fill="#FBF3DC"/></svg>
+    <span class="tb-word">H‑Nerve <span class="erp">ERP</span></span>
+  </div>
+  <a class="tb-orbit" href="/orrery">↺ العودة إلى المدار</a>
+  <button class="tb-user"><span class="tb-avatar">أ</span><span class="tb-uinfo"><span class="tb-uname">أ. الحوراني</span><span class="tb-urole">رئيس مجلس الإدارة</span></span></button>
+</header>
+
+<div class="co-wrap">
+  <div class="co-ribbon">
+    <div class="co-title-box">
+      <span class="eb"><span class="tick"></span data-i18n="br.eyebrow.intel">الذكاء التشغيلي</span>
+      <h1 data-i18n="br.title.council">المجلس</h1>
+    </div>
+    <div class="co-intro" data-i18n="br.council.intro">خمسة مستشارين متخصّصين يتناظرون حول قرار حيّ. يستمع الدماغ، يوازن الحجج، ثم يصوغ التوصية النهائية.</div>
+  </div>
+
+  <div class="co-question">
+    <div class="q-glow"></div>
+    <div class="lbl" data-i18n="br.council.qlabel">السؤال المطروح</div>
+    <h2 data-i18n="br.council.question">هل نضاعف إنتاج جبن المها للربع الثالث؟</h2>
+  </div>
+
+  <div class="co-table" id="table">
+    <svg id="coSvg"></svg>
+    <div class="ring-c"></div>
+    <div class="co-center"><div class="ttl">الدماغ<b>يستمع</b></div></div>
+    <!-- seats injected -->
+  </div>
+
+  <div class="co-feed" id="feed"></div>
+
+  <div class="co-mod" id="mod">
+    <div class="mod-card">
+      <div class="ring-wrap">
+        <svg width="104" height="104"><circle cx="52" cy="52" r="46" fill="none" stroke="rgba(205,224,214,.15)" stroke-width="7"/><circle id="confRing" cx="52" cy="52" r="46" fill="none" stroke="url(#cg)" stroke-width="7" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="289"/><defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#DCC38A"/><stop offset="100%" stop-color="#C2A35A"/></linearGradient></defs></svg>
+        <div class="rtxt"><b id="confVal">٠</b><span data-i18n="br.kpi.confidence">الثقة</span></div>
+      </div>
+      <div class="mod-body">
+        <div class="mlbl">◆ توصية المُنسّق</div>
+        <h3>توسّع تدريجي ومشروط — لا مضاعفة كاملة</h3>
+        <p>صرّف الدفعات الخمس القريبة من الانتهاء خلال ٧٢ ساعة، ثم ارفع الطاقة ٦٠٪ قبل مؤتمرات الربع الثالث. يلتقط معظم الطلب مع احتواء خطر الهدر.</p>
+        <div class="mod-actions">
+          <button class="btn btn-secondary" style="color:var(--mist);box-shadow:inset 0 0 0 1.5px rgba(194,163,90,.4)">اعرض كل الأصوات</button>
+          <a class="btn btn-primary" href="whatif.html">نفّذ التوصية</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-secondary co-replay" id="replayBtn" style="color:var(--mist);box-shadow:inset 0 0 0 1.5px rgba(194,163,90,.4)" data-i18n="br.council.replay">↻ أعد النقاش</button>
+</div>
+
+<script src="../living-bg.js" defer></script>
+<script src="../ambient.js" defer></script>
+<script src="council.js" defer></script>
+<script src="../app-layer.js?v=nav3" defer></script><script src="../states.js" defer></script></body>
+</html>

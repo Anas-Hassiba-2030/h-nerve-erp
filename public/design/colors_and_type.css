@@ -1,0 +1,151 @@
+/* ============================================================================
+   H-Nerve Design System — colors_and_type.css
+   ----------------------------------------------------------------------------
+   Single source of truth for color + type tokens, distilled from the live
+   product (BMV2026/app/globals.css). Import fonts/fonts.css FIRST.
+
+   H-Nerve runs TWO coherent registers under one roof (DESIGN-SKILL §6):
+     1. EMERALD SYSTEM  — app chrome, navigation, primary CTAs, login,
+                          the brand logo. Deep emerald + gold. The
+                          "interactive / brand signature" layer.
+     2. HERITAGE MODERN — editorial content surfaces: the executive
+                          dashboard hero, section cards, the Decision
+                          Theater. Cream + ochre + terracotta + teal.
+                          The "calm editorial magazine" layer.
+   Gold/ochre #c69345 is the connective accent shared by BOTH registers.
+   ============================================================================ */
+
+:root {
+  /* ── EMERALD SYSTEM (chrome / nav / CTA / login) ───────────────────────── */
+  --surface:           #f8f6ef;   /* warm off-white app background          */
+  --surface-elevated:  #ffffff;   /* cards, sidebar, panels                 */
+  --text:              #0f2e2a;   /* deep forest — primary text             */
+  --text-muted:        #5b6f6a;   /* secondary text, labels                 */
+  --border:            #e6e2d3;   /* warm hairline border                   */
+  --brand:             #0f7a5a;   /* deep emerald — primary                  */
+  --brand-deep:        #0a4d3a;   /* darkest emerald — gradient base, hover */
+  --brand-soft:        #e6f5ee;   /* emerald tint — active nav, soft fills  */
+  --accent:            #c69345;   /* gold / amber — the shared accent       */
+
+  /* ── HERITAGE MODERN (editorial content surfaces) ──────────────────────── */
+  --heri-cream:        #f5efe6;   /* primary editorial surface              */
+  --heri-cream-2:      #ede5d6;   /* raised cream — cards                    */
+  --heri-cream-3:      #e0d3bb;   /* deepest cream                          */
+  --heri-ink:          #1a1612;   /* warm ink — display headlines           */
+  --heri-ink-2:        #2c2620;   /* secondary ink                          */
+  --heri-ink-3:        #4a4138;   /* tertiary ink, captions                 */
+  --heri-terracotta:   #b85c38;   /* primary editorial accent / critical    */
+  --heri-terracotta-2: #9c4a2c;
+  --heri-ochre:        #c69345;   /* gold accent / CTAs (== --accent)       */
+  --heri-ochre-2:      #a87a32;   /* deeper gold — number emphasis          */
+  --heri-rose:         #c98b8b;   /* soft accent                            */
+  --heri-teal:         #1f4e4a;   /* deep teal — success / punctuation      */
+  --heri-teal-2:       #143734;
+  --heri-copper:       #7d5a3a;   /* mid accent, eyebrows                    */
+  --heri-sage:         #7a9b7a;   /* organic / agriculture                   */
+  --heri-rule:         #d8cdb9;   /* hairline rule — the workhorse divider  */
+  --heri-rule-strong:  #b8a98c;   /* emphasized rule                        */
+
+  /* ── MOBILE DAILY-BRIEF (calm clinical, warm) ──────────────────────────── */
+  --m-bg:        #fbfaf7;  --m-bg-2:     #f4f2ec;
+  --m-ink:       #1a1a1a;  --m-ink-2:    #5b5b5b;  --m-ink-3: #8a8a86;
+  --m-rule:      #ece9e2;  --m-rule-2:   #d8d4ca;
+  --m-sage:      #a8b89a;  --m-sage-soft:#e3eadc;
+  --m-sky:       #9bb2c4;  --m-sky-soft: #dde7ee;
+  --m-blush:     #cf9d9d;  --m-blush-soft:#f1dede;
+  --m-ochre:     #c89b3c;  --m-ochre-soft:#f3e5c4;
+
+  /* ── SEMANTIC STATUS (emerald register defaults) ───────────────────────── */
+  --ok:        #0a8e54;   /* healthy — emerald                              */
+  --warn:      #c69345;   /* warning — ochre                                */
+  --critical:  #b85c38;   /* critical — terracotta                          */
+  --info:      #1f4e4a;   /* info — deep teal                               */
+
+  /* ── ELEVATION ─────────────────────────────────────────────────────────── */
+  --ring:        color-mix(in srgb, var(--brand) 30%, transparent);
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.04),
+                 0 6px 24px color-mix(in srgb, var(--brand-deep) 8%, transparent);
+  --shadow-glow: 0 0 0 1px color-mix(in srgb, var(--brand) 12%, transparent),
+                 0 12px 48px -12px color-mix(in srgb, var(--brand) 35%, transparent);
+
+  /* ── MOTION EASING (reach for these — never bare ease-out) ─────────────── */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);     /* default UI         */
+  --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);     /* dramatic entry     */
+  --ease-in-out-q:  cubic-bezier(0.65, 0, 0.35, 1);    /* loops, transforms  */
+  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1); /* playful (rare)     */
+
+  /* ── TYPE FAMILIES ─────────────────────────────────────────────────────── */
+  --font-display-latin:  "Fraunces", "GT Sectra", "Tiempos Headline", Georgia, serif;
+  --font-display-arabic: "Reem Kufi", "Aref Ruqaa", "Cairo", serif;
+  --font-editorial-ar:   "Aref Ruqaa", "Reem Kufi", serif;
+  --font-body-latin:     "Inter Tight", "Inter", system-ui, sans-serif;
+  --font-body-arabic:    "IBM Plex Sans Arabic", "Cairo", "Tajawal", system-ui, sans-serif;
+  --font-mono:           "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+
+  /* ── TYPE SCALE (16px base · 1.25 major-third) ─────────────────────────── */
+  --text-xs:   12.8px;
+  --text-sm:   14px;
+  --text-base: 16px;
+  --text-lg:   20px;
+  --text-xl:   25px;
+  --text-2xl:  31.25px;
+  --text-3xl:  39px;
+  --text-4xl:  48.8px;
+  --text-5xl:  61px;
+}
+
+/* ============================================================================
+   BASE TYPE STYLES
+   ============================================================================ */
+.font-display-latin  { font-family: var(--font-display-latin);  font-optical-sizing: auto; }
+.font-display-arabic { font-family: var(--font-display-arabic); }
+.font-editorial-ar   { font-family: var(--font-editorial-ar); }
+.font-body-latin     { font-family: var(--font-body-latin); }
+.font-body-arabic    { font-family: var(--font-body-arabic); }
+.font-mono           { font-family: var(--font-mono); }
+
+/* Hero / display steps — clamped, balanced (DESIGN-SKILL §2.2) */
+.h-display-xl { font-family: var(--font-display-latin); font-size: clamp(48px,7vw,120px); line-height:.95; letter-spacing:-.03em; text-wrap:balance; font-weight:500; }
+.h-display-lg { font-family: var(--font-display-latin); font-size: clamp(40px,5vw,72px);  line-height:1.0; letter-spacing:-.02em; text-wrap:balance; font-weight:500; }
+.h-display-md { font-family: var(--font-display-latin); font-size: clamp(28px,3vw,44px);  line-height:1.1; letter-spacing:-.015em; font-weight:500; }
+.h-display-sm { font-family: var(--font-display-latin); font-size: clamp(22px,2vw,30px);  line-height:1.15; letter-spacing:-.01em; font-weight:600; }
+
+/* Semantic headings (Latin display, deep forest text) */
+h1, .h1 { font-family: var(--font-display-latin); font-size: var(--text-3xl); line-height:1.1;  letter-spacing:-.02em;  font-weight:500; color: var(--text); text-wrap: balance; }
+h2, .h2 { font-family: var(--font-display-latin); font-size: var(--text-2xl); line-height:1.15; letter-spacing:-.015em; font-weight:500; color: var(--text); }
+h3, .h3 { font-family: var(--font-body-latin);    font-size: var(--text-xl);  line-height:1.2;  letter-spacing:-.01em;  font-weight:600; color: var(--text); }
+h4, .h4 { font-family: var(--font-body-latin);    font-size: var(--text-lg);  line-height:1.3;  font-weight:600; color: var(--text); }
+
+/* Body */
+p, .p { font-family: var(--font-body-latin); font-size: var(--text-base); line-height:1.6; color: var(--text); }
+.p-sm  { font-size: var(--text-sm); line-height:1.55; }
+.measure { max-width: 65ch; }
+
+/* Eyebrow — mono uppercase, wide tracking (the H-Nerve signature label) */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 500; line-height: 1;
+  text-transform: uppercase; letter-spacing: 0.16em;
+  color: var(--text-muted);
+}
+.eyebrow-heri { letter-spacing: 0.18em; color: var(--heri-copper); }
+
+/* Numerals — ALWAYS tabular for data (DESIGN-SKILL §2.4) */
+.tnum { font-variant-numeric: tabular-nums; }
+.num-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+/* The signature Heritage move: display-serif numerals with tabular figures */
+.num-display { font-family: var(--font-display-latin); font-variant-numeric: tabular-nums; font-weight: 500; letter-spacing: -0.01em; }
+
+/* Code / inline mono */
+code, .code { font-family: var(--font-mono); font-size: 0.92em; }
+
+/* RTL body defaults — apply lang/dir on the element */
+[lang="ar"] { font-family: var(--font-body-arabic); }
+[lang="ar"] h1, [lang="ar"] h2, [lang="ar"] .h-display-xl,
+[lang="ar"] .h-display-lg, [lang="ar"] .h-display-md {
+  font-family: var(--font-display-arabic); font-weight: 600; letter-spacing: -0.005em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

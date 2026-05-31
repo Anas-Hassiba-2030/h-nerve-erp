@@ -1,0 +1,71 @@
+/* ════════════════════════════════════════════════════════════════
+   H-NERVE · INTERACTIONS  (shared include — Phase 3)
+   Crafted-but-calm micro-interactions. Drop in alongside _section.css.
+   Timing 0.3–0.4s, ease power2.out-ish. All transform/opacity only.
+   Reduced-motion = instant states, no sweeps.
+   ════════════════════════════════════════════════════════════════ */
+:root{ --ix-ease:cubic-bezier(.22,1,.36,1); --ix-fast:.32s; }
+
+/* ─────────── BUTTONS ─────────── */
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  min-height:44px;padding:0 22px;border-radius:999px;font-family:inherit;font-weight:700;font-size:14px;
+  cursor:pointer;border:1.5px solid transparent;overflow:hidden;isolation:isolate;
+  transition:transform var(--ix-fast) var(--ix-ease),box-shadow var(--ix-fast) var(--ix-ease),
+             background var(--ix-fast) var(--ix-ease),color var(--ix-fast) var(--ix-ease),border-color var(--ix-fast) var(--ix-ease);}
+.btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+/* primary — emerald with gold shine sweep */
+.btn-primary{background:linear-gradient(135deg,var(--emerald-soft),var(--emerald));color:#fff;
+  box-shadow:0 6px 18px -10px rgba(31,77,63,.7)}
+.btn-primary::before{content:"";position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(115deg,transparent 30%,rgba(220,195,138,.55) 50%,transparent 70%);
+  transform:translateX(-130%);transition:transform .55s var(--ix-ease);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 34px -14px rgba(31,77,63,.75)}
+.btn-primary:hover::before{transform:translateX(130%)}
+[dir="rtl"] .btn-primary::before{transform:translateX(130%)}
+[dir="rtl"] .btn-primary:hover::before{transform:translateX(-130%)}
+.btn-primary:active{transform:translateY(0) scale(.97)}
+
+/* gold variant */
+.btn-gold{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#3a2e12;
+  box-shadow:0 6px 18px -10px rgba(194,163,90,.7)}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 16px 34px -14px rgba(194,163,90,.8)}
+.btn-gold:active{transform:translateY(0) scale(.97)}
+
+/* secondary / ghost — gold border draws in */
+.btn-secondary,.btn-ghost{background:transparent;color:var(--emerald);
+  box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn-ghost{color:var(--ink-muted)}
+.btn-secondary:hover,.btn-ghost:hover{color:var(--emerald);box-shadow:inset 0 0 0 1.5px var(--gold);transform:translateY(-1px)}
+.btn-secondary:active,.btn-ghost:active{transform:scale(.98)}
+
+/* ripple (added by interactions.js) */
+.ix-ripple{position:absolute;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%) scale(0);
+  background:radial-gradient(circle,rgba(255,255,255,.5),transparent 70%);z-index:0;
+  animation:ix-ripple .55s var(--ix-ease) forwards}
+.btn-gold .ix-ripple,.btn-secondary .ix-ripple,.btn-ghost .ix-ripple{background:radial-gradient(circle,rgba(194,163,90,.45),transparent 70%)}
+@keyframes ix-ripple{to{transform:translate(-50%,-50%) scale(1);opacity:0}}
+
+/* ─────────── CARDS — lift + gold top-edge wipe ─────────── */
+.ix-card{position:relative;overflow:hidden;
+  transition:transform .4s var(--ix-ease),box-shadow .4s var(--ix-ease),border-color .4s var(--ix-ease)}
+.ix-card::after{content:"";position:absolute;top:0;inset-inline:0;height:2px;
+  background:linear-gradient(90deg,var(--gold),var(--gold-soft));
+  transform:scaleX(0);transform-origin:inline-start;transition:transform .5s var(--ix-ease)}
+.ix-card:hover{transform:translateY(-3px);box-shadow:0 22px 50px -26px rgba(31,77,63,.4);border-color:rgba(194,163,90,.4)}
+.ix-card:hover::after{transform:scaleX(1)}
+
+/* ─────────── LINKS — gold underline grows from start edge (RTL-aware) ─────────── */
+.ix-link{position:relative;color:var(--emerald);font-weight:700;text-decoration:none;padding-bottom:2px}
+.ix-link::after{content:"";position:absolute;inset-inline-start:0;bottom:0;height:1.5px;width:100%;
+  background:var(--gold);transform:scaleX(0);transform-origin:inline-start;
+  transition:transform .35s var(--ix-ease)}
+.ix-link:hover::after{transform:scaleX(1)}
+
+/* ─────────── REDUCED MOTION ─────────── */
+@media (prefers-reduced-motion:reduce){
+  .btn,.ix-card,.ix-link::after,.btn-primary::before,.ix-card::after{transition:none!important;animation:none!important}
+  .btn-primary::before{display:none}
+  .ix-ripple{display:none}
+  .btn:hover,.ix-card:hover{transform:none!important}
+}

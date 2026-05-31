@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-living="work" data-ambient="finance">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-Nerve · التحليلات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../living-bg.css">
+<link rel="stylesheet" href="_section.css">
+<link rel="stylesheet" href="../interactions.css">
+<link rel="stylesheet" href="../ambient.css">
+<link rel="stylesheet" href="../ops.css">
+<style>
+.an-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:820px){.an-grid{grid-template-columns:1fr}}
+.an-card{background:var(--cream);border:1px solid var(--line);border-radius:18px;padding:20px}
+.an-card h2{font-family:var(--display);font-size:20px;font-weight:600;color:var(--emerald);margin-bottom:4px}
+.an-card .sub{font-size:11.5px;color:var(--ink-muted);margin-bottom:16px}
+.an-callouts{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.an-callout{flex:1;min-width:200px;display:flex;align-items:center;gap:14px;background:linear-gradient(160deg,#fffdf8,var(--cream));border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.an-callout .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:rgba(194,163,90,.14);color:var(--gold)}
+.an-callout .t{font-size:12px;color:var(--ink-muted)}
+.an-callout .v{font-family:var(--display);font-size:20px;font-weight:600;color:var(--emerald)}
+.an-covers{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.cover{background:var(--cream);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;transition:transform .25s,border-color .25s}
+.cover:hover{transform:translateY(-2px);border-color:var(--gold)}
+.cover .lg{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-family:var(--display);font-size:17px;font-weight:600;color:#fff;background:linear-gradient(140deg,var(--emerald-soft),var(--emerald));margin-bottom:10px}
+.cover .cn{font-size:13px;font-weight:700;color:var(--ink)}
+.cover .cv{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:17px;color:var(--emerald);margin-top:4px}
+.donut-wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.donut-legend{display:flex;flex-direction:column;gap:7px;font-size:12.5px}
+.donut-legend .lg-row{display:flex;align-items:center;gap:8px}
+.donut-legend .sw{width:11px;height:11px;border-radius:3px}
+.gauges-row{display:flex;gap:20px;justify-content:space-around;flex-wrap:wrap}
+</style>
+<link rel="stylesheet" href="../app-layer.css?v=nav3"><link rel="stylesheet" href="../states.css"></head>
+<body><header id="topbar">
+  <div class="tb-brand">
+    <svg class="tb-mark" viewBox="0 0 100 100" fill="none"><defs><radialGradient id="ngan" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FBF3DC"/><stop offset="50%" stop-color="#DCC38A"/><stop offset="100%" stop-color="#C2A35A" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="42" stroke="#C2A35A" stroke-width="1.4" opacity=".6"/><ellipse cx="50" cy="50" rx="42" ry="17" stroke="#C2A35A" stroke-width="1.2" opacity=".45"/><g stroke="#DCC38A" stroke-width="6.5" stroke-linecap="round"><line x1="31" y1="26" x2="31" y2="74"/><line x1="69" y1="26" x2="69" y2="74"/><line x1="31" y1="50" x2="69" y2="50"/></g><circle cx="50" cy="50" r="15" fill="url(#ngan)"/><circle cx="50" cy="50" r="4.5" fill="#FBF3DC"/></svg>
+    <span class="tb-word">H‑Nerve <span class="erp">ERP</span></span>
+  </div>
+  <a class="tb-orbit" href="/orrery">↺ العودة إلى المدار</a>
+  <button class="tb-user"><span class="tb-avatar">أ</span><span class="tb-uinfo"><span class="tb-uname">أ. الحوراني</span><span class="tb-urole">رئيس مجلس الإدارة</span></span></button>
+</header>
+<div class="wrap">
+  <div class="sec-head reveal">
+    <div>
+      <div class="sec-eyebrow"><span class="tick"></span data-i18n="b4.an.eyebrow">النمو ورأس المال · التحليلات</div>
+      <h1 class="sec-title" data-i18n="b4.title.analytics">التحليلات</h1>
+      <p class="sec-sub" data-i18n="b4.an.intro">أداء المجموعة عبر اثني عشر شهراً — الإيراد، التوزيع، النموّ، والمعايير المرجعية.</p>
+    </div>
+    <div class="sec-head-aside"><span class="sec-status"><span class="dot"></span>مباشر · مُحدّث</span></div>
+  </div>
+
+  <div class="an-callouts reveal">
+    <div class="an-callout"><span class="ic">↗</span><div><div class="t" data-i18n="b4.an.fastest">الأسرع نمواً</div><div class="v">المها للألبان · +٤٤٪</div></div></div>
+    <div class="an-callout"><span class="ic">♔</span><div><div class="t" data-i18n="b4.an.topRev">الأعلى إيراداً</div><div class="v">أرينا للضيافة</div></div></div>
+    <div class="an-callout"><span class="ic">⊕</span><div><div class="t" data-i18n="b4.an.topMargin">الأعلى هامشاً</div><div class="v">الأهلية · ١٠٠٪</div></div></div>
+  </div>
+
+  <div class="filter-pills reveal" id="secPills" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px"></div>
+
+  <div class="an-grid">
+    <div class="an-card reveal"><h2 data-i18n="b4.an.revPanel">إيراد المجموعة · ١٢ شهراً</h2><div class="sub">بالدينار الأردني · شهري</div><div id="revBars"></div></div>
+    <div class="an-card reveal"><h2 data-i18n="b4.an.distPanel">توزيع الإيراد حسب القطاع</h2><div class="sub">حصة كل وحدة</div><div class="donut-wrap"><div id="donut"></div><div class="donut-legend" id="legend"></div></div></div>
+    <div class="an-card reveal"><h2 data-i18n="b4.an.growthPanel">منحنى النموّ التراكمي</h2><div class="sub">مؤشّر الأداء الموحّد</div><div id="area"></div></div>
+    <div class="an-card reveal"><h2 data-i18n="b4.an.benchPanel">المعايير المرجعية</h2><div class="sub">مقابل متوسط القطاع</div><div id="bench"></div></div>
+  </div>
+
+  <div class="an-card reveal"><h2 data-i18n="b4.an.companies">الشركات</h2><div class="sub">انقر شركة للتفاصيل</div><div class="an-covers" id="covers"></div></div>
+</div>
+<script src="../living-bg.js" defer></script>
+<script src="../ambient.js" defer></script>
+<script src="../charts.js?v=i18n2" defer></script>
+<script src="group-data.js" defer></script>
+<script src="../ops.js?v=i18n2" defer></script>
+<script src="section.js" defer></script>
+<script src="analytics-ops.js" defer></script>
+<script src="../app-layer.js?v=nav3" defer></script><script src="../states.js" defer></script></body>
+</html>

@@ -1,0 +1,9 @@
+<svg viewBox="0 0 100 100" width="100" height="100" xmlns="http://www.w3.org/2000/svg" aria-label="Al-Ahliyya Amman University">
+  <defs><linearGradient id="au" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#c8cdf5"></stop><stop offset="100%" stop-color="#4f5dd1"></stop></linearGradient></defs>
+  <path d="M 50 8 L 88 18 L 88 56 C 88 76 70 88 50 94 C 30 88 12 76 12 56 L 12 18 Z" fill="url(#au)" stroke="#4f5dd1" stroke-width="1.5" stroke-linejoin="round"></path>
+  <rect x="24" y="36" width="8" height="36" fill="#1d2680" opacity="0.5" rx="1"></rect><rect x="46" y="36" width="8" height="36" fill="#1d2680" opacity="0.5" rx="1"></rect><rect x="68" y="36" width="8" height="36" fill="#1d2680" opacity="0.5" rx="1"></rect>
+  <line x1="22" y1="34" x2="78" y2="34" stroke="#1d2680" stroke-width="2" stroke-linecap="round"></line>
+  <path d="M 28 60 L 50 56 L 72 60 L 72 76 L 50 72 L 28 76 Z" fill="#ffffff" stroke="#4f5dd1" stroke-width="1.2" stroke-linejoin="round"></path>
+  <line x1="50" y1="56" x2="50" y2="72" stroke="#4f5dd1" stroke-width="1"></line>
+  <polygon points="50,16 52,21 57,21 53,24 55,29 50,26 45,29 47,24 43,21 48,21" fill="#f5b341"></polygon>
+</svg>

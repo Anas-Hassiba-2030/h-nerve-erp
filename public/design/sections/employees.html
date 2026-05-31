@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-living="night" data-ambient="university">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-Nerve · الفريق</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../living-bg.css">
+<link rel="stylesheet" href="_section.css">
+<link rel="stylesheet" href="../interactions.css">
+<link rel="stylesheet" href="../ambient.css">
+<style>
+/* ── الفريق · Employees / Team — roster + org tree + profile drawer ── */
+html,body{height:100%}
+body{background:transparent;color:var(--mist)}
+.em-wrap{max-width:1200px;margin:0 auto;padding:14px 24px 80px}
+.em-top{display:flex;align-items:stretch;gap:16px;margin-bottom:14px;flex-wrap:wrap}
+.em-title-box{display:flex;flex-direction:column;justify-content:center;padding-inline-end:16px;border-inline-end:1px solid rgba(194,163,90,.2);min-width:150px}
+.em-title-box .eb{display:inline-flex;align-items:center;gap:7px;font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--gold-soft);text-transform:uppercase;margin-bottom:4px}
+.em-title-box .eb .tick{width:18px;height:1.5px;background:var(--gold-soft)}
+.em-title-box h1{font-family:var(--display);font-size:34px;font-weight:600;color:#fff;line-height:1}
+.em-kpis{display:flex;gap:12px;flex:1;flex-wrap:wrap}
+.em-kpi{flex:1;min-width:110px;background:linear-gradient(160deg,rgba(20,46,38,.5),rgba(13,31,26,.46));border:1px solid rgba(194,163,90,.2);border-radius:14px;padding:11px 16px}
+.em-kpi .v{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:25px;font-weight:600;color:#fff;line-height:1}
+.em-kpi .k{font-size:11px;color:var(--mist);opacity:.7;margin-top:4px}
+
+.em-tabs{display:flex;gap:8px;margin-bottom:16px}
+.em-tab{padding:9px 20px;border-radius:999px;font-size:13.5px;font-weight:700;color:var(--mist);opacity:.7;cursor:pointer;background:rgba(13,31,26,.4);border:1px solid rgba(194,163,90,.16);font-family:var(--ui);transition:all .25s}
+.em-tab.on{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#241b06;opacity:1;border-color:transparent}
+
+/* org tree */
+.em-tree-wrap{overflow:auto;padding:14px 0}
+.tree{display:flex;flex-direction:column;align-items:center;min-width:max-content;margin:0 auto;animation:breathe 8s ease-in-out infinite;transform-origin:top center}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.012)}}
+.tnode{display:flex;flex-direction:column;align-items:center;position:relative}
+.tcard{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;cursor:pointer;
+  background:linear-gradient(160deg,rgba(20,46,38,.7),rgba(13,31,26,.62));border:1px solid rgba(194,163,90,.22);transition:border-color .25s,box-shadow .25s,transform .25s;white-space:nowrap}
+.tcard:hover{border-color:rgba(194,163,90,.55);box-shadow:0 0 22px rgba(220,195,138,.3);transform:translateY(-2px)}
+.tav{width:38px;height:38px;flex:0 0 38px;border-radius:50%;display:grid;place-items:center;font-size:16px;font-weight:700;color:#fff;background:linear-gradient(140deg,rgba(46,107,87,.95),rgba(13,31,26,.95));border:1.5px solid rgba(194,163,90,.3);position:relative}
+.tav .pres{position:absolute;bottom:0;inset-inline-end:0;width:9px;height:9px;border-radius:50%;background:var(--sage);border:2px solid #0d1f1a;animation:prespulse 2.4s ease-in-out infinite}
+@keyframes prespulse{0%,100%{box-shadow:0 0 0 0 rgba(126,155,134,.6)}50%{box-shadow:0 0 0 4px rgba(126,155,134,0)}}
+.tinfo .tn{font-size:13px;font-weight:700;color:#fff}
+.tinfo .tr{font-size:10.5px;color:var(--gold-soft);opacity:.8}
+.tbadge{font-size:14px;margin-inline-start:4px}
+.tkids{display:flex;gap:18px;margin-top:22px;position:relative;transition:opacity .3s}
+.tnode.collapsed > .tkids{display:none}
+.tnode > .tkids::before{content:"";position:absolute;top:-22px;left:50%;width:1.5px;height:22px;background:rgba(194,163,90,.4);transform:translateX(-50%)}
+.tkids > .tnode::before{content:"";position:absolute;top:-22px;left:50%;width:1.5px;height:22px;background:rgba(194,163,90,.4);transform:translateX(-50%)}
+.tkids::after{content:"";position:absolute;top:-22px;left:10%;right:10%;height:1.5px;background:rgba(194,163,90,.4)}
+.tnode.has-kids > .tcard::after{content:"▾";margin-inline-start:6px;color:var(--gold-soft);font-size:11px;transition:transform .3s}
+.tnode.collapsed.has-kids > .tcard::after{transform:rotate(-90deg)}
+
+/* list grid */
+.em-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.em-controls{display:flex;gap:9px;margin-bottom:14px;flex-wrap:wrap}
+.em-search{background:rgba(13,31,26,.5);border:1px solid rgba(194,163,90,.22);border-radius:999px;color:#fff;font-family:var(--ui);font-size:13px;padding:9px 15px;outline:none;flex:1;min-width:160px}
+.em-search::placeholder{color:var(--mist);opacity:.5}
+.mcard{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:16px;cursor:pointer;
+  background:linear-gradient(160deg,rgba(17,42,35,.55),rgba(13,31,26,.5));border:1px solid rgba(194,163,90,.2);transition:border-color .25s,transform .25s}
+.mcard:hover{border-color:rgba(194,163,90,.5);transform:translateY(-2px)}
+.mcard .mhead{display:flex;align-items:center;gap:11px}
+.mcard .mav{width:48px;height:48px;flex:0 0 48px;border-radius:50%;display:grid;place-items:center;font-size:19px;font-weight:700;color:#fff;background:linear-gradient(140deg,rgba(46,107,87,.95),rgba(13,31,26,.95));border:1.5px solid rgba(194,163,90,.3);position:relative}
+.mcard .mav .pres{position:absolute;bottom:1px;inset-inline-end:1px;width:11px;height:11px;border-radius:50%;background:var(--sage);border:2px solid #0d1f1a}
+.mcard .mn{font-size:14.5px;font-weight:700;color:#fff}
+.mcard .mr{font-size:11.5px;color:var(--gold-soft);opacity:.85}
+.mcard .mmeta{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:var(--mist);opacity:.7;border-top:1px solid rgba(194,163,90,.12);padding-top:9px}
+.mcard .sector{font-size:10.5px;color:var(--gold-soft);background:rgba(194,163,90,.1);padding:2px 9px;border-radius:999px}
+.mcard .chips{display:flex;gap:4px}
+
+/* profile drawer */
+.em-drawer{position:fixed;top:0;inset-inline-start:0;bottom:0;width:360px;max-width:88vw;z-index:90;transform:translateX(-105%);transition:transform .4s cubic-bezier(.22,1,.36,1);
+  background:linear-gradient(160deg,rgba(17,42,35,.97),rgba(8,18,14,.97));backdrop-filter:blur(16px);border-inline-end:1px solid rgba(194,163,90,.3);box-shadow:0 0 60px rgba(0,0,0,.5);overflow-y:auto;padding:24px}
+[dir="rtl"] .em-drawer{inset-inline-start:auto;inset-inline-end:0;transform:translateX(105%)}
+.em-drawer.open{transform:translateX(0)}
+.em-backdrop{position:fixed;inset:0;z-index:89;background:rgba(5,13,10,.5);opacity:0;pointer-events:none;transition:opacity .4s}
+.em-backdrop.open{opacity:1;pointer-events:auto}
+.dr-close{position:absolute;top:16px;inset-inline-start:16px;font-size:22px;color:var(--mist);background:none;border:0;cursor:pointer}
+.dr-av{width:88px;height:88px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-size:36px;font-weight:600;color:#fff;background:linear-gradient(140deg,rgba(46,107,87,.95),rgba(13,31,26,.95));border:2px solid rgba(194,163,90,.4);margin:8px auto 14px}
+.dr-nm{text-align:center;font-family:var(--display);font-size:24px;font-weight:600;color:#fff}
+.dr-ro{text-align:center;font-size:13px;color:var(--gold-soft);margin-bottom:18px}
+.dr-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.dr-stat{background:rgba(13,31,26,.5);border:1px solid rgba(194,163,90,.16);border-radius:12px;padding:11px 13px}
+.dr-stat .v{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:21px;font-weight:600;color:#fff}
+.dr-stat .k{font-size:10.5px;color:var(--mist);opacity:.7;margin-top:2px}
+.dr-sec{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--gold-soft);text-transform:uppercase;margin:16px 0 9px}
+.dr-act{display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--mist)}
+.dr-act .ev{padding:9px 12px;background:rgba(13,31,26,.4);border-radius:10px;border-inline-start:2px solid rgba(194,163,90,.4)}
+.dr-ach{display:flex;flex-wrap:wrap;gap:8px}
+.dr-ach .a{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:18px;background:rgba(194,163,90,.12);border:1px solid rgba(194,163,90,.25)}
+.dr-msg{display:block;width:100%;margin-top:18px;text-align:center;font-size:13px;font-weight:700;color:#241b06;background:linear-gradient(135deg,var(--gold-soft),var(--gold));border:0;border-radius:12px;padding:12px;cursor:pointer;text-decoration:none}
+@media (prefers-reduced-motion:reduce){.tree{animation:none}.tav .pres{animation:none}}
+</style>
+<link rel="stylesheet" href="../app-layer.css?v=nav3"><link rel="stylesheet" href="../states.css"></head>
+<body>
+<header id="topbar">
+  <div class="tb-brand">
+    <svg class="tb-mark" viewBox="0 0 100 100" fill="none"><defs><radialGradient id="ngem" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FBF3DC"/><stop offset="50%" stop-color="#DCC38A"/><stop offset="100%" stop-color="#C2A35A" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="42" stroke="#C2A35A" stroke-width="1.4" opacity=".6"/><ellipse cx="50" cy="50" rx="42" ry="17" stroke="#C2A35A" stroke-width="1.2" opacity=".45"/><g stroke="#DCC38A" stroke-width="6.5" stroke-linecap="round"><line x1="31" y1="26" x2="31" y2="74"/><line x1="69" y1="26" x2="69" y2="74"/><line x1="31" y1="50" x2="69" y2="50"/></g><circle cx="50" cy="50" r="15" fill="url(#ngem)"/><circle cx="50" cy="50" r="4.5" fill="#FBF3DC"/></svg>
+    <span class="tb-word">H‑Nerve <span class="erp">ERP</span></span>
+  </div>
+  <a class="tb-orbit" href="/orrery">↺ العودة إلى المدار</a>
+  <button class="tb-user"><span class="tb-avatar">أ</span><span class="tb-uinfo"><span class="tb-uname">أ. الحوراني</span><span class="tb-urole">رئيس مجلس الإدارة</span></span></button>
+</header>
+
+<div class="em-wrap">
+  <div class="em-top">
+    <div class="em-title-box"><span class="eb"><span class="tick"></span data-i18n="b4.eyebrow.people">الأفراد</span><h1>الفريق</h1></div>
+    <div class="em-kpis">
+      <div class="em-kpi"><div class="v" id="kp_count">١٢</div><div class="k" data-i18n="b4.emp.members">عدد الأعضاء</div></div>
+      <div class="em-kpi"><div class="v" id="kp_online">٥</div><div class="k" data-i18n="b4.emp.onlineNow">النشطون الآن</div></div>
+      <div class="em-kpi"><div class="v" id="kp_silver">٧</div><div class="k" data-i18n="b4.emp.silverPlus">رتب فضية+</div></div>
+      <div class="em-kpi"><div class="v" id="kp_xp">٨٬٤٢٠</div><div class="k" data-i18n="b4.emp.totalXp">إجمالي XP الفريق</div></div>
+    </div>
+  </div>
+
+  <div class="em-tabs">
+    <button class="em-tab on" data-t="tree" data-i18n="b4.emp.tabTree">الهيكل التنظيمي</button>
+    <button class="em-tab" data-t="list" data-i18n="b4.emp.tabList">قائمة الأعضاء</button>
+  </div>
+
+  <div id="treeView" class="em-tree-wrap"></div>
+  <div id="listView" style="display:none">
+    <div class="em-controls"><input class="em-search" id="search" placeholder="بحث بالاسم أو الدور…"></div>
+    <div class="em-grid" id="grid"></div>
+  </div>
+</div>
+
+<div class="em-backdrop" id="backdrop"></div>
+<aside class="em-drawer" id="drawer"></aside>
+
+<script src="../living-bg.js" defer></script>
+<script src="../ambient.js" defer></script>
+<script src="employees.js" defer></script>
+<script src="../app-layer.js?v=nav3" defer></script><script src="../states.js" defer></script></body>
+</html>

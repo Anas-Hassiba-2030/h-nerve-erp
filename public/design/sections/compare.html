@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-living="work" data-ambient="finance">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-Nerve · مقارنة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../living-bg.css">
+<link rel="stylesheet" href="_section.css">
+<link rel="stylesheet" href="../interactions.css">
+<link rel="stylesheet" href="../ambient.css">
+<link rel="stylesheet" href="../ops.css">
+<style>
+.cmp-pickers{display:flex;align-items:center;gap:16px;justify-content:center;margin-bottom:20px;flex-wrap:wrap}
+.cmp-sel{display:flex;flex-direction:column;gap:6px}
+.cmp-sel label{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--ink-muted)}
+.cmp-sel select{background:var(--cream);border:1px solid var(--line);border-radius:12px;color:var(--ink);font-family:var(--ui);font-size:15px;font-weight:700;padding:11px 16px;outline:none;min-width:200px;cursor:pointer}
+.cmp-sel select:focus{border-color:var(--gold)}
+.cmp-vs{font-family:var(--display);font-size:26px;font-weight:600;color:var(--gold);margin-top:18px}
+.cmp-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.cmp-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-radius:16px 16px 0 0;color:#fff}
+.cmp-head .lg{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-family:var(--display);font-size:19px;font-weight:600;background:rgba(255,255,255,.16)}
+.cmp-head .nm{font-size:16px;font-weight:700}.cmp-head .sc{font-size:11.5px;opacity:.85}
+.cmp-card{background:var(--cream);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.cmp-body{padding:18px 20px}
+.cmp-metric{margin-bottom:16px}
+.cmp-metric .ml{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px}
+.cmp-metric .ml b{font-family:var(--display);font-weight:600;color:var(--emerald)}
+.cmp-bar{height:9px;border-radius:999px;background:rgba(46,107,87,.12);overflow:hidden}
+.cmp-bar span{display:block;height:100%;border-radius:999px;width:0;transition:width 1s cubic-bezier(.22,1,.36,1)}
+</style>
+<link rel="stylesheet" href="../app-layer.css?v=nav3"><link rel="stylesheet" href="../states.css"></head>
+<body><header id="topbar">
+  <div class="tb-brand">
+    <svg class="tb-mark" viewBox="0 0 100 100" fill="none"><defs><radialGradient id="ngcmp" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FBF3DC"/><stop offset="50%" stop-color="#DCC38A"/><stop offset="100%" stop-color="#C2A35A" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="42" stroke="#C2A35A" stroke-width="1.4" opacity=".6"/><ellipse cx="50" cy="50" rx="42" ry="17" stroke="#C2A35A" stroke-width="1.2" opacity=".45"/><g stroke="#DCC38A" stroke-width="6.5" stroke-linecap="round"><line x1="31" y1="26" x2="31" y2="74"/><line x1="69" y1="26" x2="69" y2="74"/><line x1="31" y1="50" x2="69" y2="50"/></g><circle cx="50" cy="50" r="15" fill="url(#ngcmp)"/><circle cx="50" cy="50" r="4.5" fill="#FBF3DC"/></svg>
+    <span class="tb-word">H‑Nerve <span class="erp">ERP</span></span>
+  </div>
+  <a class="tb-orbit" href="/orrery">↺ العودة إلى المدار</a>
+  <button class="tb-user"><span class="tb-avatar">أ</span><span class="tb-uinfo"><span class="tb-uname">أ. الحوراني</span><span class="tb-urole">رئيس مجلس الإدارة</span></span></button>
+</header>
+<div class="wrap">
+  <div class="sec-head reveal">
+    <div>
+      <div class="sec-eyebrow"><span class="tick"></span data-i18n="b4.gc.eyebrowCompare">النمو ورأس المال · مقارنة</div>
+      <h1 class="sec-title" data-i18n="b4.title.compare">مقارنة الوحدات</h1>
+      <p class="sec-sub" data-i18n="b4.cmp.intro">اختر شركتين لمقارنة الإيراد والهامش والاستدامة والبصمة التشغيلية جنباً إلى جنب.</p>
+    </div>
+    <div class="sec-head-aside"><span class="sec-status"><span class="dot"></span>مباشر</span></div>
+  </div>
+
+  <div class="cmp-pickers reveal">
+    <div class="cmp-sel"><label data-i18n="b4.cmp.first">الشركة الأولى</label><select id="selA"></select></div>
+    <span class="cmp-vs">⚔</span>
+    <div class="cmp-sel"><label data-i18n="b4.cmp.second">الشركة الثانية</label><select id="selB"></select></div>
+  </div>
+
+  <div class="cmp-cols">
+    <div class="cmp-card reveal"><div class="cmp-head" id="headA"></div><div class="cmp-body" id="bodyA"></div></div>
+    <div class="cmp-card reveal"><div class="cmp-head" id="headB"></div><div class="cmp-body" id="bodyB"></div></div>
+  </div>
+
+  <div class="an-card reveal" style="background:var(--cream);border:1px solid var(--line);border-radius:18px;padding:20px">
+    <div style="font-family:var(--display);font-size:20px;font-weight:600;color:var(--emerald);margin-bottom:4px">منحنى الإيراد · ١٢ شهراً</div>
+    <div style="font-size:11.5px;color:var(--ink-muted);margin-bottom:16px">الأخضر = الأولى · الذهبي = الثانية</div>
+    <div id="cmpArea" style="position:relative"></div>
+  </div>
+</div>
+<script src="../living-bg.js" defer></script>
+<script src="../ambient.js" defer></script>
+<script src="../charts.js?v=i18n2" defer></script>
+<script src="group-data.js" defer></script>
+<script src="../ops.js?v=i18n2" defer></script>
+<script src="section.js" defer></script>
+<script src="compare-ops.js" defer></script>
+<script src="../app-layer.js?v=nav3" defer></script><script src="../states.js" defer></script></body>
+</html>

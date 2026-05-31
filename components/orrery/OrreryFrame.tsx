@@ -26,6 +26,9 @@ export function OrreryFrame({ identity }: { identity: OrreryIdentity }) {
         // design — real data fills in section by section as each is rebuilt.
         const REAL_DATA_PAGES: Record<string, string> = {
           "sections/arena.html": "/hotels",
+          "sections/maha.html": "/dairy",
+          "sections/loran.html": "/farms",
+          "sections/ahliyya.html": "/education",
         };
         window.location.assign(REAL_DATA_PAGES[href] ?? "/design/" + href);
       }

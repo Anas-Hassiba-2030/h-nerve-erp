@@ -1,6 +1,10 @@
 import { Topbar } from "@/components/Topbar";
+import { getLocale } from "@/lib/i18n.server";
 import { prisma } from "@/lib/db";
-import { ar, formatDate, ROLES_AR } from "@/lib/utils";
+import { ar, formatDate, ROLES_AR,
+  ROLES_EN,
+  loc,
+} from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +59,7 @@ export default async function UsersPage() {
                   <td className="font-mono text-xs text-slate-500" dir="ltr">{u.email}</td>
                   <td>
                     <span className={ROLE_TONE[u.role] ?? "badge-slate"}>
-                      {ar(ROLES_AR, u.role)}
+                      {loc(ROLES_AR, ROLES_EN, getLocale(), u.role)}
                     </span>
                   </td>
                   <td className="text-xs text-slate-500">{formatDate(u.createdAt)}</td>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getLocale } from "@/lib/i18n.server";
 import { notFound } from "next/navigation";
 import {
   Pencil,
@@ -37,6 +38,10 @@ import {
   TIERS_AR,
   FARM_TYPES_AR,
   VERTICALS_AR,
+  FARM_TYPES_EN,
+  VERTICALS_EN,
+  TIERS_EN,
+  loc,
 } from "@/lib/utils";
 import { getCompanyBrand } from "@/lib/companyBrand";
 
@@ -412,7 +417,7 @@ export default async function CompanyDetailPage({
                           </span>
                         </div>
                         <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
-                          {h.city} • {ar(TIERS_AR, h.tier)} • {formatNumber(h.totalRooms)} غرفة
+                          {h.city} • {loc(TIERS_AR, TIERS_EN, getLocale(), h.tier)} • {formatNumber(h.totalRooms)} غرفة
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -480,7 +485,7 @@ export default async function CompanyDetailPage({
                           {f.name}
                         </div>
                         <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
-                          {ar(FARM_TYPES_AR, f.type)} • {f.location} • {formatNumber(f.areaDunum)} دونم
+                          {loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), f.type)} • {f.location} • {formatNumber(f.areaDunum)} دونم
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -513,7 +518,7 @@ export default async function CompanyDetailPage({
                           {p.name}
                         </div>
                         <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
-                          {ar(VERTICALS_AR, p.vertical)} • مؤسس: {p.founder} • فوج {p.cohort}
+                          {loc(VERTICALS_AR, VERTICALS_EN, getLocale(), p.vertical)} • مؤسس: {p.founder} • فوج {p.cohort}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">

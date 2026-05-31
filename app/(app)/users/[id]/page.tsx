@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getLocale } from "@/lib/i18n.server";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
@@ -24,6 +25,8 @@ import {
   formatRelative,
   formatShortDate,
   ROLES_AR,
+  ROLES_EN,
+  loc,
 } from "@/lib/utils";
 import {
   RANKS,
@@ -151,7 +154,7 @@ export default async function UserDetailPage({
       <Topbar
         eyebrow="ملف الموظف"
         title={user.name}
-        subtitle={user.title ?? ar(ROLES_AR, user.role)}
+        subtitle={user.title ?? loc(ROLES_AR, ROLES_EN, getLocale(), user.role)}
         actions={
           <Link href="/users" className="btn-ghost">
             <ArrowLeft className="h-4 w-4" />
@@ -213,7 +216,7 @@ export default async function UserDetailPage({
                     border: "1px solid rgba(255,255,255,.3)",
                   }}
                 >
-                  {ar(ROLES_AR, user.role)}
+                  {loc(ROLES_AR, ROLES_EN, getLocale(), user.role)}
                 </span>
                 {user.company ? (
                   <Link
@@ -694,7 +697,7 @@ export default async function UserDetailPage({
                 البطاقة الوظيفية
               </h3>
               <dl className="space-y-2 text-xs">
-                <Fact label="الدور" value={ar(ROLES_AR, user.role)} />
+                <Fact label="الدور" value={loc(ROLES_AR, ROLES_EN, getLocale(), user.role)} />
                 {user.title ? (
                   <Fact label="المسمى الوظيفي" value={user.title} />
                 ) : null}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getLocale } from "@/lib/i18n.server";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
@@ -21,6 +22,9 @@ import {
   formatShortDate,
   ROOM_TYPES_AR,
   TIERS_AR,
+  ROOM_TYPES_EN,
+  TIERS_EN,
+  loc,
 } from "@/lib/utils";
 
 const COUNTRY_NAMES: Record<string, string> = { JO: "الأردن", BG: "بلغاريا" };
@@ -134,7 +138,7 @@ export default async function HotelDetailPage({
               </div>
               <div className="min-w-0">
                 <div className="heri-eyebrow heri-eyebrow-ink mb-1.5">
-                  {ar(TIERS_AR, hotel.tier)} · {"★".repeat(hotel.starRating)}
+                  {loc(TIERS_AR, TIERS_EN, getLocale(), hotel.tier)} · {"★".repeat(hotel.starRating)}
                 </div>
                 <h2
                   className="text-2xl font-semibold md:text-3xl"
@@ -307,7 +311,7 @@ export default async function HotelDetailPage({
                           className="text-[11px] font-mono"
                           style={{ color: "var(--heri-ink-3)" }}
                         >
-                          {b.reference} • {ar(ROOM_TYPES_AR, b.roomType)} •{" "}
+                          {b.reference} • {loc(ROOM_TYPES_AR, ROOM_TYPES_EN, getLocale(), b.roomType)} •{" "}
                           {b.rooms} غرفة • {b.guests} ضيف
                         </div>
                       </div>
@@ -448,7 +452,7 @@ export default async function HotelDetailPage({
                 بطاقة العقار
               </h3>
               <dl className="space-y-2 text-xs">
-                <Fact label="الفئة" value={ar(TIERS_AR, hotel.tier)} />
+                <Fact label="الفئة" value={loc(TIERS_AR, TIERS_EN, getLocale(), hotel.tier)} />
                 <Fact
                   label="التقييم"
                   value={`${"★".repeat(hotel.starRating)} (${hotel.starRating}/5)`}

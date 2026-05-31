@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getLocale } from "@/lib/i18n.server";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
@@ -26,6 +27,9 @@ import {
   formatDateTime,
   ROOM_TYPES_AR,
   TIERS_AR,
+  ROOM_TYPES_EN,
+  TIERS_EN,
+  loc,
 } from "@/lib/utils";
 import { getCompanyBrand } from "@/lib/companyBrand";
 
@@ -178,7 +182,7 @@ export default async function BookingDetailPage({
                   }}
                 >
                   <BedDouble className="h-3 w-3" />
-                  {ar(ROOM_TYPES_AR, booking.roomType)} •{" "}
+                  {loc(ROOM_TYPES_AR, ROOM_TYPES_EN, getLocale(), booking.roomType)} •{" "}
                   {formatNumber(booking.rooms)} غرفة
                 </span>
                 <span
@@ -471,7 +475,7 @@ export default async function BookingDetailPage({
                 >
                   {booking.hotel.city} •{" "}
                   {COUNTRY_NAMES[booking.hotel.country] ?? booking.hotel.country}{" "}
-                  • {ar(TIERS_AR, booking.hotel.tier)} •{" "}
+                  • {loc(TIERS_AR, TIERS_EN, getLocale(), booking.hotel.tier)} •{" "}
                   {"★".repeat(booking.hotel.starRating)}
                 </div>
               </Link>
@@ -490,7 +494,7 @@ export default async function BookingDetailPage({
                 <Fact label="الضيف" value={booking.guestName} />
                 <Fact
                   label="نوع الغرفة"
-                  value={ar(ROOM_TYPES_AR, booking.roomType)}
+                  value={loc(ROOM_TYPES_AR, ROOM_TYPES_EN, getLocale(), booking.roomType)}
                 />
                 <Fact
                   label="الغرف"

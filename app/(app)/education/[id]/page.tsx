@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getLocale } from "@/lib/i18n.server";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
@@ -23,6 +24,9 @@ import {
   formatNumber,
   STATUS_AR,
   VERTICALS_AR,
+  STATUS_EN,
+  VERTICALS_EN,
+  loc,
 } from "@/lib/utils";
 
 const STAGE_FLOW = ["INTAKE", "ACCELERATING", "GRADUATED"] as const;
@@ -97,7 +101,7 @@ export default async function EducationDetailPage({
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <span className={VERTICAL_TONE[program.vertical] ?? "badge-slate"}>
-                  {ar(VERTICALS_AR, program.vertical)}
+                  {loc(VERTICALS_AR, VERTICALS_EN, getLocale(), program.vertical)}
                 </span>
                 <StatusBadge status={program.stage} />
                 <Link
@@ -177,7 +181,7 @@ export default async function EducationDetailPage({
             raw={stalled ? 0 : (Math.max(0, stageIdx + 1) / STAGE_FLOW.length)}
             kind="percent"
             accent={stalled ? "var(--heri-terracotta)" : "var(--heri-teal)"}
-            hint={ar(STATUS_AR, program.stage)}
+            hint={loc(STATUS_AR, STATUS_EN, getLocale(), program.stage)}
           />
         </section>
 
@@ -238,7 +242,7 @@ export default async function EducationDetailPage({
                         color: reached ? "var(--heri-ink)" : "var(--heri-ink-3)",
                       }}
                     >
-                      {ar(STATUS_AR, stage)}
+                      {loc(STATUS_AR, STATUS_EN, getLocale(), stage)}
                     </div>
                     {i < STAGE_FLOW.length - 1 ? (
                       <div
@@ -332,7 +336,7 @@ export default async function EducationDetailPage({
                             {r.name}
                           </span>
                           <span className={VERTICAL_TONE[r.vertical] ?? "badge-slate"}>
-                            {ar(VERTICALS_AR, r.vertical)}
+                            {loc(VERTICALS_AR, VERTICALS_EN, getLocale(), r.vertical)}
                           </span>
                         </div>
                         <div
@@ -374,8 +378,8 @@ export default async function EducationDetailPage({
               </h3>
               <dl className="space-y-2 text-xs">
                 <Fact label="المؤسس" value={program.founder} />
-                <Fact label="القطاع" value={ar(VERTICALS_AR, program.vertical)} />
-                <Fact label="المرحلة" value={ar(STATUS_AR, program.stage)} />
+                <Fact label="القطاع" value={loc(VERTICALS_AR, VERTICALS_EN, getLocale(), program.vertical)} />
+                <Fact label="المرحلة" value={loc(STATUS_AR, STATUS_EN, getLocale(), program.stage)} />
                 <Fact label="الفوج" value={program.cohort} />
                 <Fact label="حجم الفريق" value={`${formatNumber(program.teamSize)} فرد`} />
                 <Fact label="التمويل" value={formatMoney(program.fundingJod)} />

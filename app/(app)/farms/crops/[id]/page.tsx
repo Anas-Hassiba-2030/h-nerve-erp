@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getLocale } from "@/lib/i18n.server";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
@@ -21,6 +22,9 @@ import {
   formatRelative,
   formatShortDate,
   FARM_TYPES_AR,
+  STATUS_EN,
+  FARM_TYPES_EN,
+  loc,
 } from "@/lib/utils";
 import { getCompanyBrand } from "@/lib/companyBrand";
 
@@ -29,6 +33,12 @@ const CROP_STATUS_AR: Record<string, string> = {
   HARVESTING: "في الحصاد",
   HARVESTED: "تم الحصاد",
   FAILED: "متعثر",
+};
+const CROP_STATUS_EN: Record<string, string> = {
+  GROWING: "Growing",
+  HARVESTING: "Harvesting",
+  HARVESTED: "Harvested",
+  FAILED: "Failed",
 };
 
 export default async function CropDetailPage({
@@ -188,7 +198,7 @@ export default async function CropDetailPage({
                     border: "1px solid rgba(255,255,255,.25)",
                   }}
                 >
-                  {ar(FARM_TYPES_AR, crop.farm.type)}
+                  {loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), crop.farm.type)}
                 </span>
                 <span
                   className="flex items-center gap-1.5 rounded-full px-3 py-1 font-bold"
@@ -260,7 +270,7 @@ export default async function CropDetailPage({
           />
           <KpiCard
             label="الحالة"
-            value={ar(CROP_STATUS_AR, crop.status)}
+            value={loc(CROP_STATUS_AR, CROP_STATUS_EN, getLocale(), crop.status)}
             icon={harvested ? TrendingUp : TrendingDown}
             tone={
               crop.status === "FAILED"
@@ -582,7 +592,7 @@ export default async function CropDetailPage({
                 ) : null}
                 <Fact
                   label="الحالة"
-                  value={ar(CROP_STATUS_AR, crop.status)}
+                  value={loc(CROP_STATUS_AR, CROP_STATUS_EN, getLocale(), crop.status)}
                 />
                 <Fact
                   label="زُرع"

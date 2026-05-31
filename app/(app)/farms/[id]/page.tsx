@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getLocale } from "@/lib/i18n.server";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
@@ -24,6 +25,8 @@ import {
   formatNumber,
   formatRelative,
   formatShortDate,
+  FARM_TYPES_EN,
+  loc,
 } from "@/lib/utils";
 import { updateSensors, deleteCrop } from "../actions";
 
@@ -46,7 +49,7 @@ export default async function FarmDetailPage({ params }: { params: { id: string 
   return (
     <>
       <Topbar
-        eyebrow={`${farm.company.name} • ${ar(FARM_TYPES_AR, farm.type)}`}
+        eyebrow={`${farm.company.name} • ${loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), farm.type)}`}
         title={farm.name}
         subtitle={`${farm.location} • ${formatNumber(farm.areaDunum)} دونم`}
         actions={
@@ -85,7 +88,7 @@ export default async function FarmDetailPage({ params }: { params: { id: string 
               </div>
               <div className="min-w-0">
                 <div className="heri-eyebrow heri-eyebrow-ink mb-1.5 flex items-center gap-2">
-                  <span>{ar(FARM_TYPES_AR, farm.type)}</span>
+                  <span>{loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), farm.type)}</span>
                   <span style={{ color: "var(--heri-rule-strong)" }}>·</span>
                   <StatusBadge status={farm.alertLevel} />
                 </div>
@@ -261,7 +264,7 @@ export default async function FarmDetailPage({ params }: { params: { id: string 
               </p>
             )}
             <dl className="mt-4 space-y-2 text-xs">
-              <Fact label="النوع" value={ar(FARM_TYPES_AR, farm.type)} />
+              <Fact label="النوع" value={loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), farm.type)} />
               <Fact label="الموقع" value={farm.location} />
               <Fact label="المساحة" value={`${formatNumber(farm.areaDunum)} دونم`} />
               <Fact

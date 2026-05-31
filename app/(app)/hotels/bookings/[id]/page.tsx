@@ -34,6 +34,7 @@ import {
 import { getCompanyBrand } from "@/lib/companyBrand";
 
 const COUNTRY_NAMES: Record<string, string> = { JO: "الأردن", BG: "بلغاريا" };
+const COUNTRY_NAMES_EN: Record<string, string> = { JO: "Jordan", BG: "Bulgaria" };
 
 export default async function BookingDetailPage({
   params,
@@ -57,9 +58,10 @@ export default async function BookingDetailPage({
     },
     orderBy: { checkIn: "desc" },
     take: 5,
-    include: { hotel: { select: { name: true } } },
+    include: { hotel: { select: { name: true, nameEn: true } } },
   });
 
+  const en = getLocale() === "en";
   const now = new Date();
   const nights = Math.max(
     1,
@@ -79,10 +81,12 @@ export default async function BookingDetailPage({
   const isPast = booking.checkOut <= now;
 
   const stayLabel = isStaying
-    ? "يقيم الآن"
+    ? en
+      ? "Staying now"
+      : "يقيم الآن"
     : isUpcoming
-      ? `قادم — ${formatRelative(booking.checkIn)}`
-      : `انتهى — ${formatRelative(booking.checkOut)}`;
+      ? `${en ? "Upcoming" : "قادم"} — ${formatRelative(booking.checkIn)}`
+      : `${en ? "Ended" : "انتهى"} — ${formatRelative(booking.checkOut)}`;
 
   const stayTone: "emerald" | "amber" | "slate" = isStaying
     ? "emerald"
@@ -96,14 +100,14 @@ export default async function BookingDetailPage({
   return (
     <>
       <Topbar
-        eyebrow="حجز فندقي"
+        eyebrow={en ? "Hotel booking" : "حجز فندقي"}
         title={booking.guestName}
-        subtitle={`${booking.reference} • ${booking.hotel.name}`}
+        subtitle={`${booking.reference} • ${en ? (booking.hotel.nameEn ?? booking.hotel.name) : booking.hotel.name}`}
         actions={
           <div className="flex items-center gap-2">
             <Link href="/hotels" className="btn-ghost">
               <ArrowLeft className="h-4 w-4" />
-              الفنادق
+              {en ? "Hotels" : "الفنادق"}
             </Link>
             <PinButton
               entityType="BOOKING"
@@ -113,7 +117,7 @@ export default async function BookingDetailPage({
               icon="Calendar"
               initial={pinned}
               tone="default"
-              locale="ar"
+              locale={en ? "en" : "ar"}
             />
           </div>
         }
@@ -167,7 +171,7 @@ export default async function BookingDetailPage({
                   }}
                 >
                   <HotelIcon className="me-1 inline h-3 w-3" />
-                  {booking.hotel.name}
+                  {en ? (booking.hotel.nameEn ?? booking.hotel.name) : booking.hotel.name}
                 </Link>
               </div>
               <h2 className="mt-1 text-3xl font-bold md:text-4xl">
@@ -183,7 +187,7 @@ export default async function BookingDetailPage({
                 >
                   <BedDouble className="h-3 w-3" />
                   {loc(ROOM_TYPES_AR, ROOM_TYPES_EN, getLocale(), booking.roomType)} •{" "}
-                  {formatNumber(booking.rooms)} غرفة
+                  {formatNumber(booking.rooms)} {en ? "rooms" : "غرفة"}
                 </span>
                 <span
                   className="flex items-center gap-1.5 rounded-full px-3 py-1 font-bold"
@@ -193,7 +197,7 @@ export default async function BookingDetailPage({
                   }}
                 >
                   <Users2 className="h-3 w-3" />
-                  {formatNumber(booking.guests)} ضيف
+                  {formatNumber(booking.guests)} {en ? "guests" : "ضيف"}
                 </span>
                 <span
                   className="flex items-center gap-1.5 rounded-full px-3 py-1 font-bold"
@@ -211,7 +215,7 @@ export default async function BookingDetailPage({
             {/* Revenue block */}
             <div className="text-end">
               <div className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-90">
-                إيراد الحجز
+                {en ? "Booking revenue" : "إيراد الحجز"}
               </div>
               <div
                 className="font-mono text-4xl font-bold md:text-5xl"
@@ -223,7 +227,7 @@ export default async function BookingDetailPage({
                 {formatMoney(booking.revenue)}
               </div>
               <div className="text-[11px] opacity-90">
-                {formatNumber(nights)} ليلة
+                {formatNumber(nights)} {en ? "nights" : "ليلة"}
               </div>
             </div>
           </div>
@@ -240,7 +244,7 @@ export default async function BookingDetailPage({
                 className="h-4 w-4"
                 style={{ color: "var(--heri-ochre)" }}
               />
-              فترة الإقامة
+              {en ? "Stay period" : "فترة الإقامة"}
             </h3>
             <span
               className="text-[10px] font-bold uppercase tracking-widest"
@@ -248,7 +252,17 @@ export default async function BookingDetailPage({
                 color: isStaying ? "#0a8e54" : isUpcoming ? "#b06a1a" : "var(--heri-ink-3)",
               }}
             >
-              {isStaying ? "قائمة الآن" : isUpcoming ? "قادمة" : "منتهية"}
+              {isStaying
+                ? en
+                  ? "In progress"
+                  : "قائمة الآن"
+                : isUpcoming
+                  ? en
+                    ? "Upcoming"
+                    : "قادمة"
+                  : en
+                    ? "Ended"
+                    : "منتهية"}
             </span>
           </header>
           <div className="mb-3 flex items-center justify-between gap-4">
@@ -257,7 +271,7 @@ export default async function BookingDetailPage({
                 className="text-[10px] font-bold uppercase tracking-widest"
                 style={{ color: "var(--heri-ink-3)" }}
               >
-                وصول
+                {en ? "Check-in" : "وصول"}
               </div>
               <div
                 className="text-base font-bold"
@@ -322,7 +336,7 @@ export default async function BookingDetailPage({
                 className="text-[10px] font-bold uppercase tracking-widest"
                 style={{ color: "var(--heri-ink-3)" }}
               >
-                مغادرة
+                {en ? "Check-out" : "مغادرة"}
               </div>
               <div
                 className="text-base font-bold"
@@ -339,34 +353,39 @@ export default async function BookingDetailPage({
             </div>
           </div>
           <div className="text-center text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
-            {formatNumber(nights)} ليلة • {formatNumber(booking.rooms)} غرفة •{" "}
-            {formatNumber(booking.guests)} ضيف
+            {formatNumber(nights)} {en ? "nights" : "ليلة"} •{" "}
+            {formatNumber(booking.rooms)} {en ? "rooms" : "غرفة"} •{" "}
+            {formatNumber(booking.guests)} {en ? "guests" : "ضيف"}
           </div>
         </section>
 
         {/* KPIs */}
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <KpiCard
-            label="إيراد الحجز"
+            label={en ? "Booking revenue" : "إيراد الحجز"}
             value={formatMoney(booking.revenue)}
             icon={CircleDollarSign}
             tone="emerald"
           />
           <KpiCard
-            label="إيراد لكل ليلة"
+            label={en ? "Revenue per night" : "إيراد لكل ليلة"}
             value={formatMoney(perNight)}
             icon={Sparkles}
             tone="amber"
           />
           <KpiCard
-            label="ADR فعلي / غرفة"
+            label={en ? "Actual ADR / room" : "ADR فعلي / غرفة"}
             value={formatMoney(perRoomNight)}
             icon={BedDouble}
             tone="violet"
-            hint={`بمقارنة ${formatMoney(booking.hotel.baselineADR)} مرجعي`}
+            hint={
+              en
+                ? `vs ${formatMoney(booking.hotel.baselineADR)} baseline`
+                : `بمقارنة ${formatMoney(booking.hotel.baselineADR)} مرجعي`
+            }
           />
           <KpiCard
-            label="الحالة"
+            label={en ? "Status" : "الحالة"}
             value={booking.status}
             icon={Clock}
             tone={stayTone}
@@ -383,7 +402,7 @@ export default async function BookingDetailPage({
                   className="mb-2 text-sm font-semibold"
                   style={{ color: "var(--heri-ink)" }}
                 >
-                  ملاحظات الحجز
+                  {en ? "Booking notes" : "ملاحظات الحجز"}
                 </h3>
                 <p
                   className="whitespace-pre-line text-sm leading-relaxed"
@@ -402,7 +421,7 @@ export default async function BookingDetailPage({
                     className="text-sm font-semibold"
                     style={{ color: "var(--heri-ink)" }}
                   >
-                    حجوزات أخرى للضيف
+                    {en ? "Other bookings for this guest" : "حجوزات أخرى للضيف"}
                   </h3>
                 </header>
                 <ul className="divide-y divide-[var(--heri-rule)]">
@@ -429,7 +448,8 @@ export default async function BookingDetailPage({
                           className="text-[11px]"
                           style={{ color: "var(--heri-ink-3)" }}
                         >
-                          {b.hotel.name} • {formatShortDate(b.checkIn)} →{" "}
+                          {en ? (b.hotel.nameEn ?? b.hotel.name) : b.hotel.name} •{" "}
+                          {formatShortDate(b.checkIn)} →{" "}
                           {formatShortDate(b.checkOut)}
                         </div>
                       </Link>
@@ -457,7 +477,7 @@ export default async function BookingDetailPage({
                   className="h-4 w-4"
                   style={{ color: "var(--heri-ochre)" }}
                 />
-                العقار
+                {en ? "Property" : "العقار"}
               </h3>
               <Link
                 href={`/hotels/${booking.hotel.id}`}
@@ -467,14 +487,15 @@ export default async function BookingDetailPage({
                   className="text-sm font-semibold"
                   style={{ color: "var(--heri-ink)" }}
                 >
-                  {booking.hotel.name}
+                  {en ? (booking.hotel.nameEn ?? booking.hotel.name) : booking.hotel.name}
                 </div>
                 <div
                   className="text-[11px]"
                   style={{ color: "var(--heri-ink-3)" }}
                 >
                   {booking.hotel.city} •{" "}
-                  {COUNTRY_NAMES[booking.hotel.country] ?? booking.hotel.country}{" "}
+                  {(en ? COUNTRY_NAMES_EN : COUNTRY_NAMES)[booking.hotel.country] ??
+                    booking.hotel.country}{" "}
                   • {loc(TIERS_AR, TIERS_EN, getLocale(), booking.hotel.tier)} •{" "}
                   {"★".repeat(booking.hotel.starRating)}
                 </div>
@@ -487,34 +508,34 @@ export default async function BookingDetailPage({
                 className="mb-3 text-sm font-semibold"
                 style={{ color: "var(--heri-ink)" }}
               >
-                البطاقة
+                {en ? "Summary" : "البطاقة"}
               </h3>
               <dl className="space-y-2 text-xs">
-                <Fact label="المرجع" value={booking.reference} mono />
-                <Fact label="الضيف" value={booking.guestName} />
+                <Fact label={en ? "Reference" : "المرجع"} value={booking.reference} mono />
+                <Fact label={en ? "Guest" : "الضيف"} value={booking.guestName} />
                 <Fact
-                  label="نوع الغرفة"
+                  label={en ? "Room type" : "نوع الغرفة"}
                   value={loc(ROOM_TYPES_AR, ROOM_TYPES_EN, getLocale(), booking.roomType)}
                 />
                 <Fact
-                  label="الغرف"
+                  label={en ? "Rooms" : "الغرف"}
                   value={formatNumber(booking.rooms)}
                 />
                 <Fact
-                  label="الضيوف"
+                  label={en ? "Guests" : "الضيوف"}
                   value={formatNumber(booking.guests)}
                 />
-                <Fact label="الليالي" value={formatNumber(nights)} />
+                <Fact label={en ? "Nights" : "الليالي"} value={formatNumber(nights)} />
                 <Fact
-                  label="الإيراد"
+                  label={en ? "Revenue" : "الإيراد"}
                   value={formatMoney(booking.revenue)}
                 />
                 <Fact
-                  label="وصول"
+                  label={en ? "Check-in" : "وصول"}
                   value={formatShortDate(booking.checkIn)}
                 />
                 <Fact
-                  label="مغادرة"
+                  label={en ? "Check-out" : "مغادرة"}
                   value={formatShortDate(booking.checkOut)}
                 />
               </dl>

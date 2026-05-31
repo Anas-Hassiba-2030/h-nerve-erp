@@ -51,6 +51,13 @@ const TASK_STATUS_AR: Record<string, string> = {
   BLOCKED: "معطّلة",
 };
 
+const TASK_STATUS_EN: Record<string, string> = {
+  TODO: "To Do",
+  IN_PROGRESS: "In Progress",
+  DONE: "Done",
+  BLOCKED: "Blocked",
+};
+
 export default async function UserDetailPage({
   params,
 }: {
@@ -149,16 +156,18 @@ export default async function UserDetailPage({
 
   const brand = user.company ? getCompanyBrand(user.company.code) : null;
 
+  const en = getLocale() === "en";
+
   return (
     <>
       <Topbar
-        eyebrow="ملف الموظف"
+        eyebrow={en ? "Employee Profile" : "ملف الموظف"}
         title={user.name}
         subtitle={user.title ?? loc(ROLES_AR, ROLES_EN, getLocale(), user.role)}
         actions={
           <Link href="/users" className="btn-ghost">
             <ArrowLeft className="h-4 w-4" />
-            الفريق
+            {en ? "Team" : "الفريق"}
           </Link>
         }
       />
@@ -189,7 +198,7 @@ export default async function UserDetailPage({
               <div
                 className="rank-piece rank-piece-xl"
                 style={{ color: currentRank.color, filter: "drop-shadow(0 4px 14px rgba(0,0,0,.2))" }}
-                title={currentRank.ar}
+                title={en ? currentRank.en : currentRank.ar}
               >
                 {currentRank.symbol}
               </div>
@@ -201,7 +210,7 @@ export default async function UserDetailPage({
                   className="text-lg font-bold"
                   style={{ color: "white", textShadow: "0 1px 4px rgba(0,0,0,.2)" }}
                 >
-                  {currentRank.ar}
+                  {en ? currentRank.en : currentRank.ar}
                 </div>
               </div>
             </div>
@@ -258,7 +267,7 @@ export default async function UserDetailPage({
                     }}
                   >
                     <Clock className="h-3 w-3" />
-                    آخر دخول {formatRelative(user.lastLoginAt)}
+                    {en ? "Last login" : "آخر دخول"} {formatRelative(user.lastLoginAt)}
                   </span>
                 ) : null}
               </div>
@@ -274,12 +283,12 @@ export default async function UserDetailPage({
                   </span>
                   {next ? (
                     <span>
-                      التالي:{" "}
-                      <span style={{ color: "white" }}>{next.ar}</span> (
+                      {en ? "Next" : "التالي"}:{" "}
+                      <span style={{ color: "white" }}>{en ? next.en : next.ar}</span> (
                       {formatNumber(next.minXp - xp)} XP)
                     </span>
                   ) : (
-                    <span>أعلى رتبة 👑</span>
+                    <span>{en ? "Top rank 👑" : "أعلى رتبة 👑"}</span>
                   )}
                 </div>
                 <div
@@ -320,7 +329,7 @@ export default async function UserDetailPage({
                         : "1px solid transparent",
                       opacity: reached ? 1 : 0.4,
                     }}
-                    title={`${r.ar} — ${formatNumber(r.minXp)} XP`}
+                    title={`${en ? r.en : r.ar} — ${formatNumber(r.minXp)} XP`}
                   >
                     <span
                       className="text-lg"
@@ -332,7 +341,7 @@ export default async function UserDetailPage({
                       {r.symbol}
                     </span>
                     <span className="text-[10px] font-bold opacity-95">
-                      {r.ar}
+                      {en ? r.en : r.ar}
                     </span>
                   </div>
                 );
@@ -344,35 +353,35 @@ export default async function UserDetailPage({
         {/* KPIs */}
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <KpiCard
-            label="نقاط الخبرة"
+            label={en ? "Experience Points" : "نقاط الخبرة"}
             value={formatNumber(xp)}
             icon={Sparkles}
             tone="violet"
-            hint={currentRank.ar}
+            hint={en ? currentRank.en : currentRank.ar}
           />
           <KpiCard
-            label="بونص الرتبة"
+            label={en ? "Rank Bonus" : "بونص الرتبة"}
             value={`+${user.bonusPercent}٪`}
             icon={Award}
             tone="amber"
           />
           <KpiCard
-            label="الأوسمة"
+            label={en ? "Badges" : "الأوسمة"}
             value={`${earnedCount}/${totalCount}`}
             icon={Trophy}
             tone="emerald"
             hint={
               totalCount > 0
-                ? `${Math.round((earnedCount / totalCount) * 100)}٪ إكمال`
+                ? `${Math.round((earnedCount / totalCount) * 100)}٪ ${en ? "complete" : "إكمال"}`
                 : undefined
             }
           />
           <KpiCard
-            label="إنجاز المهام"
+            label={en ? "Task Completion" : "إنجاز المهام"}
             value={`${completionRate}٪`}
             icon={CheckCircle2}
             tone={completionRate >= 60 ? "emerald" : "amber"}
-            hint={`${formatNumber(doneTasks)} من ${formatNumber(totalTasks)}`}
+            hint={`${formatNumber(doneTasks)} ${en ? "of" : "من"} ${formatNumber(totalTasks)}`}
           />
         </section>
 
@@ -391,13 +400,13 @@ export default async function UserDetailPage({
                       className="h-4 w-4"
                       style={{ color: "var(--heri-ochre)" }}
                     />
-                    المهام
+                    {en ? "Tasks" : "المهام"}
                   </h3>
                   <span
                     className="text-[11px] font-bold"
                     style={{ color: "var(--heri-ink-3)" }}
                   >
-                    {formatNumber(totalTasks)} إجمالي
+                    {formatNumber(totalTasks)} {en ? "total" : "إجمالي"}
                   </span>
                 </header>
 
@@ -415,7 +424,7 @@ export default async function UserDetailPage({
                         color: "var(--heri-ink)",
                       }}
                     >
-                      {TASK_STATUS_AR[status] ?? status}: {formatNumber(count)}
+                      {(en ? TASK_STATUS_EN[status] : TASK_STATUS_AR[status]) ?? status}: {formatNumber(count)}
                     </span>
                   ))}
                 </div>
@@ -442,17 +451,29 @@ export default async function UserDetailPage({
                                 : "badge-emerald"
                             }
                           >
-                            {t.kind === "SIDE" ? "جانبي" : "أساسي"}
+                            {t.kind === "SIDE"
+                              ? en
+                                ? "Side"
+                                : "جانبي"
+                              : en
+                                ? "Core"
+                                : "أساسي"}
                           </span>
                         </div>
                         <div
                           className="text-[11px]"
                           style={{ color: "var(--heri-ink-3)" }}
                         >
-                          {TASK_STATUS_AR[t.status] ?? t.status} •{" "}
-                          {t.dueAt ? `استحقاق ${formatShortDate(t.dueAt)}` : "بدون موعد"}
+                          {(en ? TASK_STATUS_EN[t.status] : TASK_STATUS_AR[t.status]) ?? t.status} •{" "}
+                          {t.dueAt
+                            ? `${en ? "Due" : "استحقاق"} ${formatShortDate(t.dueAt)}`
+                            : en
+                              ? "No due date"
+                              : "بدون موعد"}
                           {" • "}
-                          <span className="font-mono">{t.points} نقطة</span>
+                          <span className="font-mono">
+                            {t.points} {en ? "pts" : "نقطة"}
+                          </span>
                         </div>
                       </div>
                     </li>
@@ -473,14 +494,14 @@ export default async function UserDetailPage({
                       className="h-4 w-4"
                       style={{ color: "var(--heri-ochre)" }}
                     />
-                    إشارات منشورة
+                    {en ? "Published Signals" : "إشارات منشورة"}
                   </h3>
                   <Link
                     href="/insights"
                     className="text-[11px] font-bold"
                     style={{ color: "var(--heri-ochre)" }}
                   >
-                    عرض الكل ←
+                    {en ? "View all ←" : "عرض الكل ←"}
                   </Link>
                 </header>
                 <ul className="divide-y divide-[var(--heri-rule)]">
@@ -524,7 +545,7 @@ export default async function UserDetailPage({
                       className="h-4 w-4"
                       style={{ color: "var(--heri-ochre)" }}
                     />
-                    الأوسمة
+                    {en ? "Badges" : "الأوسمة"}
                   </h3>
                   <span
                     className="text-[11px] font-mono"
@@ -598,7 +619,7 @@ export default async function UserDetailPage({
                       className="h-4 w-4"
                       style={{ color: "var(--heri-ochre)" }}
                     />
-                    توقعات منشورة
+                    {en ? "Published Forecasts" : "توقعات منشورة"}
                   </h3>
                 </header>
                 <ul className="space-y-1.5">
@@ -645,7 +666,7 @@ export default async function UserDetailPage({
                       className="h-4 w-4"
                       style={{ color: "var(--heri-ochre)" }}
                     />
-                    حركات مالية
+                    {en ? "Transactions" : "حركات مالية"}
                   </h3>
                 </header>
                 <ul className="space-y-1.5">
@@ -694,29 +715,29 @@ export default async function UserDetailPage({
                   className="h-4 w-4"
                   style={{ color: "var(--heri-ochre)" }}
                 />
-                البطاقة الوظيفية
+                {en ? "Employment Card" : "البطاقة الوظيفية"}
               </h3>
               <dl className="space-y-2 text-xs">
-                <Fact label="الدور" value={loc(ROLES_AR, ROLES_EN, getLocale(), user.role)} />
+                <Fact label={en ? "Role" : "الدور"} value={loc(ROLES_AR, ROLES_EN, getLocale(), user.role)} />
                 {user.title ? (
-                  <Fact label="المسمى الوظيفي" value={user.title} />
+                  <Fact label={en ? "Job Title" : "المسمى الوظيفي"} value={user.title} />
                 ) : null}
                 {user.company ? (
                   <Fact
-                    label="الشركة"
+                    label={en ? "Company" : "الشركة"}
                     value={user.company.name}
                     link={`/companies/${user.company.id}`}
                   />
                 ) : null}
-                <Fact label="مرات الدخول" value={formatNumber(user.loginCount)} />
+                <Fact label={en ? "Login Count" : "مرات الدخول"} value={formatNumber(user.loginCount)} />
                 <Fact
-                  label="آخر دخول"
+                  label={en ? "Last Login" : "آخر دخول"}
                   value={
                     user.lastLoginAt ? formatRelative(user.lastLoginAt) : "—"
                   }
                 />
                 <Fact
-                  label="منذ"
+                  label={en ? "Member Since" : "منذ"}
                   value={formatShortDate(user.createdAt)}
                 />
               </dl>

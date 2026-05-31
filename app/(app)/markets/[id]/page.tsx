@@ -14,6 +14,7 @@ import { KpiCard } from "@/components/KpiCard";
 import { prisma } from "@/lib/db";
 import { formatNumber, formatRelative } from "@/lib/utils";
 import { getCompanyBrand } from "@/lib/companyBrand";
+import { getLocale } from "@/lib/i18n.server";
 
 const REGION_AR: Record<string, string> = {
   MENA: "الشرق الأوسط وشمال أفريقيا",
@@ -22,12 +23,27 @@ const REGION_AR: Record<string, string> = {
   ASIA: "آسيا",
 };
 
+const REGION_EN: Record<string, string> = {
+  MENA: "Middle East & North Africa",
+  EU: "Europe",
+  US: "United States",
+  ASIA: "Asia",
+};
+
 const EXCHANGE_AR: Record<string, string> = {
   ASE: "بورصة عمّان",
   TADAWUL: "تداول السعودية",
   DFM: "سوق دبي المالي",
   NYSE: "بورصة نيويورك",
   NASDAQ: "ناسداك",
+};
+
+const EXCHANGE_EN: Record<string, string> = {
+  ASE: "Amman Stock Exchange",
+  TADAWUL: "Tadawul (Saudi Exchange)",
+  DFM: "Dubai Financial Market",
+  NYSE: "New York Stock Exchange",
+  NASDAQ: "NASDAQ",
 };
 
 function parseHistory(raw: string): number[] {
@@ -142,16 +158,24 @@ export default async function MarketDetailPage({
     ? getCompanyBrand(stock.company.code)
     : null;
 
+  const en = getLocale() === "en";
+  const regionLabel =
+    (en ? REGION_EN[stock.region] : REGION_AR[stock.region]) ?? stock.region;
+  const exchangeLabel =
+    (en ? EXCHANGE_EN[stock.exchange] : EXCHANGE_AR[stock.exchange]) ??
+    stock.exchange;
+  const pct = en ? "%" : "٪";
+
   return (
     <>
       <Topbar
-        eyebrow="الأسواق العالمية"
+        eyebrow={en ? "Global Markets" : "الأسواق العالمية"}
         title={stock.labelAr ?? stock.label}
         subtitle={stock.label}
         actions={
           <Link href="/markets" className="btn-ghost">
             <ArrowLeft className="h-4 w-4" />
-            الأسواق
+            {en ? "Markets" : "الأسواق"}
           </Link>
         }
       />
@@ -196,7 +220,7 @@ export default async function MarketDetailPage({
                     border: "1px solid rgba(255,255,255,.3)",
                   }}
                 >
-                  {EXCHANGE_AR[stock.exchange] ?? stock.exchange}
+                  {exchangeLabel}
                 </span>
                 <span
                   className="rounded-full px-2 py-0.5 text-[10px] font-bold"
@@ -206,7 +230,7 @@ export default async function MarketDetailPage({
                   }}
                 >
                   <Globe className="me-1 inline h-3 w-3" />
-                  {REGION_AR[stock.region] ?? stock.region}
+                  {regionLabel}
                 </span>
                 {stock.company ? (
                   <Link
@@ -217,7 +241,8 @@ export default async function MarketDetailPage({
                       border: "1px solid rgba(255,255,255,.3)",
                     }}
                   >
-                    شركة المجموعة: {stock.company.name}
+                    {en ? "Group company: " : "شركة المجموعة: "}
+                    {stock.company.name}
                   </Link>
                 ) : null}
               </div>
@@ -234,7 +259,7 @@ export default async function MarketDetailPage({
             {/* Price block */}
             <div className="text-end">
               <div className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-90">
-                آخر سعر
+                {en ? "Last Price" : "آخر سعر"}
               </div>
               <div
                 className="font-mono text-5xl font-bold md:text-6xl"
@@ -257,7 +282,8 @@ export default async function MarketDetailPage({
               >
                 <TrendIcon className="h-4 w-4" />
                 {isUp ? "+" : ""}
-                {stock.changePct.toFixed(2)}٪
+                {stock.changePct.toFixed(2)}
+                {pct}
               </div>
               <div className="mt-1 font-mono text-xs opacity-80" dir="ltr">
                 {stock.currency}
@@ -278,11 +304,11 @@ export default async function MarketDetailPage({
                   className="h-4 w-4"
                   style={{ color: "var(--heri-ochre)" }}
                 />
-                الحركة السعرية
+                {en ? "Price Movement" : "الحركة السعرية"}
               </h3>
               <div className="flex items-center gap-3 text-[11px]">
                 <span style={{ color: "var(--heri-ink-3)" }}>
-                  أعلى:{" "}
+                  {en ? "High:" : "أعلى:"}{" "}
                   <span
                     className="font-mono font-bold"
                     style={{ color: "var(--heri-ink)" }}
@@ -291,7 +317,7 @@ export default async function MarketDetailPage({
                   </span>
                 </span>
                 <span style={{ color: "var(--heri-ink-3)" }}>
-                  أدنى:{" "}
+                  {en ? "Low:" : "أدنى:"}{" "}
                   <span
                     className="font-mono font-bold"
                     style={{ color: "var(--heri-ink)" }}
@@ -300,7 +326,7 @@ export default async function MarketDetailPage({
                   </span>
                 </span>
                 <span style={{ color: "var(--heri-ink-3)" }}>
-                  مدى:{" "}
+                  {en ? "Range:" : "مدى:"}{" "}
                   <span className="font-mono font-bold" style={{ color: trendColor }}>
                     {sessionRange.toFixed(2)}
                   </span>
@@ -314,26 +340,26 @@ export default async function MarketDetailPage({
         {/* KPIs */}
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <KpiCard
-            label="آخر إغلاق"
+            label={en ? "Last Close" : "آخر إغلاق"}
             value={`${stock.lastPrice.toFixed(2)} ${stock.currency}`}
             icon={Activity}
             tone="indigo"
           />
           <KpiCard
-            label="التغير"
-            value={`${isUp ? "+" : ""}${stock.changePct.toFixed(2)}٪`}
+            label={en ? "Change" : "التغير"}
+            value={`${isUp ? "+" : ""}${stock.changePct.toFixed(2)}${pct}`}
             icon={TrendIcon}
             tone={isUp ? "emerald" : "red"}
           />
           <KpiCard
-            label="البورصة"
-            value={EXCHANGE_AR[stock.exchange] ?? stock.exchange}
+            label={en ? "Exchange" : "البورصة"}
+            value={exchangeLabel}
             icon={Globe}
             tone="violet"
           />
           <KpiCard
-            label="المنطقة"
-            value={REGION_AR[stock.region] ?? stock.region}
+            label={en ? "Region" : "المنطقة"}
+            value={regionLabel}
             icon={Building2}
             tone="amber"
           />
@@ -353,15 +379,15 @@ export default async function MarketDetailPage({
                     className="h-4 w-4"
                     style={{ color: "var(--heri-ochre)" }}
                   />
-                  أسهم أخرى من{" "}
-                  {EXCHANGE_AR[stock.exchange] ?? stock.exchange}
+                  {en ? "Other listings on" : "أسهم أخرى من"}{" "}
+                  {exchangeLabel}
                 </h3>
                 <Link
                   href="/markets"
                   className="text-[11px] font-bold"
                   style={{ color: "var(--heri-ochre)" }}
                 >
-                  كل الأسواق ←
+                  {en ? "All markets ←" : "كل الأسواق ←"}
                 </Link>
               </header>
               <ul className="divide-y divide-[var(--heri-rule)]">
@@ -405,7 +431,8 @@ export default async function MarketDetailPage({
                           style={{ color: pUp ? "#0a8e54" : "#c0392b" }}
                         >
                           {pUp ? "+" : ""}
-                          {p.changePct.toFixed(2)}٪
+                          {p.changePct.toFixed(2)}
+                          {pct}
                         </span>
                       </div>
                     </li>
@@ -423,27 +450,32 @@ export default async function MarketDetailPage({
                 className="mb-3 text-sm font-semibold"
                 style={{ color: "var(--heri-ink)" }}
               >
-                البطاقة
+                {en ? "Overview" : "البطاقة"}
               </h3>
               <dl className="space-y-2 text-xs">
-                <Fact label="الرمز" value={stock.ticker} mono />
-                <Fact label="الاسم" value={stock.labelAr ?? stock.label} />
                 <Fact
-                  label="البورصة"
-                  value={EXCHANGE_AR[stock.exchange] ?? stock.exchange}
-                />
-                <Fact label="العملة" value={stock.currency} mono />
-                <Fact
-                  label="المنطقة"
-                  value={REGION_AR[stock.region] ?? stock.region}
+                  label={en ? "Ticker" : "الرمز"}
+                  value={stock.ticker}
+                  mono
                 />
                 <Fact
-                  label="آخر تحديث"
+                  label={en ? "Name" : "الاسم"}
+                  value={stock.labelAr ?? stock.label}
+                />
+                <Fact label={en ? "Exchange" : "البورصة"} value={exchangeLabel} />
+                <Fact
+                  label={en ? "Currency" : "العملة"}
+                  value={stock.currency}
+                  mono
+                />
+                <Fact label={en ? "Region" : "المنطقة"} value={regionLabel} />
+                <Fact
+                  label={en ? "Last Updated" : "آخر تحديث"}
                   value={formatRelative(stock.updatedAt)}
                 />
                 {stock.company ? (
                   <Fact
-                    label="شركة المجموعة"
+                    label={en ? "Group Company" : "شركة المجموعة"}
                     value={stock.company.name}
                     link={`/companies/${stock.company.id}`}
                   />

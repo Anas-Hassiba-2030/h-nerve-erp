@@ -25,6 +25,7 @@ import {
 } from "@/lib/utils";
 import { getCompanyBrand } from "@/lib/companyBrand";
 import { rankById } from "@/lib/gamification";
+import { getLocale } from "@/lib/i18n.server";
 
 const CATEGORY_AR: Record<string, string> = {
   DAIRY: "ألبان",
@@ -36,6 +37,16 @@ const CATEGORY_AR: Record<string, string> = {
   GENERAL: "عام",
 };
 
+const CATEGORY_EN: Record<string, string> = {
+  DAIRY: "Dairy",
+  PRODUCE: "Produce",
+  MEAT: "Meat",
+  BAKERY: "Bakery",
+  BEVERAGE: "Beverage",
+  HOSPITALITY: "Hospitality",
+  GENERAL: "General",
+};
+
 export default async function ForecastDetailPage({
   params,
 }: {
@@ -45,10 +56,10 @@ export default async function ForecastDetailPage({
     where: { id: params.id },
     include: {
       source: {
-        select: { id: true, name: true, code: true, sector: true },
+        select: { id: true, name: true, nameEn: true, code: true, sector: true },
       },
       target: {
-        select: { id: true, name: true, code: true, sector: true },
+        select: { id: true, name: true, nameEn: true, code: true, sector: true },
       },
       generatedBy: {
         select: { id: true, name: true, role: true, rank: true, xp: true },
@@ -86,17 +97,24 @@ export default async function ForecastDetailPage({
 
   const pinned = await isPinned("FORECAST", f.id);
 
+  const en = getLocale() === "en";
+  const sourceName = en ? (f.source.nameEn ?? f.source.name) : f.source.name;
+  const targetName = en ? (f.target.nameEn ?? f.target.name) : f.target.name;
+  const categoryLabel = en
+    ? (CATEGORY_EN[f.category] ?? f.category)
+    : (CATEGORY_AR[f.category] ?? f.category);
+
   return (
     <>
       <Topbar
-        eyebrow="سلسلة التوريد التنبؤية"
+        eyebrow={en ? "Predictive Supply Chain" : "سلسلة التوريد التنبؤية"}
         title={f.productLabel}
-        subtitle={`${f.source.name} → ${f.target.name}`}
+        subtitle={`${sourceName} → ${targetName}`}
         actions={
           <div className="flex items-center gap-2">
             <Link href="/supply-chain" className="btn-ghost">
               <ArrowLeft className="h-4 w-4" />
-              التوقعات
+              {en ? "Forecasts" : "التوقعات"}
             </Link>
             <PinButton
               entityType="FORECAST"
@@ -106,7 +124,7 @@ export default async function ForecastDetailPage({
               icon="Brain"
               initial={pinned}
               tone="default"
-              locale="ar"
+              locale={en ? "en" : "ar"}
             />
           </div>
         }
@@ -132,10 +150,10 @@ export default async function ForecastDetailPage({
               />
               <div className="relative">
                 <div className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-80">
-                  المصدر
+                  {en ? "Source" : "المصدر"}
                 </div>
                 <div className="mt-1 text-2xl font-bold">
-                  {f.source.name}
+                  {sourceName}
                 </div>
                 <div className="font-mono text-xs opacity-90">
                   #{f.source.code}
@@ -149,7 +167,7 @@ export default async function ForecastDetailPage({
                 className="mb-1 text-[10px] font-bold uppercase tracking-widest"
                 style={{ color: "var(--heri-ink-3)" }}
               >
-                الطلب المتوقع
+                {en ? "Predicted Demand" : "الطلب المتوقع"}
               </div>
               <div
                 className="font-mono text-2xl font-bold"
@@ -196,10 +214,10 @@ export default async function ForecastDetailPage({
               />
               <div className="relative">
                 <div className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-80">
-                  الوجهة
+                  {en ? "Destination" : "الوجهة"}
                 </div>
                 <div className="mt-1 text-2xl font-bold">
-                  {f.target.name}
+                  {targetName}
                 </div>
                 <div className="font-mono text-xs opacity-90">
                   #{f.target.code}
@@ -212,27 +230,27 @@ export default async function ForecastDetailPage({
         {/* KPIs */}
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <KpiCard
-            label="الطلب المتوقع"
+            label={en ? "Predicted Demand" : "الطلب المتوقع"}
             value={`${formatNumber(f.predictedDemand)} ${f.unit}`}
             icon={Package2}
             tone="violet"
           />
           <KpiCard
-            label="مستوى الثقة"
+            label={en ? "Confidence Level" : "مستوى الثقة"}
             value={formatPercent(conf, 0)}
             icon={Target}
             tone={confTone}
           />
           <KpiCard
-            label="مدة الفترة"
-            value={`${formatNumber(periodDays)} يوم`}
+            label={en ? "Period Duration" : "مدة الفترة"}
+            value={`${formatNumber(periodDays)} ${en ? "days" : "يوم"}`}
             icon={Calendar}
             tone="indigo"
             hint={`${formatShortDate(f.periodStart)} → ${formatShortDate(f.periodEnd)}`}
           />
           <KpiCard
-            label="التصنيف"
-            value={CATEGORY_AR[f.category] ?? f.category}
+            label={en ? "Category" : "التصنيف"}
+            value={categoryLabel}
             icon={Activity}
             tone="amber"
           />
@@ -249,7 +267,7 @@ export default async function ForecastDetailPage({
                 className="h-4 w-4"
                 style={{ color: "var(--heri-ochre)" }}
               />
-              مؤشر ثقة المحرك
+              {en ? "Engine Confidence Indicator" : "مؤشر ثقة المحرك"}
             </h3>
             <span
               className="text-xs font-mono font-bold"
@@ -262,7 +280,7 @@ export default async function ForecastDetailPage({
                       : "#c0392b",
               }}
             >
-              {Math.round(conf * 100)}٪
+              {Math.round(conf * 100)}{en ? "%" : "٪"}
             </span>
           </header>
           <div
@@ -297,10 +315,16 @@ export default async function ForecastDetailPage({
             style={{ color: "var(--heri-ink-3)" }}
           >
             {confTone === "emerald"
-              ? "ثقة عالية — يوصى بالاعتماد المباشر"
+              ? en
+                ? "High confidence — direct adoption recommended"
+                : "ثقة عالية — يوصى بالاعتماد المباشر"
               : confTone === "amber"
-                ? "ثقة متوسطة — تحقق قبل الاعتماد"
-                : "ثقة منخفضة — يحتاج مراجعة بشرية"}
+                ? en
+                  ? "Medium confidence — verify before adopting"
+                  : "ثقة متوسطة — تحقق قبل الاعتماد"
+                : en
+                  ? "Low confidence — requires human review"
+                  : "ثقة منخفضة — يحتاج مراجعة بشرية"}
           </div>
         </section>
 
@@ -317,7 +341,7 @@ export default async function ForecastDetailPage({
                   className="h-4 w-4"
                   style={{ color: "var(--heri-ochre)" }}
                 />
-                الإشارة المحفّزة
+                {en ? "Triggering Signal" : "الإشارة المحفّزة"}
               </h3>
               <p
                 className="whitespace-pre-line text-sm leading-relaxed"
@@ -339,15 +363,15 @@ export default async function ForecastDetailPage({
                       className="h-4 w-4"
                       style={{ color: "var(--heri-ochre)" }}
                     />
-                    توقعات أخرى من تصنيف{" "}
-                    {CATEGORY_AR[f.category] ?? f.category}
+                    {en ? "Other forecasts in category" : "توقعات أخرى من تصنيف"}{" "}
+                    {categoryLabel}
                   </h3>
                   <Link
                     href="/supply-chain"
                     className="text-[11px] font-bold"
                     style={{ color: "var(--heri-ochre)" }}
                   >
-                    كل التوقعات ←
+                    {en ? "All forecasts ←" : "كل التوقعات ←"}
                   </Link>
                 </header>
                 <ul className="divide-y divide-[var(--heri-rule)]">
@@ -383,7 +407,8 @@ export default async function ForecastDetailPage({
                           style={{ color: "var(--heri-ink-3)" }}
                         >
                           {r.source.code} → {r.target.code} •{" "}
-                          {Math.round(r.confidence * 100)}٪ ثقة
+                          {Math.round(r.confidence * 100)}
+                          {en ? "% confidence" : "٪ ثقة"}
                         </div>
                       </Link>
                     </li>
@@ -404,7 +429,7 @@ export default async function ForecastDetailPage({
                   className="h-4 w-4"
                   style={{ color: "var(--heri-ochre)" }}
                 />
-                الفترة الزمنية
+                {en ? "Time Period" : "الفترة الزمنية"}
               </h3>
               <div className="mb-2 flex items-center justify-between text-xs">
                 <div>
@@ -412,7 +437,7 @@ export default async function ForecastDetailPage({
                     className="text-[10px] font-bold uppercase tracking-widest"
                     style={{ color: "var(--heri-ink-3)" }}
                   >
-                    من
+                    {en ? "From" : "من"}
                   </div>
                   <div
                     className="font-bold"
@@ -430,7 +455,7 @@ export default async function ForecastDetailPage({
                     className="text-[10px] font-bold uppercase tracking-widest"
                     style={{ color: "var(--heri-ink-3)" }}
                   >
-                    إلى
+                    {en ? "To" : "إلى"}
                   </div>
                   <div
                     className="font-bold"
@@ -444,8 +469,9 @@ export default async function ForecastDetailPage({
                 className="text-[11px] text-center"
                 style={{ color: "var(--heri-ink-3)" }}
               >
-                {formatNumber(periodDays)} يوم • متوسط{" "}
-                {formatNumber(f.predictedDemand / periodDays)} {f.unit}/يوم
+                {formatNumber(periodDays)} {en ? "days • avg" : "يوم • متوسط"}{" "}
+                {formatNumber(f.predictedDemand / periodDays)} {f.unit}
+                {en ? "/day" : "/يوم"}
               </div>
             </section>
 
@@ -460,7 +486,7 @@ export default async function ForecastDetailPage({
                     className="h-4 w-4"
                     style={{ color: "var(--heri-ochre)" }}
                   />
-                  مَن أصدر التوقع
+                  {en ? "Generated By" : "مَن أصدر التوقع"}
                 </h3>
                 <Link
                   href={`/users/${f.generatedBy.id}`}
@@ -472,7 +498,7 @@ export default async function ForecastDetailPage({
                       <div
                         className="rank-piece anim-pop"
                         style={{ color: r.color }}
-                        title={r.ar}
+                        title={en ? r.en : r.ar}
                       >
                         {r.symbol}
                       </div>
@@ -507,13 +533,15 @@ export default async function ForecastDetailPage({
                     className="h-4 w-4"
                     style={{ color: "var(--heri-ochre)" }}
                   />
-                  محرك تلقائي
+                  {en ? "Automated Engine" : "محرك تلقائي"}
                 </h3>
                 <p
                   className="text-[11px]"
                   style={{ color: "var(--heri-ink-3)" }}
                 >
-                  هذا التوقع صادر عن المحرك التنبؤي للنظام دون تدخل بشري.
+                  {en
+                    ? "This forecast was generated by the system's predictive engine without human intervention."
+                    : "هذا التوقع صادر عن المحرك التنبؤي للنظام دون تدخل بشري."}
                 </p>
               </section>
             )}
@@ -524,18 +552,18 @@ export default async function ForecastDetailPage({
                 className="mb-3 text-sm font-semibold"
                 style={{ color: "var(--heri-ink)" }}
               >
-                البطاقة
+                {en ? "Summary" : "البطاقة"}
               </h3>
               <dl className="space-y-2 text-xs">
-                <Fact label="المنتج" value={f.productLabel} />
-                <Fact label="الوحدة" value={f.unit} />
+                <Fact label={en ? "Product" : "المنتج"} value={f.productLabel} />
+                <Fact label={en ? "Unit" : "الوحدة"} value={f.unit} />
                 <Fact
-                  label="التصنيف"
-                  value={CATEGORY_AR[f.category] ?? f.category}
+                  label={en ? "Category" : "التصنيف"}
+                  value={categoryLabel}
                 />
-                <Fact label="الحالة" value={f.status} />
+                <Fact label={en ? "Status" : "الحالة"} value={f.status} />
                 <Fact
-                  label="نُشر"
+                  label={en ? "Published" : "نُشر"}
                   value={formatRelative(f.createdAt)}
                 />
               </dl>

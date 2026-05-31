@@ -17,6 +17,7 @@ import { HeriKpi } from "@/components/HeriKpi";
 import { PinButton } from "@/components/PinButton";
 import { prisma } from "@/lib/db";
 import { isPinned } from "@/lib/pins";
+import { getLocale } from "@/lib/i18n.server";
 import {
   formatMoney,
   formatNumber,
@@ -30,6 +31,14 @@ const KIND_AR: Record<string, string> = {
   EXPENSE: "مصروف",
   COST: "تكلفة",
   TRANSFER: "تحويل داخلي",
+};
+
+const KIND_EN: Record<string, string> = {
+  REVENUE: "Revenue",
+  INCOME: "Income",
+  EXPENSE: "Expense",
+  COST: "Cost",
+  TRANSFER: "Internal transfer",
 };
 
 const KIND_ICON = {
@@ -48,7 +57,9 @@ export default async function FinanceDetailPage({
   const tx = await prisma.transaction.findUnique({
     where: { id: params.id },
     include: {
-      company: { select: { id: true, name: true, code: true, sector: true } },
+      company: {
+        select: { id: true, name: true, nameEn: true, code: true, sector: true },
+      },
       createdBy: {
         select: { id: true, name: true, role: true, rank: true, xp: true },
       },
@@ -64,7 +75,7 @@ export default async function FinanceDetailPage({
       },
       orderBy: { occurredAt: "desc" },
       take: 6,
-      include: { company: { select: { name: true, code: true } } },
+      include: { company: { select: { name: true, nameEn: true, code: true } } },
     }),
     prisma.transaction.findMany({
       where: {
@@ -102,17 +113,23 @@ export default async function FinanceDetailPage({
 
   const pinned = await isPinned("TRANSACTION", tx.id);
 
+  const en = getLocale() === "en";
+  const companyName = en ? (tx.company.nameEn ?? tx.company.name) : tx.company.name;
+  const kindLabel = en
+    ? (KIND_EN[tx.kind] ?? tx.kind)
+    : (KIND_AR[tx.kind] ?? tx.kind);
+
   return (
     <>
       <PageHeader
-        eyebrow="السجل المالي"
+        eyebrow={en ? "Financial ledger" : "السجل المالي"}
         title={tx.description ?? tx.category}
         subtitle={tx.reference}
         actions={
           <div className="flex items-center gap-2">
             <Link href="/finance" className="heri-btn heri-btn-ghost" style={{ fontSize: 13 }}>
               <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
-              السجل
+              {en ? "Ledger" : "السجل"}
             </Link>
             <PinButton
               entityType="TRANSACTION"
@@ -122,7 +139,7 @@ export default async function FinanceDetailPage({
               icon="Wallet"
               initial={pinned}
               tone="default"
-              locale="ar"
+              locale={en ? "en" : "ar"}
             />
           </div>
         }
@@ -151,14 +168,14 @@ export default async function FinanceDetailPage({
                     color: accent,
                   }}
                 >
-                  {KIND_AR[tx.kind] ?? tx.kind}
+                  {kindLabel}
                 </span>
                 <Link
                   href={`/companies/${tx.company.id}`}
                   className="heri-pill heri-pill-info"
                   style={{ textDecoration: "none" }}
                 >
-                  {tx.company.name}
+                  {companyName}
                 </Link>
                 <span
                   className="heri-number-mono"
@@ -200,7 +217,7 @@ export default async function FinanceDetailPage({
             </div>
 
             <div className="text-end">
-              <div className="heri-eyebrow heri-eyebrow-ink">المبلغ</div>
+              <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Amount" : "المبلغ"}</div>
               <div
                 className="heri-number mt-1"
                 style={{
@@ -228,25 +245,25 @@ export default async function FinanceDetailPage({
         {/* KPI band — company P&L snapshot */}
         <section className="grid gap-4 heri-stagger sm:grid-cols-3">
           <HeriKpi
-            label={`إيرادات ${tx.company.name}`}
+            label={en ? `${companyName} revenue` : `إيرادات ${companyName}`}
             raw={companyIncome}
             kind="money"
             accent="var(--heri-teal)"
-            hint="إجمالي تاريخي"
+            hint={en ? "Historical total" : "إجمالي تاريخي"}
           />
           <HeriKpi
-            label={`مصاريف ${tx.company.name}`}
+            label={en ? `${companyName} expenses` : `مصاريف ${companyName}`}
             raw={companyExpense}
             kind="money"
             accent="var(--heri-terracotta)"
-            hint="إجمالي تاريخي"
+            hint={en ? "Historical total" : "إجمالي تاريخي"}
           />
           <HeriKpi
-            label="الصافي"
+            label={en ? "Net" : "الصافي"}
             raw={companyNet}
             kind="money"
             accent={companyNet >= 0 ? "var(--heri-teal)" : "var(--heri-terracotta)"}
-            hint={companyNet >= 0 ? "ربح" : "خسارة"}
+            hint={companyNet >= 0 ? (en ? "Profit" : "ربح") : (en ? "Loss" : "خسارة")}
           />
         </section>
 
@@ -256,7 +273,7 @@ export default async function FinanceDetailPage({
             {/* Description */}
             {tx.description ? (
               <section className="heri-card">
-                <div className="heri-eyebrow heri-eyebrow-ink">وصف الحركة</div>
+                <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Transaction note" : "وصف الحركة"}</div>
                 <h3
                   className="mt-1 mb-2 flex items-center gap-2"
                   style={{
@@ -267,7 +284,7 @@ export default async function FinanceDetailPage({
                   }}
                 >
                   <Wallet className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
-                  الملاحظات
+                  {en ? "Notes" : "الملاحظات"}
                 </h3>
                 <p
                   className="text-sm leading-relaxed"
@@ -283,7 +300,7 @@ export default async function FinanceDetailPage({
               <section className="heri-card">
                 <header className="mb-3 flex items-center justify-between">
                   <div>
-                    <div className="heri-eyebrow heri-eyebrow-ink">حركات بنفس التصنيف</div>
+                    <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Same category" : "حركات بنفس التصنيف"}</div>
                     <h3
                       className="mt-1 flex items-center gap-2"
                       style={{
@@ -347,7 +364,7 @@ export default async function FinanceDetailPage({
               <section className="heri-card">
                 <header className="mb-3 flex items-center justify-between">
                   <div>
-                    <div className="heri-eyebrow heri-eyebrow-ink">من نفس الشركة</div>
+                    <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Same company" : "من نفس الشركة"}</div>
                     <h3
                       className="mt-1 flex items-center gap-2"
                       style={{
@@ -358,7 +375,7 @@ export default async function FinanceDetailPage({
                       }}
                     >
                       <Building2 className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
-                      حركات أخرى — {tx.company.name}
+                      {en ? "Other transactions" : "حركات أخرى"} — {companyName}
                     </h3>
                   </div>
                   <Link
@@ -366,7 +383,7 @@ export default async function FinanceDetailPage({
                     className="heri-eyebrow"
                     style={{ color: "var(--heri-ochre)", textDecoration: "none" }}
                   >
-                    ملف الشركة ←
+                    {en ? "Company profile →" : "ملف الشركة ←"}
                   </Link>
                 </header>
                 <ul className="divide-y divide-[var(--heri-rule)]">
@@ -391,7 +408,7 @@ export default async function FinanceDetailPage({
                             className="heri-number-mono mt-0.5"
                             style={{ fontSize: 10.5, color: "var(--heri-ink-3)" }}
                           >
-                            {s.reference} • {KIND_AR[s.kind] ?? s.kind} • {formatShortDate(s.occurredAt)}
+                            {s.reference} • {en ? (KIND_EN[s.kind] ?? s.kind) : (KIND_AR[s.kind] ?? s.kind)} • {formatShortDate(s.occurredAt)}
                           </div>
                         </Link>
                         <span
@@ -418,7 +435,7 @@ export default async function FinanceDetailPage({
             {/* Created by */}
             {tx.createdBy ? (
               <section className="heri-card">
-                <div className="heri-eyebrow heri-eyebrow-ink">من سجّل</div>
+                <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Logged by" : "من سجّل"}</div>
                 <h3
                   className="mt-1 mb-3 flex items-center gap-2"
                   style={{
@@ -429,7 +446,7 @@ export default async function FinanceDetailPage({
                   }}
                 >
                   <UserIcon className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
-                  المستخدم
+                  {en ? "User" : "المستخدم"}
                 </h3>
                 <Link
                   href={`/users/${tx.createdBy.id}`}
@@ -458,7 +475,7 @@ export default async function FinanceDetailPage({
 
             {/* Meta */}
             <section className="heri-card">
-              <div className="heri-eyebrow heri-eyebrow-ink">البطاقة</div>
+              <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Card" : "البطاقة"}</div>
               <h3
                 className="mt-1 mb-3"
                 style={{
@@ -468,22 +485,22 @@ export default async function FinanceDetailPage({
                   color: "var(--heri-ink)",
                 }}
               >
-                تفاصيل الحركة
+                {en ? "Transaction details" : "تفاصيل الحركة"}
               </h3>
               <dl className="space-y-2 text-xs">
-                <Fact label="المرجع" value={tx.reference} mono />
-                <Fact label="النوع" value={KIND_AR[tx.kind] ?? tx.kind} />
-                <Fact label="التصنيف" value={tx.category} />
+                <Fact label={en ? "Reference" : "المرجع"} value={tx.reference} mono />
+                <Fact label={en ? "Type" : "النوع"} value={kindLabel} />
+                <Fact label={en ? "Category" : "التصنيف"} value={tx.category} />
                 <Fact
-                  label="المبلغ"
+                  label={en ? "Amount" : "المبلغ"}
                   value={`${sign}${formatMoney(tx.amount, tx.currency)}`}
                   color={accent}
                 />
-                <Fact label="العملة" value={tx.currency} mono />
-                <Fact label="وقع في" value={formatDateTime(tx.occurredAt)} />
+                <Fact label={en ? "Currency" : "العملة"} value={tx.currency} mono />
+                <Fact label={en ? "Occurred at" : "وقع في"} value={formatDateTime(tx.occurredAt)} />
                 <Fact
-                  label="الشركة"
-                  value={tx.company.name}
+                  label={en ? "Company" : "الشركة"}
+                  value={companyName}
                   link={`/companies/${tx.company.id}`}
                 />
               </dl>

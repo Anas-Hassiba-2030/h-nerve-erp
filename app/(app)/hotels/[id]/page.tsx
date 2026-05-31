@@ -28,6 +28,12 @@ import {
 } from "@/lib/utils";
 
 const COUNTRY_NAMES: Record<string, string> = { JO: "الأردن", BG: "بلغاريا" };
+const COUNTRY_NAMES_EN: Record<string, string> = { JO: "Jordan", BG: "Bulgaria" };
+function countryName(code: string, en: boolean): string {
+  return (
+    (en ? COUNTRY_NAMES_EN[code] : COUNTRY_NAMES[code]) ?? code
+  );
+}
 
 export default async function HotelDetailPage({
   params,
@@ -92,20 +98,22 @@ export default async function HotelDetailPage({
 
   const pinned = await isPinned("HOTEL", hotel.id);
 
+  const en = getLocale() === "en";
+
   return (
     <>
       <Topbar
-        eyebrow="الضيافة والفنادق"
-        title={hotel.name}
+        eyebrow={en ? "Hospitality & Hotels" : "الضيافة والفنادق"}
+        title={en ? (hotel.nameEn ?? hotel.name) : hotel.name}
         subtitle={
-          hotel.nameEn ??
-          `${hotel.city} • ${COUNTRY_NAMES[hotel.country] ?? hotel.country}`
+          (en ? hotel.nameEn : undefined) ??
+          `${hotel.city} • ${countryName(hotel.country, en)}`
         }
         actions={
           <div className="flex items-center gap-2">
             <Link href="/hotels" className="heri-btn heri-btn-ghost" style={{ fontSize: 13 }}>
               <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
-              الفنادق
+              {en ? "Hotels" : "الفنادق"}
             </Link>
             <PinButton
               entityType="HOTEL"
@@ -116,7 +124,7 @@ export default async function HotelDetailPage({
               icon="Hotel"
               initial={pinned}
               tone="default"
-              locale="ar"
+              locale={en ? "en" : "ar"}
             />
           </div>
         }
@@ -144,9 +152,9 @@ export default async function HotelDetailPage({
                   className="text-2xl font-semibold md:text-3xl"
                   style={{ color: "var(--heri-ink)", letterSpacing: "-0.01em", lineHeight: 1.15 }}
                 >
-                  {hotel.name}
+                  {en ? (hotel.nameEn ?? hotel.name) : hotel.name}
                 </h2>
-                {hotel.nameEn ? (
+                {!en && hotel.nameEn ? (
                   <p className="mt-0.5 text-sm" style={{ color: "var(--heri-ink-3)" }} dir="ltr">
                     {hotel.nameEn}
                   </p>
@@ -154,18 +162,18 @@ export default async function HotelDetailPage({
                 <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px]" style={{ color: "var(--heri-ink-3)" }}>
                   <span className="inline-flex items-center gap-1.5">
                     <MapPin className="h-3.5 w-3.5" strokeWidth={1.5} />
-                    {hotel.city} · {COUNTRY_NAMES[hotel.country] ?? hotel.country}
+                    {hotel.city} · {countryName(hotel.country, en)}
                   </span>
                   <span className="inline-flex items-center gap-1.5">
                     <BedDouble className="h-3.5 w-3.5" strokeWidth={1.5} />
-                    {formatNumber(hotel.totalRooms)} غرفة
+                    {formatNumber(hotel.totalRooms)} {en ? "rooms" : "غرفة"}
                   </span>
                   <Link
                     href={`/companies/${hotel.companyId}`}
                     className="hover:underline"
                     style={{ color: "var(--heri-ochre)" }}
                   >
-                    {hotel.company.name}
+                    {en ? (hotel.company.nameEn ?? hotel.company.name) : hotel.company.name}
                   </Link>
                 </div>
               </div>
@@ -181,29 +189,29 @@ export default async function HotelDetailPage({
         {/* KPI strip — HeriKpi with CountUpValue */}
         <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
           <HeriKpi
-            label="إشغال حالي"
+            label={en ? "Current occupancy" : "إشغال حالي"}
             raw={occ}
             kind="percent"
             accent={occ >= 0.6 ? "var(--heri-teal, #1f4e4a)" : undefined}
-            hint={`${formatNumber(activeRooms)} / ${formatNumber(hotel.totalRooms)} غرفة`}
+            hint={`${formatNumber(activeRooms)} / ${formatNumber(hotel.totalRooms)} ${en ? "rooms" : "غرفة"}`}
           />
           <HeriKpi
-            label="إيرادات 30 يوم"
+            label={en ? "Revenue (30 days)" : "إيرادات 30 يوم"}
             raw={revenue30}
             kind="money"
-            hint={`${formatNumber(bookings30)} حجز`}
+            hint={`${formatNumber(bookings30)} ${en ? "bookings" : "حجز"}`}
           />
           <HeriKpi
-            label="متوسط إيراد/حجز"
+            label={en ? "Avg. revenue / booking" : "متوسط إيراد/حجز"}
             raw={avgRevenuePerBooking}
             kind="money"
-            hint="آخر 30 يوم"
+            hint={en ? "Last 30 days" : "آخر 30 يوم"}
           />
           <HeriKpi
-            label="إجمالي الحجوزات"
+            label={en ? "Total bookings" : "إجمالي الحجوزات"}
             raw={hotel._count.bookings}
             kind="number"
-            hint="منذ الانطلاق"
+            hint={en ? "Since launch" : "منذ الانطلاق"}
           />
         </section>
 
@@ -219,9 +227,9 @@ export default async function HotelDetailPage({
                 style={{ color: "var(--heri-ochre)" }}
                 strokeWidth={1.5}
               />
-              نبض الإشغال
+              {en ? "Occupancy pulse" : "نبض الإشغال"}
             </h3>
-            <span className="heri-eyebrow heri-eyebrow-ink">نشط الآن</span>
+            <span className="heri-eyebrow heri-eyebrow-ink">{en ? "Live now" : "نشط الآن"}</span>
           </header>
           <div className="space-y-1.5">
             <div
@@ -232,10 +240,10 @@ export default async function HotelDetailPage({
                 <span style={{ color: "var(--heri-ink)" }}>
                   {formatNumber(activeRooms)}
                 </span>{" "}
-                محجوز
+                {en ? "booked" : "محجوز"}
               </span>
               <span>
-                {formatNumber(Math.max(0, hotel.totalRooms - activeRooms))} متاح
+                {formatNumber(Math.max(0, hotel.totalRooms - activeRooms))} {en ? "available" : "متاح"}
               </span>
             </div>
             <div
@@ -274,13 +282,13 @@ export default async function HotelDetailPage({
                     style={{ color: "var(--heri-ochre)" }}
                     strokeWidth={1.5}
                   />
-                  وصول وشيك (14 يوم)
+                  {en ? "Upcoming arrivals (14 days)" : "وصول وشيك (14 يوم)"}
                 </h3>
                 <span
                   className="text-[11px] font-bold"
                   style={{ color: "var(--heri-ink-3)" }}
                 >
-                  {formatNumber(upcoming.length)} حجز
+                  {formatNumber(upcoming.length)} {en ? "bookings" : "حجز"}
                 </span>
               </header>
               {upcoming.length === 0 ? (
@@ -288,7 +296,9 @@ export default async function HotelDetailPage({
                   className="text-xs"
                   style={{ color: "var(--heri-ink-3)" }}
                 >
-                  لا توجد وصولات وشيكة في الأسبوعين القادمين.
+                  {en
+                    ? "No upcoming arrivals in the next two weeks."
+                    : "لا توجد وصولات وشيكة في الأسبوعين القادمين."}
                 </p>
               ) : (
                 <ul className="divide-y divide-[var(--heri-rule)]">
@@ -312,7 +322,7 @@ export default async function HotelDetailPage({
                           style={{ color: "var(--heri-ink-3)" }}
                         >
                           {b.reference} • {loc(ROOM_TYPES_AR, ROOM_TYPES_EN, getLocale(), b.roomType)} •{" "}
-                          {b.rooms} غرفة • {b.guests} ضيف
+                          {b.rooms} {en ? "rooms" : "غرفة"} • {b.guests} {en ? "guests" : "ضيف"}
                         </div>
                       </div>
                       <div className="text-end">
@@ -347,7 +357,7 @@ export default async function HotelDetailPage({
                     style={{ color: "var(--heri-ochre)" }}
                     strokeWidth={1.5}
                   />
-                  أحدث الحجوزات (30 يوم)
+                  {en ? "Latest bookings (30 days)" : "أحدث الحجوزات (30 يوم)"}
                 </h3>
               </header>
               {recentBookings.length === 0 ? (
@@ -355,7 +365,9 @@ export default async function HotelDetailPage({
                   className="text-xs"
                   style={{ color: "var(--heri-ink-3)" }}
                 >
-                  لا توجد حجوزات في آخر 30 يوم.
+                  {en
+                    ? "No bookings in the last 30 days."
+                    : "لا توجد حجوزات في آخر 30 يوم."}
                 </p>
               ) : (
                 <ul className="divide-y divide-[var(--heri-rule)]">
@@ -403,7 +415,7 @@ export default async function HotelDetailPage({
                   className="mb-3 text-sm font-semibold"
                   style={{ color: "var(--heri-ink)" }}
                 >
-                  توزيع الحجوزات حسب الحالة
+                  {en ? "Bookings by status" : "توزيع الحجوزات حسب الحالة"}
                 </h3>
                 <div className="space-y-2">
                   {statusBreakdown.map((g) => {
@@ -449,26 +461,26 @@ export default async function HotelDetailPage({
                 className="mb-3 text-sm font-semibold"
                 style={{ color: "var(--heri-ink)" }}
               >
-                بطاقة العقار
+                {en ? "Property card" : "بطاقة العقار"}
               </h3>
               <dl className="space-y-2 text-xs">
-                <Fact label="الفئة" value={loc(TIERS_AR, TIERS_EN, getLocale(), hotel.tier)} />
+                <Fact label={en ? "Tier" : "الفئة"} value={loc(TIERS_AR, TIERS_EN, getLocale(), hotel.tier)} />
                 <Fact
-                  label="التقييم"
+                  label={en ? "Rating" : "التقييم"}
                   value={`${"★".repeat(hotel.starRating)} (${hotel.starRating}/5)`}
                 />
                 <Fact
-                  label="إجمالي الغرف"
+                  label={en ? "Total rooms" : "إجمالي الغرف"}
                   value={formatNumber(hotel.totalRooms)}
                 />
-                <Fact label="ADR مرجعي" value={formatMoney(hotel.baselineADR)} />
+                <Fact label={en ? "Baseline ADR" : "ADR مرجعي"} value={formatMoney(hotel.baselineADR)} />
                 <Fact
-                  label="الموقع"
-                  value={`${hotel.city}، ${COUNTRY_NAMES[hotel.country] ?? hotel.country}`}
+                  label={en ? "Location" : "الموقع"}
+                  value={`${hotel.city}${en ? ", " : "، "}${countryName(hotel.country, en)}`}
                 />
                 <Fact
-                  label="الشركة المالكة"
-                  value={hotel.company.name}
+                  label={en ? "Owning company" : "الشركة المالكة"}
+                  value={en ? (hotel.company.nameEn ?? hotel.company.name) : hotel.company.name}
                   link={`/companies/${hotel.companyId}`}
                 />
               </dl>

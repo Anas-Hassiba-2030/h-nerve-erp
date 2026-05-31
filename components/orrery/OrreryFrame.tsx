@@ -19,11 +19,15 @@ export function OrreryFrame({ identity }: { identity: OrreryIdentity }) {
     function onMessage(e: MessageEvent) {
       const data = e?.data as { __orreryNav?: string } | undefined;
       if (data && typeof data.__orreryNav === "string") {
-        // A dive opens the ACTUAL Claude Design page, served under /design
-        // (e.g. "sections/arena.html" -> /design/sections/arena.html). Each
-        // designed page's "back to orbit" returns here to /orrery.
         const href = data.__orreryNav.replace(/^\/+/, "");
-        window.location.assign("/design/" + href);
+        // Sections rebuilt with REAL data live as real app routes (the design
+        // + the live numbers + working CRUD). Everything not yet rebuilt opens
+        // the designed mock under /design so the dive always lands on the
+        // design — real data fills in section by section as each is rebuilt.
+        const REAL_DATA_PAGES: Record<string, string> = {
+          "sections/arena.html": "/hotels",
+        };
+        window.location.assign(REAL_DATA_PAGES[href] ?? "/design/" + href);
       }
     }
     window.addEventListener("message", onMessage);

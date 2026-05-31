@@ -1,25 +1,20 @@
 import Link from "next/link";
 import { Wallet, Plus } from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
-import { HeriKpi } from "@/components/HeriKpi";
 import { ExportMenu } from "@/components/ExportMenu";
 import { SectorPill } from "@/components/SectorPill";
 import { EmptyState } from "@/components/EmptyState";
 import { TransactionTable } from "@/components/finance/TransactionTable";
+import {
+  DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel,
+} from "@/components/orrery/daylight";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { hasRole } from "@/lib/authz";
 import { prisma } from "@/lib/db";
-import { formatMoney, formatNumber, formatShortDate } from "@/lib/utils";
+import { formatMoney, formatNumber } from "@/lib/utils";
+import "../daylight.css";
 
 export const dynamic = "force-dynamic";
-
-const KIND_LABEL: Record<string, { ar: string; en: string; tone: string }> = {
-  REVENUE:  { ar: "إيراد",  en: "Revenue",  tone: "badge-emerald" },
-  EXPENSE:  { ar: "مصروف",  en: "Expense",  tone: "badge-red" },
-  TRANSFER: { ar: "تحويل",  en: "Transfer", tone: "badge-blue" },
-};
 
 export default async function FinancePage() {
   const locale = getLocale();
@@ -31,29 +26,21 @@ export default async function FinancePage() {
   const last90 = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
 
   const [transactions, allCompanies] = await Promise.all([
-    prisma.transaction.findMany({
-      orderBy: { occurredAt: "desc" },
-      include: { company: true, createdBy: true },
-      take: 60,
-    }),
+    prisma.transaction.findMany({ orderBy: { occurredAt: "desc" }, include: { company: true, createdBy: true }, take: 60 }),
     prisma.company.findMany({ orderBy: { name: "asc" } }),
   ]);
 
   const tx30 = transactions.filter((t) => new Date(t.occurredAt) >= last30);
   const tx90 = transactions.filter((t) => new Date(t.occurredAt) >= last90);
-
-  const sumKind = (rows: typeof transactions, kind: string) =>
-    rows.filter((t) => t.kind === kind).reduce((acc, t) => acc + t.amount, 0);
+  const sumKind = (rows: typeof transactions, kind: string) => rows.filter((t) => t.kind === kind).reduce((acc, t) => acc + t.amount, 0);
 
   const revenue30 = sumKind(tx30, "REVENUE");
   const expense30 = sumKind(tx30, "EXPENSE");
   const transfer30 = sumKind(tx30, "TRANSFER");
   const net30 = revenue30 - expense30;
-
   const revenue90 = sumKind(tx90, "REVENUE");
   const expense90 = sumKind(tx90, "EXPENSE");
 
-  // Per-company breakdown (last 30 days)
   const perCompany = new Map<string, { revenue: number; expense: number }>();
   for (const c of allCompanies) perCompany.set(c.id, { revenue: 0, expense: 0 });
   for (const t of tx30) {
@@ -64,141 +51,69 @@ export default async function FinancePage() {
   }
 
   return (
-    <>
-      <PageHeader
-        eyebrow={ar ? "المركز المالي" : "Finance Center"}
-        title={ar ? "السجل المالي الموحّد" : "Unified financial ledger"}
-        subtitle={
-          ar
-            ? "رؤية واحدة عبر شركات المجموعة — إيرادات، مصاريف، وتحويلات."
-            : "One view across the group — revenue, expenses, transfers."
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
+        eyebrow={ar ? "المالية · المركز المالي" : "Finance Center"}
+        title={ar ? "السجل المالي الموحّد" : "Unified Financial Ledger"}
+        subtitle={ar ? "رؤية واحدة عبر شركات المجموعة — إيرادات، مصاريف، وتحويلات — آخر ثلاثين يوماً." : "One view across the group — revenue, expenses and transfers — last 30 days."}
+        status={ar ? "مباشر · محدّث الآن" : "Live · updated now"}
+        actions={
+          <>
+            <Link href="/finance/new" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "عملية جديدة" : "New transaction"}</Link>
+            <ExportMenu type="finance" locale={lc} />
+          </>
         }
       />
 
-      <PageContainer>
-        {/* Action rail */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="heri-eyebrow heri-eyebrow-ink">
-            {ar ? "آخر 30 يوماً" : "Last 30 days"}
-          </div>
-          <div className="flex items-center gap-2">
-            <Link href="/finance/new" className="heri-btn heri-btn-primary" style={{ fontSize: 13 }}>
-              <Plus className="h-4 w-4" strokeWidth={1.5} />
-              {ar ? "عملية جديدة" : "New transaction"}
-            </Link>
-            <ExportMenu type="finance" locale={lc} />
-          </div>
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "إيرادات ٣٠ يوم" : "Revenue 30d"} value={formatMoney(revenue30)} hint={`${formatMoney(revenue90)} ${ar ? "في ٩٠ي" : "90d"}`} delta={{ dir: "up", text: ar ? "إيراد" : "rev" }} />
+        <DaylightKpi label={ar ? "مصاريف ٣٠ يوم" : "Expenses 30d"} value={formatMoney(expense30)} hint={`${formatMoney(expense90)} ${ar ? "في ٩٠ي" : "90d"}`} delta={{ dir: "down", text: ar ? "مصروف" : "exp" }} />
+        <DaylightKpi label={ar ? "صافي الربح ٣٠ي" : "Net 30d"} value={formatMoney(net30)} hint={net30 >= 0 ? (ar ? "ربح إيجابي" : "Positive") : (ar ? "خسارة" : "Loss")} delta={{ dir: net30 >= 0 ? "up" : "down", text: net30 >= 0 ? (ar ? "ربح" : "profit") : (ar ? "خسارة" : "loss") }} />
+        <DaylightKpi label={ar ? "تحويلات داخلية" : "Internal transfers"} value={formatMoney(transfer30)} hint={ar ? "آخر ٣٠ يوم" : "last 30 days"} />
+      </DaylightKpiGrid>
+
+      <DaylightPanel title={ar ? "الأداء حسب الشركة" : "Performance by company"} aside={ar ? "آخر ٣٠ يوم" : "Last 30 days"}>
+        <div style={{ overflowX: "auto" }}>
+          <table className="dl-table">
+            <thead>
+              <tr>
+                <th>{ar ? "الشركة" : "Company"}</th>
+                <th>{ar ? "القطاع" : "Sector"}</th>
+                <th className="num">{ar ? "إيرادات" : "Revenue"}</th>
+                <th className="num">{ar ? "مصاريف" : "Expenses"}</th>
+                <th className="num">{ar ? "الصافي" : "Net"}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allCompanies.map((c) => {
+                const v = perCompany.get(c.id) ?? { revenue: 0, expense: 0 };
+                const net = v.revenue - v.expense;
+                return (
+                  <tr key={c.id}>
+                    <td style={{ fontWeight: 700, color: "var(--ink)" }}>{c.name}</td>
+                    <td><SectorPill sector={c.sector} /></td>
+                    <td className="num" style={{ fontFamily: "monospace", color: "var(--emerald)" }}>{formatMoney(v.revenue)}</td>
+                    <td className="num" style={{ fontFamily: "monospace", color: "var(--brick)" }}>{formatMoney(v.expense)}</td>
+                    <td className="num" style={{ fontFamily: "monospace", fontWeight: 700, color: net >= 0 ? "var(--emerald)" : "var(--brick)" }}>{formatMoney(net)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
+      </DaylightPanel>
 
-        {/* KPI band — Heritage tiles with count-up */}
-        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
-          <HeriKpi
-            label={ar ? "إيرادات 30 يوم" : "Revenue 30d"}
-            raw={revenue30}
-            kind="money"
-            hint={`${formatMoney(revenue90)} ${ar ? "في 90ي" : "90d"}`}
+      <DaylightPanel title={ar ? "العمليات الأخيرة" : "Recent transactions"} aside={ar ? `آخر ${formatNumber(transactions.length)} عملية` : `Last ${formatNumber(transactions.length)}`}>
+        {transactions.length === 0 ? (
+          <EmptyState
+            icon={Wallet}
+            title={ar ? "لا توجد عمليات مالية بعد" : "No transactions yet"}
+            action={<Link href="/finance/new" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "أضف أول عملية" : "Add the first transaction"}</Link>}
           />
-          <HeriKpi
-            label={ar ? "مصاريف 30 يوم" : "Expenses 30d"}
-            raw={expense30}
-            kind="money"
-            accent="var(--heri-terracotta, #b85c38)"
-            hint={`${formatMoney(expense90)} ${ar ? "في 90ي" : "90d"}`}
-          />
-          <HeriKpi
-            label={ar ? "صافي الربح 30ي" : "Net 30d"}
-            raw={net30}
-            kind="money"
-            accent={net30 >= 0 ? "var(--heri-teal, #1f4e4a)" : "var(--heri-terracotta, #b85c38)"}
-            hint={net30 >= 0 ? (ar ? "ربح إيجابي" : "Positive") : (ar ? "خسارة" : "Loss")}
-          />
-          <HeriKpi
-            label={ar ? "تحويلات داخلية" : "Internal transfers"}
-            raw={transfer30}
-            kind="money"
-            hint={ar ? "آخر 30 يوم" : "last 30 days"}
-          />
-        </section>
-
-        {/* Per-company breakdown */}
-        <section className="heri-card" style={{ padding: 0 }}>
-          <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--heri-rule)" }}>
-            <div className="heri-eyebrow heri-eyebrow-ink">
-              {ar ? "حسب الشركة" : "By company"}
-            </div>
-            <div
-              style={{
-                fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
-                fontSize: 16,
-                fontWeight: 500,
-                color: "var(--heri-ink)",
-                marginTop: 2,
-              }}
-            >
-              {ar ? "توزيع الأداء (30 يوم)" : "Performance by company (30d)"}
-            </div>
-          </div>
-          <div className="table-wrap rounded-none border-0 shadow-none">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>{ar ? "الشركة" : "Company"}</th>
-                  <th>{ar ? "القطاع" : "Sector"}</th>
-                  <th>{ar ? "إيرادات" : "Revenue"}</th>
-                  <th>{ar ? "مصاريف" : "Expenses"}</th>
-                  <th>{ar ? "الصافي" : "Net"}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {allCompanies.map((c) => {
-                  const v = perCompany.get(c.id) ?? { revenue: 0, expense: 0 };
-                  const net = v.revenue - v.expense;
-                  return (
-                    <tr key={c.id}>
-                      <td className="font-bold" style={{ color: "var(--heri-ink)" }}>{c.name}</td>
-                      <td><SectorPill sector={c.sector} /></td>
-                      <td className="font-mono" style={{ color: "var(--heri-teal, #1f4e4a)" }}>{formatMoney(v.revenue)}</td>
-                      <td className="font-mono" style={{ color: "var(--heri-terracotta, #b85c38)" }}>{formatMoney(v.expense)}</td>
-                      <td
-                        className="font-mono font-bold"
-                        style={{ color: net >= 0 ? "var(--heri-teal, #1f4e4a)" : "var(--heri-terracotta, #b85c38)" }}
-                      >
-                        {formatMoney(net)}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* Transactions list */}
-        <section className="space-y-3">
-          <div className="heri-eyebrow heri-eyebrow-ink">
-            {ar ? "العمليات الأخيرة" : "Recent transactions"}
-          </div>
-          {transactions.length === 0 ? (
-            <EmptyState
-              icon={Wallet}
-              title={ar ? "لا توجد عمليات مالية بعد" : "No transactions yet"}
-              action={
-                <Link href="/finance/new" className="heri-btn heri-btn-primary">
-                  <Plus className="h-4 w-4" strokeWidth={1.5} />
-                  {ar ? "أضف أول عملية" : "Add the first transaction"}
-                </Link>
-              }
-            />
-          ) : (
-            <TransactionTable transactions={transactions} ar={ar} canManage={canManage} />
-          )}
-          <div style={{ fontSize: 11, color: "var(--heri-ink-3)" }}>
-            {ar
-              ? `عرض آخر ${formatNumber(transactions.length)} عملية`
-              : `Showing last ${formatNumber(transactions.length)} transactions`}
-          </div>
-        </section>
-      </PageContainer>
-    </>
+        ) : (
+          <TransactionTable transactions={transactions} ar={ar} canManage={canManage} />
+        )}
+      </DaylightPanel>
+    </DaylightShell>
   );
 }

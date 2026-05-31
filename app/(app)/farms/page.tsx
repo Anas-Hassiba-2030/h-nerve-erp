@@ -82,7 +82,7 @@ export default async function FarmsPage() {
           </div>
           <ul style={{ fontSize: 12, color: "var(--ink-muted)", lineHeight: 1.7 }}>
             {alerts.map((f) => (
-              <li key={f.id}>{f.name} — {f.alertLevel === "CRITICAL" ? (ar ? "حرج" : "critical") : (ar ? "تحذير" : "warning")}{f.soilMoisture != null ? ` · ${ar ? "رطوبة تربة" : "soil"} ${f.soilMoisture}%` : ""}</li>
+              <li key={f.id}>{ar ? f.name : (f.nameEn ?? f.name)} — {f.alertLevel === "CRITICAL" ? (ar ? "حرج" : "critical") : (ar ? "تحذير" : "warning")}{f.soilMoisture != null ? ` · ${ar ? "رطوبة تربة" : "soil"} ${f.soilMoisture}%` : ""}</li>
             ))}
           </ul>
         </div>
@@ -101,7 +101,7 @@ export default async function FarmsPage() {
                     <div className="flex items-center gap-3">
                       <div className="flex h-11 w-11 items-center justify-center" style={{ borderRadius: 12, background: "rgba(46,107,87,.1)", color: "var(--emerald)" }}><Icon className="h-5 w-5" /></div>
                       <div>
-                        <div className="flex items-center gap-2"><h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--ink)" }}>{f.name}</h3><StatusBadge status={f.alertLevel} /></div>
+                        <div className="flex items-center gap-2"><h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--ink)" }}>{ar ? f.name : (f.nameEn ?? f.name)}</h3><StatusBadge status={f.alertLevel} /></div>
                         <div style={{ fontSize: 11, color: "var(--ink-muted)" }}>{loc(FARM_TYPES_AR, FARM_TYPES_EN, lc, f.type)} · {f.location} · {formatNumber(f.areaDunum)} {ar ? "دونم" : "dunum"}</div>
                       </div>
                     </div>

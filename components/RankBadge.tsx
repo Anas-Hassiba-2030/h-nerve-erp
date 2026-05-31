@@ -1,14 +1,21 @@
 import { rankById, type Rank } from "@/lib/gamification";
+import { getLocale } from "@/lib/i18n.server";
 
+// BILINGUAL: rank name + bonus suffix flip AR/EN. Locale from the optional
+// `locale` prop or the h_nerve_locale cookie (server component). Previously the
+// rank name (r.ar) + "٪ بونص" suffix were hardcoded Arabic.
 export function RankBadge({
   rank,
   size = "md",
   showLabel = true,
+  locale,
 }: {
   rank: Rank | string;
   size?: "sm" | "md" | "lg" | "xl";
   showLabel?: boolean;
+  locale?: "ar" | "en";
 }) {
+  const ar = (locale ?? getLocale()) === "ar";
   const r = rankById(rank);
   const cls =
     size === "xl" ? "rank-piece rank-piece-xl" :
@@ -23,8 +30,12 @@ export function RankBadge({
       </span>
       {showLabel ? (
         <span className="flex flex-col leading-tight">
-          <span className="text-xs font-extrabold" style={{ color: "var(--text)" }}>{r.ar}</span>
-          <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>+{r.bonusPercent}٪ بونص</span>
+          <span className="text-xs font-extrabold" style={{ color: "var(--text)" }}>
+            {ar ? r.ar : r.en}
+          </span>
+          <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+            +{r.bonusPercent}{ar ? "٪ بونص" : "% bonus"}
+          </span>
         </span>
       ) : null}
     </span>

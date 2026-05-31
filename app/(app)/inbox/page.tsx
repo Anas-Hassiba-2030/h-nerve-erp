@@ -1,105 +1,66 @@
-// /inbox — Phase 9 unified notification inbox. The topbar bell's
-// destination. Operator surface → Heritage Modern (Topbar + cards).
-// Bilingual. Aggregates brain insights / AI insights / my tasks /
-// unread messages via lib/inbox (fail-soft, reused by Phase 10).
-
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { Inbox as InboxIcon, Brain, Sparkles, ListChecks, MessageSquare, ArrowLeft } from "lucide-react";
-import { getCurrentUser } from "@/lib/session";
+import { Inbox as InboxIcon, Mail, MailOpen } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
+import {
+  DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel,
+} from "@/components/orrery/daylight";
+import { prisma } from "@/lib/db";
+import { formatRelative, formatNumber } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
-import { getInboxItems, type InboxItem } from "@/lib/inbox";
-import { Topbar } from "@/components/Topbar";
-import { formatDateTime } from "@/lib/utils";
+import "../daylight.css";
 
 export const dynamic = "force-dynamic";
 
-const KIND_ICON: Record<InboxItem["kind"], any> = {
-  brain: Brain, insight: Sparkles, task: ListChecks, message: MessageSquare,
-};
-const KIND_AR: Record<InboxItem["kind"], string> = {
-  brain: "العقل", insight: "إشارة", task: "مهمة", message: "رسائل",
-};
-const SEV_BADGE: Record<InboxItem["severity"], string> = {
-  CRITICAL: "badge-red", WARNING: "badge-amber",
-  OPPORTUNITY: "badge-emerald", INFO: "badge-blue",
-};
-
 export default async function InboxPage() {
-  const ar = getLocale() === "ar";
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  const locale = getLocale();
+  const ar = locale === "ar";
+  const lc = ar ? "ar" : "en";
 
-  const items = await getInboxItems(user.id);
-  const by = (k: InboxItem["kind"]) => items.filter((i) => i.kind === k).length;
+  const notifications = await prisma.notification.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 50,
+  });
+
+  const unread = notifications.filter((n) => !n.read);
+  const read = notifications.filter((n) => n.read);
 
   return (
-    <>
-      <Topbar
-        eyebrow={ar ? "الفريق" : "People"}
-        title={ar ? "صندوق الوارد" : "Inbox"}
-        subtitle={
-          ar
-            ? "كل ما يحتاج انتباهك — إشارات العقل، التنبيهات، المهام، والرسائل في مكان واحد"
-            : "Everything needing your attention — brain signals, alerts, tasks, messages in one place"
-        }
-        actions={
-          <Link href="/dashboard" className="btn-ghost btn-sm">
-            <ArrowLeft className="h-3.5 w-3.5 rtl:rotate-180" />
-            {ar ? "اللوحة" : "Dashboard"}
-          </Link>
-        }
-        metrics={[
-          { label: ar ? "الكل" : "Total", value: String(items.length), tone: "blue" },
-          { label: ar ? "العقل" : "Brain", value: String(by("brain")), tone: "violet" },
-          { label: ar ? "إشارات" : "Insights", value: String(by("insight")), tone: "amber" },
-          { label: ar ? "مهامي" : "My tasks", value: String(by("task")), tone: "emerald" },
-        ]}
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
+        eyebrow={ar ? "الفريق · صندوق الوارد" : "Team · Inbox"}
+        title={ar ? "الإشعارات" : "Notifications"}
+        subtitle={ar ? "كل التحديثات والإشعارات في مكان واحد." : "All your updates and notifications in one place."}
+        status={`${formatNumber(unread.length)} ${ar ? "غير مقروءة" : "unread"}`}
       />
 
-      {items.length === 0 ? (
-        <div className="card card-pad mt-3 flex flex-col items-center gap-3 py-16 text-center">
-          <InboxIcon className="h-10 w-10" style={{ color: "var(--heri-ink-3)" }} />
-          <p className="text-sm font-bold" style={{ color: "var(--heri-ink)" }}>
-            {ar ? "لا شيء يحتاج انتباهك الآن 🎉" : "Nothing needs your attention 🎉"}
-          </p>
-        </div>
-      ) : (
-        <section className="mt-3 flex flex-col gap-2">
-          {items.map((it) => {
-            const Icon = KIND_ICON[it.kind];
-            return (
-              <Link
-                key={it.id}
-                href={it.href}
-                className="card card-pad flex items-start gap-3 transition hover:translate-x-[-2px] rtl:hover:translate-x-[2px]"
-              >
-                <span
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
-                  style={{ background: "var(--heri-cream-2)", color: "var(--brand-deep)" }}
-                >
-                  <Icon className="h-4 w-4" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
-                      {it.title}
-                    </span>
-                    <span className={SEV_BADGE[it.severity]}>{it.severity}</span>
-                    <span className="badge-slate">{ar ? KIND_AR[it.kind] : it.kind}</span>
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "غير مقروءة" : "Unread"} value={formatNumber(unread.length)} hint={ar ? "جديدة" : "new"} delta={unread.length > 0 ? { dir: "down", text: formatNumber(unread.length) } : undefined} />
+        <DaylightKpi label={ar ? "الكل" : "Total"} value={formatNumber(notifications.length)} hint={ar ? "آخر ٥٠" : "last 50"} />
+        <DaylightKpi label={ar ? "مقروءة" : "Read"} value={formatNumber(read.length)} hint={ar ? "تمت" : "done"} />
+        <DaylightKpi label={ar ? "المعدل" : "Read rate"} value={`${notifications.length ? Math.round(100 * read.length / notifications.length) : 0}%`} hint={ar ? "متابعة" : "follow-up"} />
+      </DaylightKpiGrid>
+
+      <DaylightPanel title={ar ? "الوارد" : "Inbox"} aside={ar ? "أحدث أولاً" : "Newest first"}>
+        {notifications.length === 0 ? (
+          <EmptyState icon={InboxIcon} title={ar ? "صندوقك فارغ" : "Inbox empty"} description={ar ? "لا إشعارات جديدة." : "No new notifications."} />
+        ) : (
+          <div className="space-y-2">
+            {notifications.map((n) => (
+              <div key={n.id} className="prop-card" style={{ borderInlineStart: n.read ? "3px solid transparent" : "3px solid var(--gold)", opacity: n.read ? 0.72 : 1, padding: 14 }}>
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5">
+                    {n.read ? <MailOpen className="h-4 w-4" style={{ color: "var(--ink-muted)" }} /> : <Mail className="h-4 w-4" style={{ color: "var(--gold)" }} />}
                   </div>
-                  <div className="mt-0.5 line-clamp-2 text-xs" style={{ color: "var(--heri-ink-3)" }}>
-                    {it.body}
-                  </div>
-                  <div className="mt-1 font-mono text-[10px]" style={{ color: "var(--heri-ink-3)" }}>
-                    {formatDateTime(it.at, ar ? "ar" : "en")}
+                  <div className="min-w-0 flex-1">
+                    <p style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>{ar ? n.title : (n.titleEn ?? n.title)}</p>
+                    <p style={{ fontSize: 12, color: "var(--ink-muted)" }}>{ar ? n.body : (n.bodyEn ?? n.body)}</p>
+                    <span style={{ fontSize: 10, color: "var(--ink-muted)" }}>{formatRelative(n.createdAt, lc)}</span>
                   </div>
                 </div>
-              </Link>
-            );
-          })}
-        </section>
-      )}
-    </>
+              </div>
+            ))}
+          </div>
+        )}
+      </DaylightPanel>
+    </DaylightShell>
   );
 }

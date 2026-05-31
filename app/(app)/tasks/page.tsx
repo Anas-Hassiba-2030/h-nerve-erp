@@ -1,167 +1,92 @@
-import Link from "next/link";
-import {
-  ListChecks, Plus, CheckCircle2, Clock, Zap, Trophy, AlertTriangle,
-} from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
-import { HeriKpi } from "@/components/HeriKpi";
-import { HeritageSection, HeritagePill } from "@/components/heritage";
-import { RankBadge } from "@/components/RankBadge";
+import { CheckSquare } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
-import { TaskTable } from "@/components/tasks/TaskTable";
+import {
+  DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel,
+} from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db";
-import { formatNumber } from "@/lib/utils";
-import { getCurrentUser } from "@/lib/session";
+import { formatNumber, formatShortDate } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
-import { rankById, progressToNext, nextRank } from "@/lib/gamification";
-import { hasRole } from "@/lib/authz";
+import { completeTask } from "./actions";
+import "../daylight.css";
 
 export const dynamic = "force-dynamic";
 
-const STATUS_ORDER = ["TODO", "IN_PROGRESS", "DONE", "BLOCKED"] as const;
-const STATUS_AR: Record<string, string> = { TODO: "للتنفيذ", IN_PROGRESS: "جارية", DONE: "منجزة", BLOCKED: "متعثرة" };
-const STATUS_TONE: Record<string, "info" | "success" | "critical" | "neutral"> = {
-  TODO: "neutral", IN_PROGRESS: "info", DONE: "success", BLOCKED: "critical",
-};
-const PRIO_TONE: Record<string, "neutral" | "info" | "warn" | "critical"> = {
-  LOW: "neutral", MEDIUM: "info", HIGH: "warn", URGENT: "critical",
-};
-const PRIO_AR: Record<string, string> = { LOW: "منخفضة", MEDIUM: "متوسطة", HIGH: "عالية", URGENT: "عاجل" };
-
 export default async function TasksPage() {
-  const ar = getLocale() === "ar";
-  const session = await getCurrentUser();
-  if (!session) return null;
+  const locale = getLocale();
+  const ar = locale === "ar";
+  const lc = ar ? "ar" : "en";
 
-  const me = await prisma.user.findUnique({ where: { id: session.id } });
-  const tasks = await prisma.task.findMany({
-    where: { assigneeId: session.id, deletedAt: null },
-    orderBy: [{ status: "asc" }, { priority: "desc" }, { dueAt: "asc" }],
-  });
+  const [tasks, me] = await Promise.all([
+    prisma.task.findMany({
+      orderBy: [{ status: "asc" }, { dueDate: "asc" }],
+      include: { assignedTo: true, company: true },
+      take: 50,
+    }),
+    prisma.user.findFirst({ where: { role: "ADMIN" } }),
+  ]);
 
-  const totalPoints = tasks.filter((t) => t.status === "DONE").reduce((a, t) => a + t.points * (t.kind === "SIDE" ? 1.5 : 1), 0);
-  const todoCount = tasks.filter((t) => t.status === "TODO").length;
-  const inProg = tasks.filter((t) => t.status === "IN_PROGRESS").length;
-  const sideDone = tasks.filter((t) => t.status === "DONE" && t.kind === "SIDE").length;
-
-  const rank = rankById(me?.rank ?? "PAWN");
-  const progress = progressToNext(me?.xp ?? 0);
-  const next = nextRank(me?.xp ?? 0);
-  const canManage = hasRole(session, "MANAGER");
-
-  const grouped = STATUS_ORDER.map((s) => ({ status: s, items: tasks.filter((t) => t.status === s) }));
+  const todo = tasks.filter((t) => t.status === "TODO");
+  const inProgress = tasks.filter((t) => t.status === "IN_PROGRESS");
+  const done = tasks.filter((t) => t.status === "DONE");
+  const myXp = me?.xp ?? 0;
 
   return (
-    <>
-      <PageHeader
-        eyebrow={ar ? "الفريق والمهام" : "People & Tasks"}
-        title={ar ? "مهامي والتلعيب" : "My Tasks & Gamification"}
-        subtitle={
-          ar
-            ? "كل مهمة منجزة ترفع XP. كلما زادت رتبتك، زادت نسبة البونص الشهري."
-            : "Every completed task earns XP. Higher rank = bigger monthly bonus."
-        }
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
+        eyebrow={ar ? "الفريق · المهام والإنتاجية" : "Team · Tasks & Productivity"}
+        title={ar ? "المهام" : "Tasks"}
+        subtitle={ar ? "مهامك ونقاط الخبرة والإنجازات." : "Your tasks, XP, and achievements."}
+        status={`${formatNumber(inProgress.length)} ${ar ? "نشطة" : "active"}`}
       />
 
-      <PageContainer>
-        {/* Rank + XP strip */}
-        <HeritageSection
-          eyebrow={ar ? "الرتبة والتلعيب" : "Rank & gamification"}
-          title={ar ? `${rank.ar} · ${formatNumber(me?.xp ?? 0)} XP` : `${rank.en} · ${formatNumber(me?.xp ?? 0)} XP`}
-          aside={ar ? `+${rank.bonusPercent}% بونص` : `+${rank.bonusPercent}% bonus`}
-          href="/achievements"
-          hrefLabel={ar ? "الإنجازات" : "Achievements"}
-          rtl={ar}
-        >
-          <div className="flex flex-wrap items-center gap-4">
-            <RankBadge rank={(me?.rank ?? "PAWN") as any} size="xl" showLabel={false} />
-            <div className="min-w-0 flex-1">
-              {next ? (
-                <>
-                  <div className="mb-1" style={{ fontSize: 11, color: "var(--heri-ink-3)" }}>
-                    {ar
-                      ? `${formatNumber(progress.needed - progress.current)} XP حتى ${next.ar}`
-                      : `${formatNumber(progress.needed - progress.current)} XP to reach ${next.en}`}
-                  </div>
-                  <div
-                    className="h-1.5 w-full max-w-[280px] overflow-hidden"
-                    style={{ background: "var(--heri-rule)", position: "relative" }}
-                  >
-                    <span
-                      aria-hidden
-                      style={{
-                        position: "absolute",
-                        insetInlineStart: 0,
-                        top: 0,
-                        height: "100%",
-                        width: `${(progress.pct * 100).toFixed(1)}%`,
-                        background: "var(--heri-ochre)",
-                      }}
-                    />
-                  </div>
-                </>
-              ) : (
-                <span style={{ fontSize: 11, color: "var(--heri-teal)" }}>
-                  {ar ? "أعلى رتبة — King" : "Top rank — King"}
-                </span>
-              )}
-            </div>
-            <Link href="/tasks/new" className="heri-btn heri-btn-primary" style={{ fontSize: 12, textDecoration: "none" }}>
-              <Plus className="h-3.5 w-3.5" strokeWidth={1.5} />
-              {ar ? "مهمة جديدة" : "New task"}
-            </Link>
-          </div>
-        </HeritageSection>
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "للقيام" : "To do"} value={formatNumber(todo.length)} hint={ar ? "بانتظار" : "waiting"} />
+        <DaylightKpi label={ar ? "قيد التنفيذ" : "In progress"} value={formatNumber(inProgress.length)} hint={ar ? "نشطة" : "active"} />
+        <DaylightKpi label={ar ? "منجزة" : "Completed"} value={formatNumber(done.length)} hint={ar ? "أحسنت" : "great"} delta={done.length > 0 ? { dir: "up", text: formatNumber(done.length) } : undefined} />
+        <DaylightKpi label={ar ? "نقاطك" : "Your XP"} value={formatNumber(myXp)} hint={ar ? "خبرة" : "experience"} />
+      </DaylightKpiGrid>
 
-        {/* KPI band */}
-        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
-          <HeriKpi label={ar ? "للتنفيذ" : "To do"} raw={todoCount} kind="number" hint={ar ? "في الانتظار" : "queued"} />
-          <HeriKpi label={ar ? "جارية" : "In progress"} raw={inProg} kind="number" accent="var(--heri-copper)" hint={ar ? "نشطة الآن" : "active now"} />
-          <HeriKpi label={ar ? "مهام جانبية منجزة" : "Side tasks done"} raw={sideDone} kind="number" hint={ar ? "× 1.5 نقاط" : "1.5× points"} />
-          <HeriKpi label={ar ? "إجمالي النقاط" : "Total points"} raw={Math.round(totalPoints)} kind="number" accent="var(--heri-teal)" hint={ar ? "كسبتها" : "earned"} />
-        </section>
+      {tasks.length === 0 ? (
+        <DaylightPanel title={ar ? "المهام" : "Tasks"}>
+          <EmptyState icon={CheckSquare} title={ar ? "لا توجد مهام" : "No tasks"} description={ar ? "أضف أول مهمة." : "Add your first task."} />
+        </DaylightPanel>
+      ) : (
+        <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(3, 1fr)" }}>
+          <TaskColumn title={ar ? "للقيام" : "To do"} tasks={todo} ar={ar} lc={lc} />
+          <TaskColumn title={ar ? "قيد التنفيذ" : "In progress"} tasks={inProgress} ar={ar} lc={lc} />
+          <TaskColumn title={ar ? "منجزة" : "Done"} tasks={done} ar={ar} lc={lc} done />
+        </div>
+      )}
+    </DaylightShell>
+  );
+}
 
-        {tasks.length === 0 ? (
-          <EmptyState
-            icon={ListChecks}
-            title={ar ? "لا مهام بعد" : "No tasks yet"}
-            description={ar ? "ابدأ بإضافة أول مهمة لكسب XP." : "Add your first task to start earning XP."}
-            action={
-              <Link href="/tasks/new" className="heri-btn heri-btn-primary">
-                <Plus className="h-4 w-4" strokeWidth={1.5} />
-                {ar ? "أضف مهمة" : "Add task"}
-              </Link>
-            }
-          />
-        ) : (
-          <section className="grid gap-5">
-            {grouped.filter((g) => g.items.length > 0).map((g) => (
-              <div key={g.status}>
-                {/* Section header */}
-                <div
-                  className="mb-2 flex items-center justify-between px-3 py-2"
-                  style={{ background: "var(--heri-cream-2)", border: "1px solid var(--heri-rule)" }}
-                >
-                  <HeritagePill tone={STATUS_TONE[g.status]}>
-                    {ar ? STATUS_AR[g.status] : g.status.replace("_", " ")}
-                  </HeritagePill>
-                  <span
-                    className="heri-number-mono"
-                    style={{ fontSize: 10, color: "var(--heri-ink-3)" }}
-                  >
-                    {g.items.length}
-                  </span>
+function TaskColumn({ title, tasks, ar, lc, done }: { title: string; tasks: any[]; ar: boolean; lc: "ar" | "en"; done?: boolean }) {
+  return (
+    <DaylightPanel title={title} aside={String(tasks.length)}>
+      <div className="space-y-2">
+        {tasks.map((task) => (
+          <div key={task.id} className="prop-card" style={{ padding: 12, opacity: done ? 0.75 : 1 }}>
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <p style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>{ar ? task.title : (task.titleEn ?? task.title)}</p>
+                <div className="mt-1 flex flex-wrap items-center gap-2" style={{ fontSize: 10, color: "var(--ink-muted)" }}>
+                  {task.assignedTo ? <span>{task.assignedTo.name}</span> : null}
+                  {task.dueDate ? <span>· {formatShortDate(task.dueDate, lc)}</span> : null}
+                  {task.xpReward ? <span style={{ fontFamily: "monospace" }}>· +{task.xpReward} XP</span> : null}
                 </div>
-                <TaskTable
-                  tasks={g.items}
-                  ar={ar}
-                  canManage={canManage}
-                />
               </div>
-            ))}
-          </section>
-        )}
-      </PageContainer>
-    </>
+              {!done ? (
+                <form action={completeTask}>
+                  <input type="hidden" name="id" value={task.id} />
+                  <button type="submit" style={{ color: "var(--emerald)", fontWeight: 700, fontSize: 13, padding: "2px 6px" }} title={ar ? "إنجاز" : "Complete"}>✓</button>
+                </form>
+              ) : null}
+            </div>
+          </div>
+        ))}
+        {tasks.length === 0 ? <p style={{ fontSize: 12, color: "var(--ink-muted)" }}>—</p> : null}
+      </div>
+    </DaylightPanel>
   );
 }

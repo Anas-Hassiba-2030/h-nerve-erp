@@ -81,10 +81,10 @@ export default async function EmployeesPage() {
                   <div key={u.id} className="prop-card" style={{ padding: 16 }}>
                     <div className="flex items-start gap-3">
                       <div className="flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-white" style={{ background: brand.gradient }}>
-                        {(ar ? u.name : (u.nameEn ?? u.name)).charAt(0)}
+                        {u.name.charAt(0)}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h3 className="truncate" style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>{ar ? u.name : (u.nameEn ?? u.name)}</h3>
+                        <h3 className="truncate" style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>{u.name}</h3>
                         <div className="truncate" style={{ fontSize: 11, color: "var(--ink-muted)" }}>{u.title ?? meta[lc]}</div>
                       </div>
                     </div>

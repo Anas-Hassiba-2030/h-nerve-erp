@@ -72,9 +72,9 @@ export default async function ComparePage({ searchParams }: { searchParams: { a?
         subtitle={ar ? "اختر شركتين لمقارنة أدائهما جنباً إلى جنب — الإيرادات، الهامش، ESG، البصمة التشغيلية." : "Pick two companies and compare performance side-by-side — revenue, margin, ESG, ops footprint."}
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <CompanyPicker companies={companies} current={aId} other={bId} otherKey="b" mineKey="a" label={ar ? "أ" : "A"} />
+            <CompanyPicker companies={companies} current={aId} other={bId} otherKey="b" mineKey="a" label={ar ? "أ" : "A"} ar={ar} />
             <ArrowLeftRight className="h-4 w-4" style={{ color: "var(--ink-muted)" }} />
-            <CompanyPicker companies={companies} current={bId} other={aId} otherKey="a" mineKey="b" label={ar ? "ب" : "B"} />
+            <CompanyPicker companies={companies} current={bId} other={aId} otherKey="a" mineKey="b" label={ar ? "ب" : "B"} ar={ar} />
           </div>
         }
       />
@@ -91,11 +91,11 @@ export default async function ComparePage({ searchParams }: { searchParams: { a?
           <DaylightPanel title={ar ? "اتجاه الإيرادات (١٢ شهر)" : "Revenue trend (12 months)"} aside={ar ? "منحنيا الشركتين" : "Both companies' curves"}>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <div className="mb-1 flex items-center gap-2" style={{ fontSize: 11, fontWeight: 700 }}><span style={{ display: "block", height: 8, width: 16, borderRadius: 999, background: brandA.accent }} /><span style={{ color: "var(--ink)" }}>{A.name}</span></div>
+                <div className="mb-1 flex items-center gap-2" style={{ fontSize: 11, fontWeight: 700 }}><span style={{ display: "block", height: 8, width: 16, borderRadius: 999, background: brandA.accent }} /><span style={{ color: "var(--ink)" }}>{ar ? A.name : A.nameEn}</span></div>
                 <AreaLineChart data={dA.trend} height={140} color={brandA.accent} formatY={(v) => formatMoney(v)} />
               </div>
               <div>
-                <div className="mb-1 flex items-center gap-2" style={{ fontSize: 11, fontWeight: 700 }}><span style={{ display: "block", height: 8, width: 16, borderRadius: 999, background: brandB.accent }} /><span style={{ color: "var(--ink)" }}>{B.name}</span></div>
+                <div className="mb-1 flex items-center gap-2" style={{ fontSize: 11, fontWeight: 700 }}><span style={{ display: "block", height: 8, width: 16, borderRadius: 999, background: brandB.accent }} /><span style={{ color: "var(--ink)" }}>{ar ? B.name : B.nameEn}</span></div>
                 <AreaLineChart data={dB.trend} height={140} color={brandB.accent} formatY={(v) => formatMoney(v)} />
               </div>
             </div>
@@ -118,8 +118,8 @@ export default async function ComparePage({ searchParams }: { searchParams: { a?
           </DaylightPanel>
 
           <div className="grid gap-3 md:grid-cols-2">
-            <Link href={`/companies/${A.id}`} className="prop-card flex items-center justify-between" style={{ padding: "14px 18px" }}><span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>{ar ? `ملف ${A.name} الكامل` : `${A.name} full profile`}</span><ChevronLeft className="h-4 w-4 rtl:rotate-180" style={{ color: "var(--gold)" }} /></Link>
-            <Link href={`/companies/${B.id}`} className="prop-card flex items-center justify-between" style={{ padding: "14px 18px" }}><span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>{ar ? `ملف ${B.name} الكامل` : `${B.name} full profile`}</span><ChevronLeft className="h-4 w-4 rtl:rotate-180" style={{ color: "var(--gold)" }} /></Link>
+            <Link href={`/companies/${A.id}`} className="prop-card flex items-center justify-between" style={{ padding: "14px 18px" }}><span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>{ar ? `ملف ${A.name} الكامل` : `${A.nameEn} full profile`}</span><ChevronLeft className="h-4 w-4 rtl:rotate-180" style={{ color: "var(--gold)" }} /></Link>
+            <Link href={`/companies/${B.id}`} className="prop-card flex items-center justify-between" style={{ padding: "14px 18px" }}><span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>{ar ? `ملف ${B.name} الكامل` : `${B.nameEn} full profile`}</span><ChevronLeft className="h-4 w-4 rtl:rotate-180" style={{ color: "var(--gold)" }} /></Link>
           </div>
         </>
       )}
@@ -127,13 +127,13 @@ export default async function ComparePage({ searchParams }: { searchParams: { a?
   );
 }
 
-function CompanyPicker({ companies, current, other, otherKey, mineKey, label }: { companies: Array<{ id: string; name: string }>; current?: string; other?: string; otherKey: "a" | "b"; mineKey: "a" | "b"; label: string }) {
+function CompanyPicker({ companies, current, other, otherKey, mineKey, label, ar }: { companies: Array<{ id: string; name: string; nameEn: string }>; current?: string; other?: string; otherKey: "a" | "b"; mineKey: "a" | "b"; label: string; ar: boolean }) {
   return (
     <form className="inline-flex items-center gap-1.5" method="get" action="/compare">
       {other ? <input type="hidden" name={otherKey} value={other} /> : null}
       <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--ink-muted)" }}>{label}</span>
       <select name={mineKey} defaultValue={current ?? ""} style={{ minWidth: 150, padding: "7px 10px", borderRadius: 10, border: "1px solid var(--line)", background: "var(--cream)", color: "var(--ink)", fontSize: 13 }}>
-        {companies.map((c) => (<option key={c.id} value={c.id} disabled={c.id === other}>{c.name}</option>))}
+        {companies.map((c) => (<option key={c.id} value={c.id} disabled={c.id === other}>{ar ? c.name : c.nameEn}</option>))}
       </select>
       <button type="submit" className="dl-btn dl-btn-secondary" style={{ padding: "7px 12px" }}>↻</button>
     </form>

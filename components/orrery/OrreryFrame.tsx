@@ -29,6 +29,8 @@ export function OrreryFrame({ identity }: { identity: OrreryIdentity }) {
           "sections/maha.html": "/dairy",
           "sections/loran.html": "/farms",
           "sections/ahliyya.html": "/education",
+          "sections/finance.html": "/finance",
+          "sections/reports.html": "/reports",
         };
         window.location.assign(REAL_DATA_PAGES[href] ?? "/design/" + href);
       }

@@ -38,6 +38,14 @@ let engine = /<body>[\s\S]*?<script>([\s\S]*?)<\/script>\s*<script src/.exec(htm
 engine = engine.replace(/location\.href\s*=\s*([^;]+);/g, "window.__hnNavigate($1);");
 if (/location\.href\s*=/.test(engine)) throw new Error("unrewired location.href remains in engine");
 
+// bridge: the in-hub language toggle must persist the REAL app locale. setLang()
+// only flips the iframe's own visuals, so also notify the parent (OrreryFrame),
+// which writes the h_nerve_locale cookie + reloads → whole-app bilingual switch.
+engine = engine.replace(
+  /(document\.documentElement\.dir\s*=\s*\(l==="ar"\)\s*\?\s*"rtl"\s*:\s*"ltr";)/,
+  '$1\n  try{ parent.postMessage({__orreryLang:l}, "*"); }catch(e){}',
+);
+
 // 4) copy assets
 mkdirSync(OUT_FONTS, { recursive: true });
 let fonts = 0;

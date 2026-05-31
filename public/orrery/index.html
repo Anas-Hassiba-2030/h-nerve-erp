@@ -1781,6 +1781,7 @@ function setLang(l){
   const t = I18N[l];
   document.documentElement.lang = l;
   document.documentElement.dir = (l==="ar") ? "rtl" : "ltr";
+  try{ parent.postMessage({__orreryLang:l}, "*"); }catch(e){}
   // toggle pill highlight
   document.querySelectorAll("#langToggle .lang-opt").forEach(o=> o.classList.toggle("on", o.dataset.l===l));
   // anchor + child pills

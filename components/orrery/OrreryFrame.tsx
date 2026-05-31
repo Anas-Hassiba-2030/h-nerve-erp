@@ -17,7 +17,24 @@ export function OrreryFrame({ identity }: { identity: OrreryIdentity }) {
 
   useEffect(() => {
     function onMessage(e: MessageEvent) {
-      const data = e?.data as { __orreryNav?: string } | undefined;
+      const data = e?.data as { __orreryNav?: string; __orreryLang?: string } | undefined;
+      // Language toggle inside the hub iframe → persist the real h_nerve_locale
+      // cookie + reload, so the choice applies to the WHOLE app (the iframe's
+      // setLang only flips its own visuals). This is the real bilingual switch
+      // from the Orrery.
+      if (data && (data.__orreryLang === "ar" || data.__orreryLang === "en")) {
+        const lang = data.__orreryLang;
+        try {
+          if (document.documentElement.lang === lang) return; // already set, avoid loops
+          document.cookie = `h_nerve_locale=${lang}; path=/; max-age=31536000; samesite=lax`;
+          document.documentElement.lang = lang;
+          document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+          window.location.reload();
+        } catch {
+          /* ignore */
+        }
+        return;
+      }
       if (data && typeof data.__orreryNav === "string") {
         const href = data.__orreryNav.replace(/^\/+/, "");
         // Sections rebuilt with REAL data live as real app routes (the design

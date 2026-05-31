@@ -31,6 +31,7 @@ export function OrreryFrame({ identity }: { identity: OrreryIdentity }) {
           "sections/ahliyya.html": "/education",
           "sections/finance.html": "/finance",
           "sections/reports.html": "/reports",
+          "sections/markets.html": "/markets",
         };
         window.location.assign(REAL_DATA_PAGES[href] ?? "/design/" + href);
       }

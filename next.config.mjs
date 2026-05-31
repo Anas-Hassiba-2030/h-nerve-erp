@@ -61,10 +61,30 @@ const nextConfig = {
     },
   },
   async headers() {
+    // The /orrery page renders the cinematic hub in a SAME-ORIGIN <iframe>
+    // pointing at /orrery/index.html. The global X-Frame-Options: DENY +
+    // CSP frame-ancestors 'none' would block that frame, so relax ONLY this
+    // one document to same-origin framing. Everything else stays DENY.
+    const orreryFrameHeaders = securityHeaders.map((h) => {
+      if (h.key === "X-Frame-Options") return { key: h.key, value: "SAMEORIGIN" };
+      if (h.key === "Content-Security-Policy")
+        return {
+          key: h.key,
+          value: h.value.replace("frame-ancestors 'none'", "frame-ancestors 'self'"),
+        };
+      return h;
+    });
     return [
       {
-        // Apply to every route — including API and static assets.
-        source: "/:path*",
+        // The embedded Orrery hub doc — allow same-origin framing.
+        source: "/orrery/index.html",
+        headers: orreryFrameHeaders,
+      },
+      {
+        // Every other route — including API and static assets — stays strict.
+        // Negative lookahead excludes the hub doc so its relaxed rule above
+        // isn't shadowed by a duplicate X-Frame-Options / CSP header.
+        source: "/((?!orrery/index\\.html).*)",
         headers: securityHeaders,
       },
     ];

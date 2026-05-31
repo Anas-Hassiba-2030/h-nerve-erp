@@ -24,9 +24,9 @@ export default async function SustainabilityPage() {
   const avg = (sel: (s: typeof scores[number]) => number) =>
     latest.length ? Math.round(latest.reduce((a, s) => a + sel(s), 0) / latest.length) : 0;
   const avgScore = avg((s) => s.overall);
-  const avgCarbon = avg((s) => s.carbonScore);
-  const avgWater = avg((s) => s.waterScore);
-  const avgWaste = avg((s) => s.wasteScore);
+  const avgCarbon = avg((s) => s.carbonTons);
+  const avgWater = avg((s) => s.waterCubicM);
+  const avgWaste = avg((s) => s.renewablePct);
 
   return (
     <DaylightShell dir={ar ? "rtl" : "ltr"}>
@@ -57,9 +57,9 @@ export default async function SustainabilityPage() {
                     <div style={{ fontSize: 11, color: "var(--ink-muted)" }}>{score.period} {score.year}</div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <ScoreChip label={ar ? "كربون" : "Carbon"} value={score.carbonScore} />
-                    <ScoreChip label={ar ? "مياه" : "Water"} value={score.waterScore} />
-                    <ScoreChip label={ar ? "نفايات" : "Waste"} value={score.wasteScore} />
+                    <ScoreChip label={ar ? "كربون" : "Carbon"} value={score.carbonTons} />
+                    <ScoreChip label={ar ? "مياه" : "Water"} value={score.waterCubicM} />
+                    <ScoreChip label={ar ? "نفايات" : "Waste"} value={score.renewablePct} />
                     <div className="text-center">
                       <div style={{ fontSize: 24, fontWeight: 700, color: "var(--emerald)" }}>{score.overall}</div>
                       <div style={{ fontSize: 10, textTransform: "uppercase", color: "var(--ink-muted)" }}>ESG</div>

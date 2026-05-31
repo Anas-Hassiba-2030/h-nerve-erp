@@ -29,19 +29,20 @@ export default async function MessagesPage() {
   });
 
   const participants = new Set(threads.flatMap((t) => t.participants.map((p) => p.userId))).size;
+  const totalMessages = threads.reduce((a, t) => a + t._count.messages, 0);
 
   return (
     <DaylightShell dir={ar ? "rtl" : "ltr"}>
       <DaylightHeader
         eyebrow={ar ? "الفريق · المراسلات" : "Team · Messages"}
         title={ar ? "الرسائل" : "Messages"}
-        subtitle={ar ? "تواصل مع فريقك عبر المجموعة." : "Communicate with your team across the group."}
+        subtitle={ar ? "تواصل مباشر بين مسؤولي المجموعة." : "Direct chat between group officials."}
         status={`${formatNumber(threads.length)} ${ar ? "محادثة" : "threads"}`}
       />
 
       <DaylightKpiGrid>
         <DaylightKpi label={ar ? "المحادثات" : "Threads"} value={formatNumber(threads.length)} hint={ar ? "نشطة" : "active"} />
-        <DaylightKpi label={ar ? "الرسائل" : "Messages"} value={formatNumber(threads.reduce((a, t) => a + t._count.messages, 0))} hint={ar ? "إجمالي" : "total"} />
+        <DaylightKpi label={ar ? "الرسائل" : "Messages"} value={formatNumber(totalMessages)} hint={ar ? "إجمالي" : "total"} />
         <DaylightKpi label={ar ? "المشاركون" : "Participants"} value={formatNumber(participants)} hint={ar ? "أشخاص" : "people"} />
         <DaylightKpi label={ar ? "اليوم" : "Today"} value={formatNumber(threads.filter((t) => Date.now() - new Date(t.updatedAt).getTime() < 864e5).length)} hint={ar ? "محدّثة" : "updated"} />
       </DaylightKpiGrid>
@@ -52,8 +53,9 @@ export default async function MessagesPage() {
         ) : (
           <div className="space-y-2">
             {threads.map((thread) => {
-              const other = thread.participants.find((p) => p.userId !== session?.id);
+              const other = thread.participants.find((p) => p.userId !== session?.id) ?? thread.participants[0];
               const lastMsg = thread.messages[0];
+              const heading = thread.title ?? other?.user.name ?? (ar ? "محادثة" : "Conversation");
               return (
                 <Link key={thread.id} href={`/messages/${thread.id}`} className="prop-card block" style={{ padding: 14 }}>
                   <div className="flex items-center gap-3">
@@ -62,10 +64,10 @@ export default async function MessagesPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>{thread.subject ?? other?.user.name ?? (ar ? "محادثة" : "Conversation")}</h3>
+                        <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>{heading}</h3>
                         <span style={{ fontSize: 10, color: "var(--ink-muted)", whiteSpace: "nowrap" }}>{formatRelative(thread.updatedAt, lc)}</span>
                       </div>
-                      <p className="truncate" style={{ fontSize: 12, color: "var(--ink-muted)" }}>{lastMsg ? (ar ? lastMsg.body : (lastMsg.bodyEn ?? lastMsg.body)) : (ar ? "لا رسائل" : "No messages")}</p>
+                      <p className="truncate" style={{ fontSize: 12, color: "var(--ink-muted)" }}>{lastMsg ? lastMsg.body : (ar ? "لا رسائل" : "No messages")}</p>
                     </div>
                   </div>
                 </Link>

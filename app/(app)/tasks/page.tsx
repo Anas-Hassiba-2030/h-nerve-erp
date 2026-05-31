@@ -6,7 +6,8 @@ import {
 import { prisma } from "@/lib/db";
 import { formatNumber, formatShortDate } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
-import { completeTask } from "./actions";
+import { getCurrentUser } from "@/lib/session";
+import { setTaskStatus } from "./actions";
 import "../daylight.css";
 
 export const dynamic = "force-dynamic";
@@ -15,14 +16,16 @@ export default async function TasksPage() {
   const locale = getLocale();
   const ar = locale === "ar";
   const lc = ar ? "ar" : "en";
+  const session = await getCurrentUser();
 
   const [tasks, me] = await Promise.all([
     prisma.task.findMany({
-      orderBy: [{ status: "asc" }, { dueDate: "asc" }],
-      include: { assignedTo: true, company: true },
-      take: 50,
+      where: { deletedAt: null },
+      orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+      include: { assignee: true },
+      take: 60,
     }),
-    prisma.user.findFirst({ where: { role: "ADMIN" } }),
+    session ? prisma.user.findUnique({ where: { id: session.id } }) : Promise.resolve(null),
   ]);
 
   const todo = tasks.filter((t) => t.status === "TODO");
@@ -35,7 +38,7 @@ export default async function TasksPage() {
       <DaylightHeader
         eyebrow={ar ? "الفريق · المهام والإنتاجية" : "Team · Tasks & Productivity"}
         title={ar ? "المهام" : "Tasks"}
-        subtitle={ar ? "مهامك ونقاط الخبرة والإنجازات." : "Your tasks, XP, and achievements."}
+        subtitle={ar ? "مهام الفريق ونقاط الخبرة والتقدّم." : "Team tasks, XP and progress."}
         status={`${formatNumber(inProgress.length)} ${ar ? "نشطة" : "active"}`}
       />
 
@@ -69,16 +72,17 @@ function TaskColumn({ title, tasks, ar, lc, done }: { title: string; tasks: any[
           <div key={task.id} className="prop-card" style={{ padding: 12, opacity: done ? 0.75 : 1 }}>
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
-                <p style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>{ar ? task.title : (task.titleEn ?? task.title)}</p>
+                <p style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>{task.title}</p>
                 <div className="mt-1 flex flex-wrap items-center gap-2" style={{ fontSize: 10, color: "var(--ink-muted)" }}>
-                  {task.assignedTo ? <span>{task.assignedTo.name}</span> : null}
-                  {task.dueDate ? <span>· {formatShortDate(task.dueDate, lc)}</span> : null}
-                  {task.xpReward ? <span style={{ fontFamily: "monospace" }}>· +{task.xpReward} XP</span> : null}
+                  {task.assignee ? <span>{task.assignee.name}</span> : null}
+                  {task.dueAt ? <span>· {formatShortDate(task.dueAt, lc)}</span> : null}
+                  {task.points ? <span style={{ fontFamily: "monospace" }}>· +{task.points} XP</span> : null}
                 </div>
               </div>
               {!done ? (
-                <form action={completeTask}>
+                <form action={setTaskStatus}>
                   <input type="hidden" name="id" value={task.id} />
+                  <input type="hidden" name="status" value="DONE" />
                   <button type="submit" style={{ color: "var(--emerald)", fontWeight: 700, fontSize: 13, padding: "2px 6px" }} title={ar ? "إنجاز" : "Complete"}>✓</button>
                 </form>
               ) : null}

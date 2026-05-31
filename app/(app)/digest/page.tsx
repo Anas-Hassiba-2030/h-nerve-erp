@@ -1,64 +1,67 @@
 import Link from "next/link";
-import { AlertTriangle, Sparkles } from "lucide-react";
+import { Newspaper, Brain, ArrowUpRight, Plus } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 import {
   DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel,
 } from "@/components/orrery/daylight";
-import { prisma } from "@/lib/db";
-import { formatNumber, formatShortDate } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
+import { getCurrentUser } from "@/lib/session";
+import { hasRole } from "@/lib/authz";
+import { listDigests } from "@/lib/digest";
+import { formatNumber } from "@/lib/utils";
+import { generateNewDigest } from "./actions";
 import "../daylight.css";
 
 export const dynamic = "force-dynamic";
 
-export default async function DigestPage() {
-  const locale = getLocale();
-  const ar = locale === "ar";
-  const lc = ar ? "ar" : "en";
+export default async function DigestListPage() {
+  const ar = getLocale() === "ar";
+  const session = await getCurrentUser();
+  const canGenerate = hasRole(session, "MANAGER");
 
-  const [insights, alerts, tasks, transactions] = await Promise.all([
-    prisma.aIInsight.findMany({ orderBy: { createdAt: "desc" }, take: 5, include: { company: true } }),
-    prisma.alert.findMany({ where: { resolved: false }, orderBy: { createdAt: "desc" }, take: 5, include: { company: true } }),
-    prisma.task.findMany({ where: { status: { not: "DONE" } }, orderBy: { createdAt: "desc" }, take: 5 }),
-    prisma.transaction.findMany({ orderBy: { occurredAt: "desc" }, take: 8, include: { company: true } }),
-  ]);
-
-  const today = new Date();
+  const digests = await listDigests(50);
+  const dateFmt = new Intl.DateTimeFormat("en-US", { day: "numeric", month: "short", year: "numeric" });
+  const relativeFmt = new Intl.DateTimeFormat("en-US", { day: "numeric", month: "short" });
+  const totalSignals = digests.reduce((a, d) => a + d.insightCount, 0);
 
   return (
     <DaylightShell dir={ar ? "rtl" : "ltr"}>
       <DaylightHeader
-        eyebrow={ar ? "الفريق · الموجز اليومي" : "Team · Daily Digest"}
-        title={ar ? "موجز اليوم" : "Today's Briefing"}
-        subtitle={ar ? `${formatShortDate(today, lc)} · ملخص ذكي لما يهم` : `${formatShortDate(today, lc)} · AI summary of what matters`}
-        status={ar ? "محدّث الآن" : "Updated now"}
+        eyebrow={ar ? "الفريق · الموجز التنفيذي" : "Team · Executive Digest"}
+        title={ar ? "الموجز التنفيذي" : "Executive Digest"}
+        subtitle={ar ? "ملخّصات أسبوعية مولّدة آلياً تجمع نبض المجموعة في مكان واحد." : "Auto-generated weekly snapshots that compress the group's pulse into one read."}
+        status={`${formatNumber(digests.length)} ${ar ? "موجز" : "digests"}`}
+        actions={canGenerate ? (
+          <form action={generateNewDigest}><button type="submit" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "توليد موجز جديد" : "Generate new"}</button></form>
+        ) : undefined}
       />
 
       <DaylightKpiGrid>
-        <DaylightKpi label={ar ? "إشارات جديدة" : "New signals"} value={formatNumber(insights.length)} hint={ar ? "اليوم" : "today"} />
-        <DaylightKpi label={ar ? "تنبيهات نشطة" : "Active alerts"} value={formatNumber(alerts.length)} hint={ar ? "تحتاج انتباه" : "need attention"} delta={alerts.length > 0 ? { dir: "down", text: formatNumber(alerts.length) } : undefined} />
-        <DaylightKpi label={ar ? "مهام معلقة" : "Pending tasks"} value={formatNumber(tasks.length)} hint={ar ? "غير منجزة" : "incomplete"} />
-        <DaylightKpi label={ar ? "حركات مالية" : "Transactions"} value={formatNumber(transactions.length)} hint={ar ? "اليوم" : "today"} />
+        <DaylightKpi label={ar ? "إجمالي الموجزات" : "Total digests"} value={formatNumber(digests.length)} hint={ar ? "محفوظة" : "stored"} />
+        <DaylightKpi label={ar ? "إشارات ملخّصة" : "Signals digested"} value={formatNumber(totalSignals)} hint={ar ? "إجمالاً" : "total"} />
+        <DaylightKpi label={ar ? "آخر موجز" : "Latest"} value={digests[0] ? relativeFmt.format(digests[0].weekStart) : "—"} hint={ar ? "أسبوع" : "week of"} />
+        <DaylightKpi label={ar ? "التواتر" : "Cadence"} value={ar ? "أسبوعي" : "Weekly"} hint={ar ? "تلقائي" : "automatic"} />
       </DaylightKpiGrid>
 
-      <div style={{ display: "grid", gap: 16, gridTemplateColumns: "1fr 1fr" }}>
-        <DaylightPanel title={<span className="inline-flex items-center gap-2"><Sparkles className="h-4 w-4" style={{ color: "var(--gold)" }} />{ar ? "أحدث الإشارات" : "Latest signals"}</span>}>
-          <div className="space-y-2">
-            {insights.map((i) => (
-              <Link key={i.id} href="/insights" className="block" style={{ borderRadius: 10, padding: 8, fontSize: 13, color: "var(--ink)" }}>{ar ? i.title : (i.titleEn ?? i.title)}</Link>
+      <DaylightPanel title={ar ? "الموجزات" : "Digests"} aside={ar ? "أحدث أولاً" : "Newest first"}>
+        {digests.length === 0 ? (
+          <EmptyState icon={Newspaper} title={ar ? "لا توجد موجزات بعد" : "No digests yet"} description={ar ? "ولّد أول موجز أسبوعي." : "Generate the first weekly digest."} />
+        ) : (
+          <div className="space-y-3">
+            {digests.map((d) => (
+              <Link key={d.id} href={`/digest/${d.id}`} className="prop-card block">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="tag gold">{relativeFmt.format(d.weekStart)} → {relativeFmt.format(d.weekEnd)}</span>
+                  <span className="tag ok"><Brain className="h-3 w-3" />{formatNumber(d.insightCount)} {ar ? "إشارة" : "signals"}</span>
+                  <span style={{ fontSize: 11, color: "var(--ink-muted)" }}>{ar ? "صدر" : "Issued"} {dateFmt.format(d.createdAt)}</span>
+                  <ArrowUpRight className="h-4 w-4 rtl:-scale-x-100" style={{ color: "var(--ink-muted)", marginInlineStart: "auto" }} />
+                </div>
+                <p className="mt-2" style={{ fontSize: 13, lineHeight: 1.6, color: "var(--ink)" }}>{d.summary}</p>
+              </Link>
             ))}
-            {insights.length === 0 ? <p style={{ fontSize: 12, color: "var(--ink-muted)" }}>{ar ? "لا جديد" : "Nothing new"}</p> : null}
           </div>
-        </DaylightPanel>
-
-        <DaylightPanel title={<span className="inline-flex items-center gap-2"><AlertTriangle className="h-4 w-4" style={{ color: "var(--brick)" }} />{ar ? "تنبيهات تحتاج إجراء" : "Alerts needing action"}</span>}>
-          <div className="space-y-2">
-            {alerts.map((a) => (
-              <Link key={a.id} href="/alerts" className="block" style={{ borderRadius: 10, padding: 8, fontSize: 13, color: "var(--ink)" }}>{ar ? a.message : (a.messageEn ?? a.message)}</Link>
-            ))}
-            {alerts.length === 0 ? <p style={{ fontSize: 12, color: "var(--ink-muted)" }}>{ar ? "كل شيء هادئ" : "All quiet"}</p> : null}
-          </div>
-        </DaylightPanel>
-      </div>
+        )}
+      </DaylightPanel>
     </DaylightShell>
   );
 }

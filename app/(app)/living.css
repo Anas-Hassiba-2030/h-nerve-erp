@@ -1,0 +1,156 @@
+/* ════════════════════════════════════════════════════════════════
+   H-NERVE · GLOBAL LIVING BACKGROUND  (shared include — Phase 2)
+   ----------------------------------------------------------------
+   One layer behind every page so nothing feels flat. Two modes,
+   chosen by an attribute on <html> or <body>:
+       data-living="work"   → warm ivory aurora (default)
+       data-living="night"  → cosmic emerald aurora
+   Pair with living-bg.js (injects the particle canvas + DOM).
+   Content must establish its own stacking context above z-index 0.
+   ════════════════════════════════════════════════════════════════ */
+
+:root{
+  --lb-night:#0D1F1A; --lb-night-3:#0a1813;
+  --lb-emerald-soft:#2E6B57; --lb-gold:#C2A35A; --lb-mist:#CDE0D6;
+}
+
+/* the fixed root layer the JS injects */
+#living-bg{
+  position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+}
+#living-bg .lb-aurora{
+  position:absolute; border-radius:50%; will-change:transform;
+  mix-blend-mode:multiply;
+}
+#living-bg .lb-particles{ position:absolute; inset:0; }
+
+/* keep app content above the bg layers without per-page work */
+body > *:not(#living-bg):not(#ambient-bg){ position:relative; z-index:1; }
+
+/* ─────────────── WORK MODE (ivory daylight) ─────────────── */
+[data-living="work"] #living-bg .lb-aurora{ mix-blend-mode:multiply; }
+[data-living="work"] #living-bg .a1{
+  width:60vw; height:60vw; left:-8vw; top:-12vh;
+  background:radial-gradient(circle, rgba(46,107,87,.06), transparent 68%);
+  animation:lb-drift-a 52s ease-in-out infinite;
+}
+[data-living="work"] #living-bg .a2{
+  width:52vw; height:52vw; right:-6vw; top:24vh;
+  background:radial-gradient(circle, rgba(194,163,90,.07), transparent 68%);
+  animation:lb-drift-b 60s ease-in-out infinite;
+}
+[data-living="work"] #living-bg .a3{
+  width:64vw; height:64vw; left:24vw; bottom:-22vh;
+  background:radial-gradient(circle, rgba(126,155,134,.05), transparent 70%);
+  animation:lb-drift-c 46s ease-in-out infinite;
+}
+
+/* ─────────────── NIGHT MODE (cosmic emerald) ─────────────── */
+[data-living="night"]{ background:var(--lb-night); }
+[data-living="night"] #living-bg{
+  background:radial-gradient(ellipse 120% 90% at 50% 16%, #143229 0%, var(--lb-night) 56%, var(--lb-night-3) 100%);
+}
+[data-living="night"] #living-bg .lb-aurora{ mix-blend-mode:screen; filter:blur(70px); }
+[data-living="night"] #living-bg .a1{
+  width:46vw; height:46vw; left:8%; top:6%;
+  background:radial-gradient(circle, rgba(46,107,87,.55), transparent 70%);
+  animation:lb-drift-a 50s ease-in-out infinite;
+}
+[data-living="night"] #living-bg .a2{
+  width:40vw; height:40vw; right:4%; top:40%;
+  background:radial-gradient(circle, rgba(194,163,90,.30), transparent 70%);
+  animation:lb-drift-b 58s ease-in-out -6s infinite;
+}
+[data-living="night"] #living-bg .a3{
+  width:50vw; height:50vw; left:30%; bottom:-12%;
+  background:radial-gradient(circle, rgba(205,224,214,.16), transparent 70%);
+  animation:lb-drift-c 46s ease-in-out -12s infinite;
+}
+
+/* drift loops — transform only */
+@keyframes lb-drift-a{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(4vw,3vh) scale(1.07)}66%{transform:translate(-3vw,5vh) scale(.95)}}
+@keyframes lb-drift-b{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-5vw,-4vh) scale(1.1)}}
+@keyframes lb-drift-c{0%,100%{transform:translate(0,0) scale(1)}40%{transform:translate(4vw,-5vh) scale(1.06)}80%{transform:translate(-5vw,2vh) scale(.94)}}
+
+/* ─────────────── REDUCED MOTION ─────────────── */
+@media (prefers-reduced-motion:reduce){
+  #living-bg .lb-aurora{ animation:none !important; }
+  #living-bg .lb-particles{ display:none; }
+}
+/* ════════════════════════════════════════════════════════════════
+   H-NERVE · SECTION SIGNATURE BACKGROUNDS  (Phase 4 — elevated)
+   The motion lives in ambient.js (canvas). This file provides the
+   static base TINT per signature (depth + reduced-motion fallback)
+   and the layer/canvas positioning. Content cards stay solid/frosted
+   (see _section.css) so text never fights the background.
+   ════════════════════════════════════════════════════════════════ */
+#ambient-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#ambient-bg .amb-tint{position:absolute;inset:0}
+#ambient-bg .amb-canvas{position:absolute;inset:0}
+
+/* base tints — subtle, always present (also the reduced-motion state) */
+[data-ambient="hospitality"] .amb-tint{background:radial-gradient(ellipse 70% 60% at 72% 16%,rgba(194,163,90,.10),transparent 62%)}
+[data-ambient="dairy"] .amb-tint{background:linear-gradient(0deg,rgba(232,240,243,.30),transparent 52%)}
+[data-ambient="agriculture"] .amb-tint{background:linear-gradient(0deg,rgba(126,155,134,.16),transparent 56%)}
+[data-ambient="university"] .amb-tint{background:radial-gradient(ellipse 60% 50% at 50% 18%,rgba(120,130,200,.08),transparent 60%)}
+[data-ambient="holding"] .amb-tint{background:radial-gradient(circle at 50% 46%,rgba(194,163,90,.10),transparent 58%)}
+[data-ambient="finance"] .amb-tint{background:linear-gradient(0deg,rgba(46,107,87,.10),transparent 54%)}
+[data-ambient="cosmic"] .amb-tint{background:radial-gradient(circle 36vw at 50% 46%,rgba(194,163,90,.16),rgba(46,107,87,.06) 45%,transparent 70%)}
+
+@media (prefers-reduced-motion:reduce){ #ambient-bg .amb-canvas{display:none} }
+
+/* ════════════════════════════════════════════════════════════════
+   H-NERVE · port bridge — let the living aurora show through the real
+   app's content surface. The (app) content wrapper paints a solid
+   .nerve-bg cream that would hide the fixed atmosphere behind it; when
+   the atmosphere is active (data-living present on <html>), make that
+   wrapper transparent so the aurora + particles read through. The
+   page's own cards/tables keep their solid surfaces, so text never
+   fights the background. Auto-reverts if data-living is removed.
+   ════════════════════════════════════════════════════════════════ */
+html[data-living] .nerve-bg{ background-color:transparent; background-image:none; }
+
+/* ════════════════════════════════════════════════════════════════
+   Return-to-Orrery pill — continuity affordance back to the hub.
+   Fixed top inline-start (flips to the right in RTL). Big tap target,
+   gold-on-emerald, calm hover. Sits above content + atmosphere.
+   ════════════════════════════════════════════════════════════════ */
+.orbit-return{
+  position:fixed; top:14px; inset-inline-start:16px; z-index:60;
+  display:inline-flex; align-items:center; gap:8px;
+  min-height:40px; padding:0 16px; border-radius:999px;
+  font-size:13px; font-weight:600; line-height:1; text-decoration:none;
+  color:#F6F1E7; background:rgba(31,77,63,.92);
+  border:1px solid rgba(194,163,90,.55);
+  box-shadow:0 2px 10px rgba(13,31,26,.18);
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  transition:transform .18s cubic-bezier(.25,1,.5,1), box-shadow .18s, background .18s, border-color .18s;
+}
+.orbit-return:hover{
+  background:rgba(31,77,63,1); border-color:rgba(194,163,90,.9);
+  box-shadow:0 4px 18px rgba(13,31,26,.28), 0 0 0 3px rgba(194,163,90,.16);
+  transform:translateY(-1px);
+}
+.orbit-return__glyph{ color:#DCC38A; font-size:15px; }
+.orbit-return__label{ letter-spacing:.02em; }
+@media (max-width:640px){ .orbit-return__label{ display:none; } .orbit-return{ padding:0 12px; } }
+@media (prefers-reduced-motion:reduce){ .orbit-return{ transition:none; } }
+
+/* ════════════════════════════════════════════════════════════════
+   Planet-dive arrival — the cinematic "landing" when you fall in from
+   the Orrery (.hn-dive), and a light settle on ordinary section-to-
+   section navigation (.hn-pagein). Transform+opacity only; the wrapper
+   establishes its own stacking so it rides above the atmosphere.
+   ════════════════════════════════════════════════════════════════ */
+.hn-reveal-root{ position:relative; z-index:1; }
+.hn-reveal-root.hn-dive{ animation:hn-dive .62s cubic-bezier(.22,1,.36,1) both; transform-origin:50% 42%; }
+.hn-reveal-root.hn-pagein{ animation:hn-pagein .42s cubic-bezier(.22,1,.36,1) both; }
+@keyframes hn-dive{
+  0%{ opacity:0; transform:scale(.9) translateY(10px); filter:blur(6px); }
+  60%{ opacity:1; filter:blur(0); }
+  100%{ opacity:1; transform:scale(1) translateY(0); }
+}
+@keyframes hn-pagein{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
+@media (prefers-reduced-motion:reduce){
+  .hn-reveal-root.hn-dive, .hn-reveal-root.hn-pagein{ animation:none; }
+}

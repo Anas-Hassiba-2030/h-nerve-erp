@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gathering Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#070f0c;font-family:"Cairo",sans-serif}
+#stage{position:fixed;inset:0;overflow:hidden}
+/* central dark sphere */
+#core{position:absolute;left:50%;top:50%;width:150px;height:150px;transform:translate(-50%,-50%) scale(0);opacity:0;border-radius:50%;
+  background:radial-gradient(circle at 44% 40%,#16352b 0%,#0c2019 42%,#070f0c 78%);
+  box-shadow:0 0 0 1px rgba(194,163,90,.4),inset 0 0 36px rgba(0,0,0,.7),0 0 50px rgba(31,77,63,.5);z-index:20}
+#core .nuc{position:absolute;left:50%;top:50%;width:14px;height:14px;border-radius:50%;transform:translate(-50%,-50%);
+  background:radial-gradient(circle,#FBF3DC,#DCC38A 55%,transparent);box-shadow:0 0 18px rgba(220,195,138,.8)}
+#ring{position:absolute;left:50%;top:50%;width:480px;height:480px;transform:translate(-50%,-50%);border-radius:50%;
+  border:1px solid rgba(194,163,90,.28);opacity:0;z-index:10}
+/* a body = star + label pill */
+.body{position:absolute;left:50%;top:50%;display:flex;align-items:center;gap:10px;z-index:30;will-change:transform,opacity}
+.body[data-side="left"]{flex-direction:row-reverse}
+.body .star{width:14px;height:14px;flex:0 0 14px;border-radius:50%;background:radial-gradient(circle,#fff,#DCC38A 55%,#2E6B57);box-shadow:0 0 12px rgba(220,195,138,.7)}
+.body .pill{min-height:38px;display:flex;align-items:center;padding:0 16px;border-radius:999px;white-space:nowrap;
+  background:rgba(17,42,35,.65);backdrop-filter:blur(8px);border:1px solid rgba(194,163,90,.4);font-size:15px;font-weight:700;color:#fff}
+/* comet seed + tail */
+.seed{position:absolute;left:0;top:0;width:6px;height:6px;border-radius:50%;background:radial-gradient(circle,#fff,#DCC38A 60%,transparent);
+  box-shadow:0 0 8px rgba(220,195,138,.8);will-change:transform,opacity;z-index:25}
+.seed .tail{position:absolute;right:7px;top:50%;height:2px;transform:translateY(-50%);border-radius:2px;
+  background:linear-gradient(90deg,rgba(220,195,138,0),rgba(220,195,138,.8))}
+.snap{position:absolute;left:0;top:0;width:24px;height:24px;border-radius:50%;transform:translate(-50%,-50%);
+  background:radial-gradient(circle,rgba(255,253,247,.9),transparent 65%);pointer-events:none;z-index:28}
+#replay{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:60;font-family:"Cairo";font-size:13px;font-weight:700;
+  color:#DCC38A;background:rgba(194,163,90,.14);border:1px solid rgba(194,163,90,.4);border-radius:999px;padding:9px 20px;cursor:pointer}
+.bgstar{position:absolute;width:2px;height:2px;border-radius:50%;background:#CDE0D6;opacity:.25}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="ring"></div>
+  <div id="core"><div class="nuc"></div></div>
+</div>
+<button id="replay">↻ إعادة العرض</button>
+<script>
+const stage=document.getElementById("stage"), core=document.getElementById("core"), ring=document.getElementById("ring");
+const TAU=Math.PI*2;
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+let cx,cy,R;
+function measure(){ const r=stage.getBoundingClientRect(); cx=r.width/2; cy=r.height/2; R=Math.min(r.width,r.height)*0.28; ring.style.width=ring.style.height=(R*2)+"px"; }
+measure(); addEventListener("resize",measure);
+
+const NAMES=["لوحة المجموعة","القطاعات","العقل","المالية","الفريق","النظام"];
+// 6 evenly-spaced slots around the circle
+const SLOTS=NAMES.map((n,i)=>({name:n, ang:(-90+i*60)*Math.PI/180}));
+
+// faint background stars
+for(let i=0;i<60;i++){ const s=document.createElement("div"); s.className="bgstar";
+  s.style.left=Math.random()*innerWidth+"px"; s.style.top=Math.random()*innerHeight+"px"; s.style.opacity=(Math.random()*0.3+0.08); stage.appendChild(s); }
+
+let bodies=[];
+function edgePoint(ang){ // a point well outside the ring, at angle ang, clamped to viewport edge
+  const hw=innerWidth/2-40, hh=innerHeight/2-40;
+  const rad=Math.min(Math.abs(hw/Math.cos(ang))||1e9, Math.abs(hh/Math.sin(ang))||1e9);
+  return {x:cx+Math.cos(ang)*rad*0.94, y:cy+Math.sin(ang)*rad*0.94};
+}
+
+function buildBody(slot){
+  const el=document.createElement("div"); el.className="body"; el.style.opacity="0";
+  el.innerHTML='<span class="star"></span><span class="pill">'+slot.name+'</span>';
+  stage.appendChild(el);
+  // position at slot (flat), label toward outside
+  const x=Math.cos(slot.ang)*R, y=Math.sin(slot.ang)*R;
+  el.style.transform="translate(-50%,-50%) translate("+x+"px,"+y+"px) scale(1)";
+  el.dataset.side=(Math.cos(slot.ang)<0)?"left":"right";
+  return el;
+}
+
+function snapFlash(x,y){ const s=document.createElement("div"); s.className="snap"; s.style.transform="translate("+x+"px,"+y+"px) translate(-50%,-50%)"; stage.appendChild(s);
+  gsap.fromTo(s,{scale:0,opacity:1},{scale:2.6,opacity:0,duration:.45,ease:"power2.out",onComplete:()=>s.remove()}); }
+
+function star(slot,i,delay){
+  const endA=slot.ang, endR=R;
+  // seed sits off the slot angle so it sweeps in on an arc
+  const bowOff=(i%2?1:-1)*(16+Math.random()*10)*Math.PI/180;
+  const seedA=endA+bowOff;
+  const sp=edgePoint(seedA);
+  const seed=document.createElement("div"); seed.className="seed"; const tail=document.createElement("span"); tail.className="tail"; seed.appendChild(tail);
+  seed.style.transform="translate("+sp.x+"px,"+sp.y+"px) scale(.5)"; seed.style.opacity=".4"; stage.appendChild(seed);
+  // 1. twinkle like a background star
+  const tw=gsap.to(seed,{opacity:.75,duration:1+Math.random(),repeat:-1,yoyo:true,ease:"sine.inOut"});
+  gsap.delayedCall(delay,()=>{
+    tw.kill();
+    // 2. IGNITE: flare + grow + tail
+    gsap.timeline()
+      .to(seed,{opacity:1,duration:.2,ease:"power2.out",onStart:()=>{seed.style.boxShadow="0 0 14px 2px rgba(220,195,138,.95)";}})
+      .fromTo(seed,{scale:.5},{scale:1.3,duration:.2},"<")
+      .add(()=>{
+        // 3. FLY: arc seedA→endA, radius seedR→endR. gravity: overshoot then settle
+        const seedR=Math.hypot(sp.x-cx,sp.y-cy);
+        function p3(t){return 1-Math.pow(1-t,3);}
+        function backOut(t){const s=1.45,u=t-1;return 1+(s+1)*u*u*u+s*u*u;}
+        gsap.fromTo({t:0},{t:1},{duration:1.15,ease:"none",
+          onUpdate:function(){ const t=this.targets()[0].t;
+            const ang=seedA+(endA-seedA)*backOut(t), rad=seedR+(endR-seedR)*p3(t);
+            const x=cx+Math.cos(ang)*rad, y=cy+Math.sin(ang)*rad;
+            tail.style.width=Math.max(0,(1-p3(t))*54)+"px";
+            seed.style.transform="translate("+x+"px,"+y+"px) rotate("+(ang*180/Math.PI)+"deg) scale("+(1.3-0.3*t)+")";
+          },
+          onComplete:function(){
+            const ex=cx+Math.cos(endA)*endR, ey=cy+Math.sin(endA)*endR;
+            snapFlash(ex,ey); seed.remove();
+            // 4. POP into the section at its slot
+            const el=buildBody(slot); bodies.push(el);
+            const pill=el.querySelector(".pill"); gsap.set(pill,{opacity:0,scale:.6});
+            gsap.fromTo(el,{opacity:0,scale:.2},{opacity:1,scale:1,duration:.45,ease:"back.out(1.9)",transformOrigin:"center",
+              onUpdate:function(){ /* keep at slot position */ el.style.transform="translate(-50%,-50%) translate("+(Math.cos(endA)*R)+"px,"+(Math.sin(endA)*R)+"px) scale("+(this.targets?1:1)+")"; }});
+            // simpler: set transform once, animate opacity+pill
+            el.style.transform="translate(-50%,-50%) translate("+(Math.cos(endA)*R)+"px,"+(Math.sin(endA)*R)+"px) scale(1)";
+            gsap.fromTo(el,{opacity:0},{opacity:1,duration:.35});
+            gsap.fromTo(el.querySelector(".star"),{scale:0},{scale:1,duration:.4,ease:"back.out(2)"});
+            gsap.to(pill,{opacity:1,scale:1,duration:.3,delay:.12,ease:"back.out(2)"});
+            arrived++;
+            if(arrived===SLOTS.length) igniteCore();
+          }});
+      });
+  });
+}
+
+let arrived=0;
+function igniteCore(){
+  gsap.timeline()
+    .to(core,{opacity:1,scale:1,duration:.8,ease:"back.out(1.6)"})
+    .to(ring,{opacity:1,duration:.7},"<.1")
+    .add(()=>{ if(!reduce) setTimeout(loopReplay, 2600); });
+}
+function loopReplay(){ run(); }
+
+function clearAll(){
+  bodies.forEach(b=>b.remove()); bodies=[];
+  stage.querySelectorAll(".seed,.snap").forEach(n=>n.remove());
+  gsap.set(core,{opacity:0,scale:0}); gsap.set(ring,{opacity:0});
+  arrived=0;
+}
+function run(){
+  clearAll();
+  if(reduce){ SLOTS.forEach(s=>{const el=buildBody(s);bodies.push(el);el.style.opacity="1";}); gsap.set(core,{opacity:1,scale:1}); gsap.set(ring,{opacity:1}); return; }
+  SLOTS.forEach((s,i)=>star(s,i,0.5+i*0.15));
+}
+document.getElementById("replay").addEventListener("click",run);
+run();
+</script>
+</body>
+</html>

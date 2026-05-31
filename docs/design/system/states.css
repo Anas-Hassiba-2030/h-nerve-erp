@@ -1,0 +1,108 @@
+/* ════════════════════════════════════════════════════════════════
+   H-NERVE · STATES & CONSISTENCY (shared, global include)
+   Empty / loading-skeleton / error states + a normalization layer
+   that unifies ribbon height, KPI cards, spacing, buttons, pills,
+   tables, and ambient intensity across every section. One cloth.
+   Works on both the ivory "work" register and the night register.
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── tokens (shared scale) ── */
+:root{
+  --hn-ribbon-h:120px;        /* unified hero/ribbon height target */
+  --hn-gap:16px;              /* unified panel gap */
+  --hn-radius:18px;           /* unified card radius */
+  --hn-radius-sm:13px;
+  --hn-kpi-val:25px;          /* unified KPI numeral size */
+  --hn-tap:44px;              /* min tap target */
+}
+
+/* ── LOADING SKELETON (shown briefly on entry) ── */
+#hn-skeleton{position:fixed;inset:56px 0 0 0;z-index:140;pointer-events:none;
+  display:flex;flex-direction:column;gap:16px;padding:28px 24px;max-width:1200px;margin:0 auto;
+  opacity:1;transition:opacity .45s ease}
+#hn-skeleton.gone{opacity:0}
+.hn-sk{border-radius:var(--hn-radius);background:
+  linear-gradient(100deg,rgba(180,170,140,.09) 30%,rgba(220,195,138,.22) 50%,rgba(180,170,140,.09) 70%);
+  background-size:200% 100%;animation:hn-shimmer 1.3s linear infinite}
+[data-living="night"] .hn-sk{background:linear-gradient(100deg,rgba(46,107,87,.14) 30%,rgba(194,163,90,.18) 50%,rgba(46,107,87,.14) 70%);background-size:200% 100%}
+.hn-sk-ribbon{height:78px}
+.hn-sk-row{display:flex;gap:16px}
+.hn-sk-kpi{flex:1;height:86px}
+.hn-sk-wide{height:230px}
+@keyframes hn-shimmer{to{background-position:-200% 0}}
+
+/* ── EMPTY STATE ── */
+.hn-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  padding:46px 24px;gap:6px;animation:hn-fade .5s ease}
+.hn-empty .hn-emp-art{width:64px;height:64px;margin-bottom:8px;opacity:.85}
+.hn-empty .hn-emp-t{font-family:var(--display,"Cormorant Garamond",serif);font-size:23px;font-weight:600}
+.hn-empty .hn-emp-s{font-size:13px;opacity:.65;max-width:42ch;line-height:1.5}
+.hn-empty .hn-emp-cta{margin-top:14px;display:inline-flex;align-items:center;gap:7px;min-height:var(--hn-tap);
+  padding:0 20px;border-radius:999px;font-family:var(--ui,"Cairo",sans-serif);font-weight:700;font-size:13.5px;cursor:pointer;border:0}
+/* work vs night coloring */
+.hn-empty{color:var(--ink,#2A2A26)}
+[data-living="night"] .hn-empty,[data-ambient="cosmic"] .hn-empty,[data-ambient="holding"] .hn-empty{color:#fff}
+.hn-empty .hn-emp-t{color:var(--emerald,#1F4D3F)}
+[data-living="night"] .hn-empty .hn-emp-t{color:#fff}
+.hn-empty .hn-emp-cta{color:#fff;background:linear-gradient(135deg,var(--emerald-soft,#2E6B57),var(--emerald,#1F4D3F))}
+[data-living="night"] .hn-empty .hn-emp-cta{color:#241b06;background:linear-gradient(135deg,#DCC38A,#C2A35A)}
+@keyframes hn-fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ── ERROR STATE ── */
+.hn-error{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:44px 24px;gap:8px}
+.hn-error .hn-err-ic{font-size:34px;color:#b06a5a}
+.hn-error .hn-err-t{font-family:var(--display,serif);font-size:21px;font-weight:600;color:var(--ink,#2A2A26)}
+[data-living="night"] .hn-error .hn-err-t{color:#fff}
+.hn-error .hn-err-s{font-size:13px;opacity:.65;max-width:40ch;line-height:1.5}
+.hn-error .hn-err-retry{margin-top:12px;min-height:var(--hn-tap);padding:0 20px;border-radius:999px;cursor:pointer;
+  font-family:var(--ui,sans-serif);font-weight:700;font-size:13px;border:1px solid var(--gold,#C2A35A);background:transparent;color:var(--gold,#C2A35A)}
+
+/* ── CONSISTENCY NORMALIZATION (one cloth) ── */
+/* tap targets on every interactive control */
+.ops-add,.ops-export,.ops-tab,.br-btn,.pill,.em-tab,.co-tab,.fc-btn,.seg button{min-height:var(--hn-tap)}
+/* unify KPI numerals across the registers */
+.kpi-val,.br-kpi .v,.ms-kpi .v,.tk-kpi .v,.ib-kpi .v,.em-kpi .v,.co-kpi .v,.wi-kpi .v{font-variant-numeric:tabular-nums}
+/* unify table row min height + remove zebra */
+.ops-tr.row,.br-row{min-height:var(--hn-tap)}
+/* unify pill radii */
+.ops-tag,.br-chip,.co-tag,.tag{border-radius:999px}
+
+/* ── MOBILE RESPONSIVE backstop (narrow ≤640px) ── */
+@media(max-width:640px){
+  .wrap,.br-wrap,.ms-wrap,.tk-wrap,.ib-wrap,.em-wrap,.ml-wrap,.co-wrap,.wi-wrap{padding-left:14px;padding-right:14px}
+  .br-ribbon,.ms-ribbon,.tk-top,.ib-top,.em-top,.co-ribbon,.wi-ribbon,.ml-ribbon{flex-direction:column;gap:10px}
+  .br-title-box,.ms-title-box,.tk-title-box,.ib-title-box,.em-title-box{border-inline-end:0;padding-inline-end:0;min-width:0}
+  .kpi-grid,.br-kpis,.ms-kpis,.tk-kpis,.ib-kpis,.em-kpis{grid-template-columns:1fr 1fr!important;display:grid!important}
+  .ops-tabs,.em-tabs,#co-nav{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .ops-tab,.em-tab,.co-tab{white-space:nowrap;flex:0 0 auto}
+  /* dense tables: let them scroll horizontally instead of crushing */
+  .ops-table{overflow-x:auto}
+  .ops-tr{min-width:520px}
+  #al-fabs{bottom:14px;inset-inline-start:14px}
+  #center-pick{bottom:14px}
+}
+@media(max-width:420px){
+  .kpi-grid,.br-kpis,.ms-kpis,.tk-kpis,.ib-kpis,.em-kpis{grid-template-columns:1fr!important}
+}
+
+/* ── reduced motion ── */
+@media (prefers-reduced-motion:reduce){
+  .hn-sk{animation:none;background:rgba(180,170,140,.12)}
+  #hn-skeleton{transition:none}
+  .hn-empty,.hn-error{animation:none}
+}
+@media print{ #hn-skeleton{display:none!important} }
+
+/* ── global on-theme scrollbars (replaces cheap white default) ── */
+*{scrollbar-width:thin;scrollbar-color:rgba(194,163,90,.45) transparent}
+*::-webkit-scrollbar{width:9px;height:9px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(194,163,90,.55),rgba(46,107,87,.5));border-radius:999px;border:2px solid transparent;background-clip:padding-box}
+*::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,rgba(220,195,138,.75),rgba(46,107,87,.7));background-clip:padding-box}
+*::-webkit-scrollbar-corner{background:transparent}
+
+/* shared top-bar language toggle (injected by app-layer on every page) */
+#topbar .tb-lang{display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(194,163,90,.3);cursor:pointer}
+#topbar .tb-lang .lang-opt{padding:5px 11px;border-radius:999px;font-family:var(--ui,"Cairo",sans-serif);font-size:12px;font-weight:700;color:var(--mist,#CDE0D6);transition:all .25s}
+[data-living="work"] #topbar .tb-lang .lang-opt{color:#fff}
+#topbar .tb-lang .lang-opt.on{background:linear-gradient(135deg,#DCC38A,#C2A35A);color:#241b06}

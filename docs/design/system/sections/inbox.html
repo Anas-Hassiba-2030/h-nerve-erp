@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-living="night" data-ambient="cosmic">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-Nerve · صندوق الوارد</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../living-bg.css">
+<link rel="stylesheet" href="_section.css">
+<link rel="stylesheet" href="../interactions.css">
+<link rel="stylesheet" href="../ambient.css">
+<style>
+/* ── صندوق الوارد · Inbox — unified attention feed ── */
+html,body{height:100%}
+body{background:transparent;color:var(--mist)}
+.ib-wrap{max-width:1000px;margin:0 auto;padding:14px 24px 80px}
+.ib-top{display:flex;align-items:stretch;gap:16px;margin-bottom:14px;flex-wrap:wrap}
+.ib-title-box{display:flex;flex-direction:column;justify-content:center;padding-inline-end:16px;border-inline-end:1px solid rgba(194,163,90,.2);min-width:170px}
+.ib-title-box .eb{display:inline-flex;align-items:center;gap:7px;font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--gold-soft);text-transform:uppercase;margin-bottom:4px}
+.ib-title-box .eb .tick{width:18px;height:1.5px;background:var(--gold-soft)}
+.ib-title-box h1{font-family:var(--display);font-size:34px;font-weight:600;color:#fff;line-height:1}
+.ib-kpis{display:flex;gap:12px;flex:1;flex-wrap:wrap}
+.ib-kpi{flex:1;min-width:120px;background:linear-gradient(160deg,rgba(20,46,38,.5),rgba(13,31,26,.46));border:1px solid rgba(194,163,90,.2);border-radius:14px;padding:11px 16px}
+.ib-kpi .v{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:25px;font-weight:600;color:#fff;line-height:1}
+.ib-kpi .k{font-size:11px;color:var(--mist);opacity:.7;margin-top:4px}
+
+.ib-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.ib-pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{padding:7px 15px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--mist);opacity:.7;cursor:pointer;background:rgba(13,31,26,.4);border:1px solid rgba(194,163,90,.16);font-family:var(--ui);transition:all .25s}
+.pill:hover{opacity:1}.pill.on{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#241b06;opacity:1;font-weight:700;border-color:transparent}
+.ib-search{background:rgba(13,31,26,.5);border:1px solid rgba(194,163,90,.22);border-radius:999px;color:#fff;font-family:var(--ui);font-size:13px;padding:9px 15px;outline:none;width:190px}
+.ib-search::placeholder{color:var(--mist);opacity:.5}
+
+.ib-feed{display:flex;flex-direction:column;gap:10px}
+.item{display:flex;align-items:center;gap:14px;padding:15px 18px;border-radius:16px;cursor:pointer;text-decoration:none;
+  background:linear-gradient(160deg,rgba(17,42,35,.55),rgba(13,31,26,.5));border:1px solid rgba(194,163,90,.18);transition:border-color .25s,transform .25s,box-shadow .25s}
+.item:hover{border-color:rgba(194,163,90,.45);transform:translateX(-3px);box-shadow:0 12px 36px -20px rgba(0,0,0,.6)}
+.item.new{animation:slidein .5s cubic-bezier(.22,1,.36,1)}
+@keyframes slidein{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+.item .tic{width:42px;height:42px;flex:0 0 42px;border-radius:12px;display:grid;place-items:center;font-size:19px}
+.item .tic.brain{background:rgba(194,163,90,.16);color:var(--gold-soft)}
+.item .tic.alert{background:rgba(168,106,92,.18);color:#cf9384}
+.item .tic.task{background:rgba(126,155,134,.18);color:var(--sage)}
+.item .tic.msg{background:rgba(46,107,87,.3);color:#9cc6b4}
+.item .ibody{flex:1;min-width:0}
+.item .it{font-size:14px;font-weight:700;color:#fff;margin-bottom:3px}
+.item .ip{font-size:12.5px;color:var(--mist);opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .chip{font-size:10.5px;color:var(--gold-soft);opacity:.8;background:rgba(194,163,90,.1);padding:2px 9px;border-radius:999px;white-space:nowrap}
+.item .tm{font-size:11px;color:var(--mist);opacity:.5;white-space:nowrap;font-variant-numeric:tabular-nums}
+.item .go{width:30px;height:30px;flex:0 0 30px;border-radius:50%;display:grid;place-items:center;color:var(--gold-soft);background:rgba(194,163,90,.1);font-size:15px}
+.ib-empty{text-align:center;padding:60px 20px;display:none}
+.ib-empty.show{display:block}
+.ib-empty .ic{font-size:48px;margin-bottom:14px;opacity:.5}
+.ib-empty .t{font-family:var(--display);font-size:24px;color:#fff;margin-bottom:6px}
+.ib-empty .s{font-size:13px;color:var(--mist);opacity:.6}
+@media (prefers-reduced-motion:reduce){.item.new{animation:none}}
+</style>
+<link rel="stylesheet" href="../app-layer.css?v=nav3"><link rel="stylesheet" href="../states.css"></head>
+<body>
+<header id="topbar">
+  <div class="tb-brand">
+    <svg class="tb-mark" viewBox="0 0 100 100" fill="none"><defs><radialGradient id="ngib" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FBF3DC"/><stop offset="50%" stop-color="#DCC38A"/><stop offset="100%" stop-color="#C2A35A" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="42" stroke="#C2A35A" stroke-width="1.4" opacity=".6"/><ellipse cx="50" cy="50" rx="42" ry="17" stroke="#C2A35A" stroke-width="1.2" opacity=".45"/><g stroke="#DCC38A" stroke-width="6.5" stroke-linecap="round"><line x1="31" y1="26" x2="31" y2="74"/><line x1="69" y1="26" x2="69" y2="74"/><line x1="31" y1="50" x2="69" y2="50"/></g><circle cx="50" cy="50" r="15" fill="url(#ngib)"/><circle cx="50" cy="50" r="4.5" fill="#FBF3DC"/></svg>
+    <span class="tb-word">H‑Nerve <span class="erp">ERP</span></span>
+  </div>
+  <a class="tb-orbit" href="../orrery.html">↺ العودة إلى المدار</a>
+  <button class="tb-user"><span class="tb-avatar">أ</span><span class="tb-uinfo"><span class="tb-uname">أ. الحوراني</span><span class="tb-urole">رئيس مجلس الإدارة</span></span></button>
+</header>
+
+<div class="ib-wrap">
+  <div class="ib-top">
+    <div class="ib-title-box"><span class="eb"><span class="tick"></span data-i18n="b4.eyebrow.people">الأفراد</span><h1 data-i18n="b4.title.inbox">صندوق الوارد</h1></div>
+    <div class="ib-kpis">
+      <div class="ib-kpi"><div class="v" id="kp_need">٧</div><div class="k" data-i18n="b4.inbox.needAttn">تحتاج الانتباه</div></div>
+      <div class="ib-kpi"><div class="v" id="kp_solved">٤</div><div class="k" data-i18n="b4.inbox.resolvedToday">حُلّت اليوم</div></div>
+      <div class="ib-kpi"><div class="v" id="kp_old">٣ س</div><div class="k" data-i18n="b4.inbox.oldest">أقدم بند</div></div>
+    </div>
+  </div>
+
+  <div class="ib-controls">
+    <div class="ib-pills">
+      <button class="pill on" data-f="all">الكل</button>
+      <button class="pill" data-f="brain">الدماغ</button>
+      <button class="pill" data-f="alert">التنبيهات</button>
+      <button class="pill" data-f="task" data-i18n="b4.title.tasks">المهام</button>
+      <button class="pill" data-f="msg">الرسائل</button>
+    </div>
+    <input class="ib-search" id="search" placeholder="بحث في الوارد…">
+  </div>
+
+  <div class="ib-feed" id="feed"></div>
+  <div class="ib-empty" id="empty"><div class="ic">✓</div><div class="t">كل شيء تحت السيطرة</div><div class="s">لا بنود تحتاج انتباهك الآن. سنُنبّهك عند الحاجة.</div></div>
+</div>
+
+<script src="../living-bg.js" defer></script>
+<script src="../ambient.js" defer></script>
+<script src="inbox.js" defer></script>
+<script src="../app-layer.js?v=nav3" defer></script><script src="../states.js" defer></script></body>
+</html>

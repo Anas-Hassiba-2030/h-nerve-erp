@@ -1,0 +1,27 @@
+<!-- @dsCard group="Components" -->
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Card styles by register</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_card.css"><style>
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;padding:9px 15px;font-size:13px;font-weight:700;letter-spacing:-.005em;border:0;cursor:pointer;transition:all .2s var(--ease-out-quart);font-family:var(--font-body-latin)}
+.btn:active{transform:translateY(1px)}
+.btn-primary{color:#fff;background:linear-gradient(135deg,var(--brand-deep) 0%,var(--brand) 100%);box-shadow:inset 0 1px 0 rgb(255 255 255/.16),0 1px 2px rgb(0 0 0/.06),0 4px 14px -4px color-mix(in srgb,var(--brand) 45%,transparent)}
+.btn-gold{color:#1a0e02;background:linear-gradient(135deg,var(--accent) 0%,color-mix(in srgb,var(--accent) 70%,#2a1a00) 100%);box-shadow:inset 0 1px 0 rgb(255 255 255/.3),0 4px 14px -4px color-mix(in srgb,var(--accent) 50%,transparent)}
+.btn-secondary{background:var(--surface-elevated);color:var(--brand-deep);border:1px solid var(--border)}
+.btn-ghost{color:var(--text-muted);background:transparent}
+.heri-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;font-family:var(--font-body-latin);font-size:13px;font-weight:600;letter-spacing:.02em;border-radius:0;border:1.5px solid transparent;cursor:pointer}
+.heri-btn-primary{background:var(--heri-ochre);color:var(--heri-ink);border-color:var(--heri-ochre)}
+.heri-btn-secondary{background:transparent;color:var(--heri-ink);border-color:var(--heri-ink)}
+.heri-btn-ghost{background:transparent;color:var(--heri-ink-2);border-color:var(--heri-rule-strong)}
+.badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 11px;font-size:11px;font-weight:700}
+.heri-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-family:var(--font-mono);font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;border:1px solid currentColor;background:color-mix(in srgb,currentColor 8%,transparent)}
+.heri-pill::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px color-mix(in srgb,currentColor 18%,transparent)}
+.input{width:100%;border-radius:12px;padding:9px 12px;font-size:14px;background:var(--surface-elevated);color:var(--text);border:1px solid var(--border);font-family:var(--font-body-latin)}
+.label{display:block;font-size:11px;font-weight:700;letter-spacing:.02em;color:var(--text-muted);margin-bottom:5px}
+</style></head><body style="background:var(--surface)">
+<div class="card-label">Cards · three registers</div>
+<div class="row" style="gap:12px">
+<div style="width:180px;background:var(--surface-elevated);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-soft);padding:13px"><div class="eyebrow" style="font-size:10px">EMERALD</div><div style="font-weight:700;font-size:14px;margin-top:4px;color:var(--text)">Soft shadow · 16px</div></div>
+<div style="width:180px;background:var(--heri-cream-2);border:1px solid var(--heri-rule);border-radius:0;padding:13px"><div class="eyebrow-heri" style="font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.18em;color:var(--heri-copper)">HERITAGE</div><div style="font-weight:600;font-size:14px;margin-top:4px;color:var(--heri-ink)">Hairline · sharp · flat</div></div>
+<div style="width:180px;background:var(--m-bg);border:1px solid var(--m-rule-2);border-radius:14px;padding:0;display:flex;overflow:hidden"><span style="width:4px;background:var(--m-sage)"></span><div style="padding:13px"><div class="mono" style="font-size:9px;letter-spacing:.18em;color:var(--m-ink-3)">MOBILE</div><div style="font-weight:600;font-size:14px;margin-top:4px;color:var(--m-ink)">Band · 14px</div></div></div>
+</div></body></html>

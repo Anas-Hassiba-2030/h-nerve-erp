@@ -1,0 +1,21 @@
+/* ════════════════════════════════════════════════════════════════
+   H-NERVE · SECTION SIGNATURE BACKGROUNDS  (Phase 4 — elevated)
+   The motion lives in ambient.js (canvas). This file provides the
+   static base TINT per signature (depth + reduced-motion fallback)
+   and the layer/canvas positioning. Content cards stay solid/frosted
+   (see _section.css) so text never fights the background.
+   ════════════════════════════════════════════════════════════════ */
+#ambient-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#ambient-bg .amb-tint{position:absolute;inset:0}
+#ambient-bg .amb-canvas{position:absolute;inset:0}
+
+/* base tints — subtle, always present (also the reduced-motion state) */
+[data-ambient="hospitality"] .amb-tint{background:radial-gradient(ellipse 70% 60% at 72% 16%,rgba(194,163,90,.10),transparent 62%)}
+[data-ambient="dairy"] .amb-tint{background:linear-gradient(0deg,rgba(232,240,243,.30),transparent 52%)}
+[data-ambient="agriculture"] .amb-tint{background:linear-gradient(0deg,rgba(126,155,134,.16),transparent 56%)}
+[data-ambient="university"] .amb-tint{background:radial-gradient(ellipse 60% 50% at 50% 18%,rgba(120,130,200,.08),transparent 60%)}
+[data-ambient="holding"] .amb-tint{background:radial-gradient(circle at 50% 46%,rgba(194,163,90,.10),transparent 58%)}
+[data-ambient="finance"] .amb-tint{background:linear-gradient(0deg,rgba(46,107,87,.10),transparent 54%)}
+[data-ambient="cosmic"] .amb-tint{background:radial-gradient(circle 36vw at 50% 46%,rgba(194,163,90,.16),rgba(46,107,87,.06) 45%,transparent 70%)}
+
+@media (prefers-reduced-motion:reduce){ #ambient-bg .amb-canvas{display:none} }

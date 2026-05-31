@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-living="night" data-ambient="cosmic">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-Nerve · ماذا لو</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../living-bg.css">
+<link rel="stylesheet" href="_section.css">
+<link rel="stylesheet" href="../interactions.css">
+<link rel="stylesheet" href="../ambient.css">
+<style>
+/* ── ماذا لو · What-If Simulator — night register, live causal lab ── */
+html,body{height:100%;overflow:hidden}
+body{background:transparent;color:var(--mist);display:flex;flex-direction:column}
+#topbar{flex:0 0 56px}
+.wi-wrap{flex:1;min-height:0;display:flex;flex-direction:column;padding:14px 22px 16px;width:100%;max-width:1480px;margin:0 auto}
+/* slim ribbon hero: title + brain note in one ~120px bar */
+.wi-ribbon{display:flex;align-items:stretch;gap:18px;margin-bottom:14px;flex:0 0 auto}
+.wi-title-box{display:flex;flex-direction:column;justify-content:center;padding-inline-end:18px;border-inline-end:1px solid rgba(194,163,90,.2);flex:0 0 auto;min-width:190px}
+.wi-title-box .eb{display:inline-flex;align-items:center;gap:7px;font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--gold-soft);text-transform:uppercase;margin-bottom:4px}
+.wi-title-box .eb .tick{width:18px;height:1.5px;background:var(--gold-soft)}
+.wi-title-box h1{font-family:var(--display);font-size:38px;font-weight:600;color:#fff;line-height:1}
+.wi-note{position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;
+  background:linear-gradient(160deg,rgba(20,46,38,.62),rgba(13,31,26,.58));backdrop-filter:blur(12px);
+  border:1px solid rgba(194,163,90,.24);border-radius:16px;padding:14px 20px;overflow:hidden}
+.wi-note::before{content:"";position:absolute;top:0;inset-inline-start:0;width:3px;height:100%;background:linear-gradient(180deg,var(--gold),var(--gold-soft))}
+.wi-note .eyebrow{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--gold-soft);text-transform:uppercase;margin-bottom:6px}
+.wi-note .eyebrow .pulse{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 0 rgba(220,195,138,.6);animation:idot 2.4s ease-in-out infinite}
+@keyframes idot{0%,100%{box-shadow:0 0 0 0 rgba(220,195,138,.5);opacity:1}50%{box-shadow:0 0 0 6px rgba(220,195,138,0);opacity:.6}}
+.wi-note .narr{font-family:var(--display);font-size:clamp(16px,1.7vw,21px);line-height:1.4;color:#f3efe6;font-weight:500}
+.wi-note .narr b{color:var(--gold-soft);font-weight:600}
+.wi-note .narr .up{color:var(--sage)} .wi-note .narr .down{color:#cf9384}
+
+.wi-grid{display:grid;grid-template-columns:290px 1fr 280px;gap:16px;align-items:stretch;flex:1;min-height:0}
+@media(max-width:1080px){.wi-wrap{max-width:none}html,body{overflow:auto}body{display:block}.wi-grid{grid-template-columns:1fr}}
+.wi-panel{background:rgba(17,42,35,.5);backdrop-filter:blur(12px);border:1px solid rgba(194,163,90,.2);border-radius:18px;padding:18px 20px;overflow:auto}
+.wi-panel h2{font-family:var(--display);font-size:18px;font-weight:600;color:#fff;margin-bottom:2px}
+.wi-panel .sub{font-size:11px;color:var(--mist);opacity:.7;margin-bottom:14px}
+
+/* emotional ambient overlays */
+#wi-vignette{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;
+  background:radial-gradient(ellipse 120% 100% at 50% 50%,transparent 52%,rgba(168,80,60,.34) 100%);transition:opacity .6s ease}
+#wi-reward{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;
+  background:radial-gradient(ellipse 80% 70% at 50% 60%,rgba(194,163,90,.18),transparent 60%);transition:opacity .8s ease}
+
+/* levers */
+.lever{margin-bottom:17px}
+.lever-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
+.lever-name{font-size:13.5px;font-weight:600;color:var(--mist)}
+.lever-val{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:20px;font-weight:600;color:#fff}
+.lever-val .delta{font-family:var(--ui);font-size:11px;font-weight:700;margin-inline-start:6px}
+.lever-val .delta.up{color:var(--sage)} .lever-val .delta.down{color:#cf9384} .lever-val .delta.zero{color:var(--mist);opacity:.4}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:999px;
+  background:linear-gradient(90deg,var(--gold) var(--fill,50%),rgba(205,224,214,.18) var(--fill,50%));outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;
+  background:radial-gradient(circle at 38% 35%,#FBF3DC,#DCC38A 55%,#C2A35A);box-shadow:0 0 12px rgba(220,195,138,.6),0 2px 6px rgba(0,0,0,.4);cursor:grab;border:0}
+input[type=range]::-webkit-slider-thumb:active{cursor:grabbing}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border:0;border-radius:50%;background:radial-gradient(circle at 38% 35%,#FBF3DC,#DCC38A 55%,#C2A35A);box-shadow:0 0 12px rgba(220,195,138,.6)}
+.lever.brain-moving input[type=range]::-webkit-slider-thumb{box-shadow:0 0 18px rgba(220,195,138,.95),0 0 30px rgba(194,163,90,.6)}
+
+/* center flow diagram */
+.wi-flow{position:relative;display:flex;flex-direction:column;overflow:hidden}
+.wi-flow svg{width:100%;height:100%;position:absolute;inset:0;pointer-events:none}
+.flow-cols{position:relative;z-index:2;display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:center;height:100%;flex:1;padding:6px 0}
+.flow-side{display:flex;flex-direction:column;gap:12px}
+.flow-side.out{align-items:flex-start}
+.node{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:12px;background:rgba(13,31,26,.6);border:1px solid rgba(194,163,90,.22);font-size:12.5px;font-weight:600;color:var(--mist);white-space:nowrap;transition:border-color .3s,opacity .3s}
+.node .nd{width:8px;height:8px;border-radius:50%;background:var(--gold-soft);flex:0 0 8px;box-shadow:0 0 8px rgba(220,195,138,.6)}
+.node.dim{opacity:.4}
+.node.lit{border-color:rgba(220,195,138,.6)}
+.node.out{flex-direction:column;align-items:flex-start;gap:1px;min-width:128px}
+.node.out .nlbl{font-size:11px;color:var(--mist);opacity:.7}
+.node.out .nval{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:20px;font-weight:600;color:#fff}
+.node.out .nval.up{color:var(--sage)} .node.out .nval.down{color:#cf9384}
+.node.flinch{animation:flinch .45s cubic-bezier(.34,1.56,.64,1)}
+@keyframes flinch{0%{transform:scale(1)}40%{transform:scale(1.13);filter:drop-shadow(0 0 10px rgba(220,195,138,.8))}100%{transform:scale(1)}}
+.brain-hub{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;justify-self:center;
+  background:radial-gradient(circle at 38% 32%,#2E6B57,#1F4D3F 50%,#0c2019);
+  box-shadow:inset 0 2px 16px rgba(220,195,138,.28),0 0 44px rgba(31,77,63,.7);position:relative;
+  transition:box-shadow .4s ease}
+.brain-hub::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(194,163,90,.4);animation:spin var(--spin,24s) linear infinite}
+.brain-hub.intense{box-shadow:inset 0 2px 16px rgba(220,195,138,.45),0 0 70px rgba(194,163,90,.6)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.brain-hub .bi{font-family:var(--display);font-size:12px;color:var(--gold-soft);text-align:center;line-height:1.1}
+.brain-hub .bi b{display:block;font-size:25px;color:#fff;font-weight:600}
+
+/* right KPIs */
+.wi-kpi{padding:12px 0;border-bottom:1px solid rgba(194,163,90,.14)}
+.wi-kpi:last-of-type{border-bottom:0}
+.wi-kpi .k{font-size:11.5px;color:var(--mist);opacity:.7;margin-bottom:4px}
+.wi-kpi .v{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:27px;font-weight:600;color:#fff;line-height:1;display:flex;align-items:baseline;gap:8px}
+.wi-kpi .v .u{font-size:13px;opacity:.6}
+.wi-kpi .ghost{font-size:11px;font-family:var(--ui);font-weight:700;opacity:.8;display:inline-flex;align-items:center;gap:3px}
+.wi-kpi .ghost.up{color:var(--sage)} .wi-kpi .ghost.down{color:#cf9384} .wi-kpi .ghost.zero{color:var(--mist);opacity:.4}
+.wi-kpi .ghost .base{color:var(--mist);opacity:.45;font-weight:500;text-decoration:line-through}
+.wi-kpi.flinch{animation:flinch .45s cubic-bezier(.34,1.56,.64,1)}
+.wi-kpi .bar{height:5px;border-radius:999px;background:rgba(205,224,214,.15);margin-top:8px;overflow:hidden}
+.wi-kpi .bar span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gold-soft),var(--gold));transition:width .5s cubic-bezier(.22,1,.36,1)}
+.wi-kpi.risk .bar span{background:linear-gradient(90deg,#cf9384,#b06a5a)}
+
+.wi-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.wi-actions .btn{font-size:13px;padding:0 16px;min-height:42px}
+.wi-solve{width:100%;margin-bottom:10px}
+@media (prefers-reduced-motion:reduce){.brain-hub::after{animation:none}.wi-note .eyebrow .pulse{animation:none}.node.flinch,.wi-kpi.flinch{animation:none}}
+</style>
+<link rel="stylesheet" href="../app-layer.css?v=nav3"><link rel="stylesheet" href="../states.css"></head>
+<body>
+<header id="topbar">
+  <div class="tb-brand">
+    <svg class="tb-mark" viewBox="0 0 100 100" fill="none"><defs><radialGradient id="ngw" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FBF3DC"/><stop offset="50%" stop-color="#DCC38A"/><stop offset="100%" stop-color="#C2A35A" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="42" stroke="#C2A35A" stroke-width="1.4" opacity=".6"/><ellipse cx="50" cy="50" rx="42" ry="17" stroke="#C2A35A" stroke-width="1.2" opacity=".45"/><g stroke="#DCC38A" stroke-width="6.5" stroke-linecap="round"><line x1="31" y1="26" x2="31" y2="74"/><line x1="69" y1="26" x2="69" y2="74"/><line x1="31" y1="50" x2="69" y2="50"/></g><circle cx="50" cy="50" r="15" fill="url(#ngw)"/><circle cx="50" cy="50" r="4.5" fill="#FBF3DC"/></svg>
+    <span class="tb-word">H‑Nerve <span class="erp">ERP</span></span>
+  </div>
+  <a class="tb-orbit" href="../orrery.html">↺ العودة إلى المدار</a>
+  <button class="tb-user"><span class="tb-avatar">أ</span><span class="tb-uinfo"><span class="tb-uname">أ. الحوراني</span><span class="tb-urole">رئيس مجلس الإدارة</span></span></button>
+</header>
+
+<div id="wi-vignette"></div>
+<div id="wi-reward"></div>
+
+<div class="wi-wrap">
+  <div class="wi-ribbon">
+    <div class="wi-title-box">
+      <span class="eb"><span class="tick"></span data-i18n="br.whatif.ribbon">محاكاة سببية</span>
+      <h1 data-i18n="br.title.whatif">ماذا لو</h1>
+    </div>
+    <div class="wi-note">
+      <div class="eyebrow"><span class="pulse"></span data-i18n="br.whatif.brainRead">قراءة الدماغ</div>
+      <div class="narr" id="narr" data-i18n="br.whatif.note0">حرّك أيّ رافعة لتبدأ المحاكاة — أو دع الدماغ يحسب الأفضل.</div>
+    </div>
+  </div>
+
+  <div class="wi-grid">
+    <!-- LEVERS -->
+    <div class="wi-panel">
+      <h2 data-i18n="br.whatif.levers">الروافع</h2>
+      <div class="sub" data-i18n="br.whatif.leversSub">حرّكها لتغيّر مصير المجموعة</div>
+      <div id="levers"></div>
+    </div>
+
+    <!-- FLOW -->
+    <div class="wi-panel wi-flow">
+      <svg id="wires" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+      <div class="flow-cols">
+        <div class="flow-side in" id="flowIn"></div>
+        <div class="brain-hub" id="hub"><div class="bi">ذكاء<br><b id="hubIQ">92</b><br>الدماغ</div></div>
+        <div class="flow-side out" id="flowOut"></div>
+      </div>
+    </div>
+
+    <!-- KPIS -->
+    <div class="wi-panel">
+      <h2 data-i18n="br.whatif.impact">الأثر</h2>
+      <div class="sub" data-i18n="br.whatif.impactSub">يتحدّث لحظياً</div>
+      <button class="btn btn-primary wi-solve" id="solveBtn">✦ دع الدماغ يحسب الأفضل</button>
+      <div class="wi-kpi" id="kpi_net"><div class="k">صافي الربح الشهري</div><div class="v"><span id="k_net">٩٧٬٦٤٣</span><span class="u">د.أ</span><span class="ghost zero" id="g_net"></span></div><div class="bar"><span id="b_net" style="width:71%"></span></div></div>
+      <div class="wi-kpi" id="kpi_rev"><div class="k">الإيراد الشهري</div><div class="v"><span id="k_rev">١٣٧٬٤٦٥</span><span class="u">د.أ</span><span class="ghost zero" id="g_rev"></span></div><div class="bar"><span id="b_rev" style="width:68%"></span></div></div>
+      <div class="wi-kpi" id="kpi_iq"><div class="k" data-i18n="br.title.brainiq">ذكاء الدماغ</div><div class="v"><span id="k_iq">٩٢</span><span class="ghost zero" id="g_iq"></span></div><div class="bar"><span id="b_iq" style="width:92%"></span></div></div>
+      <div class="wi-kpi risk" id="kpi_risk"><div class="k">مؤشر المخاطرة</div><div class="v"><span id="k_risk">٣١</span><span class="ghost zero" id="g_risk"></span></div><div class="bar"><span id="b_risk" style="width:31%"></span></div></div>
+      <div class="wi-actions">
+        <button class="btn btn-secondary" id="resetBtn" style="color:var(--mist);box-shadow:inset 0 0 0 1.5px rgba(194,163,90,.4)">إعادة الضبط</button>
+        <button class="btn btn-primary" id="saveBtn">احفظ كسيناريو</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../living-bg.js" defer></script>
+<script src="../ambient.js" defer></script>
+<script src="section.js" defer></script>
+<script src="whatif.js" defer></script>
+<script src="../app-layer.js?v=nav3" defer></script><script src="../states.js" defer></script></body>
+</html>

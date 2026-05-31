@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-living="work" data-ambient="agriculture">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-Nerve · سلسلة التوريد</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../living-bg.css">
+<link rel="stylesheet" href="_section.css">
+<link rel="stylesheet" href="../interactions.css">
+<link rel="stylesheet" href="../ambient.css">
+<link rel="stylesheet" href="../ops.css">
+<style>
+.sk-wrap{background:var(--cream);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:18px}
+#sankey{width:100%;height:260px}
+.sk-band{transition:opacity .25s,stroke-width .25s;cursor:pointer}
+.sk-node rect{rx:5}
+.sk-label{font-family:var(--ui);font-size:12px;font-weight:700;fill:var(--ink)}
+.sk-vol{position:absolute;background:rgba(20,46,38,.95);color:#fff;font-size:12px;padding:6px 11px;border-radius:8px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:10;white-space:nowrap}
+.fc-card{background:var(--cream);border:1px solid var(--line);border-radius:14px;padding:0;margin-bottom:10px;overflow:hidden;transition:border-color .25s}
+.fc-head{display:flex;align-items:center;gap:14px;padding:15px 18px;cursor:pointer}
+.fc-ring{position:relative;width:46px;height:46px;flex:0 0 46px}
+.fc-ring svg{transform:rotate(-90deg)}
+.fc-ring .v{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--emerald);font-variant-numeric:tabular-nums}
+.fc-body{flex:1;min-width:0}
+.fc-title{font-size:14px;font-weight:700;color:var(--ink)}
+.fc-meta{display:flex;align-items:center;gap:10px;margin-top:5px;font-size:13px;color:#5a5347}
+.fc-title{font-size:15px;font-weight:700;color:var(--ink);line-height:1.4}
+.fc-actions{display:flex;gap:8px;flex-shrink:0}
+.fc-btn{font-size:12.5px;font-weight:700;border-radius:999px;padding:8px 15px;cursor:pointer;border:1px solid;transition:all .2s}
+.fc-approve{color:#3c7a5c;border-color:rgba(126,155,134,.5);background:rgba(126,155,134,.12)}
+.fc-approve:hover{background:rgba(126,155,134,.25)}
+.fc-reject{color:#9a5648;border-color:rgba(168,106,92,.5);background:rgba(168,106,92,.1)}
+.fc-reject:hover{background:rgba(168,106,92,.22)}
+.fc-card.approved{border-color:rgba(126,155,134,.6)}.fc-card.rejected{border-color:rgba(168,106,92,.5);opacity:.7}
+.fc-card.pulse-ok{animation:pok .5s}.fc-card.pulse-no{animation:pno .5s}
+@keyframes pok{0%{box-shadow:0 0 0 0 rgba(126,155,134,.5)}100%{box-shadow:0 0 0 14px rgba(126,155,134,0)}}
+@keyframes pno{0%{box-shadow:0 0 0 0 rgba(168,106,92,.5)}100%{box-shadow:0 0 0 14px rgba(168,106,92,0)}}
+.fc-status{font-size:11px;font-weight:700;padding:4px 11px;border-radius:999px}
+.fc-status.ok{color:#3c7a5c;background:rgba(126,155,134,.2)}.fc-status.no{color:#9a5648;background:rgba(168,106,92,.18)}
+.fc-explain{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.22,1,.36,1);background:rgba(46,107,87,.06);border-top:1px solid transparent}
+.fc-card.open .fc-explain{max-height:200px;border-top-color:var(--line)}
+.fc-explain-in{padding:17px 20px;font-size:15px;line-height:1.75;color:#241f18}
+.fc-explain-in .eb{font-size:11.5px;font-weight:700;letter-spacing:.1em;color:#8a6a1f;text-transform:uppercase;margin-bottom:9px}
+.fc-explain-in b{color:var(--emerald);font-weight:700}
+.fc-card.open .fc-explain{max-height:260px;border-top-color:var(--line)}
+@media (prefers-reduced-motion:reduce){.fc-card.pulse-ok,.fc-card.pulse-no{animation:none}.fc-explain{transition:none}}
+</style>
+<link rel="stylesheet" href="../app-layer.css?v=nav3"><link rel="stylesheet" href="../states.css"></head>
+<body><header id="topbar">
+  <div class="tb-brand">
+    <svg class="tb-mark" viewBox="0 0 100 100" fill="none"><defs><radialGradient id="ngsup" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FBF3DC"/><stop offset="50%" stop-color="#DCC38A"/><stop offset="100%" stop-color="#C2A35A" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="42" stroke="#C2A35A" stroke-width="1.4" opacity=".6"/><ellipse cx="50" cy="50" rx="42" ry="17" stroke="#C2A35A" stroke-width="1.2" opacity=".45"/><g stroke="#DCC38A" stroke-width="6.5" stroke-linecap="round"><line x1="31" y1="26" x2="31" y2="74"/><line x1="69" y1="26" x2="69" y2="74"/><line x1="31" y1="50" x2="69" y2="50"/></g><circle cx="50" cy="50" r="15" fill="url(#ngsup)"/><circle cx="50" cy="50" r="4.5" fill="#FBF3DC"/></svg>
+    <span class="tb-word">H‑Nerve <span class="erp">ERP</span></span>
+  </div>
+  <a class="tb-orbit" href="../orrery.html">↺ العودة إلى المدار</a>
+  <button class="tb-user"><span class="tb-avatar">أ</span><span class="tb-uinfo"><span class="tb-uname">أ. الحوراني</span><span class="tb-urole">رئيس مجلس الإدارة</span></span></button>
+</header>
+<div class="wrap">
+  <div class="sec-head reveal">
+    <div>
+      <div class="sec-eyebrow"><span class="tick"></span data-i18n="sec.eyebrow.supply">القطاعات · اللوجستيات</div>
+      <h1 class="sec-title" data-i18n="sec.title.supply">سلسلة التوريد التنبّؤية</h1>
+      <p class="sec-sub">جسر التوريد بين وحدات المجموعة — يتنبّأ الدماغ بالتدفّقات، وأنت تعتمد أو ترفض.</p>
+    </div>
+    <div class="sec-head-aside"><span class="sec-status"><span class="dot"></span>مباشر · ٤ تنبؤات معلّقة</span>
+      <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+        <button class="btn btn-secondary" id="autoGen">توليد تلقائي</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sk-wrap reveal"><div class="panel-head" style="margin-bottom:6px"><span class="panel-title">تدفّق التوريد</span><span class="panel-aside">المصادر ← المستودعات ← الوجهات</span></div>
+    <div style="position:relative"><svg id="sankey" viewBox="0 0 800 260" preserveAspectRatio="xMidYMid meet"></svg><div class="sk-vol" id="skVol"></div></div>
+  </div>
+
+  <div class="panel reveal"><div class="panel-head"><span class="panel-title">التنبؤات</span><span class="panel-aside">انقر بطاقة لشرح الدماغ · اعتمد أو ارفض</span></div>
+    <div id="forecasts"></div>
+  </div>
+</div>
+<script src="../living-bg.js" defer></script>
+<script src="../ambient.js" defer></script>
+<script src="../ops.js?v=i18n2" defer></script>
+<script src="section.js" defer></script>
+<script src="supply-ops.js" defer></script>
+<script src="../app-layer.js?v=nav3" defer></script><script src="../states.js" defer></script></body>
+</html>

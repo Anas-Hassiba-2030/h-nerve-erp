@@ -1,0 +1,112 @@
+/* ════════════════════════════════════════════════════════════════
+   H-NERVE · OPERATIONS toolkit (shared) — tabs, CRUD tables, drawers,
+   status-cycle pills, inline create forms. Works on the ivory "work"
+   register. Pair with ops.js. Sectors differ only in domain data.
+   ════════════════════════════════════════════════════════════════ */
+.ops-tabs{display:flex;gap:8px;margin:22px 0 18px;flex-wrap:wrap}
+.ops-tab{padding:9px 20px;border-radius:999px;font-size:13.5px;font-weight:700;color:var(--ink-muted);cursor:pointer;
+  background:var(--cream);border:1px solid var(--line);font-family:var(--ui);transition:all .25s cubic-bezier(.22,1,.36,1)}
+.ops-tab:hover{border-color:var(--gold)}
+.ops-tab.on{background:linear-gradient(135deg,var(--emerald-soft),var(--emerald));color:#fff;border-color:transparent;box-shadow:0 6px 16px -8px rgba(31,77,63,.5)}
+.ops-panel{display:none;animation:ops-fade .35s ease}
+.ops-panel.on{display:block}
+@keyframes ops-fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* table tools */
+.ops-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.ops-toolbar h2{font-family:var(--display);font-size:24px;font-weight:600;color:var(--emerald)}
+.ops-actions{display:flex;gap:9px;align-items:center}
+.ops-search{background:var(--cream);border:1px solid var(--line);border-radius:999px;color:var(--ink);font-family:var(--ui);font-size:13px;padding:9px 15px;outline:none;width:170px}
+.ops-search:focus{border-color:var(--gold)}
+.ops-add{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--emerald-soft),var(--emerald));border:0;border-radius:999px;padding:9px 16px;cursor:pointer}
+.ops-export{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--emerald);background:transparent;border:1px solid var(--line);border-radius:999px;padding:9px 14px;cursor:pointer}
+.ops-export:hover{border-color:var(--gold)}
+
+/* generic data table */
+.ops-table{background:var(--cream);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.ops-tr{display:grid;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid var(--line);position:relative;transition:background .2s}
+.ops-tr.head{font-size:11px;font-weight:700;color:var(--ink-muted);letter-spacing:.03em;background:rgba(194,163,90,.06)}
+.ops-tr.row:hover{background:rgba(194,163,90,.06)}
+.ops-tr.row:last-child{border-bottom:0}
+.ops-cell{font-size:13.5px;color:var(--ink)}
+.ops-cell.num{text-align:end;font-variant-numeric:tabular-nums}
+.ops-cell.name{font-weight:700;color:var(--ink)}
+.ops-del{position:absolute;inset-inline-end:8px;top:50%;transform:translateY(-50%);opacity:0;color:var(--brick);background:none;border:0;font-size:15px;cursor:pointer;transition:opacity .2s}
+.ops-tr.row:hover .ops-del{opacity:.75}
+.ops-tag{display:inline-block;font-size:11px;font-weight:700;padding:3px 11px;border-radius:999px}
+.ops-tag.ok{color:#3c7a5c;background:rgba(126,155,134,.2)} .ops-tag.warn{color:#8a6a1f;background:rgba(194,163,90,.2)} .ops-tag.crit{color:#9a5648;background:rgba(168,106,92,.18)} .ops-tag.info{color:#2e6b57;background:rgba(46,107,87,.14)}
+/* clickable status-cycle pill */
+.ops-status{cursor:pointer;user-select:none;transition:transform .15s}
+.ops-status:active{transform:scale(.93)}
+
+/* inline create form row */
+.ops-form{display:grid;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid var(--line);background:rgba(46,107,87,.08)}
+.ops-form input,.ops-form select{background:#fff;border:1px solid var(--line);border-radius:9px;color:var(--ink);font-family:var(--ui);font-size:13px;padding:8px 10px;outline:none;width:100%}
+.ops-form input:focus,.ops-form select:focus{border-color:var(--gold)}
+.ops-form.hidden{display:none}
+
+/* drawer */
+.ops-backdrop{position:fixed;inset:0;z-index:89;background:rgba(20,26,20,.4);opacity:0;pointer-events:none;transition:opacity .35s}
+.ops-backdrop.open{opacity:1;pointer-events:auto}
+.ops-drawer{position:fixed;top:0;inset-inline-end:0;bottom:0;width:380px;max-width:90vw;z-index:90;transform:translateX(105%);
+  transition:transform .4s cubic-bezier(.22,1,.36,1);background:linear-gradient(160deg,#fffdf8,#f6f1e7);
+  border-inline-start:1px solid var(--line);box-shadow:-20px 0 60px -30px rgba(0,0,0,.4);overflow-y:auto;padding:24px}
+[dir="ltr"] .ops-drawer{inset-inline-end:auto;inset-inline-start:0;transform:translateX(-105%)}
+.ops-drawer.open{transform:translateX(0)}
+.ops-drawer .dr-close{position:absolute;top:16px;inset-inline-start:16px;font-size:22px;color:var(--ink-muted);background:none;border:0;cursor:pointer}
+.ops-drawer .dr-eyebrow{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;margin-bottom:6px}
+.ops-drawer h3{font-family:var(--display);font-size:26px;font-weight:600;color:var(--emerald);margin-bottom:4px}
+.ops-drawer .dr-sub{font-size:13px;color:var(--ink-muted);margin-bottom:18px}
+.ops-drawer .dr-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.ops-drawer .dr-stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+.ops-drawer .dr-stat .v{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:22px;font-weight:600;color:var(--emerald)}
+.ops-drawer .dr-stat .k{font-size:10.5px;color:var(--ink-muted);margin-top:2px}
+.ops-drawer .dr-sec{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--gold);text-transform:uppercase;margin:18px 0 10px}
+/* mini sparkline + heatmap in drawer */
+.dr-spark{width:100%;height:54px}
+.dr-heat{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
+.dr-heat span{aspect-ratio:1;border-radius:5px;background:var(--line)}
+
+/* sensor gauges (loran) */
+.gauges{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px}
+.gauge{text-align:center}
+.gauge svg{transform:rotate(-90deg)}
+.gauge .gv{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:18px;font-weight:600;color:var(--emerald);margin-top:-34px;display:block;position:relative}
+.gauge .gl{font-size:11px;color:var(--ink-muted);margin-top:14px}
+
+/* stage pipeline (ahliyya) */
+.stages{display:flex;align-items:center;gap:0;margin-top:6px}
+.stage{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative}
+.stage .dot{width:20px;height:20px;border-radius:50%;background:var(--line);border:2px solid var(--line);transition:all .4s cubic-bezier(.22,1,.36,1);z-index:2}
+.stage.done .dot{background:var(--emerald);border-color:var(--emerald)}
+.stage.active .dot{background:var(--gold);border-color:var(--gold);box-shadow:0 0 0 4px rgba(194,163,90,.25)}
+.stage .sl{font-size:10.5px;color:var(--ink-muted)}
+.stage.active .sl,.stage.done .sl{color:var(--ink);font-weight:700}
+.stage:not(:last-child)::after{content:"";position:absolute;top:9px;inset-inline-start:50%;width:100%;height:2px;background:var(--line);z-index:1}
+.stage.done:not(:last-child)::after{background:var(--emerald)}
+
+/* portfolio grid (holding) */
+.ops-portfolio{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.co-tile{background:var(--cream);border:1px solid var(--line);border-radius:16px;padding:18px;cursor:pointer;transition:transform .25s,border-color .25s,box-shadow .25s}
+.co-tile:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 16px 40px -22px rgba(31,77,63,.4)}
+.co-tile .co-logo{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-family:var(--display);font-size:20px;font-weight:600;color:#fff;background:linear-gradient(140deg,var(--emerald-soft),var(--emerald));margin-bottom:12px}
+.co-tile .co-nm{font-size:15px;font-weight:700;color:var(--ink)}
+.co-tile .co-sec{font-size:11.5px;color:var(--gold);margin-top:2px}
+.co-tile .co-meta{display:flex;justify-content:space-between;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-muted);font-variant-numeric:tabular-nums}
+
+@media (prefers-reduced-motion:reduce){.ops-panel,.stage .dot{animation:none!important;transition:none!important}}
+
+/* ── shared STATES (empty / skeleton / error) ── */
+.ops-empty{text-align:center;padding:46px 20px;color:var(--ink-muted)}
+.ops-empty .oe-ic{font-size:42px;opacity:.4;line-height:1}
+.ops-empty .oe-t{font-family:var(--display);font-size:21px;color:var(--ink);margin-top:12px}
+.ops-empty .oe-s{font-size:13px;color:var(--ink-muted);margin-top:5px}
+.ops-empty .ops-add{margin-top:16px;border:0}
+.al-skel{border-radius:12px;background:linear-gradient(100deg,rgba(194,163,90,.06) 30%,rgba(194,163,90,.18) 50%,rgba(194,163,90,.06) 70%);background-size:200% 100%;animation:al-shim 1.3s linear infinite}
+@keyframes al-shim{to{background-position:-200% 0}}
+.al-errwrap{text-align:center;padding:46px 20px}
+.al-errwrap .ei{font-size:40px;color:#A86A5C}
+.al-errwrap .et{font-family:var(--display);font-size:22px;color:var(--ink);margin-top:10px}
+.al-errwrap .es{font-size:13px;color:var(--ink-muted);margin-top:5px}
+.al-errwrap button{margin-top:16px;background:linear-gradient(135deg,var(--emerald-soft),var(--emerald));color:#fff;border:0;border-radius:999px;padding:10px 20px;font-family:var(--ui);font-weight:700;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.al-skel{animation:none}}

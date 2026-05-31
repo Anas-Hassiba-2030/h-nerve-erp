@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-living="night" data-section="brain" data-ambient="cosmic">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-Nerve · العقل</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../living-bg.css">
+<link rel="stylesheet" href="_section.css">
+<link rel="stylesheet" href="../interactions.css">
+<link rel="stylesheet" href="../ambient.css">
+<style>
+/* ── Brain · night-surface overrides ── */
+body{background:transparent;color:var(--mist)}
+.sec-title{color:#fff}
+.sec-sub{color:var(--mist);opacity:.8}
+.sec-eyebrow{color:var(--gold-soft)}
+.sec-eyebrow .tick{background:var(--gold-soft)}
+.sec-head{border-bottom-color:rgba(194,163,90,.2)}
+.sec-status{background:rgba(17,42,35,.6);border-color:rgba(194,163,90,.28);color:var(--mist)}
+.n-panel{background:rgba(17,42,35,.55);backdrop-filter:blur(12px);border:1px solid rgba(194,163,90,.2);border-radius:18px;padding:24px 26px;margin-bottom:22px}
+.n-panel-title{font-family:var(--display);font-size:24px;font-weight:600;color:#fff;margin-bottom:4px}
+.n-panel-aside{font-size:12.5px;color:var(--mist);opacity:.7;margin-bottom:18px}
+/* hero IQ */
+.brain-hero{display:flex;align-items:center;gap:34px;flex-wrap:wrap;background:rgba(17,42,35,.5);backdrop-filter:blur(12px);
+  border:1px solid rgba(194,163,90,.22);border-radius:22px;padding:30px 34px;margin-bottom:24px;position:relative;overflow:hidden}
+.brain-orb{position:relative;width:140px;height:140px;flex:0 0 140px;border-radius:50%;
+  background:radial-gradient(circle at 38% 32%,#2E6B57,#1F4D3F 45%,#0c2019);
+  box-shadow:inset 0 0 36px rgba(0,0,0,.5),inset 0 2px 16px rgba(220,195,138,.25),0 0 50px rgba(31,77,63,.7);
+  display:grid;place-items:center}
+.brain-orb::after{content:"";position:absolute;inset:-10px;border-radius:50%;border:1px solid rgba(194,163,90,.4);animation:b-spin 26s linear infinite}
+.brain-orb::before{content:"";position:absolute;inset:-22px;border-radius:50%;border:1px solid rgba(220,195,138,.22);animation:b-spin 34s linear infinite reverse}
+@keyframes b-spin{to{transform:rotate(360deg)}}
+.brain-iq{font-family:var(--display);font-size:58px;font-weight:600;color:#fff;line-height:.9;text-shadow:0 0 22px rgba(220,195,138,.5)}
+.brain-iq-cap{font-size:11px;color:var(--gold-soft);letter-spacing:.04em}
+.brain-hero-txt{flex:1;min-width:240px}
+.brain-hero-txt h2{font-family:var(--display);font-size:30px;font-weight:600;color:#fff;line-height:1.1}
+.brain-hero-txt p{font-size:14.5px;color:var(--mist);opacity:.85;margin-top:10px;line-height:1.6;max-width:54ch}
+.brain-stats{display:flex;gap:26px;margin-top:16px;flex-wrap:wrap}
+.brain-stat .v{font-family:var(--display);font-size:26px;font-weight:600;color:var(--gold-soft);font-variant-numeric:tabular-nums}
+.brain-stat .l{font-size:11px;color:var(--mist);opacity:.7}
+/* council mini */
+.council-row{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media(max-width:760px){.council-row{grid-template-columns:1fr}}
+.adv{background:rgba(13,31,26,.5);border:1px solid rgba(194,163,90,.16);border-radius:14px;padding:16px 18px;position:relative}
+.adv::before{content:"";position:absolute;inset-inline-start:0;top:14px;bottom:14px;width:3px;border-radius:999px}
+.adv.s::before{background:var(--sage)} .adv.o::before{background:var(--brick)} .adv.q::before{background:var(--gold)}
+.adv-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.adv-name{font-family:var(--display);font-size:18px;font-weight:600;color:#fff}
+.adv-pos{font-size:10px;font-weight:700;letter-spacing:.08em;padding:3px 9px;border-radius:999px}
+.adv.s .adv-pos{color:var(--sage);background:rgba(126,155,134,.18)}
+.adv.o .adv-pos{color:#cf9384;background:rgba(168,106,92,.2)}
+.adv.q .adv-pos{color:var(--gold-soft);background:rgba(194,163,90,.18)}
+.adv-thesis{font-size:13.5px;color:var(--mist);opacity:.85;margin-top:10px;line-height:1.5}
+/* drivers */
+.driver{display:flex;align-items:center;gap:14px;padding:13px 4px;border-bottom:1px solid rgba(194,163,90,.12)}
+.driver:last-child{border-bottom:0}
+.driver-rank{font-family:var(--display);font-size:22px;font-weight:600;color:var(--gold-soft);width:30px;text-align:center;font-variant-numeric:tabular-nums}
+.driver-body{flex:1;min-width:0}
+.driver-title{font-size:14.5px;font-weight:600;color:#fff}
+.driver-sub{font-size:12px;color:var(--mist);opacity:.7;margin-top:2px}
+.driver-impact{font-family:var(--display);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.driver-impact.up{color:var(--sage)} .driver-impact.down{color:#cf9384}
+</style>
+<link rel="stylesheet" href="../app-layer.css?v=nav3"><link rel="stylesheet" href="../states.css"></head>
+<body>
+<header id="topbar">
+  <div class="tb-brand">
+    <svg class="tb-mark" viewBox="0 0 100 100" fill="none"><defs><radialGradient id="ngbra" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FBF3DC"/><stop offset="50%" stop-color="#DCC38A"/><stop offset="100%" stop-color="#C2A35A" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="42" stroke="#C2A35A" stroke-width="1.4" opacity=".6"/><ellipse cx="50" cy="50" rx="42" ry="17" stroke="#C2A35A" stroke-width="1.2" opacity=".45"/><g stroke="#DCC38A" stroke-width="6.5" stroke-linecap="round"><line x1="31" y1="26" x2="31" y2="74"/><line x1="69" y1="26" x2="69" y2="74"/><line x1="31" y1="50" x2="69" y2="50"/></g><circle cx="50" cy="50" r="15" fill="url(#ngbra)"/><circle cx="50" cy="50" r="4.5" fill="#FBF3DC"/></svg>
+    <span class="tb-word">H‑Nerve <span class="erp">ERP</span></span>
+  </div>
+  <a class="tb-orbit" href="../orrery.html">↺ العودة إلى المدار</a>
+  <button class="tb-user"><span class="tb-avatar">أ</span><span class="tb-uinfo"><span class="tb-uname">أ. الحوراني</span><span class="tb-urole">رئيس مجلس الإدارة</span></span></button>
+</header>
+
+<div class="wrap">
+  <div class="sec-head reveal">
+    <div>
+      <div class="sec-eyebrow"><span class="tick"></span>الذكاء التشغيلي · العقل</div>
+      <h1 class="sec-title">العقل المفكّر</h1>
+      <p class="sec-sub">الدماغ السببي الذي يقرأ بيانات المجموعة، يحاور المستشارين، ويروي القرار. يقترح ولا يغيّر الأرقام.</p>
+    </div>
+    <div class="sec-head-aside"><span class="sec-status"><span class="dot"></span>نشط · يفكّر الآن</span></div>
+  </div>
+
+  <div class="brain-hero reveal">
+    <div class="brain-orb"><div style="text-align:center"><div class="brain-iq"><span data-count="92" data-ar="1">٩٢</span></div><div class="brain-iq-cap" data-i18n="br.title.brainiq">ذكاء الدماغ</div></div></div>
+    <div class="brain-hero-txt">
+      <h2>الدماغ يفكّر في ١٢٬٨٤٠ مساراً اليوم</h2>
+      <p>قرأ العقل بيانات خمس وحدات، حاور أربعة مستشارين، وأصدر اثنتي عشرة إشارة. القرار النشط: مضاعفة إنتاج جبن المها للربع الثالث.</p>
+      <div class="brain-stats">
+        <div class="brain-stat"><div class="v"><span data-count="12" data-ar="1">١٢</span></div><div class="l">إشارات اليوم</div></div>
+        <div class="brain-stat"><div class="v"><span data-count="6" data-ar="1">٦</span></div><div class="l">تنبؤات نشطة</div></div>
+        <div class="brain-stat"><div class="v"><span data-count="84" data-suffix="٪" data-ar="1">٨٤</span></div><div class="l">متوسط الثقة</div></div>
+        <div class="brain-stat"><div class="v">٤</div><div class="l">مستشارو المجلس</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="n-panel reveal">
+    <div class="n-panel-title">المجلس · النقاش الحالي</div>
+    <div class="n-panel-aside" data-i18n="br.council.question">هل نضاعف إنتاج جبن المها للربع الثالث؟</div>
+    <div class="council-row reveal-stagger">
+      <div class="adv s"><div class="adv-top"><span class="adv-name">خبير الضيافة</span><span class="adv-pos">يؤيّد</span></div><div class="adv-thesis">مؤتمرات أرينا في الربع الثالث ترفع الطلب على الأجبان الفاخرة بأكثر من الثلث.</div></div>
+      <div class="adv q"><div class="adv-top"><span class="adv-name">خبير الزراعة</span><span class="adv-pos">بتحفّظ</span></div><div class="adv-thesis">العائد يتحسّن، لكن أوصي بتوسّع تدريجي مرتبط بقدرة التبريد قبل الالتزام.</div></div>
+      <div class="adv o"><div class="adv-top"><span class="adv-name">ضابط المخاطر</span><span class="adv-pos">يعارض</span></div><div class="adv-thesis">خمس وحدات قرب الانتهاء. المضاعفة الآن تضخّم خطر الهدر قبل تصريف المخزون.</div></div>
+      <div class="adv s"><div class="adv-top"><span class="adv-name">دماغ المالية</span><span class="adv-pos">يؤيّد</span></div><div class="adv-thesis">بهامش ٧١٪، حتى التوسّع المتحفّظ يحقّق عائداً صافياً موجباً ضمن الربع نفسه.</div></div>
+    </div>
+    <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap">
+      <a class="btn btn-primary" href="../ui_kits/theater/index.html">ادخل مسرح القرار</a>
+      <a class="btn btn-secondary" href="finance.html">راجع الأثر المالي</a>
+    </div>
+  </div>
+
+  <div class="n-panel reveal">
+    <div class="n-panel-title">أبرز المحرّكات السببية</div>
+    <div class="n-panel-aside">مرتبة حسب الأثر على هامش المجموعة</div>
+    <div class="reveal-stagger">
+      <div class="driver"><span class="driver-rank">١</span><div class="driver-body"><div class="driver-title">إشغال أرينا ← طلب الضيافة</div><div class="driver-sub">٧١٪ إشغال · ثقة ٨٨٪</div></div><span class="driver-impact up">+٦٫٢</span></div>
+      <div class="driver"><span class="driver-rank">٢</span><div class="driver-body"><div class="driver-title">الري بالتنقيط ← عائد المحاصيل</div><div class="driver-sub">لوران · ثقة ٨١٪</div></div><span class="driver-impact up">+١٨٪</span></div>
+      <div class="driver"><span class="driver-rank">٣</span><div class="driver-body"><div class="driver-title">دفعات قرب الانتهاء ← خطر الهدر</div><div class="driver-sub">المها · ١٤٬٥٠٨ لتر</div></div><span class="driver-impact down">−٤٫١</span></div>
+      <div class="driver"><span class="driver-rank">٤</span><div class="driver-body"><div class="driver-title">هبوط إيراد الأهلية</div><div class="driver-sub">تعليم · ثقة ٧٦٪</div></div><span class="driver-impact down">−٦٤٪</span></div>
+    </div>
+  </div>
+</div>
+
+<script src="../living-bg.js" defer></script>
+<script src="../ambient.js" defer></script>
+<script src="section.js" defer></script>
+<script src="../app-layer.js?v=nav3" defer></script><script src="../states.js" defer></script></body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-living="night" data-ambient="university">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H-Nerve · المهام</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../living-bg.css">
+<link rel="stylesheet" href="_section.css">
+<link rel="stylesheet" href="../interactions.css">
+<link rel="stylesheet" href="../ambient.css">
+<style>
+/* ── المهام · Tasks — task manager + gamification ── */
+html,body{height:100%}
+body{background:transparent;color:var(--mist)}
+.tk-wrap{max-width:1200px;margin:0 auto;padding:14px 24px 80px}
+
+.tk-top{display:flex;align-items:stretch;gap:16px;margin-bottom:14px;flex-wrap:wrap}
+.tk-title-box{display:flex;flex-direction:column;justify-content:center;padding-inline-end:16px;border-inline-end:1px solid rgba(194,163,90,.2);min-width:150px}
+.tk-title-box .eb{display:inline-flex;align-items:center;gap:7px;font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--gold-soft);text-transform:uppercase;margin-bottom:4px}
+.tk-title-box .eb .tick{width:18px;height:1.5px;background:var(--gold-soft)}
+.tk-title-box h1{font-family:var(--display);font-size:34px;font-weight:600;color:#fff;line-height:1}
+.tk-kpis{display:flex;gap:12px;flex:1;flex-wrap:wrap}
+.tk-kpi{flex:1;min-width:110px;background:linear-gradient(160deg,rgba(20,46,38,.5),rgba(13,31,26,.46));border:1px solid rgba(194,163,90,.2);border-radius:14px;padding:11px 16px}
+.tk-kpi .v{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:25px;font-weight:600;color:#fff;line-height:1}
+.tk-kpi .k{font-size:11px;color:var(--mist);opacity:.7;margin-top:4px}
+
+/* rank card */
+.rank-card{display:flex;align-items:center;gap:14px;min-width:280px;background:linear-gradient(160deg,rgba(31,77,63,.5),rgba(13,31,26,.55));border:1px solid rgba(194,163,90,.32);border-radius:16px;padding:14px 18px;position:relative;transition:box-shadow .4s}
+.rank-card.pulse{box-shadow:0 0 30px rgba(220,195,138,.5)}
+.rank-piece{width:54px;height:54px;flex:0 0 54px;border-radius:14px;display:grid;place-items:center;font-size:30px;background:radial-gradient(circle at 38% 32%,#2E6B57,#1F4D3F 55%,#0c2019);border:1.5px solid rgba(194,163,90,.4);transition:transform .5s}
+.rank-piece.flip{transform:rotateY(360deg)}
+.rank-info{flex:1;min-width:0}
+.rank-name{font-size:14px;font-weight:700;color:#fff}
+.rank-name b{color:var(--gold-soft)}
+.rank-bar{height:7px;border-radius:999px;background:rgba(205,224,214,.15);margin-top:7px;overflow:hidden}
+.rank-bar span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gold-soft),var(--gold));width:0;transition:width .8s cubic-bezier(.22,1,.36,1)}
+.rank-meta{display:flex;justify-content:space-between;font-size:10.5px;color:var(--mist);opacity:.6;margin-top:5px;font-variant-numeric:tabular-nums}
+
+/* controls */
+.tk-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.tk-pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{padding:7px 15px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--mist);opacity:.7;cursor:pointer;background:rgba(13,31,26,.4);border:1px solid rgba(194,163,90,.16);font-family:var(--ui);transition:all .25s}
+.pill:hover{opacity:1}.pill.on{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#241b06;opacity:1;font-weight:700;border-color:transparent}
+.tk-right{display:flex;gap:9px;align-items:center}
+.tk-search{background:rgba(13,31,26,.5);border:1px solid rgba(194,163,90,.22);border-radius:999px;color:#fff;font-family:var(--ui);font-size:13px;padding:9px 15px;outline:none;width:180px}
+.tk-search::placeholder{color:var(--mist);opacity:.5}
+.tk-add{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#241b06;background:linear-gradient(135deg,var(--gold-soft),var(--gold));border:0;border-radius:999px;padding:9px 16px;cursor:pointer}
+
+/* table */
+.tk-table{background:linear-gradient(160deg,rgba(17,42,35,.5),rgba(13,31,26,.46));border:1px solid rgba(194,163,90,.2);border-radius:18px;overflow:hidden}
+.tk-head,.tk-row{display:grid;grid-template-columns:36px 1fr 96px 150px 110px 120px 70px;align-items:center;gap:10px;padding:12px 16px}
+.tk-head{font-size:11px;font-weight:700;color:var(--mist);opacity:.6;letter-spacing:.04em;border-bottom:1px solid rgba(194,163,90,.16)}
+.tk-row{border-bottom:1px solid rgba(194,163,90,.08);position:relative;transition:background .2s}
+.tk-row:hover{background:rgba(194,163,90,.05)}
+.tk-row.done{opacity:.55}
+.tk-row.done .t-title{text-decoration:line-through}
+.t-title{font-size:14px;font-weight:600;color:#fff}
+.chk{width:18px;height:18px;border-radius:6px;border:1.5px solid rgba(194,163,90,.4);background:none;cursor:pointer;display:grid;place-items:center;color:#241b06;font-size:12px}
+.chk.on{background:var(--gold);border-color:var(--gold)}
+.prio{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px}
+.prio.high{color:#cf9384;background:rgba(168,106,92,.2)}
+.prio.med{color:var(--gold-soft);background:rgba(194,163,90,.18)}
+.prio.low{color:var(--sage);background:rgba(126,155,134,.18)}
+.owner{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mist)}
+.owner .oav{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(140deg,rgba(46,107,87,.9),rgba(13,31,26,.95));border:1px solid rgba(194,163,90,.3)}
+.due{font-size:12.5px;color:var(--mist);opacity:.8;font-variant-numeric:tabular-nums}
+.stat{font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer}
+.stat.todo{color:var(--mist);background:rgba(205,224,214,.12)}
+.stat.doing{color:var(--gold-soft);background:rgba(194,163,90,.18)}
+.stat.done{color:var(--sage);background:rgba(126,155,134,.2)}
+.xp{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:16px;font-weight:600;color:var(--gold-soft);text-align:center}
+.t-del{position:absolute;inset-inline-end:8px;top:50%;transform:translateY(-50%);opacity:0;color:#cf9384;background:none;border:0;font-size:16px;cursor:pointer;transition:opacity .2s}
+.tk-row:hover .t-del{opacity:.8}
+
+/* inline composer */
+.tk-composer{display:none;grid-template-columns:36px 1fr 96px 150px 110px 120px 70px;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid rgba(194,163,90,.16);background:rgba(46,107,87,.15)}
+.tk-composer.show{display:grid}
+.tk-composer input,.tk-composer select{background:rgba(13,31,26,.6);border:1px solid rgba(194,163,90,.25);border-radius:9px;color:#fff;font-family:var(--ui);font-size:13px;padding:8px 10px;outline:none;width:100%}
+
+/* bulk toolbar */
+.tk-bulk{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);z-index:50;display:flex;align-items:center;gap:10px;
+  background:rgba(17,42,35,.92);backdrop-filter:blur(14px);border:1px solid rgba(194,163,90,.35);border-radius:999px;padding:10px 16px;opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.22,1,.36,1)}
+.tk-bulk.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.tk-bulk .cnt{font-size:13px;font-weight:700;color:var(--gold-soft)}
+.tk-bulk button{font-size:12.5px;font-weight:700;color:var(--mist);background:rgba(194,163,90,.12);border:1px solid rgba(194,163,90,.28);border-radius:999px;padding:7px 13px;cursor:pointer;transition:all .2s}
+.tk-bulk button:hover{background:rgba(194,163,90,.24);color:#fff}
+
+/* confetti + toast */
+#confetti{position:fixed;inset:0;z-index:80;pointer-events:none}
+.ru-toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);z-index:90;display:flex;align-items:center;gap:12px;
+  background:linear-gradient(135deg,rgba(31,77,63,.95),rgba(13,31,26,.95));border:1px solid var(--gold);border-radius:16px;padding:14px 22px;opacity:0;transition:all .5s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 40px rgba(220,195,138,.5)}
+.ru-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.ru-toast .pc{font-size:28px}
+.ru-toast .tx b{display:block;font-family:var(--display);font-size:18px;color:#fff}
+.ru-toast .tx span{font-size:12px;color:var(--gold-soft)}
+@media (prefers-reduced-motion:reduce){.rank-piece,.rank-bar span{transition:none}}
+@media(max-width:860px){.tk-head,.tk-row,.tk-composer{grid-template-columns:30px 1fr 70px 90px}.tk-head .h-due,.tk-row .due,.tk-composer .c-due,.tk-head .h-stat,.tk-row .stat,.tk-composer .c-stat,.tk-head .h-xp,.tk-row .xp,.tk-composer .c-xp{display:none}}
+</style>
+<link rel="stylesheet" href="../app-layer.css?v=nav3"><link rel="stylesheet" href="../states.css"></head>
+<body>
+<header id="topbar">
+  <div class="tb-brand">
+    <svg class="tb-mark" viewBox="0 0 100 100" fill="none"><defs><radialGradient id="ngtk" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FBF3DC"/><stop offset="50%" stop-color="#DCC38A"/><stop offset="100%" stop-color="#C2A35A" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="42" stroke="#C2A35A" stroke-width="1.4" opacity=".6"/><ellipse cx="50" cy="50" rx="42" ry="17" stroke="#C2A35A" stroke-width="1.2" opacity=".45"/><g stroke="#DCC38A" stroke-width="6.5" stroke-linecap="round"><line x1="31" y1="26" x2="31" y2="74"/><line x1="69" y1="26" x2="69" y2="74"/><line x1="31" y1="50" x2="69" y2="50"/></g><circle cx="50" cy="50" r="15" fill="url(#ngtk)"/><circle cx="50" cy="50" r="4.5" fill="#FBF3DC"/></svg>
+    <span class="tb-word">H‑Nerve <span class="erp">ERP</span></span>
+  </div>
+  <a class="tb-orbit" href="../orrery.html">↺ العودة إلى المدار</a>
+  <button class="tb-user"><span class="tb-avatar">أ</span><span class="tb-uinfo"><span class="tb-uname">أ. الحوراني</span><span class="tb-urole">رئيس مجلس الإدارة</span></span></button>
+</header>
+
+<div class="tk-wrap">
+  <div class="tk-top">
+    <div class="tk-title-box">
+      <span class="eb"><span class="tick"></span data-i18n="b4.eyebrow.people">الأفراد</span>
+      <h1 data-i18n="b4.title.tasks">المهام</h1>
+    </div>
+    <div class="tk-kpis">
+      <div class="tk-kpi"><div class="v" id="kp_mine">٨</div><div class="k" data-i18n="b4.tasks.mine">مهامي</div></div>
+      <div class="tk-kpi"><div class="v" id="kp_doing">٣</div><div class="k" data-i18n="b4.tasks.doing">قيد التنفيذ</div></div>
+      <div class="tk-kpi"><div class="v" id="kp_done">٢</div><div class="k" data-i18n="b4.tasks.doneToday">مكتملة اليوم</div></div>
+      <div class="tk-kpi"><div class="v" id="kp_xp">٠</div><div class="k" data-i18n="b4.tasks.xpToday">XP المكتسبة اليوم</div></div>
+    </div>
+    <div class="rank-card" id="rankCard">
+      <div class="rank-piece" id="rankPiece">♞</div>
+      <div class="rank-info">
+        <div class="rank-name">رتبتك: <b id="rankName">فارس · فضي</b></div>
+        <div class="rank-bar"><span id="rankBar"></span></div>
+        <div class="rank-meta"><span id="rankXp">٩٢٠ XP</span><span id="rankNext">التالي: ١٬١٠٠</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tk-controls">
+    <div class="tk-pills">
+      <button class="pill on" data-f="all">الكل</button>
+      <button class="pill" data-f="doing" data-i18n="b4.tasks.doing">قيد التنفيذ</button>
+      <button class="pill" data-f="done">مكتمل</button>
+      <button class="pill" data-f="urgent">عاجل</button>
+      <button class="pill" data-f="mine" data-i18n="b4.tasks.mine">مهامي</button>
+    </div>
+    <div class="tk-right">
+      <input class="tk-search" id="search" placeholder="بحث في المهام…">
+      <button class="tk-add" id="addBtn" data-i18n="b4.tasks.new">＋ مهمة جديدة</button>
+    </div>
+  </div>
+
+  <div class="tk-table">
+    <div class="tk-head">
+      <span></span><span>العنوان</span><span>الأولوية</span><span>المالك</span><span class="h-due">الاستحقاق</span><span class="h-stat" data-i18n="b4.sys.tabStatus">الحالة</span><span class="h-xp">XP</span>
+    </div>
+    <div class="tk-composer" id="composer">
+      <span></span>
+      <input id="c_title" placeholder="عنوان المهمة…">
+      <select id="c_prio" class="c-prio"><option value="high">عالية</option><option value="med" selected>متوسطة</option><option value="low">منخفضة</option></select>
+      <input id="c_owner" class="c-owner" placeholder="المالك" value="أنس">
+      <input id="c_due" class="c-due" placeholder="غداً" value="غداً">
+      <span class="c-stat"></span>
+      <input id="c_xp" class="c-xp" type="number" value="40" min="10" max="200">
+    </div>
+    <div id="rows"></div>
+  </div>
+</div>
+
+<div class="tk-bulk" id="bulk">
+  <span class="cnt" id="bulkCnt">٠ محدّد</span>
+  <button data-act="done">حدّد كمكتمل</button>
+  <button data-act="doing">حدّد قيد التنفيذ</button>
+  <button data-act="del">حذف</button>
+</div>
+
+<canvas id="confetti"></canvas>
+<div class="ru-toast" id="ruToast"><span class="pc" id="ruPc">♜</span><div class="tx"><b>تهانينا!</b><span id="ruMsg">ترقّيت إلى رتبة جديدة</span></div></div>
+
+<script src="../living-bg.js" defer></script>
+<script src="../ambient.js" defer></script>
+<script src="tasks.js" defer></script>
+<script src="../app-layer.js?v=nav3" defer></script><script src="../states.js" defer></script></body>
+</html>

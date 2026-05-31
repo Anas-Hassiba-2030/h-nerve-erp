@@ -26,6 +26,10 @@ import { unreadCountFor } from "@/lib/messages";
 import { getViewAsTenant, getTenantThemeCookie } from "@/lib/tenancy";
 import { THEME_PRESETS, themeCssVars, type ThemeKey } from "@/lib/brand/themes";
 import { permsEnforced, effectiveCanAccess } from "@/lib/permissions";
+import { LivingAtmosphere } from "@/components/orrery/LivingAtmosphere";
+import { OrbitReturn } from "@/components/orrery/OrbitReturn";
+import { DiveReveal } from "@/components/orrery/DiveReveal";
+import "./living.css";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getCurrentUser();
@@ -139,8 +143,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         unreadMessages={unreadMessages}
         enforcePerms={enforcePerms}
       />
+      <LivingAtmosphere />
+      <OrbitReturn locale={locale} />
       <div className="flex min-h-screen flex-1 flex-col nerve-bg">
-        <main className="flex-1">{children}</main>
+        <main className="flex-1"><DiveReveal>{children}</DiveReveal></main>
         <Footer />
       </div>
       <SidebarDrawer user={fullUser} locale={locale} messages={messages as any} unreadMessages={unreadMessages} enforcePerms={enforcePerms} />

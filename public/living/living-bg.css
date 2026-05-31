@@ -1,0 +1,79 @@
+/* ════════════════════════════════════════════════════════════════
+   H-NERVE · GLOBAL LIVING BACKGROUND  (shared include — Phase 2)
+   ----------------------------------------------------------------
+   One layer behind every page so nothing feels flat. Two modes,
+   chosen by an attribute on <html> or <body>:
+       data-living="work"   → warm ivory aurora (default)
+       data-living="night"  → cosmic emerald aurora
+   Pair with living-bg.js (injects the particle canvas + DOM).
+   Content must establish its own stacking context above z-index 0.
+   ════════════════════════════════════════════════════════════════ */
+
+:root{
+  --lb-night:#0D1F1A; --lb-night-3:#0a1813;
+  --lb-emerald-soft:#2E6B57; --lb-gold:#C2A35A; --lb-mist:#CDE0D6;
+}
+
+/* the fixed root layer the JS injects */
+#living-bg{
+  position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+}
+#living-bg .lb-aurora{
+  position:absolute; border-radius:50%; will-change:transform;
+  mix-blend-mode:multiply;
+}
+#living-bg .lb-particles{ position:absolute; inset:0; }
+
+/* keep app content above the bg layers without per-page work */
+body > *:not(#living-bg):not(#ambient-bg){ position:relative; z-index:1; }
+
+/* ─────────────── WORK MODE (ivory daylight) ─────────────── */
+[data-living="work"] #living-bg .lb-aurora{ mix-blend-mode:multiply; }
+[data-living="work"] #living-bg .a1{
+  width:60vw; height:60vw; left:-8vw; top:-12vh;
+  background:radial-gradient(circle, rgba(46,107,87,.06), transparent 68%);
+  animation:lb-drift-a 52s ease-in-out infinite;
+}
+[data-living="work"] #living-bg .a2{
+  width:52vw; height:52vw; right:-6vw; top:24vh;
+  background:radial-gradient(circle, rgba(194,163,90,.07), transparent 68%);
+  animation:lb-drift-b 60s ease-in-out infinite;
+}
+[data-living="work"] #living-bg .a3{
+  width:64vw; height:64vw; left:24vw; bottom:-22vh;
+  background:radial-gradient(circle, rgba(126,155,134,.05), transparent 70%);
+  animation:lb-drift-c 46s ease-in-out infinite;
+}
+
+/* ─────────────── NIGHT MODE (cosmic emerald) ─────────────── */
+[data-living="night"]{ background:var(--lb-night); }
+[data-living="night"] #living-bg{
+  background:radial-gradient(ellipse 120% 90% at 50% 16%, #143229 0%, var(--lb-night) 56%, var(--lb-night-3) 100%);
+}
+[data-living="night"] #living-bg .lb-aurora{ mix-blend-mode:screen; filter:blur(70px); }
+[data-living="night"] #living-bg .a1{
+  width:46vw; height:46vw; left:8%; top:6%;
+  background:radial-gradient(circle, rgba(46,107,87,.55), transparent 70%);
+  animation:lb-drift-a 50s ease-in-out infinite;
+}
+[data-living="night"] #living-bg .a2{
+  width:40vw; height:40vw; right:4%; top:40%;
+  background:radial-gradient(circle, rgba(194,163,90,.30), transparent 70%);
+  animation:lb-drift-b 58s ease-in-out -6s infinite;
+}
+[data-living="night"] #living-bg .a3{
+  width:50vw; height:50vw; left:30%; bottom:-12%;
+  background:radial-gradient(circle, rgba(205,224,214,.16), transparent 70%);
+  animation:lb-drift-c 46s ease-in-out -12s infinite;
+}
+
+/* drift loops — transform only */
+@keyframes lb-drift-a{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(4vw,3vh) scale(1.07)}66%{transform:translate(-3vw,5vh) scale(.95)}}
+@keyframes lb-drift-b{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-5vw,-4vh) scale(1.1)}}
+@keyframes lb-drift-c{0%,100%{transform:translate(0,0) scale(1)}40%{transform:translate(4vw,-5vh) scale(1.06)}80%{transform:translate(-5vw,2vh) scale(.94)}}
+
+/* ─────────────── REDUCED MOTION ─────────────── */
+@media (prefers-reduced-motion:reduce){
+  #living-bg .lb-aurora{ animation:none !important; }
+  #living-bg .lb-particles{ display:none; }
+}

@@ -1,0 +1,106 @@
+/* Heritage Luxury "daylight" work-surface styles, ported from the Claude Design
+   system (docs/design/system/sections/_section.css + ops.css) and SCOPED under
+   .dl-page so they only apply to restyled section pages — never leaking into the
+   rest of the app. Real data is fed in by the page; the look is the design. */
+.dl-page {
+  --gold: #c2a35a; --gold-soft: #dcc38a;
+  --emerald: #1f4d3f; --emerald-soft: #2e6b57;
+  --ink: #2a2a26; --ink-muted: #6b6459;
+  --cream: #fefcf7; --ivory: #f6f1e7; --line: #e4dccb;
+  --sage: #7e9b86; --brick: #a86a5c;
+  --dl-display: "Cormorant Garamond", "Newsreader", "Reem Kufi", Georgia, serif;
+  color: var(--ink);
+  padding: 4px 0 60px;
+}
+
+/* header */
+.dl-page .sec-head {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
+  padding: 22px 26px; margin-bottom: 26px;
+  background: linear-gradient(180deg, rgba(254,252,247,.9), rgba(254,252,247,.72));
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--line); border-radius: 18px;
+  box-shadow: 0 10px 30px -22px rgba(31,77,63,.4);
+}
+.dl-page .sec-eyebrow {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--gold); margin-bottom: 12px;
+}
+.dl-page .sec-eyebrow .tick { width: 22px; height: 1.5px; background: var(--gold); display: inline-block; }
+.dl-page .sec-title {
+  font-family: var(--dl-display); font-size: clamp(34px, 4.6vw, 56px); font-weight: 600;
+  line-height: 1.02; color: var(--emerald); letter-spacing: -.01em;
+}
+.dl-page .sec-sub { font-size: 15px; color: var(--ink-muted); margin-top: 12px; max-width: 60ch; }
+.dl-page .sec-head-aside { text-align: end; flex-shrink: 0; }
+.dl-page .sec-status {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 999px;
+  background: var(--cream); border: 1px solid var(--line); font-size: 12.5px; font-weight: 600; color: var(--ink-muted);
+}
+.dl-page .sec-status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sage); }
+.dl-page .sec-actions { display: flex; gap: 10px; margin-top: 14px; justify-content: flex-end; flex-wrap: wrap; }
+.dl-page .dl-btn {
+  display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700;
+  border-radius: 999px; padding: 9px 16px; cursor: pointer; transition: transform .2s, box-shadow .2s, border-color .2s;
+}
+.dl-page .dl-btn-primary { color: #fff; background: linear-gradient(135deg, var(--emerald-soft), var(--emerald)); border: 0; box-shadow: 0 6px 16px -8px rgba(31,77,63,.5); }
+.dl-page .dl-btn-secondary { color: var(--emerald); background: transparent; border: 1px solid var(--line); }
+.dl-page .dl-btn:hover { transform: translateY(-1px); }
+.dl-page .dl-btn-secondary:hover { border-color: var(--gold); }
+
+/* KPI grid */
+.dl-page .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 26px; }
+@media (max-width: 980px) { .dl-page .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+.dl-page .kpi-card {
+  background: var(--cream); border: 1px solid var(--line); border-radius: 18px; padding: 22px; position: relative; overflow: hidden;
+  transition: transform .4s cubic-bezier(.22,1,.36,1), box-shadow .4s, border-color .4s;
+}
+.dl-page .kpi-card::before {
+  content: ""; position: absolute; top: 0; inset-inline: 0; height: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-soft));
+  transform: scaleX(0); transform-origin: inline-start; transition: transform .5s cubic-bezier(.22,1,.36,1);
+}
+.dl-page .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 22px 50px -26px rgba(31,77,63,.4); border-color: rgba(194,163,90,.4); }
+.dl-page .kpi-card:hover::before { transform: scaleX(1); }
+.dl-page .kpi-label { font-size: 12px; font-weight: 700; letter-spacing: .03em; color: var(--ink-muted); }
+.dl-page .kpi-val { font-family: var(--dl-display); font-size: 42px; font-weight: 600; line-height: 1; color: var(--emerald); margin-top: 14px; font-variant-numeric: tabular-nums; }
+.dl-page .kpi-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 14px; }
+.dl-page .kpi-hint { font-size: 11.5px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+.dl-page .delta { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+.dl-page .delta.up { color: #3c7a5c; background: rgba(126,155,134,.18); }
+.dl-page .delta.down { color: #9a5648; background: rgba(168,106,92,.16); }
+
+/* panels */
+.dl-page .panel { background: var(--cream); border: 1px solid var(--line); border-radius: 18px; padding: 24px 26px; margin-bottom: 22px; }
+.dl-page .panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+.dl-page .panel-title { font-family: var(--dl-display); font-size: 24px; font-weight: 600; color: var(--emerald); }
+.dl-page .panel-aside { font-size: 12.5px; color: var(--ink-muted); }
+
+/* daylight table */
+.dl-page .dl-table { width: 100%; border-collapse: collapse; }
+.dl-page .dl-table th, .dl-page .dl-table td { text-align: start; padding: 13px 12px; font-size: 13.5px; border-bottom: 1px solid var(--line); }
+.dl-page .dl-table th { font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--ink-muted); }
+.dl-page .dl-table td { color: var(--ink); }
+.dl-page .dl-table td.num, .dl-page .dl-table th.num { text-align: end; font-variant-numeric: tabular-nums; }
+.dl-page .dl-table tbody tr { transition: background .25s; }
+.dl-page .dl-table tbody tr:hover { background: rgba(194,163,90,.06); }
+.dl-page .dl-table tr:last-child td { border-bottom: 0; }
+
+/* property card + occupancy bar */
+.dl-page .prop-grid { display: grid; gap: 16px; grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 980px) { .dl-page .prop-grid { grid-template-columns: 1fr; } }
+.dl-page .prop-card { background: var(--cream); border: 1px solid var(--line); border-radius: 16px; padding: 20px; transition: transform .3s, box-shadow .3s, border-color .3s; }
+.dl-page .prop-card:hover { transform: translateY(-2px); box-shadow: 0 18px 40px -26px rgba(31,77,63,.4); border-color: rgba(194,163,90,.4); }
+.dl-page .dl-bar { height: 8px; border-radius: 999px; background: var(--ivory); overflow: hidden; border: 1px solid var(--line); }
+.dl-page .dl-bar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--emerald-soft), var(--emerald)); }
+.dl-page .tag { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
+.dl-page .tag.ok { color: #3c7a5c; background: rgba(126,155,134,.18); }
+.dl-page .tag.gold { color: #8a6a1f; background: rgba(194,163,90,.2); }
+
+/* reveal entrance */
+.dl-page .reveal { animation: dl-reveal .6s cubic-bezier(.22,1,.36,1) both; }
+.dl-page .reveal:nth-child(2) { animation-delay: .06s; }
+.dl-page .reveal:nth-child(3) { animation-delay: .12s; }
+.dl-page .reveal:nth-child(4) { animation-delay: .18s; }
+@keyframes dl-reveal { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .dl-page .reveal { animation: none; } }

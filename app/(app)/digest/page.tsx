@@ -1,21 +1,18 @@
 import Link from "next/link";
-import {
-  Newspaper,
-  Sparkles,
-  ArrowUpRight,
-  Calendar,
-  Brain,
-  Plus,
-} from "lucide-react";
-import { Topbar } from "@/components/Topbar";
-import { PageContainer } from "@/components/PageContainer";
+import { Newspaper, Brain, ArrowUpRight, Plus } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
+import {
+  DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel,
+} from "@/components/orrery/daylight";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { hasRole } from "@/lib/authz";
 import { listDigests } from "@/lib/digest";
 import { formatNumber } from "@/lib/utils";
 import { generateNewDigest } from "./actions";
+import "../daylight.css";
+
+export const dynamic = "force-dynamic";
 
 export default async function DigestListPage() {
   const ar = getLocale() === "ar";
@@ -23,123 +20,48 @@ export default async function DigestListPage() {
   const canGenerate = hasRole(session, "MANAGER");
 
   const digests = await listDigests(50);
-
-  // Date format — en-US digits per house style
-  const dateFmt = new Intl.DateTimeFormat("en-US", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-  const relativeFmt = new Intl.DateTimeFormat("en-US", {
-    day: "numeric",
-    month: "short",
-  });
+  const dateFmt = new Intl.DateTimeFormat("en-US", { day: "numeric", month: "short", year: "numeric" });
+  const relativeFmt = new Intl.DateTimeFormat("en-US", { day: "numeric", month: "short" });
+  const totalSignals = digests.reduce((a, d) => a + d.insightCount, 0);
 
   return (
-    <>
-      <Topbar
-        eyebrow={ar ? "الذكاء التشغيلي" : "Operational intelligence"}
-        title={ar ? "الموجز التنفيذي" : "Executive digest"}
-        subtitle={
-          ar
-            ? "ملخّصات أسبوعية مولّدة آلياً تجمع نبض المجموعة في مكان واحد."
-            : "Auto-generated weekly snapshots that compress the group's pulse into one read."
-        }
-        actions={
-          canGenerate ? (
-            <form action={generateNewDigest}>
-              <button type="submit" className="btn-primary">
-                <Plus className="h-4 w-4" />
-                {ar ? "توليد موجز جديد" : "Generate new digest"}
-              </button>
-            </form>
-          ) : null
-        }
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
+        eyebrow={ar ? "الفريق · الموجز التنفيذي" : "Team · Executive Digest"}
+        title={ar ? "الموجز التنفيذي" : "Executive Digest"}
+        subtitle={ar ? "ملخّصات أسبوعية مولّدة آلياً تجمع نبض المجموعة في مكان واحد." : "Auto-generated weekly snapshots that compress the group's pulse into one read."}
+        status={`${formatNumber(digests.length)} ${ar ? "موجز" : "digests"}`}
+        actions={canGenerate ? (
+          <form action={generateNewDigest}><button type="submit" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "توليد موجز جديد" : "Generate new"}</button></form>
+        ) : undefined}
       />
 
-      <PageContainer>
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "إجمالي الموجزات" : "Total digests"} value={formatNumber(digests.length)} hint={ar ? "محفوظة" : "stored"} />
+        <DaylightKpi label={ar ? "إشارات ملخّصة" : "Signals digested"} value={formatNumber(totalSignals)} hint={ar ? "إجمالاً" : "total"} />
+        <DaylightKpi label={ar ? "آخر موجز" : "Latest"} value={digests[0] ? relativeFmt.format(digests[0].weekStart) : "—"} hint={ar ? "أسبوع" : "week of"} />
+        <DaylightKpi label={ar ? "التواتر" : "Cadence"} value={ar ? "أسبوعي" : "Weekly"} hint={ar ? "تلقائي" : "automatic"} />
+      </DaylightKpiGrid>
+
+      <DaylightPanel title={ar ? "الموجزات" : "Digests"} aside={ar ? "أحدث أولاً" : "Newest first"}>
         {digests.length === 0 ? (
-          <EmptyState
-            icon={Newspaper}
-            title={ar ? "لا توجد موجزات بعد" : "No digests yet"}
-            description={
-              ar
-                ? "انقر «توليد موجز جديد» لإطلاق المحرك التنبؤي وحفظ أول لقطة أسبوعية."
-                : "Hit \"Generate new digest\" to run the predictive engine and store the first weekly snapshot."
-            }
-            action={
-              canGenerate ? (
-                <form action={generateNewDigest}>
-                  <button type="submit" className="btn-primary">
-                    <Sparkles className="h-4 w-4" />
-                    {ar ? "توليد الآن" : "Generate now"}
-                  </button>
-                </form>
-              ) : undefined
-            }
-          />
+          <EmptyState icon={Newspaper} title={ar ? "لا توجد موجزات بعد" : "No digests yet"} description={ar ? "ولّد أول موجز أسبوعي." : "Generate the first weekly digest."} />
         ) : (
-          <ul className="space-y-3">
-            {digests.map((d, i) => (
-              <li
-                key={d.id}
-                className="anim-fade-up"
-                style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
-              >
-                <Link
-                  href={`/digest/${d.id}`}
-                  className="card card-hover card-pad block"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span
-                          className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[11px] font-bold"
-                          style={{
-                            background: "var(--heri-cream-2)",
-                            color: "var(--brand-deep)",
-                          }}
-                        >
-                          <Calendar className="h-3 w-3" />
-                          {relativeFmt.format(d.weekStart)} →{" "}
-                          {relativeFmt.format(d.weekEnd)}
-                        </span>
-                        <span
-                          className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold"
-                          style={{
-                            background: "color-mix(in srgb, var(--heri-copper) 14%, transparent)",
-                            color: "var(--heri-copper)",
-                          }}
-                        >
-                          <Brain className="h-3 w-3" />
-                          {formatNumber(d.insightCount)}{" "}
-                          {ar ? "إشارة" : "signals"}
-                        </span>
-                        <span
-                          className="text-[11px]"
-                          style={{ color: "var(--heri-ink-3)" }}
-                        >
-                          {ar ? "صدر" : "Issued"} {dateFmt.format(d.createdAt)}
-                        </span>
-                      </div>
-                      <p
-                        className="mt-2 text-sm leading-relaxed"
-                        style={{ color: "var(--heri-ink)" }}
-                      >
-                        {d.summary}
-                      </p>
-                    </div>
-                    <ArrowUpRight
-                      className="h-4 w-4 shrink-0 rtl:-scale-x-100"
-                      style={{ color: "var(--heri-ink-3)" }}
-                    />
-                  </div>
-                </Link>
-              </li>
+          <div className="space-y-3">
+            {digests.map((d) => (
+              <Link key={d.id} href={`/digest/${d.id}`} className="prop-card block">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="tag gold">{relativeFmt.format(d.weekStart)} → {relativeFmt.format(d.weekEnd)}</span>
+                  <span className="tag ok"><Brain className="h-3 w-3" />{formatNumber(d.insightCount)} {ar ? "إشارة" : "signals"}</span>
+                  <span style={{ fontSize: 11, color: "var(--ink-muted)" }}>{ar ? "صدر" : "Issued"} {dateFmt.format(d.createdAt)}</span>
+                  <ArrowUpRight className="h-4 w-4 rtl:-scale-x-100" style={{ color: "var(--ink-muted)", marginInlineStart: "auto" }} />
+                </div>
+                <p className="mt-2" style={{ fontSize: 13, lineHeight: 1.6, color: "var(--ink)" }}>{d.summary}</p>
+              </Link>
             ))}
-          </ul>
+          </div>
         )}
-      </PageContainer>
-    </>
+      </DaylightPanel>
+    </DaylightShell>
   );
 }

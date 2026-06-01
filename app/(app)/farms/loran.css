@@ -87,6 +87,32 @@
 .dl-page .ops-empty .oe-s { font-size: 13px; color: var(--ink-muted); margin-top: 5px; }
 .dl-page .ops-empty .ops-add { margin-top: 16px; border: 0; }
 
+/* ── raw <table> inside loran .panel (overview crops table — the reference uses
+   a bare <table>, not .dl-table) ── */
+.dl-page .panel table { width: 100%; border-collapse: collapse; }
+.dl-page .panel th, .dl-page .panel td { text-align: start; padding: 13px 12px; font-size: 14px; border-bottom: 1px solid var(--line); }
+.dl-page .panel th { font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--ink-muted); text-transform: none; }
+.dl-page .panel td { color: var(--ink); }
+.dl-page .panel td.num, .dl-page .panel th.num { text-align: end; font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+.dl-page .panel tbody tr { transition: background .25s; }
+.dl-page .panel tbody tr:hover { background: rgba(194,163,90,.06); }
+.dl-page .panel tr:last-child td { border-bottom: 0; }
+
+/* ── status tags the overview panel uses (warn / crit) ── */
+.dl-page .tag.warn { color: #8a6a1f; background: rgba(194,163,90,.2); }
+.dl-page .tag.crit { color: #9a5648; background: rgba(168,106,92,.16); }
+.dl-page .tag.info { color: #2e6b57; background: rgba(46,107,87,.14); }
+
+/* ── kpi-grid reveal-stagger entrance (matches loran.html reveal-stagger) ── */
+.dl-page .reveal-stagger > * { animation: sec-rise .6s cubic-bezier(.22,1,.36,1) both; }
+.dl-page .reveal-stagger > *:nth-child(1) { animation-delay: .05s; }
+.dl-page .reveal-stagger > *:nth-child(2) { animation-delay: .12s; }
+.dl-page .reveal-stagger > *:nth-child(3) { animation-delay: .19s; }
+.dl-page .reveal-stagger > *:nth-child(4) { animation-delay: .26s; }
+.dl-page .reveal-stagger > *:nth-child(5) { animation-delay: .33s; }
+@keyframes sec-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .dl-page .reveal-stagger > * { animation: none !important; } }
+
 @media (prefers-reduced-motion: reduce) {
   .dl-page .ops-panel { animation: none !important; transition: none !important; }
 }

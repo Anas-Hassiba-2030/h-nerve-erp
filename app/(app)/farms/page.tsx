@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { ExportMenu } from "@/components/ExportMenu";
+import { DaylightShell } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db";
 import { FARM_TYPES_AR, FARM_TYPES_EN, formatNumber, loc } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
@@ -82,7 +83,7 @@ export default async function FarmsPage() {
   // ── overview panel: KPI grid + crops table (rendered server-side) ──
   const overview = (
     <>
-      <div className="kpi-grid reveal">
+      <div className="kpi-grid reveal reveal-stagger">
         <div className="kpi-card">
           <div className="kpi-label">{ar ? "عدد المزارع" : "Farms"}</div>
           <div className="kpi-val">{formatNumber(farms.length)}</div>
@@ -144,47 +145,45 @@ export default async function FarmsPage() {
   );
 
   return (
-    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
-      <div className="wrap">
-        <div className="sec-head reveal">
-          <div>
-            <div className="sec-eyebrow"><span className="tick" />{ar ? "القطاعات · الزراعة" : "Sectors · Agriculture"}</div>
-            <h1 className="sec-title">{ar ? "لوران للاستثمار الزراعي" : "Loran Agricultural Investment"}</h1>
-            <p className="sec-sub">{ar ? "ثلاث مزارع — المحاصيل، الري الذكي، والإنتاج الموجّه لمطابخ المجموعة." : "Three farms — crops, smart irrigation, and produce routed to the group's kitchens."}</p>
-            <div className="sec-actions">
-              <Link href="/farms/new" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "مزرعة جديدة" : "New farm"}</Link>
-              <Link href="/farms/crops/new" className="dl-btn dl-btn-secondary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "محصول جديد" : "New crop"}</Link>
-              <ExportMenu type="farms" companyCode="LORAN" locale={lc} />
-            </div>
-          </div>
-          <div className="sec-head-aside">
-            <span className="sec-status"><span className="dot" />{ar ? "مباشر · إشعار ري" : "Live · irrigation alerts"}</span>
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <div className="sec-head reveal">
+        <div>
+          <div className="sec-eyebrow"><span className="tick" />{ar ? "القطاعات · الزراعة" : "Sectors · Agriculture"}</div>
+          <h1 className="sec-title">{ar ? "لوران للاستثمار الزراعي" : "Loran Agricultural Investment"}</h1>
+          <p className="sec-sub">{ar ? "ثلاث مزارع — المحاصيل، الري الذكي، والإنتاج الموجّه لمطابخ المجموعة." : "Three farms — crops, smart irrigation, and produce routed to the group's kitchens."}</p>
+        </div>
+        <div className="sec-head-aside">
+          <span className="sec-status"><span className="dot" />{ar ? "مباشر · إشعار ري" : "Live · irrigation alerts"}</span>
+          <div className="sec-actions">
+            <Link href="/farms/new" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "مزرعة جديدة" : "New farm"}</Link>
+            <Link href="/farms/crops/new" className="dl-btn dl-btn-secondary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "محصول جديد" : "New crop"}</Link>
+            <ExportMenu type="farms" companyCode="LORAN" locale={lc} />
           </div>
         </div>
-
-        <FarmsTabs
-          labels={{
-            overview: ar ? "نظرة عامة" : "Overview",
-            farms: ar ? "المزارع" : "Farms",
-            crops: ar ? "المحاصيل" : "Crops",
-            cropsTitle: ar ? "المحاصيل" : "Crops",
-            newFarm: ar ? "مزرعة جديدة" : "New farm",
-            newCrop: ar ? "محصول جديد" : "New crop",
-            colCrop: ar ? "المحصول" : "Crop",
-            colFarm: ar ? "المزرعة" : "Farm",
-            colQty: ar ? "الكمية" : "Quantity",
-            colDest: ar ? "الصنف" : "Variety",
-            colStatus: ar ? "الحالة" : "Status",
-          }}
-          overview={overview}
-          farms={farmTiles}
-          crops={cropRows}
-          newFarmHref="/farms/new"
-          newCropHref="/farms/crops/new"
-          emptyFarms={{ title: ar ? "لا توجد مزارع مسجلة" : "No farms yet", sub: ar ? "أضف أول مزرعة لبدء متابعة القراءات." : "Add your first farm to start tracking readings." }}
-          emptyCrops={{ title: ar ? "لا توجد محاصيل" : "No crops yet", sub: ar ? "أضف محصولاً لربطه بإحدى المزارع." : "Add a crop to link it to a farm." }}
-        />
       </div>
-    </div>
+
+      <FarmsTabs
+        labels={{
+          overview: ar ? "نظرة عامة" : "Overview",
+          farms: ar ? "المزارع" : "Farms",
+          crops: ar ? "المحاصيل" : "Crops",
+          cropsTitle: ar ? "المحاصيل" : "Crops",
+          newFarm: ar ? "مزرعة جديدة" : "New farm",
+          newCrop: ar ? "محصول جديد" : "New crop",
+          colCrop: ar ? "المحصول" : "Crop",
+          colFarm: ar ? "المزرعة" : "Farm",
+          colQty: ar ? "الكمية" : "Quantity",
+          colDest: ar ? "الصنف" : "Variety",
+          colStatus: ar ? "الحالة" : "Status",
+        }}
+        overview={overview}
+        farms={farmTiles}
+        crops={cropRows}
+        newFarmHref="/farms/new"
+        newCropHref="/farms/crops/new"
+        emptyFarms={{ title: ar ? "لا توجد مزارع مسجلة" : "No farms yet", sub: ar ? "أضف أول مزرعة لبدء متابعة القراءات." : "Add your first farm to start tracking readings." }}
+        emptyCrops={{ title: ar ? "لا توجد محاصيل" : "No crops yet", sub: ar ? "أضف محصولاً لربطه بإحدى المزارع." : "Add a crop to link it to a farm." }}
+      />
+    </DaylightShell>
   );
 }

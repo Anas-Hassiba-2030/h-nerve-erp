@@ -20,12 +20,8 @@ export function ConfirmResetForm({ ar }: { ar: boolean }) {
     >
       <button
         type="submit"
-        className="heri-btn heri-btn-ghost"
-        style={{
-          padding: "6px 12px",
-          fontSize: 11,
-          color: "var(--brick)",
-        }}
+        className="br-btn danger"
+        style={{ padding: "6px 12px", fontSize: 11 }}
       >
         <Trash2 className="h-3 w-3" strokeWidth={1.5} />
         {ar ? "مسح المسار" : "Reset trajectory"}

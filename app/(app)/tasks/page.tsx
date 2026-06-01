@@ -1,21 +1,49 @@
-import { CheckSquare } from "lucide-react";
-import { EmptyState } from "@/components/EmptyState";
-import {
-  DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel,
-} from "@/components/orrery/daylight";
+// المهام · Tasks — ports docs/design/system/sections/tasks.html + tasks.js.
+//
+// Night register: title-box + KPI strip + chess-rank card, filter pills +
+// search + inline composer, tasks table with priority/owner/due/status/XP,
+// bulk toolbar, confetti + rank-up toast. The look is the Claude Design
+// reference; data comes from Prisma; mutations go through server actions
+// in ./actions.ts. The client-side behaviour lives in TasksBoard.tsx.
+
 import { prisma } from "@/lib/db";
-import { formatNumber, formatShortDate } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
-import { setTaskStatus } from "./actions";
+import { rankFor, nextRank, progressToNext } from "@/lib/gamification";
+import { TasksBoard, type BoardTask, type BoardRank, type BoardPrio, type BoardStatus } from "./TasksBoard";
 import "../daylight.css";
+import "./tasks.css";
 
 export const dynamic = "force-dynamic";
+
+const DOMAIN_PRIO: Record<string, BoardPrio> = {
+  HIGH: "high", URGENT: "high", MEDIUM: "med", LOW: "low",
+};
+const DOMAIN_STATUS: Record<string, BoardStatus> = {
+  TODO: "todo", IN_PROGRESS: "doing", BLOCKED: "todo", DONE: "done",
+};
+
+function initialGlyph(name: string): string {
+  return name?.trim()?.[0] ?? "?";
+}
+
+function dueLabel(d: Date | null | undefined, ar: boolean): string {
+  if (!d) return ar ? "—" : "—";
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const dt = new Date(d); dt.setHours(0, 0, 0, 0);
+  const days = Math.round((dt.getTime() - today.getTime()) / 86400000);
+  if (days === 0) return ar ? "اليوم" : "Today";
+  if (days === 1) return ar ? "غداً" : "Tomorrow";
+  if (days === -1) return ar ? "أمس" : "Yesterday";
+  if (days < 0) return ar ? `قبل ${formatNumber(-days)} أيام` : `${-days}d ago`;
+  if (days < 7) return ar ? `بعد ${formatNumber(days)} أيام` : `in ${days}d`;
+  return new Intl.DateTimeFormat(ar ? "ar-JO-u-nu-latn" : "en-US", { day: "numeric", month: "short" }).format(d);
+}
 
 export default async function TasksPage() {
   const locale = getLocale();
   const ar = locale === "ar";
-  const lc = ar ? "ar" : "en";
   const session = await getCurrentUser();
 
   const [tasks, me] = await Promise.all([
@@ -23,74 +51,97 @@ export default async function TasksPage() {
       where: { deletedAt: null },
       orderBy: [{ status: "asc" }, { createdAt: "desc" }],
       include: { assignee: true },
-      take: 60,
+      take: 100,
     }),
     session ? prisma.user.findUnique({ where: { id: session.id } }) : Promise.resolve(null),
   ]);
 
-  const todo = tasks.filter((t) => t.status === "TODO");
-  const inProgress = tasks.filter((t) => t.status === "IN_PROGRESS");
-  const done = tasks.filter((t) => t.status === "DONE");
+  // KPI ribbon
+  const myTasks = session ? tasks.filter((t) => t.assigneeId === session.id) : [];
+  const doingTasks = tasks.filter((t) => t.status === "IN_PROGRESS");
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const doneToday = tasks.filter((t) => t.status === "DONE" && t.completedAt && new Date(t.completedAt) >= today);
+  const todayXp = doneToday.reduce((a, t) => a + Math.round(t.points * (t.kind === "SIDE" ? 1.5 : 1)), 0);
+
+  // Rank card data
   const myXp = me?.xp ?? 0;
+  const rk = rankFor(myXp);
+  const nxt = nextRank(myXp);
+  const prog = progressToNext(myXp);
+  const rank: BoardRank = {
+    name: ar ? rk.ar : rk.en,
+    symbol: rk.symbol,
+    xp: myXp,
+    pct: Math.round(prog.pct * 100),
+    nextLabel: nxt
+      ? (ar ? `التالي: ${formatNumber(nxt.minXp)}` : `Next: ${formatNumber(nxt.minXp)}`)
+      : (ar ? "أعلى رتبة" : "Top rank"),
+  };
+
+  // Board tasks
+  const initialTasks: BoardTask[] = tasks.map((t) => {
+    const ownerName = t.assignee?.name ?? (ar ? "—" : "—");
+    return {
+      id: t.id,
+      title: t.title,
+      prio: DOMAIN_PRIO[t.priority] ?? "med",
+      owner: ownerName,
+      ownerGlyph: initialGlyph(ownerName),
+      due: dueLabel(t.dueAt ?? null, ar),
+      status: DOMAIN_STATUS[t.status] ?? "todo",
+      xp: Math.round(t.points * (t.kind === "SIDE" ? 1.5 : 1)),
+      mine: !!session && t.assigneeId === session.id,
+    };
+  });
 
   return (
-    <DaylightShell dir={ar ? "rtl" : "ltr"}>
-      <DaylightHeader
-        eyebrow={ar ? "الفريق · المهام والإنتاجية" : "Team · Tasks & Productivity"}
-        title={ar ? "المهام" : "Tasks"}
-        subtitle={ar ? "مهام الفريق ونقاط الخبرة والتقدّم." : "Team tasks, XP and progress."}
-        status={`${formatNumber(inProgress.length)} ${ar ? "نشطة" : "active"}`}
-      />
-
-      <DaylightKpiGrid>
-        <DaylightKpi label={ar ? "للقيام" : "To do"} value={formatNumber(todo.length)} hint={ar ? "بانتظار" : "waiting"} />
-        <DaylightKpi label={ar ? "قيد التنفيذ" : "In progress"} value={formatNumber(inProgress.length)} hint={ar ? "نشطة" : "active"} />
-        <DaylightKpi label={ar ? "منجزة" : "Completed"} value={formatNumber(done.length)} hint={ar ? "أحسنت" : "great"} delta={done.length > 0 ? { dir: "up", text: formatNumber(done.length) } : undefined} />
-        <DaylightKpi label={ar ? "نقاطك" : "Your XP"} value={formatNumber(myXp)} hint={ar ? "خبرة" : "experience"} />
-      </DaylightKpiGrid>
-
-      {tasks.length === 0 ? (
-        <DaylightPanel title={ar ? "المهام" : "Tasks"}>
-          <EmptyState icon={CheckSquare} title={ar ? "لا توجد مهام" : "No tasks"} description={ar ? "أضف أول مهمة." : "Add your first task."} />
-        </DaylightPanel>
-      ) : (
-        <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(3, 1fr)" }}>
-          <TaskColumn title={ar ? "للقيام" : "To do"} tasks={todo} ar={ar} lc={lc} />
-          <TaskColumn title={ar ? "قيد التنفيذ" : "In progress"} tasks={inProgress} ar={ar} lc={lc} />
-          <TaskColumn title={ar ? "منجزة" : "Done"} tasks={done} ar={ar} lc={lc} done />
-        </div>
-      )}
-    </DaylightShell>
-  );
-}
-
-function TaskColumn({ title, tasks, ar, lc, done }: { title: string; tasks: any[]; ar: boolean; lc: "ar" | "en"; done?: boolean }) {
-  return (
-    <DaylightPanel title={title} aside={String(tasks.length)}>
-      <div className="space-y-2">
-        {tasks.map((task) => (
-          <div key={task.id} className="prop-card" style={{ padding: 12, opacity: done ? 0.75 : 1 }}>
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0 flex-1">
-                <p style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>{task.title}</p>
-                <div className="mt-1 flex flex-wrap items-center gap-2" style={{ fontSize: 10, color: "var(--ink-muted)" }}>
-                  {task.assignee ? <span>{task.assignee.name}</span> : null}
-                  {task.dueAt ? <span>· {formatShortDate(task.dueAt, lc)}</span> : null}
-                  {task.points ? <span style={{ fontFamily: "monospace" }}>· +{task.points} XP</span> : null}
-                </div>
+    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+      <div className="tk-wrap">
+        <div className="tk-top">
+          <div className="tk-title-box">
+            <span className="eb"><span className="tick" />{ar ? "الأفراد" : "People"}</span>
+            <h1>{ar ? "المهام" : "Tasks"}</h1>
+          </div>
+          <div className="tk-kpis">
+            <div className="tk-kpi"><div className="v" id="kp_mine">{formatNumber(myTasks.length)}</div><div className="k">{ar ? "مهامي" : "My tasks"}</div></div>
+            <div className="tk-kpi"><div className="v" id="kp_doing">{formatNumber(doingTasks.length)}</div><div className="k">{ar ? "قيد التنفيذ" : "In progress"}</div></div>
+            <div className="tk-kpi"><div className="v" id="kp_done">{formatNumber(doneToday.length)}</div><div className="k">{ar ? "مكتملة اليوم" : "Done today"}</div></div>
+            <div className="tk-kpi"><div className="v" id="kp_xp">{formatNumber(todayXp)}</div><div className="k">{ar ? "XP المكتسبة اليوم" : "XP today"}</div></div>
+          </div>
+          <div className="rank-card" id="rankCard">
+            <div className="rank-piece" id="rankPiece">{rk.symbol}</div>
+            <div className="rank-info">
+              <div className="rank-name">{ar ? "رتبتك: " : "Your rank: "}<b id="rankName">{rank.name}</b></div>
+              <div className="rank-bar"><span id="rankBar" style={{ width: `${Math.max(3, Math.min(100, rank.pct))}%` }} /></div>
+              <div className="rank-meta">
+                <span id="rankXp">{formatNumber(myXp)} XP</span>
+                <span id="rankNext">{rank.nextLabel}</span>
               </div>
-              {!done ? (
-                <form action={setTaskStatus}>
-                  <input type="hidden" name="id" value={task.id} />
-                  <input type="hidden" name="status" value="DONE" />
-                  <button type="submit" style={{ color: "var(--emerald)", fontWeight: 700, fontSize: 13, padding: "2px 6px" }} title={ar ? "إنجاز" : "Complete"}>✓</button>
-                </form>
-              ) : null}
             </div>
           </div>
-        ))}
-        {tasks.length === 0 ? <p style={{ fontSize: 12, color: "var(--ink-muted)" }}>—</p> : null}
+        </div>
+
+        <TasksBoard
+          initialTasks={initialTasks}
+          rank={rank}
+          todayXp={todayXp}
+          ar={ar}
+          labels={{
+            prio: { high: ar ? "عالية" : "High", med: ar ? "متوسطة" : "Medium", low: ar ? "منخفضة" : "Low" },
+            stat: { todo: ar ? "قيد الانتظار" : "To do", doing: ar ? "قيد التنفيذ" : "In progress", done: ar ? "مكتمل" : "Done" },
+            searchPlaceholder: ar ? "بحث في المهام…" : "Search tasks…",
+            add: ar ? "＋ مهمة جديدة" : "＋ New task",
+            selected: (n) => ar ? `${n} محدّد` : `${n} selected`,
+            bulkDone: ar ? "حدّد كمكتمل" : "Mark done",
+            bulkDoing: ar ? "حدّد قيد التنفيذ" : "Mark in-progress",
+            bulkDel: ar ? "حذف" : "Delete",
+            congrats: ar ? "تهانينا!" : "Congratulations!",
+            rankUp: (name) => ar ? `ترقّيت إلى ${name}` : `Promoted to ${name}`,
+            composer: { title: ar ? "عنوان المهمة…" : "Task title…" },
+            newHref: "/tasks/new",
+          }}
+        />
       </div>
-    </DaylightPanel>
+    </div>
   );
 }

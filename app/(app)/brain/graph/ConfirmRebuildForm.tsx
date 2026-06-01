@@ -19,7 +19,7 @@ export function ConfirmRebuildForm({ ar }: { ar: boolean }) {
         if (!window.confirm(msg)) e.preventDefault();
       }}
     >
-      <button type="submit" className="heri-btn heri-btn-primary w-full justify-center">
+      <button type="submit" className="br-btn br-btn-primary">
         <Brain className="h-3.5 w-3.5" strokeWidth={1.5} />
         {ar ? "إعادة بناء الدماغ" : "Rebuild brain"}
       </button>

@@ -41,5 +41,3 @@
 .dl-page .fc-explain-in b { color: var(--emerald); font-weight: 700; }
 .dl-page .fc-card.open .fc-explain { max-height: 260px; border-top-color: var(--line); }
 @media (prefers-reduced-motion: reduce) { .dl-page .fc-card.pulse-ok, .dl-page .fc-card.pulse-no { animation: none; } .dl-page .fc-explain { transition: none; } }
-</content>
-</invoke>

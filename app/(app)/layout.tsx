@@ -3,16 +3,16 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { Footer } from "@/components/Footer";
 import { ToastProvider } from "@/components/Toast/ToastProvider";
-import { OnboardingTour } from "@/components/OnboardingTour";
 import { QuickAddFAB } from "@/components/QuickAddFAB";
-import { WelcomeSplash } from "@/components/WelcomeSplash";
 import { ViewAsBanner } from "@/components/ViewAsBanner";
 import { Conversational } from "@/components/Conversational";
 import { TimeScrubber } from "@/components/TimeScrubber";
 import { TimeMachineBanner } from "@/components/TimeMachineBanner";
 import { getAsOf } from "@/lib/timemachine";
-import { RealtimePresence } from "@/components/realtime/RealtimePresence";
-import { DocumentDropZone } from "@/components/DocumentDropZone";
+// Phase 26.8 — non-critical overlays (tour, splash, morning brief, presence
+// SSE, drop zone) are lazy-loaded client-side to keep them off the critical
+// render path. See components/DeferredOverlays.tsx.
+import { DeferredOverlays } from "@/components/DeferredOverlays";
 // CROSS-TENANT INTENT: the (app) layout reads role permissions unscoped
 // (must resolve for any companyId the cookie points at, including a
 // superadmin "view as" context).
@@ -145,26 +145,24 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <LivingAtmosphere />
       <OrbitReturn locale={locale} />
       <FabRail locale={locale} />
-      <MorningBrief locale={locale} userName={dbUser.name ?? (locale === "ar" ? "أ. الحوراني" : "A. Al-Hourani")} />
       <div className="flex min-h-screen flex-1 flex-col nerve-bg">
         <ConstellationRail locale={locale} />
         <main className="flex-1"><DiveReveal>{children}</DiveReveal></main>
         <Footer />
       </div>
       <ToastProvider initialFlash={initialFlash} />
-      <OnboardingTour locale={locale} />
       <QuickAddFAB locale={locale} />
-      <WelcomeSplash locale={locale} />
       <Conversational locale={locale} />
       <TimeScrubber
         initialAsOf={asOfState.asOf ? asOfState.asOf.getTime() : null}
         locale={locale}
       />
-      <RealtimePresence
-        user={{ id: dbUser.id, name: dbUser.name }}
+      {/* Phase 26.8 — deferred, non-critical overlays (lazy client-side). */}
+      <DeferredOverlays
         locale={locale}
+        userId={dbUser.id}
+        userName={dbUser.name ?? (locale === "ar" ? "أ. الحوراني" : "A. Al-Hourani")}
       />
-      <DocumentDropZone locale={locale} />
     </div>
   );
 }

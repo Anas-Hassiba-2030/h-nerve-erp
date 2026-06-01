@@ -18,9 +18,7 @@ describe("mapOrreryHref", () => {
     expect(mapOrreryHref("sections/memory.html")).toBe("/brain/memory");
     expect(mapOrreryHref("sections/learning.html")).toBe("/brain/learning");
     expect(mapOrreryHref("sections/benchmarks.html")).toBe("/brain/benchmarks");
-    // narrate has no dedicated page; it must still land on a REAL route (the
-    // brain hub), never a dead mock.
-    expect(mapOrreryHref("sections/narrate.html")).toBe("/brain");
+    expect(mapOrreryHref("sections/narrate.html")).toBe("/brain/narrate");
   });
 
   it("maps team + utility + admin sections to real routes (no design mocks)", () => {

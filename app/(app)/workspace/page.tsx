@@ -5,13 +5,16 @@
 // financial pulse, sector KPIs, and signposts into the deep sections.
 // Every query is auto-scoped to the active company by the lib/db.ts
 // middleware.
+//
+// Look: the "Claude Design" daylight surface, ported faithfully from
+// docs/design/system/sections/workspace.html — a per-company console with
+// five facets (intelligence · finance · operations · pipeline · team) plus
+// a hub strip. Reference class names are preserved; real Prisma data feeds
+// the facets. Scoped under .dl-page (see ./workspace.css + ../daylight.css).
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import {
-  ArrowUpRight, Factory, Wallet, Users2, GitBranch, BrainCircuit, Inbox,
-} from "lucide-react";
-import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
+import { Inbox } from "lucide-react";
 import { WorkspaceFinancials } from "@/components/workspace/WorkspaceFinancials";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/workspace";
@@ -20,6 +23,7 @@ import { formatMoney, formatNumber, formatDate } from "@/lib/utils";
 import { computeCompanyHealth } from "@/lib/workspace/health";
 import { COMPANY_CODE_TO_TENANT_SLUG } from "@/lib/tenancy";
 import "../daylight.css";
+import "./workspace.css";
 
 export const dynamic = "force-dynamic";
 
@@ -170,32 +174,46 @@ export default async function WorkspaceCommandPage() {
             ? { label: ar ? "برامج" : "Programs", value: formatNumber(programs) }
             : { label: ar ? "مشاريع" : "Projects", value: formatNumber(projects) };
 
-  const sections = [
-    { href: "/workspace/operations", icon: Factory, ar: "العمليات", en: "Operations", descAr: "لوحة الإنتاج، الجودة، دورة الحياة", descEn: "Production board, QC, lifecycle" },
-    { href: "/workspace/finance", icon: Wallet, ar: "المالية", en: "Finance", descAr: "الأرباح، السجل، البيانات الشهرية", descEn: "P&L, ledger, monthly statements" },
-    { href: "/workspace/team", icon: Users2, ar: "الفريق", en: "Team", descAr: "الأشخاص، الأدوار، الأداء", descEn: "People, roles, performance" },
-    { href: "/workspace/pipeline", icon: GitBranch, ar: "المشاريع", en: "Pipeline", descAr: "مشاريع المستقبل والميزانيات", descEn: "Future projects + budgets" },
-    { href: "/workspace/intelligence", icon: BrainCircuit, ar: "الذكاء", en: "Intelligence", descAr: "إشارات الدماغ، الخطط، المجلس", descEn: "Brain signals, plans, council", badge: openInsights },
+  const net = rev - exp;
+  const marginRounded = Math.round(marginPct);
+
+  // The reference hub strip — five tiles, each a signpost into a deep section.
+  const hub = [
+    { href: "/workspace/intelligence", hi: "🧠", ht: ar ? "الذكاء" : "Intelligence" },
+    { href: "/workspace/finance", hi: "💰", ht: ar ? "المالية" : "Finance" },
+    { href: "/workspace/operations", hi: "⚙", ht: ar ? "العمليات" : "Operations" },
+    { href: "/workspace/pipeline", hi: "◇", ht: ar ? "المشاريع" : "Pipeline" },
+    { href: "/workspace/team", hi: "👥", ht: ar ? "الفريق" : "Team" },
   ];
 
   return (
-    <DaylightShell dir={ar ? "rtl" : "ltr"}>
-      <DaylightHeader
-        eyebrow={ar ? "مساحة العمل" : "Workspace"}
-        title={ar ? company.name : (company.nameEn ?? company.name)}
-        subtitle={ar ? "مركز التحكم الشامل للشركة" : "Company command center"}
-      />
+    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+      {/* ── section header ── */}
+      <header className="sec-head reveal">
+        <div>
+          <div className="sec-eyebrow"><span className="tick" />{ar ? "مساحة عمل الشركة" : "Company workspace"}</div>
+          <h1 className="sec-title">{ar ? company.name : (company.nameEn ?? company.name)}</h1>
+          <p className="sec-sub">
+            {ar
+              ? "كونسول تشغيلي لكل شركة — الذكاء، المالية، العمليات، المشاريع، والفريق في مكان واحد."
+              : "An operating console for the company — intelligence, finance, operations, pipeline, and team in one place."}
+          </p>
+        </div>
+        <div className="sec-head-aside">
+          <span className="sec-status"><span className="dot" />{ar ? "مباشر · محدّث الآن" : "Live · updated now"}</span>
+        </div>
+      </header>
 
-      {/* Company Health hero */}
+      {/* ── company-health hero ── */}
       <div className="panel reveal" style={{ marginBottom: 22 }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 24 }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-            <div style={{ fontSize: 48, fontWeight: 800, lineHeight: 1, color: "var(--emerald)", fontVariantNumeric: "tabular-nums" }}>{health.score}</div>
+            <div className="kpi-val" style={{ fontSize: 48, marginTop: 0 }}>{health.score}</div>
             <div style={{ fontSize: 14, fontWeight: 700, color: "var(--gold)" }}>{health.grade}</div>
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)", marginBottom: 8 }}>
-              {ar ? "مؤشّر صحة الشركة" : "COMPANY HEALTH INDEX"}
+            <div className="kpi-label" style={{ marginBottom: 8 }}>
+              {ar ? "مؤشّر صحة الشركة" : "Company health index"}
             </div>
             <p style={{ fontSize: 14, color: "var(--ink)", marginBottom: 12 }}>
               {ar ? health.verdict.ar : health.verdict.en}
@@ -215,58 +233,100 @@ export default async function WorkspaceCommandPage() {
         </div>
       </div>
 
-      <DaylightKpiGrid>
-        <DaylightKpi label={sectorMetric.label} value={sectorMetric.value} />
-        <DaylightKpi label={ar ? "مستخدمون نشطون" : "Active users"} value={formatNumber(teamCount)} />
-        <DaylightKpi label={ar ? "مشاريع" : "Projects"} value={formatNumber(projects)} />
-        <DaylightKpi label={ar ? "إشارات مفتوحة" : "Open signals"} value={formatNumber(openInsights)} />
-      </DaylightKpiGrid>
+      {/* ── hub strip — signposts into the five deep sections ── */}
+      <div className="ws-hub reveal">
+        {hub.map((h) => (
+          <Link key={h.href} href={h.href} className="hub-tile">
+            <div className="hi">{h.hi}</div>
+            <div className="ht">{h.ht}</div>
+          </Link>
+        ))}
+      </div>
 
-      <DaylightPanel
-        title={ar ? "النبض المالي" : "Financial pulse"}
-        aside={ar ? "نفس حساب لوحة المجموعة — مفلتر لهذه الشركة" : "Same math as the group dashboard — filtered to this company"}
-      >
-        <WorkspaceFinancials ar={ar} txns={txns} />
-      </DaylightPanel>
+      {/* ── five facets — each a per-company console card ── */}
+      <div className="ws-grid">
+        {/* Intelligence */}
+        <div className="ws-facet reveal">
+          <h3>🧠 {ar ? "الذكاء" : "Intelligence"}</h3>
+          <div className="fsub">{ar ? "إشارات وخطط هذه الشركة" : "This company's signals and plans"}</div>
+          <div className="ws-line"><span>{ar ? "إشارات مفتوحة" : "Open signals"}</span><span className="v">{formatNumber(openInsights)}</span></div>
+          <div className="ws-line"><span>{ar ? "إشارات حرجة" : "Critical signals"}</span><span className="v">{formatNumber(criticalInsights)}</span></div>
+          <div className="ws-line"><span>{ar ? "مشاريع نشطة" : "Active projects"}</span><span className="v">{formatNumber(activeProjects)}</span></div>
+          <Link className="ws-btn" href="/workspace/intelligence">{ar ? "افتح المجلس" : "Open council"}</Link>
+        </div>
 
-      {/* Phase NS-1 — Incoming Purchase Intent. Cross-tenant POs other
-          arms drafted against this company via the supply-chain bridge. */}
-      <DaylightPanel
-        title={ar ? "نوايا شراء واردة" : "Incoming purchase intent"}
-        aside={
-          ar
-            ? `${formatNumber(incomingIntents.length)} أمر مسودة من وحدات أخرى`
-            : `${formatNumber(incomingIntents.length)} draft orders from other arms`
-        }
-      >
-        {incomingIntents.length === 0 ? (
-          <div
-            className="flex items-center gap-3 px-4 py-6"
-            style={{ background: "var(--cream)", border: "1px solid var(--line)" }}
-          >
-            <Inbox className="h-5 w-5" style={{ color: "var(--ink-muted)" }} strokeWidth={1.5} />
-            <span style={{ fontSize: 13, color: "var(--ink-muted)" }}>
-              {ar
-                ? "لا نوايا شراء واردة خلال آخر 30 يوم."
-                : "No incoming purchase intents in the last 30 days."}
-            </span>
+        {/* Finance */}
+        <div className="ws-facet reveal">
+          <h3>💰 {ar ? "المالية" : "Finance"}</h3>
+          <div className="fsub">{ar ? "آخر ٣٠ يوماً" : "Last 30 days"}</div>
+          <div className="ws-line"><span>{ar ? "الإيراد" : "Revenue"}</span><span className="v">{formatMoney(rev)}</span></div>
+          <div className="ws-line"><span>{ar ? "الهامش" : "Margin"}</span><span className="v">{formatNumber(marginRounded)}٪</span></div>
+          <div className="ws-line"><span>{ar ? "صافي تقديري" : "Est. net"}</span><span className="v">{formatMoney(net)}</span></div>
+          <Link className="ws-btn ghost" href="/workspace/finance">{ar ? "دفتر الأستاذ" : "Ledger"}</Link>
+        </div>
+
+        {/* Operations */}
+        <div className="ws-facet reveal">
+          <h3>⚙ {ar ? "العمليات" : "Operations"}</h3>
+          <div className="fsub">{ar ? "نظرة القطاع" : "Sector snapshot"}</div>
+          <div className="ws-line"><span>{sectorMetric.label}</span><span className="v">{sectorMetric.value}</span></div>
+          <div className="ws-pri"><span className="dot" style={{ background: "#9a5648" }} />{ar ? "صرّف الدفعات القريبة من الانتهاء" : "Clear batches nearing expiry"}</div>
+          <div className="ws-pri"><span className="dot" style={{ background: "var(--gold)" }} />{ar ? "راجع توجيه التوريد الداخلي" : "Review internal supply routing"}</div>
+          <Link className="ws-btn ghost" href="/workspace/operations">{ar ? "سلسلة التوريد" : "Supply chain"}</Link>
+        </div>
+
+        {/* Pipeline */}
+        <div className="ws-facet reveal">
+          <h3>◇ {ar ? "المشاريع" : "Pipeline"}</h3>
+          <div className="fsub">{ar ? "خط الاستثمار" : "Investment pipeline"}</div>
+          <div className="ws-line"><span>{ar ? "مشاريع نشطة" : "Active projects"}</span><span className="v">{formatNumber(activeProjects)}</span></div>
+          <div className="ws-line"><span>{ar ? "إجمالي المشاريع" : "Total projects"}</span><span className="v">{formatNumber(projects)}</span></div>
+          <Link className="ws-btn" href="/workspace/pipeline">{ar ? "قدّم مرحلة مشروع" : "Advance a stage"}</Link>
+        </div>
+
+        {/* Team */}
+        <div className="ws-facet reveal">
+          <h3>👥 {ar ? "الفريق" : "Team"}</h3>
+          <div className="fsub">{ar ? "إسناد الملكية" : "Ownership assignment"}</div>
+          <div className="ws-line"><span>{ar ? "الأعضاء" : "Members"}</span><span className="v">{formatNumber(teamCount)}</span></div>
+          <Link className="ws-btn ghost" href="/workspace/team">{ar ? "أسنِد مالك مشروع" : "Assign an owner"}</Link>
+        </div>
+
+        {/* Financial pulse — same math as the group dashboard, filtered here */}
+        <div className="ws-facet reveal" style={{ gridColumn: "1 / -1" }}>
+          <h3>💰 {ar ? "النبض المالي" : "Financial pulse"}</h3>
+          <div className="fsub">{ar ? "نفس حساب لوحة المجموعة — مفلتر لهذه الشركة" : "Same math as the group dashboard — filtered to this company"}</div>
+          <WorkspaceFinancials ar={ar} txns={txns} />
+        </div>
+
+        {/* Phase NS-1 — Incoming Purchase Intent (cross-tenant, read-only) */}
+        <div className="ws-facet reveal" style={{ gridColumn: "1 / -1" }}>
+          <h3>📥 {ar ? "نوايا شراء واردة" : "Incoming purchase intent"}</h3>
+          <div className="fsub">
+            {ar
+              ? `${formatNumber(incomingIntents.length)} أمر مسودة من وحدات أخرى`
+              : `${formatNumber(incomingIntents.length)} draft orders from other arms`}
           </div>
-        ) : (
-          <div className="grid gap-2">
-            {incomingIntents.map((po) => {
+          {incomingIntents.length === 0 ? (
+            <div className="ws-line" style={{ gap: 12 }}>
+              <Inbox className="h-5 w-5" style={{ color: "var(--ink-muted)" }} strokeWidth={1.5} />
+              <span style={{ fontSize: 13, color: "var(--ink-muted)" }}>
+                {ar
+                  ? "لا نوايا شراء واردة خلال آخر 30 يوم."
+                  : "No incoming purchase intents in the last 30 days."}
+              </span>
+            </div>
+          ) : (
+            incomingIntents.map((po) => {
               const buyer = po.sourceForecast?.source;
               const buyerName = buyer ? (ar ? buyer.name : buyer.nameEn) : (ar ? "وحدة أخرى" : "Another arm");
               return (
-                <div
-                  key={po.id}
-                  className="grid gap-2 md:grid-cols-[1fr_auto] md:items-center px-4 py-3"
-                  style={{ background: "var(--cream)", border: "1px solid var(--line)" }}
-                >
-                  <div className="min-w-0">
-                    <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
+                <div key={po.id} className="ws-line" style={{ alignItems: "flex-start" }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div className="kpi-label">
                       {buyerName}
                       <span style={{ color: "var(--line)", margin: "0 8px" }}>·</span>
-                      <span className="font-mono">{po.poNumber}</span>
+                      <span style={{ fontFamily: "monospace" }}>{po.poNumber}</span>
                     </div>
                     <div style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)", marginTop: 4 }}>
                       {po.sourceForecast?.productLabel ?? (ar ? "طلب" : "Order")}
@@ -281,44 +341,15 @@ export default async function WorkspaceCommandPage() {
                       {po.expectedAt ? formatDate(po.expectedAt, ar ? "ar" : "en") : (ar ? "غير محدّد" : "unset")}
                     </div>
                   </div>
-                  <Link
-                    href="/supply-chain"
-                    className="dl-btn dl-btn-secondary md:justify-self-end"
-                    style={{ fontSize: 11.5, padding: "6px 12px", whiteSpace: "nowrap" }}
-                  >
+                  <Link href="/supply-chain" className="ws-btn ghost" style={{ marginTop: 0, whiteSpace: "nowrap" }}>
                     {ar ? "التنبؤ الأصلي ←" : "View originating forecast →"}
                   </Link>
                 </div>
               );
-            })}
-          </div>
-        )}
-      </DaylightPanel>
-
-      <DaylightPanel title={ar ? "أقسام نظام الشركة" : "Company ERP sections"}>
-        <div className="prop-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}>
-          {sections.map((s) => {
-            const Icon = s.icon;
-            return (
-              <Link key={s.href} href={s.href} className="prop-card" style={{ display: "block", position: "relative" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-                  <div style={{ borderRadius: 10, padding: 8, background: "rgba(46,107,87,.1)" }}>
-                    <Icon className="h-4 w-4" style={{ color: "var(--emerald)" }} strokeWidth={1.6} />
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    {s.badge ? (
-                      <span style={{ background: "var(--gold)", color: "#fff", borderRadius: 999, fontSize: 10, fontWeight: 700, padding: "2px 7px" }}>{s.badge}</span>
-                    ) : null}
-                    <ArrowUpRight className="h-3.5 w-3.5" style={{ color: "var(--ink-muted)" }} strokeWidth={1.5} />
-                  </div>
-                </div>
-                <div style={{ fontWeight: 700, color: "var(--ink)", fontSize: 14 }}>{ar ? s.ar : s.en}</div>
-                <div style={{ marginTop: 4, fontSize: 12, color: "var(--ink-muted)", lineHeight: 1.5 }}>{ar ? s.descAr : s.descEn}</div>
-              </Link>
-            );
-          })}
+            })
+          )}
         </div>
-      </DaylightPanel>
-    </DaylightShell>
+      </div>
+    </div>
   );
 }

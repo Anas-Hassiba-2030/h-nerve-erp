@@ -1,0 +1,42 @@
+/* ════════════════════════════════════════════════════════════════
+   /finance — Claude Design reference port.
+   CSS lifted verbatim from the styles the reference page loads
+   (docs/design/system/sections/finance.html → _section.css) and
+   SCOPED under .dl-page so it never leaks into the rest of the app.
+   Pairs with ../daylight.css (shared header / KPI / panel shell).
+   Only the finance-specific pieces live here: the segmented control,
+   the revenue-vs-expense bar chart, the bare table, and the warn/crit
+   status tags the reference uses.
+   ════════════════════════════════════════════════════════════════ */
+
+/* panel table — the reference renders a bare <table> inside .panel */
+.dl-page .panel table { width: 100%; border-collapse: collapse; }
+.dl-page .panel th, .dl-page .panel td { text-align: start; padding: 13px 12px; font-size: 14px; border-bottom: 1px solid var(--line); }
+.dl-page .panel th { font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--ink-muted); text-transform: none; }
+.dl-page .panel td { color: var(--ink); }
+.dl-page .panel td.num, .dl-page .panel th.num { text-align: end; font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+.dl-page .panel tbody tr { transition: background .25s; }
+.dl-page .panel tbody tr:hover { background: rgba(194,163,90,.06); }
+.dl-page .panel tr:last-child td { border-bottom: 0; }
+
+/* status tags */
+.dl-page .tag { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
+.dl-page .tag.ok { color: #3c7a5c; background: rgba(126,155,134,.18); }
+.dl-page .tag.warn { color: #8a6a1f; background: rgba(194,163,90,.2); }
+.dl-page .tag.crit { color: #9a5648; background: rgba(168,106,92,.16); }
+
+/* segmented control */
+.dl-page .seg { display: inline-flex; padding: 4px; border-radius: 999px; background: var(--ivory); border: 1px solid var(--line); position: relative; }
+.dl-page .seg button { position: relative; z-index: 2; padding: 7px 18px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--ink-muted); transition: color .3s; background: transparent; white-space: nowrap; border: 0; cursor: pointer; font-family: inherit; }
+.dl-page .seg button.active { color: #fff; }
+.dl-page .seg .seg-ind { position: absolute; z-index: 1; top: 4px; left: 0; height: calc(100% - 8px); border-radius: 999px; background: var(--emerald); box-shadow: 0 4px 12px -4px rgba(31,77,63,.6);
+  transition: transform .42s cubic-bezier(.22,1,.36,1), width .42s cubic-bezier(.22,1,.36,1); will-change: transform, width; }
+
+/* revenue-vs-expense bars */
+.dl-page .bars { display: flex; align-items: flex-end; gap: 8px; height: 170px; padding-top: 10px; }
+.dl-page .bar-col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 8px; height: 100%; }
+.dl-page .bar-stack { width: 100%; display: flex; flex-direction: column; justify-content: flex-end; gap: 3px; height: 100%; }
+.dl-page .bar { width: 100%; border-radius: 5px 5px 0 0; transition: height 1s cubic-bezier(.22,1,.36,1); }
+.dl-page .bar.rev { background: linear-gradient(180deg, var(--emerald-soft), var(--emerald)); }
+.dl-page .bar.exp { background: rgba(194,163,90,.55); }
+.dl-page .bar-x { font-size: 11px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }

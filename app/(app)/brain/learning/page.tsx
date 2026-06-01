@@ -1,13 +1,14 @@
 // /brain/learning — what the brain has learned about this org.
 //
-// Aesthetic: Quiet Authority (DESIGN-SKILL.md §1.C) — restrained,
-// institutional, deep ink + warm gray + a single ochre accent only on
-// the active toggles.
+// Ported to the Claude Design reference
+// (docs/design/system/sections/learning.html — brain NIGHT register: slim
+// ribbon + KPI strip + dark panel). Real data + server actions are preserved;
+// the look is the reference. Styles live in ./learning.css, scoped to .dl-page.
 //
 // Phase 7 of docs/PHASES-INTELLIGENCE.md.
 
-import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
 import "../../daylight.css";
+import "./learning.css";
 import { Brain, Database, Cpu, Trash2 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
@@ -49,372 +50,217 @@ export default async function BrainLearningPage() {
   const unlearned = patterns.filter((p) => p.status === "UNLEARNED").length;
 
   return (
-    <DaylightShell dir={ar ? "rtl" : "ltr"}>
-      <DaylightHeader
-        eyebrow={ar ? "الدماغ · ما تعلّمتُه" : "Brain · What I've learned"}
-        title={
-          ar
-            ? "ما تعلّمتُه عن طريقتك في اتخاذ القرار"
-            : "What I've learned about how you decide"
-        }
-        subtitle={
-          ar
-            ? "كل تجاهل، كل التزام، كل إلغاء يصبح إشارة. هذه هي الأنماط التي استخلصتُها — يمكنك إيقاف أيٍّ منها."
-            : "Every dismiss, every commit, every abandonment becomes signal. These are the patterns I've extracted — you can disable any of them."
-        }
-      />
-        {/* Top stats row */}
-        <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <Stat label={ar ? "أنماط نشطة" : "Active patterns"}    value={enabled}     />
-          <Stat label={ar ? "موقوفة"     : "Disabled"}           value={disabled}    />
-          <Stat label={ar ? "أحداث رصد" : "Feedback events"}    value={totalFeedback} />
-          <Stat
-            label={ar ? "قبول/رفض (30 يوم)" : "Accept/Reject (30d)"}
-            value={`${monthDigest.accepted}/${monthDigest.rejected}`}
-          />
-        </section>
+    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+      <div className="br-wrap">
+        {/* slim ribbon — eyebrow + title + intro */}
+        <div className="br-ribbon">
+          <div className="br-title-box">
+            <span className="eb">
+              <span className="tick" />
+              {ar ? "الذكاء التشغيلي" : "Operational intelligence"}
+            </span>
+            <h1>{ar ? "التعلّم" : "Learning"}</h1>
+          </div>
+          <div className="br-intro">
+            {ar
+              ? "كل تجاهل، كل التزام، كل إلغاء يصبح إشارة. هذه هي الأنماط التي استخلصتُها — يمكنك إيقاف أيٍّ منها."
+              : "Every dismiss, every commit, every abandonment becomes signal. These are the patterns I've extracted — you can disable any of them."}
+          </div>
+        </div>
+
+        {/* KPI strip */}
+        <div className="br-kpis">
+          <div className="br-kpi">
+            <div className="v">{enabled.toLocaleString("en-US")}</div>
+            <div className="k">{ar ? "أنماط نشطة" : "Active patterns"}</div>
+          </div>
+          <div className="br-kpi">
+            <div className="v">{disabled.toLocaleString("en-US")}</div>
+            <div className="k">{ar ? "موقوفة" : "Disabled"}</div>
+          </div>
+          <div className="br-kpi">
+            <div className="v">{totalFeedback.toLocaleString("en-US")}</div>
+            <div className="k">{ar ? "أحداث رصد" : "Feedback events"}</div>
+          </div>
+          <div className="br-kpi">
+            <div className="v">{monthDigest.accepted}/{monthDigest.rejected}</div>
+            <div className="k">{ar ? "قبول/رفض (30 يوم)" : "Accept/Reject (30d)"}</div>
+          </div>
+        </div>
 
         {/* Phase 7 — weekly learning curve (accepted vs rejected signal) */}
-        <div className="mt-3">
+        <div className="br-panel">
+          <h2>{ar ? "منحنى التعلّم" : "Learning curve"}</h2>
+          <div className="sub">{ar ? "إشارات القبول مقابل الرفض عبر الأسابيع" : "Accepted vs rejected signal over weeks"}</div>
           <LearningTrend ar={ar} weeks={12} />
         </div>
 
-        {/* Action rail */}
-        <div
-          className="flex flex-wrap items-center gap-2 px-1 py-3"
-          style={{
-            borderTop: "1px solid var(--line)",
-            borderBottom: "1px solid var(--line)",
-          }}
-        >
-          <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--ink-muted)" }}>{ar ? "تشغيل" : "Run"}</span>
+        {/* Controls — learn now + seed + clear */}
+        <div className="br-controls">
           <form action={learnNow}>
-            <button type="submit" className="dl-btn dl-btn-primary">
+            <button type="submit" className="br-btn br-btn-primary">
               <Cpu className="h-3.5 w-3.5" strokeWidth={1.5} />
-              {ar ? "إعادة التحليل" : "Re-analyze"}
+              {ar ? "✦ إعادة التحليل" : "✦ Re-analyze"}
             </button>
           </form>
           {totalFeedback === 0 ? (
             <form action={seedFeedback}>
-              <button type="submit" className="dl-btn dl-btn-secondary">
+              <button type="submit" className="br-btn br-btn-ghost">
                 <Database className="h-3.5 w-3.5" strokeWidth={1.5} />
                 {ar ? "ازرع أحداث تدريبية" : "Seed training events"}
               </button>
             </form>
           ) : null}
-          <div className="grow" />
           <form action={clearAllFeedback}>
-            <button
-              type="submit"
-              className="dl-btn dl-btn-secondary"
-              style={{ padding: "6px 12px", fontSize: 11, color: "var(--brick)" }}
-            >
+            <button type="submit" className="br-btn danger">
               <Trash2 className="h-3 w-3" strokeWidth={1.5} />
               {ar ? "مسح كل التعلّم" : "Clear all learning"}
             </button>
           </form>
         </div>
 
-        {/* Patterns */}
-        {patterns.length === 0 ? (
-          <EmptyState ar={ar} />
-        ) : (
-          <section
-            className="grid gap-3"
-            style={{
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(min(420px, 100%), 1fr))",
-            }}
-          >
-            {patterns.map((p) => (
-              <PatternCard key={p.id} pattern={p} ar={ar} />
-            ))}
-          </section>
-        )}
+        {/* Patterns panel */}
+        <div className="br-panel">
+          <h2>{ar ? "الأنماط" : "Patterns"}</h2>
+          <div className="sub">{ar ? "فعّل · ألغِ · احذف" : "Enable · disable · delete"}</div>
+          {patterns.length === 0 ? (
+            <EmptyState ar={ar} />
+          ) : (
+            <div>
+              {patterns.map((p) => (
+                <PatternRow key={p.id} pattern={p} ar={ar} />
+              ))}
+            </div>
+          )}
+        </div>
 
+        {/* Voluntary forgetting */}
         {unlearned > 0 ? (
-          <DaylightPanel
-            title={ar ? "نسيان طوعي" : "Voluntary forgetting"}
-            aside={
-              ar
+          <div className="br-panel">
+            <h2>{ar ? "نسيان طوعي" : "Voluntary forgetting"}</h2>
+            <div className="sub">
+              {ar
                 ? `${unlearned} نمط حُذف من الذاكرة العاملة بناءً على طلبك.`
-                : `${unlearned} pattern${unlearned === 1 ? "" : "s"} forgotten on request.`
-            }
-          >
-            <ul className="space-y-1.5">
-              {patterns
-                .filter((p) => p.status === "UNLEARNED")
-                .map((p) => (
-                  <li
-                    key={p.id}
-                    className="px-3 py-2"
-                    style={{
-                      background: "var(--ivory)",
-                      border: "1px solid var(--line)",
-                      fontSize: 12.5,
-                      color: "var(--ink-muted)",
-                      fontStyle: "italic",
-                      borderRadius: 8,
-                    }}
-                  >
-                    {ar ? p.statementAr ?? p.statementEn : p.statementEn}
-                  </li>
-                ))}
-            </ul>
-          </DaylightPanel>
+                : `${unlearned} pattern${unlearned === 1 ? "" : "s"} forgotten on request.`}
+            </div>
+            {patterns
+              .filter((p) => p.status === "UNLEARNED")
+              .map((p) => (
+                <div key={p.id} className="br-row">
+                  <div className="rt">
+                    <div className="ts" style={{ fontStyle: "italic" }}>
+                      {ar ? p.statementAr ?? p.statementEn : p.statementEn}
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
         ) : null}
-    </DaylightShell>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────
-
-function Stat({ label, value }: { label: string; value: number | string }) {
-  return (
-    <div
-      style={{
-        background: "var(--cream)",
-        border: "1px solid var(--line)",
-        padding: "14px 18px",
-      }}
-    >
-      <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--ink-muted)" }}>{label}</div>
-      <div
-        style={{
-          fontSize: "clamp(22px, 2.4vw, 30px)",
-          fontWeight: 500,
-          color: "var(--ink)",
-          marginTop: 8,
-        }}
-      >
-        {typeof value === "number" ? value.toLocaleString("en-US") : value}
       </div>
     </div>
   );
 }
 
-function PatternCard({ pattern, ar }: { pattern: any; ar: boolean }) {
+// ─────────────────────────────────────────────────────────────────────
+
+function PatternRow({ pattern, ar }: { pattern: any; ar: boolean }) {
   const enabled = pattern.status === "ENABLED";
   const m = pattern.module ? MODULE_LABEL[pattern.module] : null;
 
   return (
-    <article
-      className="panel reveal"
-      style={{
-        padding: "18px 20px 16px",
-        opacity: enabled ? 1 : 0.55,
-        transition: "opacity 220ms cubic-bezier(0.25,1,0.5,1)",
-      }}
-    >
-      {/* Top eyebrow row */}
-      <header className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 8, flexWrap: "wrap",
-              fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em",
-              color: enabled ? "var(--gold)" : "var(--ink-muted)",
-            }}
-          >
-            <span
-              aria-hidden
-              style={{
-                display: "inline-block",
-                width: 14,
-                height: 1.5,
-                background: enabled ? "var(--gold)" : "var(--line)",
-              }}
-            />
-            {pattern.authoredBy === "auto" ? (ar ? "تعلّم تلقائي" : "Auto-learned") : (ar ? "يدوي" : "Manual")}
-            {m ? (
-              <>
-                <span style={{ color: "var(--line)" }}>·</span>
-                <span>{ar ? m.ar.toUpperCase() : m.en.toUpperCase()}</span>
-              </>
-            ) : null}
-            <span style={{ color: "var(--line)" }}>·</span>
-            <span style={{ fontVariantNumeric: "tabular-nums" }}>
-              {pattern.evidenceCount} {ar ? "حدث" : "events"}
-            </span>
-          </div>
+    <div className="br-row" style={{ opacity: enabled ? 1 : 0.6 }}>
+      <div className="rt">
+        <div className="tt" style={{ fontStyle: "italic", fontWeight: 600 }}>
+          "{ar ? pattern.statementAr ?? pattern.statementEn : pattern.statementEn}"
         </div>
-        {/* Toggle — the only colored element on the page when ENABLED */}
-        <form action={togglePattern}>
-          <input type="hidden" name="id" value={pattern.id} />
-          <button
-            type="submit"
-            aria-pressed={enabled}
-            title={enabled
-              ? (ar ? "إيقاف هذا النمط" : "Disable this pattern")
-              : (ar ? "تفعيل هذا النمط" : "Enable this pattern")}
-            style={{
-              position: "relative",
-              width: 38,
-              height: 22,
-              background: enabled ? "var(--gold)" : "var(--line)",
-              border: enabled ? "1px solid var(--gold-soft)" : "1px solid var(--line)",
-              borderRadius: 999,
-              cursor: "pointer",
-              transition: "background 220ms cubic-bezier(0.25,1,0.5,1), border-color 220ms cubic-bezier(0.25,1,0.5,1)",
-            }}
-          >
-            <span
-              aria-hidden
-              style={{
-                position: "absolute",
-                top: 2,
-                insetInlineStart: enabled ? 18 : 2,
-                width: 16,
-                height: 16,
-                background: enabled ? "var(--cream)" : "var(--ivory)",
-                border: "1px solid var(--ink-muted)",
-                borderRadius: "50%",
-                transition: "inset-inline-start 220ms cubic-bezier(0.25,1,0.5,1)",
-              }}
-            />
-          </button>
-        </form>
-      </header>
+        <div className="ts">
+          {pattern.authoredBy === "auto"
+            ? (ar ? "تعلّم تلقائي" : "Auto-learned")
+            : (ar ? "يدوي" : "Manual")}
+          {m ? ` · ${ar ? m.ar : m.en}` : ""}
+          {` · ${pattern.evidenceCount} ${ar ? "حدث" : "events"}`}
+          {` · ${ar ? "ثقة" : "conf"} ${(pattern.confidence * 100).toFixed(0)}%`}
+          {` · ${ar ? "آخر مشاهدة" : "last seen"} ${new Intl.DateTimeFormat(
+            ar ? "ar-JO-u-nu-latn" : "en-US",
+            { day: "numeric", month: "short" },
+          ).format(pattern.lastObservedAt)}`}
+        </div>
+      </div>
 
-      {/* Statement — italic Fraunces, the editorial moment */}
-      <p
-        className={ar ? "mt-4" : "font-display-latin mt-4"}
-        style={{
-          fontSize: "clamp(15.5px, 1.2vw, 17px)",
-          lineHeight: 1.5,
-          color: "var(--ink)",
-          letterSpacing: ar ? 0 : "-0.012em",
-          fontStyle: "italic",
-          maxWidth: "60ch",
-          fontFamily: ar
-            ? "'IBM Plex Sans Arabic','Cairo',sans-serif"
-            : "'Fraunces','Tiempos Headline',Georgia,serif",
-          textWrap: "balance" as any,
-          animation: "pattern-reveal 600ms cubic-bezier(0.16,1,0.3,1) both",
-        }}
-      >
-        "{ar ? pattern.statementAr ?? pattern.statementEn : pattern.statementEn}"
-      </p>
+      <span className={`br-chip ${enabled ? "ok" : "warn"}`}>
+        {enabled ? (ar ? "نشط" : "Active") : (ar ? "موقوف" : "Disabled")}
+      </span>
 
-      {/* Footer — confidence + status + actions */}
-      <footer
-        className="mt-5 pt-3 flex flex-wrap items-center justify-between gap-2"
-        style={{ borderTop: "1px solid var(--line)" }}
-      >
-        <div className="flex items-center gap-2">
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 999, fontSize: 11.5, fontWeight: 600, color: "var(--ink-muted)", background: "rgba(100,90,80,.1)" }}>
-            {enabled ? (ar ? "نشط" : "Active") : (ar ? "موقوف" : "Disabled")}
-          </span>
-          <span
-            style={{
-              fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-              fontSize: 10,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: "var(--ink-muted)",
-              fontVariantNumeric: "tabular-nums",
-            }}
-          >
-            {ar ? "ثقة" : "conf"} {(pattern.confidence * 100).toFixed(0)}%
-          </span>
-          <span
-            style={{
-              fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-              fontSize: 10,
-              letterSpacing: "0.08em",
-              color: "var(--ink-muted)",
-            }}
-          >
-            {ar ? "آخر مشاهدة" : "last seen"}{" "}
-            {new Intl.DateTimeFormat(ar ? "ar-JO-u-nu-latn" : "en-US", {
-              day: "numeric",
-              month: "short",
-            }).format(pattern.lastObservedAt)}
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
-          <form action={unlearnPattern}>
-            <input type="hidden" name="id" value={pattern.id} />
-            <button
-              type="submit"
-              className="dl-btn dl-btn-secondary"
-              style={{ padding: "5px 10px", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase" }}
-              title={ar ? "نسيان هذا النمط" : "Forget this pattern"}
-            >
-              {ar ? "ينسى" : "Forget"}
-            </button>
-          </form>
-          <form action={deletePattern}>
-            <input type="hidden" name="id" value={pattern.id} />
-            <button
-              type="submit"
-              className="dl-btn dl-btn-secondary"
-              style={{
-                padding: "5px 10px",
-                fontSize: 10,
-                color: "var(--brick)",
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-              }}
-              title={ar ? "حذف نهائي" : "Delete"}
-            >
-              <Trash2 className="h-3 w-3" strokeWidth={1.5} />
-            </button>
-          </form>
-        </div>
-      </footer>
-    </article>
+      {/* Toggle */}
+      <form action={togglePattern}>
+        <input type="hidden" name="id" value={pattern.id} />
+        <button
+          type="submit"
+          className={`br-switch ${enabled ? "on" : ""}`}
+          aria-pressed={enabled}
+          title={enabled
+            ? (ar ? "إيقاف هذا النمط" : "Disable this pattern")
+            : (ar ? "تفعيل هذا النمط" : "Enable this pattern")}
+        />
+      </form>
+
+      {/* Forget */}
+      <form action={unlearnPattern}>
+        <input type="hidden" name="id" value={pattern.id} />
+        <button type="submit" className="br-btn br-btn-ghost" style={{ fontSize: 11, padding: "6px 12px" }} title={ar ? "نسيان هذا النمط" : "Forget this pattern"}>
+          {ar ? "ينسى" : "Forget"}
+        </button>
+      </form>
+
+      {/* Delete */}
+      <form action={deletePattern}>
+        <input type="hidden" name="id" value={pattern.id} />
+        <button type="submit" className="br-btn danger" style={{ fontSize: 11, padding: "6px 12px" }} title={ar ? "حذف نهائي" : "Delete"}>
+          <Trash2 className="h-3 w-3" strokeWidth={1.5} />
+        </button>
+      </form>
+    </div>
   );
 }
 
 function EmptyState({ ar }: { ar: boolean }) {
   return (
-    <section
-      className="panel reveal"
-      style={{ padding: "60px 32px", textAlign: "center" }}
-    >
+    <div style={{ textAlign: "center", padding: "40px 20px" }}>
       <div
-        className="inline-flex h-12 w-12 items-center justify-center mx-auto"
+        className="inline-flex h-12 w-12 items-center justify-center"
         style={{
-          border: "1px solid var(--line)",
-          color: "var(--gold)",
-          background: "var(--ivory)",
+          border: "1px solid rgba(194,163,90,.3)",
+          color: "var(--gold-soft)",
+          background: "rgba(13,31,26,.4)",
+          borderRadius: 14,
+          margin: "0 auto",
         }}
       >
         <Brain className="h-5 w-5" strokeWidth={1.5} />
       </div>
       <h2
-        className={ar ? "mt-5" : "font-display-latin mt-5"}
         style={{
-          fontSize: "clamp(24px, 3vw, 38px)",
-          lineHeight: 1.05,
-          letterSpacing: ar ? "-0.005em" : "-0.022em",
-          fontWeight: ar ? 600 : 500,
-          color: "var(--ink)",
+          fontFamily: "var(--display)",
+          fontSize: "clamp(22px, 3vw, 30px)",
+          color: "#fff",
+          marginTop: 16,
         }}
       >
         {ar ? "لم أتعلّم شيئاً بعد." : "I haven't learned anything yet."}
       </h2>
-      <p
-        className="measure mt-3 mx-auto"
-        style={{
-          fontSize: "clamp(13px, 1vw, 14.5px)",
-          lineHeight: 1.55,
-          color: "var(--ink-muted)",
-        }}
-      >
+      <p style={{ fontSize: 13.5, lineHeight: 1.55, color: "var(--mist)", opacity: 0.7, marginTop: 10, maxWidth: "52ch", marginInline: "auto" }}>
         {ar
           ? "كل ما تفعله بالإشارات والخطط يدخل سجل التغذية الراجعة. أو ابدأ بأحداث تدريبية مزروعة لرؤية كيف يعمل الاستخلاص."
           : "Every action you take on insights and plans flows into the feedback log. Or seed plausible training events to see the analyzer in action."}
       </p>
-      <div className="mt-6 flex justify-center gap-3">
+      <div style={{ marginTop: 20 }}>
         <form action={seedFeedback}>
-          <button type="submit" className="dl-btn dl-btn-primary">
+          <button type="submit" className="br-btn br-btn-primary">
             <Database className="h-4 w-4" strokeWidth={1.5} />
             {ar ? "ازرع أحداث تدريبية" : "Seed training events"}
           </button>
         </form>
       </div>
-    </section>
+    </div>
   );
 }

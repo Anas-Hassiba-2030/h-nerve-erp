@@ -1,19 +1,23 @@
-import { Bell, Plus, Settings, CheckCircle2 } from "lucide-react";
+import { Bell, Plus } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { DeleteButton } from "@/components/DeleteButton";
-import {
-  DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel,
-} from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db";
 import { ALERT_KINDS, type AlertKind } from "@/lib/alertEngine";
 import { formatNumber } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
-import { toggleRule, updateRule, seedRules, deleteRule } from "./actions";
+import { toggleRule, seedRules, deleteRule } from "./actions";
 import "../daylight.css";
+import "./alerts.css";
 
 export const dynamic = "force-dynamic";
 
-const SEV_AR: Record<string, string> = { INFO: "معلومة", WARN: "تحذير", CRITICAL: "حرج", OPPORTUNITY: "فرصة" };
+// Severity → night chip class + bilingual label (from alerts.html / alerts-ops.js).
+const SEV: Record<string, { chip: string; ar: string; en: string }> = {
+  CRITICAL: { chip: "crit", ar: "حرج", en: "Critical" },
+  WARN: { chip: "warn", ar: "تحذير", en: "Warning" },
+  OPPORTUNITY: { chip: "ok", ar: "فرصة", en: "Opportunity" },
+  INFO: { chip: "info", ar: "معلومة", en: "Info" },
+};
 
 export default async function AlertsPage() {
   const locale = getLocale();
@@ -26,74 +30,79 @@ export default async function AlertsPage() {
 
   const active = rules.filter((r) => r.isActive).length;
   const triggeredLast24h = rules.filter((r) => r.lastTriggered && Date.now() - r.lastTriggered.getTime() < 24 * 60 * 60 * 1000).length;
-  const totalTriggers = rules.reduce((a, r) => a + r.triggerCount, 0);
+  const critical = rules.filter((r) => r.severity === "CRITICAL").length;
 
   return (
-    <DaylightShell dir={ar ? "rtl" : "ltr"}>
-      <DaylightHeader
-        eyebrow={ar ? "العقل · مركز التنبيهات" : "Brain · Alert Center"}
-        title={ar ? "التنبيهات الذكية" : "Smart Alerts"}
-        subtitle={ar ? "قواعد قابلة للتخصيص تراقب البيانات على مدار الساعة وتصدر إشارات تلقائية." : "Customizable rules that watch your data 24/7 and auto-generate signals."}
-        status={`${formatNumber(active)} ${ar ? "نشطة" : "active"}`}
-        actions={rules.length === 0 ? (
-          <form action={seedRules}><button type="submit" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "إنشاء القواعد الافتراضية" : "Seed default rules"}</button></form>
-        ) : undefined}
-      />
+    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+      <div className="br-wrap">
+        <div className="br-ribbon">
+          <div className="br-title-box">
+            <span className="eb"><span className="tick" />{ar ? "الذكاء التشغيلي" : "Operational intelligence"}</span>
+            <h1>{ar ? "التنبيهات" : "Alerts"}</h1>
+          </div>
+          <div className="br-intro">
+            {ar
+              ? "قواعد التنبيه التي يراقبها الدماغ على مدار الساعة. فعّلها أو أوقفها حسب الحاجة."
+              : "Alert rules the brain watches around the clock. Activate or pause them as needed."}
+          </div>
+        </div>
 
-      <DaylightKpiGrid>
-        <DaylightKpi label={ar ? "قواعد نشطة" : "Active rules"} value={formatNumber(active)} hint={`${formatNumber(rules.length - active)} ${ar ? "موقوفة" : "paused"}`} />
-        <DaylightKpi label={ar ? "إنطلاقات ٢٤ ساعة" : "Last 24h fires"} value={formatNumber(triggeredLast24h)} hint={ar ? "اليوم" : "today"} delta={triggeredLast24h > 0 ? { dir: "down", text: formatNumber(triggeredLast24h) } : undefined} />
-        <DaylightKpi label={ar ? "إجمالي الانطلاقات" : "Total triggers"} value={formatNumber(totalTriggers)} hint={ar ? "كل العمر" : "all-time"} />
-        <DaylightKpi label={ar ? "إجمالي القواعد" : "Total rules"} value={formatNumber(rules.length)} hint={ar ? "مُعرّفة" : "defined"} />
-      </DaylightKpiGrid>
+        <div className="br-kpis">
+          <div className="br-kpi"><div className="v">{formatNumber(active)}</div><div className="k">{ar ? "قواعد فعّالة" : "Active rules"}</div></div>
+          <div className="br-kpi"><div className="v">{formatNumber(triggeredLast24h)}</div><div className="k">{ar ? "إطلاقات اليوم" : "Fires today"}</div></div>
+          <div className="br-kpi"><div className="v">{formatNumber(critical)}</div><div className="k">{ar ? "حرجة" : "Critical"}</div></div>
+        </div>
 
-      <DaylightPanel title={ar ? "القواعد" : "Rules"} aside={ar ? "النشطة أولاً" : "Active first"}>
-        {rules.length === 0 ? (
-          <EmptyState icon={Bell} title={ar ? "لا قواعد بعد" : "No rules yet"} description={ar ? "ابدأ بقواعد افتراضية تغطي كل الوحدات." : "Start with default rules covering every module."} action={<form action={seedRules}><button type="submit" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" />{ar ? "إنشاء القواعد" : "Seed rules"}</button></form>} />
-        ) : (
-          <div className="prop-grid">
-            {rules.map((r) => {
-              const def = ALERT_KINDS[r.kind as AlertKind];
-              if (!def) return null;
-              const sevColor = r.severity === "CRITICAL" ? "var(--brick)" : r.severity === "WARN" ? "var(--gold)" : r.severity === "OPPORTUNITY" ? "var(--emerald)" : "var(--sage)";
-              return (
-                <div key={r.id} className="prop-card" style={{ borderInlineStart: `3px solid ${sevColor}`, opacity: r.isActive ? 1 : 0.6 }}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>{ar ? def.name_ar : def.name_en}</h3>
-                      <p className="mt-0.5" style={{ fontSize: 11, color: "var(--ink-muted)", lineHeight: 1.5 }}>{ar ? def.description_ar : def.description_en}</p>
+        <div className="br-controls">
+          <form action={seedRules}>
+            <button type="submit" className="br-btn br-btn-primary">{ar ? "استعد القواعد الافتراضية" : "Seed default rules"}</button>
+          </form>
+        </div>
+
+        <div className="br-panel">
+          <h2>{ar ? "قواعد التنبيه" : "Alert rules"}</h2>
+          <div className="sub">{ar ? "انقر المفتاح للتفعيل" : "Tap the switch to toggle"}</div>
+          <div id="rules">
+            {rules.length === 0 ? (
+              <EmptyState
+                icon={Bell}
+                title={ar ? "لا قواعد بعد" : "No rules yet"}
+                description={ar ? "ابدأ بقواعد افتراضية تغطي كل الوحدات." : "Start with default rules covering every module."}
+                action={
+                  <form action={seedRules}>
+                    <button type="submit" className="br-btn br-btn-primary"><Plus className="h-4 w-4" />{ar ? "إنشاء القواعد" : "Seed rules"}</button>
+                  </form>
+                }
+              />
+            ) : (
+              rules.map((r) => {
+                const def = ALERT_KINDS[r.kind as AlertKind];
+                const sev = SEV[r.severity] ?? SEV.INFO;
+                const name = def ? (ar ? def.name_ar : def.name_en) : (ar ? r.name : (r.nameEn ?? r.name));
+                return (
+                  <div className="br-row" key={r.id} style={{ opacity: r.isActive ? 1 : 0.6 }}>
+                    <span className={`br-chip ${sev.chip}`}>{ar ? sev.ar : sev.en}</span>
+                    <div className="rt">
+                      <div className="tt">{name}</div>
+                      <div className="ts">{ar ? `أُطلقت ${formatNumber(r.triggerCount)} مرّة` : `Fired ${formatNumber(r.triggerCount)} times`}</div>
                     </div>
                     <form action={toggleRule}>
                       <input type="hidden" name="id" value={r.id} />
-                      <button type="submit" className="relative inline-flex h-6 w-11 items-center rounded-full" style={{ background: r.isActive ? "var(--gold)" : "var(--line)" }} title={r.isActive ? (ar ? "إيقاف" : "Pause") : (ar ? "تفعيل" : "Activate")}>
-                        <span className="inline-block h-5 w-5 rounded-full bg-white shadow-sm" style={{ transform: r.isActive ? "translateX(22px)" : "translateX(2px)" }} />
-                      </button>
+                      <button
+                        type="submit"
+                        className={`br-switch ${r.isActive ? "on" : ""}`}
+                        title={r.isActive ? (ar ? "إيقاف" : "Pause") : (ar ? "تفعيل" : "Activate")}
+                        aria-label={r.isActive ? (ar ? "إيقاف القاعدة" : "Pause rule") : (ar ? "تفعيل القاعدة" : "Activate rule")}
+                      />
                     </form>
+                    <DeleteButton action={deleteRule} payload={{ id: r.id }} label={ar ? `حذف قاعدة "${r.name}"؟` : `Delete rule "${r.nameEn ?? r.name}"?`} />
                   </div>
-                  <form action={updateRule} className="mt-3 space-y-2">
-                    <input type="hidden" name="id" value={r.id} />
-                    <div className="grid grid-cols-2 gap-2">
-                      <label style={{ fontSize: 10, color: "var(--ink-muted)" }}>{ar ? def.thresholdLabel_ar : def.thresholdLabel_en}
-                        <input type="number" name="threshold" defaultValue={r.threshold} min={def.thresholdMin} max={def.thresholdMax} step={def.thresholdStep} style={{ width: "100%", marginTop: 2, padding: "6px 8px", borderRadius: 8, border: "1px solid var(--line)", background: "#fff", fontFamily: "monospace" }} />
-                      </label>
-                      <label style={{ fontSize: 10, color: "var(--ink-muted)" }}>{ar ? "هدنة (ساعة)" : "Cooldown (h)"}
-                        <input type="number" name="cooldownHours" defaultValue={r.cooldownHours} min={1} max={168} style={{ width: "100%", marginTop: 2, padding: "6px 8px", borderRadius: 8, border: "1px solid var(--line)", background: "#fff", fontFamily: "monospace" }} />
-                      </label>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span style={{ fontSize: 10, color: "var(--ink-muted)", fontFamily: "monospace" }}>{formatNumber(r.triggerCount)} {ar ? "مرة" : "fires"}</span>
-                      <div className="flex items-center gap-1">
-                        <button type="submit" className="dl-btn dl-btn-secondary" style={{ padding: "5px 10px" }}><Settings className="h-3 w-3" />{ar ? "حفظ" : "Save"}</button>
-                        <DeleteButton action={deleteRule} payload={{ id: r.id }} label={ar ? `حذف قاعدة "${r.name}"؟` : `Delete rule "${r.nameEn ?? r.name}"?`} />
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
-        )}
-      </DaylightPanel>
-    </DaylightShell>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -1,0 +1,23 @@
+/* ════════════════════════════════════════════════════════════════
+   الأسواق · Markets section styles — ported verbatim from the Claude
+   Design reference (docs/design/system/sections/markets.html) and SCOPED
+   under .dl-page so they only apply to this restyled section page —
+   never leaking into the rest of the app. The base daylight look
+   (sec-head, kpi-grid, panel) lives in ../daylight.css; this file adds
+   the markets-only pieces the reference uses: region groups + stock
+   cards. Real data is fed in by page.tsx; the look is the design.
+   ════════════════════════════════════════════════════════════════ */
+
+.dl-page .mk-region { margin-bottom: 18px; }
+.dl-page .mk-region h2 { font-family: var(--dl-display); font-size: 20px; font-weight: 600; color: var(--emerald); margin-bottom: 12px; display: flex; align-items: center; gap: 9px; }
+.dl-page .mk-region h2 .rg { font-size: 11px; font-weight: 700; color: var(--ink-muted); background: var(--cream); border: 1px solid var(--line); padding: 3px 10px; border-radius: 999px; }
+.dl-page .mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.dl-page .stock { background: var(--cream); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; cursor: pointer; transition: transform .25s, border-color .25s; }
+.dl-page .stock:hover { transform: translateY(-2px); border-color: var(--gold); }
+.dl-page .stock .sk-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.dl-page .stock .sym { font-size: 13px; font-weight: 800; color: var(--ink); }
+.dl-page .stock .ch { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.dl-page .stock .ch.up { color: #3c7a5c; }
+.dl-page .stock .ch.down { color: #9a5648; }
+.dl-page .stock .nm { font-size: 11px; color: var(--ink-muted); margin: 2px 0 8px; }
+.dl-page .stock .px { font-family: var(--dl-display); font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 600; color: var(--emerald); }

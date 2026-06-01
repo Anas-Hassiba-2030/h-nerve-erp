@@ -1,20 +1,22 @@
 export const dynamic = "force-dynamic";
 // /education — The Tank Incubator at Al-Ahliyya Amman University. Fully bilingual.
+// Ported to the Claude Design "الأهلية" reference (docs/design/system/sections/
+// ahliyya.html + ahliyya-ops.js): raw .dl-page markup, three ops tabs
+// (overview · programs · teams). All Prisma fetching below is unchanged; real
+// data is mapped onto the reference's HTML slots.
 
 import Link from "next/link";
 import { GraduationCap, Plus } from "lucide-react";
 import { ExportMenu } from "@/components/ExportMenu";
-import { DeleteButton } from "@/components/DeleteButton";
 import { StatusBadge } from "@/components/StatusBadge";
 import { EmptyState } from "@/components/EmptyState";
-import {
-  DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel,
-} from "@/components/orrery/daylight";
 import { getLocale } from "@/lib/i18n.server";
 import { prisma } from "@/lib/db";
 import { formatMoney, formatNumber } from "@/lib/utils";
-import { deleteProgram } from "./actions";
+import { setProgramStage } from "./actions";
+import { AhliyyaTabs, type AhliyyaProgram } from "./AhliyyaTabs";
 import "../daylight.css";
+import "./ahliyya.css";
 
 const VERTICAL_LABEL: Record<string, { ar: string; en: string }> = {
   AI: { ar: "ذكاء اصطناعي", en: "AI" },
@@ -23,6 +25,22 @@ const VERTICAL_LABEL: Record<string, { ar: string; en: string }> = {
   AGRITECH: { ar: "زراعة ذكية", en: "Agritech" },
   EDTECH: { ar: "تعليم تقني", en: "EdTech" },
   OTHER: { ar: "أخرى", en: "Other" },
+};
+
+// domain stage -> pipeline index (reference order: idea · incubate · growth · exit)
+const STAGE_INDEX: Record<string, number> = {
+  INTAKE: 0,
+  STALLED: 1,
+  ACCELERATING: 2,
+  GRADUATED: 3,
+};
+
+// table status tag tone (matches the reference's ok / warn / crit tags)
+const STAGE_TAG: Record<string, "ok" | "warn" | "crit"> = {
+  GRADUATED: "ok",
+  ACCELERATING: "ok",
+  INTAKE: "warn",
+  STALLED: "crit",
 };
 
 export default async function EducationPage() {
@@ -37,29 +55,61 @@ export default async function EducationPage() {
   const totalFunding = programs.reduce((acc, p) => acc + p.fundingJod, 0);
   const totalTeam = programs.reduce((acc, p) => acc + p.teamSize, 0);
 
-  return (
-    <DaylightShell dir={ar ? "rtl" : "ltr"}>
-      <DaylightHeader
-        eyebrow={ar ? "القطاعات · التعليم والأبحاث" : "Sectors · Education & Research"}
-        title={ar ? "حاضنة The Tank" : "The Tank Incubator"}
-        subtitle={ar ? "بيت الشركات الناشئة لطلاب وخريجي جامعة عمّان الأهلية — كوهورت ٢٠٢٦." : "Home of student & alumni startups at Al-Ahliyya Amman University — cohort 2026."}
-        status={ar ? "كوهورت ٢٠٢٦" : "Cohort 2026"}
-        actions={
-          <>
-            <Link href="/education/new" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "تسجيل مشروع" : "Register program"}</Link>
-            <ExportMenu type="education" companyCode="AAU" locale={lc} />
-          </>
-        }
-      />
+  const tagText: Record<string, { ar: string; en: string }> = {
+    GRADUATED: { ar: "خروج", en: "Exit" },
+    ACCELERATING: { ar: "نمو", en: "Growth" },
+    INTAKE: { ar: "فكرة", en: "Idea" },
+    STALLED: { ar: "مراقبة", en: "Watch" },
+  };
 
-      <DaylightKpiGrid>
-        <DaylightKpi label={ar ? "مشاريع مسجلة" : "Programs"} value={formatNumber(programs.length)} hint={ar ? "كوهورت ٢٠٢٦" : "Cohort 2026"} />
-        <DaylightKpi label={ar ? "في طور التسريع" : "Accelerating"} value={formatNumber(accelerating)} hint={ar ? "مشاريع نشطة" : "active"} delta={accelerating > 0 ? { dir: "up", text: formatNumber(accelerating) } : undefined} />
-        <DaylightKpi label={ar ? "تمويل تراكمي" : "Total funding"} value={formatMoney(totalFunding)} hint={`${formatNumber(graduated)} ${ar ? "متخرج" : "graduated"}`} />
-        <DaylightKpi label={ar ? "المؤسسون والفرق" : "Founders & teams"} value={formatNumber(totalTeam)} hint={ar ? "أفراد" : "members"} />
-      </DaylightKpiGrid>
+  // data mapped onto the client tabs (programs pipeline + founding teams)
+  const tabPrograms: AhliyyaProgram[] = programs.map((p) => {
+    const vert = VERTICAL_LABEL[p.vertical] ?? VERTICAL_LABEL.OTHER;
+    return {
+      id: p.id,
+      name: p.name,
+      nameEn: p.nameEn,
+      founder: p.founder,
+      college: ar ? vert.ar : vert.en,
+      stage: p.stage,
+      stageIndex: STAGE_INDEX[p.stage] ?? 0,
+    };
+  });
 
-      <DaylightPanel title={ar ? "الشركات الناشئة" : "Startups"} aside={ar ? "محفظة الحاضنة" : "Incubator portfolio"}>
+  // ── overview panel (server-rendered, handed to the tabs island) ──
+  const overview = (
+    <>
+      <div className="kpi-grid reveal reveal-stagger">
+        <div className="kpi-card">
+          <div className="kpi-label">{ar ? "مشاريع مسجلة" : "Programs"}</div>
+          <div className="kpi-val">{formatNumber(programs.length)}</div>
+          <div className="kpi-foot"><span className="kpi-hint">{ar ? "كوهورت ٢٠٢٦" : "Cohort 2026"}</span></div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-label">{ar ? "في طور التسريع" : "Accelerating"}</div>
+          <div className="kpi-val">{formatNumber(accelerating)}</div>
+          <div className="kpi-foot">
+            <span className="kpi-hint">{ar ? "مشاريع نشطة" : "active"}</span>
+            {accelerating > 0 ? <span className="delta up">▲ {formatNumber(accelerating)}</span> : null}
+          </div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-label">{ar ? "تمويل تراكمي" : "Total funding"}</div>
+          <div className="kpi-val">{formatMoney(totalFunding)}</div>
+          <div className="kpi-foot"><span className="kpi-hint">{`${formatNumber(graduated)} ${ar ? "متخرج" : "graduated"}`}</span></div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-label">{ar ? "المؤسسون والفرق" : "Founders & teams"}</div>
+          <div className="kpi-val">{formatNumber(totalTeam)}</div>
+          <div className="kpi-foot"><span className="kpi-hint">{ar ? "أفراد" : "members"}</span></div>
+        </div>
+      </div>
+
+      <div className="panel reveal">
+        <div className="panel-head">
+          <span className="panel-title">{ar ? "البرامج" : "Programs"}</span>
+          <span className="panel-aside">{`${formatNumber(programs.length)} · ${ar ? "حسب التسجيل" : "by registration"}`}</span>
+        </div>
         {programs.length === 0 ? (
           <EmptyState
             icon={GraduationCap}
@@ -67,48 +117,66 @@ export default async function EducationPage() {
             action={<Link href="/education/new" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "تسجيل مشروع" : "Register program"}</Link>}
           />
         ) : (
-          <div className="prop-grid">
-            {programs.map((p) => {
-              const vert = VERTICAL_LABEL[p.vertical] ?? VERTICAL_LABEL.OTHER;
-              return (
-                <div key={p.id} className="prop-card">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--ink)" }}>{ar ? p.name : p.nameEn ?? p.name}</h3>
-                        <StatusBadge status={p.stage} />
-                      </div>
-                      {p.nameEn && ar ? <div style={{ fontSize: 10.5, fontWeight: 700, color: "var(--ink-muted)" }} dir="ltr">{p.nameEn}</div> : null}
-                      <div className="mt-1.5" style={{ fontSize: 11, fontWeight: 700 }}>
-                        <span style={{ color: "var(--ink-muted)" }}>{ar ? "المؤسس:" : "Founder:"}</span>{" "}<span style={{ color: "var(--ink)" }}>{p.founder}</span>
-                      </div>
-                    </div>
-                    <span className="tag gold">{ar ? vert.ar : vert.en}</span>
-                  </div>
-                  {p.description ? <p style={{ fontSize: 12, color: "var(--ink-muted)", lineHeight: 1.6, marginTop: 8, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{p.description}</p> : null}
-                  <div className="mt-3 grid grid-cols-3 gap-2 text-center" style={{ background: "var(--ivory)", border: "1px solid var(--line)", borderRadius: 12, padding: 10 }}>
-                    <ProgStat label={ar ? "كوهورت" : "Cohort"} value={p.cohort} />
-                    <ProgStat label={ar ? "تمويل" : "Funding"} value={formatMoney(p.fundingJod)} />
-                    <ProgStat label={ar ? "الفريق" : "Team"} value={formatNumber(p.teamSize)} />
-                  </div>
-                  <div className="mt-3 flex items-center justify-end" style={{ borderTop: "1px solid var(--line)", paddingTop: 10 }}>
-                    <DeleteButton action={deleteProgram} payload={{ id: p.id }} label={ar ? `حذف مشروع ${p.name}؟` : `Delete program ${p.nameEn ?? p.name}?`} description={ar ? "سيتم حذف المشروع نهائياً من حاضنة The Tank." : "This will permanently delete the program."} />
-                  </div>
-                </div>
-              );
-            })}
+          <div style={{ overflowX: "auto" }}>
+            <table className="dl-table">
+              <thead>
+                <tr>
+                  <th>{ar ? "البرنامج" : "Program"}</th>
+                  <th>{ar ? "الكلية" : "College"}</th>
+                  <th>{ar ? "المؤسس" : "Founder"}</th>
+                  <th className="num">{ar ? "الفريق" : "Team"}</th>
+                  <th className="num">{ar ? "تمويل" : "Funding"}</th>
+                  <th>{ar ? "الحالة" : "Status"}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {programs.map((p) => {
+                  const vert = VERTICAL_LABEL[p.vertical] ?? VERTICAL_LABEL.OTHER;
+                  const tone = STAGE_TAG[p.stage] ?? "warn";
+                  const txt = tagText[p.stage] ?? { ar: p.stage, en: p.stage };
+                  return (
+                    <tr key={p.id}>
+                      <td style={{ fontWeight: 700, color: "var(--ink)" }}>{ar ? p.name : (p.nameEn ?? p.name)}</td>
+                      <td>{ar ? vert.ar : vert.en}</td>
+                      <td>{p.founder}</td>
+                      <td className="num">{formatNumber(p.teamSize)}</td>
+                      <td className="num">{formatMoney(p.fundingJod)}</td>
+                      <td><span className={`tag ${tone}`}>{ar ? txt.ar : txt.en}</span></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
-      </DaylightPanel>
-    </DaylightShell>
+      </div>
+    </>
   );
-}
 
-function ProgStat({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--ink-muted)" }}>{label}</div>
-      <div style={{ marginTop: 2, fontSize: 14, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: "var(--ink)" }}>{value}</div>
+    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+      {/* ── section header ── */}
+      <header className="sec-head reveal">
+        <div>
+          <div className="sec-eyebrow"><span className="tick" />{ar ? "القطاعات · التعليم" : "Sectors · Education"}</div>
+          <h1 className="sec-title">{ar ? "جامعة عمّان الأهلية" : "Al-Ahliyya Amman University"}</h1>
+          <p className="sec-sub">
+            {ar
+              ? "«الخزّان» — حاضنة الشركات الناشئة لطلاب وخريجي الجامعة: القبول، البرامج، والفرق المؤسِّسة."
+              : "The Tank — the incubator for student & alumni startups: intake, programs, and founding teams."}
+          </p>
+        </div>
+        <div className="sec-head-aside">
+          <span className="sec-status"><span className="dot" />{ar ? "كوهورت ٢٠٢٦" : "Cohort 2026"}</span>
+          <div className="sec-actions">
+            <Link href="/education/new" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "تسجيل مشروع" : "Register program"}</Link>
+            <ExportMenu type="education" companyCode="AAU" locale={lc} />
+          </div>
+        </div>
+      </header>
+
+      {/* ── three-tab work surface: overview · programs · teams ── */}
+      <AhliyyaTabs ar={ar} programs={tabPrograms} overview={overview} setProgramStage={setProgramStage} />
     </div>
   );
 }

@@ -1,0 +1,85 @@
+/* ============================================================================
+   التعلّم · Learning — what the brain has learned about this org.
+   ----------------------------------------------------------------------------
+   Ported verbatim (structure + tokens) from
+   docs/design/system/sections/learning.html (which links _section.css +
+   brain.css), then SCOPED under .dl-page so it only applies on the learning
+   page and inherits the Daylight surface (app/(app)/daylight.css). The
+   reference is the BRAIN NIGHT register (slim ribbon + KPI strip + dark
+   panel with light --mist text, white headings, gold/sage accents), so the
+   reference tokens the Daylight surface doesn't already define
+   (--mist / --display / --ui / --night) are declared here, scoped to .dl-page.
+   .dl-page already provides --gold / --gold-soft / --sage / --emerald / --ink.
+   ============================================================================ */
+.dl-page {
+  --night: #0d1f1a;
+  --night-2: #112a23;
+  --mist: #cde0d6;
+  --display: var(--dl-display);
+  --ui: "Cairo", system-ui, sans-serif;
+}
+
+/* ── slim ribbon (brain.css) ── */
+.dl-page .br-wrap { max-width: 1180px; margin: 0 auto; padding: 14px 24px 80px; }
+.dl-page .br-ribbon { display: flex; align-items: stretch; gap: 18px; margin-bottom: 16px; flex-wrap: wrap; }
+.dl-page .br-title-box { display: flex; flex-direction: column; justify-content: center; padding-inline-end: 18px; border-inline-end: 1px solid rgba(194,163,90,.2); min-width: 170px; }
+.dl-page .br-title-box .eb { display: inline-flex; align-items: center; gap: 7px; font-size: 10px; font-weight: 700; letter-spacing: .14em; color: var(--gold-soft); text-transform: uppercase; margin-bottom: 4px; }
+.dl-page .br-title-box .eb .tick { width: 18px; height: 1.5px; background: var(--gold-soft); }
+.dl-page .br-title-box h1 { font-family: var(--display); font-size: 36px; font-weight: 600; color: #fff; line-height: 1; }
+.dl-page .br-intro { display: flex; align-items: center; flex: 1; font-size: 14px; line-height: 1.5; color: var(--mist); opacity: .82; background: linear-gradient(160deg, rgba(20,46,38,.5), rgba(13,31,26,.46)); border: 1px solid rgba(194,163,90,.2); border-radius: 16px; padding: 14px 20px; }
+
+/* ── controls (brain.css) ── */
+.dl-page .br-controls { display: flex; gap: 9px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.dl-page .br-btn { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; border-radius: 999px; padding: 9px 16px; cursor: pointer; font-family: var(--ui); transition: all .25s cubic-bezier(.22,1,.36,1); border: 0; background: none; color: inherit; }
+.dl-page .br-btn-primary { color: #241b06; background: linear-gradient(135deg, var(--gold-soft), var(--gold)); border: 0; }
+.dl-page .br-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 24px -12px rgba(194,163,90,.7); }
+.dl-page .br-btn-ghost { color: var(--mist); background: rgba(194,163,90,.1); border: 1px solid rgba(194,163,90,.3); }
+.dl-page .br-btn-ghost:hover { background: rgba(194,163,90,.2); color: #fff; }
+.dl-page .br-btn.danger { color: #cf9384; border-color: rgba(168,106,92,.4); background: rgba(168,106,92,.1); }
+.dl-page .br-btn:active { transform: scale(.97); }
+
+/* ── KPI strip (brain.css) ── */
+.dl-page .br-kpis { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.dl-page .br-kpi { flex: 1; min-width: 120px; background: linear-gradient(160deg, rgba(20,46,38,.5), rgba(13,31,26,.46)); border: 1px solid rgba(194,163,90,.2); border-radius: 14px; padding: 13px 16px; }
+.dl-page .br-kpi .v { font-family: var(--display); font-variant-numeric: tabular-nums; font-size: 25px; font-weight: 600; color: #fff; line-height: 1; }
+.dl-page .br-kpi .k { font-size: 11px; color: var(--mist); opacity: .7; margin-top: 4px; }
+
+/* ── panel (brain.css) ── */
+.dl-page .br-panel { background: linear-gradient(160deg, rgba(17,42,35,.5), rgba(13,31,26,.46)); backdrop-filter: blur(12px); border: 1px solid rgba(194,163,90,.2); border-radius: 18px; padding: 20px; margin-bottom: 16px; }
+.dl-page .br-panel h2 { font-family: var(--display); font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+.dl-page .br-panel .sub { font-size: 11.5px; color: var(--mist); opacity: .7; margin-bottom: 14px; }
+
+/* ── night list rows (brain.css) ── */
+.dl-page .br-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 13px; background: rgba(13,31,26,.4); border: 1px solid rgba(194,163,90,.14); margin-bottom: 9px; transition: border-color .2s; }
+.dl-page .br-row:hover { border-color: rgba(194,163,90,.4); }
+.dl-page .br-row .rt { flex: 1; min-width: 0; }
+.dl-page .br-row .rt .tt { font-size: 14px; font-weight: 700; color: #fff; }
+.dl-page .br-row .rt .ts { font-size: 12px; color: var(--mist); opacity: .7; margin-top: 2px; }
+.dl-page .br-chip { font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+.dl-page .br-chip.crit { color: #cf9384; background: rgba(168,106,92,.2); }
+.dl-page .br-chip.warn { color: var(--gold-soft); background: rgba(194,163,90,.18); }
+.dl-page .br-chip.ok { color: var(--sage); background: rgba(126,155,134,.2); }
+.dl-page .br-chip.info { color: #9cc6b4; background: rgba(46,107,87,.3); }
+
+/* ── toggle switch (brain.css) ── */
+.dl-page .br-switch { width: 42px; height: 24px; border-radius: 999px; background: rgba(205,224,214,.18); border: 0; cursor: pointer; position: relative; transition: background .25s; flex: 0 0 42px; }
+.dl-page .br-switch::after { content: ""; position: absolute; top: 3px; inset-inline-start: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .25s cubic-bezier(.22,1,.36,1); }
+.dl-page .br-switch.on { background: linear-gradient(135deg, var(--sage), var(--emerald)); }
+.dl-page .br-switch.on::after { transform: translateX(-18px); }
+.dl-page [dir="ltr"] .br-switch.on::after { transform: translateX(18px); }
+
+/* ── thinking overlay (brain.css) ── */
+.dl-page .br-thinking { display: inline-flex; align-items: center; gap: 8px; color: var(--gold-soft); font-size: 13px; font-weight: 700; }
+.dl-page .br-thinking .dots span { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--gold-soft); animation: brthink 1.3s ease-in-out infinite; }
+.dl-page .br-thinking .dots span:nth-child(2) { animation-delay: .2s; }
+.dl-page .br-thinking .dots span:nth-child(3) { animation-delay: .4s; }
+@keyframes brthink { 0%, 100% { opacity: .3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-4px); } }
+
+/* ── toast (brain.css) ── */
+.dl-page .br-toast { position: fixed; top: 70px; left: 50%; transform: translateX(-50%) translateY(-16px); z-index: 90; display: flex; align-items: center; gap: 10px; background: linear-gradient(135deg, rgba(31,77,63,.96), rgba(13,31,26,.96)); border: 1px solid var(--gold); border-radius: 14px; padding: 12px 20px; opacity: 0; transition: all .4s cubic-bezier(.34,1.56,.64,1); box-shadow: 0 0 36px rgba(220,195,138,.4); color: #fff; font-size: 13px; font-weight: 600; }
+.dl-page .br-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dl-page .br-thinking .dots span { animation: none; }
+  .dl-page .br-switch::after, .dl-page .br-toast { transition: none; }
+}

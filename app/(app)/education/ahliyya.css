@@ -1,0 +1,59 @@
+/* ════════════════════════════════════════════════════════════════
+   /education · الأهلية — section styles ported from the Claude Design
+   reference (docs/design/system/sections/ahliyya.html, which pulls from
+   _section.css + ops.css). The reference HTML has no inline <style>
+   block; these are the exact rules its markup depends on that are NOT
+   already provided by ../daylight.css — the ops tabs/panels, founding-
+   team portfolio tiles, the stage pipeline, and the warn/crit table
+   tags. Every selector is SCOPED under .dl-page so it never leaks into
+   the rest of the app. Class names are kept identical to the reference.
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── ops tabs + panels (from ops.css) ── */
+.dl-page .ops-tabs { display: flex; gap: 8px; margin: 22px 0 18px; flex-wrap: wrap; }
+.dl-page .ops-tab {
+  padding: 9px 20px; border-radius: 999px; font-size: 13.5px; font-weight: 700; color: var(--ink-muted); cursor: pointer;
+  background: var(--cream); border: 1px solid var(--line); font-family: var(--ui); transition: all .25s cubic-bezier(.22,1,.36,1);
+}
+.dl-page .ops-tab:hover { border-color: var(--gold); }
+.dl-page .ops-tab.on { background: linear-gradient(135deg, var(--emerald-soft), var(--emerald)); color: #fff; border-color: transparent; box-shadow: 0 6px 16px -8px rgba(31,77,63,.5); }
+.dl-page .ops-panel { display: none; animation: ops-fade .35s ease; }
+.dl-page .ops-panel.on { display: block; }
+@keyframes ops-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ── table tools (toolbar + add button) ── */
+.dl-page .ops-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.dl-page .ops-toolbar h2 { font-family: var(--dl-display); font-size: 24px; font-weight: 600; color: var(--emerald); }
+.dl-page .ops-actions { display: flex; gap: 9px; align-items: center; }
+.dl-page .ops-add { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--emerald-soft), var(--emerald)); border: 0; border-radius: 999px; padding: 9px 16px; cursor: pointer; }
+
+/* ── status tags (warn + crit complete the set daylight.css already has) ── */
+.dl-page .tag.warn { color: #8a6a1f; background: rgba(194,163,90,.2); }
+.dl-page .tag.crit { color: #9a5648; background: rgba(168,106,92,.16); }
+.dl-page .ops-tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 11px; border-radius: 999px; }
+.dl-page .ops-tag.ok { color: #3c7a5c; background: rgba(126,155,134,.2); }
+.dl-page .ops-tag.warn { color: #8a6a1f; background: rgba(194,163,90,.2); }
+.dl-page .ops-tag.crit { color: #9a5648; background: rgba(168,106,92,.18); }
+.dl-page .ops-tag.info { color: #2e6b57; background: rgba(46,107,87,.14); }
+
+/* ── stage pipeline (ahliyya) ── */
+.dl-page .stages { display: flex; align-items: center; gap: 0; margin-top: 6px; }
+.dl-page .stage { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; }
+.dl-page .stage .dot { width: 20px; height: 20px; border-radius: 50%; background: var(--line); border: 2px solid var(--line); transition: all .4s cubic-bezier(.22,1,.36,1); z-index: 2; }
+.dl-page .stage.done .dot { background: var(--emerald); border-color: var(--emerald); }
+.dl-page .stage.active .dot { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 0 4px rgba(194,163,90,.25); }
+.dl-page .stage .sl { font-size: 10.5px; color: var(--ink-muted); }
+.dl-page .stage.active .sl, .dl-page .stage.done .sl { color: var(--ink); font-weight: 700; }
+.dl-page .stage:not(:last-child)::after { content: ""; position: absolute; top: 9px; inset-inline-start: 50%; width: 100%; height: 2px; background: var(--line); z-index: 1; }
+.dl-page .stage.done:not(:last-child)::after { background: var(--emerald); }
+
+/* ── founding-team portfolio grid ── */
+.dl-page .ops-portfolio { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.dl-page .co-tile { background: var(--cream); border: 1px solid var(--line); border-radius: 16px; padding: 18px; cursor: pointer; transition: transform .25s, border-color .25s, box-shadow .25s; }
+.dl-page .co-tile:hover { transform: translateY(-3px); border-color: var(--gold); box-shadow: 0 16px 40px -22px rgba(31,77,63,.4); }
+.dl-page .co-tile .co-logo { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; font-family: var(--dl-display); font-size: 20px; font-weight: 600; color: #fff; background: linear-gradient(140deg, var(--emerald-soft), var(--emerald)); margin-bottom: 12px; }
+.dl-page .co-tile .co-nm { font-size: 15px; font-weight: 700; color: var(--ink); }
+.dl-page .co-tile .co-sec { font-size: 11.5px; color: var(--gold); margin-top: 2px; }
+.dl-page .co-tile .co-meta { display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) { .dl-page .ops-panel, .dl-page .stage .dot { animation: none !important; transition: none !important; } }

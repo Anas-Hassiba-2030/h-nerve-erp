@@ -1,27 +1,22 @@
 
 export const dynamic = "force-dynamic";
-// /supply-chain — predictive supply chain bridge. Daylight vocabulary.
-// Phase NS-1: every approved forecast drafts a cross-tenant PO.
+// /supply-chain — predictive supply chain bridge.
+// Claude Design "daylight" port: reference HTML structure (sec-head + sk-wrap +
+// panel/fc-card), CSS scoped under .dl-page. Prisma queries & server actions
+// are unchanged from the previous DaylightShell version.
 
 import Link from "next/link";
-import {
-  Brain, ArrowLeftRight, Plus, CheckCircle2, XCircle, Sparkles,
-  Network, Zap, Activity, ShoppingCart,
-} from "lucide-react";
-import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
-import { StatusBadge } from "@/components/StatusBadge";
-import "../daylight.css";
-import { EmptyState } from "@/components/EmptyState";
-import { DeleteButton } from "@/components/DeleteButton";
 import { Sankey, type SankeyNode, type SankeyLink } from "@/components/charts/Sankey";
 import { ForecastExplainer } from "@/components/ForecastExplainer";
 import { ExportMenu } from "@/components/ExportMenu";
+import { DeleteButton } from "@/components/DeleteButton";
+import { ForecastCardClient } from "./ForecastCardClient";
 import { getCompanyBrand } from "@/lib/companyBrand";
 import { getLocale } from "@/lib/i18n.server";
 import { prisma } from "@/lib/db";
-import {
-  formatNumber, formatPercent, formatShortDate,
-} from "@/lib/utils";
+import { formatNumber, formatPercent, formatShortDate } from "@/lib/utils";
+import "../daylight.css";
+import "./supply.css";
 import {
   autoGenerateForecasts, deleteForecast, setForecastStatus,
   approveForecast, rejectForecast,
@@ -42,6 +37,21 @@ const STATUS_LABEL: Record<string, { ar: string; en: string }> = {
   DISMISSED: { ar: "مرفوض", en: "Dismissed" },
 };
 
+// Confidence ring — mirrors the ring() helper in supply-ops.js.
+function ConfidenceRing({ pct }: { pct: number }) {
+  const C = 2 * Math.PI * 18;
+  const off = C * (1 - pct / 100);
+  return (
+    <svg width="46" height="46">
+      <circle cx="23" cy="23" r="18" fill="none" stroke="rgba(46,107,87,.15)" strokeWidth="4.5" />
+      <circle
+        cx="23" cy="23" r="18" fill="none" stroke="#C2A35A" strokeWidth="4.5"
+        strokeLinecap="round" strokeDasharray={C} strokeDashoffset={off}
+      />
+    </svg>
+  );
+}
+
 export default async function SupplyChainPage() {
   const locale = getLocale();
   const ar = locale === "ar";
@@ -59,11 +69,6 @@ export default async function SupplyChainPage() {
   });
 
   const drafts = forecasts.filter((f) => f.status === "DRAFT").length;
-  const approved = forecasts.filter((f) => f.status === "APPROVED").length;
-  const executed = forecasts.filter((f) => f.status === "EXECUTED").length;
-  const avgConfidence = forecasts.length > 0
-    ? forecasts.reduce((acc, f) => acc + f.confidence, 0) / forecasts.length
-    : 0;
 
   // Sankey data
   const sourceCompanies = new Map<string, { id: string; name: string; nameEn: string; code: string }>();
@@ -120,107 +125,89 @@ export default async function SupplyChainPage() {
   ];
 
   return (
-    <DaylightShell dir={ar ? "rtl" : "ltr"}>
-      <DaylightHeader
-        eyebrow={ar ? "الذكاء التشغيلي" : "Operational intelligence"}
-        title={ar ? "سلسلة التوريد التنبؤية" : "Predictive supply chain"}
-        subtitle={
-          ar
-            ? "جسر الذكاء بين شركات المجموعة — كل إشارة من فندق تتحول إلى أمر تصنيع أو حصاد."
-            : "AI bridge across group companies — every hotel signal becomes a production or harvest order."
-        }
-      />
-
-      {/* Bridge narrative + actions */}
-      <DaylightPanel
-        title={ar ? "من حجز فندقي… إلى أمر تصنيع" : "From booking… to production order"}
-        aside={ar ? `${formatNumber(forecasts.length)} إشارة` : `${formatNumber(forecasts.length)} signals`}
-      >
-        <p
-          style={{
-            fontSize: 13,
-            lineHeight: 1.65,
-            color: "var(--ink-muted)",
-            maxWidth: 640,
-            marginBottom: 16,
-          }}
-        >
-          {ar
-            ? "المحرك التنبؤي يقرأ كل حجز قادم في فنادق أرينا، يحسب توقعات استهلاك النزلاء، ويولّد إشارات شراء للمها ولوران قبل أن يصبح الطلب أزمة."
-            : "The predictive engine reads every incoming booking at Arena hotels, models guest consumption, and pushes purchase signals to Maha and Loran before demand becomes a crisis."}
-        </p>
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
-          <form action={autoGenerateForecasts}>
-            <button type="submit" className="dl-btn dl-btn-primary" style={{ fontSize: 12 }}>
-              <Zap className="h-3.5 w-3.5" strokeWidth={1.5} />
-              {ar ? "تشغيل المحرك" : "Run engine"}
-            </button>
-          </form>
-          <Link href="/supply-chain/new" className="dl-btn dl-btn-secondary" style={{ fontSize: 12, textDecoration: "none" }}>
-            <Plus className="h-3.5 w-3.5" strokeWidth={1.5} />
-            {ar ? "تنبؤ يدوي" : "Manual forecast"}
-          </Link>
-          <ExportMenu type="supply-chain" locale={lc} />
+    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+      {/* ── header ── */}
+      <div className="sec-head reveal">
+        <div>
+          <div className="sec-eyebrow">
+            <span className="tick" />
+            {ar ? "القطاعات · اللوجستيات" : "Sectors · Logistics"}
+          </div>
+          <h1 className="sec-title">
+            {ar ? "سلسلة التوريد التنبّؤية" : "Predictive supply chain"}
+          </h1>
+          <p className="sec-sub">
+            {ar
+              ? "جسر التوريد بين وحدات المجموعة — يتنبّأ الدماغ بالتدفّقات، وأنت تعتمد أو ترفض."
+              : "The supply bridge across group units — the Brain forecasts the flows, and you approve or reject."}
+          </p>
         </div>
-      </DaylightPanel>
+        <div className="sec-head-aside">
+          <span className="sec-status">
+            <span className="dot" />
+            {ar
+              ? `مباشر · ${formatNumber(drafts)} تنبؤات معلّقة`
+              : `Live · ${formatNumber(drafts)} pending forecasts`}
+          </span>
+          <div className="sec-actions">
+            <Link href="/supply-chain/new" className="dl-btn dl-btn-secondary" style={{ textDecoration: "none" }}>
+              {ar ? "تنبؤ يدوي" : "Manual forecast"}
+            </Link>
+            <ExportMenu type="supply-chain" locale={lc} />
+            <form action={autoGenerateForecasts}>
+              <button type="submit" className="dl-btn dl-btn-secondary">
+                {ar ? "توليد تلقائي" : "Auto-generate"}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
 
-      {/* KPI band */}
-      <DaylightKpiGrid>
-        <DaylightKpi label={ar ? "مسودات معلّقة" : "Drafts pending"} value={String(drafts)} hint={ar ? "تنتظر القرار" : "awaiting decision"} />
-        <DaylightKpi label={ar ? "موافق عليها" : "Approved"} value={String(approved)} hint={ar ? "جاهزة للتنفيذ" : "ready to execute"} />
-        <DaylightKpi label={ar ? "منفّذة" : "Executed"} value={String(executed)} hint={ar ? "تمت" : "completed"} />
-        <DaylightKpi label={ar ? "متوسط الثقة" : "Avg confidence"} value={`${Math.round(avgConfidence * 100)}%`} hint={ar ? "درجة AI" : "AI score"} />
-      </DaylightKpiGrid>
-
-      {/* Sankey */}
+      {/* ── sankey flow ── */}
       {forecasts.length > 0 ? (
-        <DaylightPanel
-          title={ar ? "جسر التوريد المرئي" : "Visual supply bridge"}
-          aside={ar ? "المصدر ← الفئة ← الهدف (السُّمك ∝ الكمية)" : "Source → category → target (thickness ∝ demand)"}
-        >
-          <Sankey nodes={sankeyNodes} links={sankeyLinks} width={1040} height={380} />
-        </DaylightPanel>
+        <div className="sk-wrap reveal">
+          <div className="panel-head" style={{ marginBottom: 6 }}>
+            <span className="panel-title">{ar ? "تدفّق التوريد" : "Supply flow"}</span>
+            <span className="panel-aside">
+              {ar ? "المصادر ← الفئات ← الوجهات" : "Sources → categories → destinations"}
+            </span>
+          </div>
+          <div style={{ position: "relative" }}>
+            <Sankey nodes={sankeyNodes} links={sankeyLinks} width={800} height={260} />
+          </div>
+        </div>
       ) : null}
 
-      {/* Forecast cards */}
-      {forecasts.length === 0 ? (
-        <DaylightPanel title={ar ? "لم يصدر أي تنبؤ بعد" : "No forecasts yet"}>
-          <p style={{ fontSize: 13, color: "var(--ink-muted)", marginBottom: 12 }}>
+      {/* ── forecasts ── */}
+      <div className="panel reveal">
+        <div className="panel-head">
+          <span className="panel-title">{ar ? "التنبؤات" : "Forecasts"}</span>
+          <span className="panel-aside">
             {ar
-              ? "شغّل المحرك ليقرأ بيانات الحجوزات والإنتاج الحالية، أو سجّل تنبؤاً يدوياً."
-              : "Run the engine to read current booking & production data, or register a manual forecast."}
-          </p>
-          <form action={autoGenerateForecasts}>
-            <button type="submit" className="dl-btn dl-btn-primary">
-              <Brain className="h-4 w-4" strokeWidth={1.5} />
-              {ar ? "توليد تلقائي" : "Auto-generate"}
-            </button>
-          </form>
-        </DaylightPanel>
-      ) : (
-        <DaylightPanel
-          title={ar ? "جسر التنبؤات" : "Forecast bridge"}
-          aside={ar ? `${formatNumber(forecasts.length)} إشارة AI` : `${formatNumber(forecasts.length)} AI signals`}
-        >
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(420px, 1fr))", gap: 12 }}>
-            {forecasts.map((f) => (
+              ? "انقر بطاقة لشرح الدماغ · اعتمد أو ارفض"
+              : "Click a card for the Brain's explanation · approve or reject"}
+          </span>
+        </div>
+
+        <div id="forecasts">
+          {forecasts.length === 0 ? (
+            <p style={{ fontSize: 15, color: "var(--ink-muted)" }}>
+              {ar
+                ? "لم يصدر أي تنبؤ بعد. شغّل التوليد التلقائي أو سجّل تنبؤاً يدوياً."
+                : "No forecasts yet. Run auto-generate or register a manual forecast."}
+            </p>
+          ) : (
+            forecasts.map((f) => (
               <ForecastCard key={f.id} forecast={f} ar={ar} lc={lc} />
-            ))}
-          </div>
-        </DaylightPanel>
-      )}
-    </DaylightShell>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
-/* ── Forecast card — Heritage Modern ──────────────────────────── */
-
-const STATUS_ACCENT: Record<string, string> = {
-  APPROVED:  "var(--emerald)",
-  EXECUTED:  "var(--gold)",
-  DISMISSED: "var(--ink-muted)",
-  DRAFT:     "var(--gold)",
-};
+/* ── Forecast card — reference .fc-card structure ───────────────── */
 
 function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc: "ar" | "en" }) {
   const sourceBrand = getCompanyBrand(f.source.code);
@@ -228,142 +215,96 @@ function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc:
   const catLabel = CATEGORY_LABEL[f.category]
     ? ar ? CATEGORY_LABEL[f.category].ar : CATEGORY_LABEL[f.category].en
     : f.category;
-  const accent = STATUS_ACCENT[f.status] ?? "var(--gold)";
+  const confPct = Math.round(f.confidence * 100);
 
-  return (
-    <article
-      className="relative overflow-hidden"
-      style={{
-        background: "var(--ivory)",
-        border: "1px solid var(--line)",
-      }}
-    >
-      <span
-        aria-hidden
-        className="absolute top-0 bottom-0"
-        style={{ insetInlineStart: 0, width: 3, background: accent }}
-      />
+  const title = ar
+    ? `${f.productLabel}: ${f.source.name} ← ${f.target.name}`
+    : `${f.productLabel}: ${f.source.nameEn} ← ${f.target.nameEn}`;
 
-      <div className="ms-2 p-4 space-y-3">
-        {/* Header row */}
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span
-              style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}
-            >
-              {catLabel}
-            </span>
-            <StatusBadge status={f.status} />
-          </div>
-          <span
-            style={{ fontSize: 10, color: "var(--ink-muted)", letterSpacing: "0.04em", fontFamily: "monospace" }}
-          >
-            {formatShortDate(f.periodStart)} → {formatShortDate(f.periodEnd)}
-          </span>
-        </div>
+  const ring = (
+    <>
+      <ConfidenceRing pct={confPct} />
+      <span className="v">{formatPercent(f.confidence, 0)}</span>
+    </>
+  );
 
-        <h3
-          className={ar ? "" : "font-display-latin"}
-          style={{ fontSize: 15, fontWeight: 600, color: "var(--ink)", lineHeight: 1.3 }}
+  const meta = (
+    <>
+      <span className="tag gold">{catLabel}</span>
+      <span>
+        {(ar ? "الكمية " : "Qty ") + formatNumber(f.predictedDemand) + " " + f.unit}
+      </span>
+      {f.sourcedPO ? (
+        <Link
+          href={`/admin/purchase-orders?po=${encodeURIComponent(f.sourcedPO.poNumber)}`}
+          style={{ color: "var(--gold)", textDecoration: "none", fontFamily: "'JetBrains Mono',ui-monospace,monospace" }}
         >
-          {f.productLabel}
-        </h3>
+          {f.sourcedPO.poNumber} → {f.sourcedPO.supplierRef?.name ?? (ar ? f.target.name : f.target.nameEn)}
+        </Link>
+      ) : (
+        <span style={{ color: "var(--gold)" }}>{ar ? "▾ يوضّح الدماغ" : "▾ Brain explains"}</span>
+      )}
+    </>
+  );
 
-        {/* Source → Target flow */}
-        <div className="flex items-center gap-2" style={{ fontSize: 11.5 }}>
-          <span
-            className="inline-flex items-center gap-1 px-2 py-0.5 font-semibold ring-1"
-            style={{
-              background: `color-mix(in srgb, ${sourceBrand.accent} 12%, transparent)`,
-              color: sourceBrand.accent,
-              borderColor: `color-mix(in srgb, ${sourceBrand.accent} 28%, transparent)`,
-            }}
-          >
-            <span style={{ fontSize: 10 }}>{sourceBrand.emblem}</span>
-            <span className="line-clamp-1">{ar ? f.source.name : f.source.nameEn}</span>
-          </span>
-          <ArrowLeftRight className="h-3 w-3 shrink-0" style={{ color: "var(--ink-muted)" }} strokeWidth={1.5} />
-          <span
-            className="inline-flex items-center gap-1 px-2 py-0.5 font-semibold ring-1"
-            style={{
-              background: `color-mix(in srgb, ${targetBrand.accent} 12%, transparent)`,
-              color: targetBrand.accent,
-              borderColor: `color-mix(in srgb, ${targetBrand.accent} 28%, transparent)`,
-            }}
-          >
-            <span style={{ fontSize: 10 }}>{targetBrand.emblem}</span>
-            <span className="line-clamp-1">{ar ? f.target.name : f.target.nameEn}</span>
-          </span>
-        </div>
-
-        {/* Phase NS-1 — linked PO badge */}
-        {f.sourcedPO ? (
-          <Link
-            href={`/admin/purchase-orders?po=${encodeURIComponent(f.sourcedPO.poNumber)}`}
-            className="inline-flex items-center gap-1.5 px-2 py-1 ring-1 transition hover:brightness-95"
-            style={{
-              fontSize: 10.5,
-              fontWeight: 600,
-              background: "var(--cream)",
-              color: "var(--gold)",
-              borderColor: "var(--line)",
-              textDecoration: "none",
-            }}
-          >
-            <ShoppingCart className="h-3 w-3" strokeWidth={1.5} />
-            <span style={{ fontFamily: "'JetBrains Mono',ui-monospace,monospace" }}>{f.sourcedPO.poNumber}</span>
-            <span>→ {f.sourcedPO.supplierRef?.name ?? (ar ? f.target.name : f.target.nameEn)}</span>
-          </Link>
-        ) : null}
-
-        {/* 3 stat cells */}
-        <div className="grid grid-cols-3 gap-2">
-          <ForecastStat label={ar ? "الكمية" : "Qty"} value={formatNumber(f.predictedDemand)} sub={f.unit} />
-          <ForecastStat label={ar ? "الثقة" : "Conf"} value={formatPercent(f.confidence, 0)} sub="AI" highlight />
-          <ForecastStat
-            label={ar ? "أيام" : "Days"}
-            value={formatNumber(Math.max(1, Math.round((f.periodEnd.getTime() - f.periodStart.getTime()) / 86400000)))}
-            sub={ar ? "نافذة" : "window"}
-          />
-        </div>
-
-        {/* H-Nerve signal */}
-        <div
-          className="px-3 py-2.5"
-          style={{
-            background: "var(--cream)",
-            border: "1px solid var(--line)",
-            borderInlineStart: `3px solid ${accent}`,
-            fontSize: 11,
-            lineHeight: 1.6,
-            color: "var(--ink-muted)",
-          }}
-        >
-          <span style={{ fontWeight: 700, color: "var(--ink)" }}>
-            {ar ? "إشارة H-Nerve: " : "H-Nerve signal: "}
-          </span>
-          {f.signal}
-        </div>
-
-        <ForecastExplainer
-          signal={f.signal}
-          predictedDemand={f.predictedDemand}
-          unit={f.unit}
-          confidence={f.confidence}
-          productLabel={f.productLabel}
-          sourceCompany={ar ? f.source.name : f.source.nameEn}
-          targetCompany={ar ? f.target.name : f.target.nameEn}
-          category={catLabel}
-          locale={lc}
-        />
+  // Actions: pending (DRAFT) → approve / reject buttons; otherwise a status pill.
+  const actions =
+    f.status === "DRAFT" ? (
+      <div className="fc-actions">
+        <form action={approveForecast}>
+          <input type="hidden" name="id" value={f.id} />
+          <input type="hidden" name="status" value="APPROVED" />
+          <button type="submit" className="fc-btn fc-approve">{ar ? "يعتمد" : "Approve"}</button>
+        </form>
+        <form action={rejectForecast}>
+          <input type="hidden" name="id" value={f.id} />
+          <input type="hidden" name="status" value="DISMISSED" />
+          <button type="submit" className="fc-btn fc-reject">{ar ? "يرفض" : "Reject"}</button>
+        </form>
       </div>
+    ) : f.status === "DISMISSED" ? (
+      <span className="fc-status no">{ar ? STATUS_LABEL.DISMISSED.ar : STATUS_LABEL.DISMISSED.en}</span>
+    ) : (
+      <span className="fc-status ok">{ar ? STATUS_LABEL[f.status].ar : STATUS_LABEL[f.status].en}</span>
+    );
 
-      {/* Footer actions */}
+  const accentSource = `color-mix(in srgb, ${sourceBrand.accent} 14%, transparent)`;
+  const accentTarget = `color-mix(in srgb, ${targetBrand.accent} 14%, transparent)`;
+
+  const explain = (
+    <>
+      <div className="eb">{ar ? "لماذا تنبّأ الدماغ بهذا؟" : "Why did the Brain forecast this?"}</div>
       <div
-        className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5"
-        style={{ borderTop: "1px solid var(--line)", background: "var(--cream)" }}
+        style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 12, fontSize: 12 }}
       >
-        <div className="flex flex-wrap gap-1">
+        <span style={{ padding: "3px 10px", borderRadius: 999, background: accentSource, color: sourceBrand.accent, fontWeight: 700 }}>
+          {sourceBrand.emblem} {ar ? f.source.name : f.source.nameEn}
+        </span>
+        <span style={{ color: "var(--ink-muted)" }}>→</span>
+        <span style={{ padding: "3px 10px", borderRadius: 999, background: accentTarget, color: targetBrand.accent, fontWeight: 700 }}>
+          {targetBrand.emblem} {ar ? f.target.name : f.target.nameEn}
+        </span>
+        <span style={{ color: "var(--ink-muted)" }}>
+          {formatShortDate(f.periodStart)} → {formatShortDate(f.periodEnd)}
+        </span>
+      </div>
+      <p style={{ margin: "0 0 12px" }}>
+        <b>{ar ? "إشارة H-Nerve: " : "H-Nerve signal: "}</b>
+        {f.signal}
+      </p>
+      <ForecastExplainer
+        signal={f.signal}
+        predictedDemand={f.predictedDemand}
+        unit={f.unit}
+        confidence={f.confidence}
+        productLabel={f.productLabel}
+        sourceCompany={ar ? f.source.name : f.source.nameEn}
+        targetCompany={ar ? f.target.name : f.target.nameEn}
+        category={catLabel}
+        locale={lc}
+      />
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 12 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
           {(["DRAFT", "APPROVED", "EXECUTED", "DISMISSED"] as const).map((s) => {
             const act =
               s === "APPROVED" && f.status === "DRAFT"
@@ -375,18 +316,7 @@ function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc:
               <form key={s} action={act}>
                 <input type="hidden" name="id" value={f.id} />
                 <input type="hidden" name="status" value={s} />
-                <button
-                  type="submit"
-                  className="dl-btn dl-btn-secondary"
-                  style={{ padding: "4px 10px", fontSize: 10.5 }}
-                >
-                  {s === "APPROVED" ? (
-                    <CheckCircle2 className="h-3 w-3" style={{ color: "var(--emerald)" }} strokeWidth={1.5} />
-                  ) : s === "EXECUTED" ? (
-                    <ArrowLeftRight className="h-3 w-3" style={{ color: "var(--gold)" }} strokeWidth={1.5} />
-                  ) : s === "DISMISSED" ? (
-                    <XCircle className="h-3 w-3" style={{ color: "var(--brick)" }} strokeWidth={1.5} />
-                  ) : null}
+                <button type="submit" className="dl-btn dl-btn-secondary" style={{ padding: "5px 12px", fontSize: 11.5 }}>
                   {ar ? STATUS_LABEL[s].ar : STATUS_LABEL[s].en}
                 </button>
               </form>
@@ -400,37 +330,17 @@ function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc:
           label={ar ? "حذف التنبؤ" : "Delete forecast"}
         />
       </div>
-    </article>
+    </>
   );
-}
 
-function ForecastStat({
-  label,
-  value,
-  sub,
-  highlight = false,
-}: {
-  label: string;
-  value: string;
-  sub: string;
-  highlight?: boolean;
-}) {
   return (
-    <div
-      className="p-2 text-center"
-      style={{
-        background: highlight ? "var(--cream)" : "var(--ivory)",
-        border: `1px solid ${highlight ? "var(--line)" : "var(--line)"}`,
-        borderTop: highlight ? `2px solid var(--gold)` : undefined,
-      }}
-    >
-      <div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.08em", color: "var(--ink-muted)" }}>{label}</div>
-      <div
-        style={{ fontSize: 15, fontWeight: 700, color: highlight ? "var(--gold)" : "var(--ink)", fontFamily: "monospace", marginTop: 2 }}
-      >
-        {value}
-      </div>
-      <div style={{ fontSize: 9, fontWeight: 600, color: "var(--ink-muted)" }}>{sub}</div>
-    </div>
+    <ForecastCardClient
+      status={f.status}
+      ring={ring}
+      title={title}
+      meta={meta}
+      actions={actions}
+      explain={explain}
+    />
   );
 }

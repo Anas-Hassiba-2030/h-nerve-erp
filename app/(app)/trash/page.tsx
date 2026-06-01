@@ -1,6 +1,3 @@
-import { Trash2 } from "lucide-react";
-import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
-import { EmptyState } from "@/components/EmptyState";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { requireUser } from "@/lib/session";
@@ -9,6 +6,7 @@ import type { SoftEntity } from "@/lib/softDelete";
 import { TrashClient, type TrashItem } from "./TrashClient";
 import { purgeAllExpired } from "./actions";
 import "../daylight.css";
+import "./trash.css";
 
 export const dynamic = "force-dynamic";
 
@@ -143,42 +141,38 @@ export default async function TrashPage() {
   ).length;
 
   return (
-    <DaylightShell dir={ar ? "rtl" : "ltr"}>
-      <DaylightHeader
-        eyebrow={ar ? "النظام" : "System"}
-        title={ar ? "سلة المحذوفات" : "Trash"}
-        subtitle={
-          ar
-            ? "كل عنصر محذوف ناعماً يبقى قابلاً للاسترجاع لمدة 24 ساعة قبل الحذف الدائم."
-            : "Soft-deleted items stay recoverable for 24 hours before permanent purge."
-        }
-        actions={
-          expiredCount > 0 ? (
-            <form action={purgeAllExpired}>
-              <button type="submit" className="dl-btn dl-btn-secondary">
-                <Trash2 className="h-3.5 w-3.5" />
-                <span>
-                  {ar ? `تفريغ ${expiredCount} منتهي الصلاحية` : `Purge ${expiredCount} expired`}
-                </span>
-              </button>
-            </form>
-          ) : null
-        }
-      />
-        {items.length === 0 ? (
-          <EmptyState
-            icon={Trash2}
-            title={ar ? "السلة فارغة" : "Trash is empty"}
-            description={
-              ar
-                ? "لا توجد عناصر محذوفة في الوقت الحالي. أي حذف ناعم سيظهر هنا قبل تفريغ نهائي بعد 24 ساعة."
-                : "No deleted items right now. Any soft-delete will land here before its 24-hour permanent purge."
-            }
-          />
-        ) : (
-          <TrashClient items={items} graceMs={GRACE_MS} ar={ar} />
-        )}
-    </DaylightShell>
+    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+      <div className="wrap">
+        <div className="sec-head reveal">
+          <div>
+            <div className="sec-eyebrow">
+              <span className="tick" />
+              {ar ? "النظام · المحذوفات" : "System · Trash"}
+            </div>
+            <h1 className="sec-title">{ar ? "سلة المحذوفات" : "Trash"}</h1>
+            <p className="sec-sub">
+              {ar
+                ? "استعد العناصر المحذوفة أو احذفها نهائياً. تُمسح المنتهية تلقائياً بعد ٢٤ ساعة."
+                : "Restore deleted items or purge them permanently. Expired items are swept automatically after 24 hours."}
+            </p>
+          </div>
+          <div className="sec-head-aside">
+            <span className="sec-status">
+              <span className="dot" />
+              {ar ? "مباشر" : "Live"}
+            </span>
+          </div>
+        </div>
+
+        <TrashClient
+          items={items}
+          graceMs={GRACE_MS}
+          ar={ar}
+          expiredCount={expiredCount}
+          purgeAllExpired={purgeAllExpired}
+        />
+      </div>
+    </div>
   );
 }
 

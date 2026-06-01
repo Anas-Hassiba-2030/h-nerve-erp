@@ -1,0 +1,83 @@
+/* ════════════════════════════════════════════════════════════════
+   أرينا · Hospitality section styles — ported verbatim from the Claude
+   Design reference (docs/design/system/sections/arena.html, which pulls
+   _section.css + ops.css) and SCOPED under .dl-page so they only apply
+   to this restyled section page — never leaking into the rest of the
+   app. The base daylight look (sec-head, kpi-grid, panel, tables) lives
+   in ../daylight.css; this file adds the arena-only pieces the reference
+   uses: ops tabs/panels, the segmented control, and the revenue bars.
+   Real data is fed in by page.tsx; the look is the design.
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── status pulse dot (arena sec-status uses the animated ping) ── */
+.dl-page .sec-status .dot { position: relative; }
+.dl-page .sec-status .dot::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--sage);
+  animation: s-ping 2.6s cubic-bezier(.16,1,.3,1) infinite;
+}
+@keyframes s-ping { 0% { transform: scale(1); opacity: .7; } 75%, 100% { transform: scale(3); opacity: 0; } }
+
+/* ── tabs (ops.css) ── */
+.dl-page .ops-tabs { display: flex; gap: 8px; margin: 22px 0 18px; flex-wrap: wrap; }
+.dl-page .ops-tab {
+  padding: 9px 20px; border-radius: 999px; font-size: 13.5px; font-weight: 700; color: var(--ink-muted); cursor: pointer;
+  background: var(--cream); border: 1px solid var(--line); font-family: inherit; transition: all .25s cubic-bezier(.22,1,.36,1);
+}
+.dl-page .ops-tab:hover { border-color: var(--gold); }
+.dl-page .ops-tab.on {
+  background: linear-gradient(135deg, var(--emerald-soft), var(--emerald)); color: #fff; border-color: transparent;
+  box-shadow: 0 6px 16px -8px rgba(31,77,63,.5);
+}
+.dl-page .ops-panel { display: none; animation: ops-fade .35s ease; }
+.dl-page .ops-panel.on { display: block; }
+@keyframes ops-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ── status tags used by the arena tables (warn / crit / info) ── */
+.dl-page .tag.warn { color: #8a6a1f; background: rgba(194,163,90,.2); }
+.dl-page .tag.crit { color: #9a5648; background: rgba(168,106,92,.16); }
+.dl-page .tag.info { color: #2e6b57; background: rgba(46,107,87,.14); }
+
+/* ── segmented control (Revenue vs Expenses) ── */
+.dl-page .seg { display: inline-flex; padding: 4px; border-radius: 999px; background: var(--ivory); border: 1px solid var(--line); position: relative; }
+.dl-page .seg button {
+  position: relative; z-index: 2; padding: 7px 18px; border-radius: 999px; font-size: 13px; font-weight: 600;
+  color: var(--ink-muted); transition: color .3s; background: transparent; white-space: nowrap; cursor: pointer; border: 0; font-family: inherit;
+}
+.dl-page .seg button.active { color: #fff; }
+.dl-page .seg .seg-ind {
+  position: absolute; z-index: 1; top: 4px; left: 0; height: calc(100% - 8px); border-radius: 999px; background: var(--emerald);
+  box-shadow: 0 4px 12px -4px rgba(31,77,63,.6);
+  transition: transform .42s cubic-bezier(.22,1,.36,1), width .42s cubic-bezier(.22,1,.36,1); will-change: transform, width;
+}
+
+/* ── revenue / expense bars ── */
+.dl-page .bars { display: flex; align-items: flex-end; gap: 8px; height: 170px; padding-top: 10px; }
+.dl-page .bar-col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 8px; height: 100%; }
+.dl-page .bar-stack { width: 100%; display: flex; flex-direction: column; justify-content: flex-end; gap: 3px; height: 100%; }
+.dl-page .bar { width: 100%; border-radius: 5px 5px 0 0; transition: height 1s cubic-bezier(.22,1,.36,1); }
+.dl-page .bar.rev { background: linear-gradient(180deg, var(--emerald-soft), var(--emerald)); }
+.dl-page .bar.exp { background: rgba(194,163,90,.55); }
+.dl-page .bar-x { font-size: 11px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+
+/* ── raw <table> inside arena panels (reference uses bare <table>, not .dl-table) ── */
+.dl-page .panel table { width: 100%; border-collapse: collapse; }
+.dl-page .panel th, .dl-page .panel td { text-align: start; padding: 13px 12px; font-size: 14px; border-bottom: 1px solid var(--line); }
+.dl-page .panel th { font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--ink-muted); text-transform: none; }
+.dl-page .panel td { color: var(--ink); }
+.dl-page .panel td.num, .dl-page .panel th.num { text-align: end; font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+.dl-page .panel tbody tr { transition: background .25s; }
+.dl-page .panel tbody tr:hover { background: rgba(194,163,90,.06); }
+.dl-page .panel tr:last-child td { border-bottom: 0; }
+
+/* ── reveal-stagger (kpi grid entrance) ── */
+.dl-page .reveal-stagger > * { animation: dl-reveal .6s cubic-bezier(.22,1,.36,1) both; }
+.dl-page .reveal-stagger > *:nth-child(1) { animation-delay: .05s; }
+.dl-page .reveal-stagger > *:nth-child(2) { animation-delay: .12s; }
+.dl-page .reveal-stagger > *:nth-child(3) { animation-delay: .19s; }
+.dl-page .reveal-stagger > *:nth-child(4) { animation-delay: .26s; }
+.dl-page .reveal-stagger > *:nth-child(5) { animation-delay: .33s; }
+@media (prefers-reduced-motion: reduce) {
+  .dl-page .reveal-stagger > * { animation: none !important; }
+  .dl-page .sec-status .dot::after { animation: none !important; }
+  .dl-page .ops-panel { animation: none !important; }
+}

@@ -1,0 +1,60 @@
+/* ============================================================================
+   الإعدادات · Settings — Heritage Luxury "work" register (Claude Design).
+   ----------------------------------------------------------------------------
+   Ported verbatim (structure + look) from
+   docs/design/system/sections/system.html (which links _section.css + ops.css)
+   and system-ops.js, then SCOPED under .dl-page so it only applies on the
+   /settings page and never leaks into the rest of the app.
+
+   The .ops-tabs / .ops-tab / .ops-panel / .panel / .ops-tag / .br-switch rules
+   are copied 1:1 from docs/design/system/ops.css + _section.css. The .wrap /
+   .sec-* / .kpi-* / .panel shell already lives in daylight.css; we re-declare
+   --ui here (the reference resolves it from _section.css) so the verbatim rules
+   resolve identically.
+   ============================================================================ */
+.dl-page {
+  --ui: "Cairo", system-ui, sans-serif;
+}
+
+/* page shell (reference .wrap) */
+.dl-page .wrap { max-width: 1180px; margin: 0 auto; padding: 34px 26px 80px; }
+
+/* tabs — copied 1:1 from ops.css .ops-tabs / .ops-tab / .ops-panel */
+.dl-page .ops-tabs { display: flex; gap: 8px; margin: 22px 0 18px; flex-wrap: wrap; }
+.dl-page .ops-tab {
+  padding: 9px 20px; border-radius: 999px; font-size: 13.5px; font-weight: 700; color: var(--ink-muted); cursor: pointer;
+  background: var(--cream); border: 1px solid var(--line); font-family: var(--ui); transition: all .25s cubic-bezier(.22, 1, .36, 1);
+}
+.dl-page .ops-tab:hover { border-color: var(--gold); }
+.dl-page .ops-tab.on { background: linear-gradient(135deg, var(--emerald-soft), var(--emerald)); color: #fff; border-color: transparent; box-shadow: 0 6px 16px -8px rgba(31, 77, 63, .5); }
+.dl-page .ops-panel { display: none; animation: ops-fade .35s ease; }
+.dl-page .ops-panel.on { display: block; }
+@keyframes ops-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* status pill — copied 1:1 from ops.css .ops-tag */
+.dl-page .ops-tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 11px; border-radius: 999px; }
+.dl-page .ops-tag.ok { color: #3c7a5c; background: rgba(126, 155, 134, .2); }
+.dl-page .ops-tag.warn { color: #8a6a1f; background: rgba(194, 163, 90, .2); }
+.dl-page .ops-tag.crit { color: #9a5648; background: rgba(168, 106, 92, .18); }
+.dl-page .ops-tag.info { color: #2e6b57; background: rgba(46, 107, 87, .14); }
+
+/* platform-health line (reference .ws-line, inline-styled in system-ops.js) */
+.dl-page .ws-line { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--line); }
+
+/* preference toggle — copied 1:1 from brain.css .br-switch (used by system-ops.js) */
+.dl-page .br-switch {
+  width: 42px; height: 24px; border-radius: 999px; background: rgba(46, 107, 87, .18); border: 0; cursor: pointer;
+  position: relative; transition: background .25s; flex: 0 0 42px;
+}
+.dl-page .br-switch::after {
+  content: ""; position: absolute; top: 3px; inset-inline-start: 3px; width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; transition: transform .25s cubic-bezier(.22, 1, .36, 1);
+}
+.dl-page .br-switch.on { background: linear-gradient(135deg, var(--sage), var(--emerald)); }
+.dl-page .br-switch.on::after { transform: translateX(-18px); }
+.dl-page [dir="ltr"] .br-switch.on::after { transform: translateX(18px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dl-page .ops-panel { animation: none !important; }
+  .dl-page .br-switch::after { transition: none !important; }
+}

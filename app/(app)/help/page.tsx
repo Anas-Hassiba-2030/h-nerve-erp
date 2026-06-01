@@ -1,15 +1,13 @@
 // Help center — keyboard shortcuts, tour of modules, FAQ.
-// First-class onboarding so new users can self-serve.
+// Ported to the daylight "info" reference (docs/design/system/sections/
+// info.html — the help tab): .sec-head header + .panel cards with
+// .panel-head / .panel-title and inline-styled <kbd> rows, recoloured to
+// the ivory daylight register. First-class onboarding so new users can
+// self-serve.
 
-import Link from "next/link";
-import {
-  Keyboard, Sparkles, Brain, Hotel, Milk, Sprout, GraduationCap,
-  Wallet, TrendingUp, Leaf, FlaskConical, ListChecks, Trophy,
-  Activity, Search, FileText, ArrowLeftRight, Building2, Command,
-} from "lucide-react";
-import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { getLocale } from "@/lib/i18n.server";
 import "../daylight.css";
+import "./info.css";
 
 type Shortcut = { keys: string[]; ar: string; en: string };
 
@@ -29,40 +27,28 @@ type Module = {
   en: string;
   desc_ar: string;
   desc_en: string;
-  icon: any;
-  tone: string;
 };
 
 const MODULES: Module[] = [
-  { href: "/dashboard", ar: "اللوحة التنفيذية", en: "Executive dashboard", desc_ar: "نظرة شاملة على نبض المجموعة في شاشة واحدة.", desc_en: "Whole-group pulse in one screen.", icon: Sparkles, tone: "emerald" },
-  { href: "/search", ar: "البحث الشامل", en: "Global search", desc_ar: "بحث عميق عبر 14 جدول بيانات.", desc_en: "Deep search across 14 data tables.", icon: Search, tone: "blue" },
-  { href: "/companies", ar: "الشركات", en: "Companies", desc_ar: "سجل القابضة وكل وحدة أعمال.", desc_en: "Holdings registry per business unit.", icon: Building2, tone: "emerald" },
-  { href: "/compare", ar: "مقارنة شركتين", en: "Compare", desc_ar: "وجه لوجه بين أي شركتين بكل المؤشرات.", desc_en: "Side-by-side head-to-head.", icon: ArrowLeftRight, tone: "violet" },
-  { href: "/hotels", ar: "أرينا للضيافة", en: "Arena Hospitality", desc_ar: "فنادق وحجوزات ومعدلات إشغال.", desc_en: "Hotels, bookings, occupancy.", icon: Hotel, tone: "amber" },
-  { href: "/dairy", ar: "المها للألبان", en: "Maha Dairy", desc_ar: "دفعات إنتاج وجودة وتوزيع.", desc_en: "Production batches, quality, distribution.", icon: Milk, tone: "sky" },
-  { href: "/farms", ar: "لوران الزراعية", en: "Loran Agri", desc_ar: "دفيئات ذكية ومحاصيل ومستشعرات.", desc_en: "Smart greenhouses, crops, sensors.", icon: Sprout, tone: "emerald" },
-  { href: "/education", ar: "حاضنة The Tank", en: "The Tank", desc_ar: "ستارت أب تحت مظلة الجامعة الأهلية.", desc_en: "Startups under the AAU umbrella.", icon: GraduationCap, tone: "indigo" },
-  { href: "/supply-chain", ar: "جسر AI", en: "AI Bridge", desc_ar: "تنبؤات تربط إشغال الفنادق بإنتاج الألبان والزراعة.", desc_en: "Forecasts linking occupancy → dairy/produce.", icon: Brain, tone: "violet" },
-  { href: "/insights", ar: "إشارات الذكاء", en: "Insights", desc_ar: "تنبيهات ذكية وفرص اكتشفها AI.", desc_en: "AI-discovered alerts & opportunities.", icon: Sparkles, tone: "amber" },
-  { href: "/finance", ar: "المركز المالي", en: "Finance", desc_ar: "السجل المالي عبر كل الشركات.", desc_en: "Cross-company ledger.", icon: Wallet, tone: "emerald" },
-  { href: "/markets", ar: "الأسواق العالمية", en: "Markets", desc_ar: "متابعة أسهم MENA + عالمية.", desc_en: "MENA + global watchlist.", icon: TrendingUp, tone: "blue" },
-  { href: "/sustainability", ar: "الاستدامة ESG", en: "Sustainability", desc_ar: "بيئة + اجتماعي + حوكمة.", desc_en: "Environmental + social + governance.", icon: Leaf, tone: "emerald" },
-  { href: "/projects", ar: "خط الأنابيب", en: "Pipeline", desc_ar: "مشاريع مستقبلية لكل شركة.", desc_en: "Future projects per company.", icon: FlaskConical, tone: "violet" },
-  { href: "/tasks", ar: "المهام والXP", en: "Tasks & XP", desc_ar: "نظام مهام ملعّب يكسبك نقاط ورتبة.", desc_en: "Gamified tasks earning XP & rank.", icon: ListChecks, tone: "blue" },
-  { href: "/achievements", ar: "الإنجازات", en: "Achievements", desc_ar: "ميداليات + رتبة شطرنجية للموظف.", desc_en: "Medals + chess rank.", icon: Trophy, tone: "amber" },
-  { href: "/reports", ar: "التقارير الرسمية", en: "Reports", desc_ar: "تقرير من صفحة واحدة لكل شركة، جاهز PDF.", desc_en: "One-pager per company, print-ready PDF.", icon: FileText, tone: "indigo" },
-  { href: "/activity", ar: "سجل النشاط", en: "Activity log", desc_ar: "تتبع كل عملية في النظام.", desc_en: "Audit trail of every action.", icon: Activity, tone: "slate" },
+  { href: "/dashboard", ar: "اللوحة التنفيذية", en: "Executive dashboard", desc_ar: "نظرة شاملة على نبض المجموعة في شاشة واحدة.", desc_en: "Whole-group pulse in one screen." },
+  { href: "/search", ar: "البحث الشامل", en: "Global search", desc_ar: "بحث عميق عبر 14 جدول بيانات.", desc_en: "Deep search across 14 data tables." },
+  { href: "/companies", ar: "الشركات", en: "Companies", desc_ar: "سجل القابضة وكل وحدة أعمال.", desc_en: "Holdings registry per business unit." },
+  { href: "/compare", ar: "مقارنة شركتين", en: "Compare", desc_ar: "وجه لوجه بين أي شركتين بكل المؤشرات.", desc_en: "Side-by-side head-to-head." },
+  { href: "/hotels", ar: "أرينا للضيافة", en: "Arena Hospitality", desc_ar: "فنادق وحجوزات ومعدلات إشغال.", desc_en: "Hotels, bookings, occupancy." },
+  { href: "/dairy", ar: "المها للألبان", en: "Maha Dairy", desc_ar: "دفعات إنتاج وجودة وتوزيع.", desc_en: "Production batches, quality, distribution." },
+  { href: "/farms", ar: "لوران الزراعية", en: "Loran Agri", desc_ar: "دفيئات ذكية ومحاصيل ومستشعرات.", desc_en: "Smart greenhouses, crops, sensors." },
+  { href: "/education", ar: "حاضنة The Tank", en: "The Tank", desc_ar: "ستارت أب تحت مظلة الجامعة الأهلية.", desc_en: "Startups under the AAU umbrella." },
+  { href: "/supply-chain", ar: "جسر AI", en: "AI Bridge", desc_ar: "تنبؤات تربط إشغال الفنادق بإنتاج الألبان والزراعة.", desc_en: "Forecasts linking occupancy → dairy/produce." },
+  { href: "/insights", ar: "إشارات الذكاء", en: "Insights", desc_ar: "تنبيهات ذكية وفرص اكتشفها AI.", desc_en: "AI-discovered alerts & opportunities." },
+  { href: "/finance", ar: "المركز المالي", en: "Finance", desc_ar: "السجل المالي عبر كل الشركات.", desc_en: "Cross-company ledger." },
+  { href: "/markets", ar: "الأسواق العالمية", en: "Markets", desc_ar: "متابعة أسهم MENA + عالمية.", desc_en: "MENA + global watchlist." },
+  { href: "/sustainability", ar: "الاستدامة ESG", en: "Sustainability", desc_ar: "بيئة + اجتماعي + حوكمة.", desc_en: "Environmental + social + governance." },
+  { href: "/projects", ar: "خط الأنابيب", en: "Pipeline", desc_ar: "مشاريع مستقبلية لكل شركة.", desc_en: "Future projects per company." },
+  { href: "/tasks", ar: "المهام والXP", en: "Tasks & XP", desc_ar: "نظام مهام ملعّب يكسبك نقاط ورتبة.", desc_en: "Gamified tasks earning XP & rank." },
+  { href: "/achievements", ar: "الإنجازات", en: "Achievements", desc_ar: "ميداليات + رتبة شطرنجية للموظف.", desc_en: "Medals + chess rank." },
+  { href: "/reports", ar: "التقارير الرسمية", en: "Reports", desc_ar: "تقرير من صفحة واحدة لكل شركة، جاهز PDF.", desc_en: "One-pager per company, print-ready PDF." },
+  { href: "/activity", ar: "سجل النشاط", en: "Activity log", desc_ar: "تتبع كل عملية في النظام.", desc_en: "Audit trail of every action." },
 ];
-
-const TONE: Record<string, string> = {
-  emerald: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  blue: "bg-blue-50 text-blue-700 ring-blue-200",
-  sky: "bg-sky-50 text-sky-700 ring-sky-200",
-  amber: "bg-amber-50 text-amber-700 ring-amber-200",
-  violet: "bg-violet-50 text-violet-700 ring-violet-200",
-  indigo: "bg-indigo-50 text-indigo-700 ring-indigo-200",
-  slate: "bg-slate-100 text-slate-700 ring-slate-200",
-};
 
 export default async function HelpPage() {
   const locale = getLocale();
@@ -108,162 +94,158 @@ export default async function HelpPage() {
   ];
 
   return (
-    <DaylightShell dir={ar ? "rtl" : "ltr"}>
-      <DaylightHeader
-        eyebrow={ar ? "المساعدة" : "Help"}
-        title={ar ? "مركز المساعدة" : "Help center"}
-        subtitle={
-          ar
-            ? "اختصارات لوحة المفاتيح + جولة في الوحدات + أسئلة شائعة"
-            : "Keyboard shortcuts + module tour + frequently asked questions"
-        }
-      />
-        {/* Keyboard shortcuts */}
-        <section className="card card-pad">
-          <div className="mb-3 flex items-center gap-2">
-            <Keyboard
-              className="h-4 w-4"
-              style={{ color: "var(--gold)" }}
-            />
-            <h2
-              className="text-[13px] font-semibold"
-              style={{ color: "var(--ink)" }}
-            >
+    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+      <div className="wrap">
+        <div className="sec-head reveal">
+          <div>
+            <div className="sec-eyebrow">
+              <span className="tick" />
+              {ar ? "النظام · المعلومات" : "System · Info"}
+            </div>
+            <h1 className="sec-title">
+              {ar ? "مركز المساعدة" : "Help center"}
+            </h1>
+            <p className="sec-sub">
+              {ar
+                ? "اختصارات لوحة المفاتيح، جولة في الوحدات، وأسئلة شائعة."
+                : "Keyboard shortcuts, a module tour, and frequently asked questions."}
+            </p>
+          </div>
+          <div className="sec-head-aside">
+            <span className="sec-status">
+              <span className="dot" />
+              {ar ? "مباشر" : "Live"}
+            </span>
+          </div>
+        </div>
+
+        {/* Keyboard shortcuts — reference help-tab panel */}
+        <div className="panel">
+          <div className="panel-head">
+            <span className="panel-title">
               {ar ? "اختصارات لوحة المفاتيح" : "Keyboard shortcuts"}
-            </h2>
+            </span>
           </div>
-          <div className="grid gap-2 md:grid-cols-2">
-            {SHORTCUTS.map((s, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 transition hover:bg-[var(--cream)]"
-                style={{ border: "1px solid var(--line)" }}
-              >
-                <span
-                  className="text-[12px] font-bold"
-                  style={{ color: "var(--ink)" }}
-                >
-                  {ar ? s.ar : s.en}
-                </span>
-                <span className="flex items-center gap-1">
-                  {s.keys.map((k, j) => (
-                    <kbd
-                      key={j}
-                      className="rounded-md px-2 py-1 font-mono text-[10px] font-semibold ring-1"
-                      style={{
-                        background: "var(--cream)",
-                        color: "var(--ink)",
-                        borderColor: "var(--line)",
-                        boxShadow: "0 1px 0 0 var(--line)",
-                      }}
-                    >
-                      {k}
-                    </kbd>
-                  ))}
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Module tour */}
-        <section>
-          <div className="mb-3 flex items-center gap-2">
-            <Command
-              className="h-4 w-4"
-              style={{ color: "var(--gold)" }}
-            />
-            <h2
-              className="text-[13px] font-semibold"
-              style={{ color: "var(--ink)" }}
+          {SHORTCUTS.map((s, i) => (
+            <div
+              key={i}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "12px 0",
+                borderBottom: "1px solid var(--line)",
+              }}
             >
+              <span style={{ fontSize: "13.5px", color: "var(--ink)" }}>
+                {ar ? s.ar : s.en}
+              </span>
+              <span style={{ display: "inline-flex", gap: 6 }}>
+                {s.keys.map((kk, j) => (
+                  <kbd
+                    key={j}
+                    style={{
+                      fontFamily: "var(--font-mono,monospace)",
+                      fontSize: 12,
+                      background: "var(--ivory)",
+                      border: "1px solid var(--line)",
+                      borderRadius: 6,
+                      padding: "3px 9px",
+                      color: "var(--emerald)",
+                    }}
+                  >
+                    {kk}
+                  </kbd>
+                ))}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Module tour — reference panel + list rows */}
+        <div className="panel">
+          <div className="panel-head">
+            <span className="panel-title">
               {ar ? "جولة في الوحدات" : "Module tour"}
-            </h2>
+            </span>
           </div>
-          <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-            {MODULES.map((m) => {
-              const Icon = m.icon;
-              return (
-                <Link
-                  key={m.href}
-                  href={m.href}
-                  className="card card-hover flex items-start gap-3 p-3"
-                >
-                  <span
-                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ring-1 ${TONE[m.tone]}`}
-                  >
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <div className="min-w-0">
-                    <div
-                      className="text-[12.5px] font-semibold"
-                      style={{ color: "var(--ink)" }}
-                    >
-                      {ar ? m.ar : m.en}
-                    </div>
-                    <div
-                      className="line-clamp-2 text-[10.5px]"
-                      style={{ color: "var(--ink-muted)" }}
-                    >
-                      {ar ? m.desc_ar : m.desc_en}
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section>
-          <div className="mb-3 flex items-center gap-2">
-            <Sparkles
-              className="h-4 w-4"
-              style={{ color: "var(--gold)" }}
-            />
-            <h2
-              className="text-[13px] font-semibold"
-              style={{ color: "var(--ink)" }}
+          {MODULES.map((m) => (
+            <a
+              key={m.href}
+              href={m.href}
+              className="br-row"
+              style={{ background: "var(--cream)", borderColor: "var(--line)" }}
             >
-              {ar ? "الأسئلة الشائعة" : "Frequently asked"}
-            </h2>
-          </div>
-          <div className="space-y-2">
-            {faq.map((f, i) => (
-              <details
-                key={i}
-                className="card group p-0 transition"
-              >
-                <summary
-                  className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3 text-[12.5px] font-semibold"
-                  style={{ color: "var(--ink)" }}
-                >
-                  <span>{ar ? f.q_ar : f.q_en}</span>
-                  <span
-                    className="text-[10px] transition group-open:rotate-180"
-                    style={{ color: "var(--ink-muted)" }}
-                  >
-                    ▾
-                  </span>
-                </summary>
-                <div
-                  className="px-4 pb-3 text-[11.5px] leading-relaxed"
-                  style={{ color: "var(--ink-muted)" }}
-                >
-                  {ar ? f.a_ar : f.a_en}
+              <div className="rt">
+                <div className="tt" style={{ color: "var(--ink)" }}>
+                  {ar ? m.ar : m.en}
                 </div>
-              </details>
-            ))}
-          </div>
-        </section>
+                <div className="ts">{ar ? m.desc_ar : m.desc_en}</div>
+              </div>
+              <span className="ops-tag info">
+                {ar ? "افتح" : "Open"}
+              </span>
+            </a>
+          ))}
+        </div>
 
-        {/* Footer credit */}
+        {/* FAQ — reference panel + disclosure rows */}
+        <div className="panel">
+          <div className="panel-head">
+            <span className="panel-title">
+              {ar ? "الأسئلة الشائعة" : "Frequently asked"}
+            </span>
+          </div>
+          {faq.map((f, i) => (
+            <details
+              key={i}
+              style={{ borderBottom: "1px solid var(--line)" }}
+            >
+              <summary
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 12,
+                  padding: "12px 0",
+                  cursor: "pointer",
+                  fontSize: "13.5px",
+                  fontWeight: 700,
+                  color: "var(--ink)",
+                }}
+              >
+                <span>{ar ? f.q_ar : f.q_en}</span>
+                <span style={{ fontSize: 11, color: "var(--ink-muted)" }}>
+                  ▾
+                </span>
+              </summary>
+              <div
+                style={{
+                  padding: "0 0 12px",
+                  fontSize: "12.5px",
+                  lineHeight: 1.7,
+                  color: "var(--ink-muted)",
+                }}
+              >
+                {ar ? f.a_ar : f.a_en}
+              </div>
+            </details>
+          ))}
+        </div>
+
         <p
-          className="text-center text-[10.5px]"
-          style={{ color: "var(--ink-muted)" }}
+          style={{
+            textAlign: "center",
+            fontSize: "11px",
+            color: "var(--ink-muted)",
+          }}
         >
-          H-Nerve ERP · {ar ? "نظام الحوراني العصبي المركزي" : "Hourani Group's Central Nervous System"}
+          H-Nerve ERP ·{" "}
+          {ar
+            ? "نظام الحوراني العصبي المركزي"
+            : "Hourani Group's Central Nervous System"}
         </p>
-    </DaylightShell>
+      </div>
+    </div>
   );
 }

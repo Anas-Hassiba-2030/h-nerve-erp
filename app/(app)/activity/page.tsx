@@ -2,34 +2,40 @@
 export const dynamic = "force-dynamic";
 // Activity Log — system-wide audit trail.
 // Filters by entity, action, actor. Bilingual summaries with icons + relative time.
+//
+// Visuals are ported to the Claude Design reference
+// (docs/design/system/sections/audit.html + audit-ops.js): the .dl-page
+// daylight register, .sec-head header, .ops-tabs/.ops-panel tabs, and the
+// .ops-table / .ops-tr / .ops-cell / .ops-tag operations table. Real data
+// comes from the Prisma queries below; only the look is the design.
 
 import Link from "next/link";
 import {
   Activity, Plus, Pencil, Trash2, RotateCcw, LogIn, LogOut, Download,
   Brain, Sparkles, CheckCircle2, XCircle, UserPlus, FileDown,
 } from "lucide-react";
-import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { formatDate, formatNumber } from "@/lib/utils";
 import "../daylight.css";
+import "./audit.css";
 
 const ACTION_META: Record<
   string,
-  { icon: any; tone: string; ar: string; en: string }
+  { icon: any; tone: string; tag: "ok" | "warn" | "crit" | "info"; ar: string; en: string }
 > = {
-  CREATE: { icon: Plus, tone: "emerald", ar: "إنشاء", en: "Created" },
-  UPDATE: { icon: Pencil, tone: "blue", ar: "تحديث", en: "Updated" },
-  DELETE: { icon: Trash2, tone: "rose", ar: "حذف", en: "Deleted" },
-  RESTORE: { icon: RotateCcw, tone: "amber", ar: "استعادة", en: "Restored" },
-  LOGIN: { icon: LogIn, tone: "violet", ar: "دخول", en: "Login" },
-  LOGOUT: { icon: LogOut, tone: "slate", ar: "خروج", en: "Logout" },
-  EXPORT: { icon: Download, tone: "blue", ar: "تصدير", en: "Export" },
-  FORECAST: { icon: Brain, tone: "violet", ar: "تنبؤ", en: "Forecast" },
-  INSIGHT: { icon: Sparkles, tone: "amber", ar: "إشارة", en: "Insight" },
-  APPROVE: { icon: CheckCircle2, tone: "emerald", ar: "اعتماد", en: "Approved" },
-  REJECT: { icon: XCircle, tone: "rose", ar: "رفض", en: "Rejected" },
-  ASSIGN: { icon: UserPlus, tone: "blue", ar: "إسناد", en: "Assigned" },
+  CREATE: { icon: Plus, tone: "emerald", tag: "ok", ar: "إنشاء", en: "Created" },
+  UPDATE: { icon: Pencil, tone: "blue", tag: "info", ar: "تحديث", en: "Updated" },
+  DELETE: { icon: Trash2, tone: "rose", tag: "crit", ar: "حذف", en: "Deleted" },
+  RESTORE: { icon: RotateCcw, tone: "amber", tag: "warn", ar: "استعادة", en: "Restored" },
+  LOGIN: { icon: LogIn, tone: "violet", tag: "info", ar: "دخول", en: "Login" },
+  LOGOUT: { icon: LogOut, tone: "slate", tag: "info", ar: "خروج", en: "Logout" },
+  EXPORT: { icon: Download, tone: "blue", tag: "ok", ar: "تصدير", en: "Export" },
+  FORECAST: { icon: Brain, tone: "violet", tag: "info", ar: "تنبؤ", en: "Forecast" },
+  INSIGHT: { icon: Sparkles, tone: "amber", tag: "warn", ar: "إشارة", en: "Insight" },
+  APPROVE: { icon: CheckCircle2, tone: "emerald", tag: "ok", ar: "اعتماد", en: "Approved" },
+  REJECT: { icon: XCircle, tone: "rose", tag: "crit", ar: "رفض", en: "Rejected" },
+  ASSIGN: { icon: UserPlus, tone: "blue", tag: "info", ar: "إسناد", en: "Assigned" },
 };
 
 const ENTITY_AR: Record<string, string> = {
@@ -37,15 +43,6 @@ const ENTITY_AR: Record<string, string> = {
   PROGRAM: "برنامج", FORECAST: "تنبؤ", INSIGHT: "إشارة", TASK: "مهمة",
   PROJECT: "مشروع", TRANSACTION: "معاملة", USER: "مستخدم", COMPANY: "شركة",
   HOTEL: "فندق", MARKET: "سوق", ESG: "ESG", AUTH: "نظام", REPORT: "تقرير",
-};
-
-const TONE_CLASS: Record<string, string> = {
-  emerald: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  blue: "bg-blue-50 text-blue-700 ring-blue-200",
-  rose: "bg-rose-50 text-rose-700 ring-rose-200",
-  amber: "bg-amber-50 text-amber-700 ring-amber-200",
-  violet: "bg-violet-50 text-violet-700 ring-violet-200",
-  slate: "bg-slate-100 text-slate-700 ring-slate-200",
 };
 
 function relativeTime(date: Date, ar: boolean): string {
@@ -112,270 +109,217 @@ export default async function ActivityLogPage({
     groups.get(label)!.push(log);
   }
 
-  const filterChips = [
-    { key: "entity", values: byEntity.map((b) => b.entity) },
-    { key: "action", values: byAction.map((b) => b.action) },
-  ];
-
   const hasFilter =
     searchParams.entity || searchParams.action || searchParams.actor;
 
-  return (
-    <DaylightShell dir={ar ? "rtl" : "ltr"}>
-      <DaylightHeader
-        eyebrow={ar ? "السجل" : "Audit"}
-        title={ar ? "سجل النشاط" : "Activity log"}
-        subtitle={
-          ar
-            ? `${formatNumber(total)} عملية مسجلة عبر النظام`
-            : `${formatNumber(total)} actions recorded across the system`
-        }
-        actions={
-          <>
-            {hasFilter ? (
-              <Link href="/activity" className="dl-btn dl-btn-secondary">
-                {ar ? "مسح الفلاتر" : "Clear filters"}
-              </Link>
-            ) : null}
-            <a
-              href={`/api/export/activity?locale=${ar ? "ar" : "en"}${
-                searchParams.entity ? `&entity=${searchParams.entity}` : ""
-              }${searchParams.action ? `&action=${searchParams.action}` : ""}`}
-              className="dl-btn dl-btn-secondary"
-            >
-              <FileDown className="h-4 w-4" />
-              {ar ? "تصدير CSV" : "Export CSV"}
-            </a>
-          </>
-        }
-      />
+  const todayCount = logs.filter((l) => {
+    const d = new Date(l.createdAt);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime() === today.getTime();
+  }).length;
 
-      <DaylightKpiGrid>
-        <DaylightKpi
-          label={ar ? "اليوم" : "Today"}
-          value={formatNumber(logs.filter((l) => {
-            const d = new Date(l.createdAt);
-            d.setHours(0, 0, 0, 0);
-            return d.getTime() === today.getTime();
-          }).length)}
-        />
-        <DaylightKpi
-          label={ar ? "إنشاء" : "Created"}
-          value={formatNumber(byAction.find((b) => b.action === "CREATE")?._count._all ?? 0)}
-        />
-        <DaylightKpi
-          label={ar ? "حذف" : "Deleted"}
-          value={formatNumber(byAction.find((b) => b.action === "DELETE")?._count._all ?? 0)}
-        />
-        <DaylightKpi label={ar ? "إجمالي" : "Total"} value={formatNumber(total)} />
-      </DaylightKpiGrid>
-        {/* Filter rail */}
-        <div className="card card-pad space-y-3">
+  return (
+    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+      <div className="wrap">
+        <div className="sec-head reveal">
           <div>
-            <div
-              className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider"
-              style={{ color: "var(--ink-muted)" }}
-            >
-              {ar ? "حسب نوع الكيان" : "By entity"}
+            <div className="sec-eyebrow">
+              <span className="tick" />
+              {ar ? "النظام · التدقيق" : "System · Audit"}
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {byEntity
-                .sort((a, b) => b._count._all - a._count._all)
-                .map((b) => {
-                  const active = searchParams.entity === b.entity;
-                  return (
-                    <Link
-                      key={b.entity}
-                      href={
-                        active
-                          ? `/activity${searchParams.action ? `?action=${searchParams.action}` : ""}`
-                          : `/activity?entity=${b.entity}${searchParams.action ? `&action=${searchParams.action}` : ""}`
-                      }
-                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 transition ${
-                        active
-                          ? "bg-emerald-600 text-white ring-emerald-700 shadow-sm"
-                          : "bg-white text-slate-700 ring-slate-200 hover:bg-slate-50"
-                      }`}
-                    >
-                      <span>{ar ? ENTITY_AR[b.entity] ?? b.entity : b.entity}</span>
-                      <span className="font-mono opacity-80">
-                        {formatNumber(b._count._all)}
-                      </span>
-                    </Link>
-                  );
-                })}
-            </div>
+            <h1 className="sec-title">{ar ? "سجل النشاط" : "Activity log"}</h1>
+            <p className="sec-sub">
+              {ar
+                ? `${formatNumber(total)} عملية مسجلة عبر النظام`
+                : `${formatNumber(total)} actions recorded across the system`}
+            </p>
           </div>
-          <div>
-            <div
-              className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider"
-              style={{ color: "var(--ink-muted)" }}
-            >
-              {ar ? "حسب الإجراء" : "By action"}
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {byAction
-                .sort((a, b) => b._count._all - a._count._all)
-                .map((b) => {
-                  const active = searchParams.action === b.action;
-                  const meta = ACTION_META[b.action];
-                  const Icon = meta?.icon ?? Activity;
-                  return (
-                    <Link
-                      key={b.action}
-                      href={
-                        active
-                          ? `/activity${searchParams.entity ? `?entity=${searchParams.entity}` : ""}`
-                          : `/activity?action=${b.action}${searchParams.entity ? `&entity=${searchParams.entity}` : ""}`
-                      }
-                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 transition ${
-                        active
-                          ? "bg-emerald-600 text-white ring-emerald-700 shadow-sm"
-                          : `${TONE_CLASS[meta?.tone ?? "slate"]} hover:opacity-80`
-                      }`}
-                    >
-                      <Icon className="h-3 w-3" />
-                      <span>{ar ? meta?.ar ?? b.action : meta?.en ?? b.action}</span>
-                      <span className="font-mono opacity-80">
-                        {formatNumber(b._count._all)}
-                      </span>
-                    </Link>
-                  );
-                })}
+          <div className="sec-head-aside">
+            <span className="sec-status">
+              <span className="dot" />
+              {ar ? "مباشر" : "Live"}
+            </span>
+            <div className="sec-actions">
+              {hasFilter ? (
+                <Link href="/activity" className="dl-btn dl-btn-secondary">
+                  {ar ? "مسح الفلاتر" : "Clear filters"}
+                </Link>
+              ) : null}
+              <a
+                href={`/api/export/activity?locale=${ar ? "ar" : "en"}${
+                  searchParams.entity ? `&entity=${searchParams.entity}` : ""
+                }${searchParams.action ? `&action=${searchParams.action}` : ""}`}
+                className="dl-btn dl-btn-secondary"
+              >
+                <FileDown className="h-4 w-4" />
+                {ar ? "تصدير CSV" : "Export CSV"}
+              </a>
             </div>
           </div>
         </div>
 
-        {/* Timeline */}
-        {logs.length === 0 ? (
-          <div className="card card-pad py-16 text-center">
-            <Activity
-              className="mx-auto mb-3 h-10 w-10"
-              style={{ color: "var(--ink-muted)" }}
-            />
-            <h3 className="text-base font-semibold" style={{ color: "var(--ink)" }}>
-              {ar ? "لا توجد إجراءات مسجلة" : "No activity yet"}
-            </h3>
-            <p className="mt-1 text-xs" style={{ color: "var(--ink-muted)" }}>
-              {ar
-                ? "ستظهر هنا كل عمليات الإنشاء والتعديل والحذف فور حدوثها."
-                : "Create, update and delete actions will show here as they happen."}
-            </p>
+        {/* KPI grid */}
+        <section className="kpi-grid reveal">
+          <div className="kpi-card">
+            <div className="kpi-label">{ar ? "اليوم" : "Today"}</div>
+            <div className="kpi-val">{formatNumber(todayCount)}</div>
           </div>
-        ) : (
-          <div className="space-y-5">
-            {Array.from(groups.entries()).map(([label, items]) => (
-              <section key={label}>
-                <div className="mb-2 flex items-center gap-2">
-                  <div
-                    className="h-[2px] flex-1 rounded-full"
-                    style={{
-                      background:
-                        "linear-gradient(90deg, var(--line) 0%, transparent 100%)",
-                    }}
-                  />
-                  <span
-                    className="text-[11px] font-semibold uppercase tracking-[0.16em]"
-                    style={{ color: "var(--ink-muted)" }}
-                  >
-                    {label}
-                  </span>
-                  <span
-                    className="rounded-full px-2 py-0.5 text-[10px] font-bold"
-                    style={{
-                      background: "var(--cream)",
-                      color: "var(--gold)",
-                    }}
-                  >
-                    {formatNumber(items.length)}
-                  </span>
-                  <div
-                    className="h-[2px] flex-1 rounded-full"
-                    style={{
-                      background:
-                        "linear-gradient(270deg, var(--line) 0%, transparent 100%)",
-                    }}
-                  />
-                </div>
+          <div className="kpi-card">
+            <div className="kpi-label">{ar ? "إنشاء" : "Created"}</div>
+            <div className="kpi-val">
+              {formatNumber(byAction.find((b) => b.action === "CREATE")?._count._all ?? 0)}
+            </div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">{ar ? "حذف" : "Deleted"}</div>
+            <div className="kpi-val">
+              {formatNumber(byAction.find((b) => b.action === "DELETE")?._count._all ?? 0)}
+            </div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">{ar ? "إجمالي" : "Total"}</div>
+            <div className="kpi-val">{formatNumber(total)}</div>
+          </div>
+        </section>
 
-                <ol className="relative space-y-2">
-                  {/* vertical line */}
-                  <span
-                    className="absolute top-3 bottom-3 w-px ltr:left-[15px] rtl:right-[15px]"
-                    style={{ background: "var(--line)" }}
-                  />
+        {/* Tabs — reference audit.html: التدقيق ٣٦٠ / النشاط */}
+        <div className="ops-tabs">
+          <Link href="/audit-360" className="ops-tab">
+            {ar ? "التدقيق ٣٦٠" : "Audit 360"}
+          </Link>
+          <span className="ops-tab on">{ar ? "النشاط" : "Activity"}</span>
+        </div>
+
+        {/* Filter rail */}
+        <div className="panel reveal">
+          <div className="panel-head">
+            <div className="panel-title">{ar ? "تصفية" : "Filters"}</div>
+          </div>
+          <div className="kpi-label" style={{ marginBottom: 8 }}>
+            {ar ? "حسب نوع الكيان" : "By entity"}
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>
+            {byEntity
+              .sort((a, b) => b._count._all - a._count._all)
+              .map((b) => {
+                const active = searchParams.entity === b.entity;
+                return (
+                  <Link
+                    key={b.entity}
+                    href={
+                      active
+                        ? `/activity${searchParams.action ? `?action=${searchParams.action}` : ""}`
+                        : `/activity?entity=${b.entity}${searchParams.action ? `&action=${searchParams.action}` : ""}`
+                    }
+                    className={`ops-tag ${active ? "ok" : "info"}`}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {ar ? ENTITY_AR[b.entity] ?? b.entity : b.entity}{" "}
+                    {formatNumber(b._count._all)}
+                  </Link>
+                );
+              })}
+          </div>
+          <div className="kpi-label" style={{ marginBottom: 8 }}>
+            {ar ? "حسب الإجراء" : "By action"}
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {byAction
+              .sort((a, b) => b._count._all - a._count._all)
+              .map((b) => {
+                const active = searchParams.action === b.action;
+                const meta = ACTION_META[b.action];
+                return (
+                  <Link
+                    key={b.action}
+                    href={
+                      active
+                        ? `/activity${searchParams.entity ? `?entity=${searchParams.entity}` : ""}`
+                        : `/activity?action=${b.action}${searchParams.entity ? `&entity=${searchParams.entity}` : ""}`
+                    }
+                    className={`ops-tag ${active ? "ok" : meta?.tag ?? "info"}`}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {ar ? meta?.ar ?? b.action : meta?.en ?? b.action}{" "}
+                    {formatNumber(b._count._all)}
+                  </Link>
+                );
+              })}
+          </div>
+        </div>
+
+        {/* Timeline as grouped ops-tables */}
+        <div className="ops-panel on">
+          {logs.length === 0 ? (
+            <div className="ops-table">
+              <div className="ops-empty">
+                <div className="oe-ic">◇</div>
+                <div className="oe-t">{ar ? "لا توجد إجراءات مسجلة" : "No activity yet"}</div>
+                <div className="oe-s">
+                  {ar
+                    ? "ستظهر هنا كل عمليات الإنشاء والتعديل والحذف فور حدوثها."
+                    : "Create, update and delete actions will show here as they happen."}
+                </div>
+              </div>
+            </div>
+          ) : (
+            Array.from(groups.entries()).map(([label, items]) => (
+              <section key={label} style={{ marginBottom: 22 }}>
+                <div className="ops-toolbar">
+                  <h2>{label}</h2>
+                  <div className="ops-actions">
+                    <span className="panel-aside">{formatNumber(items.length)}</span>
+                  </div>
+                </div>
+                <div className="ops-table">
+                  <div
+                    className="ops-tr head"
+                    style={{ gridTemplateColumns: "1fr 1fr 2fr 1.2fr .9fr" }}
+                  >
+                    <span className="ops-cell">{ar ? "الإجراء" : "Action"}</span>
+                    <span className="ops-cell">{ar ? "الكيان" : "Entity"}</span>
+                    <span className="ops-cell name">{ar ? "الملخص" : "Summary"}</span>
+                    <span className="ops-cell">{ar ? "المستخدم" : "User"}</span>
+                    <span className="ops-cell num">{ar ? "الوقت" : "Time"}</span>
+                  </div>
                   {items.map((log) => {
                     const meta = ACTION_META[log.action];
-                    const Icon = meta?.icon ?? Activity;
-                    const tone = meta?.tone ?? "slate";
                     return (
-                      <li
+                      <div
                         key={log.id}
-                        className="card card-hover relative ms-8 flex items-start gap-3 p-3 transition"
+                        className="ops-tr row"
+                        style={{ gridTemplateColumns: "1fr 1fr 2fr 1.2fr .9fr" }}
                       >
-                        {/* dot bullet */}
-                        <span
-                          className={`absolute top-3.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ring-1 ltr:-left-9 rtl:-right-9 ${TONE_CLASS[tone]}`}
-                        >
-                          <Icon className="h-3.5 w-3.5" />
+                        <span className="ops-cell">
+                          <span className={`ops-tag ${meta?.tag ?? "info"}`}>
+                            {ar ? meta?.ar ?? log.action : meta?.en ?? log.action}
+                          </span>
                         </span>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <span
-                              className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase ring-1 ${TONE_CLASS[tone]}`}
-                            >
-                              {ar ? meta?.ar ?? log.action : meta?.en ?? log.action}
-                            </span>
-                            <span
-                              className="text-[10px] font-bold uppercase"
-                              style={{ color: "var(--ink-muted)" }}
-                            >
-                              {ar ? ENTITY_AR[log.entity] ?? log.entity : log.entity}
-                            </span>
-                            <span
-                              className="ms-auto font-mono text-[10px]"
-                              style={{ color: "var(--ink-muted)" }}
-                            >
-                              {relativeTime(log.createdAt, ar)}
-                            </span>
-                          </div>
-                          <div
-                            className="mt-1 text-[12.5px] font-bold leading-snug"
-                            style={{ color: "var(--ink)" }}
-                          >
-                            {ar ? log.summary : log.summaryEn ?? log.summary}
-                          </div>
-                          {log.actorName ? (
-                            <div
-                              className="mt-1 text-[10.5px]"
-                              style={{ color: "var(--ink-muted)" }}
-                            >
-                              <span className="font-bold">
-                                {ar ? "بواسطة" : "by"}
-                              </span>{" "}
-                              {log.actorName}
-                            </div>
-                          ) : null}
-                        </div>
-                      </li>
+                        <span className="ops-cell">
+                          {ar ? ENTITY_AR[log.entity] ?? log.entity : log.entity}
+                        </span>
+                        <span className="ops-cell name">
+                          {ar ? log.summary : log.summaryEn ?? log.summary}
+                        </span>
+                        <span className="ops-cell">{log.actorName ?? "—"}</span>
+                        <span className="ops-cell num">{relativeTime(log.createdAt, ar)}</span>
+                      </div>
                     );
                   })}
-                </ol>
+                </div>
               </section>
-            ))}
-          </div>
-        )}
+            ))
+          )}
 
-        {logs.length >= 200 ? (
-          <p
-            className="text-center text-[11px]"
-            style={{ color: "var(--ink-muted)" }}
-          >
-            {ar
-              ? "عرض آخر 200 إجراء — يتم تنظيف السجل تلقائياً للحفاظ على آخر 5000."
-              : "Showing latest 200 entries — log auto-prunes to last 5,000."}
-          </p>
-        ) : null}
-    </DaylightShell>
+          {logs.length >= 200 ? (
+            <p className="panel-aside" style={{ textAlign: "center" }}>
+              {ar
+                ? "عرض آخر 200 إجراء — يتم تنظيف السجل تلقائياً للحفاظ على آخر 5000."
+                : "Showing latest 200 entries — log auto-prunes to last 5,000."}
+            </p>
+          ) : null}
+        </div>
+      </div>
+    </div>
   );
 }

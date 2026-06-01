@@ -1,24 +1,29 @@
 import Link from "next/link";
-import { Hotel as HotelIcon, Plus, Star, MapPin, BedDouble, Calendar } from "lucide-react";
 import { ExportMenu } from "@/components/ExportMenu";
-import { StatusBadge } from "@/components/StatusBadge";
-import { EmptyState } from "@/components/EmptyState";
 import { DeleteButton } from "@/components/DeleteButton";
-import { Sparkline } from "@/components/Sparkline";
-import { HeatMap, HeatMapLegend, type HeatMapCell } from "@/components/charts/HeatMap";
 import { prisma } from "@/lib/db";
 import {
   formatMoney, formatNumber, formatPercent, formatShortDate,
-  ROOM_TYPES_AR, ROOM_TYPES_EN, TIERS_AR, TIERS_EN, loc,
+  STATUS_AR, STATUS_EN, loc,
 } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
 import { deleteHotel, deleteBooking } from "./actions";
+import { ArenaTabs } from "./ArenaTabs";
 import "../daylight.css";
+import "./arena.css";
 
 export const dynamic = "force-dynamic";
 
 const COUNTRY_NAMES_AR: Record<string, string> = { JO: "الأردن", BG: "بلغاريا" };
 const COUNTRY_NAMES_EN: Record<string, string> = { JO: "Jordan", BG: "Bulgaria" };
+
+// Arena reference maps each hotel onto a strong / good / watch occupancy state.
+// We derive it from real occupancy so the tag colours mean something.
+function occState(occ: number): { tag: "ok" | "info" | "warn"; ar: string; en: string } {
+  if (occ >= 0.75) return { tag: "ok", ar: "قوي", en: "Strong" };
+  if (occ >= 0.65) return { tag: "info", ar: "جيد", en: "Good" };
+  return { tag: "warn", ar: "مراقبة", en: "Watch" };
+}
 
 export default async function HotelsPage() {
   const locale = getLocale();
@@ -47,6 +52,17 @@ export default async function HotelsPage() {
     include: { hotel: true },
   });
 
+  // Revenue-vs-expenses bars: real monthly transactions for the hotel-owning
+  // companies over the last 6 months (kind REVENUE / EXPENSE on Transaction).
+  const companyIds = Array.from(new Set(hotels.map((h) => h.companyId)));
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+  const monthlyTx = companyIds.length
+    ? await prisma.transaction.findMany({
+        where: { companyId: { in: companyIds }, occurredAt: { gte: sixMonthsAgo } },
+        select: { kind: true, amount: true, occurredAt: true },
+      })
+    : [];
+
   // === Single-source KPIs (unchanged) — every number derives from `hotels`. ===
   const allHotelBookings = hotels.flatMap((h) => h.bookings);
   const totalRooms = hotels.reduce((a, h) => a + h.totalRooms, 0);
@@ -63,226 +79,254 @@ export default async function HotelsPage() {
   const joCount = hotels.filter((h) => h.country === "JO").length;
   const bgCount = hotels.filter((h) => h.country === "BG").length;
 
-  const buildTrend = (bookings: { checkIn: Date; revenue: number }[]) => {
-    const arr: number[] = [];
-    for (let i = 6; i >= 0; i--) {
-      const day = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      const next = new Date(day.getTime() + 24 * 60 * 60 * 1000);
-      arr.push(bookings.filter((b) => b.checkIn >= day && b.checkIn < next).reduce((a, b) => a + b.revenue, 0));
-    }
-    return arr;
-  };
-
-  // heat map data
-  const heatDays: Array<{ key: string; label: string; date: Date }> = [];
-  for (let i = 13; i >= 0; i--) {
-    const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-    d.setHours(0, 0, 0, 0);
-    heatDays.push({
-      key: d.toISOString().slice(0, 10),
-      label: new Intl.DateTimeFormat(ar ? "ar-JO-u-nu-latn" : "en-US", { day: "numeric" }).format(d),
-      date: d,
+  // ── monthly buckets for the bar chart ──
+  const months: { label: string; rev: number; exp: number }[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({
+      label: new Intl.DateTimeFormat(ar ? "ar-JO" : "en-US", { month: "short" }).format(d),
+      rev: 0,
+      exp: 0,
     });
   }
-  const heatCells: HeatMapCell[] = [];
-  for (const h of hotels) {
-    for (const day of heatDays) {
-      const next = new Date(day.date.getTime() + 24 * 60 * 60 * 1000);
-      const occRooms = h.bookings
-        .filter((b) => { const ci = new Date(b.checkIn); return ci >= day.date && ci < next; })
-        .reduce((a, b) => a + b.rooms, 0);
-      heatCells.push({ rowKey: h.id, colKey: day.key, value: occRooms, label: `${h.name} · ${day.label}: ${occRooms}` });
+  for (const t of monthlyTx) {
+    const d = new Date(t.occurredAt);
+    const idx = (d.getFullYear() - now.getFullYear()) * 12 + (d.getMonth() - now.getMonth()) + 5;
+    if (idx >= 0 && idx < 6) {
+      if (t.kind === "REVENUE") months[idx].rev += t.amount;
+      else if (t.kind === "EXPENSE") months[idx].exp += t.amount;
     }
   }
-  const heatMax = Math.max(0, ...heatCells.map((c) => c.value));
+  const barMax = Math.max(1, ...months.map((m) => m.rev + m.exp));
+  const hasBarData = months.some((m) => m.rev > 0 || m.exp > 0);
+
+  // Per-hotel rollups, reused by the overview table and the hotels tab.
+  const hotelRows = hotels.map((h) => {
+    const rev = h.bookings.reduce((a, b) => a + b.revenue, 0);
+    const occRooms = h.bookings
+      .filter((b) => b.status === "CONFIRMED" || b.status === "CHECKED_IN")
+      .reduce((a, b) => a + b.rooms, 0);
+    const o = h.totalRooms ? Math.min(occRooms / h.totalRooms, 1) : 0;
+    return { h, rev, occ: o, state: occState(o) };
+  });
+  const topHotels = [...hotelRows].sort((a, b) => b.occ - a.occ).slice(0, 5);
+
+  // ── Overview panel ──
+  const overview = (
+    <>
+      <div className="kpi-grid reveal reveal-stagger">
+        <div className="kpi-card">
+          <div className="kpi-label">{ar ? "إيراد ٣٠ يوم" : "Revenue 30d"}</div>
+          <div className="kpi-val">{formatMoney(revenue30)}</div>
+          <div className="kpi-foot">
+            <span className="kpi-hint">{`${ar ? "متوسط/حجز" : "Avg/booking"} ${formatMoney(adr30)}`}</span>
+          </div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-label">{ar ? "الإشغال" : "Occupancy"}</div>
+          <div className="kpi-val">{formatPercent(occ, 0)}</div>
+          <div className="kpi-foot">
+            <span className="kpi-hint">{`${formatNumber(occupiedRooms)} / ${formatNumber(totalRooms)} ${ar ? "غرفة" : "rooms"}`}</span>
+            <span className={`delta ${occ >= 0.6 ? "up" : "down"}`}>{occ >= 0.6 ? "▲" : "▾"} {formatPercent(occ, 0)}</span>
+          </div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-label">{ar ? "متوسط سعر الغرفة" : "Avg room rate"}</div>
+          <div className="kpi-val">{formatMoney(adr30)}</div>
+          <div className="kpi-foot">
+            <span className="kpi-hint">{ar ? "لكل حجز · آخر ٣٠ي" : "Per booking · last 30d"}</span>
+          </div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-label">{ar ? "عقارات نشطة" : "Active properties"}</div>
+          <div className="kpi-val">{formatNumber(hotels.length)}</div>
+          <div className="kpi-foot">
+            <span className="kpi-hint">{`${joCount} ${ar ? "أردن" : "JO"} · ${bgCount} ${ar ? "بلغاريا" : "BG"}`}</span>
+          </div>
+        </div>
+      </div>
+
+      {hasBarData ? (
+        <div className="panel reveal">
+          <div className="panel-head">
+            <span className="panel-title">{ar ? "الإيراد مقابل المصاريف" : "Revenue vs Expenses"}</span>
+            <div className="seg">
+              <span className="seg-ind" style={{ transform: "translateX(0)", width: "33%" }} />
+              <button className="active">{ar ? "شهري" : "Monthly"}</button>
+              <button>{ar ? "ربعي" : "Quarterly"}</button>
+              <button>{ar ? "سنوي" : "Yearly"}</button>
+            </div>
+          </div>
+          <div className="bars">
+            {months.map((m, i) => (
+              <div className="bar-col" key={i}>
+                <div className="bar-stack">
+                  <div className="bar rev" style={{ height: `${Math.round((m.rev / barMax) * 100)}%` }} />
+                  <div className="bar exp" style={{ height: `${Math.round((m.exp / barMax) * 100)}%` }} />
+                </div>
+                <span className="bar-x">{m.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      <div className="panel reveal">
+        <div className="panel-head">
+          <span className="panel-title">{ar ? "الفنادق" : "Hotels"}</span>
+          <span className="panel-aside">{`${formatNumber(hotels.length)} ${ar ? "منشآت · مرتبة حسب الإشغال" : "properties · ranked by occupancy"}`}</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>{ar ? "المنشأة" : "Facility"}</th>
+              <th>{ar ? "المدينة" : "City"}</th>
+              <th className="num">{ar ? "الغرف" : "Rooms"}</th>
+              <th className="num">{ar ? "الإشغال" : "Occupancy"}</th>
+              <th className="num">{ar ? "إيراد ٣٠ي" : "Rev 30d"}</th>
+              <th>{ar ? "الحالة" : "Status"}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {topHotels.map(({ h, rev, occ: o, state }) => (
+              <tr key={h.id}>
+                <td>{ar ? h.name : (h.nameEn ?? h.name)}</td>
+                <td>{h.city}</td>
+                <td className="num">{formatNumber(h.totalRooms)}</td>
+                <td className="num">{formatPercent(o, 0)}</td>
+                <td className="num">{formatMoney(rev)}</td>
+                <td><span className={`tag ${state.tag}`}>{ar ? state.ar : state.en}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+
+  // ── Hotels tab (full list + delete) ──
+  const hotelsPanel = (
+    <div className="panel reveal">
+      <div className="panel-head">
+        <span className="panel-title">{ar ? "الفنادق" : "Hotels"}</span>
+        <Link href="/hotels/new" className="dl-btn dl-btn-primary">＋ {ar ? "فندق جديد" : "New hotel"}</Link>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>{ar ? "المنشأة" : "Facility"}</th>
+            <th>{ar ? "المدينة" : "City"}</th>
+            <th className="num">{ar ? "الغرف" : "Rooms"}</th>
+            <th className="num">{ar ? "الإشغال" : "Occupancy"}</th>
+            <th className="num">{ar ? "إيراد ٣٠ي" : "Rev 30d"}</th>
+            <th>{ar ? "الحالة" : "Status"}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {hotelRows.map(({ h, rev, occ: o, state }) => (
+            <tr key={h.id}>
+              <td>
+                <Link href={`/hotels/${h.id}`} style={{ fontWeight: 700, color: "var(--ink)" }}>
+                  {ar ? h.name : (h.nameEn ?? h.name)}
+                </Link>
+              </td>
+              <td>{h.city} · {(ar ? COUNTRY_NAMES_AR : COUNTRY_NAMES_EN)[h.country] ?? h.country}</td>
+              <td className="num">{formatNumber(h.totalRooms)}</td>
+              <td className="num">{formatPercent(o, 0)}</td>
+              <td className="num">{formatMoney(rev)}</td>
+              <td><span className={`tag ${state.tag}`}>{ar ? state.ar : state.en}</span></td>
+              <td>
+                <DeleteButton
+                  action={deleteHotel}
+                  payload={{ id: h.id }}
+                  label={ar ? `حذف ${h.name}؟` : `Delete ${h.name}?`}
+                  description={ar ? "سيتم حذف الفندق وكل الحجوزات المرتبطة." : "The hotel and all bookings will be deleted."}
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  // ── Bookings tab ──
+  const bookingsPanel = (
+    <div className="panel reveal">
+      <div className="panel-head">
+        <span className="panel-title">{ar ? "الحجوزات" : "Bookings"}</span>
+        <Link href="/hotels/bookings/new" className="dl-btn dl-btn-primary">＋ {ar ? "حجز جديد" : "New booking"}</Link>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>{ar ? "المرجع" : "Reference"}</th>
+            <th>{ar ? "الضيف" : "Guest"}</th>
+            <th>{ar ? "الفندق" : "Hotel"}</th>
+            <th className="num">{ar ? "وصول" : "Check-in"}</th>
+            <th className="num">{ar ? "مغادرة" : "Check-out"}</th>
+            <th className="num">{ar ? "غرف" : "Rooms"}</th>
+            <th className="num">{ar ? "إيراد" : "Revenue"}</th>
+            <th>{ar ? "الحالة" : "Status"}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {recentBookings.map((b) => (
+            <tr key={b.id}>
+              <td style={{ fontFamily: "monospace", fontSize: 11, color: "var(--ink-muted)" }}>{b.reference}</td>
+              <td style={{ fontWeight: 700, color: "var(--ink)" }}>{b.guestName}</td>
+              <td>{ar ? b.hotel.name : (b.hotel.nameEn ?? b.hotel.name)}</td>
+              <td className="num" style={{ fontSize: 12 }}>{formatShortDate(b.checkIn, lc)}</td>
+              <td className="num" style={{ fontSize: 12 }}>{formatShortDate(b.checkOut, lc)}</td>
+              <td className="num">{formatNumber(b.rooms)}</td>
+              <td className="num">{formatMoney(b.revenue)}</td>
+              <td><span className="tag info">{loc(STATUS_AR, STATUS_EN, lc, b.status)}</span></td>
+              <td>
+                <DeleteButton
+                  action={deleteBooking}
+                  payload={{ id: b.id }}
+                  label={ar ? `حذف الحجز ${b.reference}؟` : `Delete booking ${b.reference}?`}
+                  description={ar ? "سيتم حذف هذا الحجز نهائياً." : "This booking will be permanently deleted."}
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 
   return (
     <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
-      {/* ── section header ── */}
-      <header className="sec-head reveal">
+      <div className="sec-head reveal">
         <div>
           <div className="sec-eyebrow"><span className="tick" />{ar ? "القطاعات · الضيافة" : "Sectors · Hospitality"}</div>
           <h1 className="sec-title">{ar ? "أرينا سبيس للضيافة" : "Arena Space Hospitality"}</h1>
           <p className="sec-sub">
             {ar
-              ? "إشغال حي، حجوزات وشيكة، وأداء كل عقار في الأردن وبلغاريا — آخر ثلاثين يوماً."
-              : "Live occupancy, upcoming bookings, and per-property performance across Jordan & Bulgaria — last 30 days."}
+              ? `${formatNumber(hotels.length)} فنادق · ${formatNumber(totalRooms)} غرفة · أداء الإشغال والإيراد لآخر ثلاثين يوماً عبر محفظة الضيافة.`
+              : `${hotels.length} hotels · ${totalRooms} rooms · occupancy & revenue performance across the hospitality portfolio over the last 30 days.`}
           </p>
         </div>
         <div className="sec-head-aside">
           <span className="sec-status"><span className="dot" />{ar ? "مباشر · محدّث الآن" : "Live · updated now"}</span>
           <div className="sec-actions">
-            <Link href="/hotels/bookings/new" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "حجز جديد" : "New booking"}</Link>
-            <Link href="/hotels/new" className="dl-btn dl-btn-secondary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "فندق جديد" : "New hotel"}</Link>
+            <Link className="dl-btn dl-btn-secondary" href="/finance">{ar ? "الأثر المالي" : "Financial impact"}</Link>
             <ExportMenu type="hotels" companyCode="ARENA" locale={lc} />
           </div>
         </div>
-      </header>
-
-      {/* ── KPI band ── */}
-      <section className="kpi-grid">
-        <div className="kpi-card reveal">
-          <div className="kpi-label">{ar ? "عقارات نشطة" : "Active properties"}</div>
-          <div className="kpi-val">{formatNumber(hotels.length)}</div>
-          <div className="kpi-foot"><span className="kpi-hint">{`${joCount} ${ar ? "أردن" : "JO"} · ${bgCount} ${ar ? "بلغاريا" : "BG"}`}</span></div>
-        </div>
-        <div className="kpi-card reveal">
-          <div className="kpi-label">{ar ? "إجمالي الغرف" : "Total rooms"}</div>
-          <div className="kpi-val">{formatNumber(totalRooms)}</div>
-          <div className="kpi-foot"><span className="kpi-hint">{`${formatNumber(occupiedRooms)} ${ar ? "محجوزة" : "occupied"}`}</span></div>
-        </div>
-        <div className="kpi-card reveal">
-          <div className="kpi-label">{ar ? "نسبة الإشغال" : "Occupancy"}</div>
-          <div className="kpi-val">{formatPercent(occ, 0)}</div>
-          <div className="kpi-foot">
-            <span className="kpi-hint">{occ >= 0.6 ? (ar ? "أداء ممتاز" : "Excellent") : (ar ? "هامش للنمو" : "Room to grow")}</span>
-            <span className={`delta ${occ >= 0.6 ? "up" : "down"}`}>{occ >= 0.6 ? "▲" : "▾"} {formatPercent(occ, 0)}</span>
-          </div>
-        </div>
-        <div className="kpi-card reveal">
-          <div className="kpi-label">{ar ? "إيرادات ٣٠ يوم" : "Revenue 30d"}</div>
-          <div className="kpi-val">{formatMoney(revenue30)}</div>
-          <div className="kpi-foot"><span className="kpi-hint">{`${ar ? "متوسط/حجز" : "Avg/booking"} ${formatMoney(adr30)}`}</span></div>
-        </div>
-      </section>
-
-      {/* ── booking density heat map ── */}
-      {hotels.length > 0 ? (
-        <div className="panel reveal">
-          <div className="panel-head">
-            <div className="panel-title">{ar ? "كثافة الحجوزات" : "Booking density"}</div>
-            <span className="panel-aside">{ar ? "غرف محجوزة لكل فندق × يوم — آخر ١٤ يوم" : "Rooms booked per hotel × day — last 14 days"}</span>
-          </div>
-          <HeatMap
-            rows={hotels.map((h) => ({ key: h.id, label: ar ? h.name : (h.nameEn ?? h.name) }))}
-            cols={heatDays.map((d) => ({ key: d.key, label: d.label }))}
-            cells={heatCells}
-            cellSize={26}
-            rowLabelWidth={140}
-            formatValue={(v) => v.toString()}
-            locale={ar ? "ar" : "en"}
-          />
-          <div className="mt-3 flex items-center justify-between text-[11px]"><HeatMapLegend min={0} max={heatMax} ar={ar} /></div>
-        </div>
-      ) : null}
-
-      {/* ── properties ── */}
-      <div className="panel reveal">
-        <div className="panel-head">
-          <div className="panel-title">{ar ? "العقارات" : "Properties"}</div>
-          <span className="panel-aside">{ar ? "أداء كل عقار في آخر ٧ أيام" : "Per-property performance, last 7 days"}</span>
-        </div>
-        {hotels.length === 0 ? (
-          <EmptyState
-            icon={HotelIcon}
-            title={ar ? "لا توجد فنادق مسجلة" : "No hotels yet"}
-            action={<Link href="/hotels/new" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" />{ar ? "أضف أول فندق" : "Add first hotel"}</Link>}
-          />
-        ) : (
-          <div className="prop-grid">
-            {hotels.map((h) => {
-              const hotelRevenue = h.bookings.reduce((acc, b) => acc + b.revenue, 0);
-              const occRoomsHere = h.bookings.filter((b) => b.status === "CONFIRMED" || b.status === "CHECKED_IN").reduce((acc, b) => acc + b.rooms, 0);
-              const occHere = h.totalRooms ? Math.min(occRoomsHere / h.totalRooms, 1) : 0;
-              const trend = buildTrend(h.bookings);
-              return (
-                <div key={h.id} className="prop-card">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 style={{ fontSize: 17, fontWeight: 700, color: "var(--ink)" }}>{ar ? h.name : (h.nameEn ?? h.name)}</h3>
-                        <span className="tag gold">{loc(TIERS_AR, TIERS_EN, lc, h.tier)}</span>
-                        <span className="inline-flex items-center gap-0.5" style={{ color: "var(--gold)" }} title={`${h.starRating} stars`}>
-                          {[...Array(h.starRating)].map((_, i) => (<Star key={i} className="h-3 w-3" style={{ fill: "var(--gold)" }} />))}
-                        </span>
-                      </div>
-                      {h.nameEn ? <div style={{ fontSize: 11, color: "var(--ink-muted)" }} dir={ar ? "ltr" : "rtl"}>{ar ? h.nameEn : h.name}</div> : null}
-                      <div className="mt-2 flex flex-wrap items-center gap-3" style={{ fontSize: 12, color: "var(--ink-muted)" }}>
-                        <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{h.city} · {(ar ? COUNTRY_NAMES_AR : COUNTRY_NAMES_EN)[h.country] ?? h.country}</span>
-                        <span className="inline-flex items-center gap-1"><BedDouble className="h-3.5 w-3.5" />{formatNumber(h.totalRooms)} {ar ? "غرفة" : "rooms"}</span>
-                      </div>
-                    </div>
-                    <DeleteButton action={deleteHotel} payload={{ id: h.id }} label={ar ? `حذف ${h.name}؟` : `Delete ${h.name}?`} description={ar ? "سيتم حذف الفندق وكل الحجوزات المرتبطة." : "The hotel and all bookings will be deleted."} />
-                  </div>
-                  <div className="mt-4 grid grid-cols-3 gap-3">
-                    <PropStat label={ar ? "إشغال" : "Occupancy"} value={formatPercent(occHere, 0)} />
-                    <PropStat label={ar ? "إيراد ٣٠ي" : "Revenue 30d"} value={formatMoney(hotelRevenue)} />
-                    <PropStat label={ar ? "سعر مرجعي" : "Baseline ADR"} value={formatMoney(h.baselineADR)} />
-                  </div>
-                  <div className="mt-3">
-                    <div className="mb-1.5 flex items-center justify-between" style={{ fontSize: 10, color: "var(--ink-muted)" }}>
-                      <span style={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em" }}>{ar ? "إشغال حالي" : "Current occupancy"}</span>
-                      <span style={{ fontVariantNumeric: "tabular-nums" }}>{Math.round(occHere * 100)}%</span>
-                    </div>
-                    <div className="dl-bar"><i style={{ width: `${occHere * 100}%` }} /></div>
-                  </div>
-                  {trend.some((v) => v > 0) ? (
-                    <div className="mt-3 -mx-1">
-                      <div className="mb-1" style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--ink-muted)" }}>{ar ? "إيرادات آخر ٧ أيام" : "Last 7-day revenue"}</div>
-                      <Sparkline data={trend} width={420} height={48} positive />
-                    </div>
-                  ) : null}
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
 
-      {/* ── recent bookings ── */}
-      <div className="panel reveal">
-        <div className="panel-head">
-          <div className="panel-title">{ar ? "حجوزات حديثة" : "Recent bookings"}</div>
-          <Link href="/hotels/bookings/new" className="dl-btn dl-btn-secondary" style={{ padding: "7px 14px" }}><Plus className="h-3.5 w-3.5" /> {ar ? "حجز جديد" : "New booking"}</Link>
-        </div>
-        {recentBookings.length === 0 ? (
-          <EmptyState icon={Calendar} title={ar ? "لا توجد حجوزات بعد" : "No bookings yet"} />
-        ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table className="dl-table">
-              <thead>
-                <tr>
-                  <th>{ar ? "المرجع" : "Reference"}</th>
-                  <th>{ar ? "الضيف" : "Guest"}</th>
-                  <th>{ar ? "الفندق" : "Hotel"}</th>
-                  <th>{ar ? "النوع" : "Type"}</th>
-                  <th>{ar ? "وصول" : "Check-in"}</th>
-                  <th>{ar ? "مغادرة" : "Check-out"}</th>
-                  <th className="num">{ar ? "غرف" : "Rooms"}</th>
-                  <th className="num">{ar ? "إيراد" : "Revenue"}</th>
-                  <th>{ar ? "الحالة" : "Status"}</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentBookings.map((b) => (
-                  <tr key={b.id}>
-                    <td style={{ fontFamily: "monospace", fontSize: 11, color: "var(--ink-muted)" }}>{b.reference}</td>
-                    <td style={{ fontWeight: 700, color: "var(--ink)" }}>{b.guestName}</td>
-                    <td>{ar ? b.hotel.name : (b.hotel.nameEn ?? b.hotel.name)}</td>
-                    <td>{loc(ROOM_TYPES_AR, ROOM_TYPES_EN, lc, b.roomType)}</td>
-                    <td style={{ fontSize: 11, fontVariantNumeric: "tabular-nums" }}>{formatShortDate(b.checkIn, lc)}</td>
-                    <td style={{ fontSize: 11, fontVariantNumeric: "tabular-nums" }}>{formatShortDate(b.checkOut, lc)}</td>
-                    <td className="num">{formatNumber(b.rooms)}</td>
-                    <td className="num" style={{ fontFamily: "monospace", fontSize: 11 }}>{formatMoney(b.revenue)}</td>
-                    <td><StatusBadge status={b.status} /></td>
-                    <td><DeleteButton action={deleteBooking} payload={{ id: b.id }} label={ar ? `حذف الحجز ${b.reference}؟` : `Delete booking ${b.reference}?`} description={ar ? "سيتم حذف هذا الحجز نهائياً." : "This booking will be permanently deleted."} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function PropStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--ink-muted)" }}>{label}</div>
-      <div style={{ marginTop: 2, fontSize: 16, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: "var(--ink)" }}>{value}</div>
+      <ArenaTabs
+        tabs={[
+          { id: "overview", label: ar ? "نظرة عامة" : "Overview" },
+          { id: "hotels", label: ar ? "الفنادق" : "Hotels" },
+          { id: "bookings", label: ar ? "الحجوزات" : "Bookings" },
+        ]}
+        panels={{ overview, hotels: hotelsPanel, bookings: bookingsPanel }}
+      />
     </div>
   );
 }

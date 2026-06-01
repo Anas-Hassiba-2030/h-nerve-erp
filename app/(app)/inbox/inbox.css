@@ -1,0 +1,56 @@
+/* صندوق الوارد · Inbox — unified attention feed.
+   Reference CSS ported verbatim from docs/design/system/sections/inbox.html
+   <style> block, scoped under .dl-page so it never leaks into the rest of
+   the app. Real data is fed by the page; the look is the design. */
+
+/* Night-register tokens the reference Inbox CSS depends on, ported verbatim
+   from docs/design/system/sections/_section.css :root, scoped to .dl-page. */
+.dl-page {
+  --night: #0D1F1A; --night-2: #112A23;
+  --mist: #CDE0D6;
+  --display: "Cormorant Garamond", "Newsreader", serif;
+  --ui: "Cairo", system-ui, sans-serif;
+}
+
+.dl-page .ib-wrap { max-width: 1000px; margin: 0 auto; padding: 14px 24px 80px; }
+.dl-page .ib-top { display: flex; align-items: stretch; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
+.dl-page .ib-title-box { display: flex; flex-direction: column; justify-content: center; padding-inline-end: 16px; border-inline-end: 1px solid rgba(194, 163, 90, .2); min-width: 170px; }
+.dl-page .ib-title-box .eb { display: inline-flex; align-items: center; gap: 7px; font-size: 10px; font-weight: 700; letter-spacing: .14em; color: var(--gold-soft); text-transform: uppercase; margin-bottom: 4px; }
+.dl-page .ib-title-box .eb .tick { width: 18px; height: 1.5px; background: var(--gold-soft); }
+.dl-page .ib-title-box h1 { font-family: var(--display); font-size: 34px; font-weight: 600; color: #fff; line-height: 1; }
+.dl-page .ib-kpis { display: flex; gap: 12px; flex: 1; flex-wrap: wrap; }
+.dl-page .ib-kpi { flex: 1; min-width: 120px; background: linear-gradient(160deg, rgba(20, 46, 38, .5), rgba(13, 31, 26, .46)); border: 1px solid rgba(194, 163, 90, .2); border-radius: 14px; padding: 11px 16px; }
+.dl-page .ib-kpi .v { font-family: var(--display); font-variant-numeric: tabular-nums; font-size: 25px; font-weight: 600; color: #fff; line-height: 1; }
+.dl-page .ib-kpi .k { font-size: 11px; color: var(--mist); opacity: .7; margin-top: 4px; }
+
+.dl-page .ib-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.dl-page .ib-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.dl-page .pill { padding: 7px 15px; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: var(--mist); opacity: .7; cursor: pointer; background: rgba(13, 31, 26, .4); border: 1px solid rgba(194, 163, 90, .16); font-family: var(--ui); transition: all .25s; }
+.dl-page .pill:hover { opacity: 1; }
+.dl-page .pill.on { background: linear-gradient(135deg, var(--gold-soft), var(--gold)); color: #241b06; opacity: 1; font-weight: 700; border-color: transparent; }
+.dl-page .ib-search { background: rgba(13, 31, 26, .5); border: 1px solid rgba(194, 163, 90, .22); border-radius: 999px; color: #fff; font-family: var(--ui); font-size: 13px; padding: 9px 15px; outline: none; width: 190px; }
+.dl-page .ib-search::placeholder { color: var(--mist); opacity: .5; }
+
+.dl-page .ib-feed { display: flex; flex-direction: column; gap: 10px; }
+.dl-page .item { display: flex; align-items: center; gap: 14px; padding: 15px 18px; border-radius: 16px; cursor: pointer; text-decoration: none;
+  background: linear-gradient(160deg, rgba(17, 42, 35, .55), rgba(13, 31, 26, .5)); border: 1px solid rgba(194, 163, 90, .18); transition: border-color .25s, transform .25s, box-shadow .25s; }
+.dl-page .item:hover { border-color: rgba(194, 163, 90, .45); transform: translateX(-3px); box-shadow: 0 12px 36px -20px rgba(0, 0, 0, .6); }
+.dl-page .item.new { animation: slidein .5s cubic-bezier(.22, 1, .36, 1); }
+@keyframes slidein { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+.dl-page .item .tic { width: 42px; height: 42px; flex: 0 0 42px; border-radius: 12px; display: grid; place-items: center; font-size: 19px; }
+.dl-page .item .tic.brain { background: rgba(194, 163, 90, .16); color: var(--gold-soft); }
+.dl-page .item .tic.alert { background: rgba(168, 106, 92, .18); color: #cf9384; }
+.dl-page .item .tic.task { background: rgba(126, 155, 134, .18); color: var(--sage); }
+.dl-page .item .tic.msg { background: rgba(46, 107, 87, .3); color: #9cc6b4; }
+.dl-page .item .ibody { flex: 1; min-width: 0; }
+.dl-page .item .it { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+.dl-page .item .ip { font-size: 12.5px; color: var(--mist); opacity: .7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dl-page .item .chip { font-size: 10.5px; color: var(--gold-soft); opacity: .8; background: rgba(194, 163, 90, .1); padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.dl-page .item .tm { font-size: 11px; color: var(--mist); opacity: .5; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.dl-page .item .go { width: 30px; height: 30px; flex: 0 0 30px; border-radius: 50%; display: grid; place-items: center; color: var(--gold-soft); background: rgba(194, 163, 90, .1); font-size: 15px; }
+.dl-page .ib-empty { text-align: center; padding: 60px 20px; display: none; }
+.dl-page .ib-empty.show { display: block; }
+.dl-page .ib-empty .ic { font-size: 48px; margin-bottom: 14px; opacity: .5; }
+.dl-page .ib-empty .t { font-family: var(--display); font-size: 24px; color: #fff; margin-bottom: 6px; }
+.dl-page .ib-empty .s { font-size: 13px; color: var(--mist); opacity: .6; }
+@media (prefers-reduced-motion: reduce) { .dl-page .item.new { animation: none; } }

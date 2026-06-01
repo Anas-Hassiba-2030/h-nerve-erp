@@ -1,0 +1,29 @@
+/* ════════════════════════════════════════════════════════════════
+   مقارنة · Compare section styles — ported verbatim from the Claude
+   Design reference (docs/design/system/sections/compare.html) and SCOPED
+   under .dl-page so they only apply to this restyled section page —
+   never leaking into the rest of the app. The base daylight look
+   (sec-head, panel) lives in ../daylight.css; this file adds the
+   compare-only pieces the reference uses: pickers, the head-to-head
+   columns, and the metric bars. Real data is fed in by page.tsx; the
+   look is the design.
+   ════════════════════════════════════════════════════════════════ */
+
+.dl-page .cmp-pickers { display: flex; align-items: center; gap: 16px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+.dl-page .cmp-sel { display: flex; flex-direction: column; gap: 6px; }
+.dl-page .cmp-sel label { font-size: 11px; font-weight: 700; letter-spacing: .06em; color: var(--ink-muted); }
+.dl-page .cmp-sel select { background: var(--cream); border: 1px solid var(--line); border-radius: 12px; color: var(--ink); font-family: inherit; font-size: 15px; font-weight: 700; padding: 11px 16px; outline: none; min-width: 200px; cursor: pointer; }
+.dl-page .cmp-sel select:focus { border-color: var(--gold); }
+.dl-page .cmp-vs { font-family: var(--dl-display); font-size: 26px; font-weight: 600; color: var(--gold); margin-top: 18px; }
+.dl-page .cmp-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.dl-page .cmp-head { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-radius: 16px 16px 0 0; color: #fff; }
+.dl-page .cmp-head .lg { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font-family: var(--dl-display); font-size: 19px; font-weight: 600; background: rgba(255, 255, 255, .16); }
+.dl-page .cmp-head .nm { font-size: 16px; font-weight: 700; }
+.dl-page .cmp-head .sc { font-size: 11.5px; opacity: .85; }
+.dl-page .cmp-card { background: var(--cream); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+.dl-page .cmp-body { padding: 18px 20px; }
+.dl-page .cmp-metric { margin-bottom: 16px; }
+.dl-page .cmp-metric .ml { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; }
+.dl-page .cmp-metric .ml b { font-family: var(--dl-display); font-weight: 600; color: var(--emerald); }
+.dl-page .cmp-bar { height: 9px; border-radius: 999px; background: rgba(46, 107, 87, .12); overflow: hidden; }
+.dl-page .cmp-bar span { display: block; height: 100%; border-radius: 999px; width: 0; transition: width 1s cubic-bezier(.22, 1, .36, 1); }

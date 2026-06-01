@@ -37,11 +37,14 @@ center in both languages.
 - Fixed the dead **"New member"** button (was 404'ing via a wrong route match).
 - Recovered **2 orphaned built features** with no nav link: **Audit 360** and **Trash**
   (soft-delete recovery) — now in the System sidebar group.
-- Reconnected **19 Orrery hub dives** that were landing on static design mocks instead
-  of real pages (Brain, Causal graph, Council, Memory, Learning, Benchmarks, What-if,
-  Supply chain, Workflows, Integrations, Workspace, Holding, Search, Pinned, System,
-  Trash, Audit, Admin/Empire, Help). The hub now lands **38 of 40** dives on the live
-  system.
+- Reconnected the Orrery hub dives that were landing on static design mocks instead of
+  real pages (Brain, Causal graph, Council, Memory, Learning, Benchmarks, What-if, Supply
+  chain, Workflows, Integrations, Workspace, Holding, Search, Pinned, System, Trash, Audit,
+  Admin/Empire, Help, …). Then consolidated: `OrreryFrame` had its own untested inline
+  map while `lib/orrery/routeMap.ts` — a comprehensive, **unit-tested** resolver — sat
+  unused. Wired the live path to the tested resolver and deleted the duplicate, so **every
+  dive now lands on a real route** (incl. `narrate → /brain`) and the live navigation is
+  covered by `lib/orrery/routeMap.test.ts`.
 
 ## 4. Self-review caught & fixed 3 real bugs
 
@@ -63,7 +66,7 @@ the automated i18n edits — all fixed and re-verified:
 | `tsc --noEmit` (Postgres client) | 0 errors |
 | `next build` | compiles |
 | `scripts/build-orrery.mjs` rebuild | idempotent |
-| `npm test` | 392 / 392 pass |
+| `npm test` | 393 / 393 pass |
 | AR + EN render, all surfaces | no errors |
 | CRUD (create/edit company, create transaction) | writes to DB |
 | Orrery language round-trip + 6 dive targets | navigate to real routes |

@@ -7,9 +7,10 @@
 // the content surface via app/(app)/living.css (it neutralizes the solid .nerve-bg
 // while data-living is set); cards/tables keep their solid surfaces on top.
 //
-// Mode note: forced "work" (ivory daylight) for now. The brain's cosmic-night
-// register needs a dark-adapted page before flipping data-living to "night";
-// until then the cosmic *ambient* (gold/mist motes) plays in daylight.
+// Living mode is determined per-route by lib/orrery/ambientMap.ts — sections
+// that the Claude Design reference marks data-living="night" (brain, intel,
+// signals, team comms, workflows) get the cosmic emerald aurora; everything
+// else gets the ivory daylight aurora.
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { ambientForPath } from "@/lib/orrery/ambientMap";
@@ -24,8 +25,7 @@ export function LivingAtmosphere() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const { ambient } = ambientForPath(pathname || "/");
-    const living = "work"; // see mode note above
+    const { ambient, living } = ambientForPath(pathname || "/");
 
     function apply() {
       window.HNAtmosphere?.mount(living, ambient);

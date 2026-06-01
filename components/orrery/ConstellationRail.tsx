@@ -4,9 +4,14 @@
 // current group, with the active section highlighted. Equivalent of the
 // #al-rail auto-mounted by app-layer.js (lines 262-285). Placed just below
 // the page's ribbon/header in app/(app)/layout.tsx.
+//
+// Uses usePathname() directly (not a prop) so the rail updates on every
+// client-side navigation without needing a page refresh — fixes the bug
+// where the previous group's rail would stick after navigating.
 
 import Link from "next/link";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 type Locale = "ar" | "en";
 
@@ -101,14 +106,9 @@ function detectGroup(currentPath: string): Group | null {
   return null;
 }
 
-export function ConstellationRail({
-  currentPath,
-  locale,
-}: {
-  currentPath: string;
-  locale: Locale;
-}) {
+export function ConstellationRail({ locale }: { locale: Locale }) {
   const [collapsed, setCollapsed] = useState(false);
+  const currentPath = usePathname() ?? "";
   const group = detectGroup(currentPath);
 
   // No group match → don't render anything.

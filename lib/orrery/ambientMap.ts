@@ -11,6 +11,10 @@ export type Ambient =
   | "cosmic";
 export type Living = "work" | "night";
 
+// Living mode per Claude Design reference HTML (docs/design/system/sections/*.html):
+// 19 sections set data-living="night" (cosmic emerald) — brain group, intel signals,
+// team comms, workflows. The rest stay "work" (ivory daylight). This map matches the
+// references 1:1 — see `grep -l data-living="night" docs/design/system/sections/`.
 const RULES: { test: RegExp; ambient: Ambient; living?: Living }[] = [
   { test: /^\/hotels/, ambient: "hospitality" },
   { test: /^\/dairy/, ambient: "dairy" },
@@ -19,11 +23,16 @@ const RULES: { test: RegExp; ambient: Ambient; living?: Living }[] = [
   { test: /^\/supply-chain/, ambient: "agriculture" },
   // the group / governance god-views
   { test: /^\/(admin\/empire|admin\/tenants|companies|dashboard|compare)\b/, ambient: "holding" },
-  // money surfaces
-  { test: /^\/(finance|markets|analytics|reports|sustainability|projects)\b/, ambient: "finance" },
+  // money surfaces + audit trail (reference: data-ambient="finance")
+  { test: /^\/(finance|markets|analytics|reports|sustainability|projects|audit-360)\b/, ambient: "finance" },
   // the Brain runs in the cosmic-night register
   { test: /^\/brain/, ambient: "cosmic", living: "night" },
-  { test: /^\/(insights|alerts|plans|documents|digest|narrate)\b/, ambient: "cosmic" },
+  // intel + signal surfaces (cosmic night per reference)
+  { test: /^\/(insights|alerts|plans|documents|digest|narrate)\b/, ambient: "cosmic", living: "night" },
+  // team comms (cosmic night per reference)
+  { test: /^\/(messages|tasks|inbox|employees|users)\b/, ambient: "cosmic", living: "night" },
+  // workflow studio (cosmic night per reference)
+  { test: /^\/workflows/, ambient: "cosmic", living: "night" },
 ];
 
 export function ambientForPath(path: string): { ambient: Ambient; living: Living } {

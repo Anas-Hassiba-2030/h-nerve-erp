@@ -28,20 +28,24 @@
 body > *:not(#living-bg):not(#ambient-bg){ position:relative; z-index:1; }
 
 /* ─────────────── WORK MODE (ivory daylight) ─────────────── */
+[data-living="work"]{ background:#FBF6EC; }
+[data-living="work"] #living-bg{
+  background:radial-gradient(ellipse 120% 90% at 50% 16%, #FFFCF3 0%, #F6F1E7 60%, #EFE8D5 100%);
+}
 [data-living="work"] #living-bg .lb-aurora{ mix-blend-mode:multiply; }
 [data-living="work"] #living-bg .a1{
   width:60vw; height:60vw; left:-8vw; top:-12vh;
-  background:radial-gradient(circle, rgba(46,107,87,.06), transparent 68%);
+  background:radial-gradient(circle, rgba(46,107,87,.16), transparent 68%);
   animation:lb-drift-a 52s ease-in-out infinite;
 }
 [data-living="work"] #living-bg .a2{
   width:52vw; height:52vw; right:-6vw; top:24vh;
-  background:radial-gradient(circle, rgba(194,163,90,.07), transparent 68%);
+  background:radial-gradient(circle, rgba(194,163,90,.20), transparent 68%);
   animation:lb-drift-b 60s ease-in-out infinite;
 }
 [data-living="work"] #living-bg .a3{
   width:64vw; height:64vw; left:24vw; bottom:-22vh;
-  background:radial-gradient(circle, rgba(126,155,134,.05), transparent 70%);
+  background:radial-gradient(circle, rgba(126,155,134,.14), transparent 70%);
   animation:lb-drift-c 46s ease-in-out infinite;
 }
 

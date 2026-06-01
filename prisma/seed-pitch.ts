@@ -201,6 +201,84 @@ async function main() {
     console.log(`  ✓ ${flows.length} workflows`);
   }
 
+  // ── Brain: graph + memory + feedback + meta + federation ────────────
+  // The brain pages are the differentiator — they MUST render with data.
+  // These seeders are idempotent (clear-then-write or upsert), safe to re-run.
+  const brainGraph = await prisma.brainNode.count();
+  if (brainGraph === 0) {
+    console.log("\n→ Seeding brain (graph + memory + feedback + meta + federation)…");
+    const { seedBrainGraph } = await import("../lib/brain/seedGraph");
+    const { seedMemoryLake } = await import("../lib/brain/seedMemories");
+    const { seedFeedback } = await import("../lib/brain/seedFeedback");
+    const { seedMetaHistory } = await import("../lib/brain/seedMetaHistory");
+    const { seedFederation } = await import("../lib/brain/seedFederation");
+    const g = await seedBrainGraph();
+    const m = await seedMemoryLake();
+    const fb = await seedFeedback();
+    const mt = await seedMetaHistory();
+    const fe = await seedFederation();
+    console.log(`  ✓ graph ${g.nodesUpserted}/${g.edgesUpserted}, memory ${m.written}, feedback ${fb.written}, meta ${mt.iqRowsWritten} iq + ${mt.reportsWritten} reports, federation ${fe.written}`);
+  } else {
+    console.log(`  ✓ brain graph already has ${brainGraph} nodes — skipping brain seeds`);
+  }
+
+  // Council debates — 5 past sessions across hotels/dairy/agri/edu/IT.
+  const councilCount = await prisma.councilSession.count();
+  if (councilCount === 0) {
+    console.log("\n→ Seeding council debates…");
+    const sessions = [
+      { topic: "خفض أسعار الغرف بنسبة 15% في الموسم المنخفض؟", recommendation: "خفض الأسعار بنسبة 8–10% فقط، مقترناً بحملة \"إقامتين مع وجبة\" — يُحسّن الإشغال دون تآكل ADR.", confidence: 0.78, dissent: "ضابط المخاطر يحذّر من تثبيت سعر مرجعي أقل لدى المسافرين المتكررين.", duration: 4200, voices: [
+        { agentId: "hospitality-expert", labelAr: "خبير الضيافة", labelEn: "Hospitality Expert", position: "qualify", thesis: "خفض 15% يرفع الإشغال 22% لكنه يحجز الذهن على \"الفندق الرخيص\". 8–10% مع باقة تجريبية أأمن — اختبار A/B لأسبوعين، ثم وسّع للأفضل." },
+        { agentId: "finance-brain", labelAr: "العقل المالي", labelEn: "Finance Brain", position: "qualify", thesis: "RevPAR الحالي 84 JOD. خفض 8% يحرّك RevPAR إلى 87 (إشغال +14%). خفض 15% يكبّس RevPAR إلى 81. الرياضيات تفضّل الخفض المعتدل." },
+        { agentId: "risk-officer", labelAr: "ضابط المخاطر", labelEn: "Risk Officer", position: "oppose", thesis: "خفض السعر سهل، الرفع صعب. السعر المرجعي يلتصق في ذاكرة العملاء المتكررين 9 أشهر. مخاطرة سمعة + Booking.com." },
+        { agentId: "moderator", labelAr: "المُيسِّر", labelEn: "Moderator", position: "moderate", thesis: "اتفاق ضمني: خفض معتدل 8–10% + باقة تجريبية + قياس أسبوعي. لو RevPAR لم يتحسّن خلال 14 يوماً، عُد للسعر الأصلي." },
+      ]},
+      { topic: "توسعة مزرعة المها بـ 60 رأس ماعز جديدة الربع القادم؟", recommendation: "نعم — توسعة بـ 40 رأس فقط (لا 60) بسبب طاقة المراعي الحالية، مع شراء خزّان حليب ثانٍ مسبقاً.", confidence: 0.84, dissent: null, duration: 3850, voices: [
+        { agentId: "dairy-expert", labelAr: "خبير الألبان", labelEn: "Dairy Expert", position: "support", thesis: "الطلب على حليب الماعز ارتفع 31% YoY في عمّان. 40 رأس إضافية يرفع الإنتاج اليومي 280 لتر — متماشٍ مع طاقة التبريد بعد شراء خزّان ثانٍ." },
+        { agentId: "finance-brain", labelAr: "العقل المالي", labelEn: "Finance Brain", position: "qualify", thesis: "ROI لـ 40 رأس + خزّان: 19 شهر. لـ 60 رأس بدون خزّان كافٍ: تالف الحليب يأكل 23% من الإيراد. 40 هو الرقم." },
+        { agentId: "risk-officer", labelAr: "ضابط المخاطر", labelEn: "Risk Officer", position: "qualify", thesis: "بياطرة المنطقة محدودون — أضف عقد بيطرة طارئ مع \"عيادة الشمال\" قبل التوسعة. درس وباء PPR في 2019." },
+        { agentId: "moderator", labelAr: "المُيسِّر", labelEn: "Moderator", position: "support", thesis: "توافق واضح. خطة: 40 رأس + خزّان 2 + عقد بيطرة. تخفيف من 60 إلى 40 يحافظ على الجودة." },
+      ]},
+      { topic: "زراعة الكينوا في حقل لوران الجنوبي بدل الذرة؟", recommendation: "تجربة على 12% من الحقل فقط هذا الموسم. لو نجحت، توسعة 40% في الموسم التالي.", confidence: 0.62, dissent: "خبير الزراعة قلق من ندرة سوق محلي يتقبّل سعراً عادلاً.", duration: 5100, voices: [
+        { agentId: "agri-expert", labelAr: "خبير الزراعة", labelEn: "Agri Expert", position: "qualify", thesis: "الكينوا تتحمّل ملوحة الأردن الجنوبي + استهلاك مياه أقل 38% من الذرة. لكن السوق المحلي ضعيف — لا تزرع 100% بدون عقد توريد مسبق." },
+        { agentId: "finance-brain", labelAr: "العقل المالي", labelEn: "Finance Brain", position: "qualify", thesis: "سعر الكينوا في عمّان: 12 JOD/kg. الذرة 0.8 JOD/kg. لكن العائد للهكتار يتقارب لأن الكينوا غلّتها أقل. لا يستحقّ الانتقال الكامل." },
+        { agentId: "risk-officer", labelAr: "ضابط المخاطر", labelEn: "Risk Officer", position: "oppose", thesis: "تغيير 100% للمحصول = مخاطرة وجودية لو فشل الموسم. ابدأ بـ 12% كحقل تجريبي، احفظ 88% ذرة معروفة." },
+        { agentId: "moderator", labelAr: "المُيسِّر", labelEn: "Moderator", position: "moderate", thesis: "تجربة محدودة + بحث عن مشترٍ مسبق. لو الحصاد +35% من الذرة بالقيمة وتأمنّا عقد توريد، توسّع تدريجياً." },
+      ]},
+      { topic: "إطلاق برنامج ذكاء اصطناعي تطبيقي في حاضنة Tank؟", recommendation: "أطلق الموسم القادم — 25 مقعد، 4 شهور، شراكة مع جهة محلية للوظائف.", confidence: 0.81, dissent: null, duration: 3200, voices: [
+        { agentId: "agri-expert", labelAr: "خبير المسار التعليمي", labelEn: "Education Expert", position: "support", thesis: "الطلب: 8 من 10 من خريجي البرامج السابقة سُئلوا عن AI. السوق الأردني الناشئ يحتاج 800 وظيفة AI خلال 2026." },
+        { agentId: "finance-brain", labelAr: "العقل المالي", labelEn: "Finance Brain", position: "support", thesis: "تكلفة البرنامج: 12 ألف JOD لكل دفعة. سعر المقعد: 850 JOD × 25 = 21,250. هامش 43% — صحّي." },
+        { agentId: "risk-officer", labelAr: "ضابط المخاطر", labelEn: "Risk Officer", position: "qualify", thesis: "ندرة المدرّبين الجيدين في AI. وقّع عقد مع 2 مدرّب على الأقل قبل الإعلان، وإلا انتظر دفعة الخريف." },
+        { agentId: "moderator", labelAr: "المُيسِّر", labelEn: "Moderator", position: "support", thesis: "إطلاق مشروط بتوقيع عقدَي مدرّب. لو لم يتوفّرا في 30 يوماً، أجّل بشهرين. ربط بشركاء توظيف يقلّل مخاطر السمعة." },
+      ]},
+      { topic: "استبدال نظام الحجوزات الحالي بـ Cloud PMS؟", recommendation: "نعم، لكن انتقال متدرّج: فندقَين تجريبياً 90 يوم، ثم البقية.", confidence: 0.71, dissent: "ضابط المخاطر يلفت لخطر هجرة بيانات ضائعة في فنادق غير مستعدّة.", duration: 6400, voices: [
+        { agentId: "hospitality-expert", labelAr: "خبير الضيافة", labelEn: "Hospitality Expert", position: "support", thesis: "النظام الحالي عمره 9 سنوات، لا API حديث، التكامل مع Booking.com يحدث يدوياً 3 مرات يومياً. PMS سحابي يوفّر 14 ساعة عمل/أسبوع." },
+        { agentId: "finance-brain", labelAr: "العقل المالي", labelEn: "Finance Brain", position: "qualify", thesis: "تكلفة الانتقال: 38,000 JOD لمرة واحدة + 1,800/شهر اشتراك. مقابل وفر 14 ساعة × 6 أشهر = استرداد في 16 شهر." },
+        { agentId: "risk-officer", labelAr: "ضابط المخاطر", labelEn: "Risk Officer", position: "qualify", thesis: "هجرة 47,000 سجل ضيف عبر 4 فنادق متزامناً = كارثة محتملة. ابدأ بـ Arena + Beverly Hills (الأحدث رقمياً)، تعلّم، ثم وسّع." },
+        { agentId: "moderator", labelAr: "المُيسِّر", labelEn: "Moderator", position: "moderate", thesis: "اتفاق على \"نعم متدرّج\". 90 يوم تجريبي مع فندقَين + خطة rollback. لو نجحت، البقية في 6 أشهر. لو فشلت، عُد لـ on-prem مع تجديد." },
+      ]},
+    ];
+    const now = Date.now();
+    for (let i = 0; i < sessions.length; i++) {
+      const s = sessions[i];
+      await prisma.councilSession.create({
+        data: {
+          topic: s.topic, contextRefs: "[]", recommendation: s.recommendation,
+          confidence: s.confidence, dissentNote: s.dissent ?? null, status: "DONE",
+          ranAt: new Date(now - (i + 1) * 4 * 24 * 60 * 60 * 1000),
+          durationMs: s.duration, usedLiveLlm: false,
+          voices: { create: s.voices.map((v, idx) => ({
+            agentId: v.agentId, speakerLabelAr: v.labelAr, speakerLabelEn: v.labelEn,
+            position: v.position, thesis: v.thesis, evidenceJson: "[]", orderIndex: idx, isStub: true,
+          }))},
+        },
+      });
+    }
+    console.log(`  ✓ ${sessions.length} council debates`);
+  } else {
+    console.log(`  ✓ council already has ${councilCount} sessions — skipping`);
+  }
+
   console.log("\n✓ Pitch gap-filler complete.");
 }
 

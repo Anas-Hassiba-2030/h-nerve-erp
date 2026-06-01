@@ -1765,7 +1765,7 @@ document.addEventListener("click",function(){ chip.classList.remove("open"); });
 menu.addEventListener("click",function(e){ var mi=e.target.closest(".mi"); if(!mi)return; var act=mi.dataset.act; chip.classList.remove("open");
   if(act==="role"){ roleIdx=(roleIdx+1)%ROLES.length; applyRole(); }
   else if(act==="lang"){ setLang(LANG==="ar"?"en":"ar"); }
-  else if(act==="profile"){ window.__hnNavigate("/settings"); }
+  else if(act==="profile"){ window.__hnNavigate("/me"); }
   else if(act==="settings"){ window.__hnNavigate("/settings"); }
   else if(act==="logout"){ window.__hnNavigate("/logout"); }
 });

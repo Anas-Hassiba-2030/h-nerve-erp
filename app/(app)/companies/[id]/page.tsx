@@ -27,6 +27,7 @@ import { SectorPill } from "@/components/SectorPill";
 import { StatusBadge } from "@/components/StatusBadge";
 import { EmptyState } from "@/components/EmptyState";
 import { PinButton } from "@/components/PinButton";
+import { enterWorkspace } from "@/app/actions/workspace";
 import { prisma } from "@/lib/db";
 import { isPinned } from "@/lib/pins";
 import {
@@ -162,18 +163,30 @@ export default async function CompanyDetailPage({
 
   const age = yearsSince(company.foundedYear);
   const latestEsg = company.esgScores[0];
+  const en = getLocale() === "en";
 
   return (
     <>
       <Topbar
-        eyebrow="ملف الشركة"
-        title={company.name}
-        subtitle={company.nameEn}
+        eyebrow={getLocale() === "en" ? "Company profile" : "ملف الشركة"}
+        title={getLocale() === "en" ? company.nameEn : company.name}
+        subtitle={getLocale() === "en" ? company.name : company.nameEn}
         actions={
           <div className="flex items-center gap-2">
+            {/* The descent: enter THIS company's scoped ERP back-office. Sets
+                the workspace + tenant cookies (enterWorkspace) and lands on
+                /workspace — every query then auto-scopes to this company. */}
+            <form action={enterWorkspace}>
+              <input type="hidden" name="companyId" value={company.id} />
+              <button type="submit" className="btn-primary">
+                <Building2 className="h-4 w-4" />
+                {getLocale() === "en" ? "Open back-office" : "دخول نظام الشركة"}
+                <ArrowUpRight className="h-4 w-4" />
+              </button>
+            </form>
             <Link href="/companies" className="btn-ghost">
               <ArrowLeft className="h-4 w-4" />
-              السجل
+              {getLocale() === "en" ? "Register" : "السجل"}
             </Link>
             <PinButton
               entityType="COMPANY"
@@ -186,9 +199,9 @@ export default async function CompanyDetailPage({
               tone="default"
               locale="ar"
             />
-            <Link href={`/companies/${company.id}/edit`} className="btn-primary">
+            <Link href={`/companies/${company.id}/edit`} className="btn-ghost">
               <Pencil className="h-4 w-4" />
-              تعديل
+              {getLocale() === "en" ? "Edit" : "تعديل"}
             </Link>
           </div>
         }
@@ -231,7 +244,7 @@ export default async function CompanyDetailPage({
                   <StatusBadge status={company.status} />
                 </div>
                 <h2 className="mt-1 text-2xl font-bold md:text-3xl" style={{ letterSpacing: "-0.01em" }}>
-                  {company.name}
+                  {getLocale() === "en" ? company.nameEn : company.name}
                 </h2>
                 <p className="text-sm opacity-90" dir="ltr">
                   {brand.mottoEn}
@@ -255,7 +268,7 @@ export default async function CompanyDetailPage({
                   style={{ background: "rgba(255,255,255,.15)", border: "1px solid rgba(255,255,255,.25)" }}
                 >
                   <Calendar className="h-3 w-3" />
-                  تأسست {company.foundedYear} {age != null ? `• ${age} سنة` : ""}
+                  {en ? "Founded" : "تأسست"} {company.foundedYear} {age != null ? `• ${age} ${en ? "yrs" : "سنة"}` : ""}
                 </span>
               ) : null}
               <span
@@ -263,7 +276,7 @@ export default async function CompanyDetailPage({
                 style={{ background: "rgba(255,255,255,.15)", border: "1px solid rgba(255,255,255,.25)" }}
               >
                 <Users2 className="h-3 w-3" />
-                {formatNumber(company.employees)} موظف
+                {formatNumber(company.employees)} {en ? "employees" : "موظف"}
               </span>
               {company.ticker ? (
                 <span
@@ -288,20 +301,20 @@ export default async function CompanyDetailPage({
         {/* ---------------------------------------------------------------- */}
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <KpiCard
-            label="إيرادات"
+            label={en ? "Revenue" : "إيرادات"}
             value={formatMoney(incomeTotal)}
             icon={TrendingUp}
             tone="emerald"
-            hint={`${formatNumber(company._count.transactions)} حركة مالية`}
+            hint={`${formatNumber(company._count.transactions)} ${en ? "transactions" : "حركة مالية"}`}
           />
           <KpiCard
-            label="مصروفات"
+            label={en ? "Expenses" : "مصروفات"}
             value={formatMoney(expenseTotal)}
             icon={TrendingDown}
             tone="red"
           />
           <KpiCard
-            label="صافي"
+            label={en ? "Net" : "صافي"}
             value={formatMoney(netTotal)}
             icon={Wallet}
             tone={netTotal >= 0 ? "emerald" : "red"}
@@ -309,17 +322,17 @@ export default async function CompanyDetailPage({
               incomeTotal > 0
                 ? {
                     up: netTotal >= 0,
-                    value: `${Math.round((Math.abs(netTotal) / incomeTotal) * 100)}٪`,
+                    value: `${Math.round((Math.abs(netTotal) / incomeTotal) * 100)}${en ? "%" : "٪"}`,
                   }
                 : undefined
             }
           />
           <KpiCard
-            label="فريق العمل"
+            label={en ? "Team" : "فريق العمل"}
             value={`${formatNumber(company.employees)}`}
             icon={Users2}
             tone="indigo"
-            hint={`${company._count.users} حساب نشط`}
+            hint={`${company._count.users} ${en ? "active accounts" : "حساب نشط"}`}
           />
         </section>
 
@@ -327,34 +340,34 @@ export default async function CompanyDetailPage({
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {company._count.hotels > 0 ? (
             <KpiCard
-              label="فنادق"
+              label={en ? "Hotels" : "فنادق"}
               value={formatNumber(company._count.hotels)}
               icon={Hotel}
               tone="amber"
-              hint={`${formatNumber(totalRooms)} غرفة إجمالية`}
+              hint={`${formatNumber(totalRooms)} ${en ? "total rooms" : "غرفة إجمالية"}`}
             />
           ) : null}
           {company._count.dairyBatches > 0 ? (
             <KpiCard
-              label="دفعات ألبان أخيرة"
+              label={en ? "Recent dairy batches" : "دفعات ألبان أخيرة"}
               value={formatNumber(company._count.dairyBatches)}
               icon={Milk}
               tone="sky"
-              hint={`${formatNumber(recentLiters)} لتر آخر دفعات`}
+              hint={`${formatNumber(recentLiters)} ${en ? "litres (recent)" : "لتر آخر دفعات"}`}
             />
           ) : null}
           {company._count.farms > 0 ? (
             <KpiCard
-              label="مزارع"
+              label={en ? "Farms" : "مزارع"}
               value={formatNumber(company._count.farms)}
               icon={Sprout}
               tone="emerald"
-              hint={`${formatNumber(totalDunum)} دونم`}
+              hint={`${formatNumber(totalDunum)} ${en ? "dunum" : "دونم"}`}
             />
           ) : null}
           {company._count.programs > 0 ? (
             <KpiCard
-              label="برامج وحاضنات"
+              label={en ? "Programs & incubators" : "برامج وحاضنات"}
               value={formatNumber(company._count.programs)}
               icon={GraduationCap}
               tone="indigo"
@@ -362,16 +375,16 @@ export default async function CompanyDetailPage({
           ) : null}
           {(company._count.forecastsOut > 0 || company._count.forecastsIn > 0) ? (
             <KpiCard
-              label="إشارات سلسلة التوريد"
+              label={en ? "Supply-chain signals" : "إشارات سلسلة التوريد"}
               value={formatNumber(company._count.forecastsOut + company._count.forecastsIn)}
               icon={Brain}
               tone="violet"
-              hint={`صادرة ${company._count.forecastsOut} • واردة ${company._count.forecastsIn}`}
+              hint={en ? `out ${company._count.forecastsOut} • in ${company._count.forecastsIn}` : `صادرة ${company._count.forecastsOut} • واردة ${company._count.forecastsIn}`}
             />
           ) : null}
           {company._count.futureProjects > 0 ? (
             <KpiCard
-              label="مشاريع مستقبلية"
+              label={en ? "Future projects" : "مشاريع مستقبلية"}
               value={formatNumber(company._count.futureProjects)}
               icon={FlaskConical}
               tone="blue"
@@ -379,7 +392,7 @@ export default async function CompanyDetailPage({
           ) : null}
           {latestEsg ? (
             <KpiCard
-              label="مؤشر ESG"
+              label={en ? "ESG score" : "مؤشر ESG"}
               value={`${Math.round(latestEsg.overall)}/100`}
               icon={Leaf}
               tone="emerald"
@@ -400,10 +413,9 @@ export default async function CompanyDetailPage({
                 <header className="mb-3 flex items-center justify-between">
                   <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
                     <Hotel className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
-                    الفنادق
-                  </h3>
+                    {en ? "Hotels" : "الفنادق"}                  </h3>
                   <Link href="/hotels" className="text-[11px] font-bold" style={{ color: "var(--heri-ochre)" }}>
-                    عرض الكل ←
+                    {en ? "View all →" : "عرض الكل ←"}
                   </Link>
                 </header>
                 <ul className="divide-y divide-[var(--heri-rule)]">
@@ -411,7 +423,7 @@ export default async function CompanyDetailPage({
                     <li key={h.id} className="flex items-center justify-between gap-3 py-2.5">
                       <div className="min-w-0">
                         <div className="truncate text-sm font-bold" style={{ color: "var(--heri-ink)" }}>
-                          {h.name}{" "}
+                          {en ? (h.nameEn ?? h.name) : h.name}{" "}
                           <span className="font-mono text-[10px]" style={{ color: "var(--heri-ink-3)" }}>
                             {"★".repeat(h.starRating)}
                           </span>
@@ -421,7 +433,7 @@ export default async function CompanyDetailPage({
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="badge-sky">{h._count.bookings} حجز</span>
+                        <span className="badge-sky">{h._count.bookings} {en ? "bookings" : "حجز"}</span>
                       </div>
                     </li>
                   ))}
@@ -435,10 +447,9 @@ export default async function CompanyDetailPage({
                 <header className="mb-3 flex items-center justify-between">
                   <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
                     <Milk className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
-                    دفعات الألبان الأخيرة
-                  </h3>
+                    {en ? "Recent dairy batches" : "دفعات الألبان الأخيرة"}                  </h3>
                   <Link href="/dairy" className="text-[11px] font-bold" style={{ color: "var(--heri-ochre)" }}>
-                    عرض الكل ←
+                    {en ? "View all →" : "عرض الكل ←"}
                   </Link>
                 </header>
                 <ul className="divide-y divide-[var(--heri-rule)]">
@@ -446,7 +457,7 @@ export default async function CompanyDetailPage({
                     <li key={b.id} className="flex items-center justify-between gap-3 py-2.5">
                       <div className="min-w-0">
                         <div className="truncate text-sm font-bold" style={{ color: "var(--heri-ink)" }}>
-                          {b.productAr || b.product}
+                          {en ? (b.product || b.productAr) : (b.productAr || b.product)}
                         </div>
                         <div className="text-[11px] font-mono" style={{ color: "var(--heri-ink-3)" }}>
                           {b.batchNumber} • {formatShortDate(b.productionDate)}
@@ -454,9 +465,9 @@ export default async function CompanyDetailPage({
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold" style={{ color: "var(--heri-ink)" }}>
-                          {formatNumber(b.quantityLiters)} لتر
+                          {formatNumber(b.quantityLiters)} {en ? "L" : "لتر"}
                         </span>
-                        <span className="badge-sky">درجة {b.qualityGrade}</span>
+                        <span className="badge-sky">{en ? "Grade" : "درجة"} {b.qualityGrade}</span>
                         <StatusBadge status={b.status} />
                       </div>
                     </li>
@@ -471,10 +482,9 @@ export default async function CompanyDetailPage({
                 <header className="mb-3 flex items-center justify-between">
                   <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
                     <Sprout className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
-                    المزارع
-                  </h3>
+                    {en ? "Farms" : "المزارع"}                  </h3>
                   <Link href="/farms" className="text-[11px] font-bold" style={{ color: "var(--heri-ochre)" }}>
-                    عرض الكل ←
+                    {en ? "View all →" : "عرض الكل ←"}
                   </Link>
                 </header>
                 <ul className="divide-y divide-[var(--heri-rule)]">
@@ -482,14 +492,14 @@ export default async function CompanyDetailPage({
                     <li key={f.id} className="flex items-center justify-between gap-3 py-2.5">
                       <div className="min-w-0">
                         <div className="truncate text-sm font-bold" style={{ color: "var(--heri-ink)" }}>
-                          {f.name}
+                          {en ? (f.nameEn ?? f.name) : f.name}
                         </div>
                         <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
-                          {loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), f.type)} • {f.location} • {formatNumber(f.areaDunum)} دونم
+                          {loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), f.type)} • {f.location} • {formatNumber(f.areaDunum)} {en ? "dunum" : "دونم"}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="badge-emerald">{f._count.crops} محصول</span>
+                        <span className="badge-emerald">{f._count.crops} {en ? "crops" : "محصول"}</span>
                         <StatusBadge status={f.alertLevel} />
                       </div>
                     </li>
@@ -504,10 +514,9 @@ export default async function CompanyDetailPage({
                 <header className="mb-3 flex items-center justify-between">
                   <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
                     <GraduationCap className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
-                    البرامج والحاضنات
-                  </h3>
+                    {en ? "Programs & incubators" : "البرامج والحاضنات"}                  </h3>
                   <Link href="/education" className="text-[11px] font-bold" style={{ color: "var(--heri-ochre)" }}>
-                    عرض الكل ←
+                    {en ? "View all →" : "عرض الكل ←"}
                   </Link>
                 </header>
                 <ul className="divide-y divide-[var(--heri-rule)]">
@@ -515,10 +524,10 @@ export default async function CompanyDetailPage({
                     <li key={p.id} className="flex items-center justify-between gap-3 py-2.5">
                       <div className="min-w-0">
                         <div className="truncate text-sm font-bold" style={{ color: "var(--heri-ink)" }}>
-                          {p.name}
+                          {en ? (p.nameEn ?? p.name) : p.name}
                         </div>
                         <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
-                          {loc(VERTICALS_AR, VERTICALS_EN, getLocale(), p.vertical)} • مؤسس: {p.founder} • فوج {p.cohort}
+                          {loc(VERTICALS_AR, VERTICALS_EN, getLocale(), p.vertical)} • {en ? "Founder:" : "مؤسس:"} {p.founder} • {en ? "Cohort" : "فوج"} {p.cohort}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -538,8 +547,8 @@ export default async function CompanyDetailPage({
             company.programs.length === 0 ? (
               <EmptyState
                 icon={Building2}
-                title="لا توجد عمليات مرتبطة بعد"
-                description="ستظهر هنا الفنادق، الدفعات، المزارع، والبرامج فور ربطها بهذه الشركة."
+                title={en ? "No linked operations yet" : "لا توجد عمليات مرتبطة بعد"}
+                description={en ? "Hotels, batches, farms, and programs will appear here once linked to this company." : "ستظهر هنا الفنادق، الدفعات، المزارع، والبرامج فور ربطها بهذه الشركة."}
               />
             ) : null}
           </div>
@@ -552,18 +561,16 @@ export default async function CompanyDetailPage({
                 <header className="mb-3 flex items-center justify-between">
                   <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
                     <Brain className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
-                    إشارات السلسلة
-                  </h3>
+                    {en ? "Supply-chain signals" : "إشارات السلسلة"}                  </h3>
                   <Link href="/supply-chain" className="text-[11px] font-bold" style={{ color: "var(--heri-ochre)" }}>
-                    عرض الكل ←
+                    {en ? "View all →" : "عرض الكل ←"}
                   </Link>
                 </header>
 
                 {company.forecastsOut.length > 0 ? (
                   <div className="mb-3">
                     <div className="mb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--heri-ink-3)" }}>
-                      صادرة منها
-                    </div>
+                      {en ? "Outbound" : "صادرة منها"}                    </div>
                     <ul className="space-y-1.5">
                       {company.forecastsOut.map((f) => (
                         <li
@@ -590,8 +597,7 @@ export default async function CompanyDetailPage({
                 {company.forecastsIn.length > 0 ? (
                   <div>
                     <div className="mb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--heri-ink-3)" }}>
-                      واردة إليها
-                    </div>
+                      {en ? "Inbound" : "واردة إليها"}                    </div>
                     <ul className="space-y-1.5">
                       {company.forecastsIn.map((f) => (
                         <li
@@ -623,10 +629,9 @@ export default async function CompanyDetailPage({
                 <header className="mb-3 flex items-center justify-between">
                   <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
                     <Wallet className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
-                    حركات مالية أخيرة
-                  </h3>
+                    {en ? "Recent transactions" : "حركات مالية أخيرة"}                  </h3>
                   <Link href="/finance" className="text-[11px] font-bold" style={{ color: "var(--heri-ochre)" }}>
-                    عرض الكل ←
+                    {en ? "View all →" : "عرض الكل ←"}
                   </Link>
                 </header>
                 <ul className="space-y-1.5">
@@ -665,10 +670,9 @@ export default async function CompanyDetailPage({
                 <header className="mb-3 flex items-center justify-between">
                   <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
                     <FlaskConical className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
-                    المشاريع المستقبلية
-                  </h3>
+                    {en ? "Future projects" : "المشاريع المستقبلية"}                  </h3>
                   <Link href="/projects" className="text-[11px] font-bold" style={{ color: "var(--heri-ochre)" }}>
-                    عرض الكل ←
+                    {en ? "View all →" : "عرض الكل ←"}
                   </Link>
                 </header>
                 <ul className="space-y-2">
@@ -693,7 +697,7 @@ export default async function CompanyDetailPage({
                       </div>
                       {p.budgetJod > 0 ? (
                         <div className="mt-1 text-[10px] font-mono" style={{ color: "var(--heri-ink-3)" }}>
-                          ميزانية {formatMoney(p.budgetJod)}
+                          {en ? "Budget" : "ميزانية"} {formatMoney(p.budgetJod)}
                         </div>
                       ) : null}
                       {p.progressPct > 0 ? (
@@ -723,8 +727,7 @@ export default async function CompanyDetailPage({
                 <header className="mb-3 flex items-center justify-between">
                   <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>
                     <Leaf className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
-                    الاستدامة (ESG)
-                  </h3>
+                    {en ? "Sustainability (ESG)" : "الاستدامة (ESG)"}                  </h3>
                   <span className="text-[10px] font-mono" style={{ color: "var(--heri-ink-3)" }}>
                     {latestEsg.period} {latestEsg.year}
                   </span>
@@ -760,15 +763,15 @@ export default async function CompanyDetailPage({
                   <div className="mt-3 grid grid-cols-2 gap-2 text-[10px]" style={{ color: "var(--heri-ink-3)" }}>
                     {latestEsg.carbonTons > 0 ? (
                       <div>
-                        كربون: <span className="font-mono font-bold" style={{ color: "var(--heri-ink)" }}>
-                          {formatNumber(latestEsg.carbonTons)} طن
+                        {en ? "Carbon:" : "كربون:"} <span className="font-mono font-bold" style={{ color: "var(--heri-ink)" }}>
+                          {formatNumber(latestEsg.carbonTons)} {en ? "t" : "طن"}
                         </span>
                       </div>
                     ) : null}
                     {latestEsg.renewablePct > 0 ? (
                       <div>
-                        طاقة متجددة: <span className="font-mono font-bold" style={{ color: "var(--heri-ink)" }}>
-                          {Math.round(latestEsg.renewablePct)}٪
+                        {en ? "Renewable:" : "طاقة متجددة:"} <span className="font-mono font-bold" style={{ color: "var(--heri-ink)" }}>
+                          {Math.round(latestEsg.renewablePct)}{en ? "%" : "٪"}
                         </span>
                       </div>
                     ) : null}

@@ -65,19 +65,22 @@ export default async function EducationDetailPage({
 
   const pinned = await isPinned("PROGRAM", program.id);
 
+  const en = getLocale() === "en";
+
   return (
     <>
       <PageHeader
-        eyebrow="حاضنة The Tank"
-        title={program.name}
+        eyebrow={en ? "The Tank Incubator" : "حاضنة The Tank"}
+        title={en ? (program.nameEn ?? program.name) : program.name}
         subtitle={
-          program.nameEn ?? `بقيادة ${program.founder} • فوج ${program.cohort}`
+          program.nameEn ??
+          `${en ? "Led by" : "بقيادة"} ${program.founder} • ${en ? "Cohort" : "فوج"} ${program.cohort}`
         }
         actions={
           <div className="flex items-center gap-2">
             <Link href="/education" className="heri-btn heri-btn-ghost" style={{ fontSize: 13 }}>
               <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
-              البرامج
+              {en ? "Programs" : "البرامج"}
             </Link>
             <PinButton
               entityType="PROGRAM"
@@ -123,7 +126,7 @@ export default async function EducationDetailPage({
                   lineHeight: 1.15,
                 }}
               >
-                {program.name}
+                {en ? (program.nameEn ?? program.name) : program.name}
               </h2>
               {program.nameEn ? (
                 <p
@@ -141,11 +144,11 @@ export default async function EducationDetailPage({
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
-                  فوج {program.cohort}
+                  {en ? "Cohort" : "فوج"} {program.cohort}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <Users2 className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
-                  {formatNumber(program.teamSize)} فرد
+                  {formatNumber(program.teamSize)} {en ? "members" : "فرد"}
                 </span>
               </div>
             </div>
@@ -165,19 +168,19 @@ export default async function EducationDetailPage({
         {/* KPI band */}
         <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-3">
           <HeriKpi
-            label="التمويل"
+            label={en ? "Funding" : "التمويل"}
             raw={program.fundingJod}
             kind="money"
-            hint={`فوج ${program.cohort}`}
+            hint={`${en ? "Cohort" : "فوج"} ${program.cohort}`}
           />
           <HeriKpi
-            label="حجم الفريق"
+            label={en ? "Team Size" : "حجم الفريق"}
             raw={program.teamSize}
             kind="number"
-            hint="أفراد"
+            hint={en ? "members" : "أفراد"}
           />
           <HeriKpi
-            label="نسبة الإنجاز"
+            label={en ? "Completion Rate" : "نسبة الإنجاز"}
             raw={stalled ? 0 : (Math.max(0, stageIdx + 1) / STAGE_FLOW.length)}
             kind="percent"
             accent={stalled ? "var(--heri-terracotta)" : "var(--heri-teal)"}
@@ -189,7 +192,7 @@ export default async function EducationDetailPage({
         <section className="heri-card">
           <header className="mb-4 flex items-center justify-between">
             <div>
-              <div className="heri-eyebrow heri-eyebrow-ink">المسيرة</div>
+              <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Journey" : "المسيرة"}</div>
               <h3
                 className="mt-1 flex items-center gap-2"
                 style={{
@@ -200,15 +203,17 @@ export default async function EducationDetailPage({
                 }}
               >
                 <ChevronsRight className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
-                مسيرة المشروع
+                {en ? "Startup Journey" : "مسيرة المشروع"}
               </h3>
             </div>
-            {stalled ? <span className="heri-pill heri-pill-critical">متعثر</span> : null}
+            {stalled ? <span className="heri-pill heri-pill-critical">{en ? "Stalled" : "متعثر"}</span> : null}
           </header>
 
           {stalled ? (
             <p className="text-xs" style={{ color: "var(--heri-ink-3)" }}>
-              المشروع في حالة تعثر — يحتاج تدخل من فريق الحاضنة لإعادته للمسار.
+              {en
+                ? "The startup is stalled — it needs intervention from the incubator team to get back on track."
+                : "المشروع في حالة تعثر — يحتاج تدخل من فريق الحاضنة لإعادته للمسار."}
             </p>
           ) : (
             <div className="relative flex items-center justify-between gap-2">
@@ -271,7 +276,7 @@ export default async function EducationDetailPage({
           <div className="space-y-6">
             {program.description ? (
               <section className="heri-card">
-                <div className="heri-eyebrow heri-eyebrow-ink">نظرة عامة</div>
+                <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Overview" : "نظرة عامة"}</div>
                 <h3
                   className="mt-1 mb-2"
                   style={{
@@ -281,7 +286,7 @@ export default async function EducationDetailPage({
                     color: "var(--heri-ink)",
                   }}
                 >
-                  المشروع باختصار
+                  {en ? "The Startup at a Glance" : "المشروع باختصار"}
                 </h3>
                 <p
                   className="text-sm leading-relaxed"
@@ -296,7 +301,7 @@ export default async function EducationDetailPage({
               <section className="heri-card">
                 <header className="mb-3 flex items-center justify-between">
                   <div>
-                    <div className="heri-eyebrow heri-eyebrow-ink">برامج زميلة</div>
+                    <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Peer Programs" : "برامج زميلة"}</div>
                     <h3
                       className="mt-1 flex items-center gap-2"
                       style={{
@@ -307,7 +312,7 @@ export default async function EducationDetailPage({
                       }}
                     >
                       <GraduationCap className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
-                      من نفس المظلة
+                      {en ? "Under the Same Umbrella" : "من نفس المظلة"}
                     </h3>
                   </div>
                   <Link
@@ -315,7 +320,7 @@ export default async function EducationDetailPage({
                     className="heri-eyebrow"
                     style={{ color: "var(--heri-ochre)", textDecoration: "none" }}
                   >
-                    كل البرامج ←
+                    {en ? "All Programs ←" : "كل البرامج ←"}
                   </Link>
                 </header>
                 <ul className="divide-y divide-[var(--heri-rule)]">
@@ -333,7 +338,7 @@ export default async function EducationDetailPage({
                             className="truncate font-semibold"
                             style={{ color: "var(--heri-ink)", fontSize: 13 }}
                           >
-                            {r.name}
+                            {en ? (r.nameEn ?? r.name) : r.name}
                           </span>
                           <span className={VERTICAL_TONE[r.vertical] ?? "badge-slate"}>
                             {loc(VERTICALS_AR, VERTICALS_EN, getLocale(), r.vertical)}
@@ -343,7 +348,7 @@ export default async function EducationDetailPage({
                           className="heri-number-mono mt-0.5"
                           style={{ fontSize: 10.5, color: "var(--heri-ink-3)" }}
                         >
-                          {r.founder} • فوج {r.cohort} • {formatNumber(r.teamSize)} فرد
+                          {r.founder} • {en ? "Cohort" : "فوج"} {r.cohort} • {formatNumber(r.teamSize)} {en ? "members" : "فرد"}
                         </div>
                       </Link>
                       <div className="flex items-center gap-2">
@@ -364,7 +369,7 @@ export default async function EducationDetailPage({
 
           <aside className="space-y-6">
             <section className="heri-card">
-              <div className="heri-eyebrow heri-eyebrow-ink">البطاقة</div>
+              <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Profile" : "البطاقة"}</div>
               <h3
                 className="mt-1 mb-3"
                 style={{
@@ -374,18 +379,18 @@ export default async function EducationDetailPage({
                   color: "var(--heri-ink)",
                 }}
               >
-                بطاقة المشروع
+                {en ? "Startup Profile" : "بطاقة المشروع"}
               </h3>
               <dl className="space-y-2 text-xs">
-                <Fact label="المؤسس" value={program.founder} />
-                <Fact label="القطاع" value={loc(VERTICALS_AR, VERTICALS_EN, getLocale(), program.vertical)} />
-                <Fact label="المرحلة" value={loc(STATUS_AR, STATUS_EN, getLocale(), program.stage)} />
-                <Fact label="الفوج" value={program.cohort} />
-                <Fact label="حجم الفريق" value={`${formatNumber(program.teamSize)} فرد`} />
-                <Fact label="التمويل" value={formatMoney(program.fundingJod)} />
+                <Fact label={en ? "Founder" : "المؤسس"} value={program.founder} />
+                <Fact label={en ? "Vertical" : "القطاع"} value={loc(VERTICALS_AR, VERTICALS_EN, getLocale(), program.vertical)} />
+                <Fact label={en ? "Stage" : "المرحلة"} value={loc(STATUS_AR, STATUS_EN, getLocale(), program.stage)} />
+                <Fact label={en ? "Cohort" : "الفوج"} value={program.cohort} />
+                <Fact label={en ? "Team Size" : "حجم الفريق"} value={`${formatNumber(program.teamSize)} ${en ? "members" : "فرد"}`} />
+                <Fact label={en ? "Funding" : "التمويل"} value={formatMoney(program.fundingJod)} />
                 <Fact
-                  label="مظلة الجامعة"
-                  value={program.company.name}
+                  label={en ? "University Umbrella" : "مظلة الجامعة"}
+                  value={en ? (program.company.nameEn ?? program.company.name) : program.company.name}
                   link={`/companies/${program.companyId}`}
                 />
               </dl>

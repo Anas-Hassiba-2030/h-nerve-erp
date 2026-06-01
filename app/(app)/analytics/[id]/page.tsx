@@ -75,7 +75,7 @@ export default async function AnalyticsCompanyPage({ params }: { params: { id: s
     <>
       <Topbar
         eyebrow={ar ? "تحليل عميق" : "Deep dive"}
-        title={company.name}
+        title={ar ? company.name : company.nameEn}
         subtitle={brand.motto}
         actions={
           <Link href="/analytics" className="btn-ghost btn-sm">
@@ -89,7 +89,7 @@ export default async function AnalyticsCompanyPage({ params }: { params: { id: s
         <CompanyCover
           code={company.code}
           eyebrow={company.code}
-          title={company.name}
+          title={ar ? company.name : company.nameEn}
           subtitle={brand.motto}
           metrics={[
             { label: ar ? "إيرادات 12ش" : "Revenue 12mo", value: formatMoney(revenue12) },

@@ -8,7 +8,7 @@ import {
   Brain, Wallet, Sparkles, TrendingUp, Leaf, ChartLine, FlaskConical,
   ListChecks, Trophy, Users, Settings, LogOut, Activity, ChevronLeft,
   ChevronRight, UserSquare2, ArrowLeftRight, Search, FileText, HelpCircle,
-  GitBranch, Map, Pin, MessageSquare, Bell, Workflow, Heart, Network, Zap, Target, Globe2, Plug, ScrollText, Sparkles as SparklesIcon, PlayCircle, Cpu, Palette,
+  GitBranch, Map, Pin, MessageSquare, Bell, Workflow, Heart, Network, Zap, Target, Globe2, Plug, ScrollText, Sparkles as SparklesIcon, PlayCircle, Cpu, Palette, ScanSearch, Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { canAccess } from "@/lib/permissions";
@@ -189,6 +189,8 @@ export function Sidebar({
       items: [
         { href: "/reports", label: ar ? "التقارير الرسمية" : "Reports", icon: FileText },
         { href: "/activity", label: ar ? "سجل النشاط" : "Activity log", icon: Activity },
+        { href: "/audit-360", label: ar ? "تتبع السجلات 360" : "Audit 360", icon: ScanSearch },
+        { href: "/trash", label: ar ? "سلة المحذوفات" : "Trash", icon: Trash2 },
         { href: "/system", label: ar ? "صحة النظام" : "System health", icon: Heart },
         { href: "/help", label: ar ? "المساعدة" : "Help", icon: HelpCircle },
         { href: "/changelog", label: ar ? "السجل الزمني" : "Changelog", icon: GitBranch },

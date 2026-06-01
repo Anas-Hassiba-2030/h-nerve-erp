@@ -45,17 +45,18 @@ export default async function FarmDetailPage({ params }: { params: { id: string 
   const growingCount = farm.crops.filter((c) => c.status === "GROWING").length;
   const expectedYieldKg = farm.crops.reduce((a, c) => a + (c.expectedYieldKg ?? 0), 0);
   const actualYieldKg = farm.crops.reduce((a, c) => a + (c.actualYieldKg ?? 0), 0);
+  const en = getLocale() === "en";
 
   return (
     <>
       <Topbar
-        eyebrow={`${farm.company.name} • ${loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), farm.type)}`}
-        title={farm.name}
-        subtitle={`${farm.location} • ${formatNumber(farm.areaDunum)} دونم`}
+        eyebrow={`${en ? farm.company.nameEn : farm.company.name} • ${loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), farm.type)}`}
+        title={en ? (farm.nameEn ?? farm.name) : farm.name}
+        subtitle={`${farm.location} • ${formatNumber(farm.areaDunum)} ${en ? "dunum" : "دونم"}`}
         actions={
           <div className="flex items-center gap-2">
             <Link href="/farms" className="heri-btn heri-btn-ghost" style={{ fontSize: 13 }}>
-              <ArrowLeft className="h-4 w-4" strokeWidth={1.5} /> العودة
+              <ArrowLeft className="h-4 w-4" strokeWidth={1.5} /> {en ? "Back" : "العودة"}
             </Link>
             <PinButton
               entityType="FARM"
@@ -110,7 +111,7 @@ export default async function FarmDetailPage({ params }: { params: { id: string 
                   </span>
                   <span className="inline-flex items-center gap-1.5">
                     <Activity className="h-3.5 w-3.5" strokeWidth={1.5} />
-                    آخر قراءة: {formatRelative(farm.lastReadAt)}
+                    {en ? "Last reading:" : "آخر قراءة:"} {formatRelative(farm.lastReadAt)}
                   </span>
                   <Link
                     href={`/companies/${farm.companyId}`}
@@ -133,30 +134,30 @@ export default async function FarmDetailPage({ params }: { params: { id: string 
         {/* KPI strip */}
         <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
           <HeriKpi
-            label="المساحة"
+            label={en ? "Area" : "المساحة"}
             raw={farm.areaDunum}
             kind="number"
-            hint="دونم"
+            hint={en ? "dunum" : "دونم"}
           />
           <HeriKpi
-            label="عدد المحاصيل"
+            label={en ? "Crop count" : "عدد المحاصيل"}
             raw={cropsCount}
             kind="number"
-            hint={`${formatNumber(growingCount)} في النمو`}
+            hint={`${formatNumber(growingCount)} ${en ? "growing" : "في النمو"}`}
           />
           <HeriKpi
-            label="إنتاج متوقع"
+            label={en ? "Expected yield" : "إنتاج متوقع"}
             raw={expectedYieldKg}
             kind="number"
-            hint="كغ — مجمّع"
+            hint={en ? "kg — aggregate" : "كغ — مجمّع"}
           />
           <HeriKpi
-            label="إنتاج فعلي"
+            label={en ? "Actual yield" : "إنتاج فعلي"}
             raw={actualYieldKg}
             kind="number"
             accent={actualYieldKg >= expectedYieldKg && expectedYieldKg > 0 ? "var(--heri-teal, #1f4e4a)" : undefined}
             hint={expectedYieldKg > 0
-              ? `${Math.round((actualYieldKg / expectedYieldKg) * 100)}٪ من المتوقع`
+              ? (en ? `${Math.round((actualYieldKg / expectedYieldKg) * 100)}% of target` : `${Math.round((actualYieldKg / expectedYieldKg) * 100)}٪ من المتوقع`)
               : "—"}
           />
         </section>
@@ -170,10 +171,9 @@ export default async function FarmDetailPage({ params }: { params: { id: string 
                 style={{ color: "var(--heri-ink)" }}
               >
                 <Activity className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
-                حالة المستشعرات
-              </h3>
+                {en ? "Sensor status" : "حالة المستشعرات"}              </h3>
               <span className="heri-eyebrow heri-eyebrow-ink">
-                آخر قراءة: {formatRelative(farm.lastReadAt)}
+                {en ? "Last reading:" : "آخر قراءة:"} {formatRelative(farm.lastReadAt)}
               </span>
             </div>
 
@@ -182,7 +182,7 @@ export default async function FarmDetailPage({ params }: { params: { id: string 
                 <div>
                   <label className="label" htmlFor="tempC">
                     <Thermometer className="me-1 inline h-3.5 w-3.5 text-amber-600" />
-                    حرارة (°م)
+                    {en ? "Temp (°C)" : "حرارة (°م)"}
                   </label>
                   <input
                     id="tempC"
@@ -196,7 +196,7 @@ export default async function FarmDetailPage({ params }: { params: { id: string 
                 <div>
                   <label className="label" htmlFor="humidity">
                     <Droplets className="me-1 inline h-3.5 w-3.5 text-sky-600" />
-                    رطوبة (٪)
+                    {en ? "Humidity (%)" : "رطوبة (٪)"}
                   </label>
                   <input
                     id="humidity"
@@ -212,7 +212,7 @@ export default async function FarmDetailPage({ params }: { params: { id: string 
                 <div>
                   <label className="label" htmlFor="soilMoisture">
                     <Beaker className="me-1 inline h-3.5 w-3.5 text-emerald-600" />
-                    رطوبة تربة (٪)
+                    {en ? "Soil moisture (%)" : "رطوبة تربة (٪)"}
                   </label>
                   <input
                     id="soilMoisture"
@@ -228,20 +228,20 @@ export default async function FarmDetailPage({ params }: { params: { id: string 
               </div>
               <div className="flex items-end justify-between gap-3">
                 <div className="flex-1">
-                  <label className="label" htmlFor="alertLevel">مستوى التنبيه</label>
+                  <label className="label" htmlFor="alertLevel">{en ? "Alert level" : "مستوى التنبيه"}</label>
                   <select
                     id="alertLevel"
                     name="alertLevel"
                     defaultValue={farm.alertLevel}
                     className="select"
                   >
-                    <option value="OK">طبيعي</option>
-                    <option value="WARN">تحذير</option>
-                    <option value="CRITICAL">حرج</option>
+                    <option value="OK">{en ? "Normal" : "طبيعي"}</option>
+                    <option value="WARN">{en ? "Warning" : "تحذير"}</option>
+                    <option value="CRITICAL">{en ? "Critical" : "حرج"}</option>
                   </select>
                 </div>
                 <button type="submit" className="heri-btn heri-btn-primary" style={{ fontSize: 13 }}>
-                  <Save className="h-4 w-4" strokeWidth={1.5} /> حفظ القراءة
+                  <Save className="h-4 w-4" strokeWidth={1.5} /> {en ? "Save reading" : "حفظ القراءة"}
                 </button>
               </div>
             </form>
@@ -252,23 +252,22 @@ export default async function FarmDetailPage({ params }: { params: { id: string 
               className="text-sm font-semibold"
               style={{ color: "var(--heri-ink)" }}
             >
-              عن المزرعة
-            </h3>
+              {en ? "About the farm" : "عن المزرعة"}            </h3>
             {farm.description ? (
               <p className="mt-3 text-sm" style={{ color: "var(--heri-ink-2)", lineHeight: 1.55 }}>
                 {farm.description}
               </p>
             ) : (
               <p className="mt-3 text-sm" style={{ color: "var(--heri-ink-3)", fontStyle: "italic" }}>
-                لا يوجد وصف.
+                {en ? "No description." : "لا يوجد وصف."}
               </p>
             )}
             <dl className="mt-4 space-y-2 text-xs">
               <Fact label="النوع" value={loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), farm.type)} />
-              <Fact label="الموقع" value={farm.location} />
-              <Fact label="المساحة" value={`${formatNumber(farm.areaDunum)} دونم`} />
+              <Fact label={en ? "Location" : "الموقع"} value={farm.location} />
+              <Fact label={en ? "Area" : "المساحة"} value={`${formatNumber(farm.areaDunum)} ${en ? "dunum" : "دونم"}`} />
               <Fact
-                label="الشركة"
+                label={en ? "Company" : "الشركة"}
                 value={farm.company.name}
                 link={`/companies/${farm.companyId}`}
               />
@@ -280,7 +279,7 @@ export default async function FarmDetailPage({ params }: { params: { id: string 
         <section className="space-y-3">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <div className="heri-eyebrow heri-eyebrow-ink">المحاصيل</div>
+              <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Crops" : "المحاصيل"}</div>
               <h2
                 className="mt-1 text-base font-semibold"
                 style={{ color: "var(--heri-ink)", letterSpacing: "-0.005em" }}
@@ -289,25 +288,25 @@ export default async function FarmDetailPage({ params }: { params: { id: string 
               </h2>
             </div>
             <Link href={`/farms/crops/new?farmId=${farm.id}`} className="heri-btn heri-btn-secondary" style={{ fontSize: 13 }}>
-              <Plus className="h-3.5 w-3.5" strokeWidth={1.5} /> إضافة محصول
+              <Plus className="h-3.5 w-3.5" strokeWidth={1.5} /> {en ? "Add crop" : "إضافة محصول"}
             </Link>
           </div>
           {farm.crops.length === 0 ? (
             <div className="heri-card text-sm" style={{ color: "var(--heri-ink-3)" }}>
-              لا توجد محاصيل مسجلة.
+              {en ? "No crops recorded." : "لا توجد محاصيل مسجلة."}
             </div>
           ) : (
             <div className="table-wrap">
               <table className="table">
                 <thead>
                   <tr>
-                    <th>المحصول</th>
-                    <th>الصنف</th>
-                    <th>زرع</th>
-                    <th>حصاد متوقع</th>
-                    <th>إنتاج متوقع (كغ)</th>
-                    <th>إنتاج فعلي (كغ)</th>
-                    <th>الحالة</th>
+                    <th>{en ? "Crop" : "المحصول"}</th>
+                    <th>{en ? "Variety" : "الصنف"}</th>
+                    <th>{en ? "Planted" : "زرع"}</th>
+                    <th>{en ? "Exp. harvest" : "حصاد متوقع"}</th>
+                    <th>{en ? "Exp. yield (kg)" : "إنتاج متوقع (كغ)"}</th>
+                    <th>{en ? "Actual yield (kg)" : "إنتاج فعلي (كغ)"}</th>
+                    <th>{en ? "Status" : "الحالة"}</th>
                     <th></th>
                   </tr>
                 </thead>

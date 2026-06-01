@@ -190,13 +190,13 @@ export default async function HotelsPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 style={{ fontSize: 17, fontWeight: 700, color: "var(--ink)" }}>{h.name}</h3>
+                        <h3 style={{ fontSize: 17, fontWeight: 700, color: "var(--ink)" }}>{ar ? h.name : (h.nameEn ?? h.name)}</h3>
                         <span className="tag gold">{loc(TIERS_AR, TIERS_EN, lc, h.tier)}</span>
                         <span className="inline-flex items-center gap-0.5" style={{ color: "var(--gold)" }} title={`${h.starRating} stars`}>
                           {[...Array(h.starRating)].map((_, i) => (<Star key={i} className="h-3 w-3" style={{ fill: "var(--gold)" }} />))}
                         </span>
                       </div>
-                      {h.nameEn ? <div style={{ fontSize: 11, color: "var(--ink-muted)" }} dir="ltr">{h.nameEn}</div> : null}
+                      {h.nameEn ? <div style={{ fontSize: 11, color: "var(--ink-muted)" }} dir={ar ? "ltr" : "rtl"}>{ar ? h.nameEn : h.name}</div> : null}
                       <div className="mt-2 flex flex-wrap items-center gap-3" style={{ fontSize: 12, color: "var(--ink-muted)" }}>
                         <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{h.city} · {(ar ? COUNTRY_NAMES_AR : COUNTRY_NAMES_EN)[h.country] ?? h.country}</span>
                         <span className="inline-flex items-center gap-1"><BedDouble className="h-3.5 w-3.5" />{formatNumber(h.totalRooms)} {ar ? "غرفة" : "rooms"}</span>
@@ -259,7 +259,7 @@ export default async function HotelsPage() {
                   <tr key={b.id}>
                     <td style={{ fontFamily: "monospace", fontSize: 11, color: "var(--ink-muted)" }}>{b.reference}</td>
                     <td style={{ fontWeight: 700, color: "var(--ink)" }}>{b.guestName}</td>
-                    <td>{b.hotel.name}</td>
+                    <td>{ar ? b.hotel.name : (b.hotel.nameEn ?? b.hotel.name)}</td>
                     <td>{loc(ROOM_TYPES_AR, ROOM_TYPES_EN, lc, b.roomType)}</td>
                     <td style={{ fontSize: 11, fontVariantNumeric: "tabular-nums" }}>{formatShortDate(b.checkIn, lc)}</td>
                     <td style={{ fontSize: 11, fontVariantNumeric: "tabular-nums" }}>{formatShortDate(b.checkOut, lc)}</td>

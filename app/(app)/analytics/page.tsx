@@ -123,7 +123,7 @@ export default async function AnalyticsHubPage() {
                     <div className="flex h-10 w-10 items-center justify-center text-base font-bold text-white" style={{ background: brand.gradient, borderRadius: 10 }}>{brand.emblem}</div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <div style={{ fontSize: 16, fontWeight: 700, color: "var(--ink)" }}>{row.company.name}</div>
+                        <div style={{ fontSize: 16, fontWeight: 700, color: "var(--ink)" }}>{ar ? row.company.name : row.company.nameEn}</div>
                         <SectorPill sector={row.company.sector} />
                       </div>
                       <div style={{ fontSize: 11, color: "var(--ink-muted)" }}>{row.company.nameEn}</div>

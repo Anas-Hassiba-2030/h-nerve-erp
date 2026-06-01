@@ -20,7 +20,7 @@ type TxRow = {
   category: string;
   amount: number;
   currency: string;
-  company: { name: string };
+  company: { name: string; nameEn: string };
   createdBy: { name: string } | null;
 };
 
@@ -96,7 +96,7 @@ export function TransactionTable({
                   )}
                   <td className="font-mono text-xs" style={{ color: "var(--heri-ink-3)" }}>{t.reference}</td>
                   <td className="text-xs">{formatShortDate(new Date(t.occurredAt))}</td>
-                  <td className="font-bold" style={{ color: "var(--heri-ink)" }}>{t.company.name}</td>
+                  <td className="font-bold" style={{ color: "var(--heri-ink)" }}>{ar ? t.company.name : t.company.nameEn}</td>
                   <td>
                     <span className={KIND_LABEL[t.kind]?.tone ?? "badge-slate"}>
                       {ar ? KIND_LABEL[t.kind]?.ar ?? t.kind : KIND_LABEL[t.kind]?.en ?? t.kind}

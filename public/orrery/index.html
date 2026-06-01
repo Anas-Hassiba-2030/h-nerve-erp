@@ -1781,6 +1781,7 @@ function setLang(l){
   const t = I18N[l];
   document.documentElement.lang = l;
   document.documentElement.dir = (l==="ar") ? "rtl" : "ltr";
+  if(window.__hnLangReady){ try{ parent.postMessage({__orreryLang:l}, "*"); }catch(e){} }
   // toggle pill highlight
   document.querySelectorAll("#langToggle .lang-opt").forEach(o=> o.classList.toggle("on", o.dataset.l===l));
   // anchor + child pills
@@ -1807,6 +1808,7 @@ function setLang(l){
 }
 document.getElementById("langToggle").addEventListener("click", ()=> setLang(LANG==="ar"?"en":"ar"));
 setLang("ar");
+  window.__hnLangReady = true;
 
 /* insight stars surface ideas calmly — one at a time, slow enough to read + click */
 if(!reduce){

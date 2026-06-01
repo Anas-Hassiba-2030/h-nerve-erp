@@ -38,6 +38,23 @@ let engine = /<body>[\s\S]*?<script>([\s\S]*?)<\/script>\s*<script src/.exec(htm
 engine = engine.replace(/location\.href\s*=\s*([^;]+);/g, "window.__hnNavigate($1);");
 if (/location\.href\s*=/.test(engine)) throw new Error("unrewired location.href remains in engine");
 
+// bridge: the in-hub language toggle must persist the REAL app locale. setLang()
+// only flips the iframe's own visuals, so also notify the parent (OrreryFrame),
+// which writes the h_nerve_locale cookie + reloads → whole-app bilingual switch.
+// GUARD: post only once setLang is user-driven (window.__hnLangReady). The hub
+// hardcodes setLang("ar") at init; without this guard an English-locale app
+// would be clobbered back to Arabic on every Orrery load.
+engine = engine.replace(
+  /(document\.documentElement\.dir\s*=\s*\(l==="ar"\)\s*\?\s*"rtl"\s*:\s*"ltr";)/,
+  '$1\n  if(window.__hnLangReady){ try{ parent.postMessage({__orreryLang:l}, "*"); }catch(e){} }',
+);
+// arm the bridge only AFTER the hardcoded init setLang("ar") has run.
+engine = engine.replace(
+  /(\n\s*setLang\("ar"\);)/,
+  '$1\n  window.__hnLangReady = true;',
+);
+if (!/__hnLangReady = true/.test(engine)) throw new Error("failed to arm orrery lang bridge after init setLang");
+
 // 4) copy assets
 mkdirSync(OUT_FONTS, { recursive: true });
 let fonts = 0;

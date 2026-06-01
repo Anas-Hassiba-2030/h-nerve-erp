@@ -102,6 +102,8 @@ export default async function CropDetailPage({
       : null;
 
   const brand = getCompanyBrand(crop.farm.company.code);
+  const en = getLocale() === "en";
+  const farmName = en ? (crop.farm.nameEn ?? crop.farm.name) : crop.farm.name;
 
   const lifecycleColor =
     crop.status === "FAILED"
@@ -115,17 +117,17 @@ export default async function CropDetailPage({
   return (
     <>
       <Topbar
-        eyebrow="الزراعة الذكية"
+        eyebrow={en ? "Smart Agriculture" : "الزراعة الذكية"}
         title={crop.name}
         subtitle={
           crop.variety
-            ? `${crop.variety} • ${crop.farm.name}`
-            : crop.farm.name
+            ? `${crop.variety} • ${farmName}`
+            : farmName
         }
         actions={
           <Link href="/farms" className="btn-ghost">
             <ArrowLeft className="h-4 w-4" />
-            المزارع
+            {en ? "Farms" : "المزارع"}
           </Link>
         }
       />
@@ -169,7 +171,7 @@ export default async function CropDetailPage({
                   }}
                 >
                   <Tractor className="me-1 inline h-3 w-3" />
-                  {crop.farm.name}
+                  {farmName}
                 </Link>
                 <Link
                   href={`/companies/${crop.farm.company.id}`}
@@ -187,7 +189,7 @@ export default async function CropDetailPage({
               </h2>
               {crop.variety ? (
                 <p className="text-sm opacity-90">
-                  صنف: <span className="font-bold">{crop.variety}</span>
+                  {en ? "Variety: " : "صنف: "}<span className="font-bold">{crop.variety}</span>
                 </p>
               ) : null}
               <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
@@ -208,7 +210,7 @@ export default async function CropDetailPage({
                   }}
                 >
                   <Calendar className="h-3 w-3" />
-                  زُرع {formatRelative(crop.plantedAt)}
+                  {en ? "Planted " : "زُرع "}{formatRelative(crop.plantedAt)}
                 </span>
                 {!harvested && crop.status !== "FAILED" ? (
                   <span
@@ -219,7 +221,7 @@ export default async function CropDetailPage({
                     }}
                   >
                     <Clock className="h-3 w-3" />
-                    {Math.max(0, daysRemaining)} يوم للحصاد
+                    {Math.max(0, daysRemaining)} {en ? "days to harvest" : "يوم للحصاد"}
                   </span>
                 ) : null}
               </div>
@@ -230,16 +232,24 @@ export default async function CropDetailPage({
         {/* KPIs */}
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <KpiCard
-            label="غلة متوقعة"
-            value={`${formatNumber(crop.expectedYieldKg)} كغم`}
+            label={en ? "Expected yield" : "غلة متوقعة"}
+            value={`${formatNumber(crop.expectedYieldKg)} ${en ? "kg" : "كغم"}`}
             icon={Scale}
             tone="emerald"
           />
           <KpiCard
-            label={harvested ? "غلة فعلية" : "في انتظار الحصاد"}
+            label={
+              harvested
+                ? en
+                  ? "Actual yield"
+                  : "غلة فعلية"
+                : en
+                  ? "Awaiting harvest"
+                  : "في انتظار الحصاد"
+            }
             value={
               crop.actualYieldKg != null
-                ? `${formatNumber(crop.actualYieldKg)} كغم`
+                ? `${formatNumber(crop.actualYieldKg)} ${en ? "kg" : "كغم"}`
                 : "—"
             }
             icon={Scale}
@@ -256,20 +266,20 @@ export default async function CropDetailPage({
                     up: yieldPct >= 100,
                     value: `${yieldPct >= 100 ? "+" : ""}${(
                       yieldPct - 100
-                    ).toFixed(0)}٪ من المتوقع`,
+                    ).toFixed(0)}${en ? "% of expected" : "٪ من المتوقع"}`,
                   }
                 : undefined
             }
           />
           <KpiCard
-            label="فترة النمو"
-            value={`${Math.round(lifePct * 100)}٪`}
+            label={en ? "Growing period" : "فترة النمو"}
+            value={`${Math.round(lifePct * 100)}${en ? "%" : "٪"}`}
             icon={Sprout}
             tone={crop.status === "FAILED" ? "red" : "emerald"}
-            hint={`${Math.max(0, daysRemaining)} يوم متبقي`}
+            hint={`${Math.max(0, daysRemaining)} ${en ? "days remaining" : "يوم متبقي"}`}
           />
           <KpiCard
-            label="الحالة"
+            label={en ? "Status" : "الحالة"}
             value={loc(CROP_STATUS_AR, CROP_STATUS_EN, getLocale(), crop.status)}
             icon={harvested ? TrendingUp : TrendingDown}
             tone={
@@ -290,19 +300,27 @@ export default async function CropDetailPage({
               style={{ color: "var(--heri-ink)" }}
             >
               <Clock className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
-              دورة المحصول
+              {en ? "Crop cycle" : "دورة المحصول"}
             </h3>
             <span
               className="text-[10px] font-bold uppercase tracking-widest"
               style={{ color: lifecycleColor }}
             >
               {crop.status === "FAILED"
-                ? "متعثر"
+                ? en
+                  ? "Failed"
+                  : "متعثر"
                 : harvested
-                  ? "اكتمل"
+                  ? en
+                    ? "Complete"
+                    : "اكتمل"
                   : lifePct > 0.85
-                    ? "قرب الحصاد"
-                    : "ينمو"}
+                    ? en
+                      ? "Near harvest"
+                      : "قرب الحصاد"
+                    : en
+                      ? "Growing"
+                      : "ينمو"}
             </span>
           </header>
           <div className="mb-2 flex items-center justify-between text-xs">
@@ -311,7 +329,7 @@ export default async function CropDetailPage({
                 className="text-[10px] font-bold uppercase tracking-widest"
                 style={{ color: "var(--heri-ink-3)" }}
               >
-                زُرع
+                {en ? "Planted" : "زُرع"}
               </div>
               <div className="font-bold" style={{ color: "var(--heri-ink)" }}>
                 {formatShortDate(crop.plantedAt)}
@@ -326,7 +344,7 @@ export default async function CropDetailPage({
                 className="text-[10px] font-bold uppercase tracking-widest"
                 style={{ color: "var(--heri-ink-3)" }}
               >
-                حصاد متوقع
+                {en ? "Expected harvest" : "حصاد متوقع"}
               </div>
               <div className="font-bold" style={{ color: "var(--heri-ink)" }}>
                 {formatShortDate(crop.expectedHarvest)}
@@ -360,7 +378,7 @@ export default async function CropDetailPage({
               style={{ color: "var(--heri-ink)" }}
             >
               <Scale className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
-              مقارنة الغلة
+              {en ? "Yield comparison" : "مقارنة الغلة"}
             </h3>
             {(() => {
               const target = Math.max(crop.expectedYieldKg, crop.actualYieldKg);
@@ -373,9 +391,9 @@ export default async function CropDetailPage({
                       className="mb-1 flex items-center justify-between text-[11px] font-bold"
                       style={{ color: "var(--heri-ink-3)" }}
                     >
-                      <span>متوقع</span>
+                      <span>{en ? "Expected" : "متوقع"}</span>
                       <span style={{ color: "var(--heri-ink)" }} className="font-mono">
-                        {formatNumber(crop.expectedYieldKg)} كغم
+                        {formatNumber(crop.expectedYieldKg)} {en ? "kg" : "كغم"}
                       </span>
                     </div>
                     <div
@@ -402,7 +420,7 @@ export default async function CropDetailPage({
                       className="mb-1 flex items-center justify-between text-[11px] font-bold"
                       style={{ color: "var(--heri-ink-3)" }}
                     >
-                      <span>فعلي</span>
+                      <span>{en ? "Actual" : "فعلي"}</span>
                       <span
                         className="font-mono"
                         style={{
@@ -410,7 +428,7 @@ export default async function CropDetailPage({
                             (yieldDelta ?? 0) >= 0 ? "#0a8e54" : "#c0392b",
                         }}
                       >
-                        {formatNumber(crop.actualYieldKg)} كغم
+                        {formatNumber(crop.actualYieldKg)} {en ? "kg" : "كغم"}
                       </span>
                     </div>
                     <div
@@ -444,11 +462,17 @@ export default async function CropDetailPage({
                         color: yieldDelta >= 0 ? "#0a8e54" : "#c0392b",
                       }}
                     >
-                      {yieldDelta >= 0 ? "تجاوز التوقعات بـ " : "نقص عن التوقعات بـ "}
+                      {yieldDelta >= 0
+                        ? en
+                          ? "Exceeded expectations by "
+                          : "تجاوز التوقعات بـ "
+                        : en
+                          ? "Below expectations by "
+                          : "نقص عن التوقعات بـ "}
                       <span className="font-mono">
                         {formatNumber(Math.abs(yieldDelta))}
                       </span>{" "}
-                      كغم ({yieldPct != null ? `${(yieldPct - 100).toFixed(0)}٪` : ""})
+                      {en ? "kg" : "كغم"} ({yieldPct != null ? `${(yieldPct - 100).toFixed(0)}${en ? "%" : "٪"}` : ""})
                     </div>
                   ) : null}
                 </div>
@@ -466,7 +490,7 @@ export default async function CropDetailPage({
                   className="mb-2 text-sm font-semibold"
                   style={{ color: "var(--heri-ink)" }}
                 >
-                  ملاحظات الحقل
+                  {en ? "Field notes" : "ملاحظات الحقل"}
                 </h3>
                 <p
                   className="whitespace-pre-line text-sm leading-relaxed"
@@ -484,14 +508,14 @@ export default async function CropDetailPage({
                     className="text-sm font-semibold"
                     style={{ color: "var(--heri-ink)" }}
                   >
-                    محاصيل أخرى في {crop.farm.name}
+                    {en ? `Other crops at ${farmName}` : `محاصيل أخرى في ${farmName}`}
                   </h3>
                   <Link
                     href={`/farms/${crop.farm.id}`}
                     className="text-[11px] font-bold"
                     style={{ color: "var(--heri-ochre)" }}
                   >
-                    ملف المزرعة ←
+                    {en ? "Farm profile →" : "ملف المزرعة ←"}
                   </Link>
                 </header>
                 <ul className="divide-y divide-[var(--heri-rule)]">
@@ -521,14 +545,14 @@ export default async function CropDetailPage({
                           className="text-[11px]"
                           style={{ color: "var(--heri-ink-3)" }}
                         >
-                          حصاد متوقع {formatShortDate(c.expectedHarvest)}
+                          {en ? "Expected harvest " : "حصاد متوقع "}{formatShortDate(c.expectedHarvest)}
                         </div>
                       </Link>
                       <span
                         className="font-mono text-xs font-bold"
                         style={{ color: "var(--heri-ink)" }}
                       >
-                        {formatNumber(c.expectedYieldKg)} كغم
+                        {formatNumber(c.expectedYieldKg)} {en ? "kg" : "كغم"}
                       </span>
                     </li>
                   ))}
@@ -542,7 +566,9 @@ export default async function CropDetailPage({
                   className="mb-3 text-sm font-semibold"
                   style={{ color: "var(--heri-ink)" }}
                 >
-                  نفس الصنف ({crop.variety}) في مزارع أخرى
+                  {en
+                    ? `Same variety (${crop.variety}) at other farms`
+                    : `نفس الصنف (${crop.variety}) في مزارع أخرى`}
                 </h3>
                 <ul className="divide-y divide-[var(--heri-rule)]">
                   {sameVariety.map((c, i) => (
@@ -583,42 +609,42 @@ export default async function CropDetailPage({
                 className="mb-3 text-sm font-semibold"
                 style={{ color: "var(--heri-ink)" }}
               >
-                البطاقة الزراعية
+                {en ? "Agricultural card" : "البطاقة الزراعية"}
               </h3>
               <dl className="space-y-2 text-xs">
-                <Fact label="المحصول" value={crop.name} />
+                <Fact label={en ? "Crop" : "المحصول"} value={crop.name} />
                 {crop.variety ? (
-                  <Fact label="الصنف" value={crop.variety} />
+                  <Fact label={en ? "Variety" : "الصنف"} value={crop.variety} />
                 ) : null}
                 <Fact
-                  label="الحالة"
+                  label={en ? "Status" : "الحالة"}
                   value={loc(CROP_STATUS_AR, CROP_STATUS_EN, getLocale(), crop.status)}
                 />
                 <Fact
-                  label="زُرع"
+                  label={en ? "Planted" : "زُرع"}
                   value={formatShortDate(crop.plantedAt)}
                 />
                 <Fact
-                  label="حصاد متوقع"
+                  label={en ? "Expected harvest" : "حصاد متوقع"}
                   value={formatShortDate(crop.expectedHarvest)}
                 />
                 <Fact
-                  label="غلة متوقعة"
-                  value={`${formatNumber(crop.expectedYieldKg)} كغم`}
+                  label={en ? "Expected yield" : "غلة متوقعة"}
+                  value={`${formatNumber(crop.expectedYieldKg)} ${en ? "kg" : "كغم"}`}
                 />
                 {crop.actualYieldKg != null ? (
                   <Fact
-                    label="غلة فعلية"
-                    value={`${formatNumber(crop.actualYieldKg)} كغم`}
+                    label={en ? "Actual yield" : "غلة فعلية"}
+                    value={`${formatNumber(crop.actualYieldKg)} ${en ? "kg" : "كغم"}`}
                   />
                 ) : null}
                 <Fact
-                  label="المزرعة"
-                  value={crop.farm.name}
+                  label={en ? "Farm" : "المزرعة"}
+                  value={farmName}
                   link={`/farms/${crop.farm.id}`}
                 />
                 <Fact
-                  label="الشركة"
+                  label={en ? "Company" : "الشركة"}
                   value={crop.farm.company.name}
                   link={`/companies/${crop.farm.company.id}`}
                 />

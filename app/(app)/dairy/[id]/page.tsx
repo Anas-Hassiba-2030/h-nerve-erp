@@ -15,6 +15,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { PinButton } from "@/components/PinButton";
 import { prisma } from "@/lib/db";
 import { isPinned } from "@/lib/pins";
+import { getLocale } from "@/lib/i18n.server";
 import {
   formatNumber,
   formatShortDate,
@@ -59,17 +60,19 @@ export default async function DairyDetailPage({
 
   const pinned = await isPinned("DAIRY", batch.id);
 
+  const en = getLocale() === "en";
+
   return (
     <>
       <Topbar
-        eyebrow="الصناعات الغذائية"
-        title={batch.productAr || batch.product}
-        subtitle={`دفعة ${batch.batchNumber}`}
+        eyebrow={en ? "Food Industries" : "الصناعات الغذائية"}
+        title={en ? (batch.product || batch.productAr) : (batch.productAr || batch.product)}
+        subtitle={`${en ? "Batch" : "دفعة"} ${batch.batchNumber}`}
         actions={
           <div className="flex items-center gap-2">
             <Link href="/dairy" className="heri-btn heri-btn-ghost" style={{ fontSize: 13 }}>
               <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
-              الدفعات
+              {en ? "Batches" : "الدفعات"}
             </Link>
             <PinButton
               entityType="DAIRY"
@@ -102,7 +105,7 @@ export default async function DairyDetailPage({
               </div>
               <div className="min-w-0">
                 <div className="heri-eyebrow heri-eyebrow-ink mb-1.5 flex items-center gap-2">
-                  <span>درجة {batch.qualityGrade}</span>
+                  <span>{en ? "Grade" : "درجة"} {batch.qualityGrade}</span>
                   <span style={{ color: "var(--heri-rule-strong)" }}>·</span>
                   <StatusBadge status={batch.status} />
                 </div>
@@ -110,11 +113,11 @@ export default async function DairyDetailPage({
                   className="text-2xl font-semibold md:text-3xl"
                   style={{ color: "var(--heri-ink)", letterSpacing: "-0.01em", lineHeight: 1.15 }}
                 >
-                  {batch.productAr || batch.product}
+                  {en ? (batch.product || batch.productAr) : (batch.productAr || batch.product)}
                 </h2>
                 {batch.productAr && batch.product !== batch.productAr ? (
-                  <p className="mt-0.5 text-sm" style={{ color: "var(--heri-ink-3)" }} dir="ltr">
-                    {batch.product}
+                  <p className="mt-0.5 text-sm" style={{ color: "var(--heri-ink-3)" }} dir={en ? "rtl" : "ltr"}>
+                    {en ? batch.productAr : batch.product}
                   </p>
                 ) : null}
                 <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px]" style={{ color: "var(--heri-ink-3)" }}>
@@ -126,18 +129,18 @@ export default async function DairyDetailPage({
                   </span>
                   <span className="inline-flex items-center gap-1.5">
                     <Beaker className="h-3.5 w-3.5" strokeWidth={1.5} />
-                    {batch.fatContent}٪ دسم
+                    {batch.fatContent}{en ? "% fat" : "٪ دسم"}
                   </span>
                   <span className="inline-flex items-center gap-1.5">
                     <Package2 className="h-3.5 w-3.5" strokeWidth={1.5} />
-                    {formatNumber(batch.quantityLiters)} لتر
+                    {formatNumber(batch.quantityLiters)} {en ? "L" : "لتر"}
                   </span>
                   <Link
                     href={`/companies/${batch.companyId}`}
                     className="hover:underline"
                     style={{ color: "var(--heri-ochre)" }}
                   >
-                    {batch.company.name}
+                    {en ? (batch.company.nameEn ?? batch.company.name) : batch.company.name}
                   </Link>
                 </div>
               </div>
@@ -153,20 +156,20 @@ export default async function DairyDetailPage({
         {/* KPI strip */}
         <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
           <HeriKpi
-            label="حجم الإنتاج"
+            label={en ? "Production Volume" : "حجم الإنتاج"}
             raw={batch.quantityLiters}
             kind="number"
-            hint="لتر"
+            hint={en ? "L" : "لتر"}
           />
           <HeriKpi
-            label="نسبة الدسم"
+            label={en ? "Fat Content" : "نسبة الدسم"}
             raw={batch.fatContent}
             kind="number"
             decimals={1}
-            hint="٪ من الحجم"
+            hint={en ? "% of volume" : "٪ من الحجم"}
           />
           <HeriKpi
-            label="درجة الجودة"
+            label={en ? "Quality Grade" : "درجة الجودة"}
             raw={batch.qualityGrade === "A" ? 100 : batch.qualityGrade === "B" ? 75 : 50}
             kind="percent"
             accent={
@@ -176,10 +179,10 @@ export default async function DairyDetailPage({
                   ? "var(--heri-ochre-2)"
                   : "var(--heri-terracotta, #b85c38)"
             }
-            hint={`فئة ${batch.qualityGrade}`}
+            hint={`${en ? "Class" : "فئة"} ${batch.qualityGrade}`}
           />
           <HeriKpi
-            label={expired ? "تجاوز الصلاحية" : "أيام للصلاحية"}
+            label={expired ? (en ? "Expired" : "تجاوز الصلاحية") : (en ? "Days to Expiry" : "أيام للصلاحية")}
             raw={expired ? 0 : Math.max(0, daysUntilExpiry)}
             kind="number"
             accent={expired || lifePct > 0.8 ? "var(--heri-terracotta, #b85c38)" : undefined}
@@ -195,22 +198,22 @@ export default async function DairyDetailPage({
               style={{ color: "var(--heri-ink)" }}
             >
               <Clock className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
-              دورة الحياة
+              {en ? "Lifecycle" : "دورة الحياة"}
             </h3>
             <span
               className="heri-eyebrow"
               style={{ color: freshnessColor }}
             >
               {expired
-                ? "منتهية"
+                ? (en ? "Expired" : "منتهية")
                 : lifePct > 0.8
-                  ? "قرب الانتهاء"
-                  : "طازجة"}
+                  ? (en ? "Near expiry" : "قرب الانتهاء")
+                  : (en ? "Fresh" : "طازجة")}
             </span>
           </header>
           <div className="mb-2 flex items-center justify-between text-xs">
             <div>
-              <div className="heri-eyebrow heri-eyebrow-ink">إنتاج</div>
+              <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Produced" : "إنتاج"}</div>
               <div className="mt-0.5 font-bold" style={{ color: "var(--heri-ink)" }}>
                 {formatShortDate(batch.productionDate)}
               </div>
@@ -221,7 +224,7 @@ export default async function DairyDetailPage({
               strokeWidth={1.5}
             />
             <div className="text-end">
-              <div className="heri-eyebrow heri-eyebrow-ink">صلاحية</div>
+              <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Expires" : "صلاحية"}</div>
               <div className="mt-0.5 font-bold" style={{ color: "var(--heri-ink)" }}>
                 {formatShortDate(batch.expiryDate)}
               </div>
@@ -247,7 +250,7 @@ export default async function DairyDetailPage({
             />
           </div>
           <div className="mt-1 text-[10px]" style={{ color: "var(--heri-ink-3)" }}>
-            {Math.round(lifePct * 100)}٪ من الفترة منقضية
+            {Math.round(lifePct * 100)}{en ? "% of period elapsed" : "٪ من الفترة منقضية"}
           </div>
         </section>
 
@@ -266,14 +269,14 @@ export default async function DairyDetailPage({
                     strokeWidth={1.5}
                     style={{ color: "var(--heri-ochre)" }}
                   />
-                  دفعات سابقة لنفس المنتج
+                  {en ? "Previous batches of the same product" : "دفعات سابقة لنفس المنتج"}
                 </h3>
                 <Link
                   href="/dairy"
                   className="text-[11px] font-bold"
                   style={{ color: "var(--heri-ochre)" }}
                 >
-                  عرض الكل ←
+                  {en ? "View all ←" : "عرض الكل ←"}
                 </Link>
               </header>
               {siblings.length === 0 ? (
@@ -281,7 +284,7 @@ export default async function DairyDetailPage({
                   className="text-xs"
                   style={{ color: "var(--heri-ink-3)" }}
                 >
-                  لا توجد دفعات أخرى من هذا المنتج.
+                  {en ? "No other batches of this product." : "لا توجد دفعات أخرى من هذا المنتج."}
                 </p>
               ) : (
                 <ul className="divide-y divide-[var(--heri-rule)]">
@@ -302,7 +305,7 @@ export default async function DairyDetailPage({
                             {s.batchNumber}
                           </span>
                           <span className="badge-sky">
-                            درجة {s.qualityGrade}
+                            {en ? "Grade" : "درجة"} {s.qualityGrade}
                           </span>
                           <StatusBadge status={s.status} />
                         </div>
@@ -318,7 +321,7 @@ export default async function DairyDetailPage({
                         className="font-mono text-xs font-bold"
                         style={{ color: "var(--heri-ink)" }}
                       >
-                        {formatNumber(s.quantityLiters)} لتر
+                        {formatNumber(s.quantityLiters)} {en ? "L" : "لتر"}
                       </span>
                     </li>
                   ))}
@@ -334,37 +337,37 @@ export default async function DairyDetailPage({
                 className="mb-3 text-sm font-semibold"
                 style={{ color: "var(--heri-ink)" }}
               >
-                البطاقة الفنية
+                {en ? "Technical Sheet" : "البطاقة الفنية"}
               </h3>
               <dl className="space-y-2 text-xs">
-                <Fact label="رقم الدفعة" value={batch.batchNumber} mono />
+                <Fact label={en ? "Batch Number" : "رقم الدفعة"} value={batch.batchNumber} mono />
                 <Fact
-                  label="المنتج"
-                  value={batch.productAr || batch.product}
+                  label={en ? "Product" : "المنتج"}
+                  value={en ? (batch.product || batch.productAr) : (batch.productAr || batch.product)}
                 />
                 <Fact
-                  label="الكمية"
-                  value={`${formatNumber(batch.quantityLiters)} لتر`}
+                  label={en ? "Quantity" : "الكمية"}
+                  value={`${formatNumber(batch.quantityLiters)} ${en ? "L" : "لتر"}`}
                 />
                 <Fact
-                  label="نسبة الدسم"
-                  value={`${batch.fatContent}٪`}
+                  label={en ? "Fat Content" : "نسبة الدسم"}
+                  value={`${batch.fatContent}${en ? "%" : "٪"}`}
                 />
-                <Fact label="درجة الجودة" value={batch.qualityGrade} />
+                <Fact label={en ? "Quality Grade" : "درجة الجودة"} value={batch.qualityGrade} />
                 <Fact
-                  label="إنتاج"
+                  label={en ? "Production Date" : "إنتاج"}
                   value={formatShortDate(batch.productionDate)}
                 />
                 <Fact
-                  label="صلاحية"
+                  label={en ? "Expiry Date" : "صلاحية"}
                   value={formatShortDate(batch.expiryDate)}
                 />
                 {batch.destination ? (
-                  <Fact label="الوجهة" value={batch.destination} />
+                  <Fact label={en ? "Destination" : "الوجهة"} value={batch.destination} />
                 ) : null}
                 <Fact
-                  label="الشركة"
-                  value={batch.company.name}
+                  label={en ? "Company" : "الشركة"}
+                  value={en ? (batch.company.nameEn ?? batch.company.name) : batch.company.name}
                   link={`/companies/${batch.companyId}`}
                 />
               </dl>
@@ -381,7 +384,7 @@ export default async function DairyDetailPage({
                     strokeWidth={1.5}
                     style={{ color: "var(--heri-ochre)" }}
                   />
-                  وجهة التوزيع
+                  {en ? "Distribution Destination" : "وجهة التوزيع"}
                 </h3>
                 <p className="text-sm" style={{ color: "var(--heri-ink)" }}>
                   {batch.destination}

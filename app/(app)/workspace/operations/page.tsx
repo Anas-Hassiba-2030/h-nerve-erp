@@ -611,7 +611,7 @@ async function AgricultureOps({ ar }: { ar: boolean }) {
                         {c.variety ? ` · ${c.variety}` : ""}
                       </div>
                       <div className="ws-board-card-meta">
-                        <span>{f?.name ?? ""}</span>
+                        <span>{ar ? (f?.name ?? "") : (f?.nameEn ?? f?.name ?? "")}</span>
                         <span className="ws-board-card-sep">·</span>
                         <span>
                           {formatNumber(Math.round(c.expectedYieldKg))}
@@ -672,7 +672,7 @@ async function AgricultureOps({ ar }: { ar: boolean }) {
                         {c.name}{c.variety ? ` · ${c.variety}` : ""}
                       </div>
                       <div className="ws-list-sub ws-mono">
-                        {f?.name ?? ""} ·{" "}
+                        {ar ? (f?.name ?? "") : (f?.nameEn ?? f?.name ?? "")} ·{" "}
                         {formatNumber(Math.round(c.expectedYieldKg))}
                         {ar ? " كغ" : " kg"}
                       </div>

@@ -16,6 +16,7 @@ import { KpiCard } from "@/components/KpiCard";
 import { prisma } from "@/lib/db";
 import { formatNumber } from "@/lib/utils";
 import { getCompanyBrand } from "@/lib/companyBrand";
+import { getLocale } from "@/lib/i18n.server";
 
 const PERIOD_AR: Record<string, string> = {
   Q1: "الربع الأول",
@@ -27,16 +28,32 @@ const PERIOD_AR: Record<string, string> = {
   FY: "السنة الكاملة",
 };
 
+const PERIOD_EN: Record<string, string> = {
+  Q1: "First Quarter",
+  Q2: "Second Quarter",
+  Q3: "Third Quarter",
+  Q4: "Fourth Quarter",
+  H1: "First Half",
+  H2: "Second Half",
+  FY: "Full Year",
+};
+
+function periodLabel(period: string, en: boolean) {
+  return (en ? PERIOD_EN[period] : PERIOD_AR[period]) ?? period;
+}
+
 function ScoreGauge({
   score,
   size = 180,
   stroke = 16,
   label,
+  en = false,
 }: {
   score: number;
   size?: number;
   stroke?: number;
   label: string;
+  en?: boolean;
 }) {
   const clamped = Math.max(0, Math.min(100, score));
   const radius = (size - stroke) / 2;
@@ -89,7 +106,7 @@ function ScoreGauge({
           className="text-[10px] font-bold uppercase tracking-widest"
           style={{ color: "var(--heri-ink-3)" }}
         >
-          من 100
+          {en ? "out of 100" : "من 100"}
         </div>
       </div>
     </div>
@@ -104,7 +121,7 @@ export default async function SustainabilityDetailPage({
   const score = await prisma.sustainabilityScore.findUnique({
     where: { id: params.id },
     include: {
-      company: { select: { id: true, name: true, code: true, sector: true } },
+      company: { select: { id: true, name: true, nameEn: true, code: true, sector: true } },
     },
   });
   if (!score) notFound();
@@ -131,11 +148,13 @@ export default async function SustainabilityDetailPage({
     orderBy: { overall: "desc" },
     take: 6,
     include: {
-      company: { select: { id: true, name: true, code: true } },
+      company: { select: { id: true, name: true, nameEn: true, code: true } },
     },
   });
 
   const brand = getCompanyBrand(score.company.code);
+  const en = getLocale() === "en";
+  const companyName = en ? (score.company.nameEn ?? score.company.name) : score.company.name;
 
   function delta(curr: number, prev?: number) {
     if (prev == null) return null;
@@ -146,13 +165,17 @@ export default async function SustainabilityDetailPage({
   return (
     <>
       <Topbar
-        eyebrow="الاستدامة وESG"
-        title={`${score.company.name} — ${PERIOD_AR[score.period] ?? score.period} ${score.year}`}
-        subtitle={`تقرير E·S·G للفترة ${score.period} ${score.year}`}
+        eyebrow={en ? "Sustainability & ESG" : "الاستدامة وESG"}
+        title={`${companyName} — ${periodLabel(score.period, en)} ${score.year}`}
+        subtitle={
+          en
+            ? `E·S·G report for ${score.period} ${score.year}`
+            : `تقرير E·S·G للفترة ${score.period} ${score.year}`
+        }
         actions={
           <Link href="/sustainability" className="btn-ghost">
             <ArrowLeft className="h-4 w-4" />
-            تقارير ESG
+            {en ? "ESG Reports" : "تقارير ESG"}
           </Link>
         }
       />
@@ -173,7 +196,7 @@ export default async function SustainabilityDetailPage({
           />
           <div className="relative grid gap-6 lg:grid-cols-[auto,1fr] lg:items-center">
             <div className="anim-pop">
-              <ScoreGauge score={score.overall} label="overall" />
+              <ScoreGauge score={score.overall} label="overall" en={en} />
             </div>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
@@ -184,7 +207,7 @@ export default async function SustainabilityDetailPage({
                     border: "1px solid rgba(255,255,255,.3)",
                   }}
                 >
-                  {PERIOD_AR[score.period] ?? score.period} {score.year}
+                  {periodLabel(score.period, en)} {score.year}
                 </span>
                 <Link
                   href={`/companies/${score.company.id}`}
@@ -194,14 +217,16 @@ export default async function SustainabilityDetailPage({
                     border: "1px solid rgba(255,255,255,.3)",
                   }}
                 >
-                  {score.company.name}
+                  {companyName}
                 </Link>
               </div>
               <h2 className="mt-1 text-2xl font-bold md:text-3xl">
-                مؤشر ESG الإجمالي
+                {en ? "Overall ESG Score" : "مؤشر ESG الإجمالي"}
               </h2>
               <p className="text-sm opacity-90">
-                تقييم بيئي • اجتماعي • حوكمة لربط الاستدامة بالأداء التشغيلي.
+                {en
+                  ? "Environmental • Social • Governance assessment linking sustainability to operational performance."
+                  : "تقييم بيئي • اجتماعي • حوكمة لربط الاستدامة بالأداء التشغيلي."}
               </p>
               {previous ? (
                 (() => {
@@ -220,7 +245,8 @@ export default async function SustainabilityDetailPage({
                         <TrendingDown className="h-3.5 w-3.5" style={{ color: "#fecaca" }} />
                       )}
                       <span>
-                        مقارنة بـ {PERIOD_AR[previous.period] ?? previous.period}{" "}
+                        {en ? "vs " : "مقارنة بـ "}
+                        {periodLabel(previous.period, en)}{" "}
                         {previous.year}:{" "}
                         <span className="font-mono">
                           {d >= 0 ? "+" : ""}
@@ -287,7 +313,7 @@ export default async function SustainabilityDetailPage({
                         className="text-sm font-semibold"
                         style={{ color: "var(--heri-ink)" }}
                       >
-                        {row.label}
+                        {en ? row.labelEn : row.label}
                       </div>
                       <div
                         className="text-[10px] font-bold uppercase tracking-widest"
@@ -327,7 +353,8 @@ export default async function SustainabilityDetailPage({
                     className="mt-2 text-[11px] font-bold"
                     style={{ color: d.up ? "#0a8e54" : "#c0392b" }}
                   >
-                    {d.up ? "↑" : "↓"} {d.value} مقارنة بالفترة السابقة
+                    {d.up ? "↑" : "↓"} {d.value}{" "}
+                    {en ? "vs previous period" : "مقارنة بالفترة السابقة"}
                   </div>
                 ) : null}
               </div>
@@ -338,21 +365,21 @@ export default async function SustainabilityDetailPage({
         {/* Operational metrics */}
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <KpiCard
-            label="انبعاثات الكربون"
-            value={`${formatNumber(score.carbonTons)} طن`}
+            label={en ? "Carbon Emissions" : "انبعاثات الكربون"}
+            value={`${formatNumber(score.carbonTons)} ${en ? "tonnes" : "طن"}`}
             icon={Cloud}
             tone="slate"
-            hint="CO₂ مكافئ"
+            hint={en ? "CO₂ equivalent" : "CO₂ مكافئ"}
           />
           <KpiCard
-            label="استهلاك المياه"
-            value={`${formatNumber(score.waterCubicM)} م³`}
+            label={en ? "Water Consumption" : "استهلاك المياه"}
+            value={`${formatNumber(score.waterCubicM)} ${en ? "m³" : "م³"}`}
             icon={Droplet}
             tone="sky"
           />
           <KpiCard
-            label="طاقة متجددة"
-            value={`${Math.round(score.renewablePct)}٪`}
+            label={en ? "Renewable Energy" : "طاقة متجددة"}
+            value={`${Math.round(score.renewablePct)}${en ? "%" : "٪"}`}
             icon={Sun}
             tone="amber"
           />
@@ -368,7 +395,7 @@ export default async function SustainabilityDetailPage({
                   className="mb-2 text-sm font-semibold"
                   style={{ color: "var(--heri-ink)" }}
                 >
-                  ملاحظات الفترة
+                  {en ? "Period Notes" : "ملاحظات الفترة"}
                 </h3>
                 <p
                   className="whitespace-pre-line text-sm leading-relaxed"
@@ -387,8 +414,10 @@ export default async function SustainabilityDetailPage({
                     className="text-sm font-semibold"
                     style={{ color: "var(--heri-ink)" }}
                   >
-                    أداء بقية شركات المجموعة في{" "}
-                    {PERIOD_AR[score.period] ?? score.period} {score.year}
+                    {en
+                      ? "Performance of other group companies in "
+                      : "أداء بقية شركات المجموعة في "}
+                    {periodLabel(score.period, en)} {score.year}
                   </h3>
                 </header>
                 <ul className="space-y-2">
@@ -407,7 +436,7 @@ export default async function SustainabilityDetailPage({
                             className="truncate text-xs font-bold"
                             style={{ color: "var(--heri-ink)" }}
                           >
-                            {p.company.name}
+                            {en ? (p.company.nameEn ?? p.company.name) : p.company.name}
                           </span>
                           <span
                             className="font-mono text-xs font-bold"
@@ -447,19 +476,19 @@ export default async function SustainabilityDetailPage({
                 className="mb-3 text-sm font-semibold"
                 style={{ color: "var(--heri-ink)" }}
               >
-                البطاقة
+                {en ? "Summary Card" : "البطاقة"}
               </h3>
               <dl className="space-y-2 text-xs">
-                <Fact label="الشركة" value={score.company.name} link={`/companies/${score.company.id}`} />
+                <Fact label={en ? "Company" : "الشركة"} value={companyName} link={`/companies/${score.company.id}`} />
                 <Fact
-                  label="الفترة"
-                  value={`${PERIOD_AR[score.period] ?? score.period} ${score.year}`}
+                  label={en ? "Period" : "الفترة"}
+                  value={`${periodLabel(score.period, en)} ${score.year}`}
                 />
-                <Fact label="بيئي" value={`${Math.round(score.environmentalScore)}/100`} />
-                <Fact label="اجتماعي" value={`${Math.round(score.socialScore)}/100`} />
-                <Fact label="حوكمة" value={`${Math.round(score.governanceScore)}/100`} />
+                <Fact label={en ? "Environmental" : "بيئي"} value={`${Math.round(score.environmentalScore)}/100`} />
+                <Fact label={en ? "Social" : "اجتماعي"} value={`${Math.round(score.socialScore)}/100`} />
+                <Fact label={en ? "Governance" : "حوكمة"} value={`${Math.round(score.governanceScore)}/100`} />
                 <Fact
-                  label="الإجمالي"
+                  label={en ? "Overall" : "الإجمالي"}
                   value={`${Math.round(score.overall)}/100`}
                 />
               </dl>

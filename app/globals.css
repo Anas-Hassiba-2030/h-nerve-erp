@@ -1758,19 +1758,24 @@ html[dir="rtl"] .sidebar-drawer-panel { --drawer-from: -100%; }
 .heri-eyebrow-ink { color: var(--heri-ink-3); }
 .heri-eyebrow-cream { color: color-mix(in srgb, var(--heri-cream) 70%, transparent); }
 
-/* Cards — flat, hairline, sharp */
+/* Cards — softened toward the "Daylight" luxury surface (rounded + lifted),
+   so detail/back-office pages match the section pages without per-page edits. */
 .heri-card {
-  background: var(--heri-cream-2);
+  background: var(--heri-cream);
   border: 1px solid var(--heri-rule);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px -24px rgba(31, 78, 74, 0.45);
   padding: 24px;
   position: relative;
   transition: border-color 200ms var(--ease-out-quart),
+              box-shadow 240ms var(--ease-out-quart),
               transform 200ms var(--ease-out-quart);
 }
-.heri-card:hover { border-color: var(--heri-rule-strong); }
+.heri-card:hover { border-color: color-mix(in srgb, var(--heri-ochre) 45%, var(--heri-rule)); box-shadow: 0 22px 48px -30px rgba(31, 78, 74, 0.45); transform: translateY(-2px); }
 .heri-card-flat {
   background: var(--heri-cream);
   border: 1px solid var(--heri-rule);
+  border-radius: 16px;
   padding: 24px;
 }
 .heri-card--gold-rail::before {
@@ -1778,6 +1783,7 @@ html[dir="rtl"] .sidebar-drawer-panel { --drawer-from: -100%; }
   position: absolute;
   inset-inline-start: 0; top: 0; bottom: 0;
   width: 3px;
+  border-radius: 16px 0 0 16px;
   background: var(--heri-ochre);
 }
 
@@ -1810,7 +1816,7 @@ html[dir="rtl"] .sidebar-drawer-panel { --drawer-from: -100%; }
   font-family: "Inter Tight", "Inter", system-ui, sans-serif;
   font-size: 13px; font-weight: 600;
   letter-spacing: 0.02em;
-  border-radius: 0;
+  border-radius: 999px;
   border: 1.5px solid transparent;
   cursor: pointer;
   transition: background 200ms var(--ease-out-quart),
@@ -1852,7 +1858,9 @@ html[dir="rtl"] .sidebar-drawer-panel { --drawer-from: -100%; }
 /* Hero plinth — cream surface, ochre hairline rails, deep ink type */
 .heri-hero {
   background: var(--heri-cream);
-  border: 1px solid var(--heri-rule-strong);
+  border: 1px solid var(--heri-rule);
+  border-radius: 18px;
+  box-shadow: 0 14px 40px -28px rgba(31, 78, 74, 0.5);
   position: relative;
   overflow: hidden;
 }
@@ -1869,6 +1877,7 @@ html[dir="rtl"] .sidebar-drawer-panel { --drawer-from: -100%; }
 .heri-hero-ink {
   background: var(--heri-ink);
   color: var(--heri-cream);
+  border-radius: 18px;
   position: relative; overflow: hidden;
 }
 .heri-hero-ink::before {

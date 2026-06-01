@@ -795,12 +795,20 @@ model Narrative {
   model       String?
   isStub      Boolean  @default(false)
   ms          Int?
+  // Phase 22 — Brain Trustworthiness Layer. Verification telemetry the
+  // narrator records on every write. Defaults preserve existing rows.
+  // 0..1, fraction of claims that grounded against the facts payload.
+  trustScore   Float    @default(0.5)
+  trustLabel   String   @default("medium") // "high" | "medium" | "low"
+  claimsTotal  Int      @default(0)
+  claimsMatched Int     @default(0)
   createdAt   DateTime @default(now())
   expiresAt   DateTime
 
   @@unique([scope, topic, register, locale, factsHash])
   @@index([expiresAt])
   @@index([scope, topic])
+  @@index([trustLabel])
 }
 
 // =====================================================================

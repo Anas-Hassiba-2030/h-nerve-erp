@@ -12,6 +12,8 @@
 import { createHash } from "node:crypto";
 import { prisma } from "@/lib/db";
 import { callLlm, llmConfig, type LlmRequest } from "./llm";
+import { verifyNarrative } from "./verifier";
+import { score as confidenceScore } from "./confidence";
 import type {
   Narrator,
   NarrativeRequest,
@@ -83,6 +85,18 @@ class ClaudeNarrator implements Narrator {
     // The model can sometimes wrap output in quotes — clean it up.
     const text = sanitize(res.text);
 
+    // Phase 22 — Brain Trustworthiness Layer. Verify the prose against the
+    // facts payload that produced it; record coverage + confidence so the
+    // trust dashboard reads real telemetry. Stubs always self-verify
+    // because the stub generator only references numbers from `facts`.
+    const verification = verifyNarrative(text, req.facts);
+    const confidence = confidenceScore({
+      verification,
+      dataAsOf: Date.now(),
+      supportingPoints: Math.max(1, Object.keys(req.facts).length),
+      graphSupports: null, // graph hook lands in Phase 1 integration
+    });
+
     // 3. Persist cache entry (idempotent upsert)
     const ttl = req.ttlMs ?? DEFAULT_TTL_MS;
     const expiresAt = new Date(Date.now() + ttl);
@@ -106,6 +120,10 @@ class ClaudeNarrator implements Narrator {
         model: res.model ?? null,
         isStub: res.isStub,
         ms: res.ms,
+        trustScore: confidence.score,
+        trustLabel: confidence.label,
+        claimsTotal: verification.total,
+        claimsMatched: verification.verified,
         expiresAt,
       },
       update: {
@@ -113,6 +131,10 @@ class ClaudeNarrator implements Narrator {
         model: res.model ?? null,
         isStub: res.isStub,
         ms: res.ms,
+        trustScore: confidence.score,
+        trustLabel: confidence.label,
+        claimsTotal: verification.total,
+        claimsMatched: verification.verified,
         expiresAt,
       },
     });

@@ -28,7 +28,7 @@ interface Group {
   children: Child[];
 }
 
-// Same GROUPS data as MiniOrrery.tsx — single source of truth for navigation.
+// GROUPS mirrors the orrery hub groupings so every route shows its sibling rail.
 const GROUPS: Group[] = [
   {
     id: "sectors",
@@ -44,17 +44,21 @@ const GROUPS: Group[] = [
     ],
   },
   {
-    id: "brain",
+    id: "intel",
     nameAr: "العقل",
     nameEn: "Brain",
     children: [
-      { label: "الدماغ",        labelEn: "Brain",   route: "/brain" },
-      { label: "الرسم السببي",  labelEn: "Graph",   route: "/brain/graph" },
-      { label: "ماذا لو",       labelEn: "What-If", route: "/brain/scenarios" },
-      { label: "المجلس",        labelEn: "Council", route: "/brain/council" },
-      { label: "الذاكرة",       labelEn: "Memory",  route: "/brain/memory" },
-      { label: "التعلّم",       labelEn: "Learning",route: "/brain/learning" },
-      { label: "ذكاء الدماغ",   labelEn: "IQ",      route: "/brain/iq" },
+      { label: "الدماغ",        labelEn: "Brain",     route: "/brain" },
+      { label: "الرؤى",         labelEn: "Insights",  route: "/insights" },
+      { label: "التنبيهات",     labelEn: "Alerts",    route: "/alerts" },
+      { label: "الخطط",         labelEn: "Plans",     route: "/plans" },
+      { label: "الوثائق",       labelEn: "Documents", route: "/documents" },
+      { label: "الرسم السببي",  labelEn: "Graph",     route: "/brain/graph" },
+      { label: "ماذا لو",       labelEn: "What-If",   route: "/brain/scenarios" },
+      { label: "المجلس",        labelEn: "Council",   route: "/brain/council" },
+      { label: "الذاكرة",       labelEn: "Memory",    route: "/brain/memory" },
+      { label: "التعلّم",       labelEn: "Learning",  route: "/brain/learning" },
+      { label: "ذكاء الدماغ",   labelEn: "IQ",        route: "/brain/iq" },
     ],
   },
   {
@@ -62,10 +66,13 @@ const GROUPS: Group[] = [
     nameAr: "المالية",
     nameEn: "Finance",
     children: [
-      { label: "المركز المالي", labelEn: "Finance",   route: "/finance" },
-      { label: "التحليلات",    labelEn: "Analytics",  route: "/analytics" },
-      { label: "مقارنة",       labelEn: "Compare",    route: "/compare" },
-      { label: "التقارير",     labelEn: "Reports",    route: "/reports" },
+      { label: "المركز المالي",  labelEn: "Finance",       route: "/finance" },
+      { label: "التحليلات",     labelEn: "Analytics",     route: "/analytics" },
+      { label: "مقارنة",        labelEn: "Compare",       route: "/compare" },
+      { label: "الأسواق",       labelEn: "Markets",       route: "/markets" },
+      { label: "التقارير",      labelEn: "Reports",       route: "/reports" },
+      { label: "الاستدامة",     labelEn: "Sustainability", route: "/sustainability" },
+      { label: "المشاريع",      labelEn: "Projects",      route: "/projects" },
     ],
   },
   {
@@ -73,11 +80,13 @@ const GROUPS: Group[] = [
     nameAr: "الفريق",
     nameEn: "Team",
     children: [
-      { label: "المراسلات",    labelEn: "Messages",  route: "/messages" },
-      { label: "المهام",       labelEn: "Tasks",     route: "/tasks" },
-      { label: "صندوق الوارد", labelEn: "Inbox",     route: "/inbox" },
-      { label: "الموجز",       labelEn: "Digest",    route: "/digest" },
-      { label: "الفريق",       labelEn: "Employees", route: "/employees" },
+      { label: "المراسلات",    labelEn: "Messages",     route: "/messages" },
+      { label: "المهام",       labelEn: "Tasks",        route: "/tasks" },
+      { label: "صندوق الوارد", labelEn: "Inbox",        route: "/inbox" },
+      { label: "الموجز",       labelEn: "Digest",       route: "/digest" },
+      { label: "الموظفون",     labelEn: "Employees",    route: "/employees" },
+      { label: "الإنجازات",    labelEn: "Achievements", route: "/achievements" },
+      { label: "المستخدمون",   labelEn: "Users",        route: "/users" },
     ],
   },
   {
@@ -85,11 +94,14 @@ const GROUPS: Group[] = [
     nameAr: "النظام",
     nameEn: "System",
     children: [
-      { label: "التنبيهات",  labelEn: "Alerts",       route: "/alerts" },
-      { label: "الخطط",      labelEn: "Plans",        route: "/plans" },
-      { label: "الوثائق",    labelEn: "Docs",         route: "/documents" },
-      { label: "التدقيق",    labelEn: "Audit",        route: "/audit-360" },
-      { label: "الإنجازات",  labelEn: "Achievements", route: "/achievements" },
+      { label: "مساحة العمل",  labelEn: "Workspace",    route: "/workspace" },
+      { label: "الأتمتة",      labelEn: "Workflows",    route: "/workflows" },
+      { label: "التكاملات",    labelEn: "Integrations", route: "/integrations" },
+      { label: "التدقيق",      labelEn: "Audit",        route: "/audit-360" },
+      { label: "سجل النشاط",   labelEn: "Activity",     route: "/activity" },
+      { label: "الإعدادات",    labelEn: "Settings",     route: "/settings" },
+      { label: "المساعدة",     labelEn: "Help",         route: "/help" },
+      { label: "خارطة الطريق", labelEn: "Roadmap",      route: "/roadmap" },
     ],
   },
 ];

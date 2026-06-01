@@ -160,8 +160,9 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 }
 
 /* ── daylight top controls: Orbit pill + language toggle together ── */
+/* Sits below the ConstellationRail (≈56px) so it never covers rail items */
 .dl-topctl{
-  position:fixed; top:14px; inset-inline-start:16px; z-index:70;
+  position:fixed; top:66px; inset-inline-start:16px; z-index:70;
   display:inline-flex; align-items:center; gap:10px;
 }
 .dl-topctl .orbit-return{ position:static; } /* it's positioned by the wrapper now */
@@ -306,3 +307,19 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 .al-rail[data-collapsed="true"] .rail-item:not(.cur){ display:none; }
 
 @media print{ .al-rail{ display:none !important; } }
+
+/* ════════════════════════════════════════════════════════════════
+   Footer theming — warm parchment in work mode, dark emerald in night mode
+   ════════════════════════════════════════════════════════════════ */
+:root{
+  --footer-bg:linear-gradient(0deg,#EFE8D5 0%,#F8F3E8 100%);
+  --footer-border:rgba(194,163,90,.28);
+  --footer-text:#3d3530;
+  --footer-muted:#7a6e65;
+}
+[data-living="night"]{
+  --footer-bg:linear-gradient(0deg,#0a1813 0%,rgba(13,31,26,.96) 100%);
+  --footer-border:rgba(194,163,90,.18);
+  --footer-text:#CDE0D6;
+  --footer-muted:rgba(205,224,214,.55);
+}

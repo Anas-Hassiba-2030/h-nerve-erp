@@ -1274,7 +1274,7 @@ const GROUPS = [
   { id:"team", name:"الفريق", en:"Team", amb:"university", kids:[
      ["الرسائل","sections/messages.html"],["المهام","sections/tasks.html"],["صندوق الوارد","sections/inbox.html"],["الموجز","sections/digest.html"],["الإنجازات","sections/achievements.html"],["الموظفون","sections/employees.html"],["الفريق","sections/employees.html"] ]},
   { id:"system", name:"النظام", en:"System", amb:"holding", kids:[
-     ["المستأجرون","sections/admin.html"],["الإمبراطورية","sections/holding.html"],["الإدارة ERP","sections/admin.html"],["مساحة العمل","sections/workspace.html"],["الأتمتة","sections/workflows.html"],["التكاملات","sections/integrations.html"],["التدقيق الشامل","sections/audit.html"],["سجل النشاط","sections/activity.html"],["صحة النظام","sections/system.html"],["البحث","sections/search.html"],["المثبّت","sections/pinned.html"],["المحذوفات","sections/trash.html"],["المساعدة","sections/info.html"],["خارطة الطريق","sections/roadmap.html"],["الإعدادات","sections/settings.html"] ]},
+     ["المستأجرون","sections/admin.html"],["الإمبراطورية","sections/holding.html"],["الإدارة ERP","sections/erp.html"],["مساحة العمل","sections/workspace.html"],["الأتمتة","sections/workflows.html"],["التكاملات","sections/integrations.html"],["التدقيق الشامل","sections/audit.html"],["سجل النشاط","sections/activity.html"],["صحة النظام","sections/system.html"],["البحث","sections/search.html"],["المثبّت","sections/pinned.html"],["المحذوفات","sections/trash.html"],["المساعدة","sections/info.html"],["خارطة الطريق","sections/roadmap.html"],["الإعدادات","sections/settings.html"] ]},
 ];
 // English child labels (parallel to kids order) — for the AR/EN toggle
 const KIDS_EN = {
@@ -1765,6 +1765,9 @@ document.addEventListener("click",function(){ chip.classList.remove("open"); });
 menu.addEventListener("click",function(e){ var mi=e.target.closest(".mi"); if(!mi)return; var act=mi.dataset.act; chip.classList.remove("open");
   if(act==="role"){ roleIdx=(roleIdx+1)%ROLES.length; applyRole(); }
   else if(act==="lang"){ setLang(LANG==="ar"?"en":"ar"); }
+  else if(act==="profile"){ window.__hnNavigate("/settings"); }
+  else if(act==="settings"){ window.__hnNavigate("/settings"); }
+  else if(act==="logout"){ window.__hnNavigate("/logout"); }
 });
 
 /* ── AR / EN language toggle ── */

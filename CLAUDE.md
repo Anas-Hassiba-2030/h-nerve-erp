@@ -48,7 +48,7 @@ The App Router uses **four** groups, each with its own `layout.tsx`:
 - `app/(admin)/` — superadmin console (Phase 11). **Sleek Operator** vocabulary (`docs/DESIGN-SKILL.md` §1.F), cyan-on-near-black, no operator chrome. Houses `/admin/tenants`, `/admin/empire`, `/admin/system`. Currently demo-gated to any logged-in user; production will hard-gate to `role === "ADMIN"`.
 - `app/(theater)/` — fullscreen Decision Theater (Phase 9). No sidebar, no footer — the user steps **out** of the dashboard into a magazine spread. ESC returns them.
 - `app/m/` — mobile-first surface (Phase 14, see `lib/mobile/today.ts`).
-- `app/page.tsx` — bare router: signed-in → `/dashboard`, otherwise → `/login`.
+- `app/page.tsx` — bare router: signed-in → `/orrery` (the Orrery hub), otherwise → `/login`.
 
 ### Where mutations live
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ExportMenu } from "@/components/ExportMenu";
 import { DeleteButton } from "@/components/DeleteButton";
+import { DaylightShell } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db";
 import {
   formatMoney, formatNumber, formatPercent, formatShortDate,
@@ -299,7 +300,7 @@ export default async function HotelsPage() {
   );
 
   return (
-    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
       <div className="sec-head reveal">
         <div>
           <div className="sec-eyebrow"><span className="tick" />{ar ? "القطاعات · الضيافة" : "Sectors · Hospitality"}</div>
@@ -327,6 +328,6 @@ export default async function HotelsPage() {
         ]}
         panels={{ overview, hotels: hotelsPanel, bookings: bookingsPanel }}
       />
-    </div>
+    </DaylightShell>
   );
 }

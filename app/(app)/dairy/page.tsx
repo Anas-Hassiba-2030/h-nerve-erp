@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { ExportMenu } from "@/components/ExportMenu";
+import { DaylightShell } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db";
 import { formatNumber, formatPercent, formatShortDate, loc, STATUS_AR, STATUS_EN } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
@@ -160,7 +161,7 @@ export default async function DairyPage() {
   );
 
   return (
-    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
       {/* ── section header ── */}
       <header className="sec-head reveal">
         <div>
@@ -189,6 +190,6 @@ export default async function DairyPage() {
         setStatus={setBatchStatus}
         remove={deleteBatch}
       />
-    </div>
+    </DaylightShell>
   );
 }

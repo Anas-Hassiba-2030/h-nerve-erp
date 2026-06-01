@@ -170,3 +170,88 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 /* make the toggle legible on the emerald pill */
 .dl-langwrap button[aria-pressed="false"]{ color:#DCC38A !important; }
 .dl-langwrap button[aria-pressed="true"]{ background:#C2A35A !important; color:#1F4D3F !important; }
+
+/* ── Mini-Orrery radial nav ── */
+.mo-btn{
+  position:relative; width:38px; height:38px; border-radius:50%; cursor:pointer;
+  display:grid; place-items:center; flex:0 0 38px; padding:0;
+  background:radial-gradient(circle at 38% 35%,#2E6B57,#1F4D3F 60%,#0D1F1A);
+  border:1px solid rgba(194,163,90,.4);
+  box-shadow:0 2px 8px rgba(13,31,26,.22);
+  transition:border-color .18s, box-shadow .18s;
+}
+.mo-btn:hover{ border-color:rgba(194,163,90,.8); box-shadow:0 0 14px rgba(31,77,63,.5); }
+.mo-btn .mo-ring{
+  position:absolute; inset:4px; border-radius:50%;
+  border:1px solid rgba(220,195,138,.5);
+  animation:mo-spin 8s linear infinite;
+}
+.mo-btn .mo-ring::after{
+  content:""; position:absolute; top:-2px; left:50%;
+  width:4px; height:4px; border-radius:50%;
+  background:#C2A35A; transform:translateX(-50%);
+}
+.mo-btn .mo-core{
+  width:9px; height:9px; border-radius:50%;
+  background:#C2A35A; box-shadow:0 0 8px rgba(194,163,90,.7);
+}
+@keyframes mo-spin{ to{ transform:rotate(360deg); } }
+
+.mo-scrim{ position:fixed; inset:0; z-index:204; }
+
+.mo-pop{
+  position:fixed; z-index:205;
+  width:360px; height:360px;
+  pointer-events:none;
+}
+
+.mo-center{
+  position:absolute; left:50%; top:50%;
+  transform:translate(-50%,-50%);
+  width:60px; height:60px; border-radius:50%;
+  display:grid; place-items:center;
+  pointer-events:auto; cursor:pointer; border:0;
+  background:radial-gradient(circle at 38% 35%,#2E6B57,#1F4D3F 55%,#0D1F1A);
+  border:1px solid rgba(194,163,90,.5);
+  box-shadow:0 0 30px rgba(31,77,63,.7);
+  font-size:11px; color:#DCC38A;
+  font-family:var(--ui,"Cairo",sans-serif); font-weight:700;
+  text-align:center; line-height:1.2; padding:4px;
+  transition:box-shadow .18s, border-color .18s;
+}
+.mo-center:hover{ border-color:#C2A35A; box-shadow:0 0 40px rgba(31,77,63,.9); }
+
+.mo-node{
+  position:absolute; display:flex; align-items:center; gap:7px;
+  pointer-events:auto; cursor:pointer;
+  transform:translate(-50%,-50%);
+  background:none; border:0; padding:0;
+  animation:mo-bloom .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+.mo-star{
+  width:13px; height:13px; border-radius:50%;
+  background:radial-gradient(circle,#fff,#C2A35A 55%,#2E6B57);
+  box-shadow:0 0 10px rgba(220,195,138,.7);
+  flex:0 0 13px;
+}
+
+.mo-lbl{
+  background:rgba(13,31,26,.92); border:1px solid rgba(194,163,90,.4);
+  border-radius:999px; padding:5px 11px;
+  font-family:var(--ui,"Cairo",sans-serif); font-size:12.5px; font-weight:700;
+  color:#CDE0D6; white-space:nowrap;
+  min-height:30px; display:flex; align-items:center;
+  transition:color .15s, border-color .15s, background .15s;
+}
+.mo-node:hover .mo-lbl{ color:#fff; border-color:#C2A35A; background:rgba(31,77,63,.85); }
+
+@keyframes mo-bloom{
+  from{ opacity:0; transform:translate(-50%,-50%) scale(.2); }
+  to{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .mo-btn .mo-ring{ animation:none; }
+  .mo-node{ animation:none; }
+}

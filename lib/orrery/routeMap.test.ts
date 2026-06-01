@@ -30,6 +30,9 @@ describe("mapOrreryHref", () => {
     expect(mapOrreryHref("sections/search.html")).toBe("/search");
     expect(mapOrreryHref("sections/integrations.html")).toBe("/integrations");
     expect(mapOrreryHref("sections/holding.html")).toBe("/admin/empire");
+    // Achievements must go to /achievements, not /tasks (was mistakenly pointing
+    // to sections/tasks.html in the orrery HTML — now fixed to sections/achievements.html)
+    expect(mapOrreryHref("sections/achievements.html")).toBe("/achievements");
   });
 
   it("maps the dashboard kit", () => {

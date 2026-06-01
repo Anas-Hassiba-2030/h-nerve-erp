@@ -1,245 +1,50 @@
 // /brain/memory — the memory lake.
 //
+// Ported to its Claude Design reference (docs/design/system/sections/
+// memory.html + memory.js). Night-register contemplative timeline:
+// alternating cards along a central rule, hover-driven emerald
+// "recall" lines to related memories, dark lake field with CSS waves.
+// Real Memory rows are mapped into the reference's slot shape; the
+// recall animation lives in components/brain/MemoryLake.tsx (a faithful
+// port of memory.js). No DaylightShell — exact reference markup.
+//
 // Phase 6 of docs/PHASES-INTELLIGENCE.md.
 
-import Link from "next/link";
-import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import "../../daylight.css";
-import { MemoryCard } from "@/components/brain/MemoryCard";
+import "./memory.css";
+import { Brain, Database, Trash2 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
-import { Brain, Database, Trash2 } from "lucide-react";
-import { seedMemories, deleteMemory, clearMemories } from "./actions";
+import { MemoryLake, type MemoryItem } from "@/components/brain/MemoryLake";
+import { seedMemories, clearMemories } from "./actions";
+
+export const dynamic = "force-dynamic";
 
 const MODULE_LABEL: Record<string, { ar: string; en: string }> = {
-  HOTELS:    { ar: "الفنادق", en: "Hotels" },
-  DAIRY:     { ar: "الألبان", en: "Dairy" },
-  FARMS:     { ar: "المزارع", en: "Farms" },
+  HOTELS:    { ar: "ضيافة", en: "Hotels" },
+  DAIRY:     { ar: "ألبان", en: "Dairy" },
+  FARMS:     { ar: "زراعة", en: "Farms" },
   EDUCATION: { ar: "تعليم", en: "Education" },
-  FINANCE:   { ar: "المالية", en: "Finance" },
+  FINANCE:   { ar: "مالية", en: "Finance" },
+  GROUP:     { ar: "مجموعة", en: "Group" },
+  SUPPLY:    { ar: "توريد", en: "Supply" },
 };
 
-export default async function BrainMemoryPage({
-  searchParams,
-}: {
-  searchParams: { module?: string };
-}) {
-  const locale = getLocale();
-  const ar = locale === "ar";
-
-  const filter = searchParams.module ?? "";
-  const where = filter ? { module: filter } : {};
-  const [rows, byModule, total] = await Promise.all([
-    prisma.memory.findMany({
-      where,
-      orderBy: { occurredAt: "desc" },
-      take: 60,
-    }),
-    prisma.memory.groupBy({
-      by: ["module"],
-      _count: { _all: true },
-    }),
-    prisma.memory.count(),
-  ]);
-
-  return (
-    <DaylightShell dir={ar ? "rtl" : "ltr"}>
-      <DaylightHeader
-        eyebrow={ar ? "الدماغ · بحيرة الذاكرة" : "Brain · Memory lake"}
-        title={ar ? "ما لا يجب نسيانه" : "What must not be forgotten"}
-        subtitle={
-          ar
-            ? "كل حدث يستحق التذكّر يعيش هنا. عندما تظهر إشارة جديدة، يبحث الدماغ في الذاكرة عن قصص مشابهة."
-            : "Every event worth remembering lives here. When a new signal appears, the brain searches the lake for analogies."
-        }
-      />
-
-        {total === 0 ? (
-          <EmptyState ar={ar} />
-        ) : (
-          <>
-            {/* Filter rail */}
-            <div
-              className="flex flex-wrap items-center gap-1.5 px-1 py-3"
-              style={{
-                borderTop: "1px solid var(--line)",
-                borderBottom: "1px solid var(--line)",
-              }}
-            >
-              <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--ink-muted)", marginInlineEnd: 8 }}>
-                {ar ? "تصفية" : "Filter"}
-              </span>
-              <FilterChip
-                href="/brain/memory"
-                active={!filter}
-                label={ar ? "الكل" : "All"}
-                count={total}
-              />
-              {byModule.map((g) => (
-                <FilterChip
-                  key={g.module}
-                  href={`/brain/memory?module=${g.module}`}
-                  active={filter === g.module}
-                  label={
-                    ar
-                      ? MODULE_LABEL[g.module]?.ar ?? g.module
-                      : MODULE_LABEL[g.module]?.en ?? g.module
-                  }
-                  count={g._count._all}
-                />
-              ))}
-              <div className="grow" />
-              <form action={seedMemories}>
-                <button
-                  type="submit"
-                  className="dl-btn dl-btn-secondary"
-                  style={{ padding: "6px 12px", fontSize: 11 }}
-                >
-                  <Database className="h-3 w-3" strokeWidth={1.5} />
-                  {ar ? "إعادة الزرع" : "Re-seed"}
-                </button>
-              </form>
-              <form action={clearMemories}>
-                <button
-                  type="submit"
-                  className="dl-btn dl-btn-secondary"
-                  style={{ padding: "6px 12px", fontSize: 11, color: "var(--brick)" }}
-                >
-                  <Trash2 className="h-3 w-3" strokeWidth={1.5} />
-                  {ar ? "مسح الكل" : "Clear all"}
-                </button>
-              </form>
-            </div>
-
-            {/* Memory grid */}
-            <div
-              className="grid gap-4"
-              style={{
-                gridTemplateColumns:
-                  "repeat(auto-fit, minmax(min(420px, 100%), 1fr))",
-              }}
-            >
-              {rows.map((row) => (
-                <MemoryCard
-                  key={row.id}
-                  memory={{
-                    id: row.id,
-                    ts: row.occurredAt,
-                    module: row.module,
-                    headline: { ar: row.headlineAr, en: row.headlineEn },
-                    body: { ar: row.bodyAr, en: row.bodyEn },
-                    tags: safeStringArray(row.tagsJson),
-                    outcome:
-                      row.outcomeMetric != null
-                        ? {
-                            metric: row.outcomeMetric,
-                            delta: row.outcomeDelta ?? 0,
-                            lessonLearned: row.lessonEn ?? undefined,
-                          }
-                        : undefined,
-                    lesson: { ar: row.lessonAr, en: row.lessonEn },
-                  }}
-                  ar={ar}
-                />
-              ))}
-            </div>
-          </>
-        )}
-    </DaylightShell>
-  );
+const AR_MONTHS = [
+  "كانون الثاني", "شباط", "آذار", "نيسان", "أيار", "حزيران",
+  "تموز", "آب", "أيلول", "تشرين الأول", "تشرين الثاني", "كانون الأول",
+];
+const EN_MONTHS_SHORT = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+function toAr(s: string | number): string {
+  return String(s).replace(/[0-9]/g, (d) => "٠١٢٣٤٥٦٧٨٩"[Number(d)]);
 }
-
-function FilterChip({
-  href,
-  active,
-  label,
-  count,
-}: {
-  href: string;
-  active: boolean;
-  label: string;
-  count: number;
-}) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex items-center gap-2 px-3 py-1.5 transition"
-      style={{
-        background: active ? "var(--ink)" : "var(--cream)",
-        border: active ? "1px solid var(--ink)" : "1px solid var(--line)",
-        color: active ? "var(--cream)" : "var(--ink)",
-        fontSize: 12,
-        fontWeight: 500,
-        letterSpacing: "-0.005em",
-        textDecoration: "none",
-      }}
-    >
-      {label}
-      <span
-        style={{
-          fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-          fontSize: 10,
-          letterSpacing: "0.06em",
-          opacity: 0.7,
-          fontVariantNumeric: "tabular-nums",
-        }}
-      >
-        {count.toLocaleString("en-US")}
-      </span>
-    </Link>
-  );
-}
-
-function EmptyState({ ar }: { ar: boolean }) {
-  return (
-    <section
-      className="panel reveal"
-      style={{ padding: "60px 32px", textAlign: "center" }}
-    >
-      <div
-        className="inline-flex h-12 w-12 items-center justify-center mx-auto"
-        style={{
-          border: "1px solid var(--line)",
-          color: "var(--gold)",
-          background: "var(--ivory)",
-        }}
-      >
-        <Brain className="h-5 w-5" strokeWidth={1.5} />
-      </div>
-      <h2
-        className={ar ? "mt-5" : "font-display-latin mt-5"}
-        style={{
-          fontSize: "clamp(24px, 3vw, 38px)",
-          lineHeight: 1.05,
-          letterSpacing: ar ? "-0.005em" : "-0.022em",
-          fontWeight: ar ? 600 : 500,
-          color: "var(--ink)",
-        }}
-      >
-        {ar ? "البحيرة فارغة." : "The lake is empty."}
-      </h2>
-      <p
-        className="measure mt-3 mx-auto"
-        style={{
-          fontSize: "clamp(13px, 1vw, 14.5px)",
-          lineHeight: 1.55,
-          color: "var(--ink-muted)",
-        }}
-      >
-        {ar
-          ? "اضغط على الزر بالأسفل لزرع ثماني ذكريات تأسيسية. لاحقاً، كل حدث مهمّ يحفظه الدماغ تلقائياً."
-          : "Press the button below to seed eight foundational memories. Going forward, the brain captures every meaningful event automatically."}
-      </p>
-      <div className="mt-6">
-        <form action={seedMemories}>
-          <button type="submit" className="dl-btn dl-btn-primary">
-            <Database className="h-4 w-4" strokeWidth={1.5} />
-            {ar ? "ازرع البحيرة" : "Seed the lake"}
-          </button>
-        </form>
-      </div>
-    </section>
-  );
+function formatDate(d: Date, ar: boolean): string {
+  const y = d.getFullYear();
+  const m = d.getMonth();
+  return ar ? `${toAr(y)} · ${AR_MONTHS[m]}` : `${EN_MONTHS_SHORT[m]} ${y}`;
 }
 
 function safeStringArray(json: string | null | undefined): string[] {
@@ -250,4 +55,173 @@ function safeStringArray(json: string | null | undefined): string[] {
   } catch {
     return [];
   }
+}
+
+export default async function BrainMemoryPage() {
+  const ar = getLocale() === "ar";
+
+  const rows = await prisma.memory.findMany({
+    orderBy: { occurredAt: "desc" },
+    take: 60,
+  });
+
+  if (rows.length === 0) {
+    return (
+      <div className="dl-page" data-section="memory" dir={ar ? "rtl" : "ltr"}>
+        <div className="ml-wrap">
+          <div id="lake" aria-hidden>
+            <div className="wave w1"></div>
+            <div className="wave w2"></div>
+            <div className="wave w3"></div>
+          </div>
+          <EmptyState ar={ar} />
+        </div>
+      </div>
+    );
+  }
+
+  // Heuristic: outcome is "good" when no signed delta is recorded (positive
+  // lessons) or when the delta is non-negative; otherwise "bad".
+  const memories: MemoryItem[] = rows.map((r) => {
+    const dom = (ar
+      ? MODULE_LABEL[r.module]?.ar
+      : MODULE_LABEL[r.module]?.en) ?? r.module;
+    const out: "good" | "bad" =
+      r.outcomeDelta == null ? "good" : r.outcomeDelta >= 0 ? "good" : "bad";
+    const tags = safeStringArray(r.tagsJson);
+    // We don't store related ids on Memory; approximate "related" via shared
+    // tags so the recall lines mean something even without a vector index.
+    return {
+      id: r.id,
+      date: formatDate(r.occurredAt, ar),
+      yr: String(r.occurredAt.getFullYear()),
+      dom,
+      out,
+      sit: ar ? r.headlineAr : r.headlineEn,
+      dec: ar ? (r.bodyAr || r.bodyEn) : (r.bodyEn || r.bodyAr),
+      outBadge: { good: ar ? "نجحت" : "Succeeded", bad: ar ? "تعثّرت" : "Stumbled" },
+      decLabel: ar ? "القرار:" : "Decision:",
+      tags,
+      related: [] as string[],
+    };
+  });
+
+  // Wire up "related" by shared tags (top 3 most overlapping memories per node).
+  for (const m of memories) {
+    const me = m.tags;
+    if (me.length === 0) continue;
+    const overlap = memories
+      .filter((o) => o.id !== m.id)
+      .map((o) => ({
+        id: o.id,
+        score: o.tags.filter((t) => me.indexOf(t) >= 0).length,
+      }))
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+      .map((x) => x.id);
+    m.related = overlap;
+  }
+
+  const domains = Array.from(new Set(memories.map((m) => m.dom)));
+  const years = Array.from(new Set(memories.map((m) => m.yr))).sort();
+
+  return (
+    <div className="dl-page" data-section="memory" dir={ar ? "rtl" : "ltr"}>
+      <div className="ml-wrap">
+        <MemoryLake
+          ar={ar}
+          memories={memories}
+          domains={domains}
+          years={years}
+          labels={{
+            sector: ar ? "القطاع" : "Sector",
+            outcome: ar ? "النتيجة" : "Outcome",
+            year: ar ? "السنة" : "Year",
+            all: ar ? "الكل" : "All",
+            good: ar ? "ناجحة" : "Succeeded",
+            bad: ar ? "متعثّرة" : "Stumbled",
+            searchPlaceholder: ar
+              ? "اسأل الذاكرة… (مثال: هبوط إيراد، توسّع إنتاج، خطر هدر)"
+              : "Ask the memory… (e.g. revenue drop, expansion, waste risk)",
+            countTemplate: (shown, total) =>
+              ar ? `${shown} من ${total} ذكرى` : `${shown} of ${total} memories`,
+            empty: ar ? "لا ذكريات مطابقة. جرّب بحثاً آخر." : "No matching memories. Try a different query.",
+          }}
+        />
+
+        {/* Maintenance controls — re-seed / clear. Reference HTML doesn't show
+            these (it ships hard-coded demo data); we keep them on the surface
+            so operators can re-populate or reset. */}
+        <div className="ml-maint">
+          <form action={seedMemories}>
+            <button type="submit" className="ml-maint-btn">
+              <Database className="h-3 w-3" strokeWidth={1.5} />
+              {ar ? "إعادة الزرع" : "Re-seed"}
+            </button>
+          </form>
+          <form action={clearMemories}>
+            <button type="submit" className="ml-maint-btn danger">
+              <Trash2 className="h-3 w-3" strokeWidth={1.5} />
+              {ar ? "مسح الكل" : "Clear all"}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EmptyState({ ar }: { ar: boolean }) {
+  return (
+    <div style={{ position: "relative", zIndex: 1, padding: "60px 32px", textAlign: "center" }}>
+      <div
+        className="inline-flex h-12 w-12 items-center justify-center"
+        style={{
+          border: "1px solid rgba(194,163,90,.3)",
+          color: "var(--gold-soft)",
+          background: "rgba(13,31,26,.4)",
+          borderRadius: 14,
+          margin: "0 auto",
+        }}
+      >
+        <Brain className="h-5 w-5" strokeWidth={1.5} />
+      </div>
+      <h2
+        style={{
+          fontFamily: "var(--display)",
+          fontSize: "clamp(24px, 3vw, 38px)",
+          color: "#fff",
+          marginTop: 20,
+          fontWeight: 600,
+          lineHeight: 1.05,
+        }}
+      >
+        {ar ? "البحيرة فارغة." : "The lake is empty."}
+      </h2>
+      <p
+        style={{
+          fontSize: 14,
+          color: "var(--mist)",
+          opacity: 0.7,
+          marginTop: 12,
+          lineHeight: 1.55,
+          maxWidth: "52ch",
+          marginInline: "auto",
+        }}
+      >
+        {ar
+          ? "اضغط على الزر بالأسفل لزرع ثماني ذكريات تأسيسية. لاحقاً، كل حدث مهمّ يحفظه الدماغ تلقائياً."
+          : "Press the button below to seed eight foundational memories. Going forward, the brain captures every meaningful event automatically."}
+      </p>
+      <div style={{ marginTop: 24 }}>
+        <form action={seedMemories}>
+          <button type="submit" className="ml-maint-btn primary">
+            <Database className="h-4 w-4" strokeWidth={1.5} />
+            {ar ? "ازرع البحيرة" : "Seed the lake"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 }

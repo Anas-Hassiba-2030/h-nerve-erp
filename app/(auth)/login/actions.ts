@@ -107,5 +107,5 @@ export async function loginAction(formData: FormData) {
     /* swallow */
   }
 
-  redirect("/dashboard");
+  redirect("/orrery");
 }

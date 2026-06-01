@@ -1,5 +1,3 @@
-
-export const dynamic = "force-dynamic";
 // /supply-chain — predictive supply chain bridge.
 // Claude Design "daylight" port: reference HTML structure (sec-head + sk-wrap +
 // panel/fc-card), CSS scoped under .dl-page. Prisma queries & server actions
@@ -10,6 +8,7 @@ import { Sankey, type SankeyNode, type SankeyLink } from "@/components/charts/Sa
 import { ForecastExplainer } from "@/components/ForecastExplainer";
 import { ExportMenu } from "@/components/ExportMenu";
 import { DeleteButton } from "@/components/DeleteButton";
+import { DaylightShell } from "@/components/orrery/daylight";
 import { ForecastCardClient } from "./ForecastCardClient";
 import { getCompanyBrand } from "@/lib/companyBrand";
 import { getLocale } from "@/lib/i18n.server";
@@ -21,6 +20,8 @@ import {
   autoGenerateForecasts, deleteForecast, setForecastStatus,
   approveForecast, rejectForecast,
 } from "./actions";
+
+export const dynamic = "force-dynamic";
 
 const CATEGORY_LABEL: Record<string, { ar: string; en: string }> = {
   DAIRY:    { ar: "ألبان", en: "Dairy" },
@@ -125,7 +126,7 @@ export default async function SupplyChainPage() {
   ];
 
   return (
-    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
       {/* ── header ── */}
       <div className="sec-head reveal">
         <div>
@@ -203,7 +204,7 @@ export default async function SupplyChainPage() {
           )}
         </div>
       </div>
-    </div>
+    </DaylightShell>
   );
 }
 

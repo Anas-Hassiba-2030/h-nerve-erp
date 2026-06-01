@@ -13,8 +13,6 @@ import "../../daylight.css";
 import "./trust.css";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
-import { verifyNarrative } from "@/lib/brain/verifier";
-import { score as confidenceScore } from "@/lib/brain/confidence";
 
 export const dynamic = "force-dynamic";
 
@@ -24,33 +22,24 @@ export default async function BrainTrustPage() {
   const locale = getLocale();
   const ar = locale === "ar";
 
-  // Pull a representative window of recent narratives.
+  // Pull a representative window of recent narratives. The narrator
+  // persists trustScore/trustLabel/claimsMatched/claimsTotal on every
+  // write (lib/brain/narrator.claude.ts § Phase 22), so the dashboard
+  // reads real verification telemetry directly off the row.
   const narratives = await prisma.narrative.findMany({
     orderBy: { createdAt: "desc" },
     take: 80,
   });
 
-  // The verifier needs the facts payload, which we don't persist on the
-  // Narrative row. We score each narrative using the lighter heuristic
-  // path (no verification, defaults to neutral) and combine with the
-  // freshness signal from `createdAt`. Once Phase 22 is integrated into
-  // the narrator write path, the report shifts to real coverage numbers.
   const scored = narratives.map((n) => {
     const ageMs = Date.now() - n.createdAt.getTime();
-    const c = confidenceScore({
-      // Without the original facts, verification is neutral.
-      verification: undefined,
-      dataAsOf: n.createdAt,
-      supportingPoints: n.isStub ? 1 : 8,
-      // Cached, non-stub answers earn implicit graph support.
-      graphSupports: n.isStub ? null : true,
-      now: Date.now(),
-    });
     return {
       id: n.id,
       text: n.text,
-      label: c.label,
-      score: c.score,
+      label: (n.trustLabel as "high" | "medium" | "low") ?? "medium",
+      score: n.trustScore ?? 0.5,
+      claimsMatched: n.claimsMatched ?? 0,
+      claimsTotal: n.claimsTotal ?? 0,
       ageMs,
       register: n.register,
       isStub: n.isStub,
@@ -58,25 +47,10 @@ export default async function BrainTrustPage() {
     };
   });
 
-  // Demonstration self-check: verify each cached narrative against a small
-  // synthetic facts payload extracted from its own numbers. This gives us
-  // a real (if conservative) coverage number for the dashboard until the
-  // narrator persists its facts payload (later in Phase 22).
-  const selfCoverage = scored.length
-    ? scored
-        .map((n) => {
-          // Build a synthetic facts payload from numbers already in the
-          // text — every claim should self-verify if extraction works.
-          const numbers = (n.text.match(/\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?/g) ?? [])
-            .map((s) => Number(s.replace(/[,\s]/g, "")))
-            .filter((v) => Number.isFinite(v));
-          const facts: Record<string, number> = {};
-          numbers.forEach((v, i) => (facts[`n${i}`] = v));
-          const report = verifyNarrative(n.text, facts);
-          return report.coverage;
-        })
-        .reduce((a, b) => a + b, 0) / scored.length
-    : 1;
+  // Aggregate verification rate from real claim counts on every cached row.
+  const totalClaims = scored.reduce((a, s) => a + s.claimsTotal, 0);
+  const matchedClaims = scored.reduce((a, s) => a + s.claimsMatched, 0);
+  const selfCoverage = totalClaims === 0 ? 1 : matchedClaims / totalClaims;
 
   const buckets: Bucket[] = [
     { label: "high", count: scored.filter((s) => s.label === "high").length },

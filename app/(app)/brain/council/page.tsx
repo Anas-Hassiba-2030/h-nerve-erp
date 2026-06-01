@@ -10,7 +10,6 @@
 import Link from "next/link";
 import {
   DaylightShell,
-  DaylightHeader,
   DaylightKpiGrid,
   DaylightKpi,
   DaylightPanel,
@@ -21,6 +20,7 @@ import { formatNumber } from "@/lib/utils";
 import { llmConfig } from "@/lib/brain/llm";
 import { Users2, ChevronLeft, MessagesSquare, ArrowRight } from "lucide-react";
 import { convene } from "./actions";
+import { CouncilStage } from "./CouncilStage";
 import "../../daylight.css";
 import "./council-design.css";
 
@@ -77,42 +77,32 @@ export default async function BrainCouncilIndex() {
 
   return (
     <DaylightShell dir={ar ? "rtl" : "ltr"}>
-      <DaylightHeader
-        eyebrow={ar ? "الدماغ · المجلس" : "Brain · Council"}
-        title={ar ? "اجتمع المجلس" : "Convene the council"}
-        subtitle={
-          ar
-            ? "متخصّصون يتداولون في سؤال واحد. مُيَسّر يُجمّع. توصية مع نسبة ثقة وملاحظة معارضة."
-            : "Specialists deliberate on one question. A moderator synthesizes. One recommendation with confidence and dissent."
-        }
-        status={
-          llmEnabled
-            ? (ar ? "المحرك مُتصِل · Claude" : "Engine live · Claude")
-            : (ar ? "تحليل محلي" : "On-device reasoning")
-        }
-      />
-
-      {/* ── Hero — frame the question, on the cosmic night field ───────── */}
+      {/* ── Hero — the live cosmic debate stage (verbatim from council.html) ── */}
       <div className="co-wrap reveal">
         <div className="co-ribbon">
           <div className="co-title-box">
             <span className="eb">
               <span className="tick" />
-              {ar ? "صياغة السؤال" : "Frame the question"}
+              {ar ? "الذكاء التشغيلي" : "Operational intelligence"}
             </span>
             <h1>{ar ? "المجلس" : "Council"}</h1>
           </div>
           <div className="co-intro">
             {ar
-              ? "اطرح القرار كما تطرحه على مجلس إدارة. خمسة مستشارين يتناظرون حول السؤال، ثم يصوغ المُنسّق التوصية."
-              : "Pose the decision as you would to a board. Specialists debate the question, then the moderator frames the recommendation."}
+              ? "خمسة مستشارين متخصّصين يتناظرون حول قرار حيّ. يستمع الدماغ، يوازن الحجج، ثم يصوغ التوصية النهائية."
+              : "Five specialists debate a live decision. The brain listens, weighs, then frames the recommendation."}
           </div>
         </div>
 
+        <CouncilStage ar={ar} />
+      </div>
+
+      {/* ── Pose a new question ─────────────────────────────────────────── */}
+      <div className="co-wrap reveal" style={{ marginTop: 22 }}>
         <div className="co-question">
           <div className="q-glow" />
           <div className="lbl">{ar ? "ابدأ من هنا" : "Start here"}</div>
-          <h2>{ar ? "اطرح القرار. اسمع الصوت كاملاً." : "Pose the decision. Hear the whole voice."}</h2>
+          <h2>{ar ? "اطرح قراراً جديداً على المجلس." : "Pose a new decision to the council."}</h2>
         </div>
 
         <form

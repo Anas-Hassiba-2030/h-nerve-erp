@@ -292,7 +292,7 @@ function FeedbackEventRow({ event, ar }: { event: any; ar: boolean }) {
 
   const glyph = KIND_GLYPH[event.kind] ?? "·";
   const color = KIND_COLOR[event.kind] ?? "var(--mist)";
-  const module = event.module ? MODULE_LABEL[event.module]?.[ar ? "ar" : "en"] ?? event.module : null;
+  const moduleLabel = event.module ? MODULE_LABEL[event.module]?.[ar ? "ar" : "en"] ?? event.module : null;
   const kindLabel = event.kind.toLowerCase().replace(/_/g, " ");
 
   return (
@@ -316,7 +316,7 @@ function FeedbackEventRow({ event, ar }: { event: any; ar: boolean }) {
       <div className="rt" style={{ flex: 1, minWidth: 0 }}>
         <div className="tt" style={{ fontSize: 12.5, fontWeight: 600, color: "var(--cream)" }}>
           {kindLabel}
-          {module ? <span style={{ fontWeight: 400, opacity: 0.65, marginInlineStart: 8 }}>{module}</span> : null}
+          {moduleLabel ? <span style={{ fontWeight: 400, opacity: 0.65, marginInlineStart: 8 }}>{moduleLabel}</span> : null}
         </div>
         {event.category ? (
           <div className="ts" style={{ fontSize: 11 }}>{event.category}</div>

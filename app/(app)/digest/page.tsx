@@ -49,13 +49,33 @@ export default async function DigestListPage() {
             <h2>{ar ? "الموجزات" : "Digests"}</h2>
             <div className="sub">{ar ? "أحدث أولاً" : "Newest first"}</div>
             {digests.length === 0 ? (
-              <div className="br-row" style={{ margin: 0 }}>
-                <span className="br-chip info">✦</span>
-                <div className="rt">
-                  <div className="tt">{ar ? "لا توجد موجزات بعد" : "No digests yet"}</div>
-                  <div className="ts">{ar ? "ولّد أول موجز أسبوعي." : "Generate the first weekly digest."}</div>
+              // Phase 26.5 — the empty state is now actionable. When the user
+              // can generate, the whole row is a submit button (so a click
+              // anywhere on "Generate the first weekly digest" works); when
+              // they can't, it explains who can.
+              canGenerate ? (
+                <form action={generateNewDigest}>
+                  <button
+                    type="submit"
+                    className="br-row"
+                    style={{ margin: 0, width: "100%", textAlign: "start", cursor: "pointer", border: "none", background: "transparent" }}
+                  >
+                    <span className="br-chip info">✦</span>
+                    <div className="rt">
+                      <div className="tt">{ar ? "لا توجد موجزات بعد" : "No digests yet"}</div>
+                      <div className="ts">{ar ? "انقر هنا لتوليد أول موجز أسبوعي." : "Click here to generate the first weekly digest."}</div>
+                    </div>
+                  </button>
+                </form>
+              ) : (
+                <div className="br-row" style={{ margin: 0 }}>
+                  <span className="br-chip info">✦</span>
+                  <div className="rt">
+                    <div className="tt">{ar ? "لا توجد موجزات بعد" : "No digests yet"}</div>
+                    <div className="ts">{ar ? "يمكن للمدراء فأعلى توليد الموجز الأسبوعي." : "Managers and above can generate the weekly digest."}</div>
+                  </div>
                 </div>
-              </div>
+              )
             ) : (
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 {digests.map((d) => (

@@ -717,6 +717,19 @@ When asking a future Claude to work on this, name the file. "Improve `lib/brain/
 
 **Reported issues (operator session 2026-06-01):**
 
+**Status legend:** ✅ fixed · 🔄 documented, pending.
+
+| # | Issue | Status |
+|---|---|---|
+| 26.1 | FAB rail panels overlap rail circles | ✅ |
+| 26.2 | Brain hub orb visual | ✅ |
+| 26.3 | Orrery hub / MiniOrrery labels cramped | ✅ (MiniOrrery spacing) |
+| 26.4 | `/workspace` redirects to `/companies` | ✅ |
+| 26.5 | Digest "Generate" button hidden / not actionable | ✅ |
+| 26.6 | Profile button opens Settings | ✅ (`/me` profile route) |
+| 26.7 | Three FAB circles disappear intermittently | 🔄 |
+| 26.8 | System feels heavy + laggy | ✅ (first pass — deferred overlays) |
+
 ### 26.1 — FAB rail panels stack badly (3 buttons → 3 overlapping circles)
 The three FAB buttons (Ask the Brain, Quick Add, Time Machine) at the bottom-start corner each open a panel. Clicking the **2nd** button opens its panel **below the 1st circle**; clicking the **3rd** opens its panel below the other two. Panels and rail collide visually. Each panel should anchor cleanly to its rail position, never overlap a sibling, and have enough offset to read as a separate surface.
 - Files: `app/(app)/living.css` (`.hn-fab-rail`, `[data-tm-legacy-pill].is-open`, `.fixed.bottom-6:has(.anim-fade-up)`), `components/QuickAddFAB.tsx`, `components/Conversational.tsx`, `components/TimeScrubber.tsx`.

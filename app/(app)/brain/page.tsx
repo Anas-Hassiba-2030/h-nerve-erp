@@ -97,6 +97,7 @@ export default async function BrainPage() {
       {/* ── Hero · Brain IQ orb ──────────────────────────────────────── */}
       <div className="brain-hero reveal">
         <div className="brain-orb">
+          <span aria-hidden className="brain-orb-ring" />
           <div style={{ textAlign: "center" }}>
             <div className="brain-iq"><CountUp value={iqScore} locale={ar ? "ar" : "en"} /></div>
             <div className="brain-iq-cap">{ar ? "ذكاء الدماغ" : "Brain IQ"}</div>

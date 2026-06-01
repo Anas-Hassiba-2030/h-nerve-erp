@@ -16,6 +16,7 @@ export const dynamic = "force-dynamic";
 // (server-side .on toggle) so no client runtime is required.
 
 import Link from "next/link";
+import { DaylightShell } from "@/components/orrery/daylight";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
 import { getTheme } from "@/lib/theme.server";
@@ -86,7 +87,7 @@ export default async function SettingsPage({
       ];
 
   return (
-    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
       <div className="wrap">
         <div className="sec-head reveal">
           <div>
@@ -304,6 +305,6 @@ export default async function SettingsPage({
           </div>
         </div>
       </div>
-    </div>
+    </DaylightShell>
   );
 }

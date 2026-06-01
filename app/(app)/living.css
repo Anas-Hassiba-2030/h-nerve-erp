@@ -255,3 +255,50 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
   .mo-btn .mo-ring{ animation:none; }
   .mo-node{ animation:none; }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   H-NERVE · Constellation Rail  (#al-rail equivalent)
+   Horizontal pill-strip nav showing all sections in the current
+   group. Sits at the page level, not scoped under .dl-page.
+   CSS mirrors app-layer.css lines 122-134.
+   ════════════════════════════════════════════════════════════════ */
+.al-rail{
+  position:relative; z-index:30;
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  margin:0 auto 14px; max-width:1180px;
+  padding:9px 14px;
+  background:linear-gradient(160deg,rgba(20,46,38,.4),rgba(13,31,26,.36));
+  border:1px solid rgba(194,163,90,.2);
+  border-radius:14px;
+}
+.al-rail.light{
+  background:linear-gradient(160deg,rgba(254,252,247,.7),rgba(246,241,231,.7));
+  border-color:#e4dccb;
+}
+.al-rail .rail-grp{
+  font-size:10.5px; font-weight:700; letter-spacing:.1em;
+  color:var(--gold,#C2A35A); opacity:.8; margin-inline-end:4px;
+}
+.al-rail .rail-toggle{
+  margin-inline-start:auto; background:none; border:0; cursor:pointer;
+  color:var(--gold-soft,#DCC38A); font-size:13px;
+}
+.al-rail.light .rail-toggle{ color:var(--emerald,#2E6B57); }
+.rail-item{
+  display:inline-flex; align-items:center; min-height:34px;
+  padding:6px 13px; border-radius:999px;
+  font-family:var(--ui,"Cairo",sans-serif); font-size:12.5px; font-weight:600;
+  cursor:pointer; text-decoration:none;
+  color:var(--mist,#CDE0D6);
+  background:rgba(13,31,26,.4); border:1px solid rgba(194,163,90,.18);
+  transition:all .2s;
+}
+.al-rail.light .rail-item{ color:#6B6459; background:#fff; border-color:#e4dccb; }
+.rail-item:hover{ border-color:var(--gold,#C2A35A); }
+.rail-item.cur{
+  background:linear-gradient(135deg,#DCC38A,#C2A35A);
+  color:#241b06; border-color:transparent; font-weight:700;
+}
+.al-rail[data-collapsed="true"] .rail-item:not(.cur){ display:none; }
+
+@media print{ .al-rail{ display:none !important; } }

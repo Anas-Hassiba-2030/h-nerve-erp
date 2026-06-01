@@ -1,19 +1,16 @@
 // /brain/council/[id] — full transcript of a council session.
 //
-// Aesthetic: Refined Editorial (DESIGN-SKILL §1.A). This is the council's
-// permanent record — every voice gets a tile in its agent accent, the
-// moderator's synthesis sits in a larger plinth, and the dissent note is
-// quoted in italic if present.
-//
-// Animation: each voice tile fades up with 80ms stagger (heri-stagger).
-// The confidence number under the moderator ticks up from 0 → final on mount.
+// Aesthetic: the ORIGINAL "Claude Design" cosmic-orbit look. This is the
+// council's permanent record — the voices orbit the Brain, the moderator's
+// synthesis fills a confidence ring, and the dissent note is quoted in italic
+// if present. The transcript itself is rendered by <CouncilTranscript/>, which
+// runs the choreographed debate + confidence tick-up.
 //
 // Phase 3 of docs/PHASES-INTELLIGENCE.md.
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
-import "../../../daylight.css";
 import { CouncilTranscript } from "@/components/brain/CouncilTranscript";
 import { council } from "@/lib/brain/council.live";
 import { getLocale } from "@/lib/i18n.server";
@@ -22,6 +19,10 @@ import { pickLocale } from "@/lib/utils";
 import { ArrowLeft, Target, ArrowRight, BookOpen } from "lucide-react";
 import { deleteSession } from "../actions";
 import { generateFromCouncil } from "@/app/(app)/plans/actions";
+import "../../../daylight.css";
+import "../council-design.css";
+
+export const dynamic = "force-dynamic";
 
 export default async function CouncilTranscriptPage({
   params,
@@ -60,45 +61,34 @@ export default async function CouncilTranscriptPage({
                 minute: "2-digit",
               }).format(session.ranAt)}`
         }
+        actions={
+          <>
+            <Link
+              href={`/theater/council/${session.id}`}
+              className="dl-btn dl-btn-secondary"
+            >
+              <BookOpen className="h-3.5 w-3.5" strokeWidth={1.5} />
+              {ar ? "افتح في المسرح" : "Open in Theater"}
+            </Link>
+            <form action={deleteSession}>
+              <input type="hidden" name="id" value={session.id} />
+              <button type="submit" className="dl-btn dl-btn-secondary">
+                {ar ? "حذف الجلسة" : "Delete session"}
+              </button>
+            </form>
+          </>
+        }
       />
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="reveal" style={{ marginBottom: 18 }}>
         <Link
           href="/brain/council"
-          className="inline-flex items-center gap-2"
-          style={{
-            fontFamily:
-              "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-            fontSize: 11,
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            color: "var(--gold)",
-            textDecoration: "none",
-          }}
+          className="dl-btn dl-btn-secondary"
+          style={{ textDecoration: "none" }}
         >
           <ArrowLeft className="h-3 w-3 rtl:rotate-180" strokeWidth={1.5} />
           {ar ? "العودة إلى المجلس" : "Back to council"}
         </Link>
-        <div className="flex items-center gap-2">
-          <Link
-            href={`/theater/council/${session.id}`}
-            className="dl-btn dl-btn-secondary"
-            style={{ padding: "8px 14px", fontSize: 12 }}
-          >
-            <BookOpen className="h-3.5 w-3.5" strokeWidth={1.5} />
-            {ar ? "افتح في المسرح" : "Open in Theater"}
-          </Link>
-          <form action={deleteSession}>
-            <input type="hidden" name="id" value={session.id} />
-            <button
-              type="submit"
-              className="dl-btn dl-btn-secondary"
-              style={{ padding: "6px 12px", fontSize: 11 }}
-            >
-              {ar ? "حذف الجلسة" : "Delete session"}
-            </button>
-          </form>
-        </div>
       </div>
 
       <CouncilTranscript session={session} ar={ar} />
@@ -124,10 +114,14 @@ async function CouncilToPlanCta({
 
   if (existing) {
     return (
-      <section
-        className="panel reveal grid gap-3 md:grid-cols-[auto_1fr_auto] md:items-center"
+      <div
+        className="panel reveal"
         style={{
-          borderInlineStart: "2px solid var(--emerald)",
+          display: "grid",
+          gridTemplateColumns: "auto 1fr auto",
+          alignItems: "center",
+          gap: 14,
+          borderInlineStart: "2px solid var(--sage)",
         }}
       >
         <Target
@@ -135,70 +129,54 @@ async function CouncilToPlanCta({
           style={{ color: "var(--emerald)" }}
           strokeWidth={1.5}
         />
-        <div className="min-w-0">
-          <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--ink-muted)" }}>
-            {ar ? "خطة موجودة" : "Plan exists"}
-          </div>
+        <div style={{ minWidth: 0 }}>
+          <div className="kpi-label">{ar ? "خطة موجودة" : "Plan exists"}</div>
           <div
-            className="line-clamp-1 mt-1"
+            className="line-clamp-1"
             style={{
-              fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
-              fontSize: 14,
-              fontWeight: 500,
-              letterSpacing: "-0.01em",
-              color: "var(--ink)",
+              fontFamily: "var(--dl-display)",
+              fontSize: 16,
+              fontWeight: 600,
+              color: "var(--emerald)",
+              marginTop: 4,
             }}
           >
             {pickLocale(ar, existing.goal, existing.goalEn)}
           </div>
         </div>
-        <Link
-          href={`/plans/${existing.id}`}
-          className="dl-btn dl-btn-secondary"
-          style={{ padding: "8px 14px", fontSize: 12 }}
-        >
+        <Link href={`/plans/${existing.id}`} className="dl-btn dl-btn-secondary">
           {ar ? "افتح الخطة" : "Open plan"}
-          <ArrowRight
-            className="h-3 w-3 transition rtl:rotate-180"
-            strokeWidth={1.5}
-          />
+          <ArrowRight className="h-3 w-3 transition rtl:rotate-180" strokeWidth={1.5} />
         </Link>
-      </section>
+      </div>
     );
   }
 
   return (
-    <section
-      className="panel reveal grid gap-4 md:grid-cols-[1fr_auto] md:items-center"
+    <div
+      className="panel reveal"
       style={{
-        position: "relative",
-        overflow: "hidden",
+        display: "grid",
+        gridTemplateColumns: "1fr auto",
+        alignItems: "center",
+        gap: 18,
       }}
     >
-      <span
-        aria-hidden
-        className="absolute"
-        style={{
-          top: 0,
-          insetInline: 0,
-          height: 2,
-          background:
-            "linear-gradient(90deg, var(--brick) 0%, var(--gold) 50%, var(--emerald) 100%)",
-        }}
-      />
-      <div className="min-w-0">
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--gold)" }}>
+      <div style={{ minWidth: 0 }}>
+        <div
+          className="sec-eyebrow"
+          style={{ marginBottom: 8 }}
+        >
           <Target className="h-3 w-3" strokeWidth={1.5} />
           {ar ? "الخطوة التالية" : "Next move"}
         </div>
         <h3
-          className={ar ? "mt-2.5" : "font-display-latin mt-2.5"}
           style={{
-            fontSize: "clamp(20px, 1.8vw, 26px)",
-            lineHeight: 1.2,
-            letterSpacing: ar ? "-0.005em" : "-0.014em",
-            fontWeight: ar ? 600 : 500,
-            color: "var(--ink)",
+            fontFamily: "var(--dl-display)",
+            fontSize: "clamp(22px, 2vw, 28px)",
+            lineHeight: 1.15,
+            fontWeight: 600,
+            color: "var(--emerald)",
           }}
         >
           {ar
@@ -206,11 +184,12 @@ async function CouncilToPlanCta({
             : "Turn the recommendation into a committable plan."}
         </h3>
         <p
-          className="mt-1.5 measure"
           style={{
-            fontSize: 13,
+            fontSize: 13.5,
             lineHeight: 1.55,
             color: "var(--ink-muted)",
+            marginTop: 8,
+            maxWidth: "62ch",
           }}
         >
           {ar
@@ -225,6 +204,6 @@ async function CouncilToPlanCta({
           {ar ? "توليد خطة" : "Generate plan"}
         </button>
       </form>
-    </section>
+    </div>
   );
 }

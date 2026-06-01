@@ -97,8 +97,8 @@ export function MessageComposer({
       action={sendMessage}
       className="flex flex-col gap-2 p-3"
       style={{
-        borderTop: "1px solid var(--heri-rule)",
-        background: "var(--heri-cream-2)",
+        borderTop: "1px solid var(--line)",
+        background: "var(--ivory)",
       }}
     >
       <input type="hidden" name="threadId" value={threadId} />
@@ -109,8 +109,8 @@ export function MessageComposer({
         <div
           className="flex items-center gap-2 self-start"
           style={{
-            background: "var(--heri-cream)",
-            border: "1px solid var(--heri-rule)",
+            background: "var(--cream)",
+            border: "1px solid var(--line)",
             padding: "6px 10px",
             maxWidth: "100%",
           }}
@@ -127,7 +127,7 @@ export function MessageComposer({
             }}
           />
           <span
-            style={{ fontSize: 11, color: "var(--heri-ink-3)" }}
+            style={{ fontSize: 11, color: "var(--ink-muted)" }}
           >
             {ar ? "صورة جاهزة للإرسال" : "Image ready"}
           </span>
@@ -139,7 +139,7 @@ export function MessageComposer({
               border: "none",
               background: "transparent",
               cursor: "pointer",
-              color: "var(--heri-ink-3)",
+              color: "var(--ink-muted)",
               padding: 2,
             }}
           >
@@ -173,9 +173,9 @@ export function MessageComposer({
             justifyContent: "center",
             width: 38,
             height: 38,
-            border: "1px solid var(--heri-rule)",
-            background: "var(--heri-cream)",
-            color: "var(--heri-ink-3)",
+            border: "1px solid var(--line)",
+            background: "var(--cream)",
+            color: "var(--ink-muted)",
             cursor: "pointer",
             borderRadius: 6,
             flexShrink: 0,

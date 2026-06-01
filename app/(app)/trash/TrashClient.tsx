@@ -102,7 +102,7 @@ function timeLeft(iso: string, graceMs: number, ar: boolean) {
 }
 
 const TONE_COLOR: Record<"ok" | "warn" | "danger", string> = {
-  ok: "linear-gradient(90deg, #10b981 0%, var(--heri-ochre) 100%)",
+  ok: "linear-gradient(90deg, #10b981 0%, var(--gold) 100%)",
   warn: "linear-gradient(90deg, #f59e0b 0%, #f97316 100%)",
   danger: "linear-gradient(90deg, #ef4444 0%, #991b1b 100%)",
 };
@@ -193,13 +193,13 @@ export function TrashClient({
               <div className="min-w-0">
                 <div
                   className="text-[10px] font-bold uppercase tracking-widest"
-                  style={{ color: "var(--heri-ink-3)" }}
+                  style={{ color: "var(--ink-muted)" }}
                 >
                   {ar ? meta.ar : meta.en}
                 </div>
                 <div
                   className="font-mono text-xl font-bold"
-                  style={{ color: "var(--heri-ink)" }}
+                  style={{ color: "var(--ink)" }}
                 >
                   {totals[e]}
                 </div>
@@ -215,8 +215,8 @@ export function TrashClient({
           className="card card-pad sticky top-2 z-10 flex flex-wrap items-center gap-3"
           style={{
             background:
-              "linear-gradient(135deg, color-mix(in srgb, var(--heri-ochre) 8%, var(--heri-cream)) 0%, var(--heri-cream) 100%)",
-            borderColor: "color-mix(in srgb, var(--heri-ochre) 28%, var(--heri-rule))",
+              "linear-gradient(135deg, color-mix(in srgb, var(--gold) 8%, var(--cream)) 0%, var(--cream) 100%)",
+            borderColor: "color-mix(in srgb, var(--gold) 28%, var(--line))",
           }}
         >
           <span
@@ -227,7 +227,7 @@ export function TrashClient({
           </span>
           <span
             className="text-sm font-bold"
-            style={{ color: "var(--heri-ink)" }}
+            style={{ color: "var(--ink)" }}
           >
             {ar ? "محدد" : "selected"}
           </span>
@@ -277,24 +277,24 @@ export function TrashClient({
         {/* Header with select-all */}
         <header
           className="flex items-center gap-3 px-4 py-3"
-          style={{ borderBottom: "1px solid var(--heri-rule)" }}
+          style={{ borderBottom: "1px solid var(--line)" }}
         >
           <input
             type="checkbox"
             checked={allChecked}
             onChange={toggleAll}
             aria-label={ar ? "تحديد الكل" : "Select all"}
-            className="h-4 w-4 cursor-pointer accent-[var(--heri-ochre)]"
+            className="h-4 w-4 cursor-pointer accent-[var(--gold)]"
           />
           <span
             className="text-sm font-semibold"
-            style={{ color: "var(--heri-ink)" }}
+            style={{ color: "var(--ink)" }}
           >
             {ar ? `${items.length} عنصر محذوف` : `${items.length} deleted item${items.length === 1 ? "" : "s"}`}
           </span>
           <span
             className="ms-auto inline-flex items-center gap-1 text-[11px]"
-            style={{ color: "var(--heri-ink-3)" }}
+            style={{ color: "var(--ink-muted)" }}
           >
             <Clock className="h-3.5 w-3.5" />
             {ar ? "نافذة الاسترجاع: 24 ساعة" : "Recovery window: 24h"}
@@ -314,9 +314,9 @@ export function TrashClient({
                 className="grid items-center gap-3 px-4 py-3 transition-colors"
                 style={{
                   gridTemplateColumns: "auto auto 1fr auto auto",
-                  borderTop: i === 0 ? "none" : "1px solid var(--heri-rule)",
+                  borderTop: i === 0 ? "none" : "1px solid var(--line)",
                   background: checked
-                    ? "color-mix(in srgb, var(--heri-ochre) 6%, transparent)"
+                    ? "color-mix(in srgb, var(--gold) 6%, transparent)"
                     : undefined,
                 }}
               >
@@ -325,7 +325,7 @@ export function TrashClient({
                   checked={checked}
                   onChange={() => toggle(item)}
                   aria-label={ar ? `تحديد ${item.label}` : `Select ${item.label}`}
-                  className="h-4 w-4 cursor-pointer accent-[var(--heri-ochre)]"
+                  className="h-4 w-4 cursor-pointer accent-[var(--gold)]"
                 />
                 <div
                   className="flex h-8 w-8 items-center justify-center rounded-lg text-white"
@@ -339,14 +339,14 @@ export function TrashClient({
                     <span className={meta.tone}>{ar ? meta.ar : meta.en}</span>
                     <span
                       className="truncate text-sm font-bold"
-                      style={{ color: "var(--heri-ink)" }}
+                      style={{ color: "var(--ink)" }}
                     >
                       {item.label}
                     </span>
                   </div>
                   <div
                     className="mt-0.5 truncate text-[11px]"
-                    style={{ color: "var(--heri-ink-3)" }}
+                    style={{ color: "var(--ink-muted)" }}
                   >
                     {item.sub ? `${item.sub} · ` : ""}
                     {ar ? "حُذف" : "deleted"}{" "}
@@ -358,7 +358,7 @@ export function TrashClient({
                       className="relative h-1 flex-1 overflow-hidden rounded-full"
                       style={{
                         background:
-                          "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
+                          "color-mix(in srgb, var(--ink-muted) 14%, transparent)",
                         maxWidth: 240,
                       }}
                     >
@@ -374,7 +374,7 @@ export function TrashClient({
                     <span
                       className="font-mono text-[10px] font-bold"
                       style={{
-                        color: t.expired ? "#dc2626" : "var(--heri-ink-3)",
+                        color: t.expired ? "#dc2626" : "var(--ink-muted)",
                       }}
                     >
                       {t.label}

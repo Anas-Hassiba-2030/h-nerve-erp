@@ -22,16 +22,16 @@ export function DesignSystemShowcase({ ar }: { ar: boolean }) {
   const [replayKey, setReplayKey] = useState(0);
 
   return (
-    <div className="space-y-10" style={{ color: "var(--heri-ink)" }}>
+    <div className="space-y-10" style={{ color: "var(--ink)" }}>
       {/* ── Toolbar ──────────────────────────────────────────────── */}
       <div
         className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
         style={{
-          background: "var(--heri-cream-2)",
-          border: "1px solid var(--heri-rule)",
+          background: "var(--ivory)",
+          border: "1px solid var(--line)",
         }}
       >
-        <p className="text-[11px] font-semibold leading-snug" style={{ color: "var(--heri-ink-3)" }}>
+        <p className="text-[11px] font-semibold leading-snug" style={{ color: "var(--ink-muted)" }}>
           {ar
             ? "كل اسم صنف قابل للنسخ بالنقر. الحركات تُعرض حيّة — اضغط «إعادة» لتشغيل حركات الدخول مرة أخرى."
             : "Every class name is click-to-copy. Animations play live — hit Replay to re-fire entrance motion."}
@@ -39,7 +39,7 @@ export function DesignSystemShowcase({ ar }: { ar: boolean }) {
         <button
           type="button"
           onClick={() => setReplayKey((k) => k + 1)}
-          className="btn btn-gold btn-sm focus-visible:[outline:2px_solid_var(--heri-ochre)] focus-visible:[outline-offset:2px]"
+          className="btn btn-gold btn-sm focus-visible:[outline:2px_solid_var(--gold)] focus-visible:[outline-offset:2px]"
         >
           <RefreshCw className="h-3.5 w-3.5" />
           {ar ? "إعادة تشغيل الحركات" : "Replay animations"}
@@ -89,9 +89,9 @@ export function DesignSystemShowcase({ ar }: { ar: boolean }) {
             <div
               key={t.cls}
               className="flex flex-wrap items-baseline justify-between gap-3 pb-3"
-              style={{ borderBottom: "1px dashed var(--heri-rule)" }}
+              style={{ borderBottom: "1px dashed var(--line)" }}
             >
-              <span className={t.cls} style={{ color: "var(--heri-ink)" }}>{t.sample}</span>
+              <span className={t.cls} style={{ color: "var(--ink)" }}>{t.sample}</span>
               <CopyChip text={t.cls} />
             </div>
           ))}
@@ -233,9 +233,9 @@ export function DesignSystemShowcase({ ar }: { ar: boolean }) {
                 key={i}
                 className="hn-anim-rise flex h-10 w-10 items-center justify-center text-xs font-bold"
                 style={{
-                  background: "var(--heri-cream-2)",
-                  border: "1px solid var(--heri-rule)",
-                  color: "var(--heri-ink-2)",
+                  background: "var(--ivory)",
+                  border: "1px solid var(--line)",
+                  color: "var(--ink-muted)",
                   fontVariantNumeric: "tabular-nums",
                 }}
               >
@@ -256,7 +256,7 @@ export function DesignSystemShowcase({ ar }: { ar: boolean }) {
           <BgTile cls="nerve-bg-mesh" />
           <div
             className="relative flex items-end overflow-hidden p-3"
-            style={{ height: 140, background: "var(--heri-cream-2)", border: "1px solid var(--heri-rule)" }}
+            style={{ height: 140, background: "var(--ivory)", border: "1px solid var(--line)" }}
           >
             <span
               className="glow-blob"
@@ -276,7 +276,7 @@ export function DesignSystemShowcase({ ar }: { ar: boolean }) {
           className="relative overflow-hidden p-5"
           style={{
             background:
-              "linear-gradient(135deg, var(--heri-terracotta) 0%, var(--heri-ochre) 55%, var(--heri-teal) 110%)",
+              "linear-gradient(135deg, var(--brick) 0%, var(--gold) 55%, var(--emerald) 110%)",
           }}
         >
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -300,7 +300,7 @@ export function DesignSystemShowcase({ ar }: { ar: boolean }) {
               <div className="bar flex-1">
                 <div className="bar-fill" style={{ width: `${w}%` }} />
               </div>
-              <span className="w-10 text-end font-mono-tech text-xs" style={{ color: "var(--heri-ink-3)" }}>
+              <span className="w-10 text-end font-mono-tech text-xs" style={{ color: "var(--ink-muted)" }}>
                 {w}%
               </span>
             </div>
@@ -395,16 +395,16 @@ function Section({
       <div className="flex items-baseline gap-3">
         <span
           className="font-mono-tech text-xs tabular-nums"
-          style={{ color: "var(--heri-ochre)", direction: "ltr" }}
+          style={{ color: "var(--gold)", direction: "ltr" }}
         >
           {String(n).padStart(2, "0")}
         </span>
-        <h2 className="exec-title" style={{ color: "var(--heri-ink)" }}>
+        <h2 className="exec-title" style={{ color: "var(--ink)" }}>
           {ar ? titleAr : titleEn}
         </h2>
-        <span className="h-px flex-1 self-center" style={{ background: "var(--heri-rule)" }} />
+        <span className="h-px flex-1 self-center" style={{ background: "var(--line)" }} />
       </div>
-      <p className="text-xs font-semibold leading-snug" style={{ color: "var(--heri-ink-3)" }}>
+      <p className="text-xs font-semibold leading-snug" style={{ color: "var(--ink-muted)" }}>
         {ar ? descAr : descEn}
       </p>
       {children}
@@ -416,7 +416,7 @@ function Sub({ label, ar }: { label: string; ar: boolean }) {
   return (
     <div
       className="eyebrow mt-2"
-      style={{ color: "var(--heri-copper)", direction: ar ? "rtl" : "ltr" }}
+      style={{ color: "var(--gold)", direction: ar ? "rtl" : "ltr" }}
     >
       {label}
     </div>
@@ -426,12 +426,12 @@ function Sub({ label, ar }: { label: string; ar: boolean }) {
 function Swatch({ name, value, ar }: { name: string; value: string; ar: boolean }) {
   const isColor = value.startsWith("#");
   return (
-    <div style={{ border: "1px solid var(--heri-rule)" }}>
+    <div style={{ border: "1px solid var(--line)" }}>
       <div
         className="h-14 w-full"
         style={{
           background: isColor ? `var(${name})` : `var(${name})`,
-          borderBottom: "1px solid var(--heri-rule)",
+          borderBottom: "1px solid var(--line)",
         }}
         aria-hidden
       />
@@ -439,7 +439,7 @@ function Swatch({ name, value, ar }: { name: string; value: string; ar: boolean 
         <CopyChip text={name} block />
         <div
           className="mt-0.5 font-mono-tech text-[10px] tabular-nums"
-          style={{ color: "var(--heri-ink-3)", direction: "ltr" }}
+          style={{ color: "var(--ink-muted)", direction: "ltr" }}
         >
           {isColor ? value : (ar ? "محسوب" : "computed")}
         </div>
@@ -450,18 +450,18 @@ function Swatch({ name, value, ar }: { name: string; value: string; ar: boolean 
 
 function ExprChip({ name, value }: { name: string; value: string }) {
   return (
-    <div className="px-3 py-2.5" style={{ background: "var(--heri-cream-2)", border: "1px solid var(--heri-rule)" }}>
+    <div className="px-3 py-2.5" style={{ background: "var(--ivory)", border: "1px solid var(--line)" }}>
       {name === "--stroke-brand" ? (
         <div className="mb-2 h-6 w-full" style={{ background: "var(--stroke-brand)" }} aria-hidden />
       ) : (
         <div
           className="mb-2 h-10 w-full"
-          style={{ background: "var(--heri-cream)", boxShadow: `var(${name})` }}
+          style={{ background: "var(--cream)", boxShadow: `var(${name})` }}
           aria-hidden
         />
       )}
       <CopyChip text={name} block />
-      <div className="mt-0.5 font-mono-tech text-[10px] leading-tight" style={{ color: "var(--heri-ink-3)", direction: "ltr" }}>
+      <div className="mt-0.5 font-mono-tech text-[10px] leading-tight" style={{ color: "var(--ink-muted)", direction: "ltr" }}>
         {value}
       </div>
     </div>
@@ -477,7 +477,7 @@ function AnimGrid({ classes }: { classes: readonly string[] }) {
           <div key={cls} className="flex flex-col items-center gap-1.5">
             <div
               className="flex h-16 w-full items-center justify-center overflow-hidden"
-              style={{ background: "var(--heri-cream-2)", border: "1px solid var(--heri-rule)" }}
+              style={{ background: "var(--ivory)", border: "1px solid var(--line)" }}
             >
               <span
                 className={cls}
@@ -486,7 +486,7 @@ function AnimGrid({ classes }: { classes: readonly string[] }) {
                   width: 30,
                   height: 30,
                   borderRadius: 8,
-                  background: gradient ? "var(--stroke-brand)" : "var(--heri-terracotta)",
+                  background: gradient ? "var(--stroke-brand)" : "var(--brick)",
                 }}
                 aria-hidden
               />
@@ -503,7 +503,7 @@ function BgTile({ cls }: { cls: string }) {
   return (
     <div
       className={`relative flex items-end p-3 ${cls}`}
-      style={{ height: 140, border: "1px solid var(--heri-rule)" }}
+      style={{ height: 140, border: "1px solid var(--line)" }}
     >
       <CopyChip text={cls} />
     </div>
@@ -513,7 +513,7 @@ function BgTile({ cls }: { cls: string }) {
 function EffectCard({ cls, ar, hover }: { cls: string; ar: boolean; hover?: boolean }) {
   return (
     <div className={`${cls} flex flex-col gap-2 p-4`} style={{ minHeight: 90 }}>
-      <span className="text-sm font-bold" style={{ color: cls === "glass" || cls === "sheen" ? "var(--text)" : "var(--heri-ink)" }}>
+      <span className="text-sm font-bold" style={{ color: cls === "glass" || cls === "sheen" ? "var(--text)" : "var(--ink)" }}>
         {hover ? (ar ? "مرّر فوقي" : "Hover me") : cls}
       </span>
       <CopyChip text={cls} />
@@ -529,22 +529,22 @@ function ThemeCard({
   return (
     <div
       className="hn-hover-lift overflow-hidden"
-      style={{ border: isNew ? "2px solid var(--heri-ochre)" : "1px solid var(--heri-rule)" }}
+      style={{ border: isNew ? "2px solid var(--gold)" : "1px solid var(--line)" }}
     >
       <div className="flex h-12">
         {chips.map((c, i) => (
           <span key={i} className="flex-1" style={{ background: c }} aria-hidden />
         ))}
       </div>
-      <div className="flex items-center justify-between gap-1 px-2 py-1.5" style={{ background: "var(--heri-cream)" }}>
-        <span className="flex items-center gap-1 text-[11px] font-bold" style={{ color: "var(--heri-ink)" }}>
-          {emblem ? <span style={{ color: "var(--heri-ochre)" }}>{emblem}</span> : null}
+      <div className="flex items-center justify-between gap-1 px-2 py-1.5" style={{ background: "var(--cream)" }}>
+        <span className="flex items-center gap-1 text-[11px] font-bold" style={{ color: "var(--ink)" }}>
+          {emblem ? <span style={{ color: "var(--gold)" }}>{emblem}</span> : null}
           {name}
         </span>
         {isNew ? (
           <span className="badge badge-gold text-[8px]">{ar ? "جديد" : "NEW"}</span>
         ) : dark ? (
-          <span className="text-[8px] font-bold" style={{ color: "var(--heri-ink-3)" }}>
+          <span className="text-[8px] font-bold" style={{ color: "var(--ink-muted)" }}>
             {ar ? "داكن" : "DARK"}
           </span>
         ) : null}
@@ -566,14 +566,14 @@ function CopyChip({ text, block, light }: { text: string; block?: boolean; light
           setTimeout(() => setCopied(false), 1100);
         } catch { /* clipboard unavailable — no-op */ }
       }}
-      className={`inline-flex items-center gap-1 font-mono-tech text-[10px] focus-visible:[outline:2px_solid_var(--heri-ochre)] focus-visible:[outline-offset:1px] ${block ? "w-full justify-between" : ""}`}
+      className={`inline-flex items-center gap-1 font-mono-tech text-[10px] focus-visible:[outline:2px_solid_var(--gold)] focus-visible:[outline-offset:1px] ${block ? "w-full justify-between" : ""}`}
       style={{
         direction: "ltr",
         padding: "2px 6px",
         borderRadius: 4,
-        background: light ? "rgba(255,255,255,0.18)" : "var(--heri-cream-2)",
-        border: `1px solid ${light ? "rgba(255,255,255,0.35)" : "var(--heri-rule)"}`,
-        color: light ? "rgba(255,255,255,0.92)" : "var(--heri-ink-2)",
+        background: light ? "rgba(255,255,255,0.18)" : "var(--ivory)",
+        border: `1px solid ${light ? "rgba(255,255,255,0.35)" : "var(--line)"}`,
+        color: light ? "rgba(255,255,255,0.92)" : "var(--ink-muted)",
         transition:
           "background 160ms var(--ease-out-quart), color 160ms var(--ease-out-quart)",
       }}

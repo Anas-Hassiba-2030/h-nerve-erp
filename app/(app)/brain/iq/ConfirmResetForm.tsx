@@ -24,7 +24,7 @@ export function ConfirmResetForm({ ar }: { ar: boolean }) {
         style={{
           padding: "6px 12px",
           fontSize: 11,
-          color: "var(--heri-terracotta)",
+          color: "var(--brick)",
         }}
       >
         <Trash2 className="h-3 w-3" strokeWidth={1.5} />

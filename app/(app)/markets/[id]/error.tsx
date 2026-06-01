@@ -28,14 +28,14 @@ export default function Error({
         >
           <AlertTriangle className="h-7 w-7" />
         </div>
-        <h2 className="text-xl font-bold" style={{ color: "var(--heri-ink)" }}>
+        <h2 className="text-xl font-bold" style={{ color: "var(--ink)" }}>
           خطأ في تحميل بيانات السهم
         </h2>
-        <p className="mt-1 text-sm" style={{ color: "var(--heri-ink-3)" }}>
+        <p className="mt-1 text-sm" style={{ color: "var(--ink-muted)" }}>
           تعذّر جلب آخر سعر أو تاريخ التداول. حاول مجدداً.
         </p>
         {error.digest ? (
-          <p className="mt-2 font-mono text-[10px]" style={{ color: "var(--heri-ink-3)" }}>
+          <p className="mt-2 font-mono text-[10px]" style={{ color: "var(--ink-muted)" }}>
             مرجع الخطأ: {error.digest}
           </p>
         ) : null}

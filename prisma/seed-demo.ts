@@ -749,6 +749,10 @@ async function main() {
   void tenants;
 }
 
-main()
-  .catch((e) => { console.error("SEED FAILED:", e); process.exit(1); })
-  .finally(() => prisma.$disconnect());
+export { main as seedDemo };
+
+if (process.argv[1]?.replace(/\\/g, "/").endsWith("prisma/seed-demo.ts")) {
+  main()
+    .catch((e) => { console.error("SEED FAILED:", e); process.exit(1); })
+    .finally(() => prisma.$disconnect());
+}

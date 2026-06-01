@@ -15,7 +15,7 @@ const ref = (prefix: string, n: number) => `${prefix}-${String(n).padStart(5, "0
 const rand = (min: number, max: number) => Math.round(min + Math.random() * (max - min));
 const randF = (min: number, max: number) => +(min + Math.random() * (max - min)).toFixed(2);
 
-async function main() {
+export async function seedOperator() {
   // -- Wipe (FK-safe order)
   await prisma.protocolClause.deleteMany();
   await prisma.userAchievement.deleteMany();
@@ -313,37 +313,75 @@ async function main() {
     "EuroSkills Conference", "Hala Saifi", "TechFest Sofia", "وفد جامعي بلغاري",
     "Investor Roadshow", "ABC Logistics",
   ];
-  const roomTypes = ["STANDARD", "DELUXE", "SUITE", "PRESIDENTIAL"];
+  const roomTypes = ["STANDARD", "DELUXE", "SUITE", "PRESIDENTIAL"] as const;
   const hotels = [arenaAmman, arenaDeadSea, arenaSofia, arenaVarna];
+  // CALCULATED, not random. Occupancy is the headline pitch number, so each
+  // hotel is filled to a believable target (66–78%) of its real room count by
+  // committed (CHECKED_IN now + CONFIRMED soon) bookings — both states count
+  // toward occupancy in hotels/page.tsx + dashboard. We also lay down ~150 days
+  // of COMPLETED history so revenue trends, ADR, and the booking heatmap look
+  // lived-in. Every booking's revenue derives from ADR × room-type × rooms ×
+  // nights, so Finance ties back to occupancy instead of floating free.
+  const pick = <T,>(arr: readonly T[]) => arr[Math.floor(Math.random() * arr.length)];
+  const roomWeighted = [1, 1, 1, 1, 2, 2, 2, 3, 4] as const; // mostly small parties
+  const adrFor = (room: string) =>
+    room === "PRESIDENTIAL" ? 3 : room === "SUITE" ? 2 : room === "DELUXE" ? 1.4 : 1;
   let bRef = 1;
-  for (let i = 0; i < 60; i++) {
-    const hotel = hotels[i % hotels.length];
-    const startOffset = -20 + Math.floor(Math.random() * 50);
-    const nights = 1 + Math.floor(Math.random() * 6);
-    const rooms = 1 + Math.floor(Math.random() * 4);
-    const room = roomTypes[Math.min(roomTypes.length - 1, Math.floor(Math.random() * (roomTypes.length + 1)))];
-    const adrMul = room === "PRESIDENTIAL" ? 3 : room === "SUITE" ? 2 : room === "DELUXE" ? 1.4 : 1;
-    const status =
-      startOffset + nights < 0 ? "COMPLETED" :
-      startOffset <= 0 ? "CHECKED_IN" :
-      Math.random() < 0.85 ? "CONFIRMED" : "CONFIRMED";
-    await prisma.booking.create({
-      data: {
+  const bookingRows: any[] = [];
+  for (const hotel of hotels) {
+    const targetOcc = randF(0.66, 0.78);
+    const occupiedTarget = Math.round(hotel.totalRooms * targetOcc);
+
+    // 1) Committed bookings filling the house to ~target occupancy now.
+    let filled = 0;
+    while (filled < occupiedTarget) {
+      const rooms = Math.min(pick(roomWeighted), occupiedTarget - filled);
+      filled += rooms;
+      const room = pick(roomTypes);
+      const nights = rand(1, 6);
+      const future = Math.random() < 0.28; // ~28% are upcoming arrivals
+      const startOffset = future ? rand(1, 18) : -rand(0, Math.max(1, nights - 1));
+      bookingRows.push({
         hotelId: hotel.id,
         tenantId: "hourani-hotels",
         reference: ref("BK", bRef++),
-        guestName: guests[i % guests.length],
+        guestName: pick(guests),
         roomType: room,
         rooms,
         guests: rooms * 2,
         checkIn: at(startOffset, 14),
         checkOut: at(startOffset + nights, 12),
-        revenue: Math.round(hotel.baselineADR * adrMul * rooms * nights),
-        status,
-        notes: i % 7 === 0 ? "VIP — تنبيه استقبال خاص." : null,
-      },
-    });
+        revenue: Math.round(hotel.baselineADR * adrFor(room) * rooms * nights),
+        status: future ? "CONFIRMED" : "CHECKED_IN",
+        notes: bRef % 9 === 0 ? "VIP — تنبيه استقبال خاص." : null,
+      });
+    }
+
+    // 2) ~150 days of completed history → revenue trend + heatmap depth.
+    const historyCount = rand(44, 60);
+    for (let h = 0; h < historyCount; h++) {
+      const rooms = pick(roomWeighted);
+      const room = pick(roomTypes);
+      const nights = rand(1, 6);
+      const seasonal = randF(0.85, 1.2); // gentle demand swing
+      const start = -rand(nights + 1, 150);
+      bookingRows.push({
+        hotelId: hotel.id,
+        tenantId: "hourani-hotels",
+        reference: ref("BK", bRef++),
+        guestName: pick(guests),
+        roomType: room,
+        rooms,
+        guests: rooms * 2,
+        checkIn: at(start, 14),
+        checkOut: at(start + nights, 12),
+        revenue: Math.round(hotel.baselineADR * adrFor(room) * rooms * nights * seasonal),
+        status: "COMPLETED",
+        notes: null,
+      });
+    }
   }
+  await prisma.booking.createMany({ data: bookingRows });
 
   // -------------------------------------------------------------------
   // DAIRY BATCHES
@@ -924,11 +962,15 @@ async function main() {
   console.log(`\nالشركات: ${allCompanies.length}, المستخدمون: ${users.length}, المشاريع المستقبلية: ${futureProjects.length}, الأسهم: ${stocks.length}\n`);
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+// Run only when invoked directly as a CLI script (npx tsx prisma/seed.ts).
+// When imported by the seed endpoint, the caller invokes seedOperator().
+if (process.argv[1]?.replace(/\\/g, "/").endsWith("prisma/seed.ts")) {
+  seedOperator()
+    .catch((e) => {
+      console.error(e);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}

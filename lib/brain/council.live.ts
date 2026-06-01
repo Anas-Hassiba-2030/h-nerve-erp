@@ -13,6 +13,7 @@ import { prisma } from "@/lib/db";
 import { causalGraph } from "./graph.prisma";
 import { SPECIALIST_AGENTS, runAgent, runModerator } from "./agents";
 import type { Council, CouncilSession, AgentVoice } from "./council";
+import { log } from "@/lib/logger";
 import { llmConfig } from "./llm";
 
 class LiveCouncil implements Council {
@@ -98,7 +99,7 @@ class LiveCouncil implements Council {
         },
       };
     } catch (err) {
-      console.error("[brain.council] convene failed:", err);
+      log.error("brain.council: convene failed", { err: String(err) });
       await prisma.councilSession.update({
         where: { id: session.id },
         data: { status: "FAILED", durationMs: Date.now() - t0 },

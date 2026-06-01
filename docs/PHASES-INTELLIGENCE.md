@@ -131,7 +131,9 @@ The intelligence substrate. Every later phase depends on this stack being real.
 
 ---
 
-## Phase 5 — The Planner
+## Phase 5 — The Planner ✅ (shipped)
+
+**Status (2026-06):** delivered. `lib/brain/planner.live.ts` generates ordered action plans from insights or council sessions (Claude + rich stub fallback for dairy/farm/hotel/finance domains). `app/(app)/plans/` shows plans with a Gantt step view; `app/(app)/plans/[id]/` is the detail page with commit/abandon/step actions. "Generate plan" buttons exist on both the Insights page and the Council session transcript. Phase 7 feedback events (PLAN_COMMITTED, PLAN_ABANDONED, PLAN_STEP_DONE) are recorded on every user action.
 
 **Pitch.** Insights become Plans. A Plan is an ordered set of actions with owners, deadlines, projected impact, and a rollback condition. Plans are first-class entities the system tracks to outcome.
 
@@ -178,7 +180,9 @@ The intelligence substrate. Every later phase depends on this stack being real.
 
 ---
 
-## Phase 7 — The Feedback Loop
+## Phase 7 — The Feedback Loop ✅ (shipped)
+
+**Status (2026-06):** delivered. `lib/brain/feedback.live.ts` records every user action as a `BrainFeedback` event (PLAN_COMMITTED, INSIGHT_DISMISSED, OUTCOME_RIGHT, etc.). `learnNow()` aggregates the log into human-readable `BrainPattern` rows via Claude. `app/(app)/brain/learning/` shows the patterns with enable/disable/forget/delete controls, a learning curve chart, and (new) a raw feedback event log. Structured logging (`lib/logger.ts`) now wired into llm.ts, council.live.ts, and feedback.live.ts so all brain events appear in Railway's log aggregator.
 
 **Pitch.** Every dismiss, override, and abandonment becomes training signal. The brain learns the org's actual decision style.
 

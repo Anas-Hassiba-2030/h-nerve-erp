@@ -10,6 +10,7 @@
 
 import { prisma } from "@/lib/db";
 import { callLlm, extractJson, type LlmRequest } from "./llm";
+import { log } from "@/lib/logger";
 import type {
   FeedbackLoop,
   FeedbackKind,
@@ -49,7 +50,7 @@ export async function recordFeedback(input: {
       },
     });
   } catch (e) {
-    console.error("[brain.feedback] record failed:", e);
+    log.error("brain.feedback: record failed", { err: String(e) });
   }
 }
 

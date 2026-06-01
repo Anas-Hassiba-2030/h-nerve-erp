@@ -37,12 +37,16 @@ export default async function BrainLearningPage() {
   const locale = getLocale();
   const ar = locale === "ar";
 
-  const [patterns, totalFeedback, monthDigest] = await Promise.all([
+  const [patterns, totalFeedback, monthDigest, recentEvents] = await Promise.all([
     prisma.brainPattern.findMany({
       orderBy: [{ status: "asc" }, { confidence: "desc" }],
     }),
     prisma.brainFeedback.count(),
     digest("month"),
+    prisma.brainFeedback.findMany({
+      orderBy: { ts: "desc" },
+      take: 16,
+    }),
   ]);
 
   const enabled = patterns.filter((p) => p.status === "ENABLED").length;
@@ -134,6 +138,23 @@ export default async function BrainLearningPage() {
           )}
         </div>
 
+        {/* Recent feedback events */}
+        {recentEvents.length > 0 ? (
+          <div className="br-panel">
+            <h2>{ar ? "سجل أحداث التغذية الراجعة" : "Feedback event log"}</h2>
+            <div className="sub">
+              {ar
+                ? "كل حدث يُعدَّل الدماغ على أساسه — من التزام بخطة إلى تجاهل إشارة."
+                : "Every event the brain is tuned on — from a plan commit to a dismissed insight."}
+            </div>
+            <div>
+              {recentEvents.map((e) => (
+                <FeedbackEventRow key={e.id} event={e} ar={ar} />
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         {/* Voluntary forgetting */}
         {unlearned > 0 ? (
           <div className="br-panel">
@@ -222,6 +243,93 @@ function PatternRow({ pattern, ar }: { pattern: any; ar: boolean }) {
     </div>
   );
 }
+
+// ─────────────────────────────────────────────────────────────────────
+
+const KIND_GLYPH: Record<string, string> = {
+  PLAN_COMMITTED:           "✓",
+  PLAN_ABANDONED:           "✗",
+  PLAN_COMPLETED:           "★",
+  PLAN_STEP_DONE:           "·",
+  PLAN_STEP_BLOCKED:        "⊘",
+  INSIGHT_HELPFUL:          "+",
+  INSIGHT_DISMISSED:        "−",
+  INSIGHT_RESOLVED:         "✓",
+  RECOMMENDATION_OVERRIDDEN:"↩",
+  OUTCOME_RIGHT:            "▲",
+  OUTCOME_WRONG:            "▼",
+  MEMORY_USEFUL:            "⬡",
+  MEMORY_IRRELEVANT:        "⬡",
+};
+
+const KIND_COLOR: Record<string, string> = {
+  PLAN_COMMITTED:           "var(--sage)",
+  PLAN_COMPLETED:           "var(--sage)",
+  PLAN_STEP_DONE:           "var(--sage)",
+  INSIGHT_HELPFUL:          "var(--sage)",
+  INSIGHT_RESOLVED:         "var(--sage)",
+  OUTCOME_RIGHT:            "var(--sage)",
+  PLAN_ABANDONED:           "#cf9384",
+  PLAN_STEP_BLOCKED:        "#cf9384",
+  INSIGHT_DISMISSED:        "#cf9384",
+  OUTCOME_WRONG:            "#cf9384",
+  RECOMMENDATION_OVERRIDDEN:"var(--gold-soft)",
+  MEMORY_USEFUL:            "var(--gold-soft)",
+  MEMORY_IRRELEVANT:        "var(--mist)",
+};
+
+function FeedbackEventRow({ event, ar }: { event: any; ar: boolean }) {
+  const ageMs = Date.now() - new Date(event.ts).getTime();
+  const ageMins = Math.round(ageMs / 60000);
+  const ageHrs = Math.round(ageMs / 3600000);
+  const ageDays = Math.round(ageMs / 86400000);
+  const ageLabel =
+    ageMins < 60
+      ? ar ? `منذ ${ageMins} دقيقة` : `${ageMins}m ago`
+      : ageHrs < 24
+      ? ar ? `منذ ${ageHrs} ساعة` : `${ageHrs}h ago`
+      : ar ? `منذ ${ageDays} يوم` : `${ageDays}d ago`;
+
+  const glyph = KIND_GLYPH[event.kind] ?? "·";
+  const color = KIND_COLOR[event.kind] ?? "var(--mist)";
+  const module = event.module ? MODULE_LABEL[event.module]?.[ar ? "ar" : "en"] ?? event.module : null;
+  const kindLabel = event.kind.toLowerCase().replace(/_/g, " ");
+
+  return (
+    <div
+      className="br-row"
+      style={{ gap: 12 }}
+    >
+      <span
+        style={{
+          fontFamily: "monospace",
+          fontSize: 13,
+          color,
+          minWidth: 16,
+          textAlign: "center",
+          flexShrink: 0,
+        }}
+        aria-hidden
+      >
+        {glyph}
+      </span>
+      <div className="rt" style={{ flex: 1, minWidth: 0 }}>
+        <div className="tt" style={{ fontSize: 12.5, fontWeight: 600, color: "var(--cream)" }}>
+          {kindLabel}
+          {module ? <span style={{ fontWeight: 400, opacity: 0.65, marginInlineStart: 8 }}>{module}</span> : null}
+        </div>
+        {event.category ? (
+          <div className="ts" style={{ fontSize: 11 }}>{event.category}</div>
+        ) : null}
+      </div>
+      <span style={{ fontSize: 11, color: "var(--mist)", opacity: 0.55, flexShrink: 0, whiteSpace: "nowrap" }}>
+        {ageLabel}
+      </span>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────
 
 function EmptyState({ ar }: { ar: boolean }) {
   return (

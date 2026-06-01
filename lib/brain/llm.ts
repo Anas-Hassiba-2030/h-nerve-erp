@@ -7,6 +7,8 @@
 //
 // Phase 3 of docs/PHASES-INTELLIGENCE.md.
 
+import { log } from "@/lib/logger";
+
 const DEFAULT_MODEL = "claude-sonnet-4-6";
 const ANTHROPIC_VERSION = "2023-06-01";
 
@@ -68,9 +70,10 @@ export async function callLlm(req: LlmRequest, stub: StubGenerator): Promise<Llm
   if (cap > 0 && __llmCallCount >= cap) {
     if (!__llmCapLogged) {
       __llmCapLogged = true;
-      console.warn(
-        `[brain.llm] cost cap reached (${cap} real calls) — serving stub to protect the API budget. Raise BRAIN_MAX_LLM_CALLS to allow more.`,
-      );
+      log.warn("brain.llm: cost cap reached — serving stub", {
+        cap,
+        hint: "Raise BRAIN_MAX_LLM_CALLS to allow more real calls",
+      });
     }
     return { text: stub(req), isStub: true, ms: Date.now() - t0 };
   }
@@ -98,7 +101,7 @@ export async function callLlm(req: LlmRequest, stub: StubGenerator): Promise<Llm
 
     if (!res.ok) {
       const errorText = await res.text();
-      console.error("[brain.llm] Anthropic API error:", res.status, errorText);
+      log.error("brain.llm: Anthropic API error", { status: res.status, body: errorText.slice(0, 400) });
       return {
         text: stub(req),
         isStub: true,
@@ -123,7 +126,7 @@ export async function callLlm(req: LlmRequest, stub: StubGenerator): Promise<Llm
       ms: Date.now() - t0,
     };
   } catch (err) {
-    console.error("[brain.llm] call failed:", err);
+    log.error("brain.llm: call failed", { err: String(err) });
     return {
       text: stub(req),
       isStub: true,

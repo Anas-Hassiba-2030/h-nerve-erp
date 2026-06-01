@@ -27,6 +27,7 @@ import { permsEnforced, effectiveCanAccess } from "@/lib/permissions";
 import { LivingAtmosphere } from "@/components/orrery/LivingAtmosphere";
 import { OrbitReturn } from "@/components/orrery/OrbitReturn";
 import { DiveReveal } from "@/components/orrery/DiveReveal";
+import { ConstellationRail } from "@/components/orrery/ConstellationRail";
 import "./living.css";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -37,13 +38,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Stale session (e.g. DB reset since login). Force a fresh sign-in.
   if (!dbUser) redirect("/logout");
 
+  // Read current pathname for permission checks and ConstellationRail.
+  const currentPath = headers().get("x-pathname") ?? "";
+
   // Phase P5 follow-up — layout-level enforcement layered over the
   // interactive RolePermission editor at /admin/permissions-preview.
   // Middleware is edge-runtime and can't read Prisma; this is where the
   // override check lives. Only fires when H_NERVE_PERMS_ENFORCED=true so
   // the dev/staging path stays unchanged.
   if (permsEnforced() && session.role !== "ADMIN") {
-    const pathname = headers().get("x-pathname") ?? "";
+    const pathname = currentPath;
     const allowed = await effectiveCanAccess(
       session.role,
       pathname,
@@ -142,6 +146,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <LivingAtmosphere />
       <OrbitReturn locale={locale} />
       <div className="flex min-h-screen flex-1 flex-col nerve-bg">
+        <ConstellationRail currentPath={currentPath} locale={locale} />
         <main className="flex-1"><DiveReveal>{children}</DiveReveal></main>
         <Footer />
       </div>

@@ -22,6 +22,7 @@ import { getLocale } from "@/lib/i18n.server";
 import { formatMoney, formatNumber, formatDate } from "@/lib/utils";
 import { computeCompanyHealth } from "@/lib/workspace/health";
 import { COMPANY_CODE_TO_TENANT_SLUG } from "@/lib/tenancy";
+import { DaylightShell } from "@/components/orrery/daylight";
 import "../daylight.css";
 import "./workspace.css";
 
@@ -187,7 +188,7 @@ export default async function WorkspaceCommandPage() {
   ];
 
   return (
-    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
       {/* ── section header ── */}
       <header className="sec-head reveal">
         <div>
@@ -350,6 +351,6 @@ export default async function WorkspaceCommandPage() {
           )}
         </div>
       </div>
-    </div>
+    </DaylightShell>
   );
 }

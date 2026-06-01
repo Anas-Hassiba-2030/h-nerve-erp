@@ -15,6 +15,7 @@ import { prisma } from "@/lib/db";
 import { formatMoney, formatNumber } from "@/lib/utils";
 import { setProgramStage } from "./actions";
 import { AhliyyaTabs, type AhliyyaProgram } from "./AhliyyaTabs";
+import { DaylightShell } from "@/components/orrery/daylight";
 import "../daylight.css";
 import "./ahliyya.css";
 
@@ -154,7 +155,7 @@ export default async function EducationPage() {
   );
 
   return (
-    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
       {/* ── section header ── */}
       <header className="sec-head reveal">
         <div>
@@ -177,6 +178,6 @@ export default async function EducationPage() {
 
       {/* ── three-tab work surface: overview · programs · teams ── */}
       <AhliyyaTabs ar={ar} programs={tabPrograms} overview={overview} setProgramStage={setProgramStage} />
-    </div>
+    </DaylightShell>
   );
 }

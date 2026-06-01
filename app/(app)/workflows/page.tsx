@@ -13,6 +13,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { DaylightShell } from "@/components/orrery/daylight";
 import "../daylight.css";
 import "./workflows.css";
 import { getLocale } from "@/lib/i18n.server";
@@ -42,7 +43,7 @@ export default async function WorkflowsPage() {
   const totalRuns = workflows.reduce((a, w) => a + w._count.runs, 0);
 
   return (
-    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
       <div className="br-wrap">
         {/* ── ribbon ── */}
         <div className="br-ribbon">
@@ -178,6 +179,6 @@ export default async function WorkflowsPage() {
           <span className="step on">▶ {ar ? "إجراء" : "Action"}</span>
         </div>
       </div>
-    </div>
+    </DaylightShell>
   );
 }

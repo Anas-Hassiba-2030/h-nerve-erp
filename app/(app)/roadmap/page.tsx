@@ -3,6 +3,7 @@
 // 3-column grid of .panel cards (Now / Next / Later), each with a
 // .panel-title and priority rows recoloured to the ivory daylight register.
 
+import { DaylightShell } from "@/components/orrery/daylight";
 import { getLocale } from "@/lib/i18n.server";
 import { ROADMAP, type RoadmapStatus } from "@/lib/roadmapData";
 import "../daylight.css";
@@ -38,7 +39,7 @@ export default function RoadmapPage() {
   const ar = getLocale() === "ar";
 
   return (
-    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
       <div className="wrap">
         <div className="sec-head reveal">
           <div>
@@ -143,6 +144,6 @@ export default function RoadmapPage() {
           })}
         </div>
       </div>
-    </div>
+    </DaylightShell>
   );
 }

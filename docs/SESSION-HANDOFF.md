@@ -1,6 +1,6 @@
 # Session handoff — `feat/finals-polish`
 
-One PR, 12 commits, fully verified. **Merge:**
+One PR, fully verified, merges cleanly into `main`. **Merge:**
 https://github.com/Anas-Hassiba-2030/h-nerve-erp/compare/main...feat/finals-polish?expand=1
 
 This was an autonomous "finish it while I sleep" session. Below is everything that

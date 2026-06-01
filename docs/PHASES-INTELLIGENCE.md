@@ -495,7 +495,157 @@ These hold across every phase. Violations are bugs.
 
 ---
 
-# Demo order for selling H-Nerve
+# WAVE E — THE GENESIS
+
+The first-touch experience. Whatever a new tenant sees before they have data of their own.
+
+## Phase 21 — The Genesis Seed (onboarding & sample-data wizard)
+
+**Pitch.** Today's `npm run db:seed` is a CLI footgun: it requires a terminal, can't be re-run from the product, and gives ADMIN users no preview of what they're about to instantiate. Phase 21 promotes seeding to a first-class onboarding surface — a bilingual wizard that shows the *shape* of the data H-Nerve is about to create, lets the operator pick which sectors to seed, and can be safely re-run (idempotent) from the product itself.
+
+**Wow moment.** A new ADMIN signs in for the first time. Instead of an empty `/orrery`, they land on **The Genesis** — a black-emerald canvas with three pulsing constellations (Hospitality · Dairy · Agriculture · Education). Each constellation expands to show the entities about to be created (companies, hotels, dairy lines, programs) as a living diagram. The operator confirms; over the next 8 seconds the constellations "drop" one by one into the database with a soft thud animation, and the orrery hub fades up around them, already populated.
+
+**Files.**
+- `prisma/seed.ts` — existing seeder, refactored into composable `seedSector(sector)` units.
+- `lib/genesis/recipes.ts` — declarative recipes per sector (industry pack hooks).
+- `app/(admin)/admin/genesis/page.tsx` — the wizard UI.
+- `app/(admin)/admin/genesis/actions.ts` — `runGenesis()` server action, ADMIN-only.
+- `components/genesis/Constellation.tsx` — the animated entity preview.
+
+**Aesthetic.** Sleek Operator (DESIGN-SKILL §1.F) — this is admin territory, cyan-on-near-black. The "thud" landing animation is a one-frame brightness spike + a 200ms scale-from-1.04 settle, no bounce.
+
+**Signature animation.** Each seeded entity flies from its constellation into a slot in the underlying database table view, leaving a trailing emerald comet. When the seeder finishes, the orrery hub fades up over the empty canvas with `ease-out-expo` over 900ms.
+
+**Effort.** 3-4 days.
+**Depends on.** Phase 11 (white-label tenants) — Genesis writes into a tenant scope.
+
+**Demo script.** "Watch what happens when a new tenant signs up. They don't see a sad empty screen. They watch their business get assembled in front of them, sector by sector. By the time they sit down, the system already knows what they own."
+
+**Why it matters.** Every demo, every test reset, every new tenant goes through this. Today that flow is `npm run db:reset && npm run db:seed`. Tomorrow it is a UI moment that sells the platform on its own.
+
+**Note.** Genesis is **idempotent and reversible**. Re-running it does not duplicate; it diffs against the live tenant and only writes missing entities. A "rollback last genesis" action exists for the same session. No accidental data loss.
+
+---
+
+## Phase 22 — Brain Trustworthiness Layer (ML + Hallucination Guard)
+
+**Pitch.** The brain's Claude API calls are fast but opaque. Phase 22 wraps every brain output in a verification layer: fact-check against the tenant's own database, confidence scoring, and a lightweight on-device ML classifier that flags suspicious claims before they reach the operator.
+
+**Why this matters.** The user is right: any LLM can hallucinate. The solution is not blind trust — it is a **verification contract**. Every brain claim must be traceable to a database row, a causal edge, or a known pattern. If it cannot be traced, it is surfaced with a low-confidence badge and a "show evidence" link, not silently accepted.
+
+**Architecture.**
+1. **Ground-truth verifier** (`lib/brain/verifier.ts`) — after every narrator/council/planner response, a structured pass checks each factual claim against Prisma queries. Claims that match get a `verified: true` flag and a source citation. Claims that do not are downgraded to `confidence: "low"` and shown with a ⚠ indicator.
+2. **Confidence scorer** (`lib/brain/confidence.ts`) — heuristic scoring based on: how many data points support the claim, how recent the underlying data is, and whether the causal graph contains a path that supports the direction of the claim.
+3. **Fallback cache** (`lib/brain/cache/`) — every verified answer is cached per `(orgId, dataDigest, question)`. If the Claude API is unavailable, the brain serves the most recent verified cached answer with a "cached from [date]" label — never silent failure.
+4. **Fine-tuning pipeline (Phase 22b)** — after 6 months of feedback data (Phase 7), export the `BrainFeedback` table and fine-tune a small domain-specific classifier (via Anthropic's fine-tuning API or open-source BERT). This classifier handles simple routing questions without hitting the Claude API at all — reducing hallucination risk AND cost AND latency.
+
+**Files.**
+- `lib/brain/verifier.ts` — ground-truth check post-processing
+- `lib/brain/confidence.ts` — confidence scoring
+- `lib/brain/cache/narrator.ts` — already stubbed; this phase fully implements it
+- `lib/brain/feedback.ts` — Phase 7 feedback loop feeds Phase 22b fine-tuning
+- `components/brain/VerifiedBadge.tsx` — ✓ / ⚠ indicator on brain outputs
+- `app/(app)/brain/trust/page.tsx` — Trust dashboard: hallucination rate, confidence distribution, cache hit rate
+
+**Aesthetic.** Industrial Precision for the trust dashboard (metrics grid, terminal-style evidence traces). Heritage Modern for the inline ✓/⚠ badge on narrator outputs.
+
+**Signature animation.** When a verified claim appears, the ✓ badge draws in from the citation — a hairline thread animates from the source number to the badge over 300ms. Unverified claims pulse amber once on first render, then settle to a static ⚠.
+
+**Effort.** 5-7 days (verifier + confidence scorer + cache + badge UI). Phase 22b (fine-tuning) is a separate future engagement.
+**Depends on.** Phase 4 (narrator output to verify), Phase 7 (feedback loop for fine-tuning).
+
+**Demo script.** "Every claim the brain makes — I can show you the database row that proves it. If it can't prove it, it tells you. That is the difference between a magic 8-ball and a brain you can trust in front of your board."
+
+---
+
+## Phase 23 — Database Migration + Infrastructure Hardening
+
+**Pitch.** H-Nerve ships on SQLite for development speed. Phase 23 migrates to PostgreSQL, deploys on Railway's managed database service, and adds the reliability layer (connection pooling, read replicas, automated backups) needed to handle real business data.
+
+**Why this matters.** SQLite is a file — it cannot handle concurrent writes from multiple users, it does not survive a server restart cleanly on Railway, and it cannot scale beyond a single machine. When the Hourani Group connects their live data, the database must be production-grade from day one.
+
+**The migration is one configuration change and a re-seed.** Prisma is already database-agnostic; changing `provider = "sqlite"` to `provider = "postgresql"` in `prisma/schema.prisma` and providing a `DATABASE_URL` is the entire switch. Railway provisions a PostgreSQL instance in 30 seconds.
+
+**Steps (in order).**
+1. Provision Railway PostgreSQL database — copy the `DATABASE_URL` to Railway environment variables.
+2. Change `prisma/schema.prisma` datasource from `sqlite` to `postgresql`.
+3. Run `npx prisma migrate dev --name init` to generate the first migration.
+4. Run `npm run db:seed` against the new database.
+5. Add `DATABASE_URL` to Railway's production environment variables.
+6. Re-deploy — Railway auto-runs `npm run build` which calls `prisma generate + db push`.
+7. Verify all 14 main routes load data correctly.
+
+**Infrastructure additions.**
+- **Connection pooling** — Prisma Accelerate (or PgBouncer) to prevent connection exhaustion under concurrent traffic.
+- **Automated backups** — Railway's daily backup + point-in-time recovery enabled.
+- **Health check endpoint** — `app/api/health/route.ts` returns `{ ok: true, db: "connected", ts: ISO }` used by Railway's uptime monitor.
+
+**Files.**
+- `prisma/schema.prisma` — `provider` change
+- `prisma/migrations/` — generated by `prisma migrate dev`
+- `app/api/health/route.ts` — new health check
+- `lib/db.ts` — no change needed (already exports shared Prisma client)
+
+**Effort.** 1-2 days (migration is mechanical; the time is in testing all routes).
+**Depends on.** Nothing — can run in parallel with any phase.
+
+**Note on lag.** PostgreSQL on Railway is co-located with the app (same Railway project, same region). Queries are <5ms. The concern about lag comes from SQLite being a local file — PostgreSQL over a TCP connection with connection pooling is actually faster under real traffic.
+
+---
+
+## Phase 24 — Railway Infrastructure Maximization
+
+**Pitch.** Make full use of the Railway subscription already in place: custom domain, environment management, automated deployments, monitoring, and the PostgreSQL service from Phase 23.
+
+**What Railway gives us that we are not yet using.**
+
+| Feature | Current state | With Phase 24 |
+|---|---|---|
+| Custom domain | railway.app subdomain | hnerve.jo or hourani-erp.com |
+| Environment variables | Manually set | Synced from a `.env.railway` template, never committed to git |
+| Deployment | Auto on `main` push | Auto on `main`; staging on `feat/*` branches; preview URLs per PR |
+| Logging | Raw stdout | Structured JSON logs parsed by Railway's log explorer |
+| PostgreSQL | Not yet provisioned | Provisioned + pooled + backed up (Phase 23) |
+| Health monitoring | None | `/api/health` polled every 60s; alert on failure |
+| Memory/CPU | Unconstrained | Resource limits set; auto-restart on OOM |
+
+**Files.**
+- `railway.toml` — health check path, restart policy, build command
+- `.env.railway.template` — non-secret env var template committed to git
+- `app/api/health/route.ts` — shares with Phase 23
+
+**Effort.** 1 day.
+**Depends on.** Phase 23 (PostgreSQL).
+
+---
+
+## Phase 25 — GitHub Workflow Documentation (Team Onboarding)
+
+**Pitch.** Every change to H-Nerve goes through GitHub. Phase 25 produces a permanent, bilingual guide (Arabic + English) that any new team member or executive can read to understand the full development workflow — commits, branches, pull requests, conflicts, merging, and Railway deployments.
+
+**Why it exists.** The team currently does not understand what PRs, branches, and conflicts are. This is not a technical failure — it is a documentation failure. Phase 25 fixes it permanently.
+
+**What a conflict is (brief version for the doc):** Two people change the same file at the same time. Git cannot decide which version wins, so it stops and asks you to choose. It marks the collision with `<<<<<<`, `=======`, and `>>>>>>>` markers, and a human (or an AI) resolves it by keeping the right version of each line. In H-Nerve, conflicts happen when a PR is merged to `main` before a second PR's branch has "fetched" those changes — the second branch is now out of date.
+
+**The fix in every case:** save the new changes as a patch → reset to `main` → re-apply the patch → force-push → the conflict disappears. This is what the assistant does automatically.
+
+**Contents of the guide (`docs/GITHUB-WORKFLOW.md`).**
+1. The mental model — main branch, feature branches, PRs as proposals
+2. What a commit is (a named snapshot of changes)
+3. What a branch is (a safe workspace that doesn't affect main)
+4. What a pull request is (a request to merge your branch into main)
+5. What a conflict is and why it happens
+6. How to read a diff (+ lines = added, − lines = removed)
+7. How Railway connects to GitHub (auto-deploy on merge to main)
+8. The H-Nerve naming convention for branches and PRs
+
+**Files.**
+- `docs/GITHUB-WORKFLOW.md` — bilingual guide, diagrams
+
+**Effort.** 1 day (writing + diagrams).
+**Depends on.** Nothing.
+
+---
 
 If we ever do a 30-minute live demo, this is the script:
 
@@ -522,5 +672,6 @@ Five minutes per beat. They will sign.
 | Brain architecture | `lib/brain/README.md` |
 | Project conventions | `CLAUDE.md` |
 | The seeded demo data | `prisma/seed.ts` |
+| The Genesis onboarding wave | `docs/PHASES-INTELLIGENCE.md` § Phase 21 |
 
 When asking a future Claude to work on this, name the file. "Improve `lib/brain/Brain.ts`." "Implement Phase 3 from `docs/PHASES-INTELLIGENCE.md`." "Apply `docs/DESIGN-SKILL.md` Heritage Modern to `/finance`." Specificity is the whole game.

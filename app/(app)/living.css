@@ -159,11 +159,17 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
   .hn-reveal-root.hn-dive, .hn-reveal-root.hn-pagein{ animation:none; }
 }
 
-/* ── daylight top controls: Orbit pill + language toggle together ── */
-/* Sits below the ConstellationRail (≈56px) so it never covers rail items */
+/* ── daylight top controls: Orbit pill + mini-orrery + language toggle ──
+   Pinned to the bottom-end corner (right in LTR, left in RTL) so it cannot
+   overlap page headers, hero sections, or the ConstellationRail.
+   The FAB rail (Ask the Brain / + / ⏱) lives at bottom-start, so they sit
+   on opposite corners and never collide. */
 .dl-topctl{
-  position:fixed; top:66px; inset-inline-start:16px; z-index:70;
+  position:fixed; bottom:22px; inset-inline-end:22px; z-index:70;
   display:inline-flex; align-items:center; gap:10px;
+}
+@media (max-width:640px){
+  .dl-topctl{ bottom:14px; inset-inline-end:12px; gap:6px; }
 }
 .dl-topctl .orbit-return{ position:static; } /* it's positioned by the wrapper now */
 .dl-langwrap{
@@ -322,4 +328,156 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
   --footer-border:rgba(194,163,90,.18);
   --footer-text:#CDE0D6;
   --footer-muted:rgba(205,224,214,.55);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Unified FAB rail — port of Claude Design #al-fabs
+   (docs/design/system/app-layer.{css,js}). Vertical column at the
+   bottom-start corner: Ask the Brain (emerald) / Quick Add (gold) /
+   Time Machine (rose). Each button dispatches a CustomEvent that
+   the existing Conversational / QuickAddFAB / TimeScrubber components
+   already listen for — single source of truth for the panel UI.
+   ════════════════════════════════════════════════════════════════ */
+.hn-fab-rail{
+  position:fixed; bottom:22px; inset-inline-start:22px; z-index:80;
+  display:flex; flex-direction:column; gap:12px;
+  pointer-events:none;
+}
+.hn-fab-rail > .hn-fab{ pointer-events:auto; }
+
+.hn-fab{
+  position:relative;
+  width:54px; height:54px; border-radius:50%;
+  border:0; cursor:pointer;
+  display:grid; place-items:center;
+  font-size:22px; font-weight:700; line-height:1;
+  background:radial-gradient(circle at 38% 35%,#DCC38A,#C2A35A 60%,#8a6c2e);
+  color:#241b06;
+  box-shadow:0 6px 18px rgba(13,31,26,.28), inset 0 1px 0 rgba(255,255,255,.35);
+  transition:transform .18s cubic-bezier(.25,1,.5,1), box-shadow .18s;
+}
+.hn-fab:hover{ transform:scale(1.08) translateY(-2px); box-shadow:0 10px 28px rgba(13,31,26,.36), inset 0 1px 0 rgba(255,255,255,.45); }
+.hn-fab:focus-visible{ outline:2px solid #C2A35A; outline-offset:3px; }
+.hn-fab--brain{
+  background:radial-gradient(circle at 38% 35%,#2E6B57,#1F4D3F 60%,#0D1F1A);
+  color:#DCC38A; font-size:24px;
+}
+.hn-fab--time{
+  background:linear-gradient(135deg,#cf9d9d,#A86A5C);
+  color:#fff;
+}
+.hn-fab__glyph{ display:inline-block; transform:translateY(-1px); }
+.hn-fab__lbl{
+  position:absolute; inset-inline-start:64px; white-space:nowrap;
+  background:rgba(13,31,26,.92); color:#fff;
+  font-family:var(--ui,"Cairo",sans-serif); font-size:12px; font-weight:700;
+  padding:6px 12px; border-radius:8px;
+  opacity:0; pointer-events:none; transition:opacity .2s;
+}
+.hn-fab:hover .hn-fab__lbl,
+.hn-fab:focus-visible .hn-fab__lbl{ opacity:1; }
+
+/* Hide the legacy standalone triggers — the FAB rail replaces them.
+   The panels themselves stay; the buttons that opened them are now in
+   the rail. Keyboard shortcuts (⌘N, ⌘J) keep working. */
+[data-qaf-legacy-trigger],
+[data-tm-legacy-pill]{
+  position:fixed !important;
+  width:1px !important; height:1px !important;
+  padding:0 !important; margin:-1px !important;
+  overflow:hidden !important; clip:rect(0 0 0 0) !important;
+  white-space:nowrap !important; border:0 !important;
+  pointer-events:none !important; opacity:0 !important;
+}
+/* The TimeScrubber wrapper IS the pill; when it expands (is-open) we let
+   the panel render normally so the date scrubber UI is visible. */
+[data-tm-legacy-pill].is-open{
+  position:fixed !important;
+  inset-inline-start:22px !important; bottom:90px !important;
+  width:auto !important; height:auto !important;
+  padding:initial !important; margin:initial !important;
+  overflow:visible !important; clip:auto !important;
+  white-space:normal !important;
+  pointer-events:auto !important; opacity:1 !important;
+}
+/* Same trick for the QuickAddFAB wrapper — when its panel is open
+   (the .anim-fade-up child exists), let the wrapper paint. */
+.fixed.bottom-6:has(.anim-fade-up){
+  position:fixed !important;
+  inset-inline-start:22px !important; bottom:90px !important;
+  width:auto !important; height:auto !important;
+  padding:initial !important; margin:initial !important;
+  overflow:visible !important; clip:auto !important;
+  white-space:normal !important;
+  pointer-events:auto !important; opacity:1 !important;
+}
+
+@media (max-width:640px){
+  .hn-fab-rail{ bottom:14px; inset-inline-start:12px; gap:8px; }
+  .hn-fab{ width:46px; height:46px; font-size:19px; }
+  .hn-fab--brain{ font-size:21px; }
+}
+@media (prefers-reduced-motion:reduce){
+  .hn-fab{ transition:none; }
+  .hn-fab:hover{ transform:none; }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Morning Briefing overlay — port of orrery.html maybeBriefing()
+   ════════════════════════════════════════════════════════════════ */
+.mb-overlay{
+  position:fixed; inset:0; z-index:200;
+  display:grid; place-items:center;
+  background:radial-gradient(circle at 50% 38%,rgba(13,31,26,.86),rgba(8,18,14,.94));
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  opacity:0; transition:opacity .35s ease;
+}
+.mb-overlay.show{ opacity:1; }
+.mb-overlay .mb-card{
+  width:min(640px,92vw);
+  background:linear-gradient(160deg,rgba(20,46,38,.96),rgba(8,18,14,.97));
+  border:1px solid rgba(194,163,90,.32);
+  border-radius:20px;
+  padding:28px 32px 24px;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.55), 0 0 0 1px rgba(220,195,138,.06);
+  transform:translateY(12px) scale(.98); transition:transform .45s cubic-bezier(.22,1,.36,1);
+}
+.mb-overlay.show .mb-card{ transform:none; }
+.mb-eyebrow{
+  font-family:var(--ui,"Cairo",sans-serif); font-size:11.5px; font-weight:700;
+  letter-spacing:.14em; color:#DCC38A; text-transform:uppercase;
+}
+.mb-greet{
+  font-family:var(--display,"Cormorant Garamond","Cairo",serif);
+  font-size:clamp(30px,4vw,42px); font-weight:600; color:#fff;
+  line-height:1.05; margin:12px 0 16px;
+}
+.mb-narr{
+  font-family:var(--ui,"Cairo",sans-serif); font-size:15px; line-height:1.65;
+  color:#CDE0D6; margin:0 0 18px;
+}
+.mb-narr b{ color:#fff; font-weight:700; }
+.mb-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px; }
+.mb-chip{
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:12px; font-weight:700;
+  padding:6px 12px; border-radius:999px;
+  background:rgba(13,31,26,.5); border:1px solid rgba(194,163,90,.22);
+  color:#CDE0D6;
+}
+.mb-chip.up{ color:#9BD9B7; border-color:rgba(95,179,135,.4); }
+.mb-chip.down{ color:#E7B6B6; border-color:rgba(201,107,107,.4); }
+.mb-actions{ display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; }
+.mb-btn{
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:13px; font-weight:700; padding:10px 18px; border-radius:999px;
+  cursor:pointer; text-decoration:none; border:1px solid transparent;
+  transition:transform .15s, box-shadow .15s, border-color .15s, background .15s;
+}
+.mb-btn.ghost{ background:transparent; color:#DCC38A; border-color:rgba(220,195,138,.4); }
+.mb-btn.ghost:hover{ border-color:#DCC38A; background:rgba(220,195,138,.08); }
+.mb-btn.primary{ background:linear-gradient(135deg,#DCC38A,#C2A35A); color:#241b06; }
+.mb-btn.primary:hover{ box-shadow:0 6px 16px rgba(194,163,90,.4); transform:translateY(-1px); }
+@media (prefers-reduced-motion:reduce){
+  .mb-overlay, .mb-overlay .mb-card{ transition:none; }
 }

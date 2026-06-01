@@ -28,6 +28,8 @@ import { LivingAtmosphere } from "@/components/orrery/LivingAtmosphere";
 import { OrbitReturn } from "@/components/orrery/OrbitReturn";
 import { DiveReveal } from "@/components/orrery/DiveReveal";
 import { ConstellationRail } from "@/components/orrery/ConstellationRail";
+import { FabRail } from "@/components/orrery/FabRail";
+import { MorningBrief } from "@/components/MorningBrief";
 import "./living.css";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -142,6 +144,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           no page can ever show the old chrome again. */}
       <LivingAtmosphere />
       <OrbitReturn locale={locale} />
+      <FabRail locale={locale} />
+      <MorningBrief locale={locale} userName={dbUser.name ?? (locale === "ar" ? "أ. الحوراني" : "A. Al-Hourani")} />
       <div className="flex min-h-screen flex-1 flex-col nerve-bg">
         <ConstellationRail locale={locale} />
         <main className="flex-1"><DiveReveal>{children}</DiveReveal></main>

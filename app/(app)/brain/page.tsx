@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   Network, Zap, Users, Heart, GraduationCap, Globe2, Trophy, ArrowRight,
-  Sparkles, GitBranch, ScrollText, Activity, TrendingUp,
+  Sparkles, GitBranch, Activity, TrendingUp,
 } from "lucide-react";
 import { BrainStatusBadge } from "@/components/BrainStatusBadge";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
@@ -35,7 +35,6 @@ export default async function BrainPage() {
     { href: "/brain/graph", icon: Network, ar: "الرسم السببي", en: "Causal graph", descAr: "شبكة تأثيرات الكيانات — كل قرار له ثقله وأثره.", descEn: "Entity impact network — every decision carries weight and downstream effect.", status: "live" },
     { href: "/brain/scenarios", icon: Zap, ar: "محاكي القرارات", en: "What-if simulator", descAr: "أدخل تغييراً وشاهد موجة الأثر تنتشر في ثوانٍ.", descEn: "Inject a change and watch the impact wave propagate in real time.", status: "live" },
     { href: "/brain/council", icon: Users, ar: "مجلس الخبراء", en: "Expert council", descAr: "خمسة وكلاء يناقشون — المشرف يُصنّع التوصية.", descEn: "Five specialist agents debate — the moderator synthesizes.", status: cfg.enabled ? "live" : "hybrid" },
-    { href: "/brain/narrate", icon: ScrollText, ar: "الراوي", en: "Narrator", descAr: "يحوّل الأرقام إلى نصوص تحريرية بالعربية والإنجليزية.", descEn: "Turns raw numbers into bilingual editorial prose.", status: cfg.enabled ? "live" : "hybrid" },
     { href: "/brain/memory", icon: Heart, ar: "بحيرة الذاكرة", en: "Memory lake", descAr: "كل موقف يُحفظ ويُستحضر عند التشابه.", descEn: "Every situation is stored and recalled when analogous events arise.", status: "live", hint: formatNumber(totalMemories) + (ar ? " ذكرى" : " memories") },
     { href: "/insights", icon: Sparkles, ar: "الإشارات", en: "Insights", descAr: "تنبيهات وفرص يكتشفها النظام عبر الشركات.", descEn: "Alerts and opportunities auto-discovered across the group.", status: "live", hint: formatNumber(totalInsights) + (ar ? " إشارة" : " insights") },
     { href: "/brain/learning", icon: GraduationCap, ar: "ما تعلّمتُه", en: "What I've learned", descAr: "كيف يُحسّن النظام ذاته من ردود أفعال المستخدمين.", descEn: "How the system improves from user reactions over time.", status: "live" },

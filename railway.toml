@@ -1,15 +1,27 @@
 [build]
 builder = "nixpacks"
-# Build phase: install deps, validate schema, build Next.
-# No DB connection needed here — `prisma generate` only reads the schema file.
+# Install deps, generate Prisma client, compile Next.js.
+# DATABASE_URL is NOT needed at build time — prisma generate reads schema only.
 buildCommand = "npm install && prisma generate && next build"
 
 [deploy]
-# Migrate runs in the deploy phase where DATABASE_URL is live.
-# This is also where Railway injects all linked service variables.
+# Run pending migrations before the new server starts accepting traffic.
+# Railway injects DATABASE_URL and other linked-service vars at this phase.
 preDeployCommand = "prisma migrate deploy"
 startCommand = "next start -p ${PORT:-3000}"
+
+# Liveness probe — Railway restarts the container if this returns non-2xx.
+# /api/health does SELECT 1 and returns 503 when DB is unreachable.
 healthcheckPath = "/api/health"
-healthcheckTimeout = 30
+healthcheckTimeout = 45
+
+# Keep the service alive; do not let Railway sleep it on inactivity.
+# Critical for the brain's scheduled jobs (weekly self-tuning, federation).
+sleepApplication = false
+
+# Restart on crash only; 3-retry cap prevents crash-loop billing runaway.
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
+
+# Explicit replica count. Remove this line to enable Railway autoscaling.
+numReplicas = 1

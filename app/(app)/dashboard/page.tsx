@@ -62,7 +62,7 @@ export default async function DashboardPage({
   });
   const brainIQ = await computeIQ("default").catch(() => null);
   const [
-    me, companies, totalRoomsAgg, activeBookings, bookingsAgg,
+    me, companies, totalRoomsAgg, activeRoomsAgg, bookingsAgg,
     dairyVolumeAgg, expiringDairy, farms, programs, forecasts, recentInsights,
     transactions, marketStocks, esg, futureProjects, myTasksDue,
     upcomingBookings, expiringDairyAll, harvestingCrops,
@@ -70,7 +70,7 @@ export default async function DashboardPage({
     session ? prisma.user.findUnique({ where: { id: session.id } }) : null,
     prisma.company.findMany({ orderBy: { createdAt: "asc" } }),
     prisma.hotel.aggregate({ _sum: { totalRooms: true } }),
-    prisma.booking.count({ where: { status: { in: ["CONFIRMED", "CHECKED_IN"] } } }),
+    prisma.booking.aggregate({ _sum: { rooms: true }, where: { status: { in: ["CONFIRMED", "CHECKED_IN"] } } }),
     prisma.booking.aggregate({
       _sum: { revenue: true },
       where: { checkIn: { gte: range.start, lte: range.end } },
@@ -150,6 +150,8 @@ export default async function DashboardPage({
 
   // === Aggregates ===
   const totalRooms = totalRoomsAgg._sum.totalRooms ?? 0;
+  // Occupied = committed ROOMS (CONFIRMED+CHECKED_IN), consistent with hotels/page.tsx.
+  const activeBookings = activeRoomsAgg._sum.rooms ?? 0;
   const occupancyPct = totalRooms ? Math.min(activeBookings / totalRooms, 1) : 0;
   const dairyVolumeL = dairyVolumeAgg._sum.quantityLiters ?? 0;
   const farmsAlerting = farms.filter((f) => f.alertLevel !== "OK").length;
@@ -421,8 +423,8 @@ export default async function DashboardPage({
           personalLine={personalLine}
           subtitle={
             ar
-              ? `${formatNumber(companies.length)} شركات · ${formatNumber(farms.length)} مزرعة · ${formatNumber(activeInsightCount)} إشارة AI · ${formatPercent(occupancyPct, 0)} إشغال${brainIQ ? ` · IQ ${Math.round(brainIQ.score * 100)}` : ""}`
-              : `${formatNumber(companies.length)} companies · ${formatNumber(farms.length)} farms · ${formatNumber(activeInsightCount)} AI signals · ${formatPercent(occupancyPct, 0)} occupancy${brainIQ ? ` · Brain IQ ${Math.round(brainIQ.score * 100)}` : ""}.`
+              ? `${formatNumber(companies.length)} شركات · ${formatNumber(farms.length)} مزرعة · ${formatNumber(activeInsightCount)} إشارة AI · ${formatPercent(occupancyPct, 0)} إشغال${brainIQ ? ` · IQ ${Math.round(brainIQ.score)}` : ""}`
+              : `${formatNumber(companies.length)} companies · ${formatNumber(farms.length)} farms · ${formatNumber(activeInsightCount)} AI signals · ${formatPercent(occupancyPct, 0)} occupancy${brainIQ ? ` · Brain IQ ${Math.round(brainIQ.score)}` : ""}.`
           }
           primaryCta={ar ? "مركز الدماغ" : "Brain hub"}
           primaryCtaHref="/brain"
@@ -678,7 +680,7 @@ export default async function DashboardPage({
               title={ar ? "طبقة الذكاء" : "Intelligence layer"}
               aside={
                 brainIQ
-                  ? (ar ? `IQ ${Math.round(brainIQ.score * 100)} · ${brainIQ.trend === "rising" ? "↑" : brainIQ.trend === "falling" ? "↓" : "→"}` : `IQ ${Math.round(brainIQ.score * 100)} · ${brainIQ.trend}`)
+                  ? (ar ? `IQ ${Math.round(brainIQ.score)} · ${brainIQ.trend === "rising" ? "↑" : brainIQ.trend === "falling" ? "↓" : "→"}` : `IQ ${Math.round(brainIQ.score)} · ${brainIQ.trend}`)
                   : (ar ? "توقعات سلسلة التوريد" : "Supply chain forecasts")
               }
               href="/brain"
@@ -708,7 +710,7 @@ export default async function DashboardPage({
                     className="heri-number-mono"
                     style={{ fontSize: 18, fontWeight: 700, color: "var(--heri-ochre-2)", letterSpacing: "-0.02em" }}
                   >
-                    {Math.round(brainIQ.score * 100)}
+                    {Math.round(brainIQ.score)}
                   </span>
                 </Link>
               ) : null}

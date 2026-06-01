@@ -28,7 +28,7 @@ export default async function BrainPage() {
     prisma.selfTuningReport.count({ where: { status: "DRAFT" } }),
   ]);
 
-  const iqScore = iq ? Math.round(iq.score * 100) : 50;
+  const iqScore = iq ? Math.round(iq.score) : 50;
   const trendLabel = iq ? (ar ? (iq.trend === "rising" ? "صاعد" : iq.trend === "falling" ? "هابط" : "ثابت") : iq.trend) : (ar ? "لا بيانات" : "no data");
 
   const subsystems: Array<{ href: string; icon: any; ar: string; en: string; descAr: string; descEn: string; status: "live" | "hybrid"; hint?: string }> = [

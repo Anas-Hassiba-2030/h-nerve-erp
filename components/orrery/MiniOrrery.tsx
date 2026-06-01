@@ -113,18 +113,18 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
   const coreLabelEn = activeGroup ? activeGroup.nameEn : "Orbit";
   const coreLabel = locale === "ar" ? coreLabelAr : coreLabelEn;
 
-  // Position the popup near the button using viewport coordinates
+  // Position the popup centered on a point near the button. The popup is
+  // centered via CSS transform(-50%,-50%), so coords hold the CENTER point.
   const openPopup = useCallback(() => {
     if (!btnRef.current) return;
     const r = btnRef.current.getBoundingClientRect();
     const bx = r.left + r.width / 2;
-    // Keep the 360px popup fully on screen horizontally
-    const cx = Math.min(Math.max(bx, 190), window.innerWidth - 190);
-    const topPos = Math.max(
-      64,
-      Math.min(r.bottom + 8, window.innerHeight - 380)
-    );
-    setCoords({ left: cx - 180, top: topPos });
+    const by = r.top + r.height / 2;
+    // Keep the popup center far enough from edges that the largest ring
+    // (intel = 12 nodes) stays on-screen. Half the max popup is ~300px.
+    const cx = Math.min(Math.max(bx, 320), window.innerWidth - 320);
+    const cy = Math.min(Math.max(by, 320), window.innerHeight - 320);
+    setCoords({ left: cx, top: cy });
     setActiveGroup(null);
     setOpen(true);
   }, []);
@@ -177,8 +177,13 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
           onPick: () => handleGroupClick(g),
         }));
 
-  // Radius: 110 for groups, 130 for children (matches reference)
-  const radius = activeGroup ? 130 : 110;
+  // Phase 26.3 — radius and popup size scale with node count so labels get
+  // breathing room instead of crowding. A 12-node intel ring now spreads
+  // wide enough that no two pills collide.
+  const count = nodes.length;
+  const radius = Math.round((activeGroup ? 122 : 104) + Math.max(0, count - 7) * 12);
+  const popupSize = (radius + 96) * 2; // leave room for pill width + star
+  const center = popupSize / 2;
 
   return (
     <>
@@ -208,7 +213,13 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
       {open && (
         <div
           className="mo-pop"
-          style={{ left: coords.left, top: coords.top }}
+          style={{
+            left: coords.left,
+            top: coords.top,
+            width: popupSize,
+            height: popupSize,
+            transform: "translate(-50%, -50%)",
+          }}
           role="dialog"
           aria-label={locale === "ar" ? "قائمة التنقل" : "Navigation menu"}
         >
@@ -232,9 +243,9 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
           {/* Nodes arranged in a circle */}
           {nodes.map((node, i) => {
             const angle = (-90 + i * (360 / nodes.length)) * (Math.PI / 180);
-            // Positions relative to popup center (180, 180)
-            const x = 180 + Math.cos(angle) * radius;
-            const y = 180 + Math.sin(angle) * radius;
+            // Positions relative to the dynamic popup center.
+            const x = center + Math.cos(angle) * radius;
+            const y = center + Math.sin(angle) * radius;
             return (
               <button
                 key={node.key}

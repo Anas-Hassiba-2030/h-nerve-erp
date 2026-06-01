@@ -212,7 +212,8 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 
 .mo-pop{
   position:fixed; z-index:205;
-  width:360px; height:360px;
+  /* width/height/transform are set inline — they scale with node count
+     (Phase 26.3) so labels never crowd. */
   pointer-events:none;
 }
 

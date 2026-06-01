@@ -701,3 +701,47 @@ Five minutes per beat. They will sign.
 | The Genesis onboarding wave | `docs/PHASES-INTELLIGENCE.md` § Phase 21 |
 
 When asking a future Claude to work on this, name the file. "Improve `lib/brain/Brain.ts`." "Implement Phase 3 from `docs/PHASES-INTELLIGENCE.md`." "Apply `docs/DESIGN-SKILL.md` Heritage Modern to `/finance`." Specificity is the whole game.
+
+---
+
+## Phase 26 — Polish & Bug-Fix Wave (operator-reported, 2026-06-01) 🔄 (in progress)
+
+**Pitch.** A focused regression / polish pass surfacing every issue the operator caught while running the system end-to-end on Railway. None of these are new features — each is something that *exists* but does not behave the way a professional product should. Tracked here so they never get forgotten.
+
+**Reported issues (operator session 2026-06-01):**
+
+### 26.1 — FAB rail panels stack badly (3 buttons → 3 overlapping circles)
+The three FAB buttons (Ask the Brain, Quick Add, Time Machine) at the bottom-start corner each open a panel. Clicking the **2nd** button opens its panel **below the 1st circle**; clicking the **3rd** opens its panel below the other two. Panels and rail collide visually. Each panel should anchor cleanly to its rail position, never overlap a sibling, and have enough offset to read as a separate surface.
+- Files: `app/(app)/living.css` (`.hn-fab-rail`, `[data-tm-legacy-pill].is-open`, `.fixed.bottom-6:has(.anim-fade-up)`), `components/QuickAddFAB.tsx`, `components/Conversational.tsx`, `components/TimeScrubber.tsx`.
+
+### 26.2 — Brain hub orb visual is wrong
+The current `/brain` hero (the dark orb with "Brain IQ" text) does not match the Claude Design reference. The reference shows a deep cosmic-emerald globe with internal glow and a faint orbiting ring, set against a starfield, with the IQ score positioned offset — far more professional. Replace the current `<div className="brain-orb">` markup with the Claude Design version (see `H-Nerve Orrery (standalone).html` from the design system, the central dark globe).
+- Files: `app/(app)/brain/page.tsx`, `app/(app)/brain/brain-section.css`.
+
+### 26.3 — Orrery hub section labels are cramped and in the wrong place
+On the orrery hub (`/orrery`), the section name pills (Brain · Insights · Alerts · Plans · …) sit at the **footer** and are visually crowded together. Two changes: (a) move the labels to the **header** area (they read as navigation, not as a credit line); (b) add generous horizontal spacing between each pill so they read as discrete sections.
+- Files: `app/(app)/orrery/page.tsx`, `app/(app)/orrery/orrery.css`.
+
+### 26.4 — `/workspace` redirects to `/companies` when no workspace is active
+`app/(app)/workspace/page.tsx:42` calls `redirect("/companies")` when `workspaceId` is null. From the operator's view this looks like a broken link — clicking "Workspace" sends them to a list of companies. Replace the redirect with an inline "Select a workspace" empty-state on the workspace page itself, with a clear CTA into the company picker.
+- Files: `app/(app)/workspace/page.tsx`.
+
+### 26.5 — `/digest` "Generate a new digest" button is hidden for most users
+The button only renders when `hasRole(session, "MANAGER")`. For an ADMIN logged into a freshly seeded system, it still doesn't appear if the role string-comparison fails. Audit `hasRole()` against the seeded admin roles, OR loosen the gate to ADMIN/EXECUTIVE/MANAGER explicitly.
+- Files: `app/(app)/digest/page.tsx`, `lib/authz.ts`.
+
+### 26.6 — Profile button opens Settings instead of Profile
+Clicking the user avatar in the top chrome navigates to `/settings` instead of `/me` (or wherever the user's profile lives). Either fix the link target or make the click open a dropdown with both "Profile" and "Settings" as separate items.
+- Files: `components/Topbar.tsx` (or wherever the avatar is wired).
+
+### 26.7 — "Three circles" disappear intermittently on the main interface
+The FAB rail's three buttons sometimes fail to mount / disappear after a navigation. Likely a hydration race where the legacy QuickAddFAB / TimeScrubber wrappers race with the new FabRail; the legacy hide-rules in `living.css` lines 380-391 may be matching the new rail when the panel state changes. Audit the `[data-qaf-legacy-trigger]`, `[data-tm-legacy-pill]` selectors and the `.fixed.bottom-6:has(.anim-fade-up)` rule for over-reach.
+- Files: `app/(app)/living.css`, `components/orrery/FabRail.tsx`.
+
+### 26.8 — System feels heavy and laggy
+End-to-end the app feels slow on Railway. Likely causes: every page is `dynamic = "force-dynamic"` so nothing caches; the `(app)` layout fans out N parallel Prisma queries on every nav; the Orrery hub mounts a heavy canvas + the FAB rail + the morning brief overlay + the realtime SSE connection on every page. Audit candidates: `revalidatePath` over force-dynamic where data is hourly; defer realtime SSE until first user interaction; lazy-import `MiniOrrery` / `OnboardingTour` / `DocumentDropZone` overlays.
+- Files: `app/(app)/layout.tsx`, every `page.tsx` with `force-dynamic`, `lib/realtime.ts`, the orrery canvas.
+
+**Effort.** 1–2 days for 26.1, 26.3–26.7. 26.2 is 1 day (port the design + CSS). 26.8 is an ongoing performance budget — initial pass 1 day, measurement loop continues.
+
+**Demo script.** "Watch — three FAB buttons, three clean panels, none overlap. Click Workspace, get a real chooser instead of being shunted off. Click your avatar, see a real profile menu. The hub labels breathe. The brain orb looks like the reference. The whole thing feels lighter."

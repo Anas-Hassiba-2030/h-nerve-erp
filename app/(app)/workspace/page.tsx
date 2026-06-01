@@ -14,7 +14,7 @@
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Inbox } from "lucide-react";
+import { Inbox, Building2 } from "lucide-react";
 import { WorkspaceFinancials } from "@/components/workspace/WorkspaceFinancials";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/workspace";
@@ -39,15 +39,43 @@ const SECTOR_MODULES: Record<string, string[]> = {
 
 export default async function WorkspaceCommandPage() {
   const workspaceId = getActiveWorkspaceId();
-  if (!workspaceId) redirect("/companies");
+  const locale = getLocale();
+  const ar = locale === "ar";
+
+  // Phase 26.4 — empty state instead of silently redirecting to /companies.
+  // The operator was clicking "Workspace" and getting bounced to a list of
+  // companies with no explanation. Render an inline picker prompt instead.
+  if (!workspaceId) {
+    return (
+      <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+        <div className="dl-empty" style={{ padding: "80px 24px", textAlign: "center", maxWidth: 560, margin: "0 auto" }}>
+          <Building2 size={48} style={{ margin: "0 auto 18px", opacity: 0.5 }} />
+          <h1 style={{ fontFamily: "var(--dl-display)", fontSize: 28, fontWeight: 600, marginBottom: 10 }}>
+            {ar ? "اختر مساحة العمل" : "Pick a workspace"}
+          </h1>
+          <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-muted)", marginBottom: 22 }}>
+            {ar
+              ? "لم تختر شركة بعد. اختر شركة من القائمة لتفتح لوحة قيادتها الخاصة — مالية، عمليات، فريق، ذاكرة الدماغ."
+              : "No company is active yet. Pick one from the list to open its dedicated command surface — financials, operations, team, brain memory."}
+          </p>
+          <Link
+            href="/companies"
+            className="dl-btn dl-btn-primary"
+            style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
+          >
+            <Building2 size={16} />
+            {ar ? "تصفّح الشركات" : "Browse companies"}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   const company = await prismaUnscoped.company.findUnique({
     where: { id: workspaceId },
     select: { sector: true, name: true, nameEn: true, code: true },
   });
   if (!company) redirect("/companies");
-
-  const locale = getLocale();
-  const ar = locale === "ar";
   const modules = SECTOR_MODULES[company.sector] ?? [];
 
   // Phase NS-1 — incoming purchase intent. This company's tenant slug is

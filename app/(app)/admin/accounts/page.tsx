@@ -31,7 +31,6 @@ export default async function AccountsPage({ searchParams }: { searchParams: SP 
   const ar = getLocale() === "ar";
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (!["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) redirect("/dashboard");
 
   const periodSel = str(searchParams.period);
   const fmtP = (y: number, m: number) => `${y}-${String(m).padStart(2, "0")}`;

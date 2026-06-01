@@ -28,7 +28,6 @@ export default async function SuppliersPage({ searchParams }: { searchParams: SP
   const ar = getLocale() === "ar";
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (!["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) redirect("/dashboard");
 
   const q = str(searchParams.q);
   const deep = str(searchParams.supplier); // supplier id → auto-expand

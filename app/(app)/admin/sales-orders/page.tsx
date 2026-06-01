@@ -54,9 +54,6 @@ export default async function SalesOrdersPage({
   const ar = getLocale() === "ar";
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (!["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) {
-    redirect("/dashboard");
-  }
 
   const statusF = str(searchParams.status);
   const customerF = str(searchParams.customer);

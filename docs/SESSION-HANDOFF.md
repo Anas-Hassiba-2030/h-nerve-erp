@@ -75,10 +75,19 @@ the automated i18n edits — all fixed and re-verified:
 1. **Merge this PR.** The automation here has no GitHub API auth, so the merge button is
    yours. Railway auto-deploys `main`.
 2. **Pitch / seed data.** This is your lane (wipe → calculated load). The i18n work means
-   whatever you load renders bilingually. One real bug to fix when you rebuild the data:
-   `prisma/seed.ts:329` has `Math.random() < 0.85 ? "CONFIRMED" : "CONFIRMED"` — both
-   ternary branches are identical (likely meant `"CONFIRMED" : "CHECKED_IN"`). Separately,
-   hotel occupancy reads low (0–13%) because few bookings are seeded relative to room
-   count — a volume/narrative tuning choice for you to set.
+   whatever you load renders bilingually. Two notes from analysing the current seed:
+
+   - **Hotel occupancy reads low (≈0–13%).** Root cause: only ~15 bookings are seeded per
+     hotel (`prisma/seed.ts:319`, loop of 60 across 4 hotels) against 140–220 rooms each,
+     and the hotels page counts last-30-day `CONFIRMED|CHECKED_IN` rooms ÷ total rooms.
+     To show a healthy ~70%, each hotel needs ~0.7 × its room count in active booked rooms
+     (~50 bookings/hotel, ~200 total). **Caveat:** booking volume also drives revenue
+     (the JOD figures on Finance + the per-company table), so this is a *coupled* number —
+     raising occupancy raises revenue. That's why it's a pitch-modelling decision for you,
+     not a mechanical fix.
+   - The status logic at `seed.ts:327-329` is **correct** as written (COMPLETED = past,
+     CHECKED_IN = active, CONFIRMED = future). The `? "CONFIRMED" : "CONFIRMED"` on line 329
+     is a harmless redundant ternary, not a bug — do **not** change it to `CHECKED_IN`,
+     which would wrongly mark *future* bookings as checked-in.
 3. **Branch cleanup (optional).** The old `feat/*-daylight` branches are already
    represented in `main`; safe to delete after merging.

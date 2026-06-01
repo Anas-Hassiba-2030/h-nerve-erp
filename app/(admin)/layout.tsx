@@ -12,7 +12,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { Building2, Settings, ArrowLeft, Crown, UsersRound, ShieldCheck, ScrollText } from "lucide-react";
+import { Building2, Settings, ArrowLeft, Crown, UsersRound, ShieldCheck, ScrollText, Sprout } from "lucide-react";
 import { getLocale } from "@/lib/i18n.server";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -56,6 +56,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <Link href="/admin/audit" className="admin-rail-link">
               <ScrollText className="h-3.5 w-3.5" strokeWidth={1.5} />
               {ar ? "التدقيق" : "Audit"}
+            </Link>
+            <Link href="/admin/genesis" className="admin-rail-link">
+              <Sprout className="h-3.5 w-3.5" strokeWidth={1.5} />
+              {ar ? "البداية" : "Genesis"}
             </Link>
             <Link href="/admin/system" className="admin-rail-link">
               <Settings className="h-3.5 w-3.5" strokeWidth={1.5} />

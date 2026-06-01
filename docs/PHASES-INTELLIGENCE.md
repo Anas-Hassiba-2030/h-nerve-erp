@@ -499,11 +499,18 @@ These hold across every phase. Violations are bugs.
 
 The first-touch experience. Whatever a new tenant sees before they have data of their own.
 
-## Phase 21 — The Genesis Seed (onboarding & sample-data wizard)
+## Phase 21 — The Genesis Seed (onboarding & sample-data wizard) 🔄 (in progress)
 
 **Pitch.** Today's `npm run db:seed` is a CLI footgun: it requires a terminal, can't be re-run from the product, and gives ADMIN users no preview of what they're about to instantiate. Phase 21 promotes seeding to a first-class onboarding surface — a bilingual wizard that shows the *shape* of the data H-Nerve is about to create, lets the operator pick which sectors to seed, and can be safely re-run (idempotent) from the product itself.
 
 **Wow moment.** A new ADMIN signs in for the first time. Instead of an empty `/orrery`, they land on **The Genesis** — a black-emerald canvas with three pulsing constellations (Hospitality · Dairy · Agriculture · Education). Each constellation expands to show the entities about to be created (companies, hotels, dairy lines, programs) as a living diagram. The operator confirms; over the next 8 seconds the constellations "drop" one by one into the database with a soft thud animation, and the orrery hub fades up around them, already populated.
+
+**Shipped in this phase:**
+- `app/(admin)/admin/genesis/page.tsx` — wizard UI: entity counts, empty/populated state, seed CTA, credentials cheat-sheet.
+- `app/(admin)/admin/genesis/actions.ts` — `runGenesisSeed()` ADMIN-only server action, imports and calls `seedOperator()` from `prisma/seed.ts`.
+- `app/(app)/brain/narrate/page.tsx` — narrator output gallery: recent Narratives with Phase 22 `VerifiedBadge` trust tagging.
+- Admin nav updated: Genesis link in the top rail.
+- `ConstellationRail` + `MiniOrrery` + `routeMap.ts` updated: `/brain/narrate` route live.
 
 **Files.**
 - `prisma/seed.ts` — existing seeder, refactored into composable `seedSector(sector)` units.

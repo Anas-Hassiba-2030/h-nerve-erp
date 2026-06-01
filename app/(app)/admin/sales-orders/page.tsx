@@ -11,7 +11,7 @@ import { Prisma } from "@prisma/client";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import {
   formatDateTime,
   formatNumber,
@@ -27,6 +27,8 @@ import {
   CancelSOButton,
 } from "./SalesOrderForms";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
+
+import "../../daylight.css";
 
 export const dynamic = "force-dynamic";
 
@@ -126,8 +128,8 @@ export default async function SalesOrdersPage({
   };
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "العمليات" : "Operations"}
         title={ar ? "أوامر البيع" : "Sales Orders"}
         subtitle={
@@ -136,21 +138,22 @@ export default async function SalesOrdersPage({
             : "Sales to customers — fulfillment writes SOLD (negative) ledger movements"
         }
         actions={<AdminFamilyNav current="/admin/sales-orders" ar={ar} />}
-        metrics={[
-          { label: ar ? "إجمالي الأوامر" : "Total SOs", value: formatNumber(kTotal), tone: "blue" },
-          { label: ar ? "مفتوحة" : "Open", value: formatNumber(kOpen), tone: "violet" },
-          { label: ar ? "بانتظار التنفيذ" : "Pending fulfillment", value: formatNumber(kPending), tone: "amber" },
-          { label: ar ? "نُفِّذت هذا الشهر" : "Fulfilled this month", value: formatNumber(kDone), tone: "emerald" },
-        ]}
       />
+
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "إجمالي الأوامر" : "Total SOs"} value={formatNumber(kTotal)} />
+        <DaylightKpi label={ar ? "مفتوحة" : "Open"} value={formatNumber(kOpen)} />
+        <DaylightKpi label={ar ? "بانتظار التنفيذ" : "Pending fulfillment"} value={formatNumber(kPending)} />
+        <DaylightKpi label={ar ? "نُفِّذت هذا الشهر" : "Fulfilled this month"} value={formatNumber(kDone)} />
+      </DaylightKpiGrid>
 
       <div className="mt-3">
         <NewSOForm products={products} customers={customers} tenantDefault={tenantDefault} ar={ar} />
       </div>
 
-      <div className="card card-pad mt-3 flex flex-col gap-3">
+      <div className="panel reveal mt-3 flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
             {ar ? "الحالة" : "Status"}
           </span>
           <Link href={hrefWith("status", "")} className={statusF ? "badge-slate" : "badge-emerald"}>
@@ -164,7 +167,7 @@ export default async function SalesOrdersPage({
         </div>
         {customers.length > 0 ? (
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
               {ar ? "العميل" : "Customer"}
             </span>
             <Link href={hrefWith("customer", "")} className={customerF ? "badge-slate" : "badge-emerald"}>
@@ -180,14 +183,14 @@ export default async function SalesOrdersPage({
       </div>
 
       {sos.length === 0 ? (
-        <div className="card card-pad mt-3 flex flex-col items-center gap-3 py-16 text-center">
-          <ReceiptIcon className="h-10 w-10" style={{ color: "var(--text-muted)" }} />
-          <p className="text-sm font-bold" style={{ color: "var(--text)" }}>
+        <div className="panel reveal mt-3 flex flex-col items-center gap-3 py-16 text-center">
+          <ReceiptIcon className="h-10 w-10" style={{ color: "var(--ink-muted)" }} />
+          <p className="text-sm font-bold" style={{ color: "var(--ink)" }}>
             {allSos.length === 0
               ? ar ? "لا توجد أوامر بيع بعد" : "No sales orders yet"
               : ar ? "لا نتائج مطابقة" : "No SOs match the filter"}
           </p>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+          <p className="text-xs" style={{ color: "var(--ink-muted)" }}>
             {ar ? "أنشئ أمر بيع من النموذج أعلاه." : "Create one from the form above."}
           </p>
         </div>
@@ -198,38 +201,38 @@ export default async function SalesOrdersPage({
             return (
               <details
                 key={so.id}
-                className="card overflow-hidden"
+                className="panel reveal overflow-hidden"
                 open={soDeep === so.soNumber}
               >
                 <summary
                   className="flex cursor-pointer flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3"
                   style={{ listStyle: "none" }}
                 >
-                  <ArrowRight className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--text-muted)" }} aria-hidden />
-                  <span className="font-mono text-sm font-extrabold" style={{ color: "var(--text)" }}>
+                  <ArrowRight className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--ink-muted)" }} aria-hidden />
+                  <span className="font-mono text-sm font-extrabold" style={{ color: "var(--ink)" }}>
                     {so.soNumber}
                   </span>
                   <span className="badge-slate">{so.customerRef?.name ?? "—"}</span>
                   <span className={orderStatusBadge(so.status)}>{oLabel(so.status)}</span>
                   <span className="ms-auto flex flex-wrap items-center gap-2 text-[11px]">
-                    <span style={{ color: "var(--text-muted)" }}>
+                    <span style={{ color: "var(--ink-muted)" }}>
                       {ar ? "بنود" : "lines"}{" "}
-                      <b style={{ color: "var(--text)" }}>{formatNumber(so.lines.length)}</b>
+                      <b style={{ color: "var(--ink)" }}>{formatNumber(so.lines.length)}</b>
                     </span>
-                    <span className="font-mono" style={{ color: "var(--text-muted)" }} title={formatDateTime(so.orderedAt, ar ? "ar" : "en")}>
+                    <span className="font-mono" style={{ color: "var(--ink-muted)" }} title={formatDateTime(so.orderedAt, ar ? "ar" : "en")}>
                       {relTime(so.orderedAt, ar)}
                     </span>
-                    <span style={{ color: "var(--text-muted)" }}>
+                    <span style={{ color: "var(--ink-muted)" }}>
                       {ar ? "مطلوب" : "req"}{" "}
                       {so.requiredBy ? formatDateTime(so.requiredBy, ar ? "ar" : "en") : dash}
                     </span>
                   </span>
                 </summary>
 
-                <div className="table-wrap" style={{ borderTop: "1px solid var(--border)" }}>
-                  <table className="w-full text-start text-xs">
+                <div style={{ borderTop: "1px solid var(--line)" }}>
+                  <table className="dl-table">
                     <thead>
-                      <tr style={{ color: "var(--text-muted)" }}>
+                      <tr style={{ color: "var(--ink-muted)" }}>
                         <th className="px-3 py-2 text-start font-bold">SKU</th>
                         <th className="px-3 py-2 text-start font-bold">{ar ? "المنتج" : "Product"}</th>
                         <th className="px-3 py-2 text-end font-bold">{ar ? "المطلوب" : "Ordered"}</th>
@@ -242,16 +245,16 @@ export default async function SalesOrdersPage({
                       {so.lines.map((l) => {
                         const short = l.product.quantity < l.quantity - l.fulfilledQty;
                         return (
-                          <tr key={l.id} style={{ borderTop: "1px solid var(--border)" }}>
+                          <tr key={l.id} style={{ borderTop: "1px solid var(--line)" }}>
                             <td className="px-3 py-2 font-mono">{l.product.sku}</td>
-                            <td className="px-3 py-2" style={{ color: "var(--text)" }}>{l.product.name}</td>
+                            <td className="px-3 py-2" style={{ color: "var(--ink)" }}>{l.product.name}</td>
                             <td className="px-3 py-2 text-end font-mono">{formatNumber(l.quantity)}</td>
                             <td className="px-3 py-2 text-end font-mono">{formatNumber(l.fulfilledQty)}</td>
                             <td className="px-3 py-2 text-end font-mono">
                               {l.unitPrice != null ? formatMoney2(Number(l.unitPrice)) : dash}
                             </td>
                             <td className="px-3 py-2 text-end font-mono">
-                              <span className={short ? "badge-amber" : ""} style={short ? undefined : { color: "var(--text-muted)" }}>
+                              <span className={short ? "badge-amber" : ""} style={short ? undefined : { color: "var(--ink-muted)" }}>
                                 {formatNumber(l.product.quantity)}
                               </span>
                             </td>
@@ -262,9 +265,9 @@ export default async function SalesOrdersPage({
                   </table>
                 </div>
 
-                <div className="flex flex-col gap-3 px-4 py-3" style={{ borderTop: "1px solid var(--border)" }}>
-                  <div className="flex flex-wrap items-center gap-3 text-[11px]" style={{ color: "var(--text-muted)" }}>
-                    <span className="font-bold" style={{ color: "var(--text)" }}>
+                <div className="flex flex-col gap-3 px-4 py-3" style={{ borderTop: "1px solid var(--line)" }}>
+                  <div className="flex flex-wrap items-center gap-3 text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                    <span className="font-bold" style={{ color: "var(--ink)" }}>
                       {so.customerRef?.name ?? "—"}
                     </span>
                     {so.customerRef?.email ? <span>✉ {so.customerRef.email}</span> : null}
@@ -295,6 +298,6 @@ export default async function SalesOrdersPage({
           })}
         </section>
       )}
-    </>
+    </DaylightShell>
   );
 }

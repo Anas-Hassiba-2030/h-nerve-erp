@@ -11,9 +11,7 @@ import {
   User as UserIcon,
   Tag,
 } from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
-import { HeriKpi } from "@/components/HeriKpi";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { PinButton } from "@/components/PinButton";
 import { prisma } from "@/lib/db";
 import { isPinned } from "@/lib/pins";
@@ -24,6 +22,7 @@ import {
   formatDateTime,
   formatShortDate,
 } from "@/lib/utils";
+import "../../daylight.css";
 
 const KIND_AR: Record<string, string> = {
   REVENUE: "إيراد",
@@ -98,10 +97,10 @@ export default async function FinanceDetailPage({
   const isExpense = tx.kind === "EXPENSE" || tx.kind === "COST";
   const sign = isIncome ? "+" : isExpense ? "−" : "";
   const accent = isIncome
-    ? "var(--heri-teal)"
+    ? "var(--emerald)"
     : isExpense
-      ? "var(--heri-terracotta)"
-      : "var(--heri-copper)";
+      ? "#b85c38"
+      : "var(--gold)";
 
   const companyIncome = companyAgg
     .filter((g) => g.kind === "INCOME" || g.kind === "REVENUE")
@@ -120,14 +119,14 @@ export default async function FinanceDetailPage({
     : (KIND_AR[tx.kind] ?? tx.kind);
 
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={en ? "ltr" : "rtl"}>
+      <DaylightHeader
         eyebrow={en ? "Financial ledger" : "السجل المالي"}
         title={tx.description ?? tx.category}
         subtitle={tx.reference}
         actions={
           <div className="flex items-center gap-2">
-            <Link href="/finance" className="heri-btn heri-btn-ghost" style={{ fontSize: 13 }}>
+            <Link href="/finance" className="dl-btn dl-btn-secondary" style={{ fontSize: 13 }}>
               <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
               {en ? "Ledger" : "السجل"}
             </Link>
@@ -145,15 +144,15 @@ export default async function FinanceDetailPage({
         }
       />
 
-      <PageContainer>
-        {/* Hero strip — Heritage Modern cream plinth with big amount */}
-        <section className="heri-hero" style={{ padding: "20px 24px" }}>
+      <div className="flex-1 space-y-6 p-6">
+        {/* Hero strip with big amount */}
+        <section className="panel reveal" style={{ padding: "20px 24px" }}>
           <div className="grid gap-6 lg:grid-cols-[auto,1fr,auto] lg:items-center">
             <div
               className="flex h-16 w-16 shrink-0 items-center justify-center"
               style={{
-                background: "var(--heri-cream-2)",
-                border: "1px solid var(--heri-rule-strong)",
+                background: "var(--cream)",
+                border: "1px solid var(--line)",
                 color: accent,
               }}
             >
@@ -163,27 +162,45 @@ export default async function FinanceDetailPage({
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <span
-                  className="heri-pill"
                   style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 5,
+                    padding: "3px 10px",
+                    borderRadius: 999,
+                    fontSize: 11.5,
+                    fontWeight: 600,
                     color: accent,
+                    border: "1px solid var(--line)",
                   }}
                 >
                   {kindLabel}
                 </span>
                 <Link
                   href={`/companies/${tx.company.id}`}
-                  className="heri-pill heri-pill-info"
-                  style={{ textDecoration: "none" }}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 5,
+                    padding: "3px 10px",
+                    borderRadius: 999,
+                    fontSize: 11.5,
+                    fontWeight: 600,
+                    color: "var(--gold)",
+                    border: "1px solid var(--line)",
+                    textDecoration: "none",
+                  }}
                 >
                   {companyName}
                 </Link>
                 <span
-                  className="heri-number-mono"
+                  className="font-mono"
                   style={{
                     fontSize: 11,
-                    color: "var(--heri-ink-3)",
-                    border: "1px solid var(--heri-rule)",
+                    color: "var(--ink-muted)",
+                    border: "1px solid var(--line)",
                     padding: "3px 8px",
+                    borderRadius: 4,
                   }}
                 >
                   {tx.reference}
@@ -192,34 +209,30 @@ export default async function FinanceDetailPage({
               <h2
                 className="mt-2"
                 style={{
-                  fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
                   fontSize: "clamp(22px,2vw,30px)",
                   fontWeight: 500,
-                  color: "var(--heri-ink)",
+                  color: "var(--ink)",
                   letterSpacing: "-0.012em",
                   lineHeight: 1.15,
                 }}
               >
                 {tx.description ?? tx.category}
               </h2>
-              <p
-                className="mt-1"
-                style={{ fontSize: 12.5, color: "var(--heri-ink-3)" }}
-              >
+              <p className="mt-1" style={{ fontSize: 12.5, color: "var(--ink-muted)" }}>
                 {tx.category}
               </p>
-              <div className="mt-3 flex flex-wrap gap-3 heri-number-mono" style={{ fontSize: 11.5, color: "var(--heri-ink-3)" }}>
+              <div className="mt-3 flex flex-wrap gap-3 font-mono" style={{ fontSize: 11.5, color: "var(--ink-muted)" }}>
                 <span className="inline-flex items-center gap-1.5">
-                  <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
+                  <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: "var(--gold)" }} />
                   {formatDateTime(tx.occurredAt)}
                 </span>
               </div>
             </div>
 
             <div className="text-end">
-              <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Amount" : "المبلغ"}</div>
+              <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>{en ? "Amount" : "المبلغ"}</div>
               <div
-                className="heri-number mt-1"
+                className="mt-1 font-mono"
                 style={{
                   fontSize: "clamp(28px, 3vw, 42px)",
                   fontWeight: 500,
@@ -231,11 +244,7 @@ export default async function FinanceDetailPage({
                 {sign}
                 {formatMoney(tx.amount, tx.currency)}
               </div>
-              <div
-                className="heri-number-mono mt-1.5"
-                style={{ fontSize: 10.5, color: "var(--heri-ink-3)" }}
-                dir="ltr"
-              >
+              <div className="mt-1.5 font-mono" style={{ fontSize: 10.5, color: "var(--ink-muted)" }} dir="ltr">
                 {tx.currency}
               </div>
             </div>
@@ -243,79 +252,55 @@ export default async function FinanceDetailPage({
         </section>
 
         {/* KPI band — company P&L snapshot */}
-        <section className="grid gap-4 heri-stagger sm:grid-cols-3">
-          <HeriKpi
+        <DaylightKpiGrid>
+          <DaylightKpi
             label={en ? `${companyName} revenue` : `إيرادات ${companyName}`}
-            raw={companyIncome}
-            kind="money"
-            accent="var(--heri-teal)"
+            value={formatMoney(companyIncome)}
             hint={en ? "Historical total" : "إجمالي تاريخي"}
           />
-          <HeriKpi
+          <DaylightKpi
             label={en ? `${companyName} expenses` : `مصاريف ${companyName}`}
-            raw={companyExpense}
-            kind="money"
-            accent="var(--heri-terracotta)"
+            value={formatMoney(companyExpense)}
             hint={en ? "Historical total" : "إجمالي تاريخي"}
           />
-          <HeriKpi
+          <DaylightKpi
             label={en ? "Net" : "الصافي"}
-            raw={companyNet}
-            kind="money"
-            accent={companyNet >= 0 ? "var(--heri-teal)" : "var(--heri-terracotta)"}
+            value={formatMoney(companyNet)}
             hint={companyNet >= 0 ? (en ? "Profit" : "ربح") : (en ? "Loss" : "خسارة")}
           />
-        </section>
+        </DaylightKpiGrid>
 
         {/* Two columns */}
-        <div className="grid gap-6 lg:grid-cols-[1fr,360px] heri-stagger">
+        <div className="grid gap-6 lg:grid-cols-[1fr,360px]">
           <div className="space-y-6">
             {/* Description */}
             {tx.description ? (
-              <section className="heri-card">
-                <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Transaction note" : "وصف الحركة"}</div>
-                <h3
-                  className="mt-1 mb-2 flex items-center gap-2"
-                  style={{
-                    fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
-                    fontSize: 16,
-                    fontWeight: 500,
-                    color: "var(--heri-ink)",
-                  }}
-                >
-                  <Wallet className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
-                  {en ? "Notes" : "الملاحظات"}
-                </h3>
-                <p
-                  className="text-sm leading-relaxed"
-                  style={{ color: "var(--heri-ink)" }}
-                >
+              <DaylightPanel
+                title={
+                  <span className="flex items-center gap-2">
+                    <Wallet className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--gold)" }} />
+                    {en ? "Notes" : "الملاحظات"}
+                  </span>
+                }
+              >
+                <p className="text-sm leading-relaxed" style={{ color: "var(--ink)" }}>
                   {tx.description}
                 </p>
-              </section>
+              </DaylightPanel>
             ) : null}
 
             {/* Same category */}
             {siblingsCategory.length > 0 ? (
-              <section className="heri-card">
-                <header className="mb-3 flex items-center justify-between">
-                  <div>
-                    <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Same category" : "حركات بنفس التصنيف"}</div>
-                    <h3
-                      className="mt-1 flex items-center gap-2"
-                      style={{
-                        fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
-                        fontSize: 16,
-                        fontWeight: 500,
-                        color: "var(--heri-ink)",
-                      }}
-                    >
-                      <Tag className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
-                      {tx.category}
-                    </h3>
-                  </div>
-                </header>
-                <ul className="divide-y divide-[var(--heri-rule)]">
+              <DaylightPanel
+                title={
+                  <span className="flex items-center gap-2">
+                    <Tag className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--gold)" }} />
+                    {tx.category}
+                  </span>
+                }
+                aside={<span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>{en ? "Same category" : "حركات بنفس التصنيف"}</span>}
+              >
+                <ul className="divide-y" style={{ borderColor: "var(--line)" }}>
                   {siblingsCategory.map((s) => {
                     const sIsIncome = s.kind === "INCOME" || s.kind === "REVENUE";
                     return (
@@ -327,25 +312,17 @@ export default async function FinanceDetailPage({
                           href={`/finance/${s.id}`}
                           className="min-w-0 flex-1 hover:underline"
                         >
-                          <div
-                            className="truncate font-semibold"
-                            style={{ color: "var(--heri-ink)", fontSize: 13 }}
-                          >
+                          <div className="truncate font-semibold" style={{ color: "var(--ink)", fontSize: 13 }}>
                             {s.description ?? s.category}
                           </div>
-                          <div
-                            className="heri-number-mono mt-0.5"
-                            style={{ fontSize: 10.5, color: "var(--heri-ink-3)" }}
-                          >
+                          <div className="font-mono mt-0.5" style={{ fontSize: 10.5, color: "var(--ink-muted)" }}>
                             {s.reference} • {s.company.code} • {formatShortDate(s.occurredAt)}
                           </div>
                         </Link>
                         <span
-                          className="heri-number-mono font-semibold"
+                          className="font-mono font-semibold"
                           style={{
-                            color: sIsIncome
-                              ? "var(--heri-teal)"
-                              : "var(--heri-terracotta)",
+                            color: sIsIncome ? "var(--emerald)" : "#b85c38",
                             fontSize: 12,
                           }}
                         >
@@ -356,37 +333,25 @@ export default async function FinanceDetailPage({
                     );
                   })}
                 </ul>
-              </section>
+              </DaylightPanel>
             ) : null}
 
             {/* Same company */}
             {siblingsCompany.length > 0 ? (
-              <section className="heri-card">
-                <header className="mb-3 flex items-center justify-between">
-                  <div>
-                    <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Same company" : "من نفس الشركة"}</div>
-                    <h3
-                      className="mt-1 flex items-center gap-2"
-                      style={{
-                        fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
-                        fontSize: 16,
-                        fontWeight: 500,
-                        color: "var(--heri-ink)",
-                      }}
-                    >
-                      <Building2 className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
-                      {en ? "Other transactions" : "حركات أخرى"} — {companyName}
-                    </h3>
-                  </div>
-                  <Link
-                    href={`/companies/${tx.company.id}`}
-                    className="heri-eyebrow"
-                    style={{ color: "var(--heri-ochre)", textDecoration: "none" }}
-                  >
+              <DaylightPanel
+                title={
+                  <span className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--gold)" }} />
+                    {en ? "Other transactions" : "حركات أخرى"} — {companyName}
+                  </span>
+                }
+                aside={
+                  <Link href={`/companies/${tx.company.id}`} style={{ color: "var(--gold)", textDecoration: "none", fontSize: 11.5 }}>
                     {en ? "Company profile →" : "ملف الشركة ←"}
                   </Link>
-                </header>
-                <ul className="divide-y divide-[var(--heri-rule)]">
+                }
+              >
+                <ul className="divide-y" style={{ borderColor: "var(--line)" }}>
                   {siblingsCompany.map((s) => {
                     const sIsIncome = s.kind === "INCOME" || s.kind === "REVENUE";
                     return (
@@ -398,25 +363,17 @@ export default async function FinanceDetailPage({
                           href={`/finance/${s.id}`}
                           className="min-w-0 flex-1 hover:underline"
                         >
-                          <div
-                            className="truncate font-semibold"
-                            style={{ color: "var(--heri-ink)", fontSize: 13 }}
-                          >
+                          <div className="truncate font-semibold" style={{ color: "var(--ink)", fontSize: 13 }}>
                             {s.description ?? s.category}
                           </div>
-                          <div
-                            className="heri-number-mono mt-0.5"
-                            style={{ fontSize: 10.5, color: "var(--heri-ink-3)" }}
-                          >
+                          <div className="font-mono mt-0.5" style={{ fontSize: 10.5, color: "var(--ink-muted)" }}>
                             {s.reference} • {en ? (KIND_EN[s.kind] ?? s.kind) : (KIND_AR[s.kind] ?? s.kind)} • {formatShortDate(s.occurredAt)}
                           </div>
                         </Link>
                         <span
-                          className="heri-number-mono font-semibold"
+                          className="font-mono font-semibold"
                           style={{
-                            color: sIsIncome
-                              ? "var(--heri-teal)"
-                              : "var(--heri-terracotta)",
+                            color: sIsIncome ? "var(--emerald)" : "#b85c38",
                             fontSize: 12,
                           }}
                         >
@@ -427,66 +384,44 @@ export default async function FinanceDetailPage({
                     );
                   })}
                 </ul>
-              </section>
+              </DaylightPanel>
             ) : null}
           </div>
 
           <aside className="space-y-6">
             {/* Created by */}
             {tx.createdBy ? (
-              <section className="heri-card">
-                <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Logged by" : "من سجّل"}</div>
-                <h3
-                  className="mt-1 mb-3 flex items-center gap-2"
-                  style={{
-                    fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
-                    fontSize: 16,
-                    fontWeight: 500,
-                    color: "var(--heri-ink)",
-                  }}
-                >
-                  <UserIcon className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
-                  {en ? "User" : "المستخدم"}
-                </h3>
+              <DaylightPanel
+                title={
+                  <span className="flex items-center gap-2">
+                    <UserIcon className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--gold)" }} />
+                    {en ? "User" : "المستخدم"}
+                  </span>
+                }
+                aside={<span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>{en ? "Logged by" : "من سجّل"}</span>}
+              >
                 <Link
                   href={`/users/${tx.createdBy.id}`}
                   className="block px-3 py-2 transition"
                   style={{
-                    background: "var(--heri-cream)",
-                    border: "1px solid var(--heri-rule)",
+                    background: "var(--ivory)",
+                    border: "1px solid var(--line)",
+                    borderRadius: 8,
                     textDecoration: "none",
                   }}
                 >
-                  <div
-                    className="font-semibold"
-                    style={{ color: "var(--heri-ink)", fontSize: 13 }}
-                  >
+                  <div className="font-semibold" style={{ color: "var(--ink)", fontSize: 13 }}>
                     {tx.createdBy.name}
                   </div>
-                  <div
-                    className="heri-number-mono mt-0.5"
-                    style={{ fontSize: 10.5, color: "var(--heri-ink-3)" }}
-                  >
+                  <div className="font-mono mt-0.5" style={{ fontSize: 10.5, color: "var(--ink-muted)" }}>
                     {tx.createdBy.role} · {formatNumber(tx.createdBy.xp)} XP
                   </div>
                 </Link>
-              </section>
+              </DaylightPanel>
             ) : null}
 
             {/* Meta */}
-            <section className="heri-card">
-              <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Card" : "البطاقة"}</div>
-              <h3
-                className="mt-1 mb-3"
-                style={{
-                  fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
-                  fontSize: 16,
-                  fontWeight: 500,
-                  color: "var(--heri-ink)",
-                }}
-              >
-                {en ? "Transaction details" : "تفاصيل الحركة"}
-              </h3>
+            <DaylightPanel title={en ? "Transaction details" : "تفاصيل الحركة"}>
               <dl className="space-y-2 text-xs">
                 <Fact label={en ? "Reference" : "المرجع"} value={tx.reference} mono />
                 <Fact label={en ? "Type" : "النوع"} value={kindLabel} />
@@ -504,11 +439,11 @@ export default async function FinanceDetailPage({
                   link={`/companies/${tx.company.id}`}
                 />
               </dl>
-            </section>
+            </DaylightPanel>
           </aside>
         </div>
-      </PageContainer>
-    </>
+      </div>
+    </DaylightShell>
   );
 }
 
@@ -526,18 +461,14 @@ function Fact({
   color?: string;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
-      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
+    <div className="flex items-center justify-between border-b pb-1.5 last:border-b-0" style={{ borderColor: "var(--line)" }}>
+      <dt style={{ color: "var(--ink-muted)" }}>{label}</dt>
       <dd
-        className={`text-end font-semibold ${mono ? "heri-number-mono" : ""}`}
-        style={{ color: color ?? "var(--heri-ink)" }}
+        className={`text-end font-semibold ${mono ? "font-mono" : ""}`}
+        style={{ color: color ?? "var(--ink)" }}
       >
         {link ? (
-          <Link
-            href={link}
-            className="hover:underline"
-            style={{ color: "var(--heri-ochre)" }}
-          >
+          <Link href={link} className="hover:underline" style={{ color: "var(--gold)" }}>
             {value}
           </Link>
         ) : (

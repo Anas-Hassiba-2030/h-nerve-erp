@@ -13,7 +13,7 @@ import { Prisma } from "@prisma/client";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import {
   formatDateTime,
   formatNumber,
@@ -25,6 +25,8 @@ import {
 import { AdjustStockForm } from "./AdjustStockForm";
 import { ReorderPointForm } from "./ReorderPointForm";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
+
+import "../../daylight.css";
 
 export const dynamic = "force-dynamic";
 
@@ -149,7 +151,7 @@ export default async function ProductsAdminPage({
       <div className="flex flex-wrap items-center gap-1.5">
         <span
           className="text-[10px] font-bold uppercase tracking-widest"
-          style={{ color: "var(--text-muted)" }}
+          style={{ color: "var(--ink-muted)" }}
         >
           {label}
         </span>
@@ -172,8 +174,8 @@ export default async function ProductsAdminPage({
     );
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "العمليات" : "Operations"}
         title={ar ? "كتالوج المنتجات" : "Product Catalog"}
         subtitle={
@@ -182,16 +184,17 @@ export default async function ProductsAdminPage({
             : "Operational source of truth — upserted by import on (tenantId, sku, warehouseId)"
         }
         actions={<AdminFamilyNav current="/admin/products" ar={ar} />}
-        metrics={[
-          { label: ar ? "منتجات" : "Products", value: formatNumber(catalog.length), tone: "blue" },
-          { label: ar ? "وحدات بالمخزون" : "Units in stock", value: formatNumber(totalUnits), tone: "violet" },
-          { label: ar ? `مخزون منخفض (<${LOW_STOCK})` : `Low stock (<${LOW_STOCK})`, value: formatNumber(lowStock), tone: "amber" },
-          { label: ar ? "موردون" : "Suppliers", value: formatNumber(suppliers.length), tone: "emerald" },
-        ]}
       />
 
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "منتجات" : "Products"} value={formatNumber(catalog.length)} />
+        <DaylightKpi label={ar ? "وحدات بالمخزون" : "Units in stock"} value={formatNumber(totalUnits)} />
+        <DaylightKpi label={ar ? `مخزون منخفض (<${LOW_STOCK})` : `Low stock (<${LOW_STOCK})`} value={formatNumber(lowStock)} />
+        <DaylightKpi label={ar ? "موردون" : "Suppliers"} value={formatNumber(suppliers.length)} />
+      </DaylightKpiGrid>
+
       {/* Search + filter pills */}
-      <div className="card card-pad flex flex-col gap-3">
+      <div className="panel reveal flex flex-col gap-3">
         <form method="GET" className="flex items-center gap-2">
           {sku ? <input type="hidden" name="sku" value={sku} /> : null}
           {supplier ? <input type="hidden" name="supplier" value={supplier} /> : null}
@@ -199,7 +202,7 @@ export default async function ProductsAdminPage({
           <div className="relative flex-1">
             <Search
               className="absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 start-3"
-              style={{ color: "var(--text-muted)" }}
+              style={{ color: "var(--ink-muted)" }}
               aria-hidden
             />
             <input
@@ -225,9 +228,9 @@ export default async function ProductsAdminPage({
       </div>
 
       {products.length === 0 ? (
-        <div className="card card-pad mt-3 flex flex-col items-center gap-3 py-16 text-center">
-          <PackageSearch className="h-10 w-10" style={{ color: "var(--text-muted)" }} />
-          <p className="text-sm font-bold" style={{ color: "var(--text)" }}>
+        <div className="panel reveal mt-3 flex flex-col items-center gap-3 py-16 text-center">
+          <PackageSearch className="h-10 w-10" style={{ color: "var(--ink-muted)" }} />
+          <p className="text-sm font-bold" style={{ color: "var(--ink)" }}>
             {catalog.length === 0
               ? ar
                 ? "لا توجد منتجات بعد"
@@ -236,7 +239,7 @@ export default async function ProductsAdminPage({
                 ? "لا نتائج مطابقة للبحث"
                 : "No products match the filter"}
           </p>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+          <p className="text-xs" style={{ color: "var(--ink-muted)" }}>
             {ar
               ? "تُنشأ المنتجات تلقائياً من عمليات الاستيراد عبر n8n."
               : "Products are created automatically from n8n imports."}
@@ -247,7 +250,7 @@ export default async function ProductsAdminPage({
           {products.map((p) => (
             <details
               key={p.id}
-              className="card overflow-hidden"
+              className="panel reveal overflow-hidden"
               open={Boolean(sku)}
             >
               <summary
@@ -256,16 +259,16 @@ export default async function ProductsAdminPage({
               >
                 <ArrowRight
                   className="h-3.5 w-3.5 shrink-0"
-                  style={{ color: "var(--text-muted)" }}
+                  style={{ color: "var(--ink-muted)" }}
                   aria-hidden
                 />
                 <span
                   className="font-mono text-sm font-extrabold"
-                  style={{ color: "var(--text)" }}
+                  style={{ color: "var(--ink)" }}
                 >
                   {p.sku}
                 </span>
-                <span className="truncate text-sm" style={{ color: "var(--text)" }}>
+                <span className="truncate text-sm" style={{ color: "var(--ink)" }}>
                   {p.name}
                 </span>
                 <span className="ms-auto flex flex-wrap items-center gap-2 text-[11px]">
@@ -286,7 +289,7 @@ export default async function ProductsAdminPage({
                     {p.quantity < (p.reorderPoint ?? LOW_STOCK) ? "● " : ""}
                     {ar ? "كمية" : "qty"} {formatNumber(p.quantity)}
                   </span>
-                  <span className="font-mono" style={{ color: "var(--text-muted)" }}>
+                  <span className="font-mono" style={{ color: "var(--ink-muted)" }}>
                     {p.unitCost != null ? formatMoney2(Number(p.unitCost)) : dash}
                   </span>
                   {p.supplierRef ? (
@@ -295,7 +298,7 @@ export default async function ProductsAdminPage({
                   {p.warehouseRef ? (
                     <span className="badge-slate">{p.warehouseRef.code}</span>
                   ) : null}
-                  <span style={{ color: "var(--text-muted)" }}>
+                  <span style={{ color: "var(--ink-muted)" }}>
                     {relTime(p.lastImportedAt, ar)}
                   </span>
                   <span className="badge-blue">
@@ -305,18 +308,17 @@ export default async function ProductsAdminPage({
               </summary>
 
               <div
-                className="table-wrap"
-                style={{ borderTop: "1px solid var(--border)" }}
+                style={{ borderTop: "1px solid var(--line)" }}
               >
                 <div
                   className="px-3 py-2 text-[11px] font-bold uppercase tracking-widest"
-                  style={{ color: "var(--text-muted)" }}
+                  style={{ color: "var(--ink-muted)" }}
                 >
                   {ar ? "سجل الاستيراد لهذا المنتج" : "Import history for this product"}
                 </div>
-                <table className="w-full text-start text-xs">
+                <table className="dl-table">
                   <thead>
-                    <tr style={{ color: "var(--text-muted)" }}>
+                    <tr style={{ color: "var(--ink-muted)" }}>
                       <th className="px-3 py-2 text-start font-bold">{ar ? "متى" : "When"}</th>
                       <th className="px-3 py-2 text-start font-bold">{ar ? "الدفعة" : "Batch"}</th>
                       <th className="px-3 py-2 text-end font-bold">{ar ? "الكمية" : "Qty"}</th>
@@ -329,11 +331,11 @@ export default async function ProductsAdminPage({
                     {p.importRows.map((r) => {
                       const ok = r.status === "ACCEPTED";
                       return (
-                        <tr key={r.id} style={{ borderTop: "1px solid var(--border)" }}>
-                          <td className="px-3 py-2 font-mono" style={{ color: "var(--text-muted)" }}>
+                        <tr key={r.id} style={{ borderTop: "1px solid var(--line)" }}>
+                          <td className="px-3 py-2 font-mono" style={{ color: "var(--ink-muted)" }}>
                             {formatDateTime(r.createdAt, ar ? "ar" : "en")}
                           </td>
-                          <td className="px-3 py-2 font-mono" style={{ color: "var(--text)" }}>
+                          <td className="px-3 py-2 font-mono" style={{ color: "var(--ink)" }}>
                             {r.importLog?.source ?? dash}
                           </td>
                           <td className="px-3 py-2 text-end font-mono">
@@ -342,7 +344,7 @@ export default async function ProductsAdminPage({
                           <td className="px-3 py-2 text-end font-mono">
                             {r.unitCost != null ? formatMoney2(Number(r.unitCost)) : dash}
                           </td>
-                          <td className="px-3 py-2" style={{ color: "var(--text)" }}>
+                          <td className="px-3 py-2" style={{ color: "var(--ink)" }}>
                             {r.supplier ?? dash}
                           </td>
                           <td className="px-3 py-2">
@@ -365,12 +367,12 @@ export default async function ProductsAdminPage({
               {/* Phase 5 — live balance + movement ledger + manual adjust */}
               <div
                 className="flex flex-col gap-3 px-4 py-3"
-                style={{ borderTop: "1px solid var(--border)" }}
+                style={{ borderTop: "1px solid var(--line)" }}
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div
                     className="text-[11px] font-bold uppercase tracking-widest"
-                    style={{ color: "var(--text-muted)" }}
+                    style={{ color: "var(--ink-muted)" }}
                   >
                     {ar ? "سجل الحركات" : "Movement history"}
                   </div>
@@ -395,14 +397,13 @@ export default async function ProductsAdminPage({
                 />
 
                 {p.movements.length === 0 ? (
-                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  <p className="text-xs" style={{ color: "var(--ink-muted)" }}>
                     {ar ? "لا حركات مسجّلة بعد." : "No movements recorded yet."}
                   </p>
                 ) : (
-                  <div className="table-wrap">
-                    <table className="w-full text-start text-xs">
+                  <table className="dl-table">
                       <thead>
-                        <tr style={{ color: "var(--text-muted)" }}>
+                        <tr style={{ color: "var(--ink-muted)" }}>
                           <th className="px-3 py-2 text-start font-bold">{ar ? "متى" : "When"}</th>
                           <th className="px-3 py-2 text-start font-bold">{ar ? "النوع" : "Type"}</th>
                           <th className="px-3 py-2 text-end font-bold">{ar ? "التغيّر" : "Delta"}</th>
@@ -415,11 +416,11 @@ export default async function ProductsAdminPage({
                           return (
                             <tr
                               key={m.id}
-                              style={{ borderTop: "1px solid var(--border)" }}
+                              style={{ borderTop: "1px solid var(--line)" }}
                             >
                               <td
                                 className="px-3 py-2 font-mono"
-                                style={{ color: "var(--text-muted)" }}
+                                style={{ color: "var(--ink-muted)" }}
                               >
                                 {formatDateTime(m.occurredAt, ar ? "ar" : "en")}
                               </td>
@@ -438,7 +439,7 @@ export default async function ProductsAdminPage({
                                   ? `+${formatNumber(m.delta)}`
                                   : formatNumber(m.delta)}
                               </td>
-                              <td className="px-3 py-2" style={{ color: "var(--text)" }}>
+                              <td className="px-3 py-2" style={{ color: "var(--ink)" }}>
                                 {m.reason}
                               </td>
                             </tr>
@@ -446,13 +447,12 @@ export default async function ProductsAdminPage({
                         })}
                       </tbody>
                     </table>
-                  </div>
                 )}
               </div>
             </details>
           ))}
         </section>
       )}
-    </>
+    </DaylightShell>
   );
 }

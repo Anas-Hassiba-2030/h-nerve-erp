@@ -5,9 +5,8 @@
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
-import { HeritagePill, HeritageSection } from "@/components/heritage";
+import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
+import "../../daylight.css";
 import { ArrowLeft, Plug, Power, Save, ShieldCheck } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
@@ -58,41 +57,37 @@ export default async function IntegrationDetail({
   })();
 
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "موصلات · تكامل" : "Connectors · Integration"}
         title={ar ? provider.nameAr : provider.name}
         subtitle={ar ? provider.descriptionAr : provider.description}
       />
-
-      <PageContainer>
         <div className="flex items-center justify-between gap-4">
           <Link
             href="/integrations"
-            className="heri-focusable inline-flex items-center gap-2"
+            className="inline-flex items-center gap-2"
             style={{
               fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
               fontSize: 11,
               letterSpacing: "0.16em",
               textTransform: "uppercase",
-              color: "var(--heri-copper)",
+              color: "var(--gold)",
               textDecoration: "none",
             }}
           >
             <ArrowLeft className="h-3 w-3 rtl:rotate-180" strokeWidth={1.5} />
             {ar ? "كل التكاملات" : "All integrations"}
           </Link>
-          <HeritagePill tone={STATUS_TONE[status]}>
-            {ar ? STATUS_LABEL[status].ar : STATUS_LABEL[status].en}
-          </HeritagePill>
+          <span className="tag gold">{ar ? STATUS_LABEL[status].ar : STATUS_LABEL[status].en}</span>
         </div>
 
         {/* Hero */}
         <section
           className="grid items-center gap-6 md:grid-cols-[auto_1fr_auto]"
           style={{
-            background: "var(--heri-cream)",
-            border: "1px solid var(--heri-rule)",
+            background: "var(--cream)",
+            border: "1px solid var(--line)",
             padding: "24px 28px",
             position: "relative",
             overflow: "hidden",
@@ -120,11 +115,11 @@ export default async function IntegrationDetail({
             {provider.glyph}
           </div>
           <div>
-            <div className="heri-eyebrow heri-eyebrow-ink">
+            <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--ink-muted)" }}>
               {ar ? cat.ar : cat.en.toUpperCase()}
               {integration?.account ? (
                 <>
-                  <span style={{ color: "var(--heri-rule-strong)", margin: "0 8px" }}>·</span>
+                  <span style={{ color: "var(--line)", margin: "0 8px" }}>·</span>
                   <span>{integration.account}</span>
                 </>
               ) : null}
@@ -136,7 +131,7 @@ export default async function IntegrationDetail({
                 lineHeight: 1.15,
                 letterSpacing: ar ? "-0.005em" : "-0.02em",
                 fontWeight: ar ? 600 : 500,
-                color: "var(--heri-ink)",
+                color: "var(--ink)",
                 textWrap: "balance" as any,
               }}
             >
@@ -144,7 +139,7 @@ export default async function IntegrationDetail({
             </h2>
             <p
               className="measure mt-2"
-              style={{ fontSize: 13, lineHeight: 1.55, color: "var(--heri-ink-2)" }}
+              style={{ fontSize: 13, lineHeight: 1.55, color: "var(--ink-muted)" }}
             >
               {ar ? provider.descriptionAr : provider.description}
             </p>
@@ -154,7 +149,7 @@ export default async function IntegrationDetail({
               <input type="hidden" name="providerKey" value={provider.key} />
               <button
                 type="submit"
-                className="heri-btn heri-btn-ghost"
+                className="dl-btn dl-btn-secondary"
                 style={{ padding: "8px 14px", fontSize: 12 }}
               >
                 <Power className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -165,15 +160,15 @@ export default async function IntegrationDetail({
             // Phase NS-4 — API-key providers use a dedicated form +
             // server-side validation (real HTTP call to provider).
             <span
-              className="heri-eyebrow"
-              style={{ color: "var(--heri-ink-3)", fontSize: 10 }}
+              className="text-[10px] font-semibold uppercase tracking-wider"
+              style={{ color: "var(--ink-muted)" }}
             >
               {ar ? "أدخل المفتاح أدناه" : "Paste your API key below"}
             </span>
           ) : (
             <form action={connect}>
               <input type="hidden" name="providerKey" value={provider.key} />
-              <button type="submit" className="heri-btn heri-btn-primary">
+              <button type="submit" className="dl-btn dl-btn-primary">
                 <Plug className="h-4 w-4" strokeWidth={1.5} />
                 {ar ? "اتصل الآن" : "Connect now"}
               </button>
@@ -182,8 +177,7 @@ export default async function IntegrationDetail({
         </section>
 
         {/* Scopes */}
-        <HeritageSection
-          eyebrow={ar ? "صلاحيات OAuth" : "OAuth scopes"}
+        <DaylightPanel
           title={ar ? "ما الذي ستُمنح إذناً عليه" : "What you'll grant"}
           aside={
             ar
@@ -197,20 +191,20 @@ export default async function IntegrationDetail({
                 key={s}
                 className="flex items-center gap-3 px-3 py-2"
                 style={{
-                  background: "var(--heri-cream)",
-                  border: "1px solid var(--heri-rule)",
+                  background: "var(--cream)",
+                  border: "1px solid var(--line)",
                 }}
               >
                 <ShieldCheck
                   className="h-3.5 w-3.5"
-                  style={{ color: isConnected ? "var(--heri-teal)" : "var(--heri-ink-3)" }}
+                  style={{ color: isConnected ? "var(--emerald)" : "var(--ink-muted)" }}
                   strokeWidth={1.5}
                 />
                 <code
                   style={{
                     fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
                     fontSize: 12,
-                    color: "var(--heri-ink)",
+                    color: "var(--ink)",
                     background: "transparent",
                   }}
                 >
@@ -219,14 +213,13 @@ export default async function IntegrationDetail({
               </div>
             ))}
           </div>
-        </HeritageSection>
+        </DaylightPanel>
 
         {/* Phase NS-4 — API-key connect form for SendGrid + Resend.
             Submits to connectWithApiKey which makes a real validation
             call to the provider's API before persisting. */}
         {!isConnected && (provider.key === "sendgrid" || provider.key === "resend") ? (
-          <HeritageSection
-            eyebrow={ar ? "ربط بمفتاح API" : "Connect with API key"}
+          <DaylightPanel
             title={ar ? "أدخل مفتاحك من " + provider.name : `Paste your ${provider.name} API key`}
             aside={
               ar
@@ -243,7 +236,7 @@ export default async function IntegrationDetail({
                     fontSize: 10,
                     letterSpacing: "0.18em",
                     textTransform: "uppercase",
-                    color: "var(--heri-ink-3)",
+                    color: "var(--ink-muted)",
                   }}
                 >
                   {provider.key === "sendgrid" ? "SendGrid API Key" : "Resend API Key"}
@@ -254,12 +247,12 @@ export default async function IntegrationDetail({
                   required
                   placeholder={provider.key === "sendgrid" ? "SG.xxxx…" : "re_xxxx…"}
                   style={{
-                    background: "var(--heri-cream-2)",
-                    border: "1px solid var(--heri-rule-strong)",
+                    background: "var(--cream)",
+                    border: "1px solid var(--line)",
                     padding: "10px 14px",
                     fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
                     fontSize: 13,
-                    color: "var(--heri-ink)",
+                    color: "var(--ink)",
                     borderRadius: 0,
                   }}
                 />
@@ -271,7 +264,7 @@ export default async function IntegrationDetail({
                     fontSize: 10,
                     letterSpacing: "0.18em",
                     textTransform: "uppercase",
-                    color: "var(--heri-ink-3)",
+                    color: "var(--ink-muted)",
                   }}
                 >
                   {ar ? "عنوان المُرسِل" : "From address"}
@@ -281,19 +274,19 @@ export default async function IntegrationDetail({
                   name="fromAddress"
                   defaultValue="ops@hourani.jo"
                   style={{
-                    background: "var(--heri-cream-2)",
-                    border: "1px solid var(--heri-rule-strong)",
+                    background: "var(--cream)",
+                    border: "1px solid var(--line)",
                     padding: "10px 14px",
                     fontFamily: "'Inter Tight','Inter',system-ui,sans-serif",
                     fontSize: 13.5,
-                    color: "var(--heri-ink)",
+                    color: "var(--ink)",
                     borderRadius: 0,
                   }}
                 />
               </label>
               <button
                 type="submit"
-                className="heri-btn heri-btn-primary"
+                className="dl-btn dl-btn-primary"
                 style={{ alignSelf: "flex-start" }}
               >
                 <Plug className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -302,7 +295,7 @@ export default async function IntegrationDetail({
               <p
                 style={{
                   fontSize: 11,
-                  color: "var(--heri-ink-3)",
+                  color: "var(--ink-muted)",
                   margin: 0,
                   lineHeight: 1.5,
                 }}
@@ -312,13 +305,12 @@ export default async function IntegrationDetail({
                   : "Note: keys store as plaintext for now. Encryption of IntegrationCredential.tokenBlob is the NS-4 follow-up."}
               </p>
             </form>
-          </HeritageSection>
+          </DaylightPanel>
         ) : null}
 
         {/* Settings */}
         {provider.settingFields && provider.settingFields.length > 0 ? (
-          <HeritageSection
-            eyebrow={ar ? "إعدادات" : "Settings"}
+          <DaylightPanel
             title={ar ? "تفاصيل التكامل" : "Connector configuration"}
             aside={
               ar
@@ -336,7 +328,7 @@ export default async function IntegrationDetail({
                       fontSize: 10,
                       letterSpacing: "0.18em",
                       textTransform: "uppercase",
-                      color: "var(--heri-ink-3)",
+                      color: "var(--ink-muted)",
                     }}
                   >
                     {f.label}
@@ -347,30 +339,29 @@ export default async function IntegrationDetail({
                     defaultValue={settings[f.key] ?? f.default ?? ""}
                     placeholder={f.default}
                     style={{
-                      background: "var(--heri-cream-2)",
-                      border: "1px solid var(--heri-rule-strong)",
+                      background: "var(--cream)",
+                      border: "1px solid var(--line)",
                       padding: "10px 14px",
                       fontFamily: "'Inter Tight','Inter',system-ui,sans-serif",
                       fontSize: 13.5,
-                      color: "var(--heri-ink)",
+                      color: "var(--ink)",
                       borderRadius: 0,
                     }}
                   />
                 </label>
               ))}
               <div className="md:col-span-2 flex justify-end">
-                <button type="submit" className="heri-btn heri-btn-primary">
+                <button type="submit" className="dl-btn dl-btn-primary">
                   <Save className="h-3.5 w-3.5" strokeWidth={1.5} />
                   {ar ? "حفظ الإعدادات" : "Save settings"}
                 </button>
               </div>
             </form>
-          </HeritageSection>
+          </DaylightPanel>
         ) : null}
 
         {/* Activity log */}
-        <HeritageSection
-          eyebrow={ar ? "سجل" : "Activity"}
+        <DaylightPanel
           title={ar ? "آخر النشاط" : "Recent activity"}
           aside={
             logs.length === 0
@@ -382,7 +373,7 @@ export default async function IntegrationDetail({
         >
           {logs.length === 0 ? (
             <p
-              style={{ color: "var(--heri-ink-3)", fontStyle: "italic", fontSize: 13 }}
+              style={{ color: "var(--ink-muted)", fontStyle: "italic", fontSize: 13 }}
             >
               {isConnected
                 ? ar
@@ -399,17 +390,17 @@ export default async function IntegrationDetail({
                   key={log.id}
                   className="grid grid-cols-[auto_auto_1fr_auto] gap-3 items-baseline px-3 py-2"
                   style={{
-                    background: "var(--heri-cream)",
-                    border: "1px solid var(--heri-rule)",
+                    background: "var(--cream)",
+                    border: "1px solid var(--line)",
                     fontSize: 12.5,
                   }}
                 >
                   <span
-                    className="heri-number-mono"
+                    className="font-mono"
                     style={{
                       fontSize: 10,
                       letterSpacing: "0.08em",
-                      color: "var(--heri-ink-3)",
+                      color: "var(--ink-muted)",
                     }}
                   >
                     {new Intl.DateTimeFormat(ar ? "ar-JO-u-nu-latn" : "en-US", {
@@ -428,21 +419,21 @@ export default async function IntegrationDetail({
                       textTransform: "uppercase",
                       color:
                         log.kind === "error"
-                          ? "var(--heri-terracotta)"
+                          ? "var(--brick)"
                           : log.kind === "connect"
-                            ? "var(--heri-teal)"
+                            ? "var(--emerald)"
                             : log.kind === "disconnect"
-                              ? "var(--heri-ink-3)"
-                              : "var(--heri-copper)",
+                              ? "var(--ink-muted)"
+                              : "var(--gold)",
                     }}
                   >
                     {log.kind}
                   </span>
-                  <span style={{ color: "var(--heri-ink)" }}>{log.message}</span>
+                  <span style={{ color: "var(--ink)" }}>{log.message}</span>
                   {log.ms != null ? (
                     <span
-                      className="heri-number-mono"
-                      style={{ fontSize: 10, color: "var(--heri-ink-3)", letterSpacing: "0.06em" }}
+                      className="font-mono"
+                      style={{ fontSize: 10, color: "var(--ink-muted)", letterSpacing: "0.06em" }}
                     >
                       {log.ms}ms
                     </span>
@@ -453,8 +444,7 @@ export default async function IntegrationDetail({
               ))}
             </ol>
           )}
-        </HeritageSection>
-      </PageContainer>
-    </>
+        </DaylightPanel>
+    </DaylightShell>
   );
 }

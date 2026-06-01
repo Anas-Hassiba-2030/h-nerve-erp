@@ -12,9 +12,8 @@
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
-import { HeritagePill } from "@/components/heritage";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
+import "../../../daylight.css";
 import { CouncilTranscript } from "@/components/brain/CouncilTranscript";
 import { council } from "@/lib/brain/council.live";
 import { getLocale } from "@/lib/i18n.server";
@@ -36,8 +35,8 @@ export default async function CouncilTranscriptPage({
   if (!session) notFound();
 
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "الدماغ · جلسة المجلس" : "Brain · Council session"}
         title={
           session.topic.length > 80
@@ -63,52 +62,50 @@ export default async function CouncilTranscriptPage({
         }
       />
 
-      <PageContainer>
-        <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4">
+        <Link
+          href="/brain/council"
+          className="inline-flex items-center gap-2"
+          style={{
+            fontFamily:
+              "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
+            fontSize: 11,
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            color: "var(--gold)",
+            textDecoration: "none",
+          }}
+        >
+          <ArrowLeft className="h-3 w-3 rtl:rotate-180" strokeWidth={1.5} />
+          {ar ? "العودة إلى المجلس" : "Back to council"}
+        </Link>
+        <div className="flex items-center gap-2">
           <Link
-            href="/brain/council"
-            className="heri-focusable inline-flex items-center gap-2"
-            style={{
-              fontFamily:
-                "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-              fontSize: 11,
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              color: "var(--heri-copper)",
-              textDecoration: "none",
-            }}
+            href={`/theater/council/${session.id}`}
+            className="dl-btn dl-btn-secondary"
+            style={{ padding: "8px 14px", fontSize: 12 }}
           >
-            <ArrowLeft className="h-3 w-3 rtl:rotate-180" strokeWidth={1.5} />
-            {ar ? "العودة إلى المجلس" : "Back to council"}
+            <BookOpen className="h-3.5 w-3.5" strokeWidth={1.5} />
+            {ar ? "افتح في المسرح" : "Open in Theater"}
           </Link>
-          <div className="flex items-center gap-2">
-            <Link
-              href={`/theater/council/${session.id}`}
-              className="heri-btn heri-btn-secondary"
-              style={{ padding: "8px 14px", fontSize: 12 }}
+          <form action={deleteSession}>
+            <input type="hidden" name="id" value={session.id} />
+            <button
+              type="submit"
+              className="dl-btn dl-btn-secondary"
+              style={{ padding: "6px 12px", fontSize: 11 }}
             >
-              <BookOpen className="h-3.5 w-3.5" strokeWidth={1.5} />
-              {ar ? "افتح في المسرح" : "Open in Theater"}
-            </Link>
-            <form action={deleteSession}>
-              <input type="hidden" name="id" value={session.id} />
-              <button
-                type="submit"
-                className="heri-btn heri-btn-ghost"
-                style={{ padding: "6px 12px", fontSize: 11 }}
-              >
-                {ar ? "حذف الجلسة" : "Delete session"}
-              </button>
-            </form>
-          </div>
+              {ar ? "حذف الجلسة" : "Delete session"}
+            </button>
+          </form>
         </div>
+      </div>
 
-        <CouncilTranscript session={session} ar={ar} />
+      <CouncilTranscript session={session} ar={ar} />
 
-        {/* Generate plan CTA — Phase 5 hook from PHASES-INTELLIGENCE.md */}
-        <CouncilToPlanCta sessionId={session.id} ar={ar} />
-      </PageContainer>
-    </>
+      {/* Generate plan CTA — Phase 5 hook from PHASES-INTELLIGENCE.md */}
+      <CouncilToPlanCta sessionId={session.id} ar={ar} />
+    </DaylightShell>
   );
 }
 
@@ -128,21 +125,18 @@ async function CouncilToPlanCta({
   if (existing) {
     return (
       <section
-        className="grid gap-3 md:grid-cols-[auto_1fr_auto] md:items-center"
+        className="panel reveal grid gap-3 md:grid-cols-[auto_1fr_auto] md:items-center"
         style={{
-          background: "var(--heri-cream-2)",
-          border: "1px solid var(--heri-rule-strong)",
-          padding: "14px 18px",
-          borderInlineStart: "2px solid var(--heri-teal)",
+          borderInlineStart: "2px solid var(--emerald)",
         }}
       >
         <Target
           className="h-4 w-4"
-          style={{ color: "var(--heri-teal)" }}
+          style={{ color: "var(--emerald)" }}
           strokeWidth={1.5}
         />
         <div className="min-w-0">
-          <div className="heri-eyebrow heri-eyebrow-ink">
+          <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--ink-muted)" }}>
             {ar ? "خطة موجودة" : "Plan exists"}
           </div>
           <div
@@ -152,7 +146,7 @@ async function CouncilToPlanCta({
               fontSize: 14,
               fontWeight: 500,
               letterSpacing: "-0.01em",
-              color: "var(--heri-ink)",
+              color: "var(--ink)",
             }}
           >
             {pickLocale(ar, existing.goal, existing.goalEn)}
@@ -160,7 +154,7 @@ async function CouncilToPlanCta({
         </div>
         <Link
           href={`/plans/${existing.id}`}
-          className="heri-btn heri-btn-secondary"
+          className="dl-btn dl-btn-secondary"
           style={{ padding: "8px 14px", fontSize: 12 }}
         >
           {ar ? "افتح الخطة" : "Open plan"}
@@ -175,11 +169,8 @@ async function CouncilToPlanCta({
 
   return (
     <section
-      className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center"
+      className="panel reveal grid gap-4 md:grid-cols-[1fr_auto] md:items-center"
       style={{
-        background: "var(--heri-cream)",
-        border: "1px solid var(--heri-rule-strong)",
-        padding: "18px 22px",
         position: "relative",
         overflow: "hidden",
       }}
@@ -192,11 +183,11 @@ async function CouncilToPlanCta({
           insetInline: 0,
           height: 2,
           background:
-            "linear-gradient(90deg, var(--heri-terracotta) 0%, var(--heri-ochre) 50%, var(--heri-teal) 100%)",
+            "linear-gradient(90deg, var(--brick) 0%, var(--gold) 50%, var(--emerald) 100%)",
         }}
       />
       <div className="min-w-0">
-        <div className="heri-eyebrow inline-flex items-center gap-2">
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--gold)" }}>
           <Target className="h-3 w-3" strokeWidth={1.5} />
           {ar ? "الخطوة التالية" : "Next move"}
         </div>
@@ -207,7 +198,7 @@ async function CouncilToPlanCta({
             lineHeight: 1.2,
             letterSpacing: ar ? "-0.005em" : "-0.014em",
             fontWeight: ar ? 600 : 500,
-            color: "var(--heri-ink)",
+            color: "var(--ink)",
           }}
         >
           {ar
@@ -219,7 +210,7 @@ async function CouncilToPlanCta({
           style={{
             fontSize: 13,
             lineHeight: 1.55,
-            color: "var(--heri-ink-2)",
+            color: "var(--ink-muted)",
           }}
         >
           {ar
@@ -229,7 +220,7 @@ async function CouncilToPlanCta({
       </div>
       <form action={generateFromCouncil}>
         <input type="hidden" name="sessionId" value={sessionId} />
-        <button type="submit" className="heri-btn heri-btn-primary">
+        <button type="submit" className="dl-btn dl-btn-primary">
           <Target className="h-4 w-4" strokeWidth={1.5} />
           {ar ? "توليد خطة" : "Generate plan"}
         </button>

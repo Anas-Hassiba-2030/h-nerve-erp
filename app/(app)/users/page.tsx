@@ -1,18 +1,19 @@
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
 import { getLocale } from "@/lib/i18n.server";
 import { prisma } from "@/lib/db";
 import { ar, formatDate, ROLES_AR,
   ROLES_EN,
   loc,
 } from "@/lib/utils";
+import "../daylight.css";
 
 export const dynamic = "force-dynamic";
 
-const ROLE_TONE: Record<string, string> = {
-  ADMIN: "badge-violet",
-  EXECUTIVE: "badge-gold",
-  MANAGER: "badge-blue",
-  STAFF: "badge-slate",
+const ROLE_TAG: Record<string, string> = {
+  ADMIN: "gold",
+  EXECUTIVE: "gold",
+  MANAGER: "ok",
+  STAFF: "ok",
 };
 
 export default async function UsersPage() {
@@ -21,54 +22,66 @@ export default async function UsersPage() {
     include: { company: true },
   });
 
+  const isAr = getLocale() === "ar";
+
   return (
-    <>
-      <Topbar
-        eyebrow="الإدارة"
-        title="فريق H‑Nerve"
-        subtitle="كل من يمتلك صلاحية الدخول إلى النظام العصبي للمجموعة."
+    <DaylightShell dir={isAr ? "rtl" : "ltr"}>
+      <DaylightHeader
+        eyebrow={isAr ? "الإدارة" : "Administration"}
+        title={isAr ? "فريق H‑Nerve" : "H‑Nerve Team"}
+        subtitle={isAr ? "كل من يمتلك صلاحية الدخول إلى النظام العصبي للمجموعة." : "Everyone with access to the group's nerve system."}
       />
-      <div className="flex-1 p-6">
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>الاسم</th>
-                <th>المسمى الوظيفي</th>
-                <th>الجهة</th>
-                <th>البريد</th>
-                <th>الدور</th>
-                <th>تاريخ الانضمام</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id}>
-                  <td>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold text-white bg-brand-700`}
-                      >
-                        {u.name.slice(0, 1)}
-                      </div>
-                      <span className="font-bold text-brand-900">{u.name}</span>
+      <DaylightPanel title={isAr ? "فريق H‑Nerve" : "H‑Nerve Team"}>
+        <table className="dl-table">
+          <thead>
+            <tr>
+              <th>{isAr ? "الاسم" : "Name"}</th>
+              <th>{isAr ? "المسمى الوظيفي" : "Title"}</th>
+              <th>{isAr ? "الجهة" : "Company"}</th>
+              <th>{isAr ? "البريد" : "Email"}</th>
+              <th>{isAr ? "الدور" : "Role"}</th>
+              <th className="num">{isAr ? "تاريخ الانضمام" : "Joined"}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((u) => (
+              <tr key={u.id}>
+                <td>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        width: 32,
+                        height: 32,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: "50%",
+                        fontSize: 13,
+                        fontWeight: 700,
+                        color: "white",
+                        background: "var(--emerald)",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {u.name.slice(0, 1)}
                     </div>
-                  </td>
-                  <td className="text-slate-700">{u.title ?? "—"}</td>
-                  <td className="text-slate-700">{u.company?.name ?? "—"}</td>
-                  <td className="font-mono text-xs text-slate-500" dir="ltr">{u.email}</td>
-                  <td>
-                    <span className={ROLE_TONE[u.role] ?? "badge-slate"}>
-                      {loc(ROLES_AR, ROLES_EN, getLocale(), u.role)}
-                    </span>
-                  </td>
-                  <td className="text-xs text-slate-500">{formatDate(u.createdAt)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </>
+                    <span style={{ fontWeight: 600, color: "var(--ink)" }}>{u.name}</span>
+                  </div>
+                </td>
+                <td style={{ color: "var(--ink-muted)" }}>{u.title ?? "—"}</td>
+                <td style={{ color: "var(--ink-muted)" }}>{u.company?.name ?? "—"}</td>
+                <td style={{ fontFamily: "monospace", fontSize: 12, color: "var(--ink-muted)" }} dir="ltr">{u.email}</td>
+                <td>
+                  <span className={`tag ${ROLE_TAG[u.role] ?? "ok"}`} style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}>
+                    {loc(ROLES_AR, ROLES_EN, getLocale(), u.role)}
+                  </span>
+                </td>
+                <td className="num" style={{ fontSize: 12, color: "var(--ink-muted)" }}>{formatDate(u.createdAt)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </DaylightPanel>
+    </DaylightShell>
   );
 }

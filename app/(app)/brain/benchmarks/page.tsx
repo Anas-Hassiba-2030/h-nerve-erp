@@ -1,15 +1,9 @@
 // /brain/benchmarks — cross-org peer benchmarks (federated learning).
 //
-// Aesthetic: Quiet Authority (DESIGN-SKILL §1.C). The federation is a
-// contract; the UI is a contract. Single chromatic accent — copper.
-// Every benchmark card animates a 1px ochre scan line on first paint
-// (the "freshly fetched from the federation" trust gesture).
-//
 // Phase 8 of docs/PHASES-INTELLIGENCE.md.
 
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
-import { HeritageSection, HeritagePill } from "@/components/heritage";
+import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
+import "../../daylight.css";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { getOptIn } from "@/lib/brain/federation.live";
@@ -47,8 +41,8 @@ export default async function BrainBenchmarksPage() {
   const enabled = optIn.status === "ENABLED";
 
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "الدماغ · المعايير المرجعية" : "Brain · Peer benchmarks"}
         title={ar ? "ما يفعله نظراؤك بدون أن يعرفهم أحد" : "What your peers know — without knowing them"}
         subtitle={
@@ -58,139 +52,135 @@ export default async function BrainBenchmarksPage() {
         }
       />
 
-      <PageContainer>
-        {!enabled ? (
-          <FederationContract ar={ar} />
-        ) : (
-          <>
-            {/* Status row */}
-            <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              <Stat label={ar ? "الحالة" : "Status"} value={ar ? "نشطة" : "ENABLED"} valueColor="var(--heri-teal)" />
-              <Stat label={ar ? "نظراء متّصلون" : "Connected peers"} value={peers.length} />
-              <Stat label={ar ? "أنماط مرئية" : "Patterns visible"} value={patterns.length} />
-              <Stat label={ar ? "K-تخفّي" : "K-anonymity"} value={optIn ? 5 : 0} />
-            </section>
+      {!enabled ? (
+        <FederationContract ar={ar} />
+      ) : (
+        <>
+          {/* Status row */}
+          <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <Stat label={ar ? "الحالة" : "Status"} value={ar ? "نشطة" : "ENABLED"} valueColor="var(--emerald)" />
+            <Stat label={ar ? "نظراء متّصلون" : "Connected peers"} value={peers.length} />
+            <Stat label={ar ? "أنماط مرئية" : "Patterns visible"} value={patterns.length} />
+            <Stat label={ar ? "K-تخفّي" : "K-anonymity"} value={optIn ? 5 : 0} />
+          </section>
 
-            {/* Action rail */}
-            <div
-              className="flex flex-wrap items-center gap-2 px-1 py-3"
-              style={{
-                borderTop: "1px solid var(--heri-rule)",
-                borderBottom: "1px solid var(--heri-rule)",
-              }}
-            >
-              <span className="heri-eyebrow">{ar ? "اتحاد" : "Federation"}</span>
-              <form action={refreshFederation}>
-                <button type="submit" className="heri-btn heri-btn-primary">
-                  <RotateCw className="h-3.5 w-3.5" strokeWidth={1.5} />
-                  {ar ? "تحديث الأنماط" : "Refresh patterns"}
+          {/* Action rail */}
+          <div
+            className="flex flex-wrap items-center gap-2 px-1 py-3"
+            style={{
+              borderTop: "1px solid var(--line)",
+              borderBottom: "1px solid var(--line)",
+            }}
+          >
+            <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--ink-muted)" }}>{ar ? "اتحاد" : "Federation"}</span>
+            <form action={refreshFederation}>
+              <button type="submit" className="dl-btn dl-btn-primary">
+                <RotateCw className="h-3.5 w-3.5" strokeWidth={1.5} />
+                {ar ? "تحديث الأنماط" : "Refresh patterns"}
+              </button>
+            </form>
+            {peers.length === 0 ? (
+              <form action={seedFederationPeers}>
+                <button type="submit" className="dl-btn dl-btn-secondary">
+                  <Database className="h-3.5 w-3.5" strokeWidth={1.5} />
+                  {ar ? "ازرع نظراء تجريبيين" : "Seed demo peers"}
                 </button>
               </form>
-              {peers.length === 0 ? (
-                <form action={seedFederationPeers}>
-                  <button type="submit" className="heri-btn heri-btn-secondary">
-                    <Database className="h-3.5 w-3.5" strokeWidth={1.5} />
-                    {ar ? "ازرع نظراء تجريبيين" : "Seed demo peers"}
-                  </button>
-                </form>
-              ) : null}
-              <div className="grow" />
-              <form action={optOutFederation}>
-                <button
-                  type="submit"
-                  className="heri-btn heri-btn-ghost"
-                  style={{ padding: "6px 12px", fontSize: 11 }}
-                >
-                  {ar ? "إيقاف الاتحاد" : "Opt out"}
-                </button>
-              </form>
-              <form action={clearFederation}>
-                <button
-                  type="submit"
-                  className="heri-btn heri-btn-ghost"
-                  style={{ padding: "6px 12px", fontSize: 11, color: "var(--heri-terracotta)" }}
-                >
-                  <Trash2 className="h-3 w-3" strokeWidth={1.5} />
-                  {ar ? "مسح" : "Clear"}
-                </button>
-              </form>
-            </div>
-
-            {patterns.length === 0 ? (
-              <HeritageSection
-                eyebrow={ar ? "نظراء" : "Peers"}
-                title={ar ? "لا أنماط بعد" : "No patterns yet"}
-                aside={
-                  ar
-                    ? "اضغط «ازرع نظراء تجريبيين» لرؤية الاتحاد قيد العمل."
-                    : "Press 'Seed demo peers' to see the federation in action."
-                }
+            ) : null}
+            <div className="grow" />
+            <form action={optOutFederation}>
+              <button
+                type="submit"
+                className="dl-btn dl-btn-secondary"
+                style={{ padding: "6px 12px", fontSize: 11 }}
               >
-                <form action={seedFederationPeers}>
-                  <button type="submit" className="heri-btn heri-btn-primary">
-                    <Database className="h-4 w-4" strokeWidth={1.5} />
-                    {ar ? "ازرع نظراء تجريبيين" : "Seed demo peers"}
-                  </button>
-                </form>
-              </HeritageSection>
-            ) : (
-              <section
-                className="grid gap-3 heri-stagger"
-                style={{
-                  gridTemplateColumns:
-                    "repeat(auto-fit, minmax(min(440px, 100%), 1fr))",
-                }}
+                {ar ? "إيقاف الاتحاد" : "Opt out"}
+              </button>
+            </form>
+            <form action={clearFederation}>
+              <button
+                type="submit"
+                className="dl-btn dl-btn-secondary"
+                style={{ padding: "6px 12px", fontSize: 11, color: "var(--brick)" }}
               >
-                {patterns.map((p) => (
-                  <BenchmarkCard key={p.id} pattern={p} ar={ar} />
-                ))}
-              </section>
-            )}
+                <Trash2 className="h-3 w-3" strokeWidth={1.5} />
+                {ar ? "مسح" : "Clear"}
+              </button>
+            </form>
+          </div>
 
-            {/* Privacy guarantees footer */}
-            <HeritageSection
-              eyebrow={ar ? "الضمانات" : "Guarantees"}
-              title={ar ? "ما يحميك في كل تبادل" : "What protects you in every exchange"}
+          {patterns.length === 0 ? (
+            <DaylightPanel
+              title={ar ? "لا أنماط بعد" : "No patterns yet"}
               aside={
                 ar
-                  ? "الاتحاد مُلتزم بثلاث قواعد قاسية. لا واحدة منها قابلة للتجاوز."
-                  : "The federation enforces three hard rules. None of them are bypassable."
+                  ? "اضغط «ازرع نظراء تجريبيين» لرؤية الاتحاد قيد العمل."
+                  : "Press 'Seed demo peers' to see the federation in action."
               }
             >
-              <ul className="space-y-2">
-                <Guarantee
-                  icon={<ShieldCheck className="h-3.5 w-3.5" strokeWidth={1.5} />}
-                  title={ar ? "K-تخفّي = 5" : "K-anonymity = 5"}
-                  body={
-                    ar
-                      ? "لا يظهر أي نمط ما لم يكن خمسة نظراء على الأقل قد ساهموا فيه. وحتى حينها، لا يُذكر أيٌّ منهم بالاسم."
-                      : "No pattern surfaces unless at least five peers have contributed to it. Even then, none of them is ever named."
-                  }
-                />
-                <Guarantee
-                  icon={<Globe2 className="h-3.5 w-3.5" strokeWidth={1.5} />}
-                  title={ar ? "بدون نسب فردي" : "No per-peer attribution"}
-                  body={
-                    ar
-                      ? "كل ما يعبر الحدود هو متوسط مجمَّع. النتائج الفردية لكل نظير تبقى داخل خادمها."
-                      : "Only the aggregate ever crosses the boundary. Each peer's individual outcomes stay inside their own server."
-                  }
-                />
-                <Guarantee
-                  icon={<Building2 className="h-3.5 w-3.5" strokeWidth={1.5} />}
-                  title={ar ? "ميزانية خصوصية محدودة" : "Bounded privacy budget"}
-                  body={
-                    ar
-                      ? `استعلامات اليوم تستهلك ${(optIn.budgetUsed * 100).toFixed(0)}٪ من ميزانية الخصوصية. عند الوصول إلى 100٪ يتوقّف التبادل تلقائياً حتى دورة تجديد جديدة.`
-                      : `Today's queries consume ${(optIn.budgetUsed * 100).toFixed(0)}% of the privacy budget. When 100% is reached, the exchange auto-pauses until the next refresh window.`
-                  }
-                />
-              </ul>
-            </HeritageSection>
-          </>
-        )}
-      </PageContainer>
-    </>
+              <form action={seedFederationPeers}>
+                <button type="submit" className="dl-btn dl-btn-primary">
+                  <Database className="h-4 w-4" strokeWidth={1.5} />
+                  {ar ? "ازرع نظراء تجريبيين" : "Seed demo peers"}
+                </button>
+              </form>
+            </DaylightPanel>
+          ) : (
+            <section
+              className="grid gap-3"
+              style={{
+                gridTemplateColumns:
+                  "repeat(auto-fit, minmax(min(440px, 100%), 1fr))",
+              }}
+            >
+              {patterns.map((p) => (
+                <BenchmarkCard key={p.id} pattern={p} ar={ar} />
+              ))}
+            </section>
+          )}
+
+          {/* Privacy guarantees footer */}
+          <DaylightPanel
+            title={ar ? "ما يحميك في كل تبادل" : "What protects you in every exchange"}
+            aside={
+              ar
+                ? "الاتحاد مُلتزم بثلاث قواعد قاسية. لا واحدة منها قابلة للتجاوز."
+                : "The federation enforces three hard rules. None of them are bypassable."
+            }
+          >
+            <ul className="space-y-2">
+              <Guarantee
+                icon={<ShieldCheck className="h-3.5 w-3.5" strokeWidth={1.5} />}
+                title={ar ? "K-تخفّي = 5" : "K-anonymity = 5"}
+                body={
+                  ar
+                    ? "لا يظهر أي نمط ما لم يكن خمسة نظراء على الأقل قد ساهموا فيه. وحتى حينها، لا يُذكر أيٌّ منهم بالاسم."
+                    : "No pattern surfaces unless at least five peers have contributed to it. Even then, none of them is ever named."
+                }
+              />
+              <Guarantee
+                icon={<Globe2 className="h-3.5 w-3.5" strokeWidth={1.5} />}
+                title={ar ? "بدون نسب فردي" : "No per-peer attribution"}
+                body={
+                  ar
+                    ? "كل ما يعبر الحدود هو متوسط مجمَّع. النتائج الفردية لكل نظير تبقى داخل خادمها."
+                    : "Only the aggregate ever crosses the boundary. Each peer's individual outcomes stay inside their own server."
+                }
+              />
+              <Guarantee
+                icon={<Building2 className="h-3.5 w-3.5" strokeWidth={1.5} />}
+                title={ar ? "ميزانية خصوصية محدودة" : "Bounded privacy budget"}
+                body={
+                  ar
+                    ? `استعلامات اليوم تستهلك ${(optIn.budgetUsed * 100).toFixed(0)}٪ من ميزانية الخصوصية. عند الوصول إلى 100٪ يتوقّف التبادل تلقائياً حتى دورة تجديد جديدة.`
+                    : `Today's queries consume ${(optIn.budgetUsed * 100).toFixed(0)}% of the privacy budget. When 100% is reached, the exchange auto-pauses until the next refresh window.`
+                }
+              />
+            </ul>
+          </DaylightPanel>
+        </>
+      )}
+    </DaylightShell>
   );
 }
 
@@ -208,18 +198,18 @@ function Stat({
   return (
     <div
       style={{
-        background: "var(--heri-cream)",
-        border: "1px solid var(--heri-rule)",
+        background: "var(--cream)",
+        border: "1px solid var(--line)",
         padding: "14px 18px",
       }}
     >
-      <div className="heri-eyebrow heri-eyebrow-ink">{label}</div>
+      <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--ink-muted)" }}>{label}</div>
       <div
-        className="heri-number mt-2"
         style={{
           fontSize: "clamp(22px, 2.4vw, 30px)",
           fontWeight: 500,
-          color: valueColor ?? "var(--heri-ink)",
+          color: valueColor ?? "var(--ink)",
+          marginTop: 8,
         }}
       >
         {typeof value === "number" ? value.toLocaleString("en-US") : value}
@@ -241,24 +231,23 @@ function Guarantee({
     <li
       className="grid grid-cols-[auto_1fr] gap-3 px-3 py-3"
       style={{
-        background: "var(--heri-cream)",
-        border: "1px solid var(--heri-rule)",
+        background: "var(--cream)",
+        border: "1px solid var(--line)",
       }}
     >
       <div
         className="flex h-7 w-7 items-center justify-center"
         style={{
-          background: "var(--heri-cream-2)",
-          border: "1px solid var(--heri-rule)",
-          color: "var(--heri-copper)",
+          background: "var(--ivory)",
+          border: "1px solid var(--line)",
+          color: "var(--gold)",
         }}
       >
         {icon}
       </div>
       <div>
         <div
-          className="heri-eyebrow heri-eyebrow-ink"
-          style={{ color: "var(--heri-copper)" }}
+          style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--gold)" }}
         >
           {title}
         </div>
@@ -267,7 +256,7 @@ function Guarantee({
           style={{
             fontSize: 13,
             lineHeight: 1.55,
-            color: "var(--heri-ink-2)",
+            color: "var(--ink-muted)",
           }}
         >
           {body}
@@ -279,12 +268,12 @@ function Guarantee({
 
 function FederationContract({ ar }: { ar: boolean }) {
   return (
-    <section
-      className="heri-hero"
+    <div
+      className="panel reveal"
       style={{ position: "relative", overflow: "hidden" }}
     >
       <div className="px-6 py-9 md:px-10 md:py-12">
-        <div className="heri-eyebrow inline-flex items-center gap-2">
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--gold)" }}>
           <ShieldCheck className="h-3 w-3" strokeWidth={1.5} />
           {ar ? "العقد" : "The contract"}
         </div>
@@ -295,7 +284,7 @@ function FederationContract({ ar }: { ar: boolean }) {
             lineHeight: 1.05,
             letterSpacing: ar ? "-0.005em" : "-0.024em",
             fontWeight: ar ? 600 : 500,
-            color: "var(--heri-ink)",
+            color: "var(--ink)",
             textWrap: "balance" as any,
             maxWidth: "26em",
           }}
@@ -310,7 +299,7 @@ function FederationContract({ ar }: { ar: boolean }) {
             fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
             fontSize: "clamp(14px, 1.05vw, 16px)",
             lineHeight: 1.65,
-            color: "var(--heri-ink-2)",
+            color: "var(--ink-muted)",
           }}
         >
           {ar
@@ -338,7 +327,7 @@ function FederationContract({ ar }: { ar: boolean }) {
 
         <div className="mt-9 flex flex-wrap items-center gap-3">
           <form action={optInFederation}>
-            <button type="submit" className="heri-btn heri-btn-primary">
+            <button type="submit" className="dl-btn dl-btn-primary">
               <Globe2 className="h-4 w-4" strokeWidth={1.5} />
               {ar ? "أوافق وأنضم إلى الاتحاد" : "I agree — join the federation"}
             </button>
@@ -349,14 +338,14 @@ function FederationContract({ ar }: { ar: boolean }) {
               fontSize: 10.5,
               letterSpacing: "0.14em",
               textTransform: "uppercase",
-              color: "var(--heri-ink-3)",
+              color: "var(--ink-muted)",
             }}
           >
             {ar ? "يمكنك الإلغاء في أي وقت" : "You can opt out at any time"}
           </span>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -364,14 +353,13 @@ function ContractTerm({ n, title, body }: { n: string; title: string; body: stri
   return (
     <div
       style={{
-        background: "var(--heri-cream-2)",
-        border: "1px solid var(--heri-rule)",
+        background: "var(--ivory)",
+        border: "1px solid var(--line)",
         padding: "16px 18px",
       }}
     >
       <div
-        className="heri-eyebrow"
-        style={{ color: "var(--heri-copper)", fontSize: 10, letterSpacing: "0.22em" }}
+        style={{ color: "var(--gold)", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.22em" }}
       >
         TERM · {n}
       </div>
@@ -381,7 +369,7 @@ function ContractTerm({ n, title, body }: { n: string; title: string; body: stri
           fontSize: 17,
           fontWeight: 500,
           letterSpacing: "-0.012em",
-          color: "var(--heri-ink)",
+          color: "var(--ink)",
         }}
       >
         {title}
@@ -391,7 +379,7 @@ function ContractTerm({ n, title, body }: { n: string; title: string; body: stri
         style={{
           fontSize: 12.5,
           lineHeight: 1.55,
-          color: "var(--heri-ink-2)",
+          color: "var(--ink-muted)",
         }}
       >
         {body}
@@ -415,36 +403,29 @@ function BenchmarkCard({ pattern, ar }: { pattern: any; ar: boolean }) {
 
   return (
     <article
-      className="relative federation-card"
+      className="panel reveal"
       style={{
-        background: "var(--heri-cream)",
-        border: "1px solid var(--heri-rule)",
         padding: "18px 20px 16px",
         overflow: "hidden",
       }}
     >
-      {/* Scan line — the trust gesture */}
-      <span aria-hidden className="federation-scan" />
-
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div
-            className="heri-eyebrow inline-flex items-center gap-2"
-            style={{ color: "var(--heri-copper)" }}
+            style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--gold)" }}
           >
             <Globe2 className="h-3 w-3" strokeWidth={1.5} />
             {ar ? "نظراء — اتحادي" : "PEERS · FEDERATED"}
           </div>
           <div
-            className="heri-eyebrow heri-eyebrow-ink mt-1.5"
-            style={{ fontSize: 9.5, letterSpacing: "0.18em" }}
+            style={{ fontSize: 9.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.18em", color: "var(--ink-muted)", marginTop: 6 }}
           >
             {tierLine || (ar ? "فئتك" : "YOUR TIER")}
           </div>
         </div>
-        <HeritagePill tone="info">
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 999, fontSize: 11.5, fontWeight: 600, color: "var(--ink-muted)", background: "rgba(100,90,80,.1)" }}>
           {pattern.peerCount} {ar ? "نظير" : "peers"}
-        </HeritagePill>
+        </span>
       </header>
 
       <p
@@ -453,7 +434,7 @@ function BenchmarkCard({ pattern, ar }: { pattern: any; ar: boolean }) {
           fontSize: "clamp(15px, 1.2vw, 17px)",
           lineHeight: 1.5,
           letterSpacing: ar ? 0 : "-0.012em",
-          color: "var(--heri-ink)",
+          color: "var(--ink)",
           fontStyle: "italic",
           maxWidth: "62ch",
           fontFamily: ar
@@ -467,7 +448,7 @@ function BenchmarkCard({ pattern, ar }: { pattern: any; ar: boolean }) {
 
       <footer
         className="mt-5 pt-3 flex flex-wrap items-center justify-between gap-2"
-        style={{ borderTop: "1px solid var(--heri-rule)" }}
+        style={{ borderTop: "1px solid var(--line)" }}
       >
         <div
           className="flex flex-wrap items-center gap-2"
@@ -476,31 +457,30 @@ function BenchmarkCard({ pattern, ar }: { pattern: any; ar: boolean }) {
             fontSize: 10,
             letterSpacing: "0.1em",
             textTransform: "uppercase",
-            color: "var(--heri-ink-3)",
+            color: "var(--ink-muted)",
             fontVariantNumeric: "tabular-nums",
           }}
         >
           {m ? (
             <>
               <span>{ar ? m.ar : m.en}</span>
-              <span style={{ color: "var(--heri-rule-strong)" }}>·</span>
+              <span style={{ color: "var(--line)" }}>·</span>
             </>
           ) : null}
           <span>
             {ar ? "متوسط" : "AVG"} {(pattern.averageDelta * 100).toFixed(1)}%
           </span>
-          <span style={{ color: "var(--heri-rule-strong)" }}>·</span>
+          <span style={{ color: "var(--line)" }}>·</span>
           <span>
             {ar ? "ثقة" : "CONF"} {(pattern.confidence * 100).toFixed(0)}%
           </span>
-          <span style={{ color: "var(--heri-rule-strong)" }}>·</span>
-          <span style={{ color: "var(--heri-copper)" }}>
+          <span style={{ color: "var(--line)" }}>·</span>
+          <span style={{ color: "var(--gold)" }}>
             K = {pattern.kAnonymity}
           </span>
         </div>
         <span
-          className="heri-eyebrow inline-flex items-center gap-1"
-          style={{ color: "var(--heri-copper)", fontSize: 10 }}
+          style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--gold)" }}
         >
           {ar ? "تفاصيل" : "DETAILS"}
           <ArrowRight className="h-3 w-3 rtl:rotate-180" strokeWidth={1.5} />

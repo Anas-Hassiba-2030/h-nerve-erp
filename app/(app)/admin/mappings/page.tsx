@@ -13,12 +13,14 @@ import { ArrowRight, Plus, ListChecks } from "lucide-react";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import { formatDateTime, formatNumber } from "@/lib/utils";
 import { MappingDeleteButton } from "./MappingDeleteButton";
 import { MappingTester } from "./MappingTester";
 import { createMapping, updateMapping, toggleMappingActive } from "./actions";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
+
+import "../../daylight.css";
 
 export const dynamic = "force-dynamic";
 
@@ -54,8 +56,8 @@ export default async function MappingsAdminPage() {
   const systems = new Set(mappings.map((m) => m.sourceSystem));
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "تكامل" : "Integrations"}
         title={ar ? "خرائط الاستيراد" : "Import Mappings"}
         subtitle={
@@ -64,16 +66,17 @@ export default async function MappingsAdminPage() {
             : "Translate source column names to canonical fields — applied before validation"
         }
         actions={<AdminFamilyNav current="/admin/mappings" ar={ar} />}
-        metrics={[
-          { label: ar ? "خرائط" : "Mappings", value: formatNumber(mappings.length), tone: "blue" },
-          { label: ar ? "نشطة" : "Active", value: formatNumber(activeCount), tone: "emerald" },
-          { label: ar ? "مستأجرون" : "Tenants", value: formatNumber(tenants.size), tone: "violet" },
-          { label: ar ? "أنظمة مصدر" : "Source systems", value: formatNumber(systems.size), tone: "amber" },
-        ]}
       />
 
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "خرائط" : "Mappings"} value={formatNumber(mappings.length)} />
+        <DaylightKpi label={ar ? "نشطة" : "Active"} value={formatNumber(activeCount)} />
+        <DaylightKpi label={ar ? "مستأجرون" : "Tenants"} value={formatNumber(tenants.size)} />
+        <DaylightKpi label={ar ? "أنظمة مصدر" : "Source systems"} value={formatNumber(systems.size)} />
+      </DaylightKpiGrid>
+
       {/* Create */}
-      <details className="card overflow-hidden">
+      <details className="panel reveal overflow-hidden">
         <summary
           className="flex cursor-pointer items-center gap-2 px-4 py-3 text-sm font-bold"
           style={{ listStyle: "none", color: "var(--brand-deep)" }}
@@ -84,7 +87,7 @@ export default async function MappingsAdminPage() {
         <form
           action={createMapping}
           className="flex flex-col gap-3 px-4 pb-4"
-          style={{ borderTop: "1px solid var(--border)" }}
+          style={{ borderTop: "1px solid var(--line)" }}
         >
           <div className="grid gap-3 pt-3 sm:grid-cols-3">
             <label className="flex flex-col gap-1 text-xs font-bold">
@@ -127,12 +130,12 @@ export default async function MappingsAdminPage() {
       </details>
 
       {mappings.length === 0 ? (
-        <div className="card card-pad mt-3 flex flex-col items-center gap-3 py-16 text-center">
-          <ListChecks className="h-10 w-10" style={{ color: "var(--text-muted)" }} />
-          <p className="text-sm font-bold" style={{ color: "var(--text)" }}>
+        <div className="panel reveal mt-3 flex flex-col items-center gap-3 py-16 text-center">
+          <ListChecks className="h-10 w-10" style={{ color: "var(--ink-muted)" }} />
+          <p className="text-sm font-bold" style={{ color: "var(--ink)" }}>
             {ar ? "لا توجد خرائط بعد" : "No mappings yet"}
           </p>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+          <p className="text-xs" style={{ color: "var(--ink-muted)" }}>
             {ar
               ? "أنشئ خريطة لترجمة أعمدة مصدر مستأجر إلى الحقول القانونية."
               : "Create one to translate a tenant's source columns to canonical fields."}
@@ -152,29 +155,29 @@ export default async function MappingsAdminPage() {
                 {showTenantHeader ? (
                   <div
                     className="px-1 pb-1 pt-2 text-[10px] font-bold uppercase tracking-widest"
-                    style={{ color: "var(--text-muted)" }}
+                    style={{ color: "var(--ink-muted)" }}
                   >
                     {ar ? "المستأجر" : "Tenant"}: {m.tenantId}
                   </div>
                 ) : null}
-                <details className="card overflow-hidden">
+                <details className="panel reveal overflow-hidden">
                   <summary
                     className="flex cursor-pointer flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3"
                     style={{ listStyle: "none" }}
                   >
                     <ArrowRight
                       className="h-3.5 w-3.5 shrink-0"
-                      style={{ color: "var(--text-muted)" }}
+                      style={{ color: "var(--ink-muted)" }}
                       aria-hidden
                     />
                     <span
                       className="font-mono text-sm font-extrabold"
-                      style={{ color: "var(--text)" }}
+                      style={{ color: "var(--ink)" }}
                     >
                       {m.sourceSystem}
                     </span>
                     {m.description ? (
-                      <span className="truncate text-sm" style={{ color: "var(--text)" }}>
+                      <span className="truncate text-sm" style={{ color: "var(--ink)" }}>
                         {m.description}
                       </span>
                     ) : null}
@@ -190,7 +193,7 @@ export default async function MappingsAdminPage() {
                       <span className={m.active ? "badge-emerald" : "badge-slate"}>
                         {m.active ? (ar ? "نشطة" : "Active") : ar ? "معطّلة" : "Inactive"}
                       </span>
-                      <span className="font-mono" style={{ color: "var(--text-muted)" }}>
+                      <span className="font-mono" style={{ color: "var(--ink-muted)" }}>
                         {formatDateTime(m.updatedAt, ar ? "ar" : "en")}
                       </span>
                     </span>
@@ -198,13 +201,13 @@ export default async function MappingsAdminPage() {
 
                   <div
                     className="flex flex-col gap-4 px-4 py-4"
-                    style={{ borderTop: "1px solid var(--border)" }}
+                    style={{ borderTop: "1px solid var(--line)" }}
                   >
                     {/* fieldMap table */}
-                    <div className="table-wrap">
-                      <table className="w-full text-start text-xs">
+                    
+                      <table className="dl-table">
                         <thead>
-                          <tr style={{ color: "var(--text-muted)" }}>
+                          <tr style={{ color: "var(--ink-muted)" }}>
                             <th className="px-3 py-2 text-start font-bold">
                               {ar ? "حقلهم" : "Their field"}
                             </th>
@@ -216,26 +219,25 @@ export default async function MappingsAdminPage() {
                         </thead>
                         <tbody>
                           {Object.entries(fieldMap).map(([k, v]) => (
-                            <tr key={k} style={{ borderTop: "1px solid var(--border)" }}>
-                              <td className="px-3 py-2 font-mono" style={{ color: "var(--text)" }}>{k}</td>
-                              <td className="px-3 py-2" style={{ color: "var(--text-muted)" }}>→</td>
+                            <tr key={k} style={{ borderTop: "1px solid var(--line)" }}>
+                              <td className="px-3 py-2 font-mono" style={{ color: "var(--ink)" }}>{k}</td>
+                              <td className="px-3 py-2" style={{ color: "var(--ink-muted)" }}>→</td>
                               <td className="px-3 py-2 font-mono" style={{ color: "var(--brand-deep)" }}>{String(v)}</td>
                             </tr>
                           ))}
                           {Object.entries(defaults).map(([k, v]) => (
-                            <tr key={`d-${k}`} style={{ borderTop: "1px solid var(--border)" }}>
-                              <td className="px-3 py-2 text-[10px] font-bold uppercase" style={{ color: "var(--text-muted)" }}>
+                            <tr key={`d-${k}`} style={{ borderTop: "1px solid var(--line)" }}>
+                              <td className="px-3 py-2 text-[10px] font-bold uppercase" style={{ color: "var(--ink-muted)" }}>
                                 {ar ? "افتراضي" : "default"}
                               </td>
-                              <td className="px-3 py-2" style={{ color: "var(--text-muted)" }}>→</td>
-                              <td className="px-3 py-2 font-mono" style={{ color: "var(--text)" }}>
+                              <td className="px-3 py-2" style={{ color: "var(--ink-muted)" }}>→</td>
+                              <td className="px-3 py-2 font-mono" style={{ color: "var(--ink)" }}>
                                 {k} = {String(v)}
                               </td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
-                    </div>
 
                     {/* Test mapping preview (pure, client-side) */}
                     <MappingTester
@@ -248,7 +250,7 @@ export default async function MappingsAdminPage() {
                     <form
                       action={updateMapping}
                       className="flex flex-col gap-3"
-                      style={{ borderTop: "1px solid var(--border)", paddingTop: "0.75rem" }}
+                      style={{ borderTop: "1px solid var(--line)", paddingTop: "0.75rem" }}
                     >
                       <input type="hidden" name="id" value={m.id} />
                       <label className="flex flex-col gap-1 text-xs font-bold">
@@ -272,7 +274,7 @@ export default async function MappingsAdminPage() {
 
                     <div
                       className="flex flex-wrap items-center gap-2"
-                      style={{ borderTop: "1px solid var(--border)", paddingTop: "0.75rem" }}
+                      style={{ borderTop: "1px solid var(--line)", paddingTop: "0.75rem" }}
                     >
                       <form action={toggleMappingActive}>
                         <input type="hidden" name="id" value={m.id} />
@@ -298,6 +300,6 @@ export default async function MappingsAdminPage() {
           })}
         </section>
       )}
-    </>
+    </DaylightShell>
   );
 }

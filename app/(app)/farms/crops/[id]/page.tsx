@@ -12,21 +12,18 @@ import {
   Tractor,
   ArrowRight,
 } from "lucide-react";
-import { Topbar } from "@/components/Topbar";
-import { KpiCard } from "@/components/KpiCard";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { StatusBadge } from "@/components/StatusBadge";
 import { prisma } from "@/lib/db";
 import {
-  ar,
   formatNumber,
   formatRelative,
   formatShortDate,
   FARM_TYPES_AR,
-  STATUS_EN,
   FARM_TYPES_EN,
   loc,
 } from "@/lib/utils";
-import { getCompanyBrand } from "@/lib/companyBrand";
+import "../../../daylight.css";
 
 const CROP_STATUS_AR: Record<string, string> = {
   GROWING: "ينمو",
@@ -101,7 +98,6 @@ export default async function CropDetailPage({
       ? (crop.actualYieldKg / crop.expectedYieldKg) * 100
       : null;
 
-  const brand = getCompanyBrand(crop.farm.company.code);
   const en = getLocale() === "en";
   const farmName = en ? (crop.farm.nameEn ?? crop.farm.name) : crop.farm.name;
 
@@ -115,545 +111,202 @@ export default async function CropDetailPage({
           : "#0a8e54";
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={en ? "ltr" : "rtl"}>
+      <DaylightHeader
         eyebrow={en ? "Smart Agriculture" : "الزراعة الذكية"}
         title={crop.name}
-        subtitle={
-          crop.variety
-            ? `${crop.variety} • ${farmName}`
-            : farmName
-        }
+        subtitle={crop.variety ? `${crop.variety} • ${farmName}` : farmName}
         actions={
-          <Link href="/farms" className="btn-ghost">
+          <Link href="/farms" className="dl-btn dl-btn-secondary">
             <ArrowLeft className="h-4 w-4" />
             {en ? "Farms" : "المزارع"}
           </Link>
         }
       />
 
-      <div className="flex-1 space-y-6 p-6">
-        {/* Hero */}
-        <section
-          className="relative overflow-hidden rounded-2xl p-6 anim-fade-up"
-          style={{ background: brand.gradient, color: "white", minHeight: "200px" }}
-        >
-          <div
-            className="absolute inset-0 opacity-15 anim-grad"
-            style={{
-              background:
-                "linear-gradient(120deg, transparent 0%, white 50%, transparent 100%)",
-            }}
-            aria-hidden
-          />
-          <div className="relative grid gap-6 lg:grid-cols-[auto,1fr] lg:items-center">
-            <div className="anim-pop">
-              <div
-                className="flex h-20 w-20 items-center justify-center rounded-2xl"
-                style={{
-                  background: "rgba(255,255,255,.18)",
-                  border: "1px solid rgba(255,255,255,.35)",
-                  backdropFilter: "blur(6px)",
-                }}
-              >
-                <Sprout className="h-10 w-10" />
-              </div>
+      {/* Hero plinth */}
+      <div className="panel reveal" style={{ marginBottom: 22 }}>
+        <div className="flex flex-wrap items-start gap-4">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center" style={{ background: "var(--cream)", border: "1px solid var(--line)" }}>
+            <Sprout className="h-8 w-8" strokeWidth={1.5} style={{ color: "var(--gold)" }} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusBadge status={crop.status} />
+              <Link href={`/farms/${crop.farm.id}`} className="text-[11px] font-bold hover:underline" style={{ color: "var(--gold)" }}>
+                <Tractor className="me-1 inline h-3 w-3" />{farmName}
+              </Link>
+              <Link href={`/companies/${crop.farm.company.id}`} className="text-[11px] font-bold hover:underline" style={{ color: "var(--ink-muted)" }}>
+                {crop.farm.company.name}
+              </Link>
             </div>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <StatusBadge status={crop.status} />
-                <Link
-                  href={`/farms/${crop.farm.id}`}
-                  className="rounded-full px-2 py-0.5 text-[10px] font-bold transition hover:bg-white/30"
-                  style={{
-                    background: "rgba(255,255,255,.2)",
-                    border: "1px solid rgba(255,255,255,.3)",
-                  }}
-                >
-                  <Tractor className="me-1 inline h-3 w-3" />
-                  {farmName}
-                </Link>
-                <Link
-                  href={`/companies/${crop.farm.company.id}`}
-                  className="rounded-full px-2 py-0.5 text-[10px] font-bold transition hover:bg-white/30"
-                  style={{
-                    background: "rgba(255,255,255,.2)",
-                    border: "1px solid rgba(255,255,255,.3)",
-                  }}
-                >
-                  {crop.farm.company.name}
-                </Link>
-              </div>
-              <h2 className="mt-1 text-3xl font-bold md:text-4xl">
-                {crop.name}
-              </h2>
-              {crop.variety ? (
-                <p className="text-sm opacity-90">
-                  {en ? "Variety: " : "صنف: "}<span className="font-bold">{crop.variety}</span>
-                </p>
+            <h2 className="mt-1 text-2xl font-bold md:text-3xl" style={{ color: "var(--ink)" }}>{crop.name}</h2>
+            {crop.variety ? (
+              <p className="text-sm" style={{ color: "var(--ink-muted)" }}>{en ? "Variety: " : "صنف: "}<span className="font-bold">{crop.variety}</span></p>
+            ) : null}
+            <div className="mt-2 flex flex-wrap gap-3 text-[12px]" style={{ color: "var(--ink-muted)" }}>
+              <span>{loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), crop.farm.type)}</span>
+              <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{en ? "Planted " : "زُرع "}{formatRelative(crop.plantedAt)}</span>
+              {!harvested && crop.status !== "FAILED" ? (
+                <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{Math.max(0, daysRemaining)} {en ? "days to harvest" : "يوم للحصاد"}</span>
               ) : null}
-              <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
-                <span
-                  className="flex items-center gap-1.5 rounded-full px-3 py-1 font-bold"
-                  style={{
-                    background: "rgba(255,255,255,.15)",
-                    border: "1px solid rgba(255,255,255,.25)",
-                  }}
-                >
-                  {loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), crop.farm.type)}
-                </span>
-                <span
-                  className="flex items-center gap-1.5 rounded-full px-3 py-1 font-bold"
-                  style={{
-                    background: "rgba(255,255,255,.15)",
-                    border: "1px solid rgba(255,255,255,.25)",
-                  }}
-                >
-                  <Calendar className="h-3 w-3" />
-                  {en ? "Planted " : "زُرع "}{formatRelative(crop.plantedAt)}
-                </span>
-                {!harvested && crop.status !== "FAILED" ? (
-                  <span
-                    className="flex items-center gap-1.5 rounded-full px-3 py-1 font-bold"
-                    style={{
-                      background: "rgba(255,255,255,.15)",
-                      border: "1px solid rgba(255,255,255,.25)",
-                    }}
-                  >
-                    <Clock className="h-3 w-3" />
-                    {Math.max(0, daysRemaining)} {en ? "days to harvest" : "يوم للحصاد"}
-                  </span>
-                ) : null}
-              </div>
             </div>
           </div>
-        </section>
-
-        {/* KPIs */}
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <KpiCard
-            label={en ? "Expected yield" : "غلة متوقعة"}
-            value={`${formatNumber(crop.expectedYieldKg)} ${en ? "kg" : "كغم"}`}
-            icon={Scale}
-            tone="emerald"
-          />
-          <KpiCard
-            label={
-              harvested
-                ? en
-                  ? "Actual yield"
-                  : "غلة فعلية"
-                : en
-                  ? "Awaiting harvest"
-                  : "في انتظار الحصاد"
-            }
-            value={
-              crop.actualYieldKg != null
-                ? `${formatNumber(crop.actualYieldKg)} ${en ? "kg" : "كغم"}`
-                : "—"
-            }
-            icon={Scale}
-            tone={
-              yieldDelta == null
-                ? "slate"
-                : yieldDelta >= 0
-                  ? "emerald"
-                  : "amber"
-            }
-            delta={
-              yieldPct != null
-                ? {
-                    up: yieldPct >= 100,
-                    value: `${yieldPct >= 100 ? "+" : ""}${(
-                      yieldPct - 100
-                    ).toFixed(0)}${en ? "% of expected" : "٪ من المتوقع"}`,
-                  }
-                : undefined
-            }
-          />
-          <KpiCard
-            label={en ? "Growing period" : "فترة النمو"}
-            value={`${Math.round(lifePct * 100)}${en ? "%" : "٪"}`}
-            icon={Sprout}
-            tone={crop.status === "FAILED" ? "red" : "emerald"}
-            hint={`${Math.max(0, daysRemaining)} ${en ? "days remaining" : "يوم متبقي"}`}
-          />
-          <KpiCard
-            label={en ? "Status" : "الحالة"}
-            value={loc(CROP_STATUS_AR, CROP_STATUS_EN, getLocale(), crop.status)}
-            icon={harvested ? TrendingUp : TrendingDown}
-            tone={
-              crop.status === "FAILED"
-                ? "red"
-                : harvested
-                  ? "emerald"
-                  : "amber"
-            }
-          />
-        </section>
-
-        {/* Lifecycle */}
-        <section className="card card-pad anim-fade-up">
-          <header className="mb-3 flex items-center justify-between">
-            <h3
-              className="flex items-center gap-2 text-sm font-semibold"
-              style={{ color: "var(--heri-ink)" }}
-            >
-              <Clock className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
-              {en ? "Crop cycle" : "دورة المحصول"}
-            </h3>
-            <span
-              className="text-[10px] font-bold uppercase tracking-widest"
-              style={{ color: lifecycleColor }}
-            >
-              {crop.status === "FAILED"
-                ? en
-                  ? "Failed"
-                  : "متعثر"
-                : harvested
-                  ? en
-                    ? "Complete"
-                    : "اكتمل"
-                  : lifePct > 0.85
-                    ? en
-                      ? "Near harvest"
-                      : "قرب الحصاد"
-                    : en
-                      ? "Growing"
-                      : "ينمو"}
-            </span>
-          </header>
-          <div className="mb-2 flex items-center justify-between text-xs">
-            <div>
-              <div
-                className="text-[10px] font-bold uppercase tracking-widest"
-                style={{ color: "var(--heri-ink-3)" }}
-              >
-                {en ? "Planted" : "زُرع"}
-              </div>
-              <div className="font-bold" style={{ color: "var(--heri-ink)" }}>
-                {formatShortDate(crop.plantedAt)}
-              </div>
-            </div>
-            <ArrowRight
-              className="h-4 w-4"
-              style={{ color: "var(--heri-ink-3)" }}
-            />
-            <div className="text-end">
-              <div
-                className="text-[10px] font-bold uppercase tracking-widest"
-                style={{ color: "var(--heri-ink-3)" }}
-              >
-                {en ? "Expected harvest" : "حصاد متوقع"}
-              </div>
-              <div className="font-bold" style={{ color: "var(--heri-ink)" }}>
-                {formatShortDate(crop.expectedHarvest)}
-              </div>
-            </div>
-          </div>
-          <div
-            className="h-3 w-full overflow-hidden rounded-full"
-            style={{
-              background:
-                "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
-            }}
-          >
-            <div
-              className="h-full rounded-full anim-rise-glow"
-              style={{
-                width: `${Math.min(100, harvested ? 100 : lifePct * 100)}%`,
-                background: `linear-gradient(90deg, ${lifecycleColor} 0%, var(--heri-copper) 100%)`,
-                boxShadow: `0 0 14px ${lifecycleColor}`,
-                transition: "width .8s cubic-bezier(.21,.92,.32,1)",
-              }}
-            />
-          </div>
-        </section>
-
-        {/* Yield comparison if harvested */}
-        {harvested && crop.actualYieldKg != null && crop.expectedYieldKg > 0 ? (
-          <section className="card card-pad anim-fade-up">
-            <h3
-              className="mb-3 flex items-center gap-2 text-sm font-semibold"
-              style={{ color: "var(--heri-ink)" }}
-            >
-              <Scale className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
-              {en ? "Yield comparison" : "مقارنة الغلة"}
-            </h3>
-            {(() => {
-              const target = Math.max(crop.expectedYieldKg, crop.actualYieldKg);
-              const expectedPct = (crop.expectedYieldKg / target) * 100;
-              const actualPct = (crop.actualYieldKg / target) * 100;
-              return (
-                <div className="space-y-3">
-                  <div>
-                    <div
-                      className="mb-1 flex items-center justify-between text-[11px] font-bold"
-                      style={{ color: "var(--heri-ink-3)" }}
-                    >
-                      <span>{en ? "Expected" : "متوقع"}</span>
-                      <span style={{ color: "var(--heri-ink)" }} className="font-mono">
-                        {formatNumber(crop.expectedYieldKg)} {en ? "kg" : "كغم"}
-                      </span>
-                    </div>
-                    <div
-                      className="h-2 overflow-hidden rounded-full"
-                      style={{
-                        background:
-                          "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
-                      }}
-                    >
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${expectedPct}%`,
-                          background:
-                            "linear-gradient(90deg, var(--heri-ochre) 0%, var(--heri-copper) 100%)",
-                          opacity: 0.55,
-                          transition: "width .6s ease",
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <div
-                      className="mb-1 flex items-center justify-between text-[11px] font-bold"
-                      style={{ color: "var(--heri-ink-3)" }}
-                    >
-                      <span>{en ? "Actual" : "فعلي"}</span>
-                      <span
-                        className="font-mono"
-                        style={{
-                          color:
-                            (yieldDelta ?? 0) >= 0 ? "#0a8e54" : "#c0392b",
-                        }}
-                      >
-                        {formatNumber(crop.actualYieldKg)} {en ? "kg" : "كغم"}
-                      </span>
-                    </div>
-                    <div
-                      className="h-2 overflow-hidden rounded-full"
-                      style={{
-                        background:
-                          "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
-                      }}
-                    >
-                      <div
-                        className="h-full rounded-full anim-rise-glow"
-                        style={{
-                          width: `${actualPct}%`,
-                          background:
-                            (yieldDelta ?? 0) >= 0
-                              ? "linear-gradient(90deg, #0a8e54 0%, var(--heri-copper) 100%)"
-                              : "linear-gradient(90deg, #c0392b 0%, #f5b341 100%)",
-                          boxShadow:
-                            (yieldDelta ?? 0) >= 0
-                              ? "0 0 14px #0a8e54"
-                              : "0 0 14px #c0392b",
-                          transition: "width .8s cubic-bezier(.21,.92,.32,1)",
-                        }}
-                      />
-                    </div>
-                  </div>
-                  {yieldDelta != null ? (
-                    <div
-                      className="text-xs font-bold"
-                      style={{
-                        color: yieldDelta >= 0 ? "#0a8e54" : "#c0392b",
-                      }}
-                    >
-                      {yieldDelta >= 0
-                        ? en
-                          ? "Exceeded expectations by "
-                          : "تجاوز التوقعات بـ "
-                        : en
-                          ? "Below expectations by "
-                          : "نقص عن التوقعات بـ "}
-                      <span className="font-mono">
-                        {formatNumber(Math.abs(yieldDelta))}
-                      </span>{" "}
-                      {en ? "kg" : "كغم"} ({yieldPct != null ? `${(yieldPct - 100).toFixed(0)}${en ? "%" : "٪"}` : ""})
-                    </div>
-                  ) : null}
-                </div>
-              );
-            })()}
-          </section>
-        ) : null}
-
-        {/* Two columns */}
-        <div className="grid gap-6 lg:grid-cols-[1fr,320px]">
-          <div className="space-y-6">
-            {crop.notes ? (
-              <section className="card card-pad anim-fade-up">
-                <h3
-                  className="mb-2 text-sm font-semibold"
-                  style={{ color: "var(--heri-ink)" }}
-                >
-                  {en ? "Field notes" : "ملاحظات الحقل"}
-                </h3>
-                <p
-                  className="whitespace-pre-line text-sm leading-relaxed"
-                  style={{ color: "var(--heri-ink)" }}
-                >
-                  {crop.notes}
-                </p>
-              </section>
-            ) : null}
-
-            {sameFarm.length > 0 ? (
-              <section className="card card-pad anim-fade-up">
-                <header className="mb-3 flex items-center justify-between">
-                  <h3
-                    className="text-sm font-semibold"
-                    style={{ color: "var(--heri-ink)" }}
-                  >
-                    {en ? `Other crops at ${farmName}` : `محاصيل أخرى في ${farmName}`}
-                  </h3>
-                  <Link
-                    href={`/farms/${crop.farm.id}`}
-                    className="text-[11px] font-bold"
-                    style={{ color: "var(--heri-ochre)" }}
-                  >
-                    {en ? "Farm profile →" : "ملف المزرعة ←"}
-                  </Link>
-                </header>
-                <ul className="divide-y divide-[var(--heri-rule)]">
-                  {sameFarm.map((c, i) => (
-                    <li
-                      key={c.id}
-                      className="flex items-center justify-between gap-3 py-2.5 anim-fade-up"
-                      style={{ animationDelay: `${i * 30}ms` }}
-                    >
-                      <Link
-                        href={`/farms/crops/${c.id}`}
-                        className="min-w-0 flex-1 hover:underline"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="truncate text-sm font-bold"
-                            style={{ color: "var(--heri-ink)" }}
-                          >
-                            {c.name}
-                          </span>
-                          {c.variety ? (
-                            <span className="badge-emerald">{c.variety}</span>
-                          ) : null}
-                          <StatusBadge status={c.status} />
-                        </div>
-                        <div
-                          className="text-[11px]"
-                          style={{ color: "var(--heri-ink-3)" }}
-                        >
-                          {en ? "Expected harvest " : "حصاد متوقع "}{formatShortDate(c.expectedHarvest)}
-                        </div>
-                      </Link>
-                      <span
-                        className="font-mono text-xs font-bold"
-                        style={{ color: "var(--heri-ink)" }}
-                      >
-                        {formatNumber(c.expectedYieldKg)} {en ? "kg" : "كغم"}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ) : null}
-
-            {sameVariety.length > 0 ? (
-              <section className="card card-pad anim-fade-up">
-                <h3
-                  className="mb-3 text-sm font-semibold"
-                  style={{ color: "var(--heri-ink)" }}
-                >
-                  {en
-                    ? `Same variety (${crop.variety}) at other farms`
-                    : `نفس الصنف (${crop.variety}) في مزارع أخرى`}
-                </h3>
-                <ul className="divide-y divide-[var(--heri-rule)]">
-                  {sameVariety.map((c, i) => (
-                    <li
-                      key={c.id}
-                      className="flex items-center justify-between gap-3 py-2.5 anim-fade-up"
-                      style={{ animationDelay: `${i * 30}ms` }}
-                    >
-                      <Link
-                        href={`/farms/crops/${c.id}`}
-                        className="min-w-0 flex-1 hover:underline"
-                      >
-                        <div
-                          className="truncate text-sm font-bold"
-                          style={{ color: "var(--heri-ink)" }}
-                        >
-                          {c.farm.name}
-                        </div>
-                        <div
-                          className="text-[11px]"
-                          style={{ color: "var(--heri-ink-3)" }}
-                        >
-                          {formatShortDate(c.plantedAt)} →{" "}
-                          {formatShortDate(c.expectedHarvest)}
-                        </div>
-                      </Link>
-                      <StatusBadge status={c.status} />
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ) : null}
-          </div>
-
-          <aside className="space-y-6">
-            <section className="card card-pad anim-fade-up">
-              <h3
-                className="mb-3 text-sm font-semibold"
-                style={{ color: "var(--heri-ink)" }}
-              >
-                {en ? "Agricultural card" : "البطاقة الزراعية"}
-              </h3>
-              <dl className="space-y-2 text-xs">
-                <Fact label={en ? "Crop" : "المحصول"} value={crop.name} />
-                {crop.variety ? (
-                  <Fact label={en ? "Variety" : "الصنف"} value={crop.variety} />
-                ) : null}
-                <Fact
-                  label={en ? "Status" : "الحالة"}
-                  value={loc(CROP_STATUS_AR, CROP_STATUS_EN, getLocale(), crop.status)}
-                />
-                <Fact
-                  label={en ? "Planted" : "زُرع"}
-                  value={formatShortDate(crop.plantedAt)}
-                />
-                <Fact
-                  label={en ? "Expected harvest" : "حصاد متوقع"}
-                  value={formatShortDate(crop.expectedHarvest)}
-                />
-                <Fact
-                  label={en ? "Expected yield" : "غلة متوقعة"}
-                  value={`${formatNumber(crop.expectedYieldKg)} ${en ? "kg" : "كغم"}`}
-                />
-                {crop.actualYieldKg != null ? (
-                  <Fact
-                    label={en ? "Actual yield" : "غلة فعلية"}
-                    value={`${formatNumber(crop.actualYieldKg)} ${en ? "kg" : "كغم"}`}
-                  />
-                ) : null}
-                <Fact
-                  label={en ? "Farm" : "المزرعة"}
-                  value={farmName}
-                  link={`/farms/${crop.farm.id}`}
-                />
-                <Fact
-                  label={en ? "Company" : "الشركة"}
-                  value={crop.farm.company.name}
-                  link={`/companies/${crop.farm.company.id}`}
-                />
-              </dl>
-            </section>
-          </aside>
         </div>
       </div>
-    </>
+
+      {/* KPIs */}
+      <DaylightKpiGrid>
+        <DaylightKpi
+          label={en ? "Expected yield" : "غلة متوقعة"}
+          value={`${formatNumber(crop.expectedYieldKg)} ${en ? "kg" : "كغم"}`}
+        />
+        <DaylightKpi
+          label={harvested ? (en ? "Actual yield" : "غلة فعلية") : (en ? "Awaiting harvest" : "في انتظار الحصاد")}
+          value={crop.actualYieldKg != null ? `${formatNumber(crop.actualYieldKg)} ${en ? "kg" : "كغم"}` : "—"}
+          hint={yieldPct != null ? `${yieldPct >= 100 ? "+" : ""}${(yieldPct - 100).toFixed(0)}${en ? "% of expected" : "٪ من المتوقع"}` : undefined}
+        />
+        <DaylightKpi
+          label={en ? "Growing period" : "فترة النمو"}
+          value={`${Math.round(lifePct * 100)}${en ? "%" : "٪"}`}
+          hint={`${Math.max(0, daysRemaining)} ${en ? "days remaining" : "يوم متبقي"}`}
+        />
+        <DaylightKpi
+          label={en ? "Status" : "الحالة"}
+          value={loc(CROP_STATUS_AR, CROP_STATUS_EN, getLocale(), crop.status)}
+        />
+      </DaylightKpiGrid>
+
+      {/* Lifecycle */}
+      <DaylightPanel
+        title={<span className="flex items-center gap-2"><Clock className="h-4 w-4" style={{ color: "var(--gold)" }} />{en ? "Crop cycle" : "دورة المحصول"}</span>}
+        aside={crop.status === "FAILED" ? (en ? "Failed" : "متعثر") : harvested ? (en ? "Complete" : "اكتمل") : lifePct > 0.85 ? (en ? "Near harvest" : "قرب الحصاد") : (en ? "Growing" : "ينمو")}
+      >
+        <div className="mb-2 flex items-center justify-between text-xs">
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>{en ? "Planted" : "زُرع"}</div>
+            <div className="font-bold" style={{ color: "var(--ink)" }}>{formatShortDate(crop.plantedAt)}</div>
+          </div>
+          <ArrowRight className="h-4 w-4" style={{ color: "var(--ink-muted)" }} />
+          <div className="text-end">
+            <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>{en ? "Expected harvest" : "حصاد متوقع"}</div>
+            <div className="font-bold" style={{ color: "var(--ink)" }}>{formatShortDate(crop.expectedHarvest)}</div>
+          </div>
+        </div>
+        <div className="dl-bar">
+          <i style={{ width: `${Math.min(100, harvested ? 100 : lifePct * 100)}%` }} />
+        </div>
+      </DaylightPanel>
+
+      {/* Yield comparison if harvested */}
+      {harvested && crop.actualYieldKg != null && crop.expectedYieldKg > 0 ? (
+        <DaylightPanel title={<span className="flex items-center gap-2"><Scale className="h-4 w-4" style={{ color: "var(--gold)" }} />{en ? "Yield comparison" : "مقارنة الغلة"}</span>}>
+          {(() => {
+            const target = Math.max(crop.expectedYieldKg, crop.actualYieldKg);
+            const expectedPct = (crop.expectedYieldKg / target) * 100;
+            const actualPct = (crop.actualYieldKg / target) * 100;
+            return (
+              <div className="space-y-3">
+                <div>
+                  <div className="mb-1 flex items-center justify-between text-[11px] font-bold" style={{ color: "var(--ink-muted)" }}>
+                    <span>{en ? "Expected" : "متوقع"}</span>
+                    <span className="font-mono" style={{ color: "var(--ink)" }}>{formatNumber(crop.expectedYieldKg)} {en ? "kg" : "كغم"}</span>
+                  </div>
+                  <div className="dl-bar"><i style={{ width: `${expectedPct}%`, opacity: 0.55 }} /></div>
+                </div>
+                <div>
+                  <div className="mb-1 flex items-center justify-between text-[11px] font-bold" style={{ color: "var(--ink-muted)" }}>
+                    <span>{en ? "Actual" : "فعلي"}</span>
+                    <span className="font-mono" style={{ color: (yieldDelta ?? 0) >= 0 ? "#0a8e54" : "#c0392b" }}>{formatNumber(crop.actualYieldKg)} {en ? "kg" : "كغم"}</span>
+                  </div>
+                  <div className="dl-bar"><i style={{ width: `${actualPct}%` }} /></div>
+                </div>
+                {yieldDelta != null ? (
+                  <div className="text-xs font-bold" style={{ color: yieldDelta >= 0 ? "#0a8e54" : "#c0392b" }}>
+                    {yieldDelta >= 0 ? (en ? "Exceeded expectations by " : "تجاوز التوقعات بـ ") : (en ? "Below expectations by " : "نقص عن التوقعات بـ ")}
+                    <span className="font-mono">{formatNumber(Math.abs(yieldDelta))}</span>{" "}
+                    {en ? "kg" : "كغم"} ({yieldPct != null ? `${(yieldPct - 100).toFixed(0)}${en ? "%" : "٪"}` : ""})
+                  </div>
+                ) : null}
+              </div>
+            );
+          })()}
+        </DaylightPanel>
+      ) : null}
+
+      {/* Two columns */}
+      <div className="grid gap-6 lg:grid-cols-[1fr,320px]">
+        <div className="space-y-6">
+          {crop.notes ? (
+            <DaylightPanel title={en ? "Field notes" : "ملاحظات الحقل"}>
+              <p className="whitespace-pre-line text-sm leading-relaxed" style={{ color: "var(--ink)" }}>{crop.notes}</p>
+            </DaylightPanel>
+          ) : null}
+
+          {sameFarm.length > 0 ? (
+            <DaylightPanel
+              title={en ? `Other crops at ${farmName}` : `محاصيل أخرى في ${farmName}`}
+              aside={<Link href={`/farms/${crop.farm.id}`} className="hover:underline" style={{ color: "var(--gold)" }}>{en ? "Farm profile →" : "ملف المزرعة ←"}</Link>}
+            >
+              <ul className="divide-y divide-[var(--line)]">
+                {sameFarm.map((c) => (
+                  <li key={c.id} className="flex items-center justify-between gap-3 py-2.5">
+                    <Link href={`/farms/crops/${c.id}`} className="min-w-0 flex-1 hover:underline">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate text-sm font-bold" style={{ color: "var(--ink)" }}>{c.name}</span>
+                        <StatusBadge status={c.status} />
+                      </div>
+                      <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                        {en ? "Expected harvest " : "حصاد متوقع "}{formatShortDate(c.expectedHarvest)}
+                      </div>
+                    </Link>
+                    <span className="font-mono text-xs font-bold" style={{ color: "var(--ink)" }}>
+                      {formatNumber(c.expectedYieldKg)} {en ? "kg" : "كغم"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </DaylightPanel>
+          ) : null}
+
+          {sameVariety.length > 0 ? (
+            <DaylightPanel title={en ? `Same variety (${crop.variety}) at other farms` : `نفس الصنف (${crop.variety}) في مزارع أخرى`}>
+              <ul className="divide-y divide-[var(--line)]">
+                {sameVariety.map((c) => (
+                  <li key={c.id} className="flex items-center justify-between gap-3 py-2.5">
+                    <Link href={`/farms/crops/${c.id}`} className="min-w-0 flex-1 hover:underline">
+                      <div className="truncate text-sm font-bold" style={{ color: "var(--ink)" }}>{c.farm.name}</div>
+                      <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                        {formatShortDate(c.plantedAt)} → {formatShortDate(c.expectedHarvest)}
+                      </div>
+                    </Link>
+                    <StatusBadge status={c.status} />
+                  </li>
+                ))}
+              </ul>
+            </DaylightPanel>
+          ) : null}
+        </div>
+
+        <aside className="space-y-6">
+          <DaylightPanel title={en ? "Agricultural card" : "البطاقة الزراعية"}>
+            <dl className="space-y-2 text-xs">
+              <Fact label={en ? "Crop" : "المحصول"} value={crop.name} />
+              {crop.variety ? (<Fact label={en ? "Variety" : "الصنف"} value={crop.variety} />) : null}
+              <Fact label={en ? "Status" : "الحالة"} value={loc(CROP_STATUS_AR, CROP_STATUS_EN, getLocale(), crop.status)} />
+              <Fact label={en ? "Planted" : "زُرع"} value={formatShortDate(crop.plantedAt)} />
+              <Fact label={en ? "Expected harvest" : "حصاد متوقع"} value={formatShortDate(crop.expectedHarvest)} />
+              <Fact label={en ? "Expected yield" : "غلة متوقعة"} value={`${formatNumber(crop.expectedYieldKg)} ${en ? "kg" : "كغم"}`} />
+              {crop.actualYieldKg != null ? (
+                <Fact label={en ? "Actual yield" : "غلة فعلية"} value={`${formatNumber(crop.actualYieldKg)} ${en ? "kg" : "كغم"}`} />
+              ) : null}
+              <Fact label={en ? "Farm" : "المزرعة"} value={farmName} link={`/farms/${crop.farm.id}`} />
+              <Fact label={en ? "Company" : "الشركة"} value={crop.farm.company.name} link={`/companies/${crop.farm.company.id}`} />
+            </dl>
+          </DaylightPanel>
+        </aside>
+      </div>
+    </DaylightShell>
   );
 }
 
@@ -667,20 +320,11 @@ function Fact({
   link?: string;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
-      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
-      <dd
-        className="text-end font-bold"
-        style={{ color: "var(--heri-ink)" }}
-      >
+    <div className="flex items-center justify-between border-b border-[var(--line)] pb-1.5 last:border-b-0">
+      <dt style={{ color: "var(--ink-muted)" }}>{label}</dt>
+      <dd className="text-end font-bold" style={{ color: "var(--ink)" }}>
         {link ? (
-          <Link
-            href={link}
-            className="hover:underline"
-            style={{ color: "var(--heri-ochre)" }}
-          >
-            {value}
-          </Link>
+          <Link href={link} className="hover:underline" style={{ color: "var(--gold)" }}>{value}</Link>
         ) : (
           value
         )}

@@ -14,8 +14,8 @@ import {
   CheckCircle2,
   Award,
 } from "lucide-react";
-import { Topbar } from "@/components/Topbar";
-import { KpiCard } from "@/components/KpiCard";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
+import "../../daylight.css";
 import { StatusBadge } from "@/components/StatusBadge";
 import { prisma } from "@/lib/db";
 import {
@@ -38,10 +38,10 @@ import {
 import { getCompanyBrand } from "@/lib/companyBrand";
 
 const TIER_TONE: Record<string, string> = {
-  BRONZE: "badge-amber",
-  SILVER: "badge-slate",
-  GOLD: "badge-gold",
-  PLATINUM: "badge-violet",
+  BRONZE: "ok",
+  SILVER: "ok",
+  GOLD: "gold",
+  PLATINUM: "gold",
 };
 
 const TASK_STATUS_AR: Record<string, string> = {
@@ -159,20 +159,20 @@ export default async function UserDetailPage({
   const en = getLocale() === "en";
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={en ? "ltr" : "rtl"}>
+      <DaylightHeader
         eyebrow={en ? "Employee Profile" : "ملف الموظف"}
         title={user.name}
         subtitle={user.title ?? loc(ROLES_AR, ROLES_EN, getLocale(), user.role)}
         actions={
-          <Link href="/users" className="btn-ghost">
+          <Link href="/users" className="dl-btn dl-btn-secondary">
             <ArrowLeft className="h-4 w-4" />
             {en ? "Team" : "الفريق"}
           </Link>
         }
       />
 
-      <div className="flex-1 space-y-6 p-6">
+      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
         {/* Hero */}
         <section
           className="relative overflow-hidden rounded-2xl p-6 anim-fade-up"
@@ -351,64 +351,34 @@ export default async function UserDetailPage({
         </section>
 
         {/* KPIs */}
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <KpiCard
+        <DaylightKpiGrid>
+          <DaylightKpi
             label={en ? "Experience Points" : "نقاط الخبرة"}
             value={formatNumber(xp)}
-            icon={Sparkles}
-            tone="violet"
             hint={en ? currentRank.en : currentRank.ar}
           />
-          <KpiCard
+          <DaylightKpi
             label={en ? "Rank Bonus" : "بونص الرتبة"}
             value={`+${user.bonusPercent}٪`}
-            icon={Award}
-            tone="amber"
           />
-          <KpiCard
+          <DaylightKpi
             label={en ? "Badges" : "الأوسمة"}
             value={`${earnedCount}/${totalCount}`}
-            icon={Trophy}
-            tone="emerald"
-            hint={
-              totalCount > 0
-                ? `${Math.round((earnedCount / totalCount) * 100)}٪ ${en ? "complete" : "إكمال"}`
-                : undefined
-            }
+            hint={totalCount > 0 ? `${Math.round((earnedCount / totalCount) * 100)}٪ ${en ? "complete" : "إكمال"}` : undefined}
           />
-          <KpiCard
+          <DaylightKpi
             label={en ? "Task Completion" : "إنجاز المهام"}
             value={`${completionRate}٪`}
-            icon={CheckCircle2}
-            tone={completionRate >= 60 ? "emerald" : "amber"}
             hint={`${formatNumber(doneTasks)} ${en ? "of" : "من"} ${formatNumber(totalTasks)}`}
           />
-        </section>
+        </DaylightKpiGrid>
 
         {/* Two columns */}
-        <div className="grid gap-6 lg:grid-cols-[1fr,360px]">
-          <div className="space-y-6">
+        <div style={{ display: "grid", gap: 24, gridTemplateColumns: "1fr 360px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
             {/* Tasks */}
             {recentTasks.length > 0 ? (
-              <section className="card card-pad anim-fade-up">
-                <header className="mb-3 flex items-center justify-between">
-                  <h3
-                    className="flex items-center gap-2 text-sm font-semibold"
-                    style={{ color: "var(--heri-ink)" }}
-                  >
-                    <ListChecks
-                      className="h-4 w-4"
-                      style={{ color: "var(--heri-ochre)" }}
-                    />
-                    {en ? "Tasks" : "المهام"}
-                  </h3>
-                  <span
-                    className="text-[11px] font-bold"
-                    style={{ color: "var(--heri-ink-3)" }}
-                  >
-                    {formatNumber(totalTasks)} {en ? "total" : "إجمالي"}
-                  </span>
-                </header>
+              <DaylightPanel title={en ? "Tasks" : "المهام"} aside={`${formatNumber(totalTasks)} ${en ? "total" : "إجمالي"}`}>
 
                 {/* Status mini-chips */}
                 <div className="mb-3 flex flex-wrap gap-2">
@@ -418,10 +388,10 @@ export default async function UserDetailPage({
                       className="rounded-full px-2.5 py-1 text-[11px] font-bold"
                       style={{
                         background:
-                          "color-mix(in srgb, var(--heri-ochre) 8%, transparent)",
+                          "color-mix(in srgb, var(--gold) 8%, transparent)",
                         border:
-                          "1px solid color-mix(in srgb, var(--heri-ochre) 18%, transparent)",
-                        color: "var(--heri-ink)",
+                          "1px solid color-mix(in srgb, var(--gold) 18%, transparent)",
+                        color: "var(--ink)",
                       }}
                     >
                       {(en ? TASK_STATUS_EN[status] : TASK_STATUS_AR[status]) ?? status}: {formatNumber(count)}
@@ -429,7 +399,7 @@ export default async function UserDetailPage({
                   ))}
                 </div>
 
-                <ul className="divide-y divide-[var(--heri-rule)]">
+                <ul className="divide-y divide-[var(--line)]">
                   {recentTasks.map((t, i) => (
                     <li
                       key={t.id}
@@ -440,16 +410,13 @@ export default async function UserDetailPage({
                         <div className="flex items-center gap-2">
                           <span
                             className="truncate text-sm font-bold"
-                            style={{ color: "var(--heri-ink)" }}
+                            style={{ color: "var(--ink)" }}
                           >
                             {t.title}
                           </span>
                           <span
-                            className={
-                              t.kind === "SIDE"
-                                ? "badge-violet"
-                                : "badge-emerald"
-                            }
+                            className={`tag ${t.kind === "SIDE" ? "gold" : "ok"}`}
+                            style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}
                           >
                             {t.kind === "SIDE"
                               ? en
@@ -462,7 +429,7 @@ export default async function UserDetailPage({
                         </div>
                         <div
                           className="text-[11px]"
-                          style={{ color: "var(--heri-ink-3)" }}
+                          style={{ color: "var(--ink-muted)" }}
                         >
                           {(en ? TASK_STATUS_EN[t.status] : TASK_STATUS_AR[t.status]) ?? t.status} •{" "}
                           {t.dueAt
@@ -479,32 +446,16 @@ export default async function UserDetailPage({
                     </li>
                   ))}
                 </ul>
-              </section>
+              </DaylightPanel>
             ) : null}
 
             {/* Recent insights */}
             {insights.length > 0 ? (
-              <section className="card card-pad anim-fade-up">
-                <header className="mb-3 flex items-center justify-between">
-                  <h3
-                    className="flex items-center gap-2 text-sm font-semibold"
-                    style={{ color: "var(--heri-ink)" }}
-                  >
-                    <Sparkles
-                      className="h-4 w-4"
-                      style={{ color: "var(--heri-ochre)" }}
-                    />
-                    {en ? "Published Signals" : "إشارات منشورة"}
-                  </h3>
-                  <Link
-                    href="/insights"
-                    className="text-[11px] font-bold"
-                    style={{ color: "var(--heri-ochre)" }}
-                  >
-                    {en ? "View all ←" : "عرض الكل ←"}
-                  </Link>
-                </header>
-                <ul className="divide-y divide-[var(--heri-rule)]">
+              <DaylightPanel
+                title={en ? "Published Signals" : "إشارات منشورة"}
+                aside={<Link href="/insights" style={{ fontSize: 11, color: "var(--gold)", textDecoration: "none" }}>{en ? "View all ←" : "عرض الكل ←"}</Link>}
+              >
+                <ul style={{ borderTop: "1px solid var(--line)" }}>
                   {insights.map((ins) => (
                     <li
                       key={ins.id}
@@ -514,46 +465,28 @@ export default async function UserDetailPage({
                         <StatusBadge status={ins.severity} />
                         <span
                           className="truncate text-sm font-bold"
-                          style={{ color: "var(--heri-ink)" }}
+                          style={{ color: "var(--ink)" }}
                         >
                           {ins.title}
                         </span>
                       </div>
                       <div
                         className="mt-0.5 text-[11px]"
-                        style={{ color: "var(--heri-ink-3)" }}
+                        style={{ color: "var(--ink-muted)" }}
                       >
                         {ins.module} • {formatRelative(ins.createdAt)}
                       </div>
                     </li>
                   ))}
                 </ul>
-              </section>
+              </DaylightPanel>
             ) : null}
           </div>
 
-          <aside className="space-y-6">
+          <aside style={{ display: "flex", flexDirection: "column", gap: 24 }}>
             {/* Achievements */}
             {achievements.length > 0 ? (
-              <section className="card card-pad anim-fade-up">
-                <header className="mb-3 flex items-center justify-between">
-                  <h3
-                    className="flex items-center gap-2 text-sm font-semibold"
-                    style={{ color: "var(--heri-ink)" }}
-                  >
-                    <Trophy
-                      className="h-4 w-4"
-                      style={{ color: "var(--heri-ochre)" }}
-                    />
-                    {en ? "Badges" : "الأوسمة"}
-                  </h3>
-                  <span
-                    className="text-[11px] font-mono"
-                    style={{ color: "var(--heri-ink-3)" }}
-                  >
-                    {earnedCount}/{totalCount}
-                  </span>
-                </header>
+              <DaylightPanel title={en ? "Badges" : "الأوسمة"} aside={`${earnedCount}/${totalCount}`}>
                 <div className="grid grid-cols-4 gap-2">
                   {achievements.slice(0, 12).map((a) => {
                     const earned = earnedIds.has(a.id);
@@ -565,11 +498,11 @@ export default async function UserDetailPage({
                         }`}
                         style={{
                           background: earned
-                            ? "linear-gradient(135deg, var(--heri-ochre) 0%, var(--heri-copper) 100%)"
-                            : "color-mix(in srgb, var(--heri-ink-3) 12%, transparent)",
-                          color: earned ? "white" : "var(--heri-ink-3)",
+                            ? "linear-gradient(135deg, var(--gold) 0%, var(--gold) 100%)"
+                            : "color-mix(in srgb, var(--ink-muted) 12%, transparent)",
+                          color: earned ? "white" : "var(--ink-muted)",
                           boxShadow: earned
-                            ? "0 8px 24px -8px var(--heri-ochre)"
+                            ? "0 8px 24px -8px var(--gold)"
                             : undefined,
                           opacity: earned ? 1 : 0.5,
                         }}
@@ -589,14 +522,13 @@ export default async function UserDetailPage({
                       >
                         <span
                           className="truncate font-bold"
-                          style={{ color: "var(--heri-ink)" }}
+                          style={{ color: "var(--ink)" }}
                         >
                           {e.achievement.name}
                         </span>
                         <span
-                          className={
-                            TIER_TONE[e.achievement.tier] ?? "badge-slate"
-                          }
+                          className={`tag ${TIER_TONE[e.achievement.tier] ?? "ok"}`}
+                          style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}
                         >
                           {e.achievement.tier}
                         </span>
@@ -604,71 +536,47 @@ export default async function UserDetailPage({
                     ))}
                   </div>
                 ) : null}
-              </section>
+              </DaylightPanel>
             ) : null}
 
             {/* Recent forecasts */}
             {forecasts.length > 0 ? (
-              <section className="card card-pad anim-fade-up">
-                <header className="mb-3 flex items-center justify-between">
-                  <h3
-                    className="flex items-center gap-2 text-sm font-semibold"
-                    style={{ color: "var(--heri-ink)" }}
-                  >
-                    <Brain
-                      className="h-4 w-4"
-                      style={{ color: "var(--heri-ochre)" }}
-                    />
-                    {en ? "Published Forecasts" : "توقعات منشورة"}
-                  </h3>
-                </header>
+              <DaylightPanel title={en ? "Published Forecasts" : "توقعات منشورة"}>
                 <ul className="space-y-1.5">
                   {forecasts.map((f) => (
                     <li
                       key={f.id}
                       className="rounded-lg px-2 py-1.5 text-[11px]"
                       style={{
-                        background: "color-mix(in srgb, var(--heri-ochre) 5%, transparent)",
+                        background: "color-mix(in srgb, var(--gold) 5%, transparent)",
                       }}
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span
                           className="truncate font-bold"
-                          style={{ color: "var(--heri-ink)" }}
+                          style={{ color: "var(--ink)" }}
                         >
                           {f.productLabel}
                         </span>
-                        <span className="font-mono text-[10px]" style={{ color: "var(--heri-ink-3)" }}>
+                        <span className="font-mono text-[10px]" style={{ color: "var(--ink-muted)" }}>
                           {Math.round(f.confidence * 100)}٪
                         </span>
                       </div>
                       <div
                         className="font-mono text-[10px]"
-                        style={{ color: "var(--heri-ink-3)" }}
+                        style={{ color: "var(--ink-muted)" }}
                       >
                         {f.source.code} → {f.target.code}
                       </div>
                     </li>
                   ))}
                 </ul>
-              </section>
+              </DaylightPanel>
             ) : null}
 
             {/* Recent transactions created */}
             {transactions.length > 0 ? (
-              <section className="card card-pad anim-fade-up">
-                <header className="mb-3 flex items-center justify-between">
-                  <h3
-                    className="flex items-center gap-2 text-sm font-semibold"
-                    style={{ color: "var(--heri-ink)" }}
-                  >
-                    <Wallet
-                      className="h-4 w-4"
-                      style={{ color: "var(--heri-ochre)" }}
-                    />
-                    {en ? "Transactions" : "حركات مالية"}
-                  </h3>
-                </header>
+              <DaylightPanel title={en ? "Transactions" : "حركات مالية"}>
                 <ul className="space-y-1.5">
                   {transactions.map((t) => {
                     const isIncome = t.kind === "INCOME" || t.kind === "REVENUE";
@@ -680,13 +588,13 @@ export default async function UserDetailPage({
                         <div className="min-w-0">
                           <div
                             className="truncate font-bold"
-                            style={{ color: "var(--heri-ink)" }}
+                            style={{ color: "var(--ink)" }}
                           >
                             {t.description ?? t.category}
                           </div>
                           <div
                             className="font-mono text-[10px]"
-                            style={{ color: "var(--heri-ink-3)" }}
+                            style={{ color: "var(--ink-muted)" }}
                           >
                             {t.company.code} • {formatShortDate(t.occurredAt)}
                           </div>
@@ -702,22 +610,12 @@ export default async function UserDetailPage({
                     );
                   })}
                 </ul>
-              </section>
+              </DaylightPanel>
             ) : null}
 
             {/* Quick facts */}
-            <section className="card card-pad anim-fade-up">
-              <h3
-                className="mb-3 flex items-center gap-2 text-sm font-semibold"
-                style={{ color: "var(--heri-ink)" }}
-              >
-                <Building2
-                  className="h-4 w-4"
-                  style={{ color: "var(--heri-ochre)" }}
-                />
-                {en ? "Employment Card" : "البطاقة الوظيفية"}
-              </h3>
-              <dl className="space-y-2 text-xs">
+            <DaylightPanel title={en ? "Employment Card" : "البطاقة الوظيفية"}>
+              <dl style={{ fontSize: 12, display: "flex", flexDirection: "column", gap: 8 }}>
                 <Fact label={en ? "Role" : "الدور"} value={loc(ROLES_AR, ROLES_EN, getLocale(), user.role)} />
                 {user.title ? (
                   <Fact label={en ? "Job Title" : "المسمى الوظيفي"} value={user.title} />
@@ -741,11 +639,11 @@ export default async function UserDetailPage({
                   value={formatShortDate(user.createdAt)}
                 />
               </dl>
-            </section>
+            </DaylightPanel>
           </aside>
         </div>
       </div>
-    </>
+    </DaylightShell>
   );
 }
 
@@ -759,17 +657,17 @@ function Fact({
   link?: string;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
-      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
+    <div className="flex items-center justify-between border-b border-[var(--line)] pb-1.5 last:border-b-0">
+      <dt style={{ color: "var(--ink-muted)" }}>{label}</dt>
       <dd
         className="text-end font-bold"
-        style={{ color: "var(--heri-ink)" }}
+        style={{ color: "var(--ink)" }}
       >
         {link ? (
           <Link
             href={link}
             className="hover:underline"
-            style={{ color: "var(--heri-ochre)" }}
+            style={{ color: "var(--gold)" }}
           >
             {value}
           </Link>

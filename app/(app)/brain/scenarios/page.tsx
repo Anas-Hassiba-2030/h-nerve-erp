@@ -9,8 +9,8 @@
 
 import Link from "next/link";
 import { Brain, Network } from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
+import "../../daylight.css";
 import { Scenario } from "@/components/brain/Scenario";
 import { causalGraph } from "@/lib/brain/graph.prisma";
 import { getLocale } from "@/lib/i18n.server";
@@ -32,8 +32,8 @@ export default async function BrainScenariosPage() {
     nodes.find((n) => HUBS.has(n.kind));
 
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "الدماغ · المُحاكي" : "Brain · Simulator"}
         title={ar ? "ماذا لو…" : "What if…"}
         subtitle={
@@ -43,7 +43,6 @@ export default async function BrainScenariosPage() {
         }
       />
 
-      <PageContainer>
         {nodes.length === 0 ? (
           <EmptyState ar={ar} />
         ) : (
@@ -54,23 +53,22 @@ export default async function BrainScenariosPage() {
             defaultSourceId={arena?.id}
           />
         )}
-      </PageContainer>
-    </>
+    </DaylightShell>
   );
 }
 
 function EmptyState({ ar }: { ar: boolean }) {
   return (
     <section
-      className="heri-hero"
+      className="panel reveal"
       style={{ padding: "60px 32px", textAlign: "center" }}
     >
       <div
         className="inline-flex h-12 w-12 items-center justify-center mx-auto"
         style={{
-          border: "1px solid var(--heri-rule-strong)",
-          color: "var(--heri-ochre)",
-          background: "var(--heri-cream-2)",
+          border: "1px solid var(--line)",
+          color: "var(--gold)",
+          background: "var(--ivory)",
         }}
       >
         <Brain className="h-5 w-5" strokeWidth={1.5} />
@@ -82,7 +80,7 @@ function EmptyState({ ar }: { ar: boolean }) {
           lineHeight: 1.05,
           letterSpacing: ar ? "-0.005em" : "-0.022em",
           fontWeight: ar ? 600 : 500,
-          color: "var(--heri-ink)",
+          color: "var(--ink)",
         }}
       >
         {ar
@@ -94,7 +92,7 @@ function EmptyState({ ar }: { ar: boolean }) {
         style={{
           fontSize: "clamp(13px, 1vw, 14.5px)",
           lineHeight: 1.55,
-          color: "var(--heri-ink-2)",
+          color: "var(--ink-muted)",
         }}
       >
         {ar
@@ -102,7 +100,7 @@ function EmptyState({ ar }: { ar: boolean }) {
           : "The simulator needs the causal graph. Head to the graph view and press \"Build the brain\"."}
       </p>
       <div className="mt-6">
-        <Link href="/brain/graph" className="heri-btn heri-btn-primary">
+        <Link href="/brain/graph" className="dl-btn dl-btn-primary">
           <Network className="h-4 w-4" strokeWidth={1.5} />
           {ar ? "اذهب إلى الرسم السببي" : "Open the causal graph"}
         </Link>

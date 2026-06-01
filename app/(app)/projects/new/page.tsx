@@ -1,8 +1,9 @@
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { createProject } from "../actions";
 import { ProjectForm } from "../ProjectForm";
+import "../../daylight.css";
 
 export default async function NewProjectPage() {
   const ar = getLocale() === "ar";
@@ -11,8 +12,8 @@ export default async function NewProjectPage() {
     select: { id: true, name: true },
   });
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "المشاريع المستقبلية" : "Future Projects"}
         title={ar ? "مشروع مستقبلي جديد" : "New future project"}
         subtitle={
@@ -24,6 +25,6 @@ export default async function NewProjectPage() {
       <div className="flex-1 p-6">
         <ProjectForm action={createProject} companies={companies} ar={ar} />
       </div>
-    </>
+    </DaylightShell>
   );
 }

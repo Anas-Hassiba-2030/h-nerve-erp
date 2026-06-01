@@ -21,7 +21,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
 } from "lucide-react";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import { KpiCard } from "@/components/KpiCard";
 import { SectorPill } from "@/components/SectorPill";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -34,7 +34,6 @@ import {
   formatNumber,
   formatMoney,
   formatShortDate,
-  ar,
   STATUS_AR,
   TIERS_AR,
   FARM_TYPES_AR,
@@ -45,6 +44,7 @@ import {
   loc,
 } from "@/lib/utils";
 import { getCompanyBrand } from "@/lib/companyBrand";
+import "../../daylight.css";
 
 const PROJECT_STAGE_AR: Record<string, string> = {
   IDEA: "فكرة",
@@ -166,11 +166,11 @@ export default async function CompanyDetailPage({
   const en = getLocale() === "en";
 
   return (
-    <>
-      <Topbar
-        eyebrow={getLocale() === "en" ? "Company profile" : "ملف الشركة"}
-        title={getLocale() === "en" ? company.nameEn : company.name}
-        subtitle={getLocale() === "en" ? company.name : company.nameEn}
+    <DaylightShell dir={en ? "ltr" : "rtl"}>
+      <DaylightHeader
+        eyebrow={en ? "Company profile" : "ملف الشركة"}
+        title={en ? company.nameEn : company.name}
+        subtitle={en ? company.name : company.nameEn}
         actions={
           <div className="flex items-center gap-2">
             {/* The descent: enter THIS company's scoped ERP back-office. Sets
@@ -178,15 +178,15 @@ export default async function CompanyDetailPage({
                 /workspace — every query then auto-scopes to this company. */}
             <form action={enterWorkspace}>
               <input type="hidden" name="companyId" value={company.id} />
-              <button type="submit" className="btn-primary">
+              <button type="submit" className="dl-btn dl-btn-primary">
                 <Building2 className="h-4 w-4" />
-                {getLocale() === "en" ? "Open back-office" : "دخول نظام الشركة"}
+                {en ? "Open back-office" : "دخول نظام الشركة"}
                 <ArrowUpRight className="h-4 w-4" />
               </button>
             </form>
-            <Link href="/companies" className="btn-ghost">
+            <Link href="/companies" className="dl-btn dl-btn-secondary">
               <ArrowLeft className="h-4 w-4" />
-              {getLocale() === "en" ? "Register" : "السجل"}
+              {en ? "Register" : "السجل"}
             </Link>
             <PinButton
               entityType="COMPANY"
@@ -199,9 +199,9 @@ export default async function CompanyDetailPage({
               tone="default"
               locale="ar"
             />
-            <Link href={`/companies/${company.id}/edit`} className="btn-ghost">
+            <Link href={`/companies/${company.id}/edit`} className="dl-btn dl-btn-secondary">
               <Pencil className="h-4 w-4" />
-              {getLocale() === "en" ? "Edit" : "تعديل"}
+              {en ? "Edit" : "تعديل"}
             </Link>
           </div>
         }
@@ -782,6 +782,6 @@ export default async function CompanyDetailPage({
           </aside>
         </div>
       </div>
-    </>
+    </DaylightShell>
   );
 }

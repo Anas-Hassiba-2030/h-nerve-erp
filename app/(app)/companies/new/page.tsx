@@ -1,11 +1,12 @@
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { CompanyForm } from "../CompanyForm";
 import { createCompany } from "../actions";
+import "../../daylight.css";
 
 export default function NewCompanyPage() {
   return (
-    <>
-      <Topbar
+    <DaylightShell>
+      <DaylightHeader
         eyebrow="السجل القابض"
         title="إضافة شركة جديدة"
         subtitle="سجل وحدة أعمال جديدة تحت مظلة مجموعة الحوراني."
@@ -15,6 +16,6 @@ export default function NewCompanyPage() {
           <CompanyForm action={createCompany} submitLabel="حفظ الشركة" />
         </div>
       </div>
-    </>
+    </DaylightShell>
   );
 }

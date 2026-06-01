@@ -9,8 +9,8 @@ import {
   Activity,
   Calendar,
 } from "lucide-react";
-import { Topbar } from "@/components/Topbar";
-import { KpiCard } from "@/components/KpiCard";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
+import "../../daylight.css";
 import { prisma } from "@/lib/db";
 import { formatNumber, formatRelative } from "@/lib/utils";
 import { getCompanyBrand } from "@/lib/companyBrand";
@@ -167,20 +167,20 @@ export default async function MarketDetailPage({
   const pct = en ? "%" : "٪";
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={en ? "ltr" : "rtl"}>
+      <DaylightHeader
         eyebrow={en ? "Global Markets" : "الأسواق العالمية"}
         title={stock.labelAr ?? stock.label}
         subtitle={stock.label}
         actions={
-          <Link href="/markets" className="btn-ghost">
+          <Link href="/markets" className="dl-btn dl-btn-secondary">
             <ArrowLeft className="h-4 w-4" />
             {en ? "Markets" : "الأسواق"}
           </Link>
         }
       />
 
-      <div className="flex-1 space-y-6 p-6">
+      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
         {/* Hero */}
         <section
           className="relative overflow-hidden rounded-2xl p-6 anim-fade-up"
@@ -294,103 +294,37 @@ export default async function MarketDetailPage({
 
         {/* Sparkline */}
         {history.length > 1 ? (
-          <section className="card card-pad anim-fade-up">
-            <header className="mb-3 flex items-center justify-between">
-              <h3
-                className="flex items-center gap-2 text-sm font-semibold"
-                style={{ color: "var(--heri-ink)" }}
-              >
-                <Activity
-                  className="h-4 w-4"
-                  style={{ color: "var(--heri-ochre)" }}
-                />
-                {en ? "Price Movement" : "الحركة السعرية"}
-              </h3>
-              <div className="flex items-center gap-3 text-[11px]">
-                <span style={{ color: "var(--heri-ink-3)" }}>
-                  {en ? "High:" : "أعلى:"}{" "}
-                  <span
-                    className="font-mono font-bold"
-                    style={{ color: "var(--heri-ink)" }}
-                  >
-                    {high.toFixed(2)}
-                  </span>
-                </span>
-                <span style={{ color: "var(--heri-ink-3)" }}>
-                  {en ? "Low:" : "أدنى:"}{" "}
-                  <span
-                    className="font-mono font-bold"
-                    style={{ color: "var(--heri-ink)" }}
-                  >
-                    {low.toFixed(2)}
-                  </span>
-                </span>
-                <span style={{ color: "var(--heri-ink-3)" }}>
-                  {en ? "Range:" : "مدى:"}{" "}
-                  <span className="font-mono font-bold" style={{ color: trendColor }}>
-                    {sessionRange.toFixed(2)}
-                  </span>
-                </span>
-              </div>
-            </header>
+          <DaylightPanel
+            title={en ? "Price Movement" : "الحركة السعرية"}
+            aside={
+              <span style={{ display: "flex", gap: 12, fontSize: 11, color: "var(--ink-muted)" }}>
+                <span>{en ? "High:" : "أعلى:"} <strong style={{ color: "var(--ink)", fontFamily: "monospace" }}>{high.toFixed(2)}</strong></span>
+                <span>{en ? "Low:" : "أدنى:"} <strong style={{ color: "var(--ink)", fontFamily: "monospace" }}>{low.toFixed(2)}</strong></span>
+                <span>{en ? "Range:" : "مدى:"} <strong style={{ color: trendColor, fontFamily: "monospace" }}>{sessionRange.toFixed(2)}</strong></span>
+              </span>
+            }
+          >
             <Sparkline values={history} color={trendColor} />
-          </section>
+          </DaylightPanel>
         ) : null}
 
         {/* KPIs */}
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <KpiCard
-            label={en ? "Last Close" : "آخر إغلاق"}
-            value={`${stock.lastPrice.toFixed(2)} ${stock.currency}`}
-            icon={Activity}
-            tone="indigo"
-          />
-          <KpiCard
-            label={en ? "Change" : "التغير"}
-            value={`${isUp ? "+" : ""}${stock.changePct.toFixed(2)}${pct}`}
-            icon={TrendIcon}
-            tone={isUp ? "emerald" : "red"}
-          />
-          <KpiCard
-            label={en ? "Exchange" : "البورصة"}
-            value={exchangeLabel}
-            icon={Globe}
-            tone="violet"
-          />
-          <KpiCard
-            label={en ? "Region" : "المنطقة"}
-            value={regionLabel}
-            icon={Building2}
-            tone="amber"
-          />
-        </section>
+        <DaylightKpiGrid>
+          <DaylightKpi label={en ? "Last Close" : "آخر إغلاق"} value={`${stock.lastPrice.toFixed(2)} ${stock.currency}`} />
+          <DaylightKpi label={en ? "Change" : "التغير"} value={`${isUp ? "+" : ""}${stock.changePct.toFixed(2)}${pct}`} />
+          <DaylightKpi label={en ? "Exchange" : "البورصة"} value={exchangeLabel} />
+          <DaylightKpi label={en ? "Region" : "المنطقة"} value={regionLabel} />
+        </DaylightKpiGrid>
 
         {/* Two columns */}
-        <div className="grid gap-6 lg:grid-cols-[1fr,320px]">
+        <div style={{ display: "grid", gap: 24, gridTemplateColumns: "1fr 320px" }}>
           {/* Peers */}
           {peers.length > 0 ? (
-            <section className="card card-pad anim-fade-up">
-              <header className="mb-3 flex items-center justify-between">
-                <h3
-                  className="flex items-center gap-2 text-sm font-semibold"
-                  style={{ color: "var(--heri-ink)" }}
-                >
-                  <TrendingUp
-                    className="h-4 w-4"
-                    style={{ color: "var(--heri-ochre)" }}
-                  />
-                  {en ? "Other listings on" : "أسهم أخرى من"}{" "}
-                  {exchangeLabel}
-                </h3>
-                <Link
-                  href="/markets"
-                  className="text-[11px] font-bold"
-                  style={{ color: "var(--heri-ochre)" }}
-                >
-                  {en ? "All markets ←" : "كل الأسواق ←"}
-                </Link>
-              </header>
-              <ul className="divide-y divide-[var(--heri-rule)]">
+            <DaylightPanel
+              title={`${en ? "Other listings on" : "أسهم أخرى من"} ${exchangeLabel}`}
+              aside={<Link href="/markets" style={{ fontSize: 11, color: "var(--gold)", textDecoration: "none" }}>{en ? "All markets ←" : "كل الأسواق ←"}</Link>}
+            >
+              <ul style={{ borderTop: "1px solid var(--line)" }}>
                 {peers.map((p, i) => {
                   const pUp = p.changePct >= 0;
                   return (
@@ -406,14 +340,14 @@ export default async function MarketDetailPage({
                         <div className="flex items-center gap-2">
                           <span
                             className="font-mono text-xs font-bold"
-                            style={{ color: "var(--heri-ink)" }}
+                            style={{ color: "var(--ink)" }}
                             dir="ltr"
                           >
                             {p.ticker}
                           </span>
                           <span
                             className="truncate text-sm font-bold"
-                            style={{ color: "var(--heri-ink)" }}
+                            style={{ color: "var(--ink)" }}
                           >
                             {p.labelAr ?? p.label}
                           </span>
@@ -422,7 +356,7 @@ export default async function MarketDetailPage({
                       <div className="flex items-center gap-3 text-end">
                         <span
                           className="font-mono text-xs font-bold"
-                          style={{ color: "var(--heri-ink)" }}
+                          style={{ color: "var(--ink)" }}
                         >
                           {p.lastPrice.toFixed(2)}
                         </span>
@@ -439,20 +373,14 @@ export default async function MarketDetailPage({
                   );
                 })}
               </ul>
-            </section>
+            </DaylightPanel>
           ) : (
             <div />
           )}
 
-          <aside className="space-y-6">
-            <section className="card card-pad anim-fade-up">
-              <h3
-                className="mb-3 text-sm font-semibold"
-                style={{ color: "var(--heri-ink)" }}
-              >
-                {en ? "Overview" : "البطاقة"}
-              </h3>
-              <dl className="space-y-2 text-xs">
+          <aside>
+            <DaylightPanel title={en ? "Overview" : "البطاقة"}>
+              <dl style={{ fontSize: 12, display: "flex", flexDirection: "column", gap: 8 }}>
                 <Fact
                   label={en ? "Ticker" : "الرمز"}
                   value={stock.ticker}
@@ -481,11 +409,11 @@ export default async function MarketDetailPage({
                   />
                 ) : null}
               </dl>
-            </section>
+            </DaylightPanel>
           </aside>
         </div>
       </div>
-    </>
+    </DaylightShell>
   );
 }
 
@@ -501,17 +429,17 @@ function Fact({
   mono?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
-      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
+    <div className="flex items-center justify-between border-b border-[var(--line)] pb-1.5 last:border-b-0">
+      <dt style={{ color: "var(--ink-muted)" }}>{label}</dt>
       <dd
         className={`text-end font-bold ${mono ? "font-mono" : ""}`}
-        style={{ color: "var(--heri-ink)" }}
+        style={{ color: "var(--ink)" }}
       >
         {link ? (
           <Link
             href={link}
             className="hover:underline"
-            style={{ color: "var(--heri-ochre)" }}
+            style={{ color: "var(--gold)" }}
           >
             {value}
           </Link>

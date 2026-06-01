@@ -10,10 +10,12 @@ import { ArrowRightLeft } from "lucide-react";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import { formatNumber, formatDateTime } from "@/lib/utils";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
 import { NewTransferForm } from "./TransferForm";
+
+import "../../daylight.css";
 
 export const dynamic = "force-dynamic";
 
@@ -173,8 +175,8 @@ export default async function TransfersPage({
   const dash = "—";
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "العمليات" : "Operations"}
         title={ar ? "التحويلات" : "Transfers"}
         subtitle={
@@ -183,30 +185,19 @@ export default async function TransfersPage({
             : "Warehouse-to-warehouse stock moves — a paired movement per transfer"
         }
         actions={<AdminFamilyNav current="/admin/transfers" ar={ar} />}
-        metrics={[
-          {
-            label: ar ? "تحويلات اليوم" : "Transfers today",
-            value: formatNumber(transfersToday),
-            tone: "blue",
-          },
-          {
-            label: ar ? "وحدات نُقلت اليوم" : "Units moved today",
-            value: formatNumber(unitsToday),
-            tone: "violet",
-          },
-          {
-            label: ar ? "الأكثر نشاطاً" : "Most active wh",
-            value: mostActiveCode,
-            tone: "emerald",
-          },
-        ]}
       />
+
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "تحويلات اليوم" : "Transfers today"} value={formatNumber(transfersToday)} />
+        <DaylightKpi label={ar ? "وحدات نُقلت اليوم" : "Units moved today"} value={formatNumber(unitsToday)} />
+        <DaylightKpi label={ar ? "الأكثر نشاطاً" : "Most active wh"} value={mostActiveCode} />
+      </DaylightKpiGrid>
 
       <div className="mt-3">
         <NewTransferForm products={products} warehouses={whOptions} ar={ar} />
       </div>
 
-      <div className="card card-pad mt-3">
+      <div className="panel reveal mt-3">
         <form
           method="GET"
           className="flex flex-wrap items-end gap-2 text-[11px] font-bold"
@@ -250,21 +241,20 @@ export default async function TransfersPage({
       </div>
 
       {rows.length === 0 ? (
-        <div className="card card-pad mt-3 flex flex-col items-center gap-3 py-16 text-center">
+        <div className="panel reveal mt-3 flex flex-col items-center gap-3 py-16 text-center">
           <ArrowRightLeft
             className="h-10 w-10"
-            style={{ color: "var(--text-muted)" }}
+            style={{ color: "var(--ink-muted)" }}
           />
-          <p className="text-sm font-bold" style={{ color: "var(--text)" }}>
+          <p className="text-sm font-bold" style={{ color: "var(--ink)" }}>
             {ar ? "لا تحويلات" : "No transfers"}
           </p>
         </div>
       ) : (
-        <div className="card mt-3 overflow-hidden">
-          <div className="table-wrap">
-            <table className="w-full text-start text-xs">
+        <div className="panel reveal mt-3 overflow-hidden">
+            <table className="dl-table">
               <thead>
-                <tr style={{ color: "var(--text-muted)" }}>
+                <tr style={{ color: "var(--ink-muted)" }}>
                   <th className="px-3 py-2 text-start font-bold">
                     {ar ? "متى" : "When"}
                   </th>
@@ -292,11 +282,11 @@ export default async function TransfersPage({
                 {rows.map((r) => (
                   <tr
                     key={r.ref}
-                    style={{ borderTop: "1px solid var(--border)" }}
+                    style={{ borderTop: "1px solid var(--line)" }}
                   >
                     <td
                       className="px-3 py-2 font-mono"
-                      style={{ color: "var(--text-muted)" }}
+                      style={{ color: "var(--ink-muted)" }}
                     >
                       {formatDateTime(r.when, ar ? "ar" : "en")}
                     </td>
@@ -324,13 +314,13 @@ export default async function TransfersPage({
                     </td>
                     <td
                       className="px-3 py-2"
-                      style={{ color: "var(--text)" }}
+                      style={{ color: "var(--ink)" }}
                     >
                       {r.reason}
                     </td>
                     <td
                       className="px-3 py-2 font-mono"
-                      style={{ color: "var(--text-muted)" }}
+                      style={{ color: "var(--ink-muted)" }}
                     >
                       {r.ref}
                     </td>
@@ -338,9 +328,8 @@ export default async function TransfersPage({
                 ))}
               </tbody>
             </table>
-          </div>
         </div>
       )}
-    </>
+    </DaylightShell>
   );
 }

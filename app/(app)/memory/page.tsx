@@ -10,18 +10,18 @@
 //
 // This is the fetch-driven twin of the SSR /brain/memory editorial page.
 
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { MemoryLakeBrowser } from "@/components/brain/MemoryLakeBrowser";
 import { getLocale } from "@/lib/i18n.server";
+import "../daylight.css";
 
 export const dynamic = "force-dynamic";
 
 export default function MemoryPage() {
   const ar = getLocale() === "ar";
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "الدماغ · استرجاع الذاكرة" : "Brain · Memory recall"}
         title={ar ? "بحيرة الذاكرة" : "The memory lake"}
         subtitle={
@@ -30,9 +30,7 @@ export default function MemoryPage() {
             : "Loaded live from the /api/memory endpoint. Filter by unit, or forget what no longer serves."
         }
       />
-      <PageContainer>
-        <MemoryLakeBrowser ar={ar} />
-      </PageContainer>
-    </>
+      <MemoryLakeBrowser ar={ar} />
+    </DaylightShell>
   );
 }

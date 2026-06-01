@@ -8,10 +8,11 @@ import { Prisma } from "@prisma/client";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import { formatNumber, orderStatusBadge, ORDER_STATUS_AR, ORDER_STATUS_EN } from "@/lib/utils";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
 import { NewCustomerForm, EditCustomerForm, DeleteCustomerButton } from "./CustomerForms";
+import "../../daylight.css";
 
 export const dynamic = "force-dynamic";
 
@@ -68,8 +69,8 @@ export default async function CustomersPage({ searchParams }: { searchParams: SP
   const oLabel = (s: string) => (ar ? ORDER_STATUS_AR : ORDER_STATUS_EN)[s] ?? s;
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "العلاقات" : "Relationships"}
         title={ar ? "العملاء" : "Customers"}
         subtitle={
@@ -78,19 +79,20 @@ export default async function CustomersPage({ searchParams }: { searchParams: SP
             : "Real entities — promoted from the SalesOrder customer strings"
         }
         actions={<AdminFamilyNav current="/admin/customers" ar={ar} />}
-        metrics={[
-          { label: ar ? "الإجمالي" : "Total", value: formatNumber(allCount), tone: "blue" },
-          { label: ar ? "نشط" : "Active", value: formatNumber(activeCount), tone: "emerald" },
-          { label: ar ? "أوامر بيع مرتبطة" : "SOs linked", value: formatNumber(soLinked), tone: "violet" },
-          { label: ar ? "نُفِّذت هذا الشهر" : "Fulfilled this month", value: formatNumber(fulfilledThisMonth), tone: "amber" },
-        ]}
       />
+
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "الإجمالي" : "Total"} value={formatNumber(allCount)} />
+        <DaylightKpi label={ar ? "نشط" : "Active"} value={formatNumber(activeCount)} />
+        <DaylightKpi label={ar ? "أوامر بيع مرتبطة" : "SOs linked"} value={formatNumber(soLinked)} />
+        <DaylightKpi label={ar ? "نُفِّذت هذا الشهر" : "Fulfilled this month"} value={formatNumber(fulfilledThisMonth)} />
+      </DaylightKpiGrid>
 
       <div className="mt-3">
         <NewCustomerForm tenantDefault={tenantDefault} ar={ar} />
       </div>
 
-      <div className="card card-pad mt-3">
+      <div className="panel reveal mt-3">
         <form method="GET" className="flex items-center gap-2">
           <input
             type="text"
@@ -106,39 +108,39 @@ export default async function CustomersPage({ searchParams }: { searchParams: SP
       </div>
 
       {customers.length === 0 ? (
-        <div className="card card-pad mt-3 flex flex-col items-center gap-3 py-16 text-center">
-          <Users className="h-10 w-10" style={{ color: "var(--text-muted)" }} />
-          <p className="text-sm font-bold" style={{ color: "var(--text)" }}>
+        <div className="panel reveal mt-3 flex flex-col items-center gap-3 py-16 text-center">
+          <Users className="h-10 w-10" style={{ color: "var(--ink-muted)" }} />
+          <p className="text-sm font-bold" style={{ color: "var(--ink)" }}>
             {ar ? "لا عملاء" : "No customers"}
           </p>
         </div>
       ) : (
         <section className="mt-3 flex flex-col gap-2">
           {customers.map((c) => (
-            <details key={c.id} className="card overflow-hidden" open={deep === c.id}>
+            <details key={c.id} className="panel reveal overflow-hidden" open={deep === c.id}>
               <summary
                 className="flex cursor-pointer flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3"
                 style={{ listStyle: "none" }}
               >
-                <ArrowRight className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--text-muted)" }} aria-hidden />
-                <span className="text-sm font-extrabold" style={{ color: "var(--text)" }}>{c.name}</span>
-                {c.email ? <span className="text-xs" style={{ color: "var(--text-muted)" }}>{c.email}</span> : null}
-                {c.phone ? <span className="font-mono text-xs" style={{ color: "var(--text-muted)" }}>{c.phone}</span> : null}
+                <ArrowRight className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--ink-muted)" }} aria-hidden />
+                <span className="text-sm font-extrabold" style={{ color: "var(--ink)" }}>{c.name}</span>
+                {c.email ? <span className="text-xs" style={{ color: "var(--ink-muted)" }}>{c.email}</span> : null}
+                {c.phone ? <span className="font-mono text-xs" style={{ color: "var(--ink-muted)" }}>{c.phone}</span> : null}
                 <span className="ms-auto flex flex-wrap items-center gap-2 text-[11px]">
                   {c.paymentTerms ? <span className="badge-slate">{c.paymentTerms}</span> : null}
                   <span className="badge-violet">{ar ? "أوامر بيع" : "SOs"} {c._count.salesOrders}</span>
                 </span>
               </summary>
 
-              <div className="flex flex-col gap-4 px-4 py-3" style={{ borderTop: "1px solid var(--border)" }}>
+              <div className="flex flex-col gap-4 px-4 py-3" style={{ borderTop: "1px solid var(--line)" }}>
                 <EditCustomerForm customer={c} ar={ar} />
 
                 <div>
-                  <div className="mb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                  <div className="mb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
                     {ar ? "أوامر البيع" : "Sales orders"}
                   </div>
                   {c.salesOrders.length === 0 ? (
-                    <p className="text-xs" style={{ color: "var(--text-muted)" }}>{dash}</p>
+                    <p className="text-xs" style={{ color: "var(--ink-muted)" }}>{dash}</p>
                   ) : (
                     <ul className="flex flex-col gap-1 text-xs">
                       {c.salesOrders.map((so) => (
@@ -161,6 +163,6 @@ export default async function CustomersPage({ searchParams }: { searchParams: SP
           ))}
         </section>
       )}
-    </>
+    </DaylightShell>
   );
 }

@@ -11,7 +11,7 @@ import { redirect } from "next/navigation";
 import {
   ArrowUpRight, Factory, Wallet, Users2, GitBranch, BrainCircuit, Inbox,
 } from "lucide-react";
-import { HeritageSection } from "@/components/heritage";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { WorkspaceFinancials } from "@/components/workspace/WorkspaceFinancials";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/workspace";
@@ -19,6 +19,7 @@ import { getLocale } from "@/lib/i18n.server";
 import { formatMoney, formatNumber, formatDate } from "@/lib/utils";
 import { computeCompanyHealth } from "@/lib/workspace/health";
 import { COMPANY_CODE_TO_TENANT_SLUG } from "@/lib/tenancy";
+import "../daylight.css";
 
 export const dynamic = "force-dynamic";
 
@@ -178,67 +179,59 @@ export default async function WorkspaceCommandPage() {
   ];
 
   return (
-    <div className="ws-page">
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
+        eyebrow={ar ? "مساحة العمل" : "Workspace"}
+        title={ar ? company.name : (company.nameEn ?? company.name)}
+        subtitle={ar ? "مركز التحكم الشامل للشركة" : "Company command center"}
+      />
+
       {/* Company Health hero */}
-      <section className="ws-health" data-grade={health.grade}>
-        <div className="ws-health-score">
-          <div className="ws-health-ring" style={{ ["--ws-h" as any]: `${health.score}` } as React.CSSProperties}>
-            <span className="ws-health-num">{health.score}</span>
-            <span className="ws-health-grade">{health.grade}</span>
+      <div className="panel reveal" style={{ marginBottom: 22 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 24 }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+            <div style={{ fontSize: 48, fontWeight: 800, lineHeight: 1, color: "var(--emerald)", fontVariantNumeric: "tabular-nums" }}>{health.score}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--gold)" }}>{health.grade}</div>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)", marginBottom: 8 }}>
+              {ar ? "مؤشّر صحة الشركة" : "COMPANY HEALTH INDEX"}
+            </div>
+            <p style={{ fontSize: 14, color: "var(--ink)", marginBottom: 12 }}>
+              {ar ? health.verdict.ar : health.verdict.en}
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {health.factors.map((f) => (
+                <div key={f.key}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4, fontSize: 12 }}>
+                    <span style={{ color: "var(--ink-muted)" }}>{ar ? f.label.ar : f.label.en}</span>
+                    <span style={{ fontVariantNumeric: "tabular-nums", color: "var(--ink)" }}>{f.value}</span>
+                  </div>
+                  <div className="dl-bar"><i style={{ width: `${f.value}%` }} /></div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-        <div className="ws-health-body">
-          <div className="ws-health-eyebrow">
-            {ar ? "مؤشّر صحة الشركة" : "COMPANY HEALTH INDEX"}
-          </div>
-          <p className="ws-health-verdict">
-            {ar ? health.verdict.ar : health.verdict.en}
-          </p>
-          <div className="ws-health-factors">
-            {health.factors.map((f) => (
-              <div key={f.key} className="ws-health-factor">
-                <div className="ws-health-factor-head">
-                  <span>{ar ? f.label.ar : f.label.en}</span>
-                  <span className="ws-mono">{f.value}</span>
-                </div>
-                <div className="ws-health-factor-bar">
-                  <span
-                    className="ws-health-factor-fill"
-                    data-key={f.key}
-                    style={{ width: `${f.value}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      </div>
 
-      {/* Phase BUG-1 — Team tile renamed to "Active users" to distinguish
-          login accounts (the tile) from staffCount/headcount shown
-          elsewhere in the company header. */}
-      <section className="ws-stat-row">
-        <Stat label={sectorMetric.label} value={sectorMetric.value} />
-        <Stat label={ar ? "مستخدمون نشطون" : "Active users"} value={formatNumber(teamCount)} />
-        <Stat label={ar ? "مشاريع" : "Projects"} value={formatNumber(projects)} />
-        <Stat label={ar ? "إشارات مفتوحة" : "Open signals"} value={formatNumber(openInsights)} accent />
-      </section>
+      <DaylightKpiGrid>
+        <DaylightKpi label={sectorMetric.label} value={sectorMetric.value} />
+        <DaylightKpi label={ar ? "مستخدمون نشطون" : "Active users"} value={formatNumber(teamCount)} />
+        <DaylightKpi label={ar ? "مشاريع" : "Projects"} value={formatNumber(projects)} />
+        <DaylightKpi label={ar ? "إشارات مفتوحة" : "Open signals"} value={formatNumber(openInsights)} />
+      </DaylightKpiGrid>
 
-      <HeritageSection
-        eyebrow={
-          ar
-            ? "نفس حساب لوحة المجموعة — مفلتر لهذه الشركة"
-            : "Same math as the group dashboard — filtered to this company"
-        }
+      <DaylightPanel
         title={ar ? "النبض المالي" : "Financial pulse"}
+        aside={ar ? "نفس حساب لوحة المجموعة — مفلتر لهذه الشركة" : "Same math as the group dashboard — filtered to this company"}
       >
         <WorkspaceFinancials ar={ar} txns={txns} />
-      </HeritageSection>
+      </DaylightPanel>
 
       {/* Phase NS-1 — Incoming Purchase Intent. Cross-tenant POs other
           arms drafted against this company via the supply-chain bridge. */}
-      <HeritageSection
-        eyebrow={ar ? "جسر سلسلة التوريد" : "Supply-chain bridge"}
+      <DaylightPanel
         title={ar ? "نوايا شراء واردة" : "Incoming purchase intent"}
         aside={
           ar
@@ -249,10 +242,10 @@ export default async function WorkspaceCommandPage() {
         {incomingIntents.length === 0 ? (
           <div
             className="flex items-center gap-3 px-4 py-6"
-            style={{ background: "var(--heri-cream)", border: "1px solid var(--heri-rule)" }}
+            style={{ background: "var(--cream)", border: "1px solid var(--line)" }}
           >
-            <Inbox className="h-5 w-5" style={{ color: "var(--heri-ink-3)" }} strokeWidth={1.5} />
-            <span style={{ fontSize: 13, color: "var(--heri-ink-2)" }}>
+            <Inbox className="h-5 w-5" style={{ color: "var(--ink-muted)" }} strokeWidth={1.5} />
+            <span style={{ fontSize: 13, color: "var(--ink-muted)" }}>
               {ar
                 ? "لا نوايا شراء واردة خلال آخر 30 يوم."
                 : "No incoming purchase intents in the last 30 days."}
@@ -267,30 +260,30 @@ export default async function WorkspaceCommandPage() {
                 <div
                   key={po.id}
                   className="grid gap-2 md:grid-cols-[1fr_auto] md:items-center px-4 py-3"
-                  style={{ background: "var(--heri-cream)", border: "1px solid var(--heri-rule)" }}
+                  style={{ background: "var(--cream)", border: "1px solid var(--line)" }}
                 >
                   <div className="min-w-0">
-                    <div className="heri-eyebrow heri-eyebrow-ink" style={{ fontSize: 10 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
                       {buyerName}
-                      <span style={{ color: "var(--heri-rule-strong)", margin: "0 8px" }}>·</span>
+                      <span style={{ color: "var(--line)", margin: "0 8px" }}>·</span>
                       <span className="font-mono">{po.poNumber}</span>
                     </div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: "var(--heri-ink)", marginTop: 4 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)", marginTop: 4 }}>
                       {po.sourceForecast?.productLabel ?? (ar ? "طلب" : "Order")}
                       {po.sourceForecast ? (
-                        <span style={{ color: "var(--heri-ink-2)", fontWeight: 500 }}>
+                        <span style={{ color: "var(--ink-muted)", fontWeight: 500 }}>
                           {" "}— {formatNumber(po.sourceForecast.predictedDemand)} {po.sourceForecast.unit}
                         </span>
                       ) : null}
                     </div>
-                    <div style={{ fontSize: 11.5, color: "var(--heri-ink-3)", marginTop: 2 }}>
+                    <div style={{ fontSize: 11.5, color: "var(--ink-muted)", marginTop: 2 }}>
                       {ar ? "تسليم متوقع: " : "Expected delivery: "}
                       {po.expectedAt ? formatDate(po.expectedAt, ar ? "ar" : "en") : (ar ? "غير محدّد" : "unset")}
                     </div>
                   </div>
                   <Link
                     href="/supply-chain"
-                    className="heri-btn heri-btn-secondary md:justify-self-end"
+                    className="dl-btn dl-btn-secondary md:justify-self-end"
                     style={{ fontSize: 11.5, padding: "6px 12px", whiteSpace: "nowrap" }}
                   >
                     {ar ? "التنبؤ الأصلي ←" : "View originating forecast →"}
@@ -300,52 +293,32 @@ export default async function WorkspaceCommandPage() {
             })}
           </div>
         )}
-      </HeritageSection>
+      </DaylightPanel>
 
-      <HeritageSection title={ar ? "أقسام نظام الشركة" : "Company ERP sections"}>
-        <div className="ws-section-grid">
+      <DaylightPanel title={ar ? "أقسام نظام الشركة" : "Company ERP sections"}>
+        <div className="prop-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}>
           {sections.map((s) => {
             const Icon = s.icon;
             return (
-              <Link key={s.href} href={s.href} className="ws-section-card">
-                <div className="ws-section-card-top">
-                  <span className="ws-section-card-icon">
-                    <Icon className="h-4 w-4" strokeWidth={1.6} />
-                  </span>
-                  {s.badge ? (
-                    <span className="ws-section-card-badge">{s.badge}</span>
-                  ) : null}
-                  <ArrowUpRight className="ws-section-card-arrow h-3.5 w-3.5" strokeWidth={1.5} />
+              <Link key={s.href} href={s.href} className="prop-card" style={{ display: "block", position: "relative" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                  <div style={{ borderRadius: 10, padding: 8, background: "rgba(46,107,87,.1)" }}>
+                    <Icon className="h-4 w-4" style={{ color: "var(--emerald)" }} strokeWidth={1.6} />
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    {s.badge ? (
+                      <span style={{ background: "var(--gold)", color: "#fff", borderRadius: 999, fontSize: 10, fontWeight: 700, padding: "2px 7px" }}>{s.badge}</span>
+                    ) : null}
+                    <ArrowUpRight className="h-3.5 w-3.5" style={{ color: "var(--ink-muted)" }} strokeWidth={1.5} />
+                  </div>
                 </div>
-                <div className="ws-section-card-name">{ar ? s.ar : s.en}</div>
-                <div className="ws-section-card-desc">{ar ? s.descAr : s.descEn}</div>
+                <div style={{ fontWeight: 700, color: "var(--ink)", fontSize: 14 }}>{ar ? s.ar : s.en}</div>
+                <div style={{ marginTop: 4, fontSize: 12, color: "var(--ink-muted)", lineHeight: 1.5 }}>{ar ? s.descAr : s.descEn}</div>
               </Link>
             );
           })}
         </div>
-      </HeritageSection>
-    </div>
-  );
-}
-
-function Stat({
-  label,
-  value,
-  accent,
-}: {
-  label: string;
-  value: string;
-  accent?: boolean;
-}) {
-  return (
-    <div className="ws-stat">
-      <div className="ws-stat-label">{label}</div>
-      <div
-        className="ws-stat-value"
-        style={accent ? { color: "var(--heri-copper)" } : undefined}
-      >
-        {value}
-      </div>
-    </div>
+      </DaylightPanel>
+    </DaylightShell>
   );
 }

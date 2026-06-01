@@ -9,7 +9,7 @@ import { ArrowRight, Warehouse as WarehouseIcon } from "lucide-react";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import { formatNumber, formatDateTime } from "@/lib/utils";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
 import {
@@ -17,6 +17,8 @@ import {
   EditWarehouseForm,
   DeleteWarehouseButton,
 } from "./WarehouseForms";
+
+import "../../daylight.css";
 
 export const dynamic = "force-dynamic";
 
@@ -94,8 +96,8 @@ export default async function WarehousesPage({
   const tLabel = (t: string) => (ar ? TYPE_AR[t] ?? t : t);
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "العمليات" : "Operations"}
         title={ar ? "المستودعات" : "Warehouses"}
         subtitle={
@@ -104,41 +106,26 @@ export default async function WarehousesPage({
             : "Physical stock locations — promoted from the Product.warehouse string"
         }
         actions={<AdminFamilyNav current="/admin/warehouses" ar={ar} />}
-        metrics={[
-          {
-            label: ar ? "مستودعات" : "Warehouses",
-            value: formatNumber(totalWh),
-            tone: "blue",
-          },
-          {
-            label: ar ? "نشطة" : "Active",
-            value: formatNumber(activeWh),
-            tone: "emerald",
-          },
-          {
-            label: ar ? "إجمالي الأصناف" : "Total SKUs",
-            value: formatNumber(totalSkus),
-            tone: "violet",
-          },
-          {
-            label: ar ? `مخزون منخفض (<${LOW_STOCK})` : `Low stock (<${LOW_STOCK})`,
-            value: formatNumber(lowStock),
-            tone: "amber",
-          },
-        ]}
       />
+
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "مستودعات" : "Warehouses"} value={formatNumber(totalWh)} />
+        <DaylightKpi label={ar ? "نشطة" : "Active"} value={formatNumber(activeWh)} />
+        <DaylightKpi label={ar ? "إجمالي الأصناف" : "Total SKUs"} value={formatNumber(totalSkus)} />
+        <DaylightKpi label={ar ? `مخزون منخفض (<${LOW_STOCK})` : `Low stock (<${LOW_STOCK})`} value={formatNumber(lowStock)} />
+      </DaylightKpiGrid>
 
       <div className="mt-3">
         <NewWarehouseForm tenantDefault={tenantDefault} ar={ar} />
       </div>
 
       {warehouses.length === 0 ? (
-        <div className="card card-pad mt-3 flex flex-col items-center gap-3 py-16 text-center">
+        <div className="panel reveal mt-3 flex flex-col items-center gap-3 py-16 text-center">
           <WarehouseIcon
             className="h-10 w-10"
-            style={{ color: "var(--text-muted)" }}
+            style={{ color: "var(--ink-muted)" }}
           />
-          <p className="text-sm font-bold" style={{ color: "var(--text)" }}>
+          <p className="text-sm font-bold" style={{ color: "var(--ink)" }}>
             {ar ? "لا مستودعات" : "No warehouses"}
           </p>
         </div>
@@ -153,7 +140,7 @@ export default async function WarehousesPage({
             return (
               <details
                 key={w.id}
-                className="card overflow-hidden"
+                className="panel reveal overflow-hidden"
                 open={deep === w.code}
               >
                 <summary
@@ -162,22 +149,22 @@ export default async function WarehousesPage({
                 >
                   <ArrowRight
                     className="h-3.5 w-3.5 shrink-0"
-                    style={{ color: "var(--text-muted)" }}
+                    style={{ color: "var(--ink-muted)" }}
                     aria-hidden
                   />
                   <span
                     className="font-mono text-sm font-extrabold"
-                    style={{ color: "var(--text)" }}
+                    style={{ color: "var(--ink)" }}
                   >
                     {w.code}
                   </span>
-                  <span className="text-sm" style={{ color: "var(--text)" }}>
+                  <span className="text-sm" style={{ color: "var(--ink)" }}>
                     {w.name}
                   </span>
                   {w.address ? (
                     <span
                       className="text-xs"
-                      style={{ color: "var(--text-muted)" }}
+                      style={{ color: "var(--ink-muted)" }}
                     >
                       {w.address}
                     </span>
@@ -211,29 +198,29 @@ export default async function WarehousesPage({
 
                 <div
                   className="flex flex-col gap-4 px-4 py-3"
-                  style={{ borderTop: "1px solid var(--border)" }}
+                  style={{ borderTop: "1px solid var(--line)" }}
                 >
                   <EditWarehouseForm w={w} ar={ar} />
 
                   <div>
                     <div
                       className="mb-1 text-[10px] font-bold uppercase tracking-widest"
-                      style={{ color: "var(--text-muted)" }}
+                      style={{ color: "var(--ink-muted)" }}
                     >
                       {ar ? "المنتجات في هذا المستودع" : "Products at this warehouse"}
                     </div>
                     {w.products.length === 0 ? (
                       <p
                         className="text-xs"
-                        style={{ color: "var(--text-muted)" }}
+                        style={{ color: "var(--ink-muted)" }}
                       >
                         {dash}
                       </p>
                     ) : (
-                      <div className="table-wrap">
-                        <table className="w-full text-start text-xs">
+
+                        <table className="dl-table">
                           <thead>
-                            <tr style={{ color: "var(--text-muted)" }}>
+                            <tr style={{ color: "var(--ink-muted)" }}>
                               <th className="px-3 py-2 text-start font-bold">
                                 {ar ? "الصنف" : "SKU"}
                               </th>
@@ -253,7 +240,7 @@ export default async function WarehousesPage({
                               <tr
                                 key={p.sku}
                                 style={{
-                                  borderTop: "1px solid var(--border)",
+                                  borderTop: "1px solid var(--line)",
                                 }}
                               >
                                 <td className="px-3 py-2 font-mono">
@@ -269,7 +256,7 @@ export default async function WarehousesPage({
                                 </td>
                                 <td
                                   className="px-3 py-2"
-                                  style={{ color: "var(--text)" }}
+                                  style={{ color: "var(--ink)" }}
                                 >
                                   {p.name}
                                 </td>
@@ -279,14 +266,14 @@ export default async function WarehousesPage({
                                     color:
                                       p.quantity < LOW_STOCK
                                         ? "#b45309"
-                                        : "var(--text)",
+                                        : "var(--ink)",
                                   }}
                                 >
                                   {formatNumber(p.quantity)}
                                 </td>
                                 <td
                                   className="px-3 py-2 font-mono"
-                                  style={{ color: "var(--text-muted)" }}
+                                  style={{ color: "var(--ink-muted)" }}
                                 >
                                   {formatDateTime(
                                     p.lastImportedAt,
@@ -297,7 +284,6 @@ export default async function WarehousesPage({
                             ))}
                           </tbody>
                         </table>
-                      </div>
                     )}
                   </div>
 
@@ -310,6 +296,6 @@ export default async function WarehousesPage({
           })}
         </section>
       )}
-    </>
+    </DaylightShell>
   );
 }

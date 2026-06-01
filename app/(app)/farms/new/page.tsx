@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db";
 import { createFarm } from "../actions";
+import "../../daylight.css";
 
 export default async function NewFarmPage() {
   const companies = await prisma.company.findMany({
@@ -11,14 +12,14 @@ export default async function NewFarmPage() {
   });
 
   return (
-    <>
-      <Topbar
+    <DaylightShell>
+      <DaylightHeader
         eyebrow="الزراعة الذكية"
         title="إضافة مزرعة"
         subtitle="مزرعة جديدة تنضم لشبكة لوران المُراقَبة عبر H-Nerve."
       />
-      <div className="flex-1 p-6">
-        <form action={createFarm} className="card card-pad mx-auto max-w-3xl space-y-5">
+      <div className="panel reveal mx-auto max-w-3xl">
+        <form action={createFarm} className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <label className="label" htmlFor="companyId">الشركة المالكة</label>
@@ -64,16 +65,16 @@ export default async function NewFarmPage() {
             <textarea id="description" name="description" rows={3} className="textarea" />
           </div>
 
-          <div className="flex items-center justify-between gap-3 border-t border-surface-200 pt-4">
-            <Link href="/farms" className="btn-ghost">
+          <div className="flex items-center justify-between gap-3 border-t border-[var(--line)] pt-4">
+            <Link href="/farms" className="dl-btn dl-btn-secondary">
               <ArrowLeft className="h-4 w-4" /> العودة
             </Link>
-            <button type="submit" className="btn-primary">
+            <button type="submit" className="dl-btn dl-btn-primary">
               <Save className="h-4 w-4" /> حفظ المزرعة
             </button>
           </div>
         </form>
       </div>
-    </>
+    </DaylightShell>
   );
 }

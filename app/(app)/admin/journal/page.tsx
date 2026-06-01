@@ -10,9 +10,11 @@ import { Prisma } from "@prisma/client";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import { formatMoney2, formatNumber, formatDateTime } from "@/lib/utils";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
+
+import "../../daylight.css";
 
 export const dynamic = "force-dynamic";
 
@@ -76,8 +78,8 @@ export default async function JournalPage({ searchParams }: { searchParams: SP }
   };
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "المحاسبة" : "Accounting"}
         title={ar ? "دفتر اليومية" : "General Journal"}
         subtitle={
@@ -86,18 +88,19 @@ export default async function JournalPage({ searchParams }: { searchParams: SP }
             : "Immutable double-entry — debits = credits per entry"
         }
         actions={<AdminFamilyNav current="/admin/journal" ar={ar} />}
-        metrics={[
-          { label: ar ? "قيود الفترة" : "Entries (period)", value: formatNumber(entries.length), tone: "blue" },
-          { label: ar ? "إجمالي المدين" : "Total debits", value: formatMoney2(totDebit), tone: "violet" },
-          { label: ar ? "إجمالي الدائن" : "Total credits", value: formatMoney2(totCredit), tone: "violet" },
-          { label: ar ? "فترات مفتوحة" : "Periods open", value: formatNumber(openCount), tone: "emerald" },
-        ]}
       />
 
-      <div className="card card-pad mt-3 flex flex-col gap-3">
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "قيود الفترة" : "Entries (period)"} value={formatNumber(entries.length)} />
+        <DaylightKpi label={ar ? "إجمالي المدين" : "Total debits"} value={formatMoney2(totDebit)} />
+        <DaylightKpi label={ar ? "إجمالي الدائن" : "Total credits"} value={formatMoney2(totCredit)} />
+        <DaylightKpi label={ar ? "فترات مفتوحة" : "Periods open"} value={formatNumber(openCount)} />
+      </DaylightKpiGrid>
+
+      <div className="panel reveal mt-3 flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
               {ar ? "الفترة" : "Period"}
             </span>
             {periods.length === 0 ? (
@@ -130,7 +133,7 @@ export default async function JournalPage({ searchParams }: { searchParams: SP }
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
             {ar ? "المرجع" : "Reference"}
           </span>
           {[
@@ -151,12 +154,12 @@ export default async function JournalPage({ searchParams }: { searchParams: SP }
       </div>
 
       {entries.length === 0 ? (
-        <div className="card card-pad mt-3 flex flex-col items-center gap-3 py-16 text-center">
-          <BookOpenCheck className="h-10 w-10" style={{ color: "var(--text-muted)" }} />
-          <p className="text-sm font-bold" style={{ color: "var(--text)" }}>
+        <div className="panel reveal mt-3 flex flex-col items-center gap-3 py-16 text-center">
+          <BookOpenCheck className="h-10 w-10" style={{ color: "var(--ink-muted)" }} />
+          <p className="text-sm font-bold" style={{ color: "var(--ink)" }}>
             {ar ? "لا قيود في هذه الفترة" : "No journal entries in this period"}
           </p>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+          <p className="text-xs" style={{ color: "var(--ink-muted)" }}>
             {ar
               ? "تُنشأ القيود تلقائياً عند استلام أوامر الشراء وتنفيذ أوامر البيع."
               : "Entries are auto-posted on PO receipt and SO fulfillment."}
@@ -168,16 +171,16 @@ export default async function JournalPage({ searchParams }: { searchParams: SP }
             const total = e.lines.reduce((s, l) => s + dec(l.debit), 0);
             const href = refHref(e.reference);
             return (
-              <details key={e.id} className="card overflow-hidden" open={jeDeep === e.id}>
+              <details key={e.id} className="panel reveal overflow-hidden" open={jeDeep === e.id}>
                 <summary
                   className="flex cursor-pointer flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3"
                   style={{ listStyle: "none" }}
                 >
-                  <ArrowRight className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--text-muted)" }} aria-hidden />
-                  <span className="font-mono text-[11px]" style={{ color: "var(--text-muted)" }}>
+                  <ArrowRight className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--ink-muted)" }} aria-hidden />
+                  <span className="font-mono text-[11px]" style={{ color: "var(--ink-muted)" }}>
                     {formatDateTime(e.postedAt ?? e.createdAt, ar ? "ar" : "en")}
                   </span>
-                  <span className="text-sm font-bold" style={{ color: "var(--text)" }}>
+                  <span className="text-sm font-bold" style={{ color: "var(--ink)" }}>
                     {e.description}
                   </span>
                   {e.reference ? (
@@ -191,18 +194,18 @@ export default async function JournalPage({ searchParams }: { searchParams: SP }
                     <span className="badge-amber">{ar ? "عكسي" : "reversal"}</span>
                   ) : null}
                   <span className="ms-auto flex flex-wrap items-center gap-2 text-[11px]">
-                    <span style={{ color: "var(--text-muted)" }}>
-                      {ar ? "بنود" : "lines"} <b style={{ color: "var(--text)" }}>{e.lines.length}</b>
+                    <span style={{ color: "var(--ink-muted)" }}>
+                      {ar ? "بنود" : "lines"} <b style={{ color: "var(--ink)" }}>{e.lines.length}</b>
                     </span>
-                    <span className="font-mono font-extrabold" style={{ color: "var(--text)" }}>
+                    <span className="font-mono font-extrabold" style={{ color: "var(--ink)" }}>
                       {formatMoney2(total)}
                     </span>
                   </span>
                 </summary>
-                <div className="table-wrap" style={{ borderTop: "1px solid var(--border)" }}>
-                  <table className="w-full text-start text-xs">
+                <div style={{ borderTop: "1px solid var(--line)" }}>
+                  <table className="dl-table">
                     <thead>
-                      <tr style={{ color: "var(--text-muted)" }}>
+                      <tr style={{ color: "var(--ink-muted)" }}>
                         <th className="px-3 py-2 text-start font-bold">{ar ? "الحساب" : "Account"}</th>
                         <th className="px-3 py-2 text-end font-bold">{ar ? "مدين" : "Debit"}</th>
                         <th className="px-3 py-2 text-end font-bold">{ar ? "دائن" : "Credit"}</th>
@@ -211,7 +214,7 @@ export default async function JournalPage({ searchParams }: { searchParams: SP }
                     </thead>
                     <tbody>
                       {e.lines.map((l) => (
-                        <tr key={l.id} style={{ borderTop: "1px solid var(--border)" }}>
+                        <tr key={l.id} style={{ borderTop: "1px solid var(--line)" }}>
                           <td className="px-3 py-2">
                             <span className="font-mono">{l.account.code}</span> · {l.account.name}
                           </td>
@@ -221,7 +224,7 @@ export default async function JournalPage({ searchParams }: { searchParams: SP }
                           <td className="px-3 py-2 text-end font-mono">
                             {dec(l.credit) ? formatMoney2(dec(l.credit)) : dash}
                           </td>
-                          <td className="px-3 py-2" style={{ color: "var(--text-muted)" }}>
+                          <td className="px-3 py-2" style={{ color: "var(--ink-muted)" }}>
                             {l.memo ?? dash}
                           </td>
                         </tr>
@@ -234,6 +237,6 @@ export default async function JournalPage({ searchParams }: { searchParams: SP }
           })}
         </section>
       )}
-    </>
+    </DaylightShell>
   );
 }

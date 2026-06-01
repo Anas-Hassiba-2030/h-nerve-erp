@@ -4,22 +4,17 @@ import { notFound } from "next/navigation";
 import {
   ArrowLeft,
   GraduationCap,
-  Banknote,
   Users2,
   Rocket,
-  Sparkles,
   Calendar,
   ChevronsRight,
 } from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
-import { HeriKpi } from "@/components/HeriKpi";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PinButton } from "@/components/PinButton";
 import { prisma } from "@/lib/db";
 import { isPinned } from "@/lib/pins";
 import {
-  ar,
   formatMoney,
   formatNumber,
   STATUS_AR,
@@ -28,6 +23,7 @@ import {
   VERTICALS_EN,
   loc,
 } from "@/lib/utils";
+import "../../daylight.css";
 
 const STAGE_FLOW = ["INTAKE", "ACCELERATING", "GRADUATED"] as const;
 
@@ -68,8 +64,8 @@ export default async function EducationDetailPage({
   const en = getLocale() === "en";
 
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={en ? "ltr" : "rtl"}>
+      <DaylightHeader
         eyebrow={en ? "The Tank Incubator" : "حاضنة The Tank"}
         title={en ? (program.nameEn ?? program.name) : program.name}
         subtitle={
@@ -78,7 +74,7 @@ export default async function EducationDetailPage({
         }
         actions={
           <div className="flex items-center gap-2">
-            <Link href="/education" className="heri-btn heri-btn-ghost" style={{ fontSize: 13 }}>
+            <Link href="/education" className="dl-btn dl-btn-secondary" style={{ fontSize: 13 }}>
               <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
               {en ? "Programs" : "البرامج"}
             </Link>
@@ -97,9 +93,9 @@ export default async function EducationDetailPage({
         }
       />
 
-      <PageContainer>
-        {/* Hero strip — Heritage Modern cream plinth */}
-        <section className="heri-hero" style={{ padding: "20px 24px" }}>
+      <div className="flex-1 space-y-6 p-6">
+        {/* Hero strip */}
+        <section className="panel reveal" style={{ padding: "20px 24px" }}>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
@@ -109,8 +105,8 @@ export default async function EducationDetailPage({
                 <StatusBadge status={program.stage} />
                 <Link
                   href={`/companies/${program.companyId}`}
-                  className="heri-pill heri-pill-info"
-                  style={{ textDecoration: "none" }}
+                  className="hover:underline"
+                  style={{ fontSize: 12, color: "var(--gold)", textDecoration: "none" }}
                 >
                   {program.company.name}
                 </Link>
@@ -118,10 +114,9 @@ export default async function EducationDetailPage({
               <h2
                 className="mt-2"
                 style={{
-                  fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
                   fontSize: "clamp(22px,2vw,30px)",
                   fontWeight: 500,
-                  color: "var(--heri-ink)",
+                  color: "var(--ink)",
                   letterSpacing: "-0.012em",
                   lineHeight: 1.15,
                 }}
@@ -129,25 +124,21 @@ export default async function EducationDetailPage({
                 {en ? (program.nameEn ?? program.name) : program.name}
               </h2>
               {program.nameEn ? (
-                <p
-                  className="mt-1"
-                  dir="ltr"
-                  style={{ fontSize: 12.5, color: "var(--heri-ink-3)" }}
-                >
+                <p className="mt-1" dir="ltr" style={{ fontSize: 12.5, color: "var(--ink-muted)" }}>
                   {program.nameEn}
                 </p>
               ) : null}
-              <div className="mt-3 flex flex-wrap gap-3 heri-number-mono" style={{ fontSize: 11.5, color: "var(--heri-ink-3)" }}>
+              <div className="mt-3 flex flex-wrap gap-3" style={{ fontSize: 11.5, color: "var(--ink-muted)" }}>
                 <span className="inline-flex items-center gap-1.5">
-                  <Users2 className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
+                  <Users2 className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: "var(--gold)" }} />
                   {program.founder}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
+                  <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: "var(--gold)" }} />
                   {en ? "Cohort" : "فوج"} {program.cohort}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <Users2 className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
+                  <Users2 className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: "var(--gold)" }} />
                   {formatNumber(program.teamSize)} {en ? "members" : "فرد"}
                 </span>
               </div>
@@ -155,9 +146,9 @@ export default async function EducationDetailPage({
             <div
               className="flex h-16 w-16 shrink-0 items-center justify-center"
               style={{
-                background: "var(--heri-cream-2)",
-                border: "1px solid var(--heri-rule-strong)",
-                color: "var(--heri-ochre)",
+                background: "var(--cream)",
+                border: "1px solid var(--line)",
+                color: "var(--gold)",
               }}
             >
               <Rocket className="h-8 w-8" strokeWidth={1.4} />
@@ -166,51 +157,35 @@ export default async function EducationDetailPage({
         </section>
 
         {/* KPI band */}
-        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-3">
-          <HeriKpi
+        <DaylightKpiGrid>
+          <DaylightKpi
             label={en ? "Funding" : "التمويل"}
-            raw={program.fundingJod}
-            kind="money"
+            value={formatMoney(program.fundingJod)}
             hint={`${en ? "Cohort" : "فوج"} ${program.cohort}`}
           />
-          <HeriKpi
+          <DaylightKpi
             label={en ? "Team Size" : "حجم الفريق"}
-            raw={program.teamSize}
-            kind="number"
+            value={formatNumber(program.teamSize)}
             hint={en ? "members" : "أفراد"}
           />
-          <HeriKpi
+          <DaylightKpi
             label={en ? "Completion Rate" : "نسبة الإنجاز"}
-            raw={stalled ? 0 : (Math.max(0, stageIdx + 1) / STAGE_FLOW.length)}
-            kind="percent"
-            accent={stalled ? "var(--heri-terracotta)" : "var(--heri-teal)"}
+            value={stalled ? "0%" : `${Math.round(Math.max(0, stageIdx + 1) / STAGE_FLOW.length * 100)}%`}
             hint={loc(STATUS_AR, STATUS_EN, getLocale(), program.stage)}
           />
-        </section>
+        </DaylightKpiGrid>
 
         {/* Stage progression */}
-        <section className="heri-card">
-          <header className="mb-4 flex items-center justify-between">
-            <div>
-              <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Journey" : "المسيرة"}</div>
-              <h3
-                className="mt-1 flex items-center gap-2"
-                style={{
-                  fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
-                  fontSize: 16,
-                  fontWeight: 500,
-                  color: "var(--heri-ink)",
-                }}
-              >
-                <ChevronsRight className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
-                {en ? "Startup Journey" : "مسيرة المشروع"}
-              </h3>
-            </div>
-            {stalled ? <span className="heri-pill heri-pill-critical">{en ? "Stalled" : "متعثر"}</span> : null}
-          </header>
-
+        <DaylightPanel
+          title={en ? "Startup Journey" : "مسيرة المشروع"}
+          aside={
+            <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
+              {en ? "Journey" : "المسيرة"}
+            </span>
+          }
+        >
           {stalled ? (
-            <p className="text-xs" style={{ color: "var(--heri-ink-3)" }}>
+            <p className="text-xs" style={{ color: "var(--ink-muted)" }}>
               {en
                 ? "The startup is stalled — it needs intervention from the incubator team to get back on track."
                 : "المشروع في حالة تعثر — يحتاج تدخل من فريق الحاضنة لإعادته للمسار."}
@@ -226,26 +201,23 @@ export default async function EducationDetailPage({
                     className="relative flex flex-1 flex-col items-center"
                   >
                     <div
-                      className="flex h-12 w-12 items-center justify-center heri-number-mono"
+                      className="flex h-12 w-12 items-center justify-center font-mono"
                       style={{
-                        background: reached
-                          ? "var(--heri-ochre)"
-                          : "var(--heri-cream-2)",
-                        border: `1px solid ${reached ? "var(--heri-ochre)" : "var(--heri-rule-strong)"}`,
-                        color: reached ? "var(--heri-ink)" : "var(--heri-ink-3)",
+                        background: reached ? "var(--gold)" : "var(--cream)",
+                        border: `1px solid ${reached ? "var(--gold)" : "var(--line)"}`,
+                        color: reached ? "var(--ink)" : "var(--ink-muted)",
                         fontSize: 16,
                         fontWeight: 600,
+                        borderRadius: 8,
                         transform: isCurrent ? "scale(1.08)" : undefined,
-                        transition: "transform .25s var(--ease-out-quart)",
+                        transition: "transform .25s ease",
                       }}
                     >
                       {i + 1}
                     </div>
                     <div
                       className="mt-2 text-center text-[11px] font-semibold"
-                      style={{
-                        color: reached ? "var(--heri-ink)" : "var(--heri-ink-3)",
-                      }}
+                      style={{ color: reached ? "var(--ink)" : "var(--ink-muted)" }}
                     >
                       {loc(STATUS_AR, STATUS_EN, getLocale(), stage)}
                     </div>
@@ -256,10 +228,7 @@ export default async function EducationDetailPage({
                           insetInlineStart: "calc(50% + 1.5rem)",
                           width: "calc(100% - 3rem)",
                           height: "1px",
-                          background:
-                            stageIdx >= 0 && i < stageIdx
-                              ? "var(--heri-ochre)"
-                              : "var(--heri-rule)",
+                          background: stageIdx >= 0 && i < stageIdx ? "var(--gold)" : "var(--line)",
                           transition: "background .6s ease",
                         }}
                       />
@@ -269,61 +238,34 @@ export default async function EducationDetailPage({
               })}
             </div>
           )}
-        </section>
+        </DaylightPanel>
 
         {/* Two columns */}
-        <div className="grid gap-6 lg:grid-cols-[1fr,320px] heri-stagger">
+        <div className="grid gap-6 lg:grid-cols-[1fr,320px]">
           <div className="space-y-6">
             {program.description ? (
-              <section className="heri-card">
-                <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Overview" : "نظرة عامة"}</div>
-                <h3
-                  className="mt-1 mb-2"
-                  style={{
-                    fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
-                    fontSize: 16,
-                    fontWeight: 500,
-                    color: "var(--heri-ink)",
-                  }}
-                >
-                  {en ? "The Startup at a Glance" : "المشروع باختصار"}
-                </h3>
-                <p
-                  className="text-sm leading-relaxed"
-                  style={{ color: "var(--heri-ink)" }}
-                >
+              <DaylightPanel title={en ? "The Startup at a Glance" : "المشروع باختصار"}>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--ink)" }}>
                   {program.description}
                 </p>
-              </section>
+              </DaylightPanel>
             ) : null}
 
             {related.length > 0 ? (
-              <section className="heri-card">
-                <header className="mb-3 flex items-center justify-between">
-                  <div>
-                    <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Peer Programs" : "برامج زميلة"}</div>
-                    <h3
-                      className="mt-1 flex items-center gap-2"
-                      style={{
-                        fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
-                        fontSize: 16,
-                        fontWeight: 500,
-                        color: "var(--heri-ink)",
-                      }}
-                    >
-                      <GraduationCap className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--heri-ochre)" }} />
-                      {en ? "Under the Same Umbrella" : "من نفس المظلة"}
-                    </h3>
-                  </div>
-                  <Link
-                    href="/education"
-                    className="heri-eyebrow"
-                    style={{ color: "var(--heri-ochre)", textDecoration: "none" }}
-                  >
+              <DaylightPanel
+                title={
+                  <span className="flex items-center gap-2">
+                    <GraduationCap className="h-4 w-4" strokeWidth={1.5} style={{ color: "var(--gold)" }} />
+                    {en ? "Under the Same Umbrella" : "من نفس المظلة"}
+                  </span>
+                }
+                aside={
+                  <Link href="/education" style={{ color: "var(--gold)", textDecoration: "none", fontSize: 11.5 }}>
                     {en ? "All Programs ←" : "كل البرامج ←"}
                   </Link>
-                </header>
-                <ul className="divide-y divide-[var(--heri-rule)]">
+                }
+              >
+                <ul className="divide-y" style={{ borderColor: "var(--line)" }}>
                   {related.map((r) => (
                     <li
                       key={r.id}
@@ -334,28 +276,19 @@ export default async function EducationDetailPage({
                         className="min-w-0 flex-1 hover:underline"
                       >
                         <div className="flex items-center gap-2">
-                          <span
-                            className="truncate font-semibold"
-                            style={{ color: "var(--heri-ink)", fontSize: 13 }}
-                          >
+                          <span className="truncate font-semibold" style={{ color: "var(--ink)", fontSize: 13 }}>
                             {en ? (r.nameEn ?? r.name) : r.name}
                           </span>
                           <span className={VERTICAL_TONE[r.vertical] ?? "badge-slate"}>
                             {loc(VERTICALS_AR, VERTICALS_EN, getLocale(), r.vertical)}
                           </span>
                         </div>
-                        <div
-                          className="heri-number-mono mt-0.5"
-                          style={{ fontSize: 10.5, color: "var(--heri-ink-3)" }}
-                        >
+                        <div className="mt-0.5 font-mono" style={{ fontSize: 10.5, color: "var(--ink-muted)" }}>
                           {r.founder} • {en ? "Cohort" : "فوج"} {r.cohort} • {formatNumber(r.teamSize)} {en ? "members" : "فرد"}
                         </div>
                       </Link>
                       <div className="flex items-center gap-2">
-                        <span
-                          className="heri-number-mono font-semibold"
-                          style={{ color: "var(--heri-ink)", fontSize: 12 }}
-                        >
+                        <span className="font-semibold font-mono" style={{ color: "var(--ink)", fontSize: 12 }}>
                           {formatMoney(r.fundingJod)}
                         </span>
                         <StatusBadge status={r.stage} />
@@ -363,24 +296,12 @@ export default async function EducationDetailPage({
                     </li>
                   ))}
                 </ul>
-              </section>
+              </DaylightPanel>
             ) : null}
           </div>
 
           <aside className="space-y-6">
-            <section className="heri-card">
-              <div className="heri-eyebrow heri-eyebrow-ink">{en ? "Profile" : "البطاقة"}</div>
-              <h3
-                className="mt-1 mb-3"
-                style={{
-                  fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
-                  fontSize: 16,
-                  fontWeight: 500,
-                  color: "var(--heri-ink)",
-                }}
-              >
-                {en ? "Startup Profile" : "بطاقة المشروع"}
-              </h3>
+            <DaylightPanel title={en ? "Startup Profile" : "بطاقة المشروع"}>
               <dl className="space-y-2 text-xs">
                 <Fact label={en ? "Founder" : "المؤسس"} value={program.founder} />
                 <Fact label={en ? "Vertical" : "القطاع"} value={loc(VERTICALS_AR, VERTICALS_EN, getLocale(), program.vertical)} />
@@ -394,11 +315,11 @@ export default async function EducationDetailPage({
                   link={`/companies/${program.companyId}`}
                 />
               </dl>
-            </section>
+            </DaylightPanel>
           </aside>
         </div>
-      </PageContainer>
-    </>
+      </div>
+    </DaylightShell>
   );
 }
 
@@ -412,18 +333,11 @@ function Fact({
   link?: string;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
-      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
-      <dd
-        className="text-end font-semibold"
-        style={{ color: "var(--heri-ink)" }}
-      >
+    <div className="flex items-center justify-between border-b pb-1.5 last:border-b-0" style={{ borderColor: "var(--line)" }}>
+      <dt style={{ color: "var(--ink-muted)" }}>{label}</dt>
+      <dd className="text-end font-semibold" style={{ color: "var(--ink)" }}>
         {link ? (
-          <Link
-            href={link}
-            className="hover:underline"
-            style={{ color: "var(--heri-ochre)" }}
-          >
+          <Link href={link} className="hover:underline" style={{ color: "var(--gold)" }}>
             {value}
           </Link>
         ) : (

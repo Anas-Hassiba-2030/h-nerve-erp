@@ -12,10 +12,11 @@ import { Landmark } from "lucide-react";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { formatMoney2, formatNumber } from "@/lib/utils";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
 import { NewAccountForm } from "./AccountForms";
+import "../../daylight.css";
 
 export const dynamic = "force-dynamic";
 
@@ -84,10 +85,10 @@ export default async function AccountsPage({ searchParams }: { searchParams: SP 
 
   const Stat = ({ label, value, strong }: { label: string; value: number; strong?: boolean }) => (
     <div className="flex items-center justify-between py-1 text-sm">
-      <span style={{ color: "var(--text-muted)" }}>{label}</span>
+      <span style={{ color: "var(--ink-muted)" }}>{label}</span>
       <span
         className="font-mono"
-        style={{ color: "var(--text)", fontWeight: strong ? 800 : 500 }}
+        style={{ color: "var(--ink)", fontWeight: strong ? 800 : 500 }}
       >
         {formatMoney2(value)}
       </span>
@@ -95,8 +96,8 @@ export default async function AccountsPage({ searchParams }: { searchParams: SP 
   );
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "المحاسبة" : "Accounting"}
         title={ar ? "دليل الحسابات" : "Chart of Accounts"}
         subtitle={
@@ -105,20 +106,21 @@ export default async function AccountsPage({ searchParams }: { searchParams: SP 
             : "Running balances + P&L + Balance Sheet for the selected period"
         }
         actions={<AdminFamilyNav current="/admin/accounts" ar={ar} />}
-        metrics={[
-          { label: ar ? "حسابات" : "Accounts", value: formatNumber(accounts.length), tone: "blue" },
-          { label: ar ? "الإيراد" : "Revenue", value: formatMoney2(revenue), tone: "emerald" },
-          { label: ar ? "صافي الدخل" : "Net income", value: formatMoney2(netIncome), tone: netIncome >= 0 ? "emerald" : "amber" },
-          { label: ar ? "الميزانية متوازنة" : "BS balanced", value: balanced ? "✓" : formatMoney2(identityDiff), tone: balanced ? "emerald" : "amber" },
-        ]}
       />
+
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "حسابات" : "Accounts"} value={formatNumber(accounts.length)} />
+        <DaylightKpi label={ar ? "الإيراد" : "Revenue"} value={formatMoney2(revenue)} />
+        <DaylightKpi label={ar ? "صافي الدخل" : "Net income"} value={formatMoney2(netIncome)} />
+        <DaylightKpi label={ar ? "الميزانية متوازنة" : "BS balanced"} value={balanced ? "✓" : formatMoney2(identityDiff)} />
+      </DaylightKpiGrid>
 
       <div className="mt-3">
         <NewAccountForm tenantDefault={tenantDefault} ar={ar} />
       </div>
 
-      <div className="card card-pad mt-3 flex flex-wrap items-center gap-1.5">
-        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+      <div className="panel reveal mt-3 flex flex-wrap items-center gap-1.5">
+        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
           {ar ? "الفترة" : "Period"}
         </span>
         {periods.length === 0 ? (
@@ -137,9 +139,9 @@ export default async function AccountsPage({ searchParams }: { searchParams: SP 
       </div>
 
       {accounts.length === 0 ? (
-        <div className="card card-pad mt-3 flex flex-col items-center gap-3 py-16 text-center">
-          <Landmark className="h-10 w-10" style={{ color: "var(--text-muted)" }} />
-          <p className="text-sm font-bold" style={{ color: "var(--text)" }}>
+        <div className="panel reveal mt-3 flex flex-col items-center gap-3 py-16 text-center">
+          <Landmark className="h-10 w-10" style={{ color: "var(--ink-muted)" }} />
+          <p className="text-sm font-bold" style={{ color: "var(--ink)" }}>
             {ar ? "دليل الحسابات غير مُهيّأ" : "Chart of Accounts not seeded"}
           </p>
         </div>
@@ -147,73 +149,59 @@ export default async function AccountsPage({ searchParams }: { searchParams: SP 
         <>
           <section className="mt-3 flex flex-col gap-3">
             {TYPE_ORDER.filter((t) => byType(t).length > 0).map((t) => (
-              <div key={t} className="card overflow-hidden">
-                <div
-                  className="px-4 py-2 text-[11px] font-extrabold uppercase tracking-widest"
-                  style={{ color: "var(--text-muted)", borderBottom: "1px solid var(--border)" }}
-                >
-                  {t}
-                </div>
-                <div className="table-wrap">
-                  <table className="w-full text-start text-xs">
-                    <thead>
-                      <tr style={{ color: "var(--text-muted)" }}>
-                        <th className="px-3 py-2 text-start font-bold">{ar ? "الرمز" : "Code"}</th>
-                        <th className="px-3 py-2 text-start font-bold">{ar ? "الاسم" : "Name"}</th>
-                        <th className="px-3 py-2 text-end font-bold">{ar ? "الرصيد (الفترة)" : "Balance (period)"}</th>
+              <DaylightPanel key={t} title={t}>
+                <table className="dl-table">
+                  <thead>
+                    <tr>
+                      <th>{ar ? "الرمز" : "Code"}</th>
+                      <th>{ar ? "الاسم" : "Name"}</th>
+                      <th className="num">{ar ? "الرصيد (الفترة)" : "Balance (period)"}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {byType(t).map((a) => (
+                      <tr key={a.id}>
+                        <td className="font-mono">{a.code}</td>
+                        <td>
+                          {a.name}
+                          {!a.active ? <span className="badge-slate ms-2">{ar ? "غير نشط" : "inactive"}</span> : null}
+                        </td>
+                        <td className="num font-mono">
+                          {formatMoney2(balOf(a))}
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {byType(t).map((a) => (
-                        <tr key={a.id} style={{ borderTop: "1px solid var(--border)" }}>
-                          <td className="px-3 py-2 font-mono">{a.code}</td>
-                          <td className="px-3 py-2" style={{ color: "var(--text)" }}>
-                            {a.name}
-                            {!a.active ? <span className="badge-slate ms-2">{ar ? "غير نشط" : "inactive"}</span> : null}
-                          </td>
-                          <td className="px-3 py-2 text-end font-mono" style={{ color: "var(--text)" }}>
-                            {formatMoney2(balOf(a))}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                    ))}
+                  </tbody>
+                </table>
+              </DaylightPanel>
             ))}
           </section>
 
           <div className="mt-3 grid gap-3 lg:grid-cols-2">
-            <div className="card card-pad">
-              <div className="mb-2 text-[11px] font-extrabold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
-                {ar ? "قائمة الدخل" : "Profit & Loss"}
-              </div>
+            <DaylightPanel title={ar ? "قائمة الدخل" : "Profit & Loss"}>
               <Stat label={ar ? "الإيراد" : "Revenue"} value={revenue} />
               <Stat label={ar ? "(تكلفة المبيعات)" : "(COGS)"} value={-cogs} />
               <Stat label={ar ? "(مصروفات)" : "(Expenses)"} value={-expense} />
-              <div style={{ borderTop: "1px solid var(--border)", marginTop: 4 }} />
+              <div style={{ borderTop: "1px solid var(--line)", marginTop: 4 }} />
               <Stat label={ar ? "صافي الدخل" : "Net income"} value={netIncome} strong />
-            </div>
-            <div className="card card-pad">
-              <div className="mb-2 text-[11px] font-extrabold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
-                {ar ? "الميزانية العمومية" : "Balance Sheet"}
-              </div>
+            </DaylightPanel>
+            <DaylightPanel title={ar ? "الميزانية العمومية" : "Balance Sheet"}>
               <Stat label={ar ? "الأصول" : "Assets"} value={assets} strong />
               <Stat label={ar ? "الخصوم" : "Liabilities"} value={liabilities} />
               <Stat label={ar ? "حقوق الملكية + صافي الدخل" : "Equity + net income"} value={equity} />
-              <div style={{ borderTop: "1px solid var(--border)", marginTop: 4 }} />
+              <div style={{ borderTop: "1px solid var(--line)", marginTop: 4 }} />
               <div className="flex items-center justify-between py-1 text-sm">
-                <span style={{ color: "var(--text-muted)" }}>
+                <span style={{ color: "var(--ink-muted)" }}>
                   {ar ? "أصول − (خصوم + حقوق)" : "Assets − (Liab + Equity)"}
                 </span>
                 <span className={balanced ? "badge-emerald" : "badge-red"}>
                   {balanced ? (ar ? "متوازنة ✓" : "Balanced ✓") : formatMoney2(identityDiff)}
                 </span>
               </div>
-            </div>
+            </DaylightPanel>
           </div>
         </>
       )}
-    </>
+    </DaylightShell>
   );
 }

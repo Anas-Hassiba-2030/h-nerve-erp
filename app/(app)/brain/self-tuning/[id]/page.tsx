@@ -7,9 +7,8 @@
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
-import { HeritagePill } from "@/components/heritage";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
+import "../../../daylight.css";
 import { DiffLog, type DiffEntry } from "@/components/brain/DiffLog";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
@@ -44,15 +43,14 @@ export default async function SelfTuningReportDetail({
   let adjustments: DiffEntry[] = [];
   try { adjustments = JSON.parse(r.proposedAdjustmentsJson); } catch { /* */ }
 
-  const tone = STATUS_TONE[r.status] ?? "neutral";
   const statusLabel = ar ? STATUS_LABEL[r.status]?.ar : STATUS_LABEL[r.status]?.en;
   const isDraft = r.status === "DRAFT";
   const finalIQ = r.iqAfterApplied ?? r.iqAfterIfApplied;
   const delta = finalIQ - r.iqBefore;
 
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "الدماغ · تقرير ضبط ذاتي" : "Brain · Self-tuning report"}
         title={
           ar
@@ -74,31 +72,32 @@ export default async function SelfTuningReportDetail({
         }
       />
 
-      <PageContainer>
         {/* Top rail */}
         <div className="flex items-center justify-between gap-4">
           <Link
             href="/brain/self-tuning"
-            className="heri-focusable inline-flex items-center gap-2"
+            className="inline-flex items-center gap-2"
             style={{
               fontFamily:
                 "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
               fontSize: 11,
               letterSpacing: "0.16em",
               textTransform: "uppercase",
-              color: "var(--heri-copper)",
+              color: "var(--gold)",
               textDecoration: "none",
             }}
           >
             <ArrowLeft className="h-3 w-3 rtl:rotate-180" strokeWidth={1.5} />
             {ar ? "كل التقارير" : "All reports"}
           </Link>
-          <HeritagePill tone={tone}>{statusLabel}</HeritagePill>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 999, fontSize: 11.5, fontWeight: 600, color: "var(--ink-muted)", background: "rgba(100,90,80,.1)" }}>
+            {statusLabel}
+          </span>
         </div>
 
         {/* IQ before / after panel */}
         <section
-          className="heri-hero"
+          className="panel reveal"
           style={{ overflow: "hidden", position: "relative" }}
         >
           <div className="px-6 py-7 md:px-9 md:py-9 grid gap-6 md:grid-cols-3 md:items-center">
@@ -107,10 +106,15 @@ export default async function SelfTuningReportDetail({
               value={r.iqBefore}
               tone="neutral"
             />
-            <div className="text-center" style={{ color: "var(--heri-ink-3)" }}>
+            <div className="text-center" style={{ color: "var(--ink-muted)" }}>
               <div
-                className="heri-eyebrow"
-                style={{ color: "var(--heri-copper)", fontSize: 10 }}
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: ".1em",
+                  color: "var(--gold)",
+                }}
               >
                 {ar ? "التغيّر" : "Δ"}
               </div>
@@ -124,10 +128,10 @@ export default async function SelfTuningReportDetail({
                   letterSpacing: "-0.04em",
                   color:
                     delta > 0
-                      ? "var(--heri-teal)"
+                      ? "var(--emerald)"
                       : delta < 0
-                        ? "var(--heri-terracotta)"
-                        : "var(--heri-ink-3)",
+                        ? "var(--brick)"
+                        : "var(--ink-muted)",
                   marginTop: 8,
                   fontVariantNumeric: "tabular-nums",
                 }}
@@ -152,8 +156,8 @@ export default async function SelfTuningReportDetail({
         {r.editorialEn ? (
           <section
             style={{
-              background: "var(--heri-cream)",
-              border: "1px solid var(--heri-rule)",
+              background: "var(--cream)",
+              border: "1px solid var(--line)",
               padding: "26px clamp(20px, 4vw, 36px)",
               maxWidth: 820,
               position: "relative",
@@ -167,13 +171,17 @@ export default async function SelfTuningReportDetail({
                 insetInlineStart: 0,
                 width: 3,
                 bottom: 0,
-                background: "var(--heri-ochre)",
+                background: "var(--gold)",
               }}
             />
             <div
-              className="heri-eyebrow ms-2"
+              className="ms-2"
               style={{
-                color: "var(--heri-copper)",
+                fontSize: 11,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: ".1em",
+                color: "var(--gold)",
                 marginBottom: 14,
               }}
             >
@@ -186,7 +194,7 @@ export default async function SelfTuningReportDetail({
                 fontSize: "clamp(15.5px, 1.3vw, 19px)",
                 lineHeight: 1.7,
                 letterSpacing: "-0.005em",
-                color: "var(--heri-ink)",
+                color: "var(--ink)",
                 maxWidth: "65ch",
                 fontStyle: "italic",
               }}
@@ -200,8 +208,17 @@ export default async function SelfTuningReportDetail({
         {observations.length > 0 ? (
           <section>
             <div
-              className="heri-eyebrow inline-flex items-center gap-2 mb-3"
-              style={{ color: "var(--heri-ochre-2)" }}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                fontSize: 11,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: ".1em",
+                color: "var(--gold)",
+                marginBottom: 12,
+              }}
             >
               <span
                 aria-hidden
@@ -209,7 +226,7 @@ export default async function SelfTuningReportDetail({
                   display: "inline-block",
                   width: 18,
                   height: 1.5,
-                  background: "var(--heri-ochre)",
+                  background: "var(--gold)",
                 }}
               />
               {ar ? "ما لاحظتُه" : "What I noticed"}
@@ -220,12 +237,12 @@ export default async function SelfTuningReportDetail({
                   key={i}
                   className="px-4 py-3"
                   style={{
-                    background: "var(--heri-cream-2)",
-                    border: "1px solid var(--heri-rule)",
+                    background: "var(--ivory)",
+                    border: "1px solid var(--line)",
                     fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
                     fontSize: 14.5,
                     lineHeight: 1.55,
-                    color: "var(--heri-ink-2)",
+                    color: "var(--ink-muted)",
                     maxWidth: "75ch",
                   }}
                 >
@@ -235,7 +252,7 @@ export default async function SelfTuningReportDetail({
                         "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
                       fontSize: 10,
                       letterSpacing: "0.18em",
-                      color: "var(--heri-copper)",
+                      color: "var(--gold)",
                       marginInlineEnd: 10,
                       verticalAlign: "middle",
                     }}
@@ -252,8 +269,17 @@ export default async function SelfTuningReportDetail({
         {/* Diff log */}
         <section>
           <div
-            className="heri-eyebrow inline-flex items-center gap-2 mb-3"
-            style={{ color: "var(--heri-ochre-2)" }}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 11,
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: ".1em",
+              color: "var(--gold)",
+              marginBottom: 12,
+            }}
           >
             <span
               aria-hidden
@@ -261,7 +287,7 @@ export default async function SelfTuningReportDetail({
                 display: "inline-block",
                 width: 18,
                 height: 1.5,
-                background: "var(--heri-ochre)",
+                background: "var(--gold)",
               }}
             />
             {ar ? "ما أقترح تغييره" : "What I propose to change"}
@@ -278,8 +304,8 @@ export default async function SelfTuningReportDetail({
           <section
             className="grid gap-3 md:grid-cols-[1fr_auto_auto] md:items-center"
             style={{
-              background: "var(--heri-cream-2)",
-              border: "1px solid var(--heri-rule-strong)",
+              background: "var(--ivory)",
+              border: "1px solid var(--line)",
               padding: "16px 20px",
             }}
           >
@@ -288,7 +314,7 @@ export default async function SelfTuningReportDetail({
                 fontFamily: "'Fraunces','Tiempos Headline',Georgia,serif",
                 fontSize: 13.5,
                 lineHeight: 1.55,
-                color: "var(--heri-ink-2)",
+                color: "var(--ink-muted)",
                 fontStyle: "italic",
                 margin: 0,
               }}
@@ -299,22 +325,21 @@ export default async function SelfTuningReportDetail({
             </p>
             <form action={rejectReport}>
               <input type="hidden" name="id" value={r.id} />
-              <button type="submit" className="heri-btn heri-btn-ghost">
+              <button type="submit" className="dl-btn dl-btn-secondary">
                 <X className="h-3.5 w-3.5" strokeWidth={1.5} />
                 {ar ? "رفض" : "Reject"}
               </button>
             </form>
             <form action={approveReport}>
               <input type="hidden" name="id" value={r.id} />
-              <button type="submit" className="heri-btn heri-btn-primary">
+              <button type="submit" className="dl-btn dl-btn-primary">
                 <CheckCircle2 className="h-4 w-4" strokeWidth={1.5} />
                 {ar ? "إقرار وتطبيق" : "Approve & apply"}
               </button>
             </form>
           </section>
         ) : null}
-      </PageContainer>
-    </>
+    </DaylightShell>
   );
 }
 
@@ -329,13 +354,21 @@ function IQBlock({
 }) {
   const color =
     tone === "pos"
-      ? "var(--heri-teal)"
+      ? "var(--emerald)"
       : tone === "neg"
-        ? "var(--heri-terracotta)"
-        : "var(--heri-ink)";
+        ? "var(--brick)"
+        : "var(--ink)";
   return (
     <div className="text-center">
-      <div className="heri-eyebrow heri-eyebrow-ink" style={{ fontSize: 10 }}>
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 700,
+          textTransform: "uppercase",
+          letterSpacing: ".1em",
+          color: "var(--ink-muted)",
+        }}
+      >
         {label}
       </div>
       <div

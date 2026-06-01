@@ -1,16 +1,17 @@
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { createTask } from "../actions";
+import "../../daylight.css";
 
 export default async function NewTaskPage() {
   const ar = getLocale() === "ar";
   const users = await prisma.user.findMany({ orderBy: { name: "asc" } });
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "المهام" : "Tasks"}
         title={ar ? "مهمة جديدة" : "New task"}
         subtitle={ar ? "المهام الجانبية تمنح ضعف النقاط (1.5x)." : "Side tasks earn 1.5x points."}
@@ -71,12 +72,12 @@ export default async function NewTaskPage() {
               </select>
             </div>
           </div>
-          <div className="flex items-center justify-between gap-3 border-t pt-4" style={{ borderColor: "var(--heri-rule)" }}>
+          <div className="flex items-center justify-between gap-3 border-t pt-4" style={{ borderColor: "var(--line)" }}>
             <Link href="/tasks" className="btn-ghost"><ArrowLeft className="h-4 w-4" /> {ar ? "العودة" : "Back"}</Link>
             <button type="submit" className="btn-primary"><Save className="h-4 w-4" /> {ar ? "حفظ" : "Save"}</button>
           </div>
         </form>
       </div>
-    </>
+    </DaylightShell>
   );
 }

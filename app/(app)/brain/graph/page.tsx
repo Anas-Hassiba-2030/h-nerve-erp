@@ -7,10 +7,9 @@
 //
 // Phase 1 of docs/PHASES-INTELLIGENCE.md.
 
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
+import "../../daylight.css";
 import { CausalStudio } from "@/components/brain/CausalStudio";
-import { HeriKpi } from "@/components/HeriKpi";
 import { causalGraph } from "@/lib/brain/graph.prisma";
 import { getLocale } from "@/lib/i18n.server";
 import { rebuildBrainGraph } from "./actions";
@@ -32,8 +31,8 @@ export default async function BrainGraphPage() {
       : 0;
 
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "الدماغ · الرسم السببي" : "Brain · Causal graph"}
         title={ar ? "الرسم السببي للأعمال" : "Business causal graph"}
         subtitle={
@@ -43,41 +42,35 @@ export default async function BrainGraphPage() {
         }
       />
 
-      <PageContainer>
-        {nodes.length === 0 ? (
-          <EmptyState ar={ar} />
-        ) : (
-          <div className="space-y-6">
-            {/* KPI strip — the brain's footprint at a glance. */}
-            <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
-              <HeriKpi
-                label={ar ? "العقد" : "Nodes"}
-                raw={nodes.length}
-                kind="number"
-                hint={ar ? "كيان في الدماغ" : "entities in the brain"}
-              />
-              <HeriKpi
-                label={ar ? "الروابط السببية" : "Causal edges"}
-                raw={edges.length}
-                kind="number"
-                hint={ar ? "علاقة موزونة" : "weighted relations"}
-              />
-              <HeriKpi
-                label={ar ? "أنواع الكيانات" : "Entity kinds"}
-                raw={distinctKinds}
-                kind="number"
-                hint={ar ? "وحدة من المجال" : "distinct domains"}
-              />
-              <HeriKpi
-                label={ar ? "متوسط الثقة" : "Avg confidence"}
-                raw={avgEdgeConfidence}
-                kind="percent"
-                decimals={0}
-                hint={ar ? "ثقة الروابط" : "edge confidence"}
-              />
-            </section>
+      {nodes.length === 0 ? (
+        <EmptyState ar={ar} />
+      ) : (
+        <div className="space-y-6">
+          {/* KPI strip — the brain's footprint at a glance. */}
+          <DaylightKpiGrid>
+            <DaylightKpi
+              label={ar ? "العقد" : "Nodes"}
+              value={String(nodes.length)}
+              hint={ar ? "كيان في الدماغ" : "entities in the brain"}
+            />
+            <DaylightKpi
+              label={ar ? "الروابط السببية" : "Causal edges"}
+              value={String(edges.length)}
+              hint={ar ? "علاقة موزونة" : "weighted relations"}
+            />
+            <DaylightKpi
+              label={ar ? "أنواع الكيانات" : "Entity kinds"}
+              value={String(distinctKinds)}
+              hint={ar ? "وحدة من المجال" : "distinct domains"}
+            />
+            <DaylightKpi
+              label={ar ? "متوسط الثقة" : "Avg confidence"}
+              value={`${(avgEdgeConfidence * 100).toFixed(0)}%`}
+              hint={ar ? "ثقة الروابط" : "edge confidence"}
+            />
+          </DaylightKpiGrid>
 
-            <CausalStudio
+          <CausalStudio
               ar={ar}
               nodes={nodes.map((n) => ({
                 id: n.id,
@@ -97,23 +90,22 @@ export default async function BrainGraphPage() {
             />
           </div>
         )}
-      </PageContainer>
-    </>
+    </DaylightShell>
   );
 }
 
 function EmptyState({ ar }: { ar: boolean }) {
   return (
     <section
-      className="heri-hero"
+      className="panel reveal"
       style={{ padding: "60px 32px", textAlign: "center" }}
     >
       <div
         className="inline-flex h-12 w-12 items-center justify-center mx-auto"
         style={{
-          border: "1px solid var(--heri-rule-strong)",
-          color: "var(--heri-ochre)",
-          background: "var(--heri-cream-2)",
+          border: "1px solid var(--line)",
+          color: "var(--gold)",
+          background: "var(--ivory)",
         }}
       >
         <Brain className="h-5 w-5" strokeWidth={1.5} />
@@ -125,7 +117,7 @@ function EmptyState({ ar }: { ar: boolean }) {
           lineHeight: 1.05,
           letterSpacing: ar ? "-0.005em" : "-0.022em",
           fontWeight: ar ? 600 : 500,
-          color: "var(--heri-ink)",
+          color: "var(--ink)",
           textWrap: "balance" as any,
         }}
       >
@@ -136,7 +128,7 @@ function EmptyState({ ar }: { ar: boolean }) {
         style={{
           fontSize: "clamp(13px, 1vw, 14.5px)",
           lineHeight: 1.55,
-          color: "var(--heri-ink-2)",
+          color: "var(--ink-muted)",
         }}
       >
         {ar
@@ -147,7 +139,7 @@ function EmptyState({ ar }: { ar: boolean }) {
         <form action={rebuildBrainGraph}>
           <button
             type="submit"
-            className="heri-btn heri-btn-primary"
+            className="dl-btn dl-btn-primary"
             style={{ fontSize: 13 }}
           >
             <Brain className="h-4 w-4" strokeWidth={1.5} />

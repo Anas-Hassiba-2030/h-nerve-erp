@@ -1,17 +1,18 @@
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { createInsight } from "../actions";
+import "../../daylight.css";
 
 export default function NewInsightPage() {
   return (
-    <>
-      <Topbar
+    <DaylightShell dir="rtl">
+      <DaylightHeader
         eyebrow="إشارات H‑Nerve"
         title="تسجيل إشارة جديدة"
         subtitle="ملاحظة، تنبيه، أو فرصة استراتيجية تستحق انتباه الإدارة العليا."
       />
-      <div className="flex-1 p-6">
+      <div style={{ padding: "0 0 24px" }}>
         <form action={createInsight} className="card card-pad mx-auto max-w-2xl space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
@@ -46,16 +47,16 @@ export default function NewInsightPage() {
             <textarea id="body" name="body" required rows={6} className="textarea" placeholder="اكتب الإشارة بلغة الإدارة — ما الملاحظة، أين، ولماذا تستحق التحرك؟" />
           </div>
 
-          <div className="flex items-center justify-between gap-3 border-t border-surface-200 pt-4">
-            <Link href="/insights" className="btn-ghost">
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, borderTop: "1px solid var(--line)", paddingTop: 16 }}>
+            <Link href="/insights" className="dl-btn dl-btn-secondary">
               <ArrowLeft className="h-4 w-4" /> العودة
             </Link>
-            <button type="submit" className="btn-primary">
+            <button type="submit" className="dl-btn dl-btn-primary">
               <Save className="h-4 w-4" /> نشر الإشارة
             </button>
           </div>
         </form>
       </div>
-    </>
+    </DaylightShell>
   );
 }

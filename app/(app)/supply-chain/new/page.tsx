@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db";
 import { createForecast } from "../actions";
+import "../../daylight.css";
 
 export default async function NewForecastPage() {
   const companies = await prisma.company.findMany({ orderBy: { name: "asc" } });
@@ -10,14 +11,14 @@ export default async function NewForecastPage() {
   const week = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
   return (
-    <>
-      <Topbar
+    <DaylightShell>
+      <DaylightHeader
         eyebrow="سلسلة التوريد"
         title="تنبؤ توريد جديد"
         subtitle="ربط يدوي بين شركة-مصدر وشركة-هدف، مع إشارة تفسير."
       />
-      <div className="flex-1 p-6">
-        <form action={createForecast} className="card card-pad mx-auto max-w-3xl space-y-5">
+      <div className="panel reveal mx-auto max-w-3xl">
+        <form action={createForecast} className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="label" htmlFor="sourceCompanyId">من شركة (المصدر)</label>
@@ -91,16 +92,16 @@ export default async function NewForecastPage() {
             <textarea id="signal" name="signal" rows={3} required className="textarea" placeholder="مثل: تأكيد 380 حجز إضافي في أرينا عمّان للأسبوع القادم — استهلاك إفطار متوقع +42%." />
           </div>
 
-          <div className="flex items-center justify-between gap-3 border-t border-surface-200 pt-4">
-            <Link href="/supply-chain" className="btn-ghost">
+          <div className="flex items-center justify-between gap-3 border-t border-[var(--line)] pt-4">
+            <Link href="/supply-chain" className="dl-btn dl-btn-secondary">
               <ArrowLeft className="h-4 w-4" /> العودة
             </Link>
-            <button type="submit" className="btn-primary">
+            <button type="submit" className="dl-btn dl-btn-primary">
               <Save className="h-4 w-4" /> حفظ التنبؤ
             </button>
           </div>
         </form>
       </div>
-    </>
+    </DaylightShell>
   );
 }

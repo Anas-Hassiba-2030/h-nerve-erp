@@ -7,8 +7,7 @@ import {
   Activity, Brain, Network, ShieldCheck, Palette, Globe, Download, Zap,
   Sparkles, Languages, FileText, Cpu, Database, Clock,
 } from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { ProfileHero } from "@/components/settings/ProfileHero";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale, getMessages } from "@/lib/i18n.server";
@@ -19,7 +18,7 @@ import { ar as arAr, ROLES_AR, formatNumber } from "@/lib/utils";
 import { rankById } from "@/lib/gamification";
 import { prisma } from "@/lib/db";
 import { getCompanyBrand } from "@/lib/companyBrand";
-import { HeritageSection, HeritagePill } from "@/components/heritage";
+import "../daylight.css";
 
 const EXPORT_TYPES = [
   { type: "all",          labelAr: "نبض المجموعة الشامل", labelEn: "Group Pulse Combined", icon: "🌐", featured: true },
@@ -59,8 +58,8 @@ export default async function SettingsPage() {
   ]);
 
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "النظام" : "System"}
         title={ar ? "الإعدادات والملف الشخصي" : "Settings & profile"}
         subtitle={
@@ -68,27 +67,13 @@ export default async function SettingsPage() {
             ? "السمة، اللغة، التصدير، حالة النظام، والإحصائيات الشخصية."
             : "Theme, language, exports, system status, and personal stats."
         }
-        metrics={[
-          { label: "XP", value: formatNumber(me?.xp ?? 0), tone: "emerald" },
-          {
-            label: ar ? "بونص" : "Bonus",
-            value: `+${(me?.bonusPercent ?? 0).toFixed(1)}%`,
-            tone: "amber",
-          },
-          {
-            label: ar ? "إنجازات" : "Awards",
-            value: formatNumber(achievementsCount),
-            tone: "violet",
-          },
-          {
-            label: ar ? "مفضلة" : "Pins",
-            value: formatNumber(pinCount),
-            tone: "blue",
-          },
-        ]}
       />
-
-      <PageContainer>
+      <DaylightKpiGrid>
+        <DaylightKpi label="XP" value={formatNumber(me?.xp ?? 0)} />
+        <DaylightKpi label={ar ? "بونص" : "Bonus"} value={`+${(me?.bonusPercent ?? 0).toFixed(1)}%`} />
+        <DaylightKpi label={ar ? "إنجازات" : "Awards"} value={formatNumber(achievementsCount)} />
+        <DaylightKpi label={ar ? "مفضلة" : "Pins"} value={formatNumber(pinCount)} />
+      </DaylightKpiGrid>
         {/* ── Profile Hero ─────────────────────────────────────── */}
         {session ? (
           <ProfileHero
@@ -107,7 +92,7 @@ export default async function SettingsPage() {
         ) : null}
 
         {/* ── Personal stats strip ─────────────────────────────── */}
-        <section className="grid gap-3 heri-stagger md:grid-cols-4">
+        <section className="grid gap-3 md:grid-cols-4">
           <StatTile
             icon={Activity}
             label={ar ? "نشاطي" : "My activity"}
@@ -139,19 +124,19 @@ export default async function SettingsPage() {
         </section>
 
         {/* ── Theme picker ─────────────────────────────────────── */}
-        <HeritageSection
+        <DaylightPanel
           title={ar ? "السمة البصرية" : "Visual theme"}
-          eyebrow={ar ? "المظهر" : "Appearance"}
+          aside={ar ? "المظهر" : "Appearance"}
         >
           <p
             className="mb-4 text-[11px] font-semibold leading-snug"
-            style={{ color: "var(--heri-ink-3)" }}
+            style={{ color: "var(--ink-muted)" }}
           >
             {ar
               ? "7 سمات مُعدّة بعناية. اختر ما يناسب عينيك — يطبق فوراً عبر كل الواجهة."
               : "7 hand-tuned themes. Pick what suits your eyes — applies instantly site-wide."}
           </p>
-          <div className="grid gap-3 heri-stagger md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {THEME_LIST.map((t) => {
               const active = currentTheme.id === t.id;
               return (
@@ -278,22 +263,22 @@ export default async function SettingsPage() {
               );
             })}
           </div>
-        </HeritageSection>
+        </DaylightPanel>
 
         {/* ── Language ─────────────────────────────────────────── */}
-        <HeritageSection
+        <DaylightPanel
           title={ar ? "اللغة والاتجاه" : "Language & direction"}
-          eyebrow={ar ? "الواجهة" : "Interface"}
+          aside={ar ? "الواجهة" : "Interface"}
         >
           <p
             className="mb-4 text-[11px] font-semibold leading-snug"
-            style={{ color: "var(--heri-ink-3)" }}
+            style={{ color: "var(--ink-muted)" }}
           >
             {ar
               ? "تنطبق على الواجهة كاملة. الأرقام دائماً en-US بصرف النظر عن اللغة."
               : "Applies site-wide. Numbers always render en-US digits regardless of locale."}
           </p>
-          <div className="grid gap-2.5 heri-stagger sm:grid-cols-2">
+          <div className="grid gap-2.5 sm:grid-cols-2">
             <LocaleCard
               localeId="ar"
               flag="🇯🇴"
@@ -315,30 +300,30 @@ export default async function SettingsPage() {
               active={locale === "en"}
             />
           </div>
-        </HeritageSection>
+        </DaylightPanel>
 
         {/* ── Exports ──────────────────────────────────────────── */}
-        <HeritageSection
+        <DaylightPanel
           title={ar ? "التصدير الاحترافي" : "Professional exports"}
-          eyebrow={ar ? "التقارير" : "Reports"}
+          aside={ar ? "التقارير" : "Reports"}
         >
           <p
             className="mb-4 text-[11px] font-semibold leading-snug"
-            style={{ color: "var(--heri-ink-3)" }}
+            style={{ color: "var(--ink-muted)" }}
           >
             {ar
               ? "كل تقرير يحتوي على KPIs + رسوم اتجاه + تعليق محلل + جدول كامل، مزيّن بشعار الحوراني."
               : "Every export ships with KPIs + trend chart + analyst note + full table, branded with Hourani."}
           </p>
-          <div className="grid gap-2.5 heri-stagger md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-2.5 md:grid-cols-2 lg:grid-cols-3">
             {EXPORT_TYPES.map((e) => (
               <div
                 key={e.type}
                 className="relative flex items-center justify-between gap-2 px-3 py-3 transition"
                 style={{
-                  border: "1px solid var(--heri-rule)",
-                  background: e.featured ? "var(--heri-cream-2)" : "var(--heri-cream)",
-                  outline: e.featured ? "2px solid var(--heri-ochre)" : undefined,
+                  border: "1px solid var(--line)",
+                  background: e.featured ? "var(--cream)" : "var(--cream)",
+                  outline: e.featured ? "2px solid var(--gold)" : undefined,
                   outlineOffset: e.featured ? "-2px" : undefined,
                 }}
               >
@@ -346,8 +331,8 @@ export default async function SettingsPage() {
                   <span
                     className="flex h-8 w-8 shrink-0 items-center justify-center text-base"
                     style={{
-                      background: "var(--heri-cream-2)",
-                      color: "var(--heri-ochre)",
+                      background: "var(--cream)",
+                      color: "var(--gold)",
                     }}
                   >
                     {e.icon}
@@ -355,14 +340,14 @@ export default async function SettingsPage() {
                   <div className="min-w-0">
                     <div
                       className="line-clamp-1 text-[12.5px] font-semibold"
-                      style={{ color: "var(--heri-ink)" }}
+                      style={{ color: "var(--ink)" }}
                     >
                       {ar ? e.labelAr : e.labelEn}
                     </div>
                     {e.featured ? (
                       <div
                         className="text-[9.5px] font-semibold"
-                        style={{ color: "var(--heri-ochre)" }}
+                        style={{ color: "var(--gold)" }}
                       >
                         {ar ? "✨ تقرير شامل" : "✨ Combined"}
                       </div>
@@ -372,7 +357,7 @@ export default async function SettingsPage() {
                 <div className="flex items-center gap-1">
                   <a
                     href={`/api/export/${e.type}?locale=${locale}`}
-                    className="heri-btn heri-btn-ghost rounded-md px-2 py-1 text-[10px]"
+                    className="dl-btn dl-btn-secondary rounded-md px-2 py-1 text-[10px]"
                     title="CSV"
                   >
                     CSV
@@ -381,7 +366,7 @@ export default async function SettingsPage() {
                     href={`/api/export/html/${e.type}?locale=${locale}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="heri-btn heri-btn-primary rounded-md px-2 py-1 text-[10px]"
+                    className="dl-btn dl-btn-primary rounded-md px-2 py-1 text-[10px]"
                     title="Branded HTML / PDF"
                   >
                     PDF
@@ -390,22 +375,22 @@ export default async function SettingsPage() {
               </div>
             ))}
           </div>
-        </HeritageSection>
+        </DaylightPanel>
 
         {/* ── System status ────────────────────────────────────── */}
-        <HeritageSection
+        <DaylightPanel
           title={ar ? "حالة النظام" : "System status"}
-          eyebrow={ar ? "البنية التحتية" : "Infrastructure"}
+          aside={ar ? "البنية التحتية" : "Infrastructure"}
         >
           <p
             className="mb-4 text-[11px] font-semibold leading-snug"
-            style={{ color: "var(--heri-ink-3)" }}
+            style={{ color: "var(--ink-muted)" }}
           >
             {ar
               ? "كل الأنظمة تعمل بكامل طاقتها."
               : "All systems operating at full capacity."}
           </p>
-          <ul className="grid gap-2 heri-stagger md:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
             <SystemRow
               icon={Activity}
               label={ar ? "العقل العصبي" : "Nerve core"}
@@ -461,18 +446,17 @@ export default async function SettingsPage() {
               tone="blue"
             />
           </ul>
-        </HeritageSection>
+        </DaylightPanel>
 
         {/* ── Footer signature ─────────────────────────────────── */}
         <p
           className="text-center text-[10.5px]"
-          style={{ color: "var(--heri-ink-3)" }}
+          style={{ color: "var(--ink-muted)" }}
         >
           H-Nerve ERP · {ar ? "نظام مجموعة الحوراني العصبي المركزي" : "Hourani Group's Central Nervous System"} ·{" "}
           {ar ? "بدعم من إتش-نيرف · مجموعة الحوراني" : "Powered by H-Nerve · Hourani Group"}
         </p>
-      </PageContainer>
-    </>
+    </DaylightShell>
   );
 }
 
@@ -505,16 +489,16 @@ function StatTile({
   };
   return (
     <div
-      className="heri-card p-4"
+      className="card p-4"
       style={{
-        background: "var(--heri-cream)",
-        border: "1px solid var(--heri-rule)",
+        background: "var(--cream)",
+        border: "1px solid var(--line)",
       }}
     >
       <div className="flex items-center justify-between">
         <span
-          className="heri-eyebrow text-[10px] uppercase tracking-[0.16em]"
-          style={{ color: "var(--heri-ink-3)" }}
+          className="text-[10px] uppercase tracking-[0.16em]"
+          style={{ color: "var(--ink-muted)" }}
         >
           {label}
         </span>
@@ -525,14 +509,14 @@ function StatTile({
         </span>
       </div>
       <div
-        className="heri-number-mono mt-1.5 text-xl font-bold leading-tight tabular-nums"
-        style={{ color: "var(--heri-ink)" }}
+        className="font-mono mt-1.5 text-xl font-bold leading-tight tabular-nums"
+        style={{ color: "var(--ink)" }}
       >
         {value}
       </div>
       <div
         className="text-[10px] font-semibold"
-        style={{ color: "var(--heri-ink-3)" }}
+        style={{ color: "var(--ink-muted)" }}
       >
         {sub}
       </div>
@@ -566,12 +550,12 @@ function LocaleCard({
         type="submit"
         className={`group relative flex w-full items-center justify-between gap-3 px-4 py-3 text-start transition-all ${active ? "ring-2 ring-offset-1" : ""}`}
         style={{
-          border: "1px solid var(--heri-rule)",
-          background: active ? "var(--heri-cream-2)" : "var(--heri-cream)",
-          color: "var(--heri-ink)",
-          ["--tw-ring-color" as any]: "var(--heri-ochre)",
+          border: "1px solid var(--line)",
+          background: active ? "var(--cream)" : "var(--cream)",
+          color: "var(--ink)",
+          ["--tw-ring-color" as any]: "var(--gold)",
           boxShadow: active
-            ? "0 8px 24px -10px var(--heri-ochre)"
+            ? "0 8px 24px -10px var(--gold)"
             : undefined,
         }}
       >
@@ -580,26 +564,22 @@ function LocaleCard({
           <div>
             <div
               className="text-sm font-semibold"
-              style={{ color: active ? "var(--heri-ochre)" : "var(--heri-ink)" }}
+              style={{ color: active ? "var(--gold)" : "var(--ink)" }}
             >
               {ar ? titleAr : titleEn}
             </div>
             <div
               className="text-[10.5px] font-semibold"
-              style={{ color: "var(--heri-ink-3)" }}
+              style={{ color: "var(--ink-muted)" }}
             >
               {ar ? dirLabelAr : dirLabelEn}
             </div>
           </div>
         </div>
         {active ? (
-          <HeritagePill tone="success">
-            ✓ {ar ? "نشط" : "Active"}
-          </HeritagePill>
+          <span className="tag gold">✓ {ar ? "نشط" : "Active"}</span>
         ) : (
-          <HeritagePill tone="neutral">
-            {ar ? "اختيار" : "Pick"}
-          </HeritagePill>
+          <span className="tag" style={{ background: "var(--cream)", color: "var(--ink-muted)", border: "1px solid var(--line)" }}>{ar ? "اختيار" : "Pick"}</span>
         )}
       </button>
     </form>
@@ -627,14 +607,14 @@ function SystemRow({
     <li
       className="flex items-center gap-2.5 px-3 py-2.5 transition"
       style={{
-        background: "var(--heri-cream-2)",
-        border: "1px solid var(--heri-rule)",
+        background: "var(--cream)",
+        border: "1px solid var(--line)",
       }}
     >
-      <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--heri-ochre)" }} />
+      <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--gold)" }} />
       <span
         className="text-[11px] font-semibold"
-        style={{ color: "var(--heri-ink)" }}
+        style={{ color: "var(--ink)" }}
       >
         {label}
       </span>
@@ -644,8 +624,8 @@ function SystemRow({
           style={{ background: TONE_DOT[tone] }}
         />
         <span
-          className="heri-number-mono text-[11px] font-semibold tabular-nums"
-          style={{ color: "var(--heri-copper)" }}
+          className="font-mono text-[11px] font-semibold tabular-nums"
+          style={{ color: "var(--gold)" }}
         >
           {value}
         </span>

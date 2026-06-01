@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db";
 import { createCrop } from "../../actions";
+import "../../../daylight.css";
 
 export default async function NewCropPage({
   searchParams,
@@ -18,14 +19,14 @@ export default async function NewCropPage({
   const harvestDefault = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
   return (
-    <>
-      <Topbar
+    <DaylightShell>
+      <DaylightHeader
         eyebrow="الزراعة الذكية"
         title="إضافة محصول جديد"
         subtitle="ينضم تلقائياً إلى نموذج التنبؤ بالإنتاج."
       />
-      <div className="flex-1 p-6">
-        <form action={createCrop} className="card card-pad mx-auto max-w-2xl space-y-5">
+      <div className="panel reveal mx-auto max-w-2xl">
+        <form action={createCrop} className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <label className="label" htmlFor="farmId">المزرعة</label>
@@ -72,16 +73,16 @@ export default async function NewCropPage({
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-3 border-t border-surface-200 pt-4">
-            <Link href="/farms" className="btn-ghost">
+          <div className="flex items-center justify-between gap-3 border-t border-[var(--line)] pt-4">
+            <Link href="/farms" className="dl-btn dl-btn-secondary">
               <ArrowLeft className="h-4 w-4" /> العودة
             </Link>
-            <button type="submit" className="btn-primary">
+            <button type="submit" className="dl-btn dl-btn-primary">
               <Save className="h-4 w-4" /> حفظ المحصول
             </button>
           </div>
         </form>
       </div>
-    </>
+    </DaylightShell>
   );
 }

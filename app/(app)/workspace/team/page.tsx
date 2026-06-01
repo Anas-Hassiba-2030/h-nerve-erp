@@ -1,8 +1,9 @@
 // /workspace/team — the unit's people, roles, performance.
 
 import { redirect } from "next/navigation";
-import { HeritageSection, HeritagePill } from "@/components/heritage";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { assignProjectOwner } from "../actions";
+import "../../daylight.css";
 import { getUserIfRole } from "@/lib/authz";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/workspace";
@@ -55,22 +56,25 @@ export default async function WorkspaceTeamPage() {
   const canMutate = !!(await getUserIfRole("MANAGER"));
 
   return (
-    <div className="ws-page">
-      <section className="ws-stat-row">
-        <St label={ar ? "أعضاء النظام" : "Platform members"} v={formatNumber(team.length)} />
-        <St label={ar ? "إجمالي الموظفين" : "Total headcount"} v={formatNumber(company.employees)} />
-        <St label={ar ? "مدراء" : "Managers"} v={formatNumber(byRole["MANAGER"] ?? 0)} />
-        <St label={ar ? "تنفيذيون" : "Executives"} v={formatNumber(byRole["EXECUTIVE"] ?? 0)} />
-      </section>
-
-      <HeritageSection
-        eyebrow={ar ? "من له حساب على H-Nerve في هذه الوحدة" : "Who has an H-Nerve seat in this unit"}
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
+        eyebrow={ar ? "الفريق" : "Team"}
         title={ar ? "فريق الوحدة" : "Unit team"}
-      >
+        subtitle={ar ? "من له حساب على H-Nerve في هذه الوحدة" : "Who has an H-Nerve seat in this unit"}
+      />
+
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "أعضاء النظام" : "Platform members"} value={formatNumber(team.length)} />
+        <DaylightKpi label={ar ? "إجمالي الموظفين" : "Total headcount"} value={formatNumber(company.employees)} />
+        <DaylightKpi label={ar ? "مدراء" : "Managers"} value={formatNumber(byRole["MANAGER"] ?? 0)} />
+        <DaylightKpi label={ar ? "تنفيذيون" : "Executives"} value={formatNumber(byRole["EXECUTIVE"] ?? 0)} />
+      </DaylightKpiGrid>
+
+      <DaylightPanel title={ar ? "فريق الوحدة" : "Unit team"} aside={ar ? "من له حساب على H-Nerve في هذه الوحدة" : "Who has an H-Nerve seat in this unit"}>
         {team.length === 0 ? (
-          <div className="ws-empty">
+          <p style={{ fontSize: 13, color: "var(--ink-muted)", padding: "12px 0" }}>
             {ar ? "لا أعضاء معيّنون لهذه الشركة بعد." : "No members assigned to this company yet."}
-          </div>
+          </p>
         ) : (
           <ul className="ws-list">
             {team.map((u, i) => (
@@ -86,23 +90,20 @@ export default async function WorkspaceTeamPage() {
                     {u.xp ? ` · ${formatNumber(u.xp)} XP` : ""}
                   </div>
                 </div>
-                <HeritagePill tone={ROLE_TONE[u.role] ?? "neutral"}>
+                <span className={`tag ${ROLE_TONE[u.role] === "critical" || ROLE_TONE[u.role] === "warn" ? "gold" : "ok"}`} style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}>
                   {u.role}
-                </HeritagePill>
+                </span>
               </li>
             ))}
           </ul>
         )}
-      </HeritageSection>
+      </DaylightPanel>
 
-      <HeritageSection
-        eyebrow={ar ? "من يملك ماذا في خط مشاريع هذه الوحدة" : "Who owns what in this unit's pipeline"}
-        title={ar ? "إسناد ملكية المشاريع" : "Project ownership"}
-      >
+      <DaylightPanel title={ar ? "إسناد ملكية المشاريع" : "Project ownership"} aside={ar ? "من يملك ماذا في خط مشاريع هذه الوحدة" : "Who owns what in this unit's pipeline"}>
         {projects.length === 0 ? (
-          <div className="ws-empty">
+          <p style={{ fontSize: 13, color: "var(--ink-muted)", padding: "12px 0" }}>
             {ar ? "لا مشاريع حيّة لإسنادها." : "No live projects to assign."}
-          </div>
+          </p>
         ) : (
           <ul className="ws-list">
             {projects.map((p) => {
@@ -148,7 +149,7 @@ export default async function WorkspaceTeamPage() {
                         </option>
                       ))}
                     </select>
-                    <button type="submit" className="ws-act ws-act-ghost">
+                    <button type="submit" className="dl-btn dl-btn-secondary" style={{ fontSize: 12, padding: "4px 10px" }}>
                       {ar ? "إسناد" : "Assign"}
                     </button>
                   </form>
@@ -158,16 +159,7 @@ export default async function WorkspaceTeamPage() {
             })}
           </ul>
         )}
-      </HeritageSection>
-    </div>
-  );
-}
-
-function St({ label, v }: { label: string; v: string }) {
-  return (
-    <div className="ws-stat">
-      <div className="ws-stat-label">{label}</div>
-      <div className="ws-stat-value">{v}</div>
-    </div>
+      </DaylightPanel>
+    </DaylightShell>
   );
 }

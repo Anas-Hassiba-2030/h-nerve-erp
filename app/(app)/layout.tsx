@@ -1,8 +1,6 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
-import { Sidebar } from "@/components/Sidebar";
-import { SidebarDrawer } from "@/components/SidebarDrawer";
 import { Footer } from "@/components/Footer";
 import { ToastProvider } from "@/components/Toast/ToastProvider";
 import { OnboardingTour } from "@/components/OnboardingTour";
@@ -135,21 +133,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           removed system-wide. The sidebar "Group Companies" link
           (/companies) is the single navigation-back path. */}
       <TimeMachineBanner locale={locale} />
-      <Sidebar
-        user={fullUser}
-        locale={locale}
-        messages={messages as any}
-        collapsed={sidebarCollapsed}
-        unreadMessages={unreadMessages}
-        enforcePerms={enforcePerms}
-      />
+      {/* Phase 1 (Claude Design Restore) — the old Heritage Sidebar + mobile
+          SidebarDrawer are REMOVED. They were the "old interface" that leaked
+          through on any page without .dl-page (workflow studio, loading/error
+          states, un-ported pages). Navigation is now exclusively the Orrery
+          hub (/orrery) + the global ↺ Orbit return pill below. One removal =
+          no page can ever show the old chrome again. */}
       <LivingAtmosphere />
       <OrbitReturn locale={locale} />
       <div className="flex min-h-screen flex-1 flex-col nerve-bg">
         <main className="flex-1"><DiveReveal>{children}</DiveReveal></main>
         <Footer />
       </div>
-      <SidebarDrawer user={fullUser} locale={locale} messages={messages as any} unreadMessages={unreadMessages} enforcePerms={enforcePerms} />
       <ToastProvider initialFlash={initialFlash} />
       <OnboardingTour locale={locale} />
       <QuickAddFAB locale={locale} />

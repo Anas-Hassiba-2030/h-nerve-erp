@@ -1,21 +1,21 @@
 export default function Loading() {
   const skel =
-    "rounded animate-pulse bg-[color-mix(in_srgb,var(--heri-ink-3)_18%,transparent)]";
+    "rounded animate-pulse bg-[color-mix(in_srgb,var(--ink-muted)_18%,transparent)]";
   const skelLight =
-    "rounded animate-pulse bg-[color-mix(in_srgb,var(--heri-ink-3)_12%,transparent)]";
+    "rounded animate-pulse bg-[color-mix(in_srgb,var(--ink-muted)_12%,transparent)]";
 
   return (
     <div className="flex-1 anim-fade-up">
       <div
         className="flex flex-wrap items-center justify-between gap-4 px-6 py-4"
-        style={{ borderBottom: "1px solid var(--heri-rule)" }}
+        style={{ borderBottom: "1px solid var(--line)" }}
       >
         <div className="space-y-2">
           <div className={`h-3 w-20 ${skelLight}`} />
           <div className={`h-7 w-64 ${skel}`} />
           <div className={`h-3 w-48 ${skelLight}`} />
         </div>
-        <div className="h-9 w-28 rounded-xl animate-pulse" style={{ background: "color-mix(in srgb, var(--heri-ochre) 14%, transparent)" }} />
+        <div className="h-9 w-28 rounded-xl animate-pulse" style={{ background: "color-mix(in srgb, var(--gold) 14%, transparent)" }} />
       </div>
 
       <div className="space-y-6 p-6">
@@ -54,13 +54,13 @@ export default function Loading() {
           <div
             className="relative h-32 overflow-hidden rounded-xl"
             style={{
-              background: "color-mix(in srgb, var(--heri-ochre) 8%, transparent)",
+              background: "color-mix(in srgb, var(--gold) 8%, transparent)",
             }}
           >
             <div
               className="absolute inset-0 anim-grad"
               style={{
-                background: "linear-gradient(120deg, transparent 0%, color-mix(in srgb, var(--heri-ochre) 22%, transparent) 50%, transparent 100%)",
+                background: "linear-gradient(120deg, transparent 0%, color-mix(in srgb, var(--gold) 22%, transparent) 50%, transparent 100%)",
                 backgroundSize: "200% 100%",
                 opacity: 0.7,
               }}
@@ -82,7 +82,7 @@ export default function Loading() {
           <div className="card card-pad space-y-3">
             <div className={`h-4 w-44 ${skel}`} />
             {[0, 1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex items-center justify-between gap-3 border-b border-[var(--heri-rule)] pb-2.5 last:border-b-0">
+              <div key={i} className="flex items-center justify-between gap-3 border-b border-[var(--line)] pb-2.5 last:border-b-0">
                 <div className="flex items-center gap-2">
                   <div className={`h-3 w-16 ${skelLight}`} />
                   <div className={`h-3.5 w-32 ${skel}`} />
@@ -97,7 +97,7 @@ export default function Loading() {
           <div className="card card-pad space-y-3">
             <div className={`h-4 w-28 ${skel}`} />
             {[0, 1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
+              <div key={i} className="flex items-center justify-between border-b border-[var(--line)] pb-1.5 last:border-b-0">
                 <div className={`h-3 w-20 ${skelLight}`} />
                 <div className={`h-3 w-24 ${skel}`} />
               </div>

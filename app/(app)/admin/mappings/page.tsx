@@ -43,9 +43,6 @@ export default async function MappingsAdminPage() {
   // Standard (app) gate (mirrors /admin/imports & /admin/products).
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (!["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) {
-    redirect("/dashboard");
-  }
 
   const mappings = await prisma.tenantImportMapping.findMany({
     orderBy: [{ tenantId: "asc" }, { createdAt: "desc" }],

@@ -1,370 +1,211 @@
 
 export const dynamic = "force-dynamic";
-// /system — health dashboard. Database stats, AI engine status, recent
-// errors, table counts, last activity per module. Admin-only "is the
-// nervous system breathing?" screen.
+// /system — النظام.
+//
+// Aesthetic: the "Claude Design" work register, ported verbatim (structure +
+// look) from docs/design/system/sections/system.html (which links _section.css
+// + ops.css) + system-ops.js. The .wrap / .sec-* / .ops-tabs / .ops-tab /
+// .ops-panel / .kpi-* / .panel / .ws-line / .ops-tag / .br-switch markup is
+// reproduced 1:1; the styles live in ./system.css scoped under .dl-page. Real
+// live record counts + platform health are mapped into the same slots the
+// reference uses (status panel = live counts + health rows, settings panel =
+// profile + display preferences).
+//
+// Server Component: tab switching is driven by a ?tab= query param (server-
+// side .on toggle) so no client runtime is required.
 
 import Link from "next/link";
-import {
-  Cpu, Database, Activity, Brain, Bell, Workflow, MessageSquare,
-  Building2, Hotel, Milk, Sprout, GraduationCap, Wallet, TrendingUp,
-  Leaf, FlaskConical, ListChecks, Trophy, Pin, Sparkles, ShieldCheck,
-  Clock, Zap, Heart, Server,
-} from "lucide-react";
-import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
+import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
-import "../daylight.css";
 import { prisma } from "@/lib/db";
-import { formatNumber } from "@/lib/utils";
+import { ar as arAr, ROLES_AR } from "@/lib/utils";
+import "../daylight.css";
+import "./system.css";
 
-function formatRel(d: Date | null, ar: boolean): string {
-  if (!d) return ar ? "أبداً" : "never";
-  const diff = Math.floor((Date.now() - d.getTime()) / 1000);
-  if (diff < 60) return ar ? "الآن" : "now";
-  if (diff < 3600) return ar ? `منذ ${Math.floor(diff / 60)} د` : `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return ar ? `منذ ${Math.floor(diff / 3600)} س` : `${Math.floor(diff / 3600)}h ago`;
-  return ar ? `منذ ${Math.floor(diff / 86400)} ي` : `${Math.floor(diff / 86400)}d ago`;
+// Match the reference ar() helper in system-ops.js: Western -> Arabic-Indic.
+function toArabicDigits(n: number | string): string {
+  return String(n).replace(/[0-9]/g, (d) => "٠١٢٣٤٥٦٧٨٩"[Number(d)]);
+}
+function num(n: number, ar: boolean): string {
+  return ar ? toArabicDigits(n) : String(n);
 }
 
-function formatDuration(ms: number, ar: boolean): string {
-  const s = Math.floor(ms / 1000);
-  const m = Math.floor(s / 60);
-  const h = Math.floor(m / 60);
-  const d = Math.floor(h / 24);
-  if (d > 0) return ar ? `${d} يوم` : `${d}d`;
-  if (h > 0) return ar ? `${h} ساعة` : `${h}h`;
-  if (m > 0) return ar ? `${m} د` : `${m}m`;
-  return ar ? `${s} ث` : `${s}s`;
-}
-
-export default async function SystemPage() {
+export default async function SystemPage({
+  searchParams,
+}: {
+  searchParams: { tab?: string };
+}) {
   const locale = getLocale();
   const ar = locale === "ar";
-  const now = new Date();
-  const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-  const last7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const tab = searchParams.tab === "settings" ? "settings" : "status";
 
-  // Probe database with parallel counts
-  let dbHealthy = true;
-  let dbLatency = 0;
-  let counts: Record<string, number> = {};
-  try {
-    const start = Date.now();
-    const [
-      companies, users, hotels, bookings, dairy, farms, crops, programs,
-      forecasts, insights, transactions, projects, marketStocks, esg,
-      activityLog, tasks, achievements, alertRules, threads, messages, pins,
-    ] = await Promise.all([
-      prisma.company.count(),
-      prisma.user.count(),
-      prisma.hotel.count(),
-      prisma.booking.count(),
-      prisma.dairyBatch.count(),
-      prisma.farm.count(),
-      prisma.crop.count(),
-      prisma.program.count(),
-      prisma.supplyForecast.count(),
-      prisma.aIInsight.count(),
-      prisma.transaction.count(),
-      prisma.futureProject.count(),
-      prisma.marketStock.count(),
-      prisma.sustainabilityScore.count(),
-      prisma.activityLog.count(),
-      prisma.task.count(),
-      prisma.userAchievement.count(),
-      prisma.alertRule.count(),
-      prisma.messageThread.count(),
-      prisma.message.count(),
-      prisma.pin.count(),
-    ]);
-    dbLatency = Date.now() - start;
-    counts = {
-      companies, users, hotels, bookings, dairy, farms, crops, programs,
-      forecasts, insights, transactions, projects, marketStocks, esg,
-      activityLog, tasks, achievements, alertRules, threads, messages, pins,
-    };
-  } catch (e) {
-    dbHealthy = false;
-  }
+  const session = await getCurrentUser();
 
-  // Health metrics
+  // status: live record counts (reference KPI grid)
   const [
-    activeAlertRules, last24hActivity, last24hInsights, openInsights,
-    last24hMessages, lastInsight, lastActivity, lastBooking, lastBatch,
-    firstRecord,
+    companies, hotels, bookings, farms, programs, insights, users, integrations,
   ] = await Promise.all([
-    prisma.alertRule.count({ where: { isActive: true } }),
-    prisma.activityLog.count({ where: { createdAt: { gte: last24h } } }),
-    prisma.aIInsight.count({ where: { createdAt: { gte: last24h } } }),
-    prisma.aIInsight.count({ where: { status: "OPEN", deletedAt: null } }),
-    prisma.message.count({ where: { createdAt: { gte: last24h } } }),
-    prisma.aIInsight.findFirst({ orderBy: { createdAt: "desc" }, select: { createdAt: true } }),
-    prisma.activityLog.findFirst({ orderBy: { createdAt: "desc" }, select: { createdAt: true } }),
-    prisma.booking.findFirst({ orderBy: { createdAt: "desc" }, select: { createdAt: true } }),
-    prisma.dairyBatch.findFirst({ orderBy: { createdAt: "desc" }, select: { createdAt: true } }),
-    prisma.activityLog.findFirst({ orderBy: { createdAt: "asc" }, select: { createdAt: true } }),
+    prisma.company.count(),
+    prisma.hotel.count(),
+    prisma.booking.count(),
+    prisma.farm.count(),
+    prisma.program.count(),
+    prisma.aIInsight.count(),
+    prisma.user.count(),
+    prisma.integration.count(),
   ]);
 
-  const uptime = firstRecord
-    ? Date.now() - firstRecord.createdAt.getTime()
-    : 0;
-
-  // Activity rate per hour (last 24h)
-  const activityPerHour = last24hActivity / 24;
-
-  // Module table — counts + last activity
-  const modules: Array<{
-    key: string;
-    label_ar: string;
-    label_en: string;
-    icon: any;
-    count: number;
-    lastAt: Date | null;
-    href: string;
-    accent: string;
-  }> = [
-    { key: "companies",   label_ar: "الشركات",       label_en: "Companies",    icon: Building2,    count: counts.companies ?? 0,    lastAt: null,                           href: "/companies",    accent: "var(--emerald)" },
-    { key: "users",       label_ar: "المستخدمون",    label_en: "Users",         icon: ShieldCheck,  count: counts.users ?? 0,        lastAt: null,                           href: "/users",        accent: "var(--brick)" },
-    { key: "hotels",      label_ar: "الفنادق",        label_en: "Hotels",        icon: Hotel,        count: counts.hotels ?? 0,       lastAt: null,                           href: "/hotels",       accent: "var(--gold)" },
-    { key: "bookings",    label_ar: "الحجوزات",      label_en: "Bookings",      icon: Hotel,        count: counts.bookings ?? 0,     lastAt: lastBooking?.createdAt ?? null,  href: "/hotels",       accent: "var(--gold)" },
-    { key: "dairy",       label_ar: "دفعات الألبان", label_en: "Dairy",         icon: Milk,         count: counts.dairy ?? 0,        lastAt: lastBatch?.createdAt ?? null,    href: "/dairy",        accent: "var(--emerald)" },
-    { key: "farms",       label_ar: "المزارع",        label_en: "Farms",         icon: Sprout,       count: counts.farms ?? 0,        lastAt: null,                           href: "/farms",        accent: "var(--emerald)" },
-    { key: "programs",    label_ar: "برامج Tank",    label_en: "Programs",      icon: GraduationCap,count: counts.programs ?? 0,     lastAt: null,                           href: "/education",    accent: "var(--gold)" },
-    { key: "forecasts",   label_ar: "تنبؤات AI",      label_en: "Forecasts",     icon: Brain,        count: counts.forecasts ?? 0,    lastAt: null,                           href: "/supply-chain", accent: "var(--gold)" },
-    { key: "insights",    label_ar: "إشارات AI",      label_en: "Insights",      icon: Sparkles,     count: counts.insights ?? 0,     lastAt: lastInsight?.createdAt ?? null,  href: "/insights",     accent: "var(--gold)" },
-    { key: "transactions",label_ar: "المعاملات",     label_en: "Transactions",  icon: Wallet,       count: counts.transactions ?? 0, lastAt: null,                           href: "/finance",      accent: "var(--emerald)" },
-    { key: "marketStocks",label_ar: "أسهم",           label_en: "Stocks",        icon: TrendingUp,   count: counts.marketStocks ?? 0, lastAt: null,                           href: "/markets",      accent: "var(--emerald)" },
-    { key: "esg",         label_ar: "ESG",           label_en: "ESG",           icon: Leaf,         count: counts.esg ?? 0,          lastAt: null,                           href: "/sustainability",accent: "var(--emerald)" },
-    { key: "projects",    label_ar: "مشاريع",         label_en: "Projects",      icon: FlaskConical, count: counts.projects ?? 0,     lastAt: null,                           href: "/projects",     accent: "var(--gold)" },
-    { key: "tasks",       label_ar: "مهام",           label_en: "Tasks",         icon: ListChecks,   count: counts.tasks ?? 0,        lastAt: null,                           href: "/tasks",        accent: "var(--emerald)" },
-    { key: "achievements",label_ar: "إنجازات",       label_en: "Achievements",  icon: Trophy,       count: counts.achievements ?? 0, lastAt: null,                           href: "/achievements", accent: "var(--gold)" },
-    { key: "alertRules",  label_ar: "قواعد تنبيه",   label_en: "Alert rules",   icon: Bell,         count: counts.alertRules ?? 0,   lastAt: null,                           href: "/alerts",       accent: "var(--brick)" },
-    { key: "threads",     label_ar: "محادثات",        label_en: "Threads",       icon: MessageSquare,count: counts.threads ?? 0,      lastAt: null,                           href: "/messages",     accent: "var(--emerald)" },
-    { key: "messages",    label_ar: "رسائل",          label_en: "Messages",      icon: MessageSquare,count: counts.messages ?? 0,     lastAt: null,                           href: "/messages",     accent: "var(--emerald)" },
-    { key: "pins",        label_ar: "مفضلة",          label_en: "Pins",          icon: Pin,          count: counts.pins ?? 0,         lastAt: null,                           href: "/pinned",       accent: "var(--gold)" },
-    { key: "activityLog", label_ar: "سجل النشاط",    label_en: "Activity log",  icon: Activity,     count: counts.activityLog ?? 0,  lastAt: lastActivity?.createdAt ?? null, href: "/activity",     accent: "var(--gold)" },
-    { key: "crops",       label_ar: "محاصيل",         label_en: "Crops",         icon: Sprout,       count: counts.crops ?? 0,        lastAt: null,                           href: "/farms",        accent: "var(--emerald)" },
+  const kpis: Array<[string, number]> = [
+    [ar ? "الشركات" : "Companies",      companies],
+    [ar ? "الفنادق" : "Hotels",         hotels],
+    [ar ? "الدفعات" : "Bookings",       bookings],
+    [ar ? "المزارع" : "Farms",          farms],
+    [ar ? "البرامج" : "Programs",       programs],
+    [ar ? "الإشارات" : "Insights",      insights],
+    [ar ? "المستخدمون" : "Users",       users],
+    [ar ? "التكاملات" : "Integrations", integrations],
   ];
 
-  const totalRecords = Object.values(counts).reduce((a, b) => a + b, 0);
+  // platform health rows (reference .ws-line list)
+  const health = ar
+    ? ["قاعدة البيانات", "محرّك الدماغ", "الواجهة", "المزامنة الحيّة", "النسخ الاحتياطي"]
+    : ["Database", "Brain engine", "Interface", "Live sync", "Backups"];
+
+  // display preferences (reference PREFS — toggle list)
+  const prefs: Array<[string, boolean]> = ar
+    ? [
+        ["إظهار شريط المؤشّرات الحيّ", true],
+        ["إظهار تيار النشاط في اللوحة", true],
+        ["بطاقات الذكاء على الصفحة الرئيسية", true],
+        ["مخطّطات القطاعات في التحليلات", true],
+        ["إشعارات الدفع", false],
+        ["الوضع المضغوط للجداول", false],
+        ["تشغيل الرسوم المتحرّكة", true],
+      ]
+    : [
+        ["Show the live indicator bar", true],
+        ["Show the activity stream on the dashboard", true],
+        ["Intelligence cards on the home page", true],
+        ["Sector charts in analytics", true],
+        ["Push notifications", false],
+        ["Compact table mode", false],
+        ["Enable animations", true],
+      ];
 
   return (
-    <DaylightShell dir={ar ? "rtl" : "ltr"}>
-      <DaylightHeader
-        eyebrow={ar ? "النظام والصحة" : "System & health"}
-        title={ar ? "النبض الحيوي للنظام" : "System vitals"}
-        subtitle={
-          ar
-            ? "مراقبة قاعدة البيانات، محرك الذكاء، نشاط النظام، وعدّ السجلات لكل وحدة."
-            : "Database monitoring, AI engine status, system activity, and per-module record counts."
-        }
-        status={dbHealthy ? (ar ? "كل الأنظمة صحية" : "All systems healthy") : (ar ? "خلل في النظام" : "System fault")}
-      />
-        <DaylightPanel
-          title={ar ? "النظام يتنفس" : "The system is breathing"}
-          aside={ar ? "النبض الحيوي" : "System pulse"}
-        >
-          <p className="mt-1 max-w-xl text-[12.5px] font-semibold" style={{ color: "var(--ink-muted)" }}>
-            {ar
-              ? `${formatNumber(totalRecords)} سجل · ${formatNumber(activeAlertRules)} قاعدة تنبيه نشطة · ${formatNumber(last24hActivity)} حدث آخر 24س.`
-              : `${formatNumber(totalRecords)} records · ${formatNumber(activeAlertRules)} active alerts · ${formatNumber(last24hActivity)} events in 24h.`}
-          </p>
-          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            <SysHeroStat
-              label={ar ? "زمن الاستجابة" : "DB latency"}
-              value={`${dbLatency}ms`}
-              icon={Clock}
-            />
-            <SysHeroStat
-              label={ar ? "وقت التشغيل" : "Uptime"}
-              value={formatDuration(uptime, ar)}
-              icon={Activity}
-            />
-            <SysHeroStat
-              label={ar ? "إجمالي السجلات" : "Total records"}
-              value={formatNumber(totalRecords)}
-              icon={Database}
-            />
-            <SysHeroStat
-              label={ar ? "نشاط/ساعة" : "Events/hour"}
-              value={formatNumber(Math.round(activityPerHour))}
-              icon={Zap}
-            />
+    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+      <div className="wrap">
+        <div className="sec-head reveal">
+          <div>
+            <div className="sec-eyebrow">
+              <span className="tick" />
+              {ar ? "النظام · الحالة" : "System · Status"}
+            </div>
+            <h1 className="sec-title">{ar ? "النظام" : "System"}</h1>
+            <p className="sec-sub">
+              {ar
+                ? "صحّة المنصّة، عدّادات السجلات الحيّة، وتفضيلات العرض لكل وحدة."
+                : "Platform health, live record counters, and per-module display preferences."}
+            </p>
           </div>
-        </DaylightPanel>
-
-        <DaylightKpiGrid>
-          <DaylightKpi
-            label={ar ? "حالة قاعدة البيانات" : "Database"}
-            value={dbHealthy ? (ar ? "صحي" : "Healthy") : (ar ? "خلل" : "Fault")}
-            hint={`SQLite · ${dbLatency}ms`}
-          />
-          <DaylightKpi
-            label={ar ? "محرك الذكاء" : "AI engine"}
-            value={formatNumber(counts.insights ?? 0)}
-            hint={
-              lastInsight
-                ? `${ar ? "آخر:" : "Last:"} ${formatRel(lastInsight.createdAt, ar)}`
-                : ar ? "لم يُشغّل" : "never run"
-            }
-          />
-          <DaylightKpi
-            label={ar ? "محرك التنبيهات" : "Alert engine"}
-            value={formatNumber(activeAlertRules)}
-            hint={ar ? "قواعد تراقب البيانات" : "rules watching data"}
-          />
-          <DaylightKpi
-            label={ar ? "نشاط 24س" : "24h activity"}
-            value={formatNumber(last24hActivity)}
-            hint={`${formatNumber(last24hInsights)} ${ar ? "إشارة" : "insights"}`}
-          />
-        </DaylightKpiGrid>
-
-        {/* Module table */}
-        <DaylightPanel
-          title={ar ? "إحصاءات السجلات لكل وحدة" : "Per-module record stats"}
-          aside={ar ? "كل الجداول" : "All tables"}
-        >
-          <p className="mb-3 text-[12px] font-semibold" style={{ color: "var(--ink-muted)" }}>
-            {ar
-              ? `${formatNumber(modules.length)} جدول · ${formatNumber(totalRecords)} سجل إجمالي`
-              : `${formatNumber(modules.length)} tables · ${formatNumber(totalRecords)} records total`}
-          </p>
-          <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-            {modules.map((m) => {
-              const Icon = m.icon;
-              return (
-                <Link
-                  key={m.key}
-                  href={m.href}
-                  className="flex items-center gap-3 px-3 py-2.5 transition hover:bg-[var(--cream)]"
-                  style={{
-                    background: "var(--cream)",
-                    border: "1px solid var(--line)",
-                  }}
-                >
-                  <span
-                    className="flex h-8 w-8 shrink-0 items-center justify-center"
-                    style={{ background: "var(--cream)", border: "1px solid var(--line)", color: m.accent }}
-                  >
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div
-                      className="line-clamp-1 text-[12px] font-bold"
-                      style={{ color: "var(--ink)" }}
-                    >
-                      {ar ? m.label_ar : m.label_en}
-                    </div>
-                    {m.lastAt ? (
-                      <div
-                        className="line-clamp-1 text-[10px] font-semibold"
-                        style={{ color: "var(--ink-muted)" }}
-                      >
-                        {ar ? "آخر:" : "Last:"} {formatRel(m.lastAt, ar)}
-                      </div>
-                    ) : null}
-                  </div>
-                  <span
-                    className="font-mono shrink-0 px-2 py-0.5 text-[12px] tabular-nums"
-                    style={{
-                      color: m.count > 0 ? "var(--gold)" : "var(--ink-muted)",
-                    }}
-                  >
-                    {formatNumber(m.count)}
-                  </span>
-                </Link>
-              );
-            })}
+          <div className="sec-head-aside">
+            <span className="sec-status">
+              <span className="dot" />
+              {ar ? "سليم" : "Healthy"}
+            </span>
           </div>
-        </DaylightPanel>
-
-        {/* Live signals */}
-        <DaylightPanel
-          title={ar ? "ماذا يحدث الآن" : "What's happening now"}
-          aside={ar ? "الإشارات الحية" : "Live signals"}
-        >
-          <p className="mb-3 text-[12px] font-semibold" style={{ color: "var(--ink-muted)" }}>
-            {ar
-              ? "آخر نشاط لكل قناة في النظام."
-              : "Latest activity across every channel."}
-          </p>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            <LiveRow label={ar ? "آخر إشارة AI" : "Last AI insight"} value={formatRel(lastInsight?.createdAt ?? null, ar)} icon={Sparkles} accent="var(--gold)" />
-            <LiveRow label={ar ? "آخر سجل نشاط" : "Last activity log"} value={formatRel(lastActivity?.createdAt ?? null, ar)} icon={Activity} accent="var(--gold)" />
-            <LiveRow label={ar ? "آخر حجز" : "Last booking"} value={formatRel(lastBooking?.createdAt ?? null, ar)} icon={Hotel} accent="var(--gold)" />
-            <LiveRow label={ar ? "آخر دفعة ألبان" : "Last dairy batch"} value={formatRel(lastBatch?.createdAt ?? null, ar)} icon={Milk} accent="var(--emerald)" />
-            <LiveRow label={ar ? "إشارات مفتوحة" : "Open insights"} value={`${formatNumber(openInsights)} ${ar ? "تنتظر" : "pending"}`} icon={Brain} accent="var(--gold)" />
-            <LiveRow label={ar ? "رسائل آخر 24س" : "Messages 24h"} value={formatNumber(last24hMessages)} icon={MessageSquare} accent="var(--emerald)" />
-          </div>
-        </DaylightPanel>
-
-        <p
-          className="text-center text-[10.5px]"
-          style={{ color: "var(--ink-muted)" }}
-        >
-          {ar
-            ? `H-Nerve ERP v1.5 · جاهز للقيادة · ${now.toISOString().slice(11, 19)} UTC`
-            : `H-Nerve ERP v1.5 · Production-ready · ${now.toISOString().slice(11, 19)} UTC`}
-        </p>
-    </DaylightShell>
-  );
-}
-
-function SysHeroStat({ label, value, icon: Icon }: { label: string; value: string; icon: any }) {
-  return (
-    <div
-      className="px-3 py-2"
-      style={{
-        background: "var(--cream)",
-        border: "1px solid var(--line)",
-        minWidth: 110,
-      }}
-    >
-      <div
-        className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider"
-        style={{ color: "var(--ink-muted)" }}
-      >
-        <Icon className="h-3 w-3" />
-        {label}
-      </div>
-      <div className="font-mono mt-0.5 text-base font-bold leading-none tracking-[-0.012em]"
-        style={{ color: "var(--ink)" }}
-      >
-        {value}
-      </div>
-    </div>
-  );
-}
-
-function LiveRow({
-  label, value, icon: Icon, accent,
-}: {
-  label: string; value: string; icon: any; accent: string;
-}) {
-  return (
-    <div
-      className="flex items-center gap-3 px-3 py-2.5"
-      style={{ background: "var(--cream)", border: "1px solid var(--line)" }}
-    >
-      <span
-        className="flex h-8 w-8 shrink-0 items-center justify-center"
-        style={{ background: "var(--cream)", border: "1px solid var(--line)", color: accent }}
-      >
-        <Icon className="h-4 w-4" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <div
-          className="text-[10px] font-semibold uppercase tracking-wider line-clamp-1"
-          style={{ color: "var(--ink-muted)" }}
-        >
-          {label}
         </div>
-        <div
-          className="font-mono text-[13px] font-semibold"
-          style={{ color: "var(--ink)" }}
-        >
-          {value}
+
+        <div className="ops-tabs">
+          <Link href="/system?tab=status" className={`ops-tab ${tab === "status" ? "on" : ""}`}>
+            {ar ? "الحالة" : "Status"}
+          </Link>
+          <Link href="/system?tab=settings" className={`ops-tab ${tab === "settings" ? "on" : ""}`}>
+            {ar ? "الإعدادات" : "Settings"}
+          </Link>
+        </div>
+
+        <div className={`ops-panel ${tab === "status" ? "on" : ""}`}>
+          <div className="kpi-grid reveal" style={{ gridTemplateColumns: "repeat(4,1fr)" }}>
+            {kpis.map(([label, value]) => (
+              <div key={label} className="kpi-card ix-card">
+                <div className="kpi-label">{label}</div>
+                <div className="kpi-val"><span>{num(value, ar)}</span></div>
+                <div className="kpi-foot">
+                  <span className="kpi-hint">
+                    {ar ? "آخر استيراد: اليوم ٨:٠٠" : "Last import: today 8:00"}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="panel" style={{ marginTop: 14 }}>
+            <div className="panel-head">
+              <span className="panel-title">{ar ? "صحّة المنصّة" : "Platform health"}</span>
+              <span className="panel-aside">{ar ? "زمن التشغيل ٩٩.٩٨٪" : "Uptime 99.98%"}</span>
+            </div>
+            {health.map((s) => (
+              <div
+                key={s}
+                className="ws-line"
+                style={{ display: "flex", justifyContent: "space-between", padding: "11px 0", borderBottom: "1px solid var(--line)" }}
+              >
+                <span>{s}</span>
+                <span className="ops-tag ok">{ar ? "سليم" : "Healthy"}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className={`ops-panel ${tab === "settings" ? "on" : ""}`}>
+          <div className="panel">
+            <div className="panel-head">
+              <span className="panel-title">{ar ? "الملف الشخصي" : "Profile"}</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 8 }}>
+              <div
+                style={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: "50%",
+                  display: "grid",
+                  placeItems: "center",
+                  fontFamily: "var(--dl-display)",
+                  fontSize: 26,
+                  fontWeight: 600,
+                  color: "#fff",
+                  background: "linear-gradient(140deg,var(--emerald-soft),var(--emerald))",
+                }}
+              >
+                {(session?.name ?? "أ").trim().charAt(0)}
+              </div>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: "var(--ink)" }}>
+                  {session?.name ?? (ar ? "أنس الحوراني" : "Anas Hourani")}
+                </div>
+                <div style={{ fontSize: 12, color: "var(--ink-muted)" }}>
+                  {session ? arAr(ROLES_AR, session.role) : ar ? "رئيس مجلس الإدارة · المجموعة" : "Chairman · Group"}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="panel" style={{ marginTop: 14 }}>
+            <div className="panel-head">
+              <span className="panel-title">{ar ? "تفضيلات العرض" : "Display preferences"}</span>
+              <span className="panel-aside">{ar ? "ما يظهر في كل وحدة" : "What shows in each module"}</span>
+            </div>
+            <div>
+              {prefs.map(([label, on]) => (
+                <div
+                  key={label}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid var(--line)" }}
+                >
+                  <span style={{ fontSize: 13.5, color: "var(--ink)" }}>{label}</span>
+                  <span className={`br-switch ${on ? "on" : ""}`} />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

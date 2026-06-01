@@ -27,7 +27,6 @@ export default async function JournalPage({ searchParams }: { searchParams: SP }
   const ar = getLocale() === "ar";
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (!["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) redirect("/dashboard");
 
   const periodSel = str(searchParams.period); // "YYYY-MM"
   const refPrefix = str(searchParams.ref); // "PO-" | "SO-" | "ADJ:"

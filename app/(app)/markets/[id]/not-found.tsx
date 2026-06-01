@@ -9,16 +9,16 @@ export default function NotFound() {
           className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
           style={{
             background:
-              "linear-gradient(135deg, color-mix(in srgb, var(--heri-ochre) 22%, transparent) 0%, color-mix(in srgb, var(--heri-copper) 22%, transparent) 100%)",
-            color: "var(--heri-ochre)",
+              "linear-gradient(135deg, color-mix(in srgb, var(--gold) 22%, transparent) 0%, color-mix(in srgb, var(--gold) 22%, transparent) 100%)",
+            color: "var(--gold)",
           }}
         >
           <TrendingUp className="h-7 w-7" />
         </div>
-        <h2 className="text-xl font-bold" style={{ color: "var(--heri-ink)" }}>
+        <h2 className="text-xl font-bold" style={{ color: "var(--ink)" }}>
           السهم غير موجود
         </h2>
-        <p className="mt-1 text-sm" style={{ color: "var(--heri-ink-3)" }}>
+        <p className="mt-1 text-sm" style={{ color: "var(--ink-muted)" }}>
           هذا الرمز إما تمّ شطبه من المتابعة أو غير متوفر في الأسواق المُتابَعة حالياً.
         </p>
         <div className="mt-5 flex items-center justify-center gap-2">

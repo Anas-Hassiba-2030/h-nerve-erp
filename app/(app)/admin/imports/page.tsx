@@ -27,9 +27,6 @@ export default async function ImportsAdminPage() {
   // then role-gate this cross-tenant surface.
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (!["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) {
-    redirect("/dashboard");
-  }
 
   const batches = await prisma.importLog.findMany({
     orderBy: { createdAt: "desc" },

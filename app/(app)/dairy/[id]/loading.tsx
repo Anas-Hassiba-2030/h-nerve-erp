@@ -9,7 +9,7 @@ export default function Loading() {
       {/* Topbar row */}
       <div
         className="flex flex-wrap items-center justify-between gap-4 px-6 py-4"
-        style={{ borderBottom: "1px solid var(--heri-rule)" }}
+        style={{ borderBottom: "1px solid var(--line)" }}
       >
         <div className="space-y-2">
           <div className="skel skel-eyebrow" />

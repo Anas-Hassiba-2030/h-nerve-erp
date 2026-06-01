@@ -1,0 +1,80 @@
+/* Brain section · night-emerald aesthetic, ported verbatim from the Claude
+   Design reference (docs/design/system/sections/brain.html <style> block).
+   SCOPED under .dl-page so the dark cosmic treatment only applies to the
+   /brain landing page — never leaking into the rest of the app.
+
+   daylight.css already defines --gold, --gold-soft, --emerald, --emerald-soft,
+   --sage, --brick and --line on .dl-page. The brain reference additionally
+   leans on --mist and --display (which normally live in _section.css), so we
+   re-declare just those two here. Real data is fed in by page.tsx; the look is
+   the design. */
+
+.dl-page {
+  --mist: #cde0d6;
+  --display: "Cormorant Garamond", "Newsreader", "Reem Kufi", Georgia, serif;
+}
+
+/* ── Night / cosmic field ──
+   The reference page runs on data-living="night" data-ambient="cosmic". In the
+   app there is no body-level night layer, so we paint the cosmic emerald field
+   straight onto the work surface that hosts this .dl-page and let it bleed full
+   width (the daylight full-bleed rule already hides the sidebar). */
+body:has(.dl-page[data-section="brain"]) .flex.min-h-screen.flex-1.flex-col.nerve-bg {
+  background-color: #0a1813;
+  background-image:
+    radial-gradient(120% 90% at 16% 8%, #143229 0%, #0d1f1a 55%, #0a1813 100%),
+    radial-gradient(40% 60% at 82% 18%, rgba(194, 163, 90, .12), transparent 70%);
+  background-attachment: fixed;
+}
+
+/* ── Brain · night-surface overrides ── */
+.dl-page { background: transparent; color: var(--mist); }
+.dl-page .sec-title { color: #fff; }
+.dl-page .sec-sub { color: var(--mist); opacity: .8; }
+.dl-page .sec-eyebrow { color: var(--gold-soft); }
+.dl-page .sec-eyebrow .tick { background: var(--gold-soft); }
+.dl-page .sec-head { border-bottom-color: rgba(194, 163, 90, .2); }
+.dl-page .sec-status { background: rgba(17, 42, 35, .6); border-color: rgba(194, 163, 90, .28); color: var(--mist); }
+.dl-page .n-panel { background: rgba(17, 42, 35, .55); backdrop-filter: blur(12px); border: 1px solid rgba(194, 163, 90, .2); border-radius: 18px; padding: 24px 26px; margin-bottom: 22px; }
+.dl-page .n-panel-title { font-family: var(--display); font-size: 24px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+.dl-page .n-panel-aside { font-size: 12.5px; color: var(--mist); opacity: .7; margin-bottom: 18px; }
+/* hero IQ */
+.dl-page .brain-hero { display: flex; align-items: center; gap: 34px; flex-wrap: wrap; background: rgba(17, 42, 35, .5); backdrop-filter: blur(12px);
+  border: 1px solid rgba(194, 163, 90, .22); border-radius: 22px; padding: 30px 34px; margin-bottom: 24px; position: relative; overflow: hidden; }
+.dl-page .brain-orb { position: relative; width: 140px; height: 140px; flex: 0 0 140px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #2E6B57, #1F4D3F 45%, #0c2019);
+  box-shadow: inset 0 0 36px rgba(0, 0, 0, .5), inset 0 2px 16px rgba(220, 195, 138, .25), 0 0 50px rgba(31, 77, 63, .7);
+  display: grid; place-items: center; }
+.dl-page .brain-orb::after { content: ""; position: absolute; inset: -10px; border-radius: 50%; border: 1px solid rgba(194, 163, 90, .4); animation: b-spin 26s linear infinite; }
+.dl-page .brain-orb::before { content: ""; position: absolute; inset: -22px; border-radius: 50%; border: 1px solid rgba(220, 195, 138, .22); animation: b-spin 34s linear infinite reverse; }
+@keyframes b-spin { to { transform: rotate(360deg); } }
+.dl-page .brain-iq { font-family: var(--display); font-size: 58px; font-weight: 600; color: #fff; line-height: .9; text-shadow: 0 0 22px rgba(220, 195, 138, .5); }
+.dl-page .brain-iq-cap { font-size: 11px; color: var(--gold-soft); letter-spacing: .04em; }
+.dl-page .brain-hero-txt { flex: 1; min-width: 240px; }
+.dl-page .brain-hero-txt h2 { font-family: var(--display); font-size: 30px; font-weight: 600; color: #fff; line-height: 1.1; }
+.dl-page .brain-hero-txt p { font-size: 14.5px; color: var(--mist); opacity: .85; margin-top: 10px; line-height: 1.6; max-width: 54ch; }
+.dl-page .brain-stats { display: flex; gap: 26px; margin-top: 16px; flex-wrap: wrap; }
+.dl-page .brain-stat .v { font-family: var(--display); font-size: 26px; font-weight: 600; color: var(--gold-soft); font-variant-numeric: tabular-nums; }
+.dl-page .brain-stat .l { font-size: 11px; color: var(--mist); opacity: .7; }
+/* council mini */
+.dl-page .council-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+@media (max-width: 760px) { .dl-page .council-row { grid-template-columns: 1fr; } }
+.dl-page .adv { background: rgba(13, 31, 26, .5); border: 1px solid rgba(194, 163, 90, .16); border-radius: 14px; padding: 16px 18px; position: relative; }
+.dl-page .adv::before { content: ""; position: absolute; inset-inline-start: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 999px; }
+.dl-page .adv.s::before { background: var(--sage); } .dl-page .adv.o::before { background: var(--brick); } .dl-page .adv.q::before { background: var(--gold); }
+.dl-page .adv-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.dl-page .adv-name { font-family: var(--display); font-size: 18px; font-weight: 600; color: #fff; }
+.dl-page .adv-pos { font-size: 10px; font-weight: 700; letter-spacing: .08em; padding: 3px 9px; border-radius: 999px; }
+.dl-page .adv.s .adv-pos { color: var(--sage); background: rgba(126, 155, 134, .18); }
+.dl-page .adv.o .adv-pos { color: #cf9384; background: rgba(168, 106, 92, .2); }
+.dl-page .adv.q .adv-pos { color: var(--gold-soft); background: rgba(194, 163, 90, .18); }
+.dl-page .adv-thesis { font-size: 13.5px; color: var(--mist); opacity: .85; margin-top: 10px; line-height: 1.5; }
+/* drivers */
+.dl-page .driver { display: flex; align-items: center; gap: 14px; padding: 13px 4px; border-bottom: 1px solid rgba(194, 163, 90, .12); }
+.dl-page .driver:last-child { border-bottom: 0; }
+.dl-page .driver-rank { font-family: var(--display); font-size: 22px; font-weight: 600; color: var(--gold-soft); width: 30px; text-align: center; font-variant-numeric: tabular-nums; }
+.dl-page .driver-body { flex: 1; min-width: 0; }
+.dl-page .driver-title { font-size: 14.5px; font-weight: 600; color: #fff; }
+.dl-page .driver-sub { font-size: 12px; color: var(--mist); opacity: .7; margin-top: 2px; }
+.dl-page .driver-impact { font-family: var(--display); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.dl-page .driver-impact.up { color: var(--sage); } .dl-page .driver-impact.down { color: #cf9384; }

@@ -9,6 +9,12 @@ export const dynamic = "force-dynamic";
 //
 // Without a selection, the page renders a "recent activity" picker grouped
 // by entity so users can drill into anything that's been touched lately.
+//
+// Visuals are ported to the Claude Design reference
+// (docs/design/system/sections/audit.html + audit-ops.js): the .dl-page
+// daylight register, .sec-head header, .ops-tabs/.ops-panel tabs, and the
+// .ops-table / .ops-tr / .ops-cell / .ops-tag operations table. Real data
+// comes from the Prisma queries below; only the look is the design.
 
 import Link from "next/link";
 import {
@@ -28,18 +34,14 @@ import {
   MessageSquare,
   Pin as PinIcon,
   Eye,
-  ArrowRight,
   Search,
-  Compass,
-  Hash,
 } from "lucide-react";
-import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
-import { EmptyState } from "@/components/EmptyState";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { isSafeId } from "@/lib/authz";
 import { formatNumber, formatRelative } from "@/lib/utils";
 import "../daylight.css";
+import "./audit.css";
 
 type EntityType =
   | "COMPANY"
@@ -132,17 +134,19 @@ const ENTITY_META: Record<
   },
 };
 
-const ACTION_TONE: Record<string, string> = {
-  CREATE: "badge-emerald",
-  UPDATE: "badge-blue",
-  DELETE: "badge-red",
-  RESTORE: "badge-violet",
-  LOGIN: "badge-slate",
-  EXPORT: "badge-amber",
-  FORECAST: "badge-violet",
-  INSIGHT: "badge-amber",
-  APPROVE: "badge-emerald",
-  REJECT: "badge-red",
+// Map a raw action to an .ops-tag tone class (ok / warn / crit / info),
+// matching the reference audit-ops.js type→tag mapping.
+const ACTION_TAG: Record<string, "ok" | "warn" | "crit" | "info"> = {
+  CREATE: "ok",
+  UPDATE: "info",
+  DELETE: "crit",
+  RESTORE: "warn",
+  LOGIN: "info",
+  EXPORT: "ok",
+  FORECAST: "info",
+  INSIGHT: "warn",
+  APPROVE: "ok",
+  REJECT: "crit",
 };
 
 const ACTION_AR: Record<string, string> = {
@@ -297,293 +301,195 @@ export default async function Audit360Page({
     ]);
 
     const meta = ENTITY_META[entity];
-    const Icon = meta.icon;
     const detailHref = meta.href(id);
 
     return (
-      <DaylightShell dir={ar ? "rtl" : "ltr"}>
-        <DaylightHeader
-          eyebrow={ar ? "النظام · تتبع 360" : "System · Audit 360"}
-          title={ar ? "تتبع السجل" : "Record trace"}
-          subtitle={
-            ar
-              ? `كل تفاعل ولمسة على هذا العنصر — عبر كل وحدة في المنصة.`
-              : "Every interaction and touch on this record — across every module."
-          }
-          actions={
-            <Link href="/audit-360" className="dl-btn dl-btn-secondary">
-              <Search className="h-4 w-4" />
-              {ar ? "تتبع آخر" : "Trace another"}
-            </Link>
-          }
-        />
-          {/* Entity card */}
-          <section
-            className="relative overflow-hidden rounded-2xl p-6 text-white anim-rise-glow"
-            style={{
-              background: `linear-gradient(135deg, color-mix(in srgb, ${meta.tint} 80%, #000) 0%, ${meta.tint} 50%, color-mix(in srgb, ${meta.tint} 50%, white) 110%)`,
-              minHeight: 160,
-            }}
-          >
-            <div className="relative flex flex-wrap items-start gap-5">
-              <div
-                className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl"
-                style={{
-                  background: "rgba(255,255,255,0.18)",
-                  border: "1px solid rgba(255,255,255,0.35)",
-                  backdropFilter: "blur(6px)",
-                }}
-                aria-hidden
-              >
-                <Icon className="h-8 w-8" />
+      <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+        <div className="wrap">
+          <div className="sec-head reveal">
+            <div>
+              <div className="sec-eyebrow">
+                <span className="tick" />
+                {ar ? "النظام · تتبع 360" : "System · Audit 360"}
               </div>
-              <div className="min-w-0 flex-1">
-                <div
-                  className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em]"
-                  style={{
-                    background: "rgba(255,255,255,0.18)",
-                    border: "1px solid rgba(255,255,255,0.32)",
-                    backdropFilter: "blur(6px)",
-                  }}
-                >
-                  {ar ? meta.ar : meta.en}
-                </div>
-                <h2
-                  className="mt-2 text-2xl font-bold md:text-3xl"
-                  style={{ letterSpacing: "-0.018em", textShadow: "0 2px 12px rgba(0,0,0,0.25)" }}
-                >
-                  {resolved?.label ?? (ar ? "سجل غير موجود" : "Record not found")}
-                </h2>
-                {resolved?.sub ? (
-                  <p className="mt-1 max-w-2xl text-sm opacity-90">{resolved.sub}</p>
-                ) : null}
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <span
-                    className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[11px] font-bold"
-                    style={{
-                      background: "rgba(255,255,255,0.18)",
-                      border: "1px solid rgba(255,255,255,0.28)",
-                    }}
-                  >
-                    <Hash className="h-3 w-3" />
-                    {id}
-                  </span>
-                  <span
-                    className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold"
-                    style={{
-                      background: "rgba(255,255,255,0.18)",
-                      border: "1px solid rgba(255,255,255,0.28)",
-                    }}
-                  >
-                    <ActivityIcon className="h-3 w-3" />
-                    {formatNumber(activity.length)}{" "}
-                    {ar ? "حدث" : activity.length === 1 ? "event" : "events"}
-                  </span>
-                  <span
-                    className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold"
-                    style={{
-                      background: "rgba(255,255,255,0.18)",
-                      border: "1px solid rgba(255,255,255,0.28)",
-                    }}
-                  >
-                    <MessageSquare className="h-3 w-3" />
-                    {formatNumber(threads.length)}{" "}
-                    {ar ? "نقاش" : threads.length === 1 ? "thread" : "threads"}
-                  </span>
-                  <span
-                    className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold"
-                    style={{
-                      background: "rgba(255,255,255,0.18)",
-                      border: "1px solid rgba(255,255,255,0.28)",
-                    }}
-                  >
-                    <PinIcon className="h-3 w-3" />
-                    {formatNumber(pinCount)}{" "}
-                    {ar ? "تثبيت" : "pin" + (pinCount === 1 ? "" : "s")}
-                  </span>
-                  {detailHref ? (
-                    <Link
-                      href={detailHref}
-                      className="ms-auto inline-flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-1 text-[12px] font-semibold transition hover:scale-105"
-                      style={{ color: meta.tint }}
-                    >
-                      <Eye className="h-3.5 w-3.5" />
-                      {ar ? "فتح السجل" : "Open record"}
-                    </Link>
-                  ) : null}
-                </div>
+              <h1 className="sec-title">{ar ? "تتبع السجل" : "Record trace"}</h1>
+              <p className="sec-sub">
+                {ar
+                  ? "كل تفاعل ولمسة على هذا العنصر — عبر كل وحدة في المنصة."
+                  : "Every interaction and touch on this record — across every module."}
+              </p>
+            </div>
+            <div className="sec-head-aside">
+              <span className="sec-status">
+                <span className="dot" />
+                {resolved?.label ?? (ar ? "سجل غير موجود" : "Record not found")}
+              </span>
+              <div className="sec-actions">
+                <Link href="/audit-360" className="dl-btn dl-btn-secondary">
+                  <Search className="h-4 w-4" />
+                  {ar ? "تتبع آخر" : "Trace another"}
+                </Link>
               </div>
+            </div>
+          </div>
+
+          {/* Entity overview KPIs */}
+          <section className="kpi-grid reveal">
+            <div className="kpi-card">
+              <div className="kpi-label">{ar ? "النوع" : "Entity"}</div>
+              <div className="kpi-val" style={{ fontSize: 28 }}>
+                {ar ? meta.ar : meta.en}
+              </div>
+              <div className="kpi-foot">
+                <span className="kpi-hint" style={{ fontFamily: "monospace" }}>{id}</span>
+              </div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-label">{ar ? "أحداث" : "Events"}</div>
+              <div className="kpi-val">{formatNumber(activity.length)}</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-label">{ar ? "نقاشات" : "Threads"}</div>
+              <div className="kpi-val">{formatNumber(threads.length)}</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-label">{ar ? "تثبيتات" : "Pins"}</div>
+              <div className="kpi-val">{formatNumber(pinCount)}</div>
+              {detailHref ? (
+                <div className="kpi-foot">
+                  <Link href={detailHref} className="kpi-hint" style={{ color: "var(--gold)", fontWeight: 700 }}>
+                    <Eye className="me-1 inline h-3.5 w-3.5" />
+                    {ar ? "فتح السجل" : "Open record"}
+                  </Link>
+                </div>
+              ) : null}
             </div>
           </section>
 
-          {/* Two-column layout: timeline + side rail */}
-          <div className="grid gap-6 lg:grid-cols-[1fr,320px]">
-            {/* Activity timeline */}
-            <section className="card overflow-hidden">
-              <header
-                className="flex items-center justify-between px-4 py-3"
-                style={{ borderBottom: "1px solid var(--line)" }}
+          {/* Tabs — reference audit.html: التدقيق ٣٦٠ / النشاط */}
+          <div className="ops-tabs">
+            <span className="ops-tab on">{ar ? "التدقيق ٣٦٠" : "Audit 360"}</span>
+            <Link href="/activity" className="ops-tab">
+              {ar ? "النشاط" : "Activity"}
+            </Link>
+          </div>
+
+          {/* Activity timeline as an ops-table */}
+          <div className="ops-panel on">
+            <div className="ops-toolbar">
+              <h2>{ar ? "الجدول الزمني" : "Activity timeline"}</h2>
+              <div className="ops-actions">
+                <span className="panel-aside">{formatNumber(activity.length)}</span>
+              </div>
+            </div>
+            <div className="ops-table">
+              <div
+                className="ops-tr head"
+                style={{ gridTemplateColumns: "1.4fr 2fr 1.2fr .9fr" }}
               >
-                <h3
-                  className="flex items-center gap-2 text-sm font-semibold"
-                  style={{ color: "var(--ink)" }}
-                >
-                  <ActivityIcon className="h-4 w-4" style={{ color: "var(--gold)" }} />
-                  {ar ? "الجدول الزمني" : "Activity timeline"}
-                </h3>
-                <span className="font-mono text-[11px]" style={{ color: "var(--ink-muted)" }}>
-                  {formatNumber(activity.length)}
-                </span>
-              </header>
+                <span className="ops-cell">{ar ? "الإجراء" : "Action"}</span>
+                <span className="ops-cell name">{ar ? "الملخص" : "Summary"}</span>
+                <span className="ops-cell">{ar ? "المستخدم" : "User"}</span>
+                <span className="ops-cell num">{ar ? "الوقت" : "Time"}</span>
+              </div>
               {activity.length === 0 ? (
-                <div
-                  className="px-4 py-6 text-center text-[12px]"
-                  style={{ color: "var(--ink-muted)" }}
-                >
-                  {ar
-                    ? "لا توجد لمسات مسجلة على هذا العنصر بعد."
-                    : "No recorded touches on this record yet."}
+                <div className="ops-empty">
+                  <div className="oe-ic">◇</div>
+                  <div className="oe-t">{ar ? "لا لمسات بعد" : "No touches yet"}</div>
+                  <div className="oe-s">
+                    {ar
+                      ? "لا توجد لمسات مسجلة على هذا العنصر بعد."
+                      : "No recorded touches on this record yet."}
+                  </div>
                 </div>
               ) : (
-                <ol className="relative">
-                  <span
-                    aria-hidden
-                    className="absolute top-0 bottom-0 w-px"
-                    style={{
-                      insetInlineStart: 30,
-                      background: "var(--line)",
-                    }}
-                  />
-                  {activity.map((a, i) => (
-                    <li
-                      key={a.id}
-                      className="relative grid items-start gap-3 px-4 py-3 anim-fade-up"
-                      style={{
-                        gridTemplateColumns: "32px 1fr auto",
-                        animationDelay: `${Math.min(i, 10) * 30}ms`,
-                        borderTop: i === 0 ? "none" : "1px solid color-mix(in srgb, var(--line) 60%, transparent)",
-                      }}
-                    >
-                      <span
-                        className="z-10 flex h-7 w-7 items-center justify-center rounded-full text-white"
-                        style={{ background: meta.tint }}
-                        aria-hidden
-                      >
-                        <Icon className="h-3.5 w-3.5" />
+                activity.map((a) => (
+                  <div
+                    key={a.id}
+                    className="ops-tr row"
+                    style={{ gridTemplateColumns: "1.4fr 2fr 1.2fr .9fr" }}
+                  >
+                    <span className="ops-cell">
+                      <span className={`ops-tag ${ACTION_TAG[a.action] ?? "info"}`}>
+                        {ar ? ACTION_AR[a.action] ?? a.action : a.action}
                       </span>
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <span
-                            className={`${ACTION_TONE[a.action] ?? "badge-slate"} font-mono`}
-                          >
-                            {ar ? ACTION_AR[a.action] ?? a.action : a.action}
-                          </span>
-                          <span
-                            className="text-sm font-bold"
-                            style={{ color: "var(--ink)" }}
-                          >
-                            {ar ? a.summary : a.summaryEn ?? a.summary}
-                          </span>
-                        </div>
-                        <div
-                          className="mt-0.5 text-[11px]"
-                          style={{ color: "var(--ink-muted)" }}
-                        >
-                          {a.actorName ? (
-                            <span>
-                              <UserIcon className="me-1 inline h-3 w-3" />
-                              {a.actorName}
-                            </span>
-                          ) : (
-                            <span>{ar ? "النظام" : "System"}</span>
-                          )}
-                          {a.module ? (
-                            <span className="ms-2">· {a.module}</span>
-                          ) : null}
-                        </div>
-                      </div>
-                      <span
-                        className="whitespace-nowrap text-[11px] font-mono"
-                        style={{ color: "var(--ink-muted)" }}
-                      >
-                        {formatRelative(a.createdAt)}
-                      </span>
-                    </li>
-                  ))}
-                </ol>
+                    </span>
+                    <span className="ops-cell name">
+                      {ar ? a.summary : a.summaryEn ?? a.summary}
+                    </span>
+                    <span className="ops-cell">
+                      {a.actorName ?? (ar ? "النظام" : "System")}
+                      {a.module ? ` · ${a.module}` : ""}
+                    </span>
+                    <span className="ops-cell num">{formatRelative(a.createdAt)}</span>
+                  </div>
+                ))
               )}
-            </section>
+            </div>
+          </div>
 
-            {/* Side rail: discussions + meta */}
-            <aside className="space-y-4">
-              <section className="card card-pad">
-                <h3
-                  className="mb-3 flex items-center gap-2 text-sm font-semibold"
-                  style={{ color: "var(--ink)" }}
-                >
-                  <MessageSquare className="h-4 w-4" style={{ color: "var(--gold)" }} />
-                  {ar ? "نقاشات حول السجل" : "Discussions"}
-                </h3>
-                {threads.length === 0 ? (
-                  <p className="text-[12px]" style={{ color: "var(--ink-muted)" }}>
+          {/* Discussions + pins as a secondary ops-table */}
+          <div className="ops-panel on">
+            <div className="ops-toolbar">
+              <h2>{ar ? "نقاشات حول السجل" : "Discussions"}</h2>
+              <div className="ops-actions">
+                <span className="panel-aside">
+                  <MessageSquare className="me-1 inline h-3.5 w-3.5" style={{ color: "var(--gold)" }} />
+                  {formatNumber(threads.length)}
+                </span>
+              </div>
+            </div>
+            <div className="ops-table">
+              <div
+                className="ops-tr head"
+                style={{ gridTemplateColumns: "2fr .8fr .8fr .9fr" }}
+              >
+                <span className="ops-cell">{ar ? "النقاش" : "Thread"}</span>
+                <span className="ops-cell num">{ar ? "رسائل" : "Msgs"}</span>
+                <span className="ops-cell num">{ar ? "مشاركون" : "People"}</span>
+                <span className="ops-cell num">{ar ? "آخر تحديث" : "Updated"}</span>
+              </div>
+              {threads.length === 0 ? (
+                <div className="ops-empty">
+                  <div className="oe-ic">◇</div>
+                  <div className="oe-t">{ar ? "لا نقاشات" : "No discussions"}</div>
+                  <div className="oe-s">
                     {ar
                       ? "لم يفتح أحد نقاشاً عن هذا العنصر بعد."
                       : "No discussion thread anchored to this record yet."}
-                  </p>
-                ) : (
-                  <ul className="divide-y divide-[var(--line)]">
-                    {threads.map((t) => (
-                      <li key={t.id} className="py-2.5">
-                        <Link
-                          href={`/messages/${t.id}`}
-                          className="block hover:underline"
-                          style={{ color: "var(--ink)" }}
-                        >
-                          <div className="text-sm font-semibold">
-                            {t.title ?? (ar ? "نقاش بدون عنوان" : "Untitled thread")}
-                          </div>
-                          <div
-                            className="mt-0.5 flex items-center gap-3 text-[11px] font-mono"
-                            style={{ color: "var(--ink-muted)" }}
-                          >
-                            <span>
-                              {formatNumber(t._count.messages)}{" "}
-                              {ar ? "رسالة" : "msgs"}
-                            </span>
-                            <span>
-                              {formatNumber(t._count.participants)}{" "}
-                              {ar ? "مشارك" : "people"}
-                            </span>
-                            <span>{formatRelative(t.updatedAt)}</span>
-                          </div>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </section>
-
-              <section className="card card-pad">
-                <h3
-                  className="mb-2 flex items-center gap-2 text-sm font-semibold"
-                  style={{ color: "var(--ink)" }}
-                >
-                  <PinIcon className="h-4 w-4" style={{ color: "var(--gold)" }} />
-                  {ar ? "تثبيتات" : "Pins"}
-                </h3>
-                <p className="text-[12px]" style={{ color: "var(--ink-muted)" }}>
-                  {pinCount === 0
-                    ? ar
-                      ? "لم يثبّت أحد هذا السجل بعد."
-                      : "No one has pinned this record yet."
-                    : ar
-                      ? `${formatNumber(pinCount)} مستخدم ثبّت هذا السجل في مفضلته.`
-                      : `${formatNumber(pinCount)} user${pinCount === 1 ? "" : "s"} pinned this record.`}
-                </p>
-              </section>
-            </aside>
+                  </div>
+                </div>
+              ) : (
+                threads.map((t) => (
+                  <Link
+                    key={t.id}
+                    href={`/messages/${t.id}`}
+                    className="ops-tr row"
+                    style={{ gridTemplateColumns: "2fr .8fr .8fr .9fr" }}
+                  >
+                    <span className="ops-cell name">
+                      {t.title ?? (ar ? "نقاش بدون عنوان" : "Untitled thread")}
+                    </span>
+                    <span className="ops-cell num">{formatNumber(t._count.messages)}</span>
+                    <span className="ops-cell num">{formatNumber(t._count.participants)}</span>
+                    <span className="ops-cell num">{formatRelative(t.updatedAt)}</span>
+                  </Link>
+                ))
+              )}
+            </div>
+            <p className="panel-aside" style={{ marginTop: 12 }}>
+              <PinIcon className="me-1 inline h-3.5 w-3.5" style={{ color: "var(--gold)" }} />
+              {pinCount === 0
+                ? ar
+                  ? "لم يثبّت أحد هذا السجل بعد."
+                  : "No one has pinned this record yet."
+                : ar
+                  ? `${formatNumber(pinCount)} مستخدم ثبّت هذا السجل في مفضلته.`
+                  : `${formatNumber(pinCount)} user${pinCount === 1 ? "" : "s"} pinned this record.`}
+            </p>
           </div>
-      </DaylightShell>
+        </div>
+      </div>
     );
   }
 
@@ -640,29 +546,43 @@ export default async function Audit360Page({
   const records = [...grouped.values()].slice(0, 30);
 
   return (
-    <DaylightShell dir={ar ? "rtl" : "ltr"}>
-      <DaylightHeader
-        eyebrow={ar ? "النظام · تتبع 360" : "System · Audit 360"}
-        title={ar ? "تتبع السجلات" : "Audit 360"}
-        subtitle={
-          ar
-            ? "اختر سجلاً لرؤية كل لمسة عليه عبر كل وحدة عمل في المجموعة."
-            : "Pick a record to see every touch on it across every business unit."
-        }
-      />
-        {/* Manual entry — paste-id form */}
-        <section className="card card-pad">
-          <h3
-            className="mb-2 flex items-center gap-2 text-sm font-semibold"
-            style={{ color: "var(--ink)" }}
-          >
-            <Compass className="h-4 w-4" style={{ color: "var(--gold)" }} />
-            {ar ? "تتبع سجل بمعرفه" : "Trace by record ID"}
-          </h3>
-          <p
-            className="mb-3 text-[12px]"
-            style={{ color: "var(--ink-muted)" }}
-          >
+    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+      <div className="wrap">
+        <div className="sec-head reveal">
+          <div>
+            <div className="sec-eyebrow">
+              <span className="tick" />
+              {ar ? "النظام · تتبع 360" : "System · Audit 360"}
+            </div>
+            <h1 className="sec-title">{ar ? "تتبع السجلات" : "Audit 360"}</h1>
+            <p className="sec-sub">
+              {ar
+                ? "اختر سجلاً لرؤية كل لمسة عليه عبر كل وحدة عمل في المجموعة."
+                : "Pick a record to see every touch on it across every business unit."}
+            </p>
+          </div>
+          <div className="sec-head-aside">
+            <span className="sec-status">
+              <span className="dot" />
+              {ar ? "مباشر" : "Live"}
+            </span>
+          </div>
+        </div>
+
+        {/* Tabs — reference audit.html: التدقيق ٣٦٠ / النشاط */}
+        <div className="ops-tabs">
+          <span className="ops-tab on">{ar ? "التدقيق ٣٦٠" : "Audit 360"}</span>
+          <Link href="/activity" className="ops-tab">
+            {ar ? "النشاط" : "Activity"}
+          </Link>
+        </div>
+
+        {/* Manual entry — paste-id form, styled as an ops-form */}
+        <div className="panel reveal">
+          <div className="panel-head">
+            <div className="panel-title">{ar ? "تتبع سجل بمعرفه" : "Trace by record ID"}</div>
+          </div>
+          <p className="panel-aside" style={{ marginBottom: 12 }}>
             {ar
               ? "اختر نوع السجل والصق المعرّف. يدعم الأنواع الـ 12 أدناه."
               : "Pick a record type and paste its ID. All 12 entity kinds are supported."}
@@ -671,9 +591,10 @@ export default async function Audit360Page({
           <form
             action="/audit-360"
             method="get"
-            className="grid gap-2 sm:grid-cols-[200px_1fr_auto]"
+            className="ops-form"
+            style={{ gridTemplateColumns: "200px 1fr auto", border: 0, background: "transparent", padding: 0 }}
           >
-            <select name="entity" className="select" defaultValue="BOOKING">
+            <select name="entity" defaultValue="BOOKING">
               {VALID_ENTITIES.map((e) => (
                 <option key={e} value={e}>
                   {ar ? ENTITY_META[e].ar : ENTITY_META[e].en} ({e})
@@ -684,123 +605,77 @@ export default async function Audit360Page({
               type="text"
               name="id"
               placeholder={ar ? "المعرّف (cuid)" : "Record ID (cuid)"}
-              className="input font-mono"
+              style={{ fontFamily: "monospace" }}
               required
               maxLength={64}
               pattern="[A-Za-z0-9_-]+"
             />
-            <button type="submit" className="btn-primary">
+            <button type="submit" className="ops-add">
               <Search className="h-4 w-4" />
               {ar ? "تتبع" : "Trace"}
             </button>
           </form>
-        </section>
+        </div>
 
-        {/* Recent activity picker */}
-        <section className="card overflow-hidden">
-          <header
-            className="flex items-center justify-between px-4 py-3"
-            style={{ borderBottom: "1px solid var(--line)" }}
-          >
-            <h3
-              className="flex items-center gap-2 text-sm font-semibold"
-              style={{ color: "var(--ink)" }}
+        {/* Recent activity picker as an ops-table */}
+        <div className="ops-panel on">
+          <div className="ops-toolbar">
+            <h2>{ar ? "أكثر السجلات تفاعلاً مؤخراً" : "Recently active records"}</h2>
+            <div className="ops-actions">
+              <span className="panel-aside">{formatNumber(records.length)}</span>
+            </div>
+          </div>
+          <div className="ops-table">
+            <div
+              className="ops-tr head"
+              style={{ gridTemplateColumns: ".9fr 2fr 1fr .7fr .8fr" }}
             >
-              <ActivityIcon className="h-4 w-4" style={{ color: "var(--gold)" }} />
-              {ar ? "أكثر السجلات تفاعلاً مؤخراً" : "Recently active records"}
-            </h3>
-            <span
-              className="text-[11px] font-mono"
-              style={{ color: "var(--ink-muted)" }}
-            >
-              {formatNumber(records.length)}
-            </span>
-          </header>
-          {records.length === 0 ? (
-            <EmptyState
-              icon={ActivityIcon}
-              title={ar ? "لا يوجد نشاط حديث" : "No recent activity"}
-              description={
-                ar
-                  ? "ما إن يبدأ التفاعل عبر الوحدات حتى تظهر السجلات هنا."
-                  : "Once touches start flowing across modules, records will surface here."
-              }
-            />
-          ) : (
-            <ul>
-              {records.map((r, i) => {
-                const meta = ENTITY_META[r.entity];
-                const Icon = meta.icon;
+              <span className="ops-cell">{ar ? "النوع" : "Type"}</span>
+              <span className="ops-cell name">{ar ? "الملخص" : "Summary"}</span>
+              <span className="ops-cell">{ar ? "المستخدم" : "User"}</span>
+              <span className="ops-cell num">{ar ? "مرات" : "Count"}</span>
+              <span className="ops-cell num">{ar ? "الوقت" : "Time"}</span>
+            </div>
+            {records.length === 0 ? (
+              <div className="ops-empty">
+                <div className="oe-ic">◇</div>
+                <div className="oe-t">{ar ? "لا يوجد نشاط حديث" : "No recent activity"}</div>
+                <div className="oe-s">
+                  {ar
+                    ? "ما إن يبدأ التفاعل عبر الوحدات حتى تظهر السجلات هنا."
+                    : "Once touches start flowing across modules, records will surface here."}
+                </div>
+              </div>
+            ) : (
+              records.map((r) => {
+                const m = ENTITY_META[r.entity];
                 const href = `/audit-360?entity=${r.entity}&id=${encodeURIComponent(r.entityId)}`;
                 return (
-                  <li
+                  <Link
                     key={`${r.entity}:${r.entityId}`}
-                    className="anim-fade-up"
-                    style={{ animationDelay: `${Math.min(i, 10) * 25}ms` }}
+                    href={href}
+                    className="ops-tr row"
+                    style={{ gridTemplateColumns: ".9fr 2fr 1fr .7fr .8fr" }}
                   >
-                    <Link
-                      href={href}
-                      className="grid items-center gap-3 px-4 py-3 transition-colors hover:bg-[var(--cream)]"
-                      style={{
-                        gridTemplateColumns: "32px 1fr auto auto",
-                        borderTop: i === 0 ? "none" : "1px solid color-mix(in srgb, var(--line) 60%, transparent)",
-                      }}
-                    >
-                      <span
-                        className="flex h-8 w-8 items-center justify-center rounded-lg text-white"
-                        style={{ background: meta.tint }}
-                        aria-hidden
-                      >
-                        <Icon className="h-4 w-4" />
+                    <span className="ops-cell">
+                      <span className="ops-tag info">{ar ? m.ar : m.en}</span>
+                    </span>
+                    <span className="ops-cell name">
+                      <span className={`ops-tag ${ACTION_TAG[r.lastAction] ?? "info"}`} style={{ marginInlineEnd: 6 }}>
+                        {ar ? ACTION_AR[r.lastAction] ?? r.lastAction : r.lastAction}
                       </span>
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <span className="badge-slate">
-                            {ar ? meta.ar : meta.en}
-                          </span>
-                          <span
-                            className={`${ACTION_TONE[r.lastAction] ?? "badge-slate"} font-mono`}
-                          >
-                            {ar ? ACTION_AR[r.lastAction] ?? r.lastAction : r.lastAction}
-                          </span>
-                          <span
-                            className="truncate text-sm font-bold"
-                            style={{ color: "var(--ink)" }}
-                          >
-                            {ar ? r.summary : r.summaryEn ?? r.summary}
-                          </span>
-                        </div>
-                        <div
-                          className="mt-0.5 truncate text-[11px] font-mono"
-                          style={{ color: "var(--ink-muted)" }}
-                        >
-                          {r.entityId}
-                          {r.actorName ? <span className="ms-2">· {r.actorName}</span> : null}
-                        </div>
-                      </div>
-                      <span
-                        className="whitespace-nowrap text-[11px] font-bold"
-                        style={{ color: "var(--ink-muted)" }}
-                      >
-                        {formatNumber(r.count)} ×
-                      </span>
-                      <span
-                        className="whitespace-nowrap text-[11px]"
-                        style={{ color: "var(--ink-muted)" }}
-                      >
-                        {formatRelative(r.lastAt)}
-                      </span>
-                      <ArrowRight
-                        className="h-4 w-4 shrink-0 rtl:-scale-x-100"
-                        style={{ color: "var(--ink-muted)", gridColumn: "5" }}
-                      />
-                    </Link>
-                  </li>
+                      {ar ? r.summary : r.summaryEn ?? r.summary}
+                    </span>
+                    <span className="ops-cell">{r.actorName ?? "—"}</span>
+                    <span className="ops-cell num">{formatNumber(r.count)} ×</span>
+                    <span className="ops-cell num">{formatRelative(r.lastAt)}</span>
+                  </Link>
                 );
-              })}
-            </ul>
-          )}
-        </section>
-    </DaylightShell>
+              })
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -12,9 +12,9 @@ export default function InsightsLoading() {
           real page, so we render them as one tall block to avoid a jump. */}
       <div className="space-y-0">
         <CardSkeleton height={200} showHeader={false} />
-        <div className="grid grid-cols-2 md:grid-cols-4 border-t" style={{ borderColor: "var(--heri-rule)" }}>
+        <div className="grid grid-cols-2 md:grid-cols-4 border-t" style={{ borderColor: "var(--line)" }}>
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="px-6 py-6 md:px-8 md:py-7 space-y-2.5" style={{ borderInlineStart: i > 0 ? "1px solid var(--heri-rule)" : undefined, background: "var(--heri-cream)" }}>
+            <div key={i} className="px-6 py-6 md:px-8 md:py-7 space-y-2.5" style={{ borderInlineStart: i > 0 ? "1px solid var(--line)" : undefined, background: "var(--cream)" }}>
               <div className="skel" style={{ width: "55%", height: 10 }} />
               <div className="skel skel-title" style={{ width: "62%" }} />
             </div>

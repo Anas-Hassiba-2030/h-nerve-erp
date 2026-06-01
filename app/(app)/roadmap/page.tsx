@@ -1,50 +1,34 @@
-import {
-  Map,
-  Target,
-  Compass,
-  Telescope,
-  Sparkles,
-  ArrowUpRight,
-} from "lucide-react";
-import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
+// Roadmap — ported to the daylight "info" reference (docs/design/system/
+// sections/info.html + info-ops.js roadmap tab): .sec-head header + a
+// 3-column grid of .panel cards (Now / Next / Later), each with a
+// .panel-title and priority rows recoloured to the ivory daylight register.
+
 import { getLocale } from "@/lib/i18n.server";
 import { ROADMAP, type RoadmapStatus } from "@/lib/roadmapData";
 import "../daylight.css";
+import "./info.css";
 
 const COLUMN_META: Record<
   RoadmapStatus,
-  {
-    ar: string;
-    en: string;
-    captionAr: string;
-    captionEn: string;
-    icon: typeof Target;
-    tint: string;
-  }
+  { ar: string; en: string; captionAr: string; captionEn: string }
 > = {
   now: {
     ar: "الآن",
     en: "Now",
     captionAr: "قيد التنفيذ — يصل خلال هذا الإصدار",
     captionEn: "Building — landing in the current release",
-    icon: Target,
-    tint: "#10b981",
   },
   next: {
     ar: "التالي",
     en: "Next",
     captionAr: "ربع قادم — مخطط ومحجوز",
     captionEn: "Next quarter — scoped and committed",
-    icon: Compass,
-    tint: "#f59e0b",
   },
   later: {
     ar: "لاحقاً",
     en: "Later",
     captionAr: "أفق بعيد — على رادار المنتج",
     captionEn: "Long horizon — on the product radar",
-    icon: Telescope,
-    tint: "#8b5cf6",
   },
 };
 
@@ -54,233 +38,111 @@ export default function RoadmapPage() {
   const ar = getLocale() === "ar";
 
   return (
-    <DaylightShell dir={ar ? "rtl" : "ltr"}>
-      <DaylightHeader
-        eyebrow={ar ? "النظام" : "System"}
-        title={ar ? "خارطة الطريق المستقبلية" : "Roadmap"}
-        subtitle={
-          ar
-            ? "ما يصل الآن، ما بعده، وما يلوح في الأفق البعيد لـ H‑Nerve."
-            : "What's shipping now, what's queued next, and what's on the long horizon for H‑Nerve."
-        }
-      />
-        {/* Header strip with totals — kept en-US digits per spec */}
-        <section className="grid gap-3 sm:grid-cols-3">
+    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+      <div className="wrap">
+        <div className="sec-head reveal">
+          <div>
+            <div className="sec-eyebrow">
+              <span className="tick" />
+              {ar ? "النظام · خارطة الطريق" : "System · Roadmap"}
+            </div>
+            <h1 className="sec-title">
+              {ar ? "خارطة الطريق" : "Roadmap"}
+            </h1>
+            <p className="sec-sub">
+              {ar
+                ? "ما يصل الآن، ما بعده، وما يلوح في الأفق البعيد لـ H‑Nerve."
+                : "What's shipping now, what's queued next, and what's on the long horizon for H‑Nerve."}
+            </p>
+          </div>
+          <div className="sec-head-aside">
+            <span className="sec-status">
+              <span className="dot" />
+              {ar ? "مباشر" : "Live"}
+            </span>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: 14,
+          }}
+        >
           {STATUS_ORDER.map((s) => {
             const meta = COLUMN_META[s];
             const items = ROADMAP.filter((r) => r.status === s);
-            const Icon = meta.icon;
             return (
-              <div
-                key={s}
-                className="card card-pad relative overflow-hidden anim-fade-up"
-              >
-                {/* Subtle tinted ribbon on the start side */}
-                <span
-                  aria-hidden
-                  className="absolute top-0 bottom-0"
-                  style={{
-                    insetInlineStart: 0,
-                    width: 4,
-                    background: `linear-gradient(180deg, ${meta.tint} 0%, color-mix(in srgb, ${meta.tint} 40%, transparent) 100%)`,
-                  }}
-                />
-                <div className="flex items-center gap-3">
+              <div className="panel" style={{ margin: 0 }} key={s}>
+                <div className="panel-head">
+                  <span className="panel-title" style={{ fontSize: 18 }}>
+                    {ar ? meta.ar : meta.en}
+                  </span>
+                  <span className="panel-aside">
+                    {ar ? meta.captionAr : meta.captionEn}
+                  </span>
+                </div>
+                {items.length === 0 ? (
                   <div
-                    className="flex h-11 w-11 items-center justify-center rounded-xl text-white"
                     style={{
-                      background: `linear-gradient(135deg, ${meta.tint} 0%, color-mix(in srgb, ${meta.tint} 65%, #000) 100%)`,
+                      padding: "9px 0",
+                      fontSize: 13,
+                      color: "var(--ink-muted)",
                     }}
                   >
-                    <Icon className="h-5 w-5" />
+                    {ar ? "لا توجد بنود في هذا العمود." : "Nothing here yet."}
                   </div>
-                  <div className="min-w-0 flex-1">
+                ) : (
+                  items.map((it) => (
                     <div
-                      className="text-base font-semibold"
-                      style={{ color: "var(--ink)" }}
+                      className="ws-pri"
+                      key={it.id}
+                      style={{
+                        display: "flex",
+                        gap: 9,
+                        padding: "9px 0",
+                        borderBottom: "1px solid var(--line)",
+                        fontSize: 13,
+                        color: "var(--ink)",
+                      }}
                     >
-                      {ar ? meta.ar : meta.en}
+                      <span style={{ color: "var(--gold)" }}>◆</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            alignItems: "center",
+                            gap: 6,
+                          }}
+                        >
+                          <span style={{ fontWeight: 700 }}>
+                            {ar ? it.titleAr : it.titleEn}
+                          </span>
+                          {it.eta ? (
+                            <span className="ops-tag info">{it.eta}</span>
+                          ) : null}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            color: "var(--ink-muted)",
+                            marginTop: 3,
+                          }}
+                        >
+                          {ar ? it.areaAr : it.areaEn} ·{" "}
+                          {ar ? it.descAr : it.descEn}
+                        </div>
+                      </div>
                     </div>
-                    <div
-                      className="text-[11px]"
-                      style={{ color: "var(--ink-muted)" }}
-                    >
-                      {ar ? meta.captionAr : meta.captionEn}
-                    </div>
-                  </div>
-                  <div
-                    className="font-mono text-2xl font-bold"
-                    style={{ color: meta.tint }}
-                  >
-                    {items.length}
-                  </div>
-                </div>
+                  ))
+                )}
               </div>
             );
           })}
-        </section>
-
-        {/* Kanban board */}
-        <section
-          className="grid gap-4 lg:grid-cols-3"
-          aria-label={ar ? "خارطة الطريق" : "Roadmap"}
-        >
-          {STATUS_ORDER.map((s, colIdx) => {
-            const meta = COLUMN_META[s];
-            const items = ROADMAP.filter((r) => r.status === s);
-            const Icon = meta.icon;
-            return (
-              <section
-                key={s}
-                className="card overflow-hidden anim-fade-up"
-                style={{ animationDelay: `${colIdx * 60}ms` }}
-              >
-                {/* Column header */}
-                <header
-                  className="flex items-center gap-3 px-4 py-3"
-                  style={{
-                    background: `linear-gradient(135deg, color-mix(in srgb, ${meta.tint} 18%, var(--cream)) 0%, var(--cream) 100%)`,
-                    borderBottom: "1px solid var(--line)",
-                  }}
-                >
-                  <div
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-white"
-                    style={{ background: meta.tint }}
-                    aria-hidden
-                  >
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h2
-                      className="text-sm font-semibold"
-                      style={{ color: "var(--ink)" }}
-                    >
-                      {ar ? meta.ar : meta.en}
-                    </h2>
-                    <p
-                      className="text-[11px]"
-                      style={{ color: "var(--ink-muted)" }}
-                    >
-                      {ar ? meta.captionAr : meta.captionEn}
-                    </p>
-                  </div>
-                  <span
-                    className="font-mono text-[12px] font-bold"
-                    style={{
-                      background: "color-mix(in srgb, var(--ink-muted) 12%, transparent)",
-                      color: "var(--ink)",
-                      padding: "3px 8px",
-                      borderRadius: 999,
-                    }}
-                  >
-                    {items.length}
-                  </span>
-                </header>
-
-                {/* Column body */}
-                <div className="space-y-3 p-3">
-                  {items.length === 0 ? (
-                    <div
-                      className="rounded-xl p-4 text-center text-xs"
-                      style={{
-                        color: "var(--ink-muted)",
-                        background:
-                          "color-mix(in srgb, var(--ink-muted) 6%, transparent)",
-                        border: "1px dashed var(--line)",
-                      }}
-                    >
-                      {ar ? "لا توجد بنود في هذا العمود." : "Nothing here yet."}
-                    </div>
-                  ) : (
-                    items.map((item, i) => (
-                      <article
-                        key={item.id}
-                        className="anim-fade-up rounded-xl p-3 transition-all"
-                        style={{
-                          animationDelay: `${(colIdx * 60) + i * 50}ms`,
-                          background:
-                            "color-mix(in srgb, var(--cream) 50%, var(--cream))",
-                          border: "1px solid var(--line)",
-                        }}
-                      >
-                        {/* Meta row */}
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <span className={`badge-${item.tone}`}>
-                            {ar ? item.areaAr : item.areaEn}
-                          </span>
-                          {item.eta ? (
-                            <span className="badge-slate font-mono">
-                              {item.eta}
-                            </span>
-                          ) : null}
-                        </div>
-
-                        {/* Title */}
-                        <h3
-                          className="mt-2 text-sm font-semibold leading-snug"
-                          style={{ color: "var(--ink)" }}
-                        >
-                          {ar ? item.titleAr : item.titleEn}
-                        </h3>
-
-                        {/* Description */}
-                        <p
-                          className="mt-1 text-xs leading-relaxed"
-                          style={{ color: "var(--ink-muted)" }}
-                        >
-                          {ar ? item.descAr : item.descEn}
-                        </p>
-                      </article>
-                    ))
-                  )}
-                </div>
-              </section>
-            );
-          })}
-        </section>
-
-        {/* Footer note linking back to changelog */}
-        <div
-          className="card card-pad flex flex-wrap items-center gap-3 anim-fade-up"
-          style={{
-            background:
-              "linear-gradient(135deg, color-mix(in srgb, var(--gold) 6%, var(--cream)) 0%, var(--cream) 100%)",
-          }}
-        >
-          <div
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-white"
-            style={{
-              background:
-                "linear-gradient(135deg, var(--brand-deep) 0%, var(--gold) 100%)",
-            }}
-            aria-hidden
-          >
-            <Map className="h-5 w-5" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div
-              className="text-sm font-semibold"
-              style={{ color: "var(--ink)" }}
-            >
-              {ar
-                ? "كل ما هنا قابل للتعديل"
-                : "Everything here is up for debate"}
-            </div>
-            <div
-              className="text-[12px]"
-              style={{ color: "var(--ink-muted)" }}
-            >
-              {ar
-                ? "الأولويات تتغير مع نبض المجموعة. شارك ملاحظاتك مع الإدارة لإعادة الترتيب."
-                : "Priorities flex with the group's pulse. Share feedback with leadership to reshuffle."}
-            </div>
-          </div>
-          <a href="/changelog" className="btn-secondary btn-sm">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>{ar ? "ما تم إنجازه" : "What shipped"}</span>
-            <ArrowUpRight className="h-3.5 w-3.5 rtl:-scale-x-100" />
-          </a>
         </div>
-    </DaylightShell>
+      </div>
+    </div>
   );
 }

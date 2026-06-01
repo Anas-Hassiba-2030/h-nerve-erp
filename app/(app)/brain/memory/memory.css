@@ -1,0 +1,90 @@
+/* ============================================================================
+   بحيرة الذاكرة · Memory Lake — contemplative episodic recall.
+   ----------------------------------------------------------------------------
+   Ported verbatim (structure + motion) from
+   docs/design/system/sections/memory.html + memory.js, then SCOPED under
+   .dl-page so it only applies on the memory page and inherits the Daylight
+   surface (app/(app)/daylight.css). The reference is a NIGHT register (a dark
+   "lake" field with light --mist text + white headings + gold/sage accents),
+   so the few reference tokens the Daylight surface doesn't already define
+   (--mist / --display / --font-mono) are declared here, scoped to .dl-page.
+   .dl-page already provides --gold / --gold-soft / --sage / --emerald / --ink.
+   ============================================================================ */
+.dl-page {
+  --mist: #cde0d6;
+  --display: var(--dl-display);
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+}
+
+/* water-like flowing lake background (light, CSS-only) */
+.dl-page #lake { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; border-radius: 22px;
+  background: radial-gradient(ellipse 100% 80% at 50% 30%, #0e2620 0%, #0a1c17 60%, #071310 100%); }
+.dl-page #lake .wave { position: absolute; inset: -30%; border-radius: 45%; mix-blend-mode: screen; opacity: .5; }
+.dl-page #lake .w1 { background: radial-gradient(ellipse 50% 40% at 40% 60%, rgba(31,77,63,.5), transparent 65%); animation: lake1 32s ease-in-out infinite; }
+.dl-page #lake .w2 { background: radial-gradient(ellipse 45% 38% at 65% 45%, rgba(46,107,87,.35), transparent 62%); animation: lake2 40s ease-in-out infinite; }
+.dl-page #lake .w3 { background: radial-gradient(ellipse 55% 30% at 50% 75%, rgba(126,155,134,.18), transparent 70%); animation: lake1 48s ease-in-out infinite reverse; }
+@keyframes lake1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(3%,-2%) scale(1.06); } }
+@keyframes lake2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-4%,3%) scale(1.08); } }
+
+.dl-page .ml-wrap { max-width: 1080px; margin: 0 auto; padding: 28px clamp(18px, 3vw, 34px) 64px; position: relative; z-index: 1; overflow: hidden; border-radius: 22px;
+  background: radial-gradient(ellipse 100% 80% at 50% 30%, #0e2620 0%, #0a1c17 60%, #071310 100%);
+  border: 1px solid rgba(194,163,90,.2); box-shadow: 0 22px 60px -30px rgba(13,31,26,.85); color: var(--mist); }
+.dl-page .ml-wrap > * { position: relative; z-index: 1; }
+
+/* slim ribbon + search */
+.dl-page .ml-ribbon { display: flex; align-items: stretch; gap: 18px; margin-bottom: 16px; flex-wrap: wrap; }
+.dl-page .ml-title-box { display: flex; flex-direction: column; justify-content: center; padding-inline-end: 18px; border-inline-end: 1px solid rgba(194,163,90,.2); min-width: 180px; }
+.dl-page .ml-title-box .eb { display: inline-flex; align-items: center; gap: 7px; font-size: 10px; font-weight: 700; letter-spacing: .14em; color: var(--gold-soft); text-transform: uppercase; margin-bottom: 4px; }
+.dl-page .ml-title-box .eb .tick { width: 18px; height: 1.5px; background: var(--gold-soft); }
+.dl-page .ml-title-box h1 { font-family: var(--display); font-size: 38px; font-weight: 600; color: #fff; line-height: 1; }
+.dl-page .ml-search { flex: 1; min-width: 260px; display: flex; align-items: center; gap: 12px;
+  background: linear-gradient(160deg, rgba(20,46,38,.55), rgba(13,31,26,.5)); border: 1px solid rgba(194,163,90,.24); border-radius: 16px; padding: 0 18px; }
+.dl-page .ml-search .ic { font-size: 18px; color: var(--gold-soft); opacity: .8; }
+.dl-page .ml-search input { flex: 1; background: none; border: 0; outline: none; color: #fff; font-family: var(--ui); font-size: 15px; padding: 16px 0; }
+.dl-page .ml-search input::placeholder { color: var(--mist); opacity: .5; }
+.dl-page .ml-search .cnt { font-size: 12px; color: var(--mist); opacity: .6; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* filter pills */
+.dl-page .ml-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.dl-page .ml-fgroup { display: flex; gap: 5px; align-items: center; padding: 4px; border-radius: 999px; background: rgba(13,31,26,.4); border: 1px solid rgba(194,163,90,.16); }
+.dl-page .ml-fgroup .glbl { font-size: 10px; color: var(--mist); opacity: .5; padding: 0 8px; letter-spacing: .06em; }
+.dl-page .pill { padding: 6px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: var(--mist); opacity: .7; cursor: pointer; transition: all .25s cubic-bezier(.22,1,.36,1); background: none; border: 0; font-family: var(--ui); }
+.dl-page .pill:hover { opacity: 1; }
+.dl-page .pill.on { background: linear-gradient(135deg, var(--gold-soft), var(--gold)); color: #241b06; opacity: 1; font-weight: 700; }
+
+/* timeline */
+.dl-page .ml-timeline { position: relative; margin-top: 28px; padding: 10px 0; }
+.dl-page .ml-timeline::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; transform: translateX(-50%);
+  background: linear-gradient(180deg, transparent, rgba(194,163,90,.5) 8%, rgba(194,163,90,.5) 92%, transparent); }
+.dl-page #recallSvg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; overflow: visible; }
+.dl-page .mem { position: relative; width: 50%; padding: 14px 34px; box-sizing: border-box; margin-bottom: 10px; opacity: 0; transform: translateY(20px); }
+.dl-page .mem.in { opacity: 1; transform: none; transition: opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1); }
+.dl-page .mem.right { margin-inline-start: 50%; text-align: start; }
+.dl-page .mem.left { text-align: start; }
+.dl-page .mem .node { position: absolute; top: 24px; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle, #FBF3DC, #C2A35A);
+  box-shadow: 0 0 12px rgba(220,195,138,.7); z-index: 5; transition: transform .3s, box-shadow .3s; }
+.dl-page .mem.left .node { inset-inline-end: -7px; }
+.dl-page .mem.right .node { inset-inline-start: -7px; }
+.dl-page .mcard { background: linear-gradient(160deg, rgba(20,46,38,.7), rgba(13,31,26,.62)); backdrop-filter: blur(10px);
+  border: 1px solid rgba(194,163,90,.2); border-radius: 16px; padding: 16px 18px; cursor: default; transition: border-color .3s, box-shadow .3s, transform .3s; }
+.dl-page .mem:hover .mcard, .dl-page .mem.related .mcard { border-color: rgba(194,163,90,.5); box-shadow: 0 14px 40px -20px rgba(0,0,0,.6); }
+.dl-page .mem:hover .mcard { transform: translateY(-2px); }
+.dl-page .mem.related .node { transform: scale(1.4); box-shadow: 0 0 18px rgba(126,155,134,.9); }
+.dl-page .mem.dim { opacity: .28; }
+.dl-page .mcard .date { font-family: var(--font-mono, monospace); font-size: 11px; color: var(--gold-soft); letter-spacing: .06em; margin-bottom: 6px; }
+.dl-page .mcard .sit { font-family: var(--display); font-size: 18px; font-weight: 600; color: #fff; line-height: 1.35; margin-bottom: 9px; }
+.dl-page .mcard .dec { font-size: 13px; color: var(--mist); opacity: .82; line-height: 1.5; margin-bottom: 10px; }
+.dl-page .mcard .dec b { color: var(--gold-soft); font-weight: 600; }
+.dl-page .mcard .foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.dl-page .mcard .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; padding: 4px 11px; border-radius: 999px; }
+.dl-page .mcard .badge.good { color: var(--sage); background: rgba(126,155,134,.18); }
+.dl-page .mcard .badge.bad { color: #cf9384; background: rgba(168,106,92,.2); }
+.dl-page .mcard .dom { font-size: 11px; color: var(--mist); opacity: .55; }
+.dl-page .mem.hidden { display: none; }
+.dl-page .ml-empty { text-align: center; padding: 40px; color: var(--mist); opacity: .6; font-family: var(--display); font-size: 20px; }
+@media (prefers-reduced-motion: reduce) { .dl-page #lake .wave { animation: none; } .dl-page .mem { opacity: 1; transform: none; } }
+@media (max-width: 720px) {
+  .dl-page .ml-timeline::before { left: 14px; }
+  .dl-page .mem, .dl-page .mem.right { width: 100%; margin-inline-start: 0; padding: 10px 0 10px 36px; }
+  .dl-page .mem .node, .dl-page .mem.left .node, .dl-page .mem.right .node { inset-inline-start: 7px; inset-inline-end: auto; }
+}

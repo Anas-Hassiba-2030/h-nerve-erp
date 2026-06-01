@@ -1,44 +1,37 @@
 // Pinned items page — surfaces the user's bookmarked entities across
 // every module in one fast-access grid. Grouped by entity type with
 // counts, plus an unpin button on each card.
+// Ported to the Heritage Luxury "daylight" register — markup mirrors
+// docs/design/system/sections/pinned.html (.sec-head + .pinned-grid of
+// .co-tile cards). Real data is fed by the Prisma-backed listPins below.
 
-import Link from "next/link";
 import {
-  Pin, Building2, Hotel, Milk, Sprout, GraduationCap, Brain,
-  Sparkles, ListChecks, FlaskConical, Wallet, ArrowRight,
+  Building2, Hotel, Milk, Sprout, GraduationCap, Brain,
+  Sparkles, ListChecks, FlaskConical, Wallet,
 } from "lucide-react";
-import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
+import Link from "next/link";
 import { PinButton } from "@/components/PinButton";
 import { listPins } from "@/lib/pins";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
-import { formatNumber, formatDate } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils";
 import "../daylight.css";
+import "./pinned.css";
 
-const ENTITY_META: Record<
-  string,
-  { icon: any; tone: string; ar: string; en: string }
-> = {
-  COMPANY: { icon: Building2, tone: "emerald", ar: "شركات", en: "Companies" },
-  HOTEL: { icon: Hotel, tone: "amber", ar: "فنادق", en: "Hotels" },
-  BOOKING: { icon: Hotel, tone: "amber", ar: "حجوزات", en: "Bookings" },
-  DAIRY: { icon: Milk, tone: "sky", ar: "ألبان", en: "Dairy" },
-  FARM: { icon: Sprout, tone: "emerald", ar: "مزارع", en: "Farms" },
-  PROGRAM: { icon: GraduationCap, tone: "indigo", ar: "برامج", en: "Programs" },
-  FORECAST: { icon: Brain, tone: "violet", ar: "تنبؤات", en: "Forecasts" },
-  INSIGHT: { icon: Sparkles, tone: "amber", ar: "إشارات", en: "Insights" },
-  TASK: { icon: ListChecks, tone: "blue", ar: "مهام", en: "Tasks" },
-  PROJECT: { icon: FlaskConical, tone: "violet", ar: "مشاريع", en: "Projects" },
-  TRANSACTION: { icon: Wallet, tone: "emerald", ar: "معاملات", en: "Transactions" },
-};
+export const dynamic = "force-dynamic";
 
-const TONE: Record<string, string> = {
-  emerald: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  amber: "bg-amber-50 text-amber-700 ring-amber-200",
-  sky: "bg-sky-50 text-sky-700 ring-sky-200",
-  blue: "bg-blue-50 text-blue-700 ring-blue-200",
-  violet: "bg-violet-50 text-violet-700 ring-violet-200",
-  indigo: "bg-indigo-50 text-indigo-700 ring-indigo-200",
+const ENTITY_META: Record<string, { ar: string; en: string }> = {
+  COMPANY: { ar: "شركات", en: "Companies" },
+  HOTEL: { ar: "فنادق", en: "Hotels" },
+  BOOKING: { ar: "حجوزات", en: "Bookings" },
+  DAIRY: { ar: "ألبان", en: "Dairy" },
+  FARM: { ar: "مزارع", en: "Farms" },
+  PROGRAM: { ar: "برامج", en: "Programs" },
+  FORECAST: { ar: "تنبؤات", en: "Forecasts" },
+  INSIGHT: { ar: "إشارات", en: "Insights" },
+  TASK: { ar: "مهام", en: "Tasks" },
+  PROJECT: { ar: "مشاريع", en: "Projects" },
+  TRANSACTION: { ar: "معاملات", en: "Transactions" },
 };
 
 export default async function PinnedPage() {
@@ -54,122 +47,103 @@ export default async function PinnedPage() {
   }
 
   return (
-    <DaylightShell dir={ar ? "rtl" : "ltr"}>
-      <DaylightHeader
-        eyebrow={ar ? "المفضلة" : "Favorites"}
-        title={ar ? "العناصر المثبتة" : "Pinned items"}
-        subtitle={
-          ar
-            ? `${formatNumber(pins.length)} عنصر مثبت عبر ${formatNumber(grouped.size)} وحدة`
-            : `${formatNumber(pins.length)} pinned items across ${formatNumber(grouped.size)} modules`
-        }
-      />
+    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+      <div className="sec-head reveal">
+        <div>
+          <div className="sec-eyebrow">
+            <span className="tick" />
+            {ar ? "المساحة · المثبّت" : "Workspace · Pinned"}
+          </div>
+          <h1 className="sec-title">{ar ? "المثبّت" : "Pinned items"}</h1>
+          <p className="sec-sub">
+            {pins.length
+              ? ar
+                ? `${formatNumber(pins.length)} عنصر مثبت عبر ${formatNumber(grouped.size)} نوع — وصول سريع.`
+                : `${formatNumber(pins.length)} pinned items across ${formatNumber(grouped.size)} types — fast access.`
+              : ar
+              ? "العناصر التي ثبّتها عبر كل الأنواع — وصول سريع."
+              : "The items you pinned across every type — fast access."}
+          </p>
+        </div>
+        <div className="sec-head-aside">
+          <span className="sec-status"><span className="dot" />{ar ? "مباشر" : "Live"}</span>
+        </div>
+      </div>
 
       {pins.length === 0 ? (
-        <div className="panel reveal py-16 text-center">
-          <Pin
-            className="mx-auto mb-3 h-12 w-12"
-            style={{ color: "var(--ink-muted)" }}
-          />
-          <h3
-            className="text-base font-semibold"
-            style={{ color: "var(--ink)" }}
-          >
-            {ar ? "لا عناصر مثبتة بعد" : "Nothing pinned yet"}
-          </h3>
-          <p
-            className="mx-auto mt-1 max-w-md text-xs"
-            style={{ color: "var(--ink-muted)" }}
-          >
-            {ar
-              ? "اضغط على أيقونة الدبوس في صفحة أي شركة، فندق، مشروع، أو مهمة لتثبيتها هنا للوصول السريع."
-              : "Tap the pin icon on any company, hotel, project, or task page to bookmark it here for quick access."}
-          </p>
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
-            <Link href="/companies" className="dl-btn dl-btn-secondary">
-              <Building2 className="h-4 w-4" />
-              {ar ? "تصفح الشركات" : "Browse companies"}
-            </Link>
-            <Link href="/projects" className="dl-btn dl-btn-secondary">
-              <FlaskConical className="h-4 w-4" />
-              {ar ? "المشاريع" : "Projects"}
-            </Link>
+        <div className="pinned-grid reveal">
+          <div className="pinned-empty">
+            <div className="pe-ic">◆</div>
+            <div className="pe-t">{ar ? "لا عناصر مثبّتة" : "Nothing pinned yet"}</div>
+            <p className="sec-sub" style={{ margin: "8px auto 0" }}>
+              {ar
+                ? "اضغط على أيقونة الدبوس في صفحة أي شركة، فندق، مشروع، أو مهمة لتثبيتها هنا."
+                : "Tap the pin icon on any company, hotel, project, or task page to bookmark it here."}
+            </p>
+            <div className="sec-actions" style={{ justifyContent: "center", marginTop: 16 }}>
+              <Link href="/companies" className="dl-btn dl-btn-secondary">
+                <Building2 className="h-4 w-4" />
+                {ar ? "تصفح الشركات" : "Browse companies"}
+              </Link>
+              <Link href="/projects" className="dl-btn dl-btn-secondary">
+                <FlaskConical className="h-4 w-4" />
+                {ar ? "المشاريع" : "Projects"}
+              </Link>
+            </div>
           </div>
         </div>
       ) : (
-        <div className="space-y-5">
-          {Array.from(grouped.entries()).map(([entityType, items]) => {
-            const meta = ENTITY_META[entityType];
-            const Icon = meta?.icon ?? Pin;
-            return (
-              <DaylightPanel
-                key={entityType}
-                title={ar ? meta?.ar ?? entityType : meta?.en ?? entityType}
-                aside={
-                  ar
+        Array.from(grouped.entries()).map(([entityType, items]) => {
+          const meta = ENTITY_META[entityType];
+          return (
+            <div key={entityType} className="panel reveal">
+              <div className="panel-head">
+                <div className="panel-title">
+                  {ar ? meta?.ar ?? entityType : meta?.en ?? entityType}
+                </div>
+                <div className="panel-aside">
+                  {ar
                     ? `${formatNumber(items.length)} عنصر`
-                    : `${formatNumber(items.length)} item${items.length === 1 ? "" : "s"}`
-                }
-              >
-                <ul className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-                  {items.map((p) => (
-                    <li key={p.id}>
-                      <div
-                        className="panel reveal group flex items-center gap-2 p-3"
-                        style={{ marginBottom: 0 }}
-                      >
-                        <Link
-                          href={p.href}
-                          className="flex min-w-0 flex-1 items-center gap-2"
-                        >
-                          <div className="min-w-0">
-                            <div
-                              className="line-clamp-1 text-[12.5px] font-semibold"
-                              style={{ color: "var(--ink)" }}
-                            >
-                              {ar ? p.label : p.labelEn ?? p.label}
-                            </div>
-                            <div
-                              className="text-[10px]"
-                              style={{ color: "var(--ink-muted)" }}
-                            >
-                              {formatDate(p.createdAt, ar ? "ar" : "en")}
-                            </div>
-                          </div>
-                          <ArrowRight
-                            className="ms-auto h-3.5 w-3.5 shrink-0 transition group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
-                            style={{ color: "var(--ink-muted)" }}
-                          />
-                        </Link>
-                        <PinButton
-                          entityType={p.entityType}
-                          entityId={p.entityId}
-                          label={p.label}
-                          labelEn={p.labelEn ?? undefined}
-                          href={p.href}
-                          icon={p.icon ?? undefined}
-                          initial={true}
-                          tone="icon-only"
-                          locale={ar ? "ar" : "en"}
-                        />
+                    : `${formatNumber(items.length)} item${items.length === 1 ? "" : "s"}`}
+                </div>
+              </div>
+              <div className="pinned-grid">
+                {items.map((p) => (
+                  <div key={p.id} className="co-tile">
+                    <Link href={p.href} style={{ textDecoration: "none", display: "block" }}>
+                      <span className="ops-tag info">
+                        {ar ? meta?.ar ?? entityType : meta?.en ?? entityType}
+                      </span>
+                      <div className="co-nm" style={{ marginTop: 10 }}>
+                        {ar ? p.label : p.labelEn ?? p.label}
                       </div>
-                    </li>
-                  ))}
-                </ul>
-              </DaylightPanel>
-            );
-          })}
-        </div>
+                    </Link>
+                    <div style={{ marginTop: 10 }}>
+                      <PinButton
+                        entityType={p.entityType}
+                        entityId={p.entityId}
+                        label={p.label}
+                        labelEn={p.labelEn ?? undefined}
+                        href={p.href}
+                        icon={p.icon ?? undefined}
+                        initial={true}
+                        tone="compact"
+                        locale={ar ? "ar" : "en"}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })
       )}
 
-      <p
-        className="text-center text-[10.5px]"
-        style={{ color: "var(--ink-muted)" }}
-      >
+      <p style={{ textAlign: "center", fontSize: "10.5px", color: "var(--ink-muted)", marginTop: 12 }}>
         {ar
-          ? "💡 لتثبيت عنصر — افتح صفحته واضغط أيقونة الدبوس"
-          : "💡 To pin an item — open its page and tap the pin icon"}
+          ? "لتثبيت عنصر — افتح صفحته واضغط أيقونة الدبوس"
+          : "To pin an item — open its page and tap the pin icon"}
       </p>
-    </DaylightShell>
+    </div>
   );
 }

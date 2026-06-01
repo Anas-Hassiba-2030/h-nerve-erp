@@ -1,0 +1,112 @@
+/* ════════════════════════════════════════════════════════════════════════
+   المها للألبان · Dairy — the original "Claude Design" look.
+   Ported faithfully from docs/design/system/sections/maha.html and its
+   stylesheets (_section.css · ops.css · interactions.css), SCOPED under
+   .dl-page so the look never leaks into the rest of the app.
+
+   The base daylight tokens + sec-head / kpi-grid / panel / table styles
+   already live in app/(app)/daylight.css. This file adds ONLY the pieces the
+   maha reference uses that daylight.css does not yet provide: the ops tab
+   strip + panels, the ix-card top-rule sweep, the reveal-stagger entrance,
+   the warn/crit table tags, and the batch-drawer gauge + bars.
+   Exact reference class names are preserved.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── tabs + panels (ops.css) ──────────────────────────────────────────── */
+.dl-page .ops-tabs { display: flex; gap: 8px; margin: 22px 0 18px; flex-wrap: wrap; }
+.dl-page .ops-tab {
+  padding: 9px 20px; border-radius: 999px; font-size: 13.5px; font-weight: 700;
+  color: var(--ink-muted); cursor: pointer;
+  background: var(--cream); border: 1px solid var(--line);
+  font-family: inherit; transition: all .25s cubic-bezier(.22, 1, .36, 1);
+}
+.dl-page .ops-tab:hover { border-color: var(--gold); }
+.dl-page .ops-tab.on {
+  background: linear-gradient(135deg, var(--emerald-soft), var(--emerald));
+  color: #fff; border-color: transparent; box-shadow: 0 6px 16px -8px rgba(31, 77, 63, .5);
+}
+.dl-page .ops-panel { display: none; animation: ops-fade .35s ease; }
+.dl-page .ops-panel.on { display: block; }
+@keyframes ops-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ── KPI card top-rule sweep (interactions.css .ix-card) ──────────────── */
+.dl-page .ix-card { position: relative; overflow: hidden; }
+.dl-page .ix-card::after {
+  content: ""; position: absolute; top: 0; inset-inline: 0; height: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-soft));
+  transform: scaleX(0); transform-origin: inline-start;
+  transition: transform .5s cubic-bezier(.22, 1, .36, 1);
+}
+.dl-page .ix-card:hover { transform: translateY(-3px); box-shadow: 0 22px 50px -26px rgba(31, 77, 63, .4); border-color: rgba(194, 163, 90, .4); }
+.dl-page .ix-card:hover::after { transform: scaleX(1); }
+
+/* ── staggered KPI entrance (_section.css) ────────────────────────────── */
+.dl-page .reveal-stagger > * { animation: sec-rise .6s cubic-bezier(.22, 1, .36, 1) both; }
+.dl-page .reveal-stagger > *:nth-child(1) { animation-delay: .05s; }
+.dl-page .reveal-stagger > *:nth-child(2) { animation-delay: .12s; }
+.dl-page .reveal-stagger > *:nth-child(3) { animation-delay: .19s; }
+.dl-page .reveal-stagger > *:nth-child(4) { animation-delay: .26s; }
+.dl-page .reveal-stagger > *:nth-child(5) { animation-delay: .33s; }
+@keyframes sec-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── table tags the reference uses (warn / crit) (_section.css) ───────── */
+.dl-page .tag.warn { color: #8a6a1f; background: rgba(194, 163, 90, .2); }
+.dl-page .tag.crit { color: #9a5648; background: rgba(168, 106, 92, .16); }
+
+/* the maha reference overview table is a plain <table> (not .dl-table) — give
+   the bare element the same daylight treatment, scoped to the overview panel */
+.dl-page .ops-panel table { width: 100%; border-collapse: collapse; }
+.dl-page .ops-panel th, .dl-page .ops-panel td { text-align: start; padding: 13px 12px; font-size: 14px; border-bottom: 1px solid var(--line); }
+.dl-page .ops-panel th { font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--ink-muted); text-transform: none; }
+.dl-page .ops-panel td { color: var(--ink); }
+.dl-page .ops-panel td.num, .dl-page .ops-panel th.num { text-align: end; font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+.dl-page .ops-panel tbody tr { transition: background .25s; }
+.dl-page .ops-panel tbody tr:hover { background: rgba(194, 163, 90, .06); }
+.dl-page .ops-panel tr:last-child td { border-bottom: 0; }
+
+/* ── batch drawer: eyebrow / heading / sub / section label (ops.css) ──── */
+.dl-page .dr-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .1em; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; }
+.dl-page .dr-title { font-family: var(--dl-display); font-size: 26px; font-weight: 600; color: var(--emerald); margin-bottom: 4px; }
+.dl-page .dr-sub { font-size: 13px; color: var(--ink-muted); margin-bottom: 18px; }
+.dl-page .dr-sec { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--gold); text-transform: uppercase; margin: 18px 0 10px; }
+.dl-page .dr-msg { display: block; margin-top: 18px; text-align: center; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--emerald-soft), var(--emerald)); border-radius: 12px; padding: 12px; text-decoration: none; }
+
+/* quality gauge (ops.css .gauge) */
+.dl-page .gauge { text-align: center; }
+.dl-page .gauge svg { transform: rotate(-90deg); }
+.dl-page .gauge .gv { font-family: var(--dl-display); font-variant-numeric: tabular-nums; font-size: 18px; font-weight: 600; color: var(--emerald); margin-top: -34px; display: block; position: relative; }
+.dl-page .gauge .gl { font-size: 11px; color: var(--ink-muted); margin-top: 14px; }
+
+/* production bars (_section.css .bars) */
+.dl-page .bars { display: flex; align-items: flex-end; gap: 8px; height: 170px; padding-top: 10px; }
+.dl-page .bar-col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 8px; height: 100%; }
+.dl-page .bar-stack { width: 100%; display: flex; flex-direction: column; justify-content: flex-end; gap: 3px; height: 100%; }
+.dl-page .bar { width: 100%; border-radius: 5px 5px 0 0; transition: height 1s cubic-bezier(.22, 1, .36, 1); }
+.dl-page .bar.rev { background: linear-gradient(180deg, var(--emerald-soft), var(--emerald)); }
+
+/* ── ops drawer shell + backdrop (ops.css) ───────────────────────────── */
+.dl-page .ops-backdrop { position: fixed; inset: 0; z-index: 89; background: rgba(20, 26, 20, .4); opacity: 0; pointer-events: none; transition: opacity .35s; }
+.dl-page .ops-backdrop.open { opacity: 1; pointer-events: auto; }
+.dl-page .ops-drawer {
+  position: fixed; top: 0; inset-inline-end: 0; bottom: 0; width: 380px; max-width: 90vw; z-index: 90;
+  transform: translateX(105%); transition: transform .4s cubic-bezier(.22, 1, .36, 1);
+  background: linear-gradient(160deg, #fffdf8, #f6f1e7);
+  border-inline-start: 1px solid var(--line); box-shadow: -20px 0 60px -30px rgba(0, 0, 0, .4);
+  overflow-y: auto; padding: 24px;
+}
+[dir="ltr"] .dl-page .ops-drawer { inset-inline-end: auto; inset-inline-start: 0; transform: translateX(-105%); }
+.dl-page .ops-drawer.open { transform: translateX(0); }
+.dl-page .ops-drawer .dr-close { position: absolute; top: 16px; inset-inline-start: 16px; font-size: 22px; color: var(--ink-muted); background: none; border: 0; cursor: pointer; }
+
+/* ── status-cycle pill (ops.css) + the reference info tag ─────────────── */
+.dl-page .tag.info { color: #2e6b57; background: rgba(46, 107, 87, .14); }
+.dl-page .ops-status { cursor: pointer; user-select: none; transition: transform .15s; }
+.dl-page .ops-status:active { transform: scale(.93); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dl-page .ops-panel,
+  .dl-page .ix-card,
+  .dl-page .reveal-stagger > *,
+  .dl-page .bar { animation: none !important; transition: none !important; }
+  .dl-page .ix-card:hover { transform: none !important; }
+}

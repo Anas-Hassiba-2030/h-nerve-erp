@@ -9,7 +9,7 @@ export default function BrainLayout({ children }: { children: React.ReactNode })
     <div>
       <div
         className="px-4 py-2"
-        style={{ borderBottom: "1px solid var(--heri-rule)" }}
+        style={{ borderBottom: "1px solid var(--line)" }}
       >
         <BrainBackLink locale={lc} />
       </div>

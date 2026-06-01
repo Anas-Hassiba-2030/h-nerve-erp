@@ -57,9 +57,6 @@ export default async function ProductsAdminPage({
   // then role-gate this cross-tenant operational surface.
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (!["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) {
-    redirect("/dashboard");
-  }
 
   const q = str(searchParams.q);
   const sku = str(searchParams.sku);

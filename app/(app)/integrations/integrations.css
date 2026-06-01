@@ -1,0 +1,65 @@
+/* ============================================================================
+   التكاملات · Integrations — Heritage Luxury "work" register (Claude Design).
+   ----------------------------------------------------------------------------
+   Ported verbatim (structure + look) from
+   docs/design/system/sections/integrations.html (which links _section.css +
+   ops.css) and integrations-ops.js, then SCOPED under .dl-page so it only
+   applies on the /integrations page and never leaks into the rest of the app.
+
+   The connector-grid + ops-* rules are copied 1:1 from
+   docs/design/system/ops.css (the .co-tile / .ops-tag / .ops-export / .ops-add
+   classes). The .wrap / .sec-* shell already lives in daylight.css; we re-declare
+   --ui / --font-mono here (the reference resolves them from _section.css) so the
+   verbatim rules resolve identically.
+   ============================================================================ */
+.dl-page {
+  --ui: "Cairo", system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
+}
+
+/* page shell (reference .wrap) */
+.dl-page .wrap { max-width: 1180px; margin: 0 auto; padding: 34px 26px 80px; }
+
+/* connectors grid (reference: inline grid on #connectors) */
+.dl-page .connectors {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+/* connector tile — copied 1:1 from ops.css .co-tile */
+.dl-page .co-tile {
+  background: var(--cream); border: 1px solid var(--line); border-radius: 16px; padding: 18px;
+  cursor: pointer; transition: transform .25s, border-color .25s, box-shadow .25s;
+}
+.dl-page .co-tile:hover { transform: translateY(-3px); border-color: var(--gold); box-shadow: 0 16px 40px -22px rgba(31, 77, 63, .4); }
+.dl-page .co-tile .co-logo {
+  width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center;
+  font-family: var(--dl-display); font-size: 20px; font-weight: 600; color: #fff;
+  background: linear-gradient(140deg, var(--emerald-soft), var(--emerald)); margin-bottom: 12px;
+}
+.dl-page .co-tile .co-nm { font-size: 15px; font-weight: 700; color: var(--ink); }
+.dl-page .co-tile .co-sec { font-size: 11.5px; color: var(--gold); margin-top: 2px; }
+.dl-page .co-tile .co-meta {
+  display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-muted); font-variant-numeric: tabular-nums;
+}
+
+/* status pill — copied 1:1 from ops.css .ops-tag */
+.dl-page .ops-tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 11px; border-radius: 999px; }
+.dl-page .ops-tag.ok { color: #3c7a5c; background: rgba(126, 155, 134, .2); }
+.dl-page .ops-tag.warn { color: #8a6a1f; background: rgba(194, 163, 90, .2); }
+.dl-page .ops-tag.crit { color: #9a5648; background: rgba(168, 106, 92, .18); }
+.dl-page .ops-tag.info { color: #2e6b57; background: rgba(46, 107, 87, .14); }
+
+/* connect / disconnect controls — copied 1:1 from ops.css .ops-add / .ops-export */
+.dl-page .ops-add {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #fff;
+  background: linear-gradient(135deg, var(--emerald-soft), var(--emerald)); border: 0; border-radius: 999px;
+  padding: 9px 16px; cursor: pointer;
+}
+.dl-page .ops-export {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--emerald);
+  background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px; cursor: pointer;
+}
+.dl-page .ops-export:hover { border-color: var(--gold); }

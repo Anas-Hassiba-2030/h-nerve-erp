@@ -1,0 +1,92 @@
+/* لوران · Agriculture — loran-specific work-surface styles, ported verbatim from
+   the Claude Design system reference (docs/design/system/ops.css, the slice that
+   docs/design/system/sections/loran.html consumes) and SCOPED under .dl-page so
+   they never leak into the rest of the app. Pairs with ../daylight.css, which
+   already carries the _section.css pieces (sec-head, kpi-grid, panel, table, tag,
+   delta). Real data is fed in by the page; the look is the design. */
+
+/* ── tabs ── */
+.dl-page .ops-tabs { display: flex; gap: 8px; margin: 22px 0 18px; flex-wrap: wrap; }
+.dl-page .ops-tab {
+  padding: 9px 20px; border-radius: 999px; font-size: 13.5px; font-weight: 700; color: var(--ink-muted); cursor: pointer;
+  background: var(--cream); border: 1px solid var(--line); font-family: inherit; transition: all .25s cubic-bezier(.22,1,.36,1);
+}
+.dl-page .ops-tab:hover { border-color: var(--gold); }
+.dl-page .ops-tab.on {
+  background: linear-gradient(135deg, var(--emerald-soft), var(--emerald)); color: #fff; border-color: transparent;
+  box-shadow: 0 6px 16px -8px rgba(31,77,63,.5);
+}
+.dl-page .ops-panel { display: none; animation: ops-fade .35s ease; }
+.dl-page .ops-panel.on { display: block; }
+@keyframes ops-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ── table tools ── */
+.dl-page .ops-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.dl-page .ops-toolbar h2 { font-family: var(--dl-display); font-size: 24px; font-weight: 600; color: var(--emerald); }
+.dl-page .ops-actions { display: flex; gap: 9px; align-items: center; }
+.dl-page .ops-search {
+  background: var(--cream); border: 1px solid var(--line); border-radius: 999px; color: var(--ink); font-family: inherit;
+  font-size: 13px; padding: 9px 15px; outline: none; width: 170px;
+}
+.dl-page .ops-search:focus { border-color: var(--gold); }
+.dl-page .ops-add {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #fff;
+  background: linear-gradient(135deg, var(--emerald-soft), var(--emerald)); border: 0; border-radius: 999px; padding: 9px 16px; cursor: pointer;
+}
+.dl-page .ops-export {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--emerald);
+  background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px; cursor: pointer;
+}
+.dl-page .ops-export:hover { border-color: var(--gold); }
+
+/* ── generic data table (crops panel) ── */
+.dl-page .ops-table { background: var(--cream); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+.dl-page .ops-tr { display: grid; align-items: center; gap: 12px; padding: 13px 18px; border-bottom: 1px solid var(--line); position: relative; transition: background .2s; }
+.dl-page .ops-tr.head { font-size: 11px; font-weight: 700; color: var(--ink-muted); letter-spacing: .03em; background: rgba(194,163,90,.06); }
+.dl-page .ops-tr.row:hover { background: rgba(194,163,90,.06); }
+.dl-page .ops-tr.row:last-child { border-bottom: 0; }
+.dl-page .ops-cell { font-size: 13.5px; color: var(--ink); }
+.dl-page .ops-cell.num { text-align: end; font-variant-numeric: tabular-nums; }
+.dl-page .ops-cell.name { font-weight: 700; color: var(--ink); }
+.dl-page .ops-del { position: absolute; inset-inline-end: 8px; top: 50%; transform: translateY(-50%); opacity: 0; color: var(--brick); background: none; border: 0; font-size: 15px; cursor: pointer; transition: opacity .2s; }
+.dl-page .ops-tr.row:hover .ops-del { opacity: .75; }
+.dl-page .ops-tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 11px; border-radius: 999px; }
+.dl-page .ops-tag.ok { color: #3c7a5c; background: rgba(126,155,134,.2); }
+.dl-page .ops-tag.warn { color: #8a6a1f; background: rgba(194,163,90,.2); }
+.dl-page .ops-tag.crit { color: #9a5648; background: rgba(168,106,92,.18); }
+.dl-page .ops-tag.info { color: #2e6b57; background: rgba(46,107,87,.14); }
+.dl-page .ops-status { cursor: pointer; user-select: none; transition: transform .15s; }
+.dl-page .ops-status:active { transform: scale(.93); }
+
+/* ── inline create form row ── */
+.dl-page .ops-form { display: grid; align-items: center; gap: 12px; padding: 13px 18px; border-bottom: 1px solid var(--line); background: rgba(46,107,87,.08); }
+.dl-page .ops-form input, .dl-page .ops-form select { background: #fff; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); font-family: inherit; font-size: 13px; padding: 8px 10px; outline: none; width: 100%; }
+.dl-page .ops-form input:focus, .dl-page .ops-form select:focus { border-color: var(--gold); }
+.dl-page .ops-form.hidden { display: none; }
+
+/* ── sensor gauges (loran) ── */
+.dl-page .gauges { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 12px; }
+.dl-page .gauge { text-align: center; }
+.dl-page .gauge svg { transform: rotate(-90deg); }
+.dl-page .gauge .gv { font-family: var(--dl-display); font-variant-numeric: tabular-nums; font-size: 18px; font-weight: 600; color: var(--emerald); margin-top: -34px; display: block; position: relative; }
+.dl-page .gauge .gl { font-size: 11px; color: var(--ink-muted); margin-top: 14px; }
+
+/* ── portfolio grid (farms) ── */
+.dl-page .ops-portfolio { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.dl-page .co-tile { background: var(--cream); border: 1px solid var(--line); border-radius: 16px; padding: 18px; transition: transform .25s, border-color .25s, box-shadow .25s; }
+.dl-page .co-tile:hover { transform: translateY(-3px); border-color: var(--gold); box-shadow: 0 16px 40px -22px rgba(31,77,63,.4); }
+.dl-page .co-tile .co-logo { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; font-family: var(--dl-display); font-size: 20px; font-weight: 600; color: #fff; background: linear-gradient(140deg, var(--emerald-soft), var(--emerald)); margin-bottom: 12px; }
+.dl-page .co-tile .co-nm { font-size: 15px; font-weight: 700; color: var(--ink); }
+.dl-page .co-tile .co-sec { font-size: 11.5px; color: var(--gold); margin-top: 2px; }
+.dl-page .co-tile .co-meta { display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+
+/* ── empty state ── */
+.dl-page .ops-empty { text-align: center; padding: 46px 20px; color: var(--ink-muted); }
+.dl-page .ops-empty .oe-ic { font-size: 42px; opacity: .4; line-height: 1; }
+.dl-page .ops-empty .oe-t { font-family: var(--dl-display); font-size: 21px; color: var(--ink); margin-top: 12px; }
+.dl-page .ops-empty .oe-s { font-size: 13px; color: var(--ink-muted); margin-top: 5px; }
+.dl-page .ops-empty .ops-add { margin-top: 16px; border: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dl-page .ops-panel { animation: none !important; transition: none !important; }
+}

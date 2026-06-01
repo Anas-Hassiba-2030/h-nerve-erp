@@ -1,0 +1,40 @@
+/* ════════════════════════════════════════════════════════════════
+   /search — ported from docs/design/system/sections/search.html.
+   The reference page rides the ivory "work" register: the daylight
+   .sec-head header (in ../daylight.css) plus the search box + filter
+   pills from the page's own <style> block, and the shared ops.css /
+   brain.css result-row classes (.ops-tag, .pill, .br-row .rt .tt .go).
+   Every rule below is taken verbatim from those references and SCOPED
+   under .dl-page so the look never leaks into the rest of the app.
+   Real data is fed in by the page; the look is the design.
+   ════════════════════════════════════════════════════════════════ */
+.dl-page {
+  --display: "Cormorant Garamond", "Newsreader", serif;
+  --ui: "Cairo", system-ui, sans-serif;
+}
+
+/* ── search box + filter pills (search.html <style> block) ── */
+.dl-page .srch-box { display: flex; align-items: center; gap: 12px; background: var(--cream); border: 1px solid var(--line); border-radius: 16px; padding: 4px 18px; margin-bottom: 14px; }
+.dl-page .srch-box input { flex: 1; border: 0; background: none; outline: none; font-family: var(--ui); font-size: 17px; color: var(--ink); padding: 14px 0; }
+.dl-page .srch-box .ic { font-size: 20px; color: var(--gold); }
+.dl-page .srch-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+
+/* ── filter pills (search-ops.js inline → ported to .pill) ── */
+.dl-page .pill { padding: 6px 13px; border-radius: 999px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--ui); border: 1px solid var(--line); background: var(--cream); color: var(--ink-muted); }
+.dl-page .pill.on { background: linear-gradient(135deg, var(--emerald-soft), var(--emerald)); color: #fff; }
+
+/* ── category tag (ops.css) ── */
+.dl-page .ops-tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 11px; border-radius: 999px; }
+.dl-page .ops-tag.ok { color: #3c7a5c; background: rgba(126,155,134,.2); }
+.dl-page .ops-tag.warn { color: #8a6a1f; background: rgba(194,163,90,.2); }
+.dl-page .ops-tag.crit { color: #9a5648; background: rgba(168,106,92,.18); }
+.dl-page .ops-tag.info { color: #2e6b57; background: rgba(46,107,87,.14); }
+
+/* ── result rows (brain.css .br-row, recolored to the ivory register
+      to match the inline overrides in search-ops.js) ── */
+.dl-page .br-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 13px; background: var(--cream); border: 1px solid var(--line); margin-bottom: 9px; transition: border-color .2s; text-decoration: none; }
+.dl-page .br-row:hover { border-color: rgba(194,163,90,.4); }
+.dl-page .br-row .rt { flex: 1; min-width: 0; }
+.dl-page .br-row .rt .tt { font-size: 14px; font-weight: 700; color: var(--ink); }
+.dl-page .br-row .rt .ts { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+.dl-page .br-row .go { color: var(--gold); font-size: 16px; }

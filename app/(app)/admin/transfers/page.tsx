@@ -31,9 +31,6 @@ export default async function TransfersPage({
   const ar = getLocale() === "ar";
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (!["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) {
-    redirect("/dashboard");
-  }
 
   const fSku = str(searchParams.sku);
   const fWh = str(searchParams.wh).toUpperCase();

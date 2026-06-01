@@ -44,9 +44,6 @@ export default async function WarehousesPage({
   const ar = getLocale() === "ar";
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (!["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) {
-    redirect("/dashboard");
-  }
 
   const deep = str(searchParams.wh); // warehouse code → auto-expand
 

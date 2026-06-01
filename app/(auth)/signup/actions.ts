@@ -52,5 +52,5 @@ export async function signupAction(formData: FormData) {
     tenantSlug: null,
   };
   await session.save();
-  redirect("/dashboard");
+  redirect("/orrery");
 }

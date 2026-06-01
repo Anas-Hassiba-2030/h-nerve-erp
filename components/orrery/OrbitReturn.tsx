@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { LocaleSwitch } from "@/components/LocaleSwitch";
 import type { Locale } from "@/lib/i18n";
+import { MiniOrrery } from "./MiniOrrery";
 
 // Fixed control cluster shown on every (app) page — but it's the ONLY chrome on
 // full-bleed daylight pages (where the sidebar is hidden). Pairs the "↺ Orbit"
@@ -17,6 +18,7 @@ export function OrbitReturn({ locale }: { locale: Locale }) {
         <span className="orbit-return__glyph" aria-hidden="true">↺</span>
         <span className="orbit-return__label">{label}</span>
       </Link>
+      <MiniOrrery locale={locale} />
       <div className="dl-langwrap">
         <LocaleSwitch current={locale} />
       </div>

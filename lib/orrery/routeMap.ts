@@ -47,6 +47,9 @@ const STEM_MAP: Record<string, string> = {
   pinned: "/pinned",
   trash: "/trash",
   info: "/help",
+  settings: "/settings",
+  activity: "/activity",
+  roadmap: "/roadmap",
 };
 
 // generated kids carry the Arabic section name in ?s= — map those names to routes

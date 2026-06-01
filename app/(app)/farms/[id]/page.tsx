@@ -50,8 +50,8 @@ export default async function FarmDetailPage({ params }: { params: { id: string 
   return (
     <>
       <Topbar
-        eyebrow={`${farm.company.name} • ${loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), farm.type)}`}
-        title={farm.name}
+        eyebrow={`${en ? farm.company.nameEn : farm.company.name} • ${loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), farm.type)}`}
+        title={en ? (farm.nameEn ?? farm.name) : farm.name}
         subtitle={`${farm.location} • ${formatNumber(farm.areaDunum)} ${en ? "dunum" : "دونم"}`}
         actions={
           <div className="flex items-center gap-2">

@@ -268,7 +268,7 @@ export default async function CompanyDetailPage({
                   style={{ background: "rgba(255,255,255,.15)", border: "1px solid rgba(255,255,255,.25)" }}
                 >
                   <Calendar className="h-3 w-3" />
-                  {en ? "Founded" : "تأسست"} {company.foundedYear} {age != null ? `•  ` : ""}
+                  {en ? "Founded" : "تأسست"} {company.foundedYear} {age != null ? `• ${age} ${en ? "yrs" : "سنة"}` : ""}
                 </span>
               ) : null}
               <span

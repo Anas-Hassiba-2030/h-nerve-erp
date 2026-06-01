@@ -7,18 +7,18 @@
 // useEffect → /api/learning/patterns fetch (grouped counts + the recharts
 // trend sparkline). Fetch-driven twin of the SSR /brain/learning page.
 
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { LearningPatterns } from "@/components/brain/LearningPatterns";
 import { getLocale } from "@/lib/i18n.server";
+import "../daylight.css";
 
 export const dynamic = "force-dynamic";
 
 export default function LearningPage() {
   const ar = getLocale() === "ar";
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "الدماغ · منحنى التعلّم" : "Brain · Learning curve"}
         title={ar ? "ما يتعلّمه الدماغ، أسبوعاً بأسبوع" : "What the brain learns, week by week"}
         subtitle={
@@ -27,9 +27,7 @@ export default function LearningPage() {
             : "Feedback signal from /api/learning/patterns, grouped by type and week — the raw signal the patterns in /brain/learning are learned from."
         }
       />
-      <PageContainer>
-        <LearningPatterns ar={ar} />
-      </PageContainer>
-    </>
+      <LearningPatterns ar={ar} />
+    </DaylightShell>
   );
 }

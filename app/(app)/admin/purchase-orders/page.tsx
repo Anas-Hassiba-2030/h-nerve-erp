@@ -12,7 +12,7 @@ import { Prisma } from "@prisma/client";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import {
   formatDateTime,
   formatNumber,
@@ -28,6 +28,8 @@ import {
   CancelPOButton,
 } from "./PurchaseOrderForms";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
+
+import "../../daylight.css";
 
 export const dynamic = "force-dynamic";
 
@@ -129,8 +131,8 @@ export default async function PurchaseOrdersPage({
   };
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "العمليات" : "Operations"}
         title={ar ? "أوامر الشراء" : "Purchase Orders"}
         subtitle={
@@ -139,21 +141,22 @@ export default async function PurchaseOrdersPage({
             : "Procurement from suppliers — receipts write RECEIVED ledger movements"
         }
         actions={<AdminFamilyNav current="/admin/purchase-orders" ar={ar} />}
-        metrics={[
-          { label: ar ? "إجمالي الأوامر" : "Total POs", value: formatNumber(kTotal), tone: "blue" },
-          { label: ar ? "مفتوحة" : "Open", value: formatNumber(kOpen), tone: "violet" },
-          { label: ar ? "بانتظار الاستلام" : "Pending receipt", value: formatNumber(kPending), tone: "amber" },
-          { label: ar ? "اكتملت هذا الشهر" : "Completed this month", value: formatNumber(kDone), tone: "emerald" },
-        ]}
       />
+
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "إجمالي الأوامر" : "Total POs"} value={formatNumber(kTotal)} />
+        <DaylightKpi label={ar ? "مفتوحة" : "Open"} value={formatNumber(kOpen)} />
+        <DaylightKpi label={ar ? "بانتظار الاستلام" : "Pending receipt"} value={formatNumber(kPending)} />
+        <DaylightKpi label={ar ? "اكتملت هذا الشهر" : "Completed this month"} value={formatNumber(kDone)} />
+      </DaylightKpiGrid>
 
       <div className="mt-3">
         <NewPOForm products={products} suppliers={suppliers} tenantDefault={tenantDefault} ar={ar} />
       </div>
 
-      <div className="card card-pad mt-3 flex flex-col gap-3">
+      <div className="panel reveal mt-3 flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
             {ar ? "الحالة" : "Status"}
           </span>
           <Link href={hrefWith("status", "")} className={statusF ? "badge-slate" : "badge-emerald"}>
@@ -167,7 +170,7 @@ export default async function PurchaseOrdersPage({
         </div>
         {suppliers.length > 0 ? (
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
               {ar ? "المورّد" : "Supplier"}
             </span>
             <Link href={hrefWith("supplier", "")} className={supplierF ? "badge-slate" : "badge-emerald"}>
@@ -183,14 +186,14 @@ export default async function PurchaseOrdersPage({
       </div>
 
       {pos.length === 0 ? (
-        <div className="card card-pad mt-3 flex flex-col items-center gap-3 py-16 text-center">
-          <ShoppingCart className="h-10 w-10" style={{ color: "var(--text-muted)" }} />
-          <p className="text-sm font-bold" style={{ color: "var(--text)" }}>
+        <div className="panel reveal mt-3 flex flex-col items-center gap-3 py-16 text-center">
+          <ShoppingCart className="h-10 w-10" style={{ color: "var(--ink-muted)" }} />
+          <p className="text-sm font-bold" style={{ color: "var(--ink)" }}>
             {allPos.length === 0
               ? ar ? "لا توجد أوامر شراء بعد" : "No purchase orders yet"
               : ar ? "لا نتائج مطابقة" : "No POs match the filter"}
           </p>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+          <p className="text-xs" style={{ color: "var(--ink-muted)" }}>
             {ar ? "أنشئ أمر شراء من النموذج أعلاه." : "Create one from the form above."}
           </p>
         </div>
@@ -202,28 +205,28 @@ export default async function PurchaseOrdersPage({
             return (
               <details
                 key={po.id}
-                className="card overflow-hidden"
+                className="panel reveal overflow-hidden"
                 open={poDeep === po.poNumber}
               >
                 <summary
                   className="flex cursor-pointer flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3"
                   style={{ listStyle: "none" }}
                 >
-                  <ArrowRight className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--text-muted)" }} aria-hidden />
-                  <span className="font-mono text-sm font-extrabold" style={{ color: "var(--text)" }}>
+                  <ArrowRight className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--ink-muted)" }} aria-hidden />
+                  <span className="font-mono text-sm font-extrabold" style={{ color: "var(--ink)" }}>
                     {po.poNumber}
                   </span>
                   <span className="badge-slate">{po.supplierRef?.name ?? "—"}</span>
                   <span className={orderStatusBadge(po.status)}>{oLabel(po.status)}</span>
                   <span className="ms-auto flex flex-wrap items-center gap-2 text-[11px]">
-                    <span style={{ color: "var(--text-muted)" }}>
+                    <span style={{ color: "var(--ink-muted)" }}>
                       {ar ? "بنود" : "lines"}{" "}
-                      <b style={{ color: "var(--text)" }}>{formatNumber(linesCount)}</b>
+                      <b style={{ color: "var(--ink)" }}>{formatNumber(linesCount)}</b>
                     </span>
-                    <span className="font-mono" style={{ color: "var(--text-muted)" }} title={formatDateTime(po.orderedAt, ar ? "ar" : "en")}>
+                    <span className="font-mono" style={{ color: "var(--ink-muted)" }} title={formatDateTime(po.orderedAt, ar ? "ar" : "en")}>
                       {relTime(po.orderedAt, ar)}
                     </span>
-                    <span style={{ color: "var(--text-muted)" }}>
+                    <span style={{ color: "var(--ink-muted)" }}>
                       {ar ? "متوقع" : "exp"}{" "}
                       {po.expectedAt ? formatDateTime(po.expectedAt, ar ? "ar" : "en") : dash}
                     </span>
@@ -235,15 +238,15 @@ export default async function PurchaseOrdersPage({
                 {po.sourceForecast ? (
                   <div
                     className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-[11px]"
-                    style={{ borderTop: "1px solid var(--border)", background: "var(--brand-soft)" }}
+                    style={{ borderTop: "1px solid var(--line)", background: "var(--brand-soft)" }}
                   >
                     <span className="font-bold uppercase tracking-widest" style={{ color: "var(--brand)" }}>
                       {ar ? "من تنبؤ" : "From forecast"}
                     </span>
-                    <span style={{ color: "var(--text)" }}>
+                    <span style={{ color: "var(--ink)" }}>
                       {po.sourceForecast.productLabel} — {formatNumber(po.sourceForecast.predictedDemand)} {po.sourceForecast.unit}
                     </span>
-                    <span style={{ color: "var(--text-muted)" }}>
+                    <span style={{ color: "var(--ink-muted)" }}>
                       {ar ? "للفترة" : "for"} {formatDateTime(po.sourceForecast.periodEnd, ar ? "ar" : "en")}
                     </span>
                     <Link href="/supply-chain" className="ms-auto" style={{ color: "var(--brand)", fontWeight: 700 }}>
@@ -253,10 +256,10 @@ export default async function PurchaseOrdersPage({
                 ) : null}
 
                 {linesCount > 0 ? (
-                  <div className="table-wrap" style={{ borderTop: "1px solid var(--border)" }}>
-                    <table className="w-full text-start text-xs">
+                  <div style={{ borderTop: "1px solid var(--line)" }}>
+                    <table className="dl-table">
                       <thead>
-                        <tr style={{ color: "var(--text-muted)" }}>
+                        <tr style={{ color: "var(--ink-muted)" }}>
                           <th className="px-3 py-2 text-start font-bold">SKU</th>
                           <th className="px-3 py-2 text-start font-bold">{ar ? "المنتج" : "Product"}</th>
                           <th className="px-3 py-2 text-end font-bold">{ar ? "المطلوب" : "Ordered"}</th>
@@ -266,9 +269,9 @@ export default async function PurchaseOrdersPage({
                       </thead>
                       <tbody>
                         {po.lines.map((l) => (
-                          <tr key={l.id} style={{ borderTop: "1px solid var(--border)" }}>
+                          <tr key={l.id} style={{ borderTop: "1px solid var(--line)" }}>
                             <td className="px-3 py-2 font-mono">{l.product.sku}</td>
-                            <td className="px-3 py-2" style={{ color: "var(--text)" }}>{l.product.name}</td>
+                            <td className="px-3 py-2" style={{ color: "var(--ink)" }}>{l.product.name}</td>
                             <td className="px-3 py-2 text-end font-mono">{formatNumber(l.quantity)}</td>
                             <td className="px-3 py-2 text-end font-mono">{formatNumber(l.receivedQty)}</td>
                             <td className="px-3 py-2 text-end font-mono">
@@ -281,9 +284,9 @@ export default async function PurchaseOrdersPage({
                   </div>
                 ) : null}
 
-                <div className="flex flex-col gap-3 px-4 py-3" style={{ borderTop: "1px solid var(--border)" }}>
-                  <div className="flex flex-wrap items-center gap-3 text-[11px]" style={{ color: "var(--text-muted)" }}>
-                    <span className="font-bold" style={{ color: "var(--text)" }}>
+                <div className="flex flex-col gap-3 px-4 py-3" style={{ borderTop: "1px solid var(--line)" }}>
+                  <div className="flex flex-wrap items-center gap-3 text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                    <span className="font-bold" style={{ color: "var(--ink)" }}>
                       {po.supplierRef?.name ?? "—"}
                     </span>
                     {po.supplierRef?.email ? <span>✉ {po.supplierRef.email}</span> : null}
@@ -314,6 +317,6 @@ export default async function PurchaseOrdersPage({
           })}
         </section>
       )}
-    </>
+    </DaylightShell>
   );
 }

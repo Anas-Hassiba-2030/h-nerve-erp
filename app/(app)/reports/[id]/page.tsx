@@ -9,6 +9,7 @@ import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { formatMoney, formatNumber, formatPercent, formatDate } from "@/lib/utils";
 import { getCompanyBrand } from "@/lib/companyBrand";
+import "../../daylight.css";
 
 export default async function CompanyReportPage({
   params,
@@ -179,7 +180,7 @@ export default async function CompanyReportPage({
         </header>
 
         {/* KPI ROW */}
-        <section className="grid grid-cols-4 gap-0 border-b" style={{ borderColor: "var(--heri-rule)" }}>
+        <section className="grid grid-cols-4 gap-0 border-b" style={{ borderColor: "#e4dccb" }}>
           <KPI label={ar ? "إيراد ١٢ شهر" : "12-mo revenue"} value={formatMoney(totalRevenue)} accent={brand.accent} />
           <KPI label={ar ? "مصاريف" : "Expenses"} value={formatMoney(totalExpense)} accent="#9ca3af" />
           <KPI label={ar ? "صافي" : "Net"} value={formatMoney(net)} accent={net >= 0 ? "#10b981" : "#ef4444"} />
@@ -217,7 +218,7 @@ export default async function CompanyReportPage({
         </section>
 
         {/* OPERATIONS BREAKDOWN — sector specific */}
-        <section className="border-t border-b px-6 py-4" style={{ borderColor: "var(--heri-rule)" }}>
+        <section className="border-t border-b px-6 py-4" style={{ borderColor: "#e4dccb" }}>
           <h2 className="mb-3 text-sm font-semibold" style={{ color: "#0f172a" }}>
             {ar ? "ملخص العمليات" : "Operations summary"}
           </h2>
@@ -313,8 +314,8 @@ export default async function CompanyReportPage({
         </section>
 
         {/* TOP REVENUE & ESG */}
-        <section className="grid grid-cols-2 gap-0 border-b" style={{ borderColor: "var(--heri-rule)" }}>
-          <div className="border-e p-6" style={{ borderColor: "var(--heri-rule)" }}>
+        <section className="grid grid-cols-2 gap-0 border-b" style={{ borderColor: "#e4dccb" }}>
+          <div className="border-e p-6" style={{ borderColor: "#e4dccb" }}>
             <h2 className="mb-3 text-sm font-semibold" style={{ color: "#0f172a" }}>
               {ar ? "أعلى الإيرادات" : "Top revenue"}
             </h2>
@@ -436,7 +437,7 @@ function KPI({ label, value, accent }: { label: string; value: string; accent: s
   return (
     <div
       className="border-e p-4 last:border-e-0"
-      style={{ borderColor: "var(--heri-rule)" }}
+      style={{ borderColor: "#e4dccb" }}
     >
       <div
         className="text-[10px] font-bold uppercase tracking-wider"

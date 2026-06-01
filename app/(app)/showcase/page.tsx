@@ -9,11 +9,10 @@
 // understand what they're buying in two scrolls.
 
 import Link from "next/link";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
-import { HeritagePill } from "@/components/heritage";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { ArrowUpRight, Brain, Layers, Theater, Crown } from "lucide-react";
 import { getLocale } from "@/lib/i18n.server";
+import "../daylight.css";
 
 type Phase = {
   n: number;
@@ -49,7 +48,7 @@ const WAVES: Wave[] = [
     blurbAr:
       "تعليل سببي، حوار متعدد العوامل، سرد، تخطيط، ذاكرة، تغذية راجعة، فيدرالية، تحسين ذاتي.",
     icon: Brain,
-    accent: "var(--heri-teal)",
+    accent: "var(--emerald)",
     phases: [
       {
         n: 1,
@@ -173,7 +172,7 @@ const WAVES: Wave[] = [
     blurbAr:
       "علامة بيضاء، خرائط أتمتة بصرية، مركز موصلات، عمليات نقّالة، طبقة محادثة.",
     icon: Layers,
-    accent: "var(--heri-copper)",
+    accent: "var(--gold)",
     phases: [
       {
         n: 11,
@@ -242,7 +241,7 @@ const WAVES: Wave[] = [
     blurbAr:
       "السفر عبر الزمن، حضور آنيّ، ذكاء المستندات — طبقة التجربة.",
     icon: Theater,
-    accent: "var(--heri-terracotta)",
+    accent: "var(--brick)",
     phases: [
       {
         n: 16,
@@ -300,7 +299,7 @@ const WAVES: Wave[] = [
     blurbAr:
       "H-Nerve بروتوكولاً مفتوحاً. عوامل في ١٢ سطراً. حزم في ٣٠. سمات في JSON.",
     icon: Crown,
-    accent: "var(--heri-ink)",
+    accent: "var(--ink)",
     phases: [
       {
         n: 20,
@@ -323,14 +322,12 @@ export default function ShowcasePage() {
   const ar = getLocale() === "ar";
   const totalPhases = WAVES.reduce((s, w) => s + w.phases.length, 0);
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow="عرض المنظومة · System showcase"
         title="عشرون مرحلة · ERP واحدة"
         subtitle="كل مرحلة لها لحظتها الخاصة. كل لحظة قابلة للتجربة الآن — اضغط أي بطاقة لتفتحها مباشرة."
       />
-
-      <PageContainer>
         {/* Hero stat strip */}
         <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <Stat label="مراحل" labelEn="Phases" value={String(totalPhases)} />
@@ -382,7 +379,7 @@ export default function ShowcasePage() {
                     <p>{ar ? p.wowAr : p.wow}</p>
                   </div>
                   <footer className="sc-card-foot">
-                    <HeritagePill tone="neutral">{p.aesthetic}</HeritagePill>
+                    <span className="tag" style={{ background: "var(--cream)", color: "var(--ink-muted)", border: "1px solid var(--line)" }}>{p.aesthetic}</span>
                     <span className="sc-card-cta">
                       {p.hrefLabel ?? (ar ? "افتح" : "Open")}
                     </span>
@@ -407,8 +404,7 @@ export default function ShowcasePage() {
               : "Eight visual vocabularies, one per surface. A causal chain behind every claim. Accessibility behind every motion. Not loose screens — a coherent work plan."}
           </p>
         </section>
-      </PageContainer>
-    </>
+    </DaylightShell>
   );
 }
 
@@ -426,23 +422,23 @@ function Stat({
   return (
     <div
       style={{
-        background: "var(--heri-cream)",
-        border: "1px solid var(--heri-rule)",
+        background: "var(--cream)",
+        border: "1px solid var(--line)",
         padding: "14px 18px",
       }}
     >
-      <div className="heri-eyebrow heri-eyebrow-ink" style={{ fontSize: 10 }}>
+      <div className="text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--ink-muted)" }}>
         <span>{label}</span>
-        <span style={{ margin: "0 6px", color: "var(--heri-rule-strong)" }}>·</span>
+        <span style={{ margin: "0 6px", color: "var(--line)" }}>·</span>
         <span style={{ opacity: 0.65 }}>{labelEn}</span>
       </div>
       <div
-        className="heri-number mt-1.5"
+        className="font-mono mt-1.5"
         style={{
           fontSize: 30,
           fontWeight: 500,
           letterSpacing: "-0.018em",
-          color: accent ? "var(--heri-copper)" : "var(--heri-ink)",
+          color: accent ? "var(--gold)" : "var(--ink)",
         }}
       >
         {value}

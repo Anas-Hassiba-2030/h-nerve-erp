@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ChartLine, Wallet, FlaskConical, Brain, Leaf } from "lucide-react";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { CompanyCover } from "@/components/CompanyCover";
 import { Sparkline } from "@/components/Sparkline";
-import { KpiCard } from "@/components/KpiCard";
+import "../../daylight.css";
 import { prisma } from "@/lib/db";
 import { formatMoney, formatNumber, formatPercent, formatShortDate } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
@@ -72,156 +72,135 @@ export default async function AnalyticsCompanyPage({ params }: { params: { id: s
   const brand = getCompanyBrand(company.code);
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "تحليل عميق" : "Deep dive"}
         title={ar ? company.name : company.nameEn}
         subtitle={brand.motto}
         actions={
-          <Link href="/analytics" className="btn-ghost btn-sm">
+          <Link href="/analytics" className="dl-btn dl-btn-secondary">
             <ArrowLeft className="h-4 w-4" />
             {ar ? "رجوع للوحدات" : "Back to hub"}
           </Link>
         }
       />
 
-      <div className="flex-1 space-y-6 p-6">
-        <CompanyCover
-          code={company.code}
-          eyebrow={company.code}
-          title={ar ? company.name : company.nameEn}
-          subtitle={brand.motto}
-          metrics={[
-            { label: ar ? "إيرادات 12ش" : "Revenue 12mo", value: formatMoney(revenue12) },
-            { label: ar ? "صافي" : "Net", value: formatMoney(net12) },
-            { label: ar ? "هامش" : "Margin", value: `${(margin * 100).toFixed(1)}٪` },
-          ]}
-        />
+      <CompanyCover
+        code={company.code}
+        eyebrow={company.code}
+        title={ar ? company.name : company.nameEn}
+        subtitle={brand.motto}
+        metrics={[
+          { label: ar ? "إيرادات 12ش" : "Revenue 12mo", value: formatMoney(revenue12) },
+          { label: ar ? "صافي" : "Net", value: formatMoney(net12) },
+          { label: ar ? "هامش" : "Margin", value: `${(margin * 100).toFixed(1)}٪` },
+        ]}
+      />
 
-        <section className="grid gap-4 stagger sm:grid-cols-2 xl:grid-cols-4">
-          <KpiCard label={ar ? "إيرادات (3 أشهر)" : "Revenue (3mo)"} value={formatMoney(q3)} icon={Wallet} tone="emerald" />
-          <KpiCard label={ar ? "إيرادات (6 أشهر)" : "Revenue (6mo)"} value={formatMoney(q6)} icon={Wallet} tone="emerald" />
-          <KpiCard label={ar ? "إيرادات (12 شهر)" : "Revenue (12mo)"} value={formatMoney(q12)} icon={Wallet} tone="emerald" />
-          <KpiCard label={ar ? "هامش الربح" : "Profit margin"} value={`${(margin * 100).toFixed(1)}٪`} icon={ChartLine} tone="violet" />
-        </section>
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "إيرادات (3 أشهر)" : "Revenue (3mo)"} value={formatMoney(q3)} />
+        <DaylightKpi label={ar ? "إيرادات (6 أشهر)" : "Revenue (6mo)"} value={formatMoney(q6)} />
+        <DaylightKpi label={ar ? "إيرادات (12 شهر)" : "Revenue (12mo)"} value={formatMoney(q12)} />
+        <DaylightKpi label={ar ? "هامش الربح" : "Profit margin"} value={`${(margin * 100).toFixed(1)}٪`} />
+      </DaylightKpiGrid>
 
-        {/* Trend strip */}
-        <section className="card card-pad">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="card-title">{ar ? "اتجاه الإيرادات والمصاريف (شهرياً)" : "Revenue vs expenses trend (monthly)"}</div>
-              <div className="card-sub">{ar ? "آخر 12 شهر" : "Last 12 months"}</div>
+      {/* Trend strip */}
+      <DaylightPanel title={ar ? "اتجاه الإيرادات والمصاريف (شهرياً)" : "Revenue vs expenses trend (monthly)"} aside={ar ? "آخر 12 شهر" : "Last 12 months"}>
+        <div style={{ display: "grid", gap: 24, gridTemplateColumns: "1fr 1fr" }}>
+          <div>
+            <div style={{ marginBottom: 4, fontSize: 11, fontWeight: 700, color: "var(--ink-muted)" }}>
+              {ar ? "إيرادات" : "Revenue"}
             </div>
+            <Sparkline data={revenueTrend} width={420} height={120} positive />
           </div>
-          <div className="mt-4 grid gap-6 md:grid-cols-2">
-            <div>
-              <div className="mb-1 text-[11px] font-bold" style={{ color: "var(--heri-ink-3)" }}>
-                {ar ? "إيرادات" : "Revenue"}
-              </div>
-              <Sparkline data={revenueTrend} width={420} height={120} positive />
+          <div>
+            <div style={{ marginBottom: 4, fontSize: 11, fontWeight: 700, color: "var(--ink-muted)" }}>
+              {ar ? "مصاريف" : "Expenses"}
             </div>
-            <div>
-              <div className="mb-1 text-[11px] font-bold" style={{ color: "var(--heri-ink-3)" }}>
-                {ar ? "مصاريف" : "Expenses"}
-              </div>
-              <Sparkline data={expenseTrend} width={420} height={120} positive={false} />
-            </div>
+            <Sparkline data={expenseTrend} width={420} height={120} positive={false} />
           </div>
-        </section>
+        </div>
+      </DaylightPanel>
 
-        {/* Category breakdown + ESG */}
-        <section className="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
-          <div className="card card-pad">
-            <div className="card-title mb-3">{ar ? "أعلى مصادر الإيراد" : "Top revenue sources"}</div>
-            <div className="space-y-2">
-              {cats.length === 0 ? (
-                <div className="text-sm" style={{ color: "var(--heri-ink-3)" }}>—</div>
-              ) : (
-                cats.map(([cat, val]) => (
-                  <div key={cat}>
-                    <div className="mb-1 flex items-center justify-between text-xs">
-                      <span className="font-bold" style={{ color: "var(--heri-ink)" }}>{cat}</span>
-                      <span className="font-mono" style={{ color: "var(--heri-ink-3)" }}>{formatMoney(val)}</span>
-                    </div>
-                    <div className="bar"><div className="bar-fill" style={{ width: `${(val / catTotal) * 100}%` }} /></div>
+      {/* Category breakdown + ESG */}
+      <div style={{ display: "grid", gap: 16, gridTemplateColumns: "1.5fr 1fr" }}>
+        <DaylightPanel title={ar ? "أعلى مصادر الإيراد" : "Top revenue sources"}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {cats.length === 0 ? (
+              <div style={{ fontSize: 13, color: "var(--ink-muted)" }}>—</div>
+            ) : (
+              cats.map(([cat, val]) => (
+                <div key={cat}>
+                  <div style={{ marginBottom: 4, display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 12 }}>
+                    <span style={{ fontWeight: 700, color: "var(--ink)" }}>{cat}</span>
+                    <span style={{ fontFamily: "monospace", color: "var(--ink-muted)" }}>{formatMoney(val)}</span>
                   </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          <div className="card card-pad">
-            <div className="card-title mb-3">{ar ? "ESG الأخير" : "Latest ESG"}</div>
-            {lastEsg ? (
-              <>
-                <div className="text-3xl font-bold" style={{ color: "var(--heri-ochre)" }}>{lastEsg.overall.toFixed(1)}</div>
-                <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>{lastEsg.year} · {lastEsg.period}</div>
-                <div className="mt-3 space-y-2 text-xs">
-                  <Bar label={ar ? "بيئي" : "Environmental"} val={lastEsg.environmentalScore} />
-                  <Bar label={ar ? "اجتماعي" : "Social"} val={lastEsg.socialScore} />
-                  <Bar label={ar ? "حوكمة" : "Governance"} val={lastEsg.governanceScore} />
+                  <div className="dl-bar"><i style={{ width: `${(val / catTotal) * 100}%` }} /></div>
                 </div>
-              </>
-            ) : <div className="text-sm" style={{ color: "var(--heri-ink-3)" }}>—</div>}
+              ))
+            )}
           </div>
-        </section>
+        </DaylightPanel>
 
-        {/* Operations footprint */}
-        <section className="grid gap-3 stagger md:grid-cols-2 xl:grid-cols-4">
-          <Footprint label={ar ? "فنادق" : "Hotels"} value={company.hotels.length} icon={Wallet} />
-          <Footprint label={ar ? "دفعات ألبان" : "Dairy batches"} value={company.dairyBatches.length} icon={FlaskConical} />
-          <Footprint label={ar ? "مزارع" : "Farms"} value={company.farms.length} icon={Leaf} />
-          <Footprint label={ar ? "إشارات تنبؤ" : "Forecasts"} value={company.forecastsOut.length + company.forecastsIn.length} icon={Brain} />
-        </section>
-
-        {/* Future Projects pipeline */}
-        {company.futureProjects.length > 0 ? (
-          <section className="card card-pad">
-            <div className="card-title mb-3">{ar ? "المشاريع المستقبلية" : "Future Projects pipeline"}</div>
-            <div className="space-y-3">
-              {company.futureProjects.map((p) => (
-                <div key={p.id} className="rounded-xl p-3" style={{ border: "1px solid var(--heri-rule)" }}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-sm font-semibold" style={{ color: "var(--heri-ink)" }}>{p.title}</div>
-                      <div className="line-clamp-2 text-xs" style={{ color: "var(--heri-ink-3)" }}>{p.description}</div>
-                    </div>
-                    <span className="badge-violet">{p.stage}</span>
-                  </div>
-                  <div className="mt-2 flex items-center justify-between text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
-                    <span>{p.startQuarter} → {p.targetQuarter}</span>
-                    <span className="font-mono">{formatMoney(p.budgetJod)}</span>
-                  </div>
-                  <div className="mt-2 bar"><div className="bar-fill" style={{ width: `${p.progressPct}%` }} /></div>
-                </div>
-              ))}
-            </div>
-          </section>
-        ) : null}
+        <DaylightPanel title={ar ? "ESG الأخير" : "Latest ESG"}>
+          {lastEsg ? (
+            <>
+              <div style={{ fontSize: 30, fontWeight: 700, color: "var(--gold)" }}>{lastEsg.overall.toFixed(1)}</div>
+              <div style={{ fontSize: 11, color: "var(--ink-muted)" }}>{lastEsg.year} · {lastEsg.period}</div>
+              <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+                <Bar label={ar ? "بيئي" : "Environmental"} val={lastEsg.environmentalScore} />
+                <Bar label={ar ? "اجتماعي" : "Social"} val={lastEsg.socialScore} />
+                <Bar label={ar ? "حوكمة" : "Governance"} val={lastEsg.governanceScore} />
+              </div>
+            </>
+          ) : <div style={{ fontSize: 13, color: "var(--ink-muted)" }}>—</div>}
+        </DaylightPanel>
       </div>
-    </>
+
+      {/* Operations footprint */}
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "فنادق" : "Hotels"} value={String(company.hotels.length)} />
+        <DaylightKpi label={ar ? "دفعات ألبان" : "Dairy batches"} value={String(company.dairyBatches.length)} />
+        <DaylightKpi label={ar ? "مزارع" : "Farms"} value={String(company.farms.length)} />
+        <DaylightKpi label={ar ? "إشارات تنبؤ" : "Forecasts"} value={String(company.forecastsOut.length + company.forecastsIn.length)} />
+      </DaylightKpiGrid>
+
+      {/* Future Projects pipeline */}
+      {company.futureProjects.length > 0 ? (
+        <DaylightPanel title={ar ? "المشاريع المستقبلية" : "Future Projects pipeline"}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {company.futureProjects.map((p) => (
+              <div key={p.id} style={{ padding: 12, border: "1px solid var(--line)", borderRadius: 8 }}>
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{p.title}</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-muted)" }}>{p.description}</div>
+                  </div>
+                  <span className="tag ok" style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}>{p.stage}</span>
+                </div>
+                <div style={{ marginTop: 8, display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 11, color: "var(--ink-muted)" }}>
+                  <span>{p.startQuarter} → {p.targetQuarter}</span>
+                  <span style={{ fontFamily: "monospace" }}>{formatMoney(p.budgetJod)}</span>
+                </div>
+                <div className="dl-bar" style={{ marginTop: 8 }}><i style={{ width: `${p.progressPct}%` }} /></div>
+              </div>
+            ))}
+          </div>
+        </DaylightPanel>
+      ) : null}
+    </DaylightShell>
   );
 }
 
 function Bar({ label, val }: { label: string; val: number }) {
   return (
     <div>
-      <div className="mb-1 flex items-center justify-between text-[11px]"><span style={{ color: "var(--heri-ink-3)" }}>{label}</span><span className="font-mono">{val.toFixed(1)}</span></div>
-      <div className="bar"><div className="bar-fill" style={{ width: `${val}%` }} /></div>
+      <div style={{ marginBottom: 4, display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 11 }}>
+        <span style={{ color: "var(--ink-muted)" }}>{label}</span>
+        <span style={{ fontFamily: "monospace" }}>{val.toFixed(1)}</span>
+      </div>
+      <div className="dl-bar"><i style={{ width: `${val}%` }} /></div>
     </div>
   );
 }
 
-function Footprint({ label, value, icon: Icon }: { label: string; value: number; icon: any }) {
-  return (
-    <div className="card card-pad flex items-center gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: "var(--heri-cream-2)", color: "var(--heri-ochre)" }}>
-        <Icon className="h-4 w-4" />
-      </div>
-      <div>
-        <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>{label}</div>
-        <div className="text-lg font-bold" style={{ color: "var(--heri-ink)" }}>{formatNumber(value)}</div>
-      </div>
-    </div>
-  );
-}

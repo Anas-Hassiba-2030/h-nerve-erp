@@ -1,6 +1,5 @@
 import { Trash2 } from "lucide-react";
-import { Topbar } from "@/components/Topbar";
-import { PageContainer } from "@/components/PageContainer";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { EmptyState } from "@/components/EmptyState";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
@@ -9,6 +8,7 @@ import { hasRole } from "@/lib/authz";
 import type { SoftEntity } from "@/lib/softDelete";
 import { TrashClient, type TrashItem } from "./TrashClient";
 import { purgeAllExpired } from "./actions";
+import "../daylight.css";
 
 export const dynamic = "force-dynamic";
 
@@ -143,8 +143,8 @@ export default async function TrashPage() {
   ).length;
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "النظام" : "System"}
         title={ar ? "سلة المحذوفات" : "Trash"}
         subtitle={
@@ -155,7 +155,7 @@ export default async function TrashPage() {
         actions={
           expiredCount > 0 ? (
             <form action={purgeAllExpired}>
-              <button type="submit" className="btn-secondary btn-sm">
+              <button type="submit" className="dl-btn dl-btn-secondary">
                 <Trash2 className="h-3.5 w-3.5" />
                 <span>
                   {ar ? `تفريغ ${expiredCount} منتهي الصلاحية` : `Purge ${expiredCount} expired`}
@@ -165,7 +165,6 @@ export default async function TrashPage() {
           ) : null
         }
       />
-      <PageContainer width="default">
         {items.length === 0 ? (
           <EmptyState
             icon={Trash2}
@@ -179,8 +178,7 @@ export default async function TrashPage() {
         ) : (
           <TrashClient items={items} graceMs={GRACE_MS} ar={ar} />
         )}
-      </PageContainer>
-    </>
+    </DaylightShell>
   );
 }
 

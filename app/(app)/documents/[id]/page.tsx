@@ -1,16 +1,15 @@
 // /documents/[id] — Single document detail.
 //
-// Refined / Warm Editorial body. Heritage Modern shell.
+// Refined / Warm Editorial body. Daylight shell.
 // Phase 18 of docs/PHASES-INTELLIGENCE.md.
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
-import { HeritagePill, HeritageSection } from "@/components/heritage";
+import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
 import { ArrowLeft, ShieldAlert, AlertTriangle, CheckCircle2, FileText } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
+import "../../daylight.css";
 
 const LINKED_LABEL: Record<string, { ar: string; en: string }> = {
   LORAN: { ar: "لوران الزراعية",       en: "Loran Farms" },
@@ -20,10 +19,10 @@ const LINKED_LABEL: Record<string, { ar: string; en: string }> = {
   GROUP: { ar: "المجموعة",             en: "the Group" },
 };
 
-const SEVERITY_TONE: Record<string, "success" | "warn" | "critical" | "neutral"> = {
-  low:    "success",
-  medium: "warn",
-  high:   "critical",
+const SEVERITY_TONE: Record<string, "ok" | "gold"> = {
+  low:    "ok",
+  medium: "gold",
+  high:   "gold",
 };
 
 function clauseIcon(kind: string) {
@@ -53,8 +52,8 @@ export default async function DocumentDetail({ params }: { params: { id: string 
     : null;
 
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "ذكاء المستندات · مستند" : "Document intelligence · Document"}
         title={ar ? doc.title ?? doc.fileName : doc.titleEn ?? doc.fileName}
         subtitle={
@@ -66,169 +65,166 @@ export default async function DocumentDetail({ params }: { params: { id: string 
         }
       />
 
-      <PageContainer>
-        <div className="flex items-center justify-between gap-4">
-          <Link
-            href="/documents"
-            className="heri-focusable inline-flex items-center gap-2"
-            style={{
-              fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-              fontSize: 11,
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              color: "var(--heri-copper)",
-              textDecoration: "none",
-            }}
-          >
-            <ArrowLeft className="h-3 w-3 rtl:rotate-180" strokeWidth={1.5} />
-            {ar ? "كل المستندات" : "All documents"}
-          </Link>
-          <HeritagePill tone={doc.status === "READY" ? "success" : "warn"}>
-            {doc.status === "READY"
-              ? ar ? "جاهز" : "Ready"
-              : ar ? "قيد القراءة" : "Reading"}
-          </HeritagePill>
-        </div>
+      <div className="flex items-center justify-between gap-4">
+        <Link
+          href="/documents"
+          className="inline-flex items-center gap-2"
+          style={{
+            fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
+            fontSize: 11,
+            letterSpacing: "0.16em",
+            textTransform: "uppercase" as const,
+            color: "var(--gold)",
+            textDecoration: "none",
+          }}
+        >
+          <ArrowLeft className="h-3 w-3 rtl:rotate-180" strokeWidth={1.5} />
+          {ar ? "كل المستندات" : "All documents"}
+        </Link>
+        <span className={`tag ${doc.status === "READY" ? "ok" : "gold"}`}>
+          {doc.status === "READY"
+            ? ar ? "جاهز" : "Ready"
+            : ar ? "قيد القراءة" : "Reading"}
+        </span>
+      </div>
 
-        {/* Editorial summary block */}
-        <article className="di-detail">
-          <p className="di-detail-eyebrow">
-            {ar ? "خلاصة المُحرّر" : "EDITORIAL SUMMARY"}
-            {doc.parsedMs ? <span className="di-detail-ms"> · {doc.parsedMs}ms</span> : null}
+      {/* Editorial summary block */}
+      <article className="di-detail">
+        <p className="di-detail-eyebrow">
+          {ar ? "خلاصة المُحرّر" : "EDITORIAL SUMMARY"}
+          {doc.parsedMs ? <span className="di-detail-ms"> · {doc.parsedMs}ms</span> : null}
+        </p>
+        <h1 className="di-detail-title">
+          {ar ? doc.title ?? doc.fileName : doc.titleEn ?? doc.fileName}
+        </h1>
+        {doc.extraction?.headline ? (
+          <p className="di-detail-headline">
+            {ar ? doc.extraction.headline : doc.extraction.headlineEn ?? doc.extraction.headline}
           </p>
-          <h1 className="di-detail-title">
-            {ar ? doc.title ?? doc.fileName : doc.titleEn ?? doc.fileName}
-          </h1>
-          {doc.extraction?.headline ? (
-            <p className="di-detail-headline">
-              {ar ? doc.extraction.headline : doc.extraction.headlineEn ?? doc.extraction.headline}
-            </p>
-          ) : null}
+        ) : null}
 
-          <div aria-hidden className="di-detail-rule" />
+        <div aria-hidden className="di-detail-rule" />
 
-          <p className="di-detail-summary">
-            {ar ? doc.summary : doc.summaryEn ?? doc.summary}
-          </p>
-        </article>
+        <p className="di-detail-summary">
+          {ar ? doc.summary : doc.summaryEn ?? doc.summary}
+        </p>
+      </article>
 
-        {/* Phase NS-8 — Document → Graph: the auto-linked entity */}
-        {doc.matchedSupplierName || doc.matchedCustomerName ? (
-          <HeritageSection
-            eyebrow={ar ? "ربط الشبكة" : "Graph link"}
-            title={ar ? "رُبط تلقائياً بكيان" : "Auto-linked to an entity"}
+      {/* Phase NS-8 — Document → Graph: the auto-linked entity */}
+      {doc.matchedSupplierName || doc.matchedCustomerName ? (
+        <DaylightPanel
+          title={ar ? "ربط الشبكة" : "Graph link"}
+          aside={ar ? "رُبط تلقائياً بكيان" : "Auto-linked to an entity"}
+        >
+          <div
+            className="inline-flex items-center gap-3 px-4 py-3"
+            style={{ background: "var(--cream)", border: "1px solid var(--line)", borderRadius: 8 }}
           >
-            <div
-              className="inline-flex items-center gap-3 px-4 py-3"
-              style={{ background: "var(--heri-cream)", border: "1px solid var(--heri-rule)" }}
+            <span
+              style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}
             >
+              {doc.matchedSupplierName ? (ar ? "مورّد" : "Supplier") : (ar ? "عميل" : "Customer")}
+            </span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)" }}>
+              {doc.matchedSupplierName ?? doc.matchedCustomerName}
+            </span>
+            {doc.matchConfidence != null ? (
               <span
-                className="heri-eyebrow heri-eyebrow-ink"
-                style={{ fontSize: 10 }}
+                style={{
+                  fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
+                  fontSize: 10,
+                  letterSpacing: "0.08em",
+                  color: "var(--gold)",
+                  fontVariantNumeric: "tabular-nums",
+                }}
               >
-                {doc.matchedSupplierName ? (ar ? "مورّد" : "Supplier") : (ar ? "عميل" : "Customer")}
+                {(doc.matchConfidence * 100).toFixed(0)}% {ar ? "تطابق" : "match"}
               </span>
-              <span style={{ fontSize: 14, fontWeight: 600, color: "var(--heri-ink)" }}>
-                {doc.matchedSupplierName ?? doc.matchedCustomerName}
-              </span>
-              {doc.matchConfidence != null ? (
-                <span
+            ) : null}
+          </div>
+        </DaylightPanel>
+      ) : null}
+
+      {/* Extracted fields */}
+      {Object.keys(fields).length > 0 ? (
+        <DaylightPanel
+          title={ar ? "ما استخرجناه من النص" : "What we pulled out of the page"}
+          aside={ar ? "حقائق" : "Extracted facts"}
+        >
+          <dl className="grid gap-3 md:grid-cols-2">
+            {Object.entries(fields).slice(0, 16).map(([k, v]) => (
+              <div
+                key={k}
+                className="px-3 py-2"
+                style={{
+                  background: "var(--cream)",
+                  border: "1px solid var(--line)",
+                  borderRadius: 8,
+                }}
+              >
+                <dt
+                  style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)", marginBottom: 2 }}
+                >
+                  {prettyKey(k, ar)}
+                </dt>
+                <dd
                   style={{
-                    fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-                    fontSize: 10,
-                    letterSpacing: "0.08em",
-                    color: "var(--heri-copper)",
-                    fontVariantNumeric: "tabular-nums",
+                    fontFamily: "'Inter Tight','Inter',system-ui,sans-serif",
+                    fontSize: 13.5,
+                    color: "var(--ink)",
+                    letterSpacing: "0.005em",
+                    margin: 0,
                   }}
                 >
-                  {(doc.matchConfidence * 100).toFixed(0)}% {ar ? "تطابق" : "match"}
-                </span>
-              ) : null}
-            </div>
-          </HeritageSection>
-        ) : null}
+                  {prettyValue(v)}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </DaylightPanel>
+      ) : null}
 
-        {/* Extracted fields */}
-        {Object.keys(fields).length > 0 ? (
-          <HeritageSection
-            eyebrow={ar ? "حقائق" : "Extracted facts"}
-            title={ar ? "ما استخرجناه من النص" : "What we pulled out of the page"}
-          >
-            <dl className="grid gap-3 md:grid-cols-2">
-              {Object.entries(fields).slice(0, 16).map(([k, v]) => (
-                <div
-                  key={k}
-                  className="px-3 py-2"
-                  style={{
-                    background: "var(--heri-cream)",
-                    border: "1px solid var(--heri-rule)",
-                  }}
+      {/* Clauses */}
+      {doc.clauses.length > 0 ? (
+        <DaylightPanel
+          title={ar ? "ما يستحق انتباهك" : "Worth your attention"}
+          aside={ar ? "بنود مهمّة" : "Notable clauses"}
+        >
+          <ol className="grid gap-3">
+            {doc.clauses.map((c) => {
+              const Icon = clauseIcon(c.kind);
+              return (
+                <li
+                  key={c.id}
+                  className="di-clause is-revealed"
+                  data-severity={c.severity}
+                  style={{ animation: "none" }}
                 >
-                  <dt
-                    className="heri-eyebrow heri-eyebrow-ink"
-                    style={{ fontSize: 10, marginBottom: 2 }}
-                  >
-                    {prettyKey(k, ar)}
-                  </dt>
-                  <dd
-                    style={{
-                      fontFamily: "'Inter Tight','Inter',system-ui,sans-serif",
-                      fontSize: 13.5,
-                      color: "var(--heri-ink)",
-                      letterSpacing: "0.005em",
-                      margin: 0,
-                    }}
-                  >
-                    {prettyValue(v)}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </HeritageSection>
-        ) : null}
-
-        {/* Clauses */}
-        {doc.clauses.length > 0 ? (
-          <HeritageSection
-            eyebrow={ar ? "بنود مهمّة" : "Notable clauses"}
-            title={ar ? "ما يستحق انتباهك" : "Worth your attention"}
-          >
-            <ol className="grid gap-3">
-              {doc.clauses.map((c) => {
-                const Icon = clauseIcon(c.kind);
-                return (
-                  <li
-                    key={c.id}
-                    className="di-clause is-revealed"
-                    data-severity={c.severity}
-                    style={{ animation: "none" }}
-                  >
-                    <span className="di-clause-icon">
-                      <Icon className="h-3.5 w-3.5" strokeWidth={1.7} />
-                    </span>
-                    <div className="di-clause-body">
-                      <q className="di-clause-quote">
-                        {ar ? c.quote : c.quoteEn ?? c.quote}
-                      </q>
-                      {c.note ? (
-                        <p className="di-clause-note">
-                          {ar ? c.note : c.noteEn ?? c.note}
-                        </p>
-                      ) : null}
-                    </div>
-                    {c.page ? (
-                      <span className="di-clause-page">
-                        {ar ? `ص ${c.page}` : `p. ${c.page}`}
-                      </span>
+                  <span className="di-clause-icon">
+                    <Icon className="h-3.5 w-3.5" strokeWidth={1.7} />
+                  </span>
+                  <div className="di-clause-body">
+                    <q className="di-clause-quote">
+                      {ar ? c.quote : c.quoteEn ?? c.quote}
+                    </q>
+                    {c.note ? (
+                      <p className="di-clause-note">
+                        {ar ? c.note : c.noteEn ?? c.note}
+                      </p>
                     ) : null}
-                  </li>
-                );
-              })}
-            </ol>
-          </HeritageSection>
-        ) : null}
-      </PageContainer>
-    </>
+                  </div>
+                  {c.page ? (
+                    <span className="di-clause-page">
+                      {ar ? `ص ${c.page}` : `p. ${c.page}`}
+                    </span>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ol>
+        </DaylightPanel>
+      ) : null}
+    </DaylightShell>
   );
 }
 

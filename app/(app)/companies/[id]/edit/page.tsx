@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { CompanyForm } from "../../CompanyForm";
 import { updateCompany } from "../../actions";
 import { prisma } from "@/lib/db";
+import "../../../daylight.css";
 
 export default async function EditCompanyPage({ params }: { params: { id: string } }) {
   const company = await prisma.company.findUnique({ where: { id: params.id } });
@@ -11,8 +12,8 @@ export default async function EditCompanyPage({ params }: { params: { id: string
   const action = updateCompany.bind(null, company.id);
 
   return (
-    <>
-      <Topbar
+    <DaylightShell>
+      <DaylightHeader
         eyebrow="السجل القابض"
         title={`تعديل: ${company.name}`}
         subtitle={company.nameEn}
@@ -37,6 +38,6 @@ export default async function EditCompanyPage({ params }: { params: { id: string
           />
         </div>
       </div>
-    </>
+    </DaylightShell>
   );
 }

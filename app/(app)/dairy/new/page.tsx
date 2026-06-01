@@ -1,7 +1,8 @@
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db";
 import { createBatch } from "../actions";
 import { BatchForm } from "../BatchForm";
+import "../../daylight.css";
 
 export default async function NewBatchPage() {
   const companies = await prisma.company.findMany({
@@ -11,8 +12,8 @@ export default async function NewBatchPage() {
   });
 
   return (
-    <>
-      <Topbar
+    <DaylightShell>
+      <DaylightHeader
         eyebrow="الصناعات الغذائية"
         title="دفعة إنتاج جديدة"
         subtitle="تسجيل دفعة طازجة من خط إنتاج المها."
@@ -20,6 +21,6 @@ export default async function NewBatchPage() {
       <div className="flex-1 p-6">
         <BatchForm action={createBatch} companies={companies} />
       </div>
-    </>
+    </DaylightShell>
   );
 }

@@ -11,8 +11,8 @@ import {
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
-import { Topbar } from "@/components/Topbar";
-import { KpiCard } from "@/components/KpiCard";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
+import "../../daylight.css";
 import { prisma } from "@/lib/db";
 import { formatNumber } from "@/lib/utils";
 import { getCompanyBrand } from "@/lib/companyBrand";
@@ -68,14 +68,14 @@ function ScoreGauge({
         <defs>
           <linearGradient id={`g-${label}`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor={color} />
-            <stop offset="100%" stopColor="var(--heri-copper)" />
+            <stop offset="100%" stopColor="var(--gold)" />
           </linearGradient>
         </defs>
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="color-mix(in srgb, var(--heri-ink-3) 14%, transparent)"
+          stroke="color-mix(in srgb, var(--ink-muted) 14%, transparent)"
           strokeWidth={stroke}
           fill="none"
         />
@@ -98,13 +98,13 @@ function ScoreGauge({
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <div
           className="font-mono text-4xl font-bold"
-          style={{ color: "var(--heri-ink)", letterSpacing: "-0.03em" }}
+          style={{ color: "var(--ink)", letterSpacing: "-0.03em" }}
         >
           {Math.round(clamped)}
         </div>
         <div
           className="text-[10px] font-bold uppercase tracking-widest"
-          style={{ color: "var(--heri-ink-3)" }}
+          style={{ color: "var(--ink-muted)" }}
         >
           {en ? "out of 100" : "من 100"}
         </div>
@@ -163,24 +163,20 @@ export default async function SustainabilityDetailPage({
   }
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={en ? "ltr" : "rtl"}>
+      <DaylightHeader
         eyebrow={en ? "Sustainability & ESG" : "الاستدامة وESG"}
         title={`${companyName} — ${periodLabel(score.period, en)} ${score.year}`}
-        subtitle={
-          en
-            ? `E·S·G report for ${score.period} ${score.year}`
-            : `تقرير E·S·G للفترة ${score.period} ${score.year}`
-        }
+        subtitle={en ? `E·S·G report for ${score.period} ${score.year}` : `تقرير E·S·G للفترة ${score.period} ${score.year}`}
         actions={
-          <Link href="/sustainability" className="btn-ghost">
+          <Link href="/sustainability" className="dl-btn dl-btn-secondary">
             <ArrowLeft className="h-4 w-4" />
             {en ? "ESG Reports" : "تقارير ESG"}
           </Link>
         }
       />
 
-      <div className="flex-1 space-y-6 p-6">
+      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
         {/* Hero */}
         <section
           className="relative overflow-hidden rounded-2xl p-6 anim-fade-up"
@@ -262,7 +258,7 @@ export default async function SustainabilityDetailPage({
         </section>
 
         {/* E/S/G triple */}
-        <section className="grid gap-4 lg:grid-cols-3">
+        <section style={{ display: "grid", gap: 16, gridTemplateColumns: "1fr 1fr 1fr" }}>
           {[
             {
               label: "بيئي",
@@ -294,8 +290,7 @@ export default async function SustainabilityDetailPage({
             return (
               <div
                 key={row.label}
-                className="card card-pad anim-fade-up"
-                style={{ animationDelay: `${i * 60}ms` }}
+                className="panel reveal"
               >
                 <div className="mb-3 flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -311,13 +306,13 @@ export default async function SustainabilityDetailPage({
                     <div>
                       <div
                         className="text-sm font-semibold"
-                        style={{ color: "var(--heri-ink)" }}
+                        style={{ color: "var(--ink)" }}
                       >
                         {en ? row.labelEn : row.label}
                       </div>
                       <div
                         className="text-[10px] font-bold uppercase tracking-widest"
-                        style={{ color: "var(--heri-ink-3)" }}
+                        style={{ color: "var(--ink-muted)" }}
                         dir="ltr"
                       >
                         {row.labelEn}
@@ -335,14 +330,14 @@ export default async function SustainabilityDetailPage({
                   className="h-2 overflow-hidden rounded-full"
                   style={{
                     background:
-                      "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
+                      "color-mix(in srgb, var(--ink-muted) 14%, transparent)",
                   }}
                 >
                   <div
                     className="h-full rounded-full anim-rise-glow"
                     style={{
                       width: `${Math.min(100, row.value)}%`,
-                      background: `linear-gradient(90deg, ${row.color} 0%, var(--heri-copper) 100%)`,
+                      background: `linear-gradient(90deg, ${row.color} 0%, var(--gold) 100%)`,
                       boxShadow: `0 0 14px ${row.color}`,
                       transition: "width .8s cubic-bezier(.21,.92,.32,1)",
                     }}
@@ -363,64 +358,30 @@ export default async function SustainabilityDetailPage({
         </section>
 
         {/* Operational metrics */}
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <KpiCard
-            label={en ? "Carbon Emissions" : "انبعاثات الكربون"}
-            value={`${formatNumber(score.carbonTons)} ${en ? "tonnes" : "طن"}`}
-            icon={Cloud}
-            tone="slate"
-            hint={en ? "CO₂ equivalent" : "CO₂ مكافئ"}
-          />
-          <KpiCard
-            label={en ? "Water Consumption" : "استهلاك المياه"}
-            value={`${formatNumber(score.waterCubicM)} ${en ? "m³" : "م³"}`}
-            icon={Droplet}
-            tone="sky"
-          />
-          <KpiCard
-            label={en ? "Renewable Energy" : "طاقة متجددة"}
-            value={`${Math.round(score.renewablePct)}${en ? "%" : "٪"}`}
-            icon={Sun}
-            tone="amber"
-          />
-        </section>
+        <DaylightKpiGrid>
+          <DaylightKpi label={en ? "Carbon Emissions" : "انبعاثات الكربون"} value={`${formatNumber(score.carbonTons)} ${en ? "tonnes" : "طن"}`} hint={en ? "CO₂ equivalent" : "CO₂ مكافئ"} />
+          <DaylightKpi label={en ? "Water Consumption" : "استهلاك المياه"} value={`${formatNumber(score.waterCubicM)} ${en ? "m³" : "م³"}`} />
+          <DaylightKpi label={en ? "Renewable Energy" : "طاقة متجددة"} value={`${Math.round(score.renewablePct)}${en ? "%" : "٪"}`} />
+        </DaylightKpiGrid>
 
         {/* Two columns */}
-        <div className="grid gap-6 lg:grid-cols-[1fr,320px]">
-          <div className="space-y-6">
+        <div style={{ display: "grid", gap: 24, gridTemplateColumns: "1fr 320px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
             {/* Notes */}
             {score.notes ? (
-              <section className="card card-pad anim-fade-up">
-                <h3
-                  className="mb-2 text-sm font-semibold"
-                  style={{ color: "var(--heri-ink)" }}
-                >
-                  {en ? "Period Notes" : "ملاحظات الفترة"}
-                </h3>
+              <DaylightPanel title={en ? "Period Notes" : "ملاحظات الفترة"}>
                 <p
-                  className="whitespace-pre-line text-sm leading-relaxed"
-                  style={{ color: "var(--heri-ink)" }}
+                  style={{ whiteSpace: "pre-line", fontSize: 13, lineHeight: 1.6, color: "var(--ink)" }}
                 >
                   {score.notes}
                 </p>
-              </section>
+              </DaylightPanel>
             ) : null}
 
             {/* Peers benchmark */}
             {peers.length > 0 ? (
-              <section className="card card-pad anim-fade-up">
-                <header className="mb-3 flex items-center justify-between">
-                  <h3
-                    className="text-sm font-semibold"
-                    style={{ color: "var(--heri-ink)" }}
-                  >
-                    {en
-                      ? "Performance of other group companies in "
-                      : "أداء بقية شركات المجموعة في "}
-                    {periodLabel(score.period, en)} {score.year}
-                  </h3>
-                </header>
-                <ul className="space-y-2">
+              <DaylightPanel title={`${en ? "Performance of other group companies in " : "أداء بقية شركات المجموعة في "} ${periodLabel(score.period, en)} ${score.year}`}>
+                <ul style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {peers.map((p, i) => (
                     <li
                       key={p.id}
@@ -429,18 +390,18 @@ export default async function SustainabilityDetailPage({
                     >
                       <Link
                         href={`/sustainability/${p.id}`}
-                        className="block rounded-xl px-2 py-1.5 transition hover:bg-[var(--heri-cream-2)]"
+                        className="block rounded-xl px-2 py-1.5 transition hover:bg-[var(--cream)]"
                       >
                         <div className="mb-1 flex items-center justify-between gap-2">
                           <span
                             className="truncate text-xs font-bold"
-                            style={{ color: "var(--heri-ink)" }}
+                            style={{ color: "var(--ink)" }}
                           >
                             {en ? (p.company.nameEn ?? p.company.name) : p.company.name}
                           </span>
                           <span
                             className="font-mono text-xs font-bold"
-                            style={{ color: "var(--heri-ink)" }}
+                            style={{ color: "var(--ink)" }}
                           >
                             {Math.round(p.overall)}
                           </span>
@@ -449,7 +410,7 @@ export default async function SustainabilityDetailPage({
                           className="h-1.5 overflow-hidden rounded-full"
                           style={{
                             background:
-                              "color-mix(in srgb, var(--heri-ink-3) 14%, transparent)",
+                              "color-mix(in srgb, var(--ink-muted) 14%, transparent)",
                           }}
                         >
                           <div
@@ -457,7 +418,7 @@ export default async function SustainabilityDetailPage({
                             style={{
                               width: `${Math.min(100, p.overall)}%`,
                               background:
-                                "linear-gradient(90deg, var(--heri-ochre) 0%, var(--heri-copper) 100%)",
+                                "linear-gradient(90deg, var(--gold) 0%, var(--gold) 100%)",
                               transition: "width .6s ease",
                             }}
                           />
@@ -466,19 +427,13 @@ export default async function SustainabilityDetailPage({
                     </li>
                   ))}
                 </ul>
-              </section>
+              </DaylightPanel>
             ) : null}
           </div>
 
-          <aside className="space-y-6">
-            <section className="card card-pad anim-fade-up">
-              <h3
-                className="mb-3 text-sm font-semibold"
-                style={{ color: "var(--heri-ink)" }}
-              >
-                {en ? "Summary Card" : "البطاقة"}
-              </h3>
-              <dl className="space-y-2 text-xs">
+          <aside>
+            <DaylightPanel title={en ? "Summary Card" : "البطاقة"}>
+              <dl style={{ fontSize: 12, display: "flex", flexDirection: "column", gap: 8 }}>
                 <Fact label={en ? "Company" : "الشركة"} value={companyName} link={`/companies/${score.company.id}`} />
                 <Fact
                   label={en ? "Period" : "الفترة"}
@@ -492,11 +447,11 @@ export default async function SustainabilityDetailPage({
                   value={`${Math.round(score.overall)}/100`}
                 />
               </dl>
-            </section>
+            </DaylightPanel>
           </aside>
         </div>
       </div>
-    </>
+    </DaylightShell>
   );
 }
 
@@ -510,17 +465,17 @@ function Fact({
   link?: string;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-[var(--heri-rule)] pb-1.5 last:border-b-0">
-      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
+    <div className="flex items-center justify-between border-b border-[var(--line)] pb-1.5 last:border-b-0">
+      <dt style={{ color: "var(--ink-muted)" }}>{label}</dt>
       <dd
         className="text-end font-bold"
-        style={{ color: "var(--heri-ink)" }}
+        style={{ color: "var(--ink)" }}
       >
         {link ? (
           <Link
             href={link}
             className="hover:underline"
-            style={{ color: "var(--heri-ochre)" }}
+            style={{ color: "var(--gold)" }}
           >
             {value}
           </Link>

@@ -8,11 +8,11 @@ import {
   Activity, Plus, Pencil, Trash2, RotateCcw, LogIn, LogOut, Download,
   Brain, Sparkles, CheckCircle2, XCircle, UserPlus, FileDown,
 } from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { formatDate, formatNumber } from "@/lib/utils";
+import "../daylight.css";
 
 const ACTION_META: Record<
   string,
@@ -121,8 +121,8 @@ export default async function ActivityLogPage({
     searchParams.entity || searchParams.action || searchParams.actor;
 
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "السجل" : "Audit"}
         title={ar ? "سجل النشاط" : "Activity log"}
         subtitle={
@@ -130,37 +130,10 @@ export default async function ActivityLogPage({
             ? `${formatNumber(total)} عملية مسجلة عبر النظام`
             : `${formatNumber(total)} actions recorded across the system`
         }
-        metrics={[
-          {
-            label: ar ? "اليوم" : "Today",
-            value: formatNumber(
-              logs.filter((l) => {
-                const d = new Date(l.createdAt);
-                d.setHours(0, 0, 0, 0);
-                return d.getTime() === today.getTime();
-              }).length
-            ),
-            tone: "emerald",
-          },
-          {
-            label: ar ? "إنشاء" : "Created",
-            value: formatNumber(
-              byAction.find((b) => b.action === "CREATE")?._count._all ?? 0
-            ),
-            tone: "blue",
-          },
-          {
-            label: ar ? "حذف" : "Deleted",
-            value: formatNumber(
-              byAction.find((b) => b.action === "DELETE")?._count._all ?? 0
-            ),
-            tone: "amber",
-          },
-        ]}
         actions={
           <>
             {hasFilter ? (
-              <Link href="/activity" className="btn-secondary">
+              <Link href="/activity" className="dl-btn dl-btn-secondary">
                 {ar ? "مسح الفلاتر" : "Clear filters"}
               </Link>
             ) : null}
@@ -168,7 +141,7 @@ export default async function ActivityLogPage({
               href={`/api/export/activity?locale=${ar ? "ar" : "en"}${
                 searchParams.entity ? `&entity=${searchParams.entity}` : ""
               }${searchParams.action ? `&action=${searchParams.action}` : ""}`}
-              className="btn-secondary"
+              className="dl-btn dl-btn-secondary"
             >
               <FileDown className="h-4 w-4" />
               {ar ? "تصدير CSV" : "Export CSV"}
@@ -177,13 +150,31 @@ export default async function ActivityLogPage({
         }
       />
 
-      <PageContainer>
+      <DaylightKpiGrid>
+        <DaylightKpi
+          label={ar ? "اليوم" : "Today"}
+          value={formatNumber(logs.filter((l) => {
+            const d = new Date(l.createdAt);
+            d.setHours(0, 0, 0, 0);
+            return d.getTime() === today.getTime();
+          }).length)}
+        />
+        <DaylightKpi
+          label={ar ? "إنشاء" : "Created"}
+          value={formatNumber(byAction.find((b) => b.action === "CREATE")?._count._all ?? 0)}
+        />
+        <DaylightKpi
+          label={ar ? "حذف" : "Deleted"}
+          value={formatNumber(byAction.find((b) => b.action === "DELETE")?._count._all ?? 0)}
+        />
+        <DaylightKpi label={ar ? "إجمالي" : "Total"} value={formatNumber(total)} />
+      </DaylightKpiGrid>
         {/* Filter rail */}
         <div className="card card-pad space-y-3">
           <div>
             <div
               className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider"
-              style={{ color: "var(--heri-ink-3)" }}
+              style={{ color: "var(--ink-muted)" }}
             >
               {ar ? "حسب نوع الكيان" : "By entity"}
             </div>
@@ -218,7 +209,7 @@ export default async function ActivityLogPage({
           <div>
             <div
               className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider"
-              style={{ color: "var(--heri-ink-3)" }}
+              style={{ color: "var(--ink-muted)" }}
             >
               {ar ? "حسب الإجراء" : "By action"}
             </div>
@@ -260,12 +251,12 @@ export default async function ActivityLogPage({
           <div className="card card-pad py-16 text-center">
             <Activity
               className="mx-auto mb-3 h-10 w-10"
-              style={{ color: "var(--heri-ink-3)" }}
+              style={{ color: "var(--ink-muted)" }}
             />
-            <h3 className="text-base font-semibold" style={{ color: "var(--heri-ink)" }}>
+            <h3 className="text-base font-semibold" style={{ color: "var(--ink)" }}>
               {ar ? "لا توجد إجراءات مسجلة" : "No activity yet"}
             </h3>
-            <p className="mt-1 text-xs" style={{ color: "var(--heri-ink-3)" }}>
+            <p className="mt-1 text-xs" style={{ color: "var(--ink-muted)" }}>
               {ar
                 ? "ستظهر هنا كل عمليات الإنشاء والتعديل والحذف فور حدوثها."
                 : "Create, update and delete actions will show here as they happen."}
@@ -280,20 +271,20 @@ export default async function ActivityLogPage({
                     className="h-[2px] flex-1 rounded-full"
                     style={{
                       background:
-                        "linear-gradient(90deg, var(--heri-rule) 0%, transparent 100%)",
+                        "linear-gradient(90deg, var(--line) 0%, transparent 100%)",
                     }}
                   />
                   <span
                     className="text-[11px] font-semibold uppercase tracking-[0.16em]"
-                    style={{ color: "var(--heri-ink-3)" }}
+                    style={{ color: "var(--ink-muted)" }}
                   >
                     {label}
                   </span>
                   <span
                     className="rounded-full px-2 py-0.5 text-[10px] font-bold"
                     style={{
-                      background: "var(--heri-cream-2)",
-                      color: "var(--heri-ochre)",
+                      background: "var(--cream)",
+                      color: "var(--gold)",
                     }}
                   >
                     {formatNumber(items.length)}
@@ -302,7 +293,7 @@ export default async function ActivityLogPage({
                     className="h-[2px] flex-1 rounded-full"
                     style={{
                       background:
-                        "linear-gradient(270deg, var(--heri-rule) 0%, transparent 100%)",
+                        "linear-gradient(270deg, var(--line) 0%, transparent 100%)",
                     }}
                   />
                 </div>
@@ -311,7 +302,7 @@ export default async function ActivityLogPage({
                   {/* vertical line */}
                   <span
                     className="absolute top-3 bottom-3 w-px ltr:left-[15px] rtl:right-[15px]"
-                    style={{ background: "var(--heri-rule)" }}
+                    style={{ background: "var(--line)" }}
                   />
                   {items.map((log) => {
                     const meta = ACTION_META[log.action];
@@ -337,27 +328,27 @@ export default async function ActivityLogPage({
                             </span>
                             <span
                               className="text-[10px] font-bold uppercase"
-                              style={{ color: "var(--heri-ink-3)" }}
+                              style={{ color: "var(--ink-muted)" }}
                             >
                               {ar ? ENTITY_AR[log.entity] ?? log.entity : log.entity}
                             </span>
                             <span
                               className="ms-auto font-mono text-[10px]"
-                              style={{ color: "var(--heri-ink-3)" }}
+                              style={{ color: "var(--ink-muted)" }}
                             >
                               {relativeTime(log.createdAt, ar)}
                             </span>
                           </div>
                           <div
                             className="mt-1 text-[12.5px] font-bold leading-snug"
-                            style={{ color: "var(--heri-ink)" }}
+                            style={{ color: "var(--ink)" }}
                           >
                             {ar ? log.summary : log.summaryEn ?? log.summary}
                           </div>
                           {log.actorName ? (
                             <div
                               className="mt-1 text-[10.5px]"
-                              style={{ color: "var(--heri-ink-3)" }}
+                              style={{ color: "var(--ink-muted)" }}
                             >
                               <span className="font-bold">
                                 {ar ? "بواسطة" : "by"}
@@ -378,14 +369,13 @@ export default async function ActivityLogPage({
         {logs.length >= 200 ? (
           <p
             className="text-center text-[11px]"
-            style={{ color: "var(--heri-ink-3)" }}
+            style={{ color: "var(--ink-muted)" }}
           >
             {ar
               ? "عرض آخر 200 إجراء — يتم تنظيف السجل تلقائياً للحفاظ على آخر 5000."
               : "Showing latest 200 entries — log auto-prunes to last 5,000."}
           </p>
         ) : null}
-      </PageContainer>
-    </>
+    </DaylightShell>
   );
 }

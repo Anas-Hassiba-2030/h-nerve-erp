@@ -10,10 +10,11 @@ import { BrainCircuit } from "lucide-react";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { formatNumber, formatDateTime } from "@/lib/utils";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
 import { RunAnalysisForm, ResolveButton, DismissButton } from "./BrainForms";
+import "../../daylight.css";
 
 export const dynamic = "force-dynamic";
 
@@ -128,8 +129,8 @@ export default async function BrainPage({ searchParams }: { searchParams: SP }) 
   const typeLabel = (t: string) => (ar ? TYPE_AR[t] ?? t : TYPE_EN[t] ?? t);
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "الذكاء" : "Intelligence"}
         title={ar ? "العقل" : "Brain"}
         subtitle={
@@ -143,31 +144,16 @@ export default async function BrainPage({ searchParams }: { searchParams: SP }) 
             <AdminFamilyNav current="/admin/brain" ar={ar} />
           </div>
         }
-        metrics={[
-          {
-            label: ar ? "رؤى نشطة" : "Active insights",
-            value: formatNumber(activeCount),
-            tone: "blue",
-          },
-          {
-            label: ar ? "تنبيهات حرجة" : "Critical alerts",
-            value: formatNumber(criticalCount),
-            tone: criticalCount > 0 ? "amber" : "emerald",
-          },
-          {
-            label: ar ? "حُلّت اليوم" : "Resolved today",
-            value: formatNumber(resolvedToday),
-            tone: "emerald",
-          },
-          {
-            label: ar ? "آخر تحليل" : "Last analysis",
-            value: lastRun ? formatDateTime(lastRun, ar ? "ar" : "en") : dash,
-            tone: "violet",
-          },
-        ]}
       />
 
-      <div className="card card-pad mt-3">
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "رؤى نشطة" : "Active insights"} value={formatNumber(activeCount)} />
+        <DaylightKpi label={ar ? "تنبيهات حرجة" : "Critical alerts"} value={formatNumber(criticalCount)} />
+        <DaylightKpi label={ar ? "حُلّت اليوم" : "Resolved today"} value={formatNumber(resolvedToday)} />
+        <DaylightKpi label={ar ? "آخر تحليل" : "Last analysis"} value={lastRun ? formatDateTime(lastRun, ar ? "ar" : "en") : dash} />
+      </DaylightKpiGrid>
+
+      <div className="panel reveal mt-3">
         <form
           method="GET"
           className="flex flex-wrap items-end gap-2 text-[11px] font-bold"
@@ -215,12 +201,12 @@ export default async function BrainPage({ searchParams }: { searchParams: SP }) 
       </div>
 
       {list.length === 0 ? (
-        <div className="card card-pad mt-3 flex flex-col items-center gap-3 py-16 text-center">
+        <div className="panel reveal mt-3 flex flex-col items-center gap-3 py-16 text-center">
           <BrainCircuit
             className="h-10 w-10"
-            style={{ color: "var(--text-muted)" }}
+            style={{ color: "var(--ink-muted)" }}
           />
-          <p className="text-sm font-bold" style={{ color: "var(--text)" }}>
+          <p className="text-sm font-bold" style={{ color: "var(--ink)" }}>
             {activeCount === 0
               ? ar
                 ? "لا رؤى نشطة — شغّل التحليل"
@@ -236,7 +222,7 @@ export default async function BrainPage({ searchParams }: { searchParams: SP }) 
             <div key={g.sev} className="flex flex-col gap-2">
               <div
                 className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest"
-                style={{ color: "var(--text-muted)" }}
+                style={{ color: "var(--ink-muted)" }}
               >
                 <span className={SEV_BADGE[g.sev]}>{sevLabel(g.sev)}</span>
                 <span>{formatNumber(g.items.length)}</span>
@@ -249,7 +235,7 @@ export default async function BrainPage({ searchParams }: { searchParams: SP }) 
                   meta = {};
                 }
                 return (
-                  <div key={i.id} className="card card-pad flex flex-col gap-2">
+                  <div key={i.id} className="panel reveal flex flex-col gap-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={SEV_BADGE[i.severity] ?? "badge-slate"}>
                         {sevLabel(i.severity)}
@@ -257,24 +243,24 @@ export default async function BrainPage({ searchParams }: { searchParams: SP }) 
                       <span className="badge-slate">{typeLabel(i.type)}</span>
                       <span
                         className="text-sm font-extrabold"
-                        style={{ color: "var(--text)" }}
+                        style={{ color: "var(--ink)" }}
                       >
                         {i.title}
                       </span>
                       <span
                         className="ms-auto font-mono text-[10px]"
-                        style={{ color: "var(--text-muted)" }}
+                        style={{ color: "var(--ink-muted)" }}
                       >
                         {formatDateTime(i.createdAt, ar ? "ar" : "en")}
                       </span>
                     </div>
-                    <p className="text-xs" style={{ color: "var(--text)" }}>
+                    <p className="text-xs" style={{ color: "var(--ink)" }}>
                       {i.body}
                     </p>
                     <details>
                       <summary
                         className="cursor-pointer text-[10px] font-bold uppercase tracking-widest"
-                        style={{ color: "var(--text-muted)", listStyle: "none" }}
+                        style={{ color: "var(--ink-muted)", listStyle: "none" }}
                       >
                         {ar ? "تفاصيل" : "Details"}
                       </summary>
@@ -282,7 +268,7 @@ export default async function BrainPage({ searchParams }: { searchParams: SP }) 
                         className="mt-1 overflow-x-auto rounded p-2 text-[11px]"
                         style={{
                           background: "var(--surface-2, rgba(0,0,0,0.04))",
-                          color: "var(--text-muted)",
+                          color: "var(--ink-muted)",
                         }}
                       >
                         {JSON.stringify(meta, null, 2)}
@@ -307,6 +293,6 @@ export default async function BrainPage({ searchParams }: { searchParams: SP }) 
           ))}
         </section>
       )}
-    </>
+    </DaylightShell>
   );
 }

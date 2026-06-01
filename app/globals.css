@@ -9685,5 +9685,63 @@ html[dir="rtl"] .sidebar-drawer-panel { --drawer-from: -100%; }
   .proto-edit-btn, .proto-btn { transition: none !important; }
 }
 
+/* ════════════════════════════════════════════════════════════════
+   Heritage → Daylight bridge: restyle the (app) sidebar + add reveal
+   motion to .heri-* blocks so detail pages feel like the section pages.
+   Scope is tight: only the layout's first <aside> (sidebar) is targeted
+   so admin/theater/auth surfaces stay untouched.
+   ════════════════════════════════════════════════════════════════ */
+body > div > aside[aria-label="Sidebar"],
+body > div > aside[aria-label="القائمة الجانبية"] {
+  background: var(--heri-cream) !important;
+  color: var(--heri-ink) !important;
+  border-inline-start: 1px solid var(--heri-rule) !important;
+  border-inline-end: 1px solid var(--heri-rule) !important;
+}
+/* nav links inside the sidebar become rounded "soft" pills */
+aside[aria-label="Sidebar"] nav a,
+aside[aria-label="القائمة الجانبية"] nav a {
+  border-radius: 12px !important;
+  transition: background 200ms ease, color 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+}
+aside[aria-label="Sidebar"] nav a:hover,
+aside[aria-label="القائمة الجانبية"] nav a:hover {
+  background: color-mix(in srgb, var(--heri-ochre) 14%, transparent) !important;
+  color: var(--heri-ink) !important;
+}
+/* group section labels — uppercase letterspacing in copper */
+aside[aria-label="Sidebar"] nav span,
+aside[aria-label="القائمة الجانبية"] nav span {
+  color: inherit;
+}
+/* tighten the brand block + add a gold hairline under it */
+aside[aria-label="Sidebar"] > div:first-child,
+aside[aria-label="القائمة الجانبية"] > div:first-child {
+  border-bottom: 1px solid var(--heri-rule) !important;
+  position: relative;
+}
+aside[aria-label="Sidebar"] > div:first-child::after,
+aside[aria-label="القائمة الجانبية"] > div:first-child::after {
+  content: ""; position: absolute; left: 16px; right: 16px; bottom: -1px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--heri-ochre), transparent);
+}
 
+/* reveal motion on heri- cards/hero so detail pages animate in like Daylight */
+.heri-card, .heri-card-flat, .heri-hero, .heri-hero-ink {
+  animation: heriReveal 520ms cubic-bezier(.22,1,.36,1) both;
+}
+.heri-card:nth-child(2), .heri-card-flat:nth-child(2) { animation-delay: 60ms; }
+.heri-card:nth-child(3), .heri-card-flat:nth-child(3) { animation-delay: 120ms; }
+.heri-card:nth-child(4), .heri-card-flat:nth-child(4) { animation-delay: 180ms; }
+.heri-card:nth-child(5), .heri-card-flat:nth-child(5) { animation-delay: 240ms; }
+@keyframes heriReveal {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .heri-card, .heri-card-flat, .heri-hero, .heri-hero-ink { animation: none !important; }
+}
+
+/* sidebar should NOT animate-in from the side every navigation (felt jittery) */
+aside[aria-label="Sidebar"], aside[aria-label="القائمة الجانبية"] { animation: none !important; }
 

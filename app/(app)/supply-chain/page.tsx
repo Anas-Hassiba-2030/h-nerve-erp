@@ -1,6 +1,6 @@
 
 export const dynamic = "force-dynamic";
-// /supply-chain — predictive supply chain bridge. Heritage Modern vocabulary.
+// /supply-chain — predictive supply chain bridge. Daylight vocabulary.
 // Phase NS-1: every approved forecast drafts a cross-tenant PO.
 
 import Link from "next/link";
@@ -8,11 +8,9 @@ import {
   Brain, ArrowLeftRight, Plus, CheckCircle2, XCircle, Sparkles,
   Network, Zap, Activity, ShoppingCart,
 } from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
-import { HeriKpi } from "@/components/HeriKpi";
-import { HeritageSection, HeritagePill } from "@/components/heritage";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { StatusBadge } from "@/components/StatusBadge";
+import "../daylight.css";
 import { EmptyState } from "@/components/EmptyState";
 import { DeleteButton } from "@/components/DeleteButton";
 import { Sankey, type SankeyNode, type SankeyLink } from "@/components/charts/Sankey";
@@ -92,7 +90,7 @@ export default async function SupplyChainPage() {
       id: `cat-${cat}`,
       label: ar ? CATEGORY_LABEL[cat]?.ar ?? cat : CATEGORY_LABEL[cat]?.en ?? cat,
       column: 1,
-      color: "var(--heri-ochre)",
+      color: "var(--gold)",
     })),
     ...[...targetCompanies.values()].map((c) => ({
       id: `tgt-${c.id}`,
@@ -122,8 +120,8 @@ export default async function SupplyChainPage() {
   ];
 
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "الذكاء التشغيلي" : "Operational intelligence"}
         title={ar ? "سلسلة التوريد التنبؤية" : "Predictive supply chain"}
         subtitle={
@@ -133,141 +131,95 @@ export default async function SupplyChainPage() {
         }
       />
 
-      <PageContainer>
-        {/* Bridge narrative + actions */}
-        <HeritageSection
-          eyebrow={ar ? "جسر الذكاء" : "AI bridge"}
-          title={ar ? "من حجز فندقي… إلى أمر تصنيع" : "From booking… to production order"}
-          aside={
-            ar
-              ? `${formatNumber(forecasts.length)} إشارة`
-              : `${formatNumber(forecasts.length)} signals`
-          }
-          rtl={ar}
+      {/* Bridge narrative + actions */}
+      <DaylightPanel
+        title={ar ? "من حجز فندقي… إلى أمر تصنيع" : "From booking… to production order"}
+        aside={ar ? `${formatNumber(forecasts.length)} إشارة` : `${formatNumber(forecasts.length)} signals`}
+      >
+        <p
+          style={{
+            fontSize: 13,
+            lineHeight: 1.65,
+            color: "var(--ink-muted)",
+            maxWidth: 640,
+            marginBottom: 16,
+          }}
         >
-          <p
-            style={{
-              fontSize: 13,
-              lineHeight: 1.65,
-              color: "var(--heri-ink-2)",
-              maxWidth: 640,
-              marginBottom: 16,
-            }}
-          >
+          {ar
+            ? "المحرك التنبؤي يقرأ كل حجز قادم في فنادق أرينا، يحسب توقعات استهلاك النزلاء، ويولّد إشارات شراء للمها ولوران قبل أن يصبح الطلب أزمة."
+            : "The predictive engine reads every incoming booking at Arena hotels, models guest consumption, and pushes purchase signals to Maha and Loran before demand becomes a crisis."}
+        </p>
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
+          <form action={autoGenerateForecasts}>
+            <button type="submit" className="dl-btn dl-btn-primary" style={{ fontSize: 12 }}>
+              <Zap className="h-3.5 w-3.5" strokeWidth={1.5} />
+              {ar ? "تشغيل المحرك" : "Run engine"}
+            </button>
+          </form>
+          <Link href="/supply-chain/new" className="dl-btn dl-btn-secondary" style={{ fontSize: 12, textDecoration: "none" }}>
+            <Plus className="h-3.5 w-3.5" strokeWidth={1.5} />
+            {ar ? "تنبؤ يدوي" : "Manual forecast"}
+          </Link>
+          <ExportMenu type="supply-chain" locale={lc} />
+        </div>
+      </DaylightPanel>
+
+      {/* KPI band */}
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "مسودات معلّقة" : "Drafts pending"} value={String(drafts)} hint={ar ? "تنتظر القرار" : "awaiting decision"} />
+        <DaylightKpi label={ar ? "موافق عليها" : "Approved"} value={String(approved)} hint={ar ? "جاهزة للتنفيذ" : "ready to execute"} />
+        <DaylightKpi label={ar ? "منفّذة" : "Executed"} value={String(executed)} hint={ar ? "تمت" : "completed"} />
+        <DaylightKpi label={ar ? "متوسط الثقة" : "Avg confidence"} value={`${Math.round(avgConfidence * 100)}%`} hint={ar ? "درجة AI" : "AI score"} />
+      </DaylightKpiGrid>
+
+      {/* Sankey */}
+      {forecasts.length > 0 ? (
+        <DaylightPanel
+          title={ar ? "جسر التوريد المرئي" : "Visual supply bridge"}
+          aside={ar ? "المصدر ← الفئة ← الهدف (السُّمك ∝ الكمية)" : "Source → category → target (thickness ∝ demand)"}
+        >
+          <Sankey nodes={sankeyNodes} links={sankeyLinks} width={1040} height={380} />
+        </DaylightPanel>
+      ) : null}
+
+      {/* Forecast cards */}
+      {forecasts.length === 0 ? (
+        <DaylightPanel title={ar ? "لم يصدر أي تنبؤ بعد" : "No forecasts yet"}>
+          <p style={{ fontSize: 13, color: "var(--ink-muted)", marginBottom: 12 }}>
             {ar
-              ? "المحرك التنبؤي يقرأ كل حجز قادم في فنادق أرينا، يحسب توقعات استهلاك النزلاء، ويولّد إشارات شراء للمها ولوران قبل أن يصبح الطلب أزمة."
-              : "The predictive engine reads every incoming booking at Arena hotels, models guest consumption, and pushes purchase signals to Maha and Loran before demand becomes a crisis."}
+              ? "شغّل المحرك ليقرأ بيانات الحجوزات والإنتاج الحالية، أو سجّل تنبؤاً يدوياً."
+              : "Run the engine to read current booking & production data, or register a manual forecast."}
           </p>
-          <div className="flex flex-wrap items-center gap-2">
-            <form action={autoGenerateForecasts}>
-              <button type="submit" className="heri-btn heri-btn-primary" style={{ fontSize: 12 }}>
-                <Zap className="h-3.5 w-3.5" strokeWidth={1.5} />
-                {ar ? "تشغيل المحرك" : "Run engine"}
-              </button>
-            </form>
-            <Link href="/supply-chain/new" className="heri-btn heri-btn-ghost" style={{ fontSize: 12, textDecoration: "none" }}>
-              <Plus className="h-3.5 w-3.5" strokeWidth={1.5} />
-              {ar ? "تنبؤ يدوي" : "Manual forecast"}
-            </Link>
-            <ExportMenu type="supply-chain" locale={lc} />
+          <form action={autoGenerateForecasts}>
+            <button type="submit" className="dl-btn dl-btn-primary">
+              <Brain className="h-4 w-4" strokeWidth={1.5} />
+              {ar ? "توليد تلقائي" : "Auto-generate"}
+            </button>
+          </form>
+        </DaylightPanel>
+      ) : (
+        <DaylightPanel
+          title={ar ? "جسر التنبؤات" : "Forecast bridge"}
+          aside={ar ? `${formatNumber(forecasts.length)} إشارة AI` : `${formatNumber(forecasts.length)} AI signals`}
+        >
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(420px, 1fr))", gap: 12 }}>
+            {forecasts.map((f) => (
+              <ForecastCard key={f.id} forecast={f} ar={ar} lc={lc} />
+            ))}
           </div>
-        </HeritageSection>
-
-        {/* KPI band */}
-        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
-          <HeriKpi
-            label={ar ? "مسودات معلّقة" : "Drafts pending"}
-            raw={drafts}
-            kind="number"
-            accent={drafts > 0 ? "var(--heri-ochre)" : undefined}
-            hint={ar ? "تنتظر القرار" : "awaiting decision"}
-          />
-          <HeriKpi
-            label={ar ? "موافق عليها" : "Approved"}
-            raw={approved}
-            kind="number"
-            accent="var(--heri-teal)"
-            hint={ar ? "جاهزة للتنفيذ" : "ready to execute"}
-          />
-          <HeriKpi
-            label={ar ? "منفّذة" : "Executed"}
-            raw={executed}
-            kind="number"
-            hint={ar ? "تمت" : "completed"}
-          />
-          <HeriKpi
-            label={ar ? "متوسط الثقة" : "Avg confidence"}
-            raw={Math.round(avgConfidence * 100)}
-            kind="number"
-            hint={ar ? "درجة AI" : "AI score"}
-          />
-        </section>
-
-        {/* Sankey */}
-        {forecasts.length > 0 ? (
-          <HeritageSection
-            eyebrow={ar ? "تدفق الذكاء" : "Intelligence flow"}
-            title={ar ? "جسر التوريد المرئي" : "Visual supply bridge"}
-            aside={
-              ar
-                ? "المصدر ← الفئة ← الهدف (السُّمك ∝ الكمية)"
-                : "Source → category → target (thickness ∝ demand)"
-            }
-            rtl={ar}
-          >
-            <Sankey nodes={sankeyNodes} links={sankeyLinks} width={1040} height={380} />
-          </HeritageSection>
-        ) : null}
-
-        {/* Forecast cards */}
-        {forecasts.length === 0 ? (
-          <EmptyState
-            icon={Brain}
-            title={ar ? "لم يصدر أي تنبؤ بعد" : "No forecasts yet"}
-            description={
-              ar
-                ? "شغّل المحرك ليقرأ بيانات الحجوزات والإنتاج الحالية، أو سجّل تنبؤاً يدوياً."
-                : "Run the engine to read current booking & production data, or register a manual forecast."
-            }
-            action={
-              <form action={autoGenerateForecasts}>
-                <button type="submit" className="heri-btn heri-btn-primary">
-                  <Brain className="h-4 w-4" strokeWidth={1.5} />
-                  {ar ? "توليد تلقائي" : "Auto-generate"}
-                </button>
-              </form>
-            }
-          />
-        ) : (
-          <HeritageSection
-            eyebrow={ar ? "كل الإشارات" : "All signals"}
-            title={ar ? "جسر التنبؤات" : "Forecast bridge"}
-            aside={
-              ar
-                ? `${formatNumber(forecasts.length)} إشارة AI`
-                : `${formatNumber(forecasts.length)} AI signals`
-            }
-            rtl={ar}
-          >
-            <div className="grid gap-3 heri-stagger md:grid-cols-2">
-              {forecasts.map((f) => (
-                <ForecastCard key={f.id} forecast={f} ar={ar} lc={lc} />
-              ))}
-            </div>
-          </HeritageSection>
-        )}
-      </PageContainer>
-    </>
+        </DaylightPanel>
+      )}
+    </DaylightShell>
   );
 }
 
 /* ── Forecast card — Heritage Modern ──────────────────────────── */
 
 const STATUS_ACCENT: Record<string, string> = {
-  APPROVED:  "var(--heri-teal)",
-  EXECUTED:  "var(--heri-copper)",
-  DISMISSED: "var(--heri-ink-3)",
-  DRAFT:     "var(--heri-ochre)",
+  APPROVED:  "var(--emerald)",
+  EXECUTED:  "var(--gold)",
+  DISMISSED: "var(--ink-muted)",
+  DRAFT:     "var(--gold)",
 };
 
 function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc: "ar" | "en" }) {
@@ -276,14 +228,14 @@ function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc:
   const catLabel = CATEGORY_LABEL[f.category]
     ? ar ? CATEGORY_LABEL[f.category].ar : CATEGORY_LABEL[f.category].en
     : f.category;
-  const accent = STATUS_ACCENT[f.status] ?? "var(--heri-ochre)";
+  const accent = STATUS_ACCENT[f.status] ?? "var(--gold)";
 
   return (
     <article
       className="relative overflow-hidden"
       style={{
-        background: "var(--heri-cream)",
-        border: "1px solid var(--heri-rule)",
+        background: "var(--ivory)",
+        border: "1px solid var(--line)",
       }}
     >
       <span
@@ -297,16 +249,14 @@ function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc:
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span
-              className="heri-eyebrow"
-              style={{ color: "var(--heri-ink-2)" }}
+              style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}
             >
               {catLabel}
             </span>
             <StatusBadge status={f.status} />
           </div>
           <span
-            className="heri-number-mono"
-            style={{ fontSize: 10, color: "var(--heri-ink-3)", letterSpacing: "0.04em" }}
+            style={{ fontSize: 10, color: "var(--ink-muted)", letterSpacing: "0.04em", fontFamily: "monospace" }}
           >
             {formatShortDate(f.periodStart)} → {formatShortDate(f.periodEnd)}
           </span>
@@ -314,7 +264,7 @@ function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc:
 
         <h3
           className={ar ? "" : "font-display-latin"}
-          style={{ fontSize: 15, fontWeight: 600, color: "var(--heri-ink)", lineHeight: 1.3 }}
+          style={{ fontSize: 15, fontWeight: 600, color: "var(--ink)", lineHeight: 1.3 }}
         >
           {f.productLabel}
         </h3>
@@ -332,7 +282,7 @@ function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc:
             <span style={{ fontSize: 10 }}>{sourceBrand.emblem}</span>
             <span className="line-clamp-1">{ar ? f.source.name : f.source.nameEn}</span>
           </span>
-          <ArrowLeftRight className="h-3 w-3 shrink-0" style={{ color: "var(--heri-ink-3)" }} strokeWidth={1.5} />
+          <ArrowLeftRight className="h-3 w-3 shrink-0" style={{ color: "var(--ink-muted)" }} strokeWidth={1.5} />
           <span
             className="inline-flex items-center gap-1 px-2 py-0.5 font-semibold ring-1"
             style={{
@@ -354,9 +304,9 @@ function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc:
             style={{
               fontSize: 10.5,
               fontWeight: 600,
-              background: "var(--heri-cream-2)",
-              color: "var(--heri-copper)",
-              borderColor: "var(--heri-rule-strong)",
+              background: "var(--cream)",
+              color: "var(--gold)",
+              borderColor: "var(--line)",
               textDecoration: "none",
             }}
           >
@@ -381,15 +331,15 @@ function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc:
         <div
           className="px-3 py-2.5"
           style={{
-            background: "var(--heri-cream-2)",
-            border: "1px solid var(--heri-rule)",
+            background: "var(--cream)",
+            border: "1px solid var(--line)",
             borderInlineStart: `3px solid ${accent}`,
             fontSize: 11,
             lineHeight: 1.6,
-            color: "var(--heri-ink-2)",
+            color: "var(--ink-muted)",
           }}
         >
-          <span style={{ fontWeight: 700, color: "var(--heri-ink)" }}>
+          <span style={{ fontWeight: 700, color: "var(--ink)" }}>
             {ar ? "إشارة H-Nerve: " : "H-Nerve signal: "}
           </span>
           {f.signal}
@@ -411,7 +361,7 @@ function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc:
       {/* Footer actions */}
       <div
         className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5"
-        style={{ borderTop: "1px solid var(--heri-rule)", background: "var(--heri-cream-2)" }}
+        style={{ borderTop: "1px solid var(--line)", background: "var(--cream)" }}
       >
         <div className="flex flex-wrap gap-1">
           {(["DRAFT", "APPROVED", "EXECUTED", "DISMISSED"] as const).map((s) => {
@@ -427,15 +377,15 @@ function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc:
                 <input type="hidden" name="status" value={s} />
                 <button
                   type="submit"
-                  className="heri-btn heri-btn-ghost"
+                  className="dl-btn dl-btn-secondary"
                   style={{ padding: "4px 10px", fontSize: 10.5 }}
                 >
                   {s === "APPROVED" ? (
-                    <CheckCircle2 className="h-3 w-3" style={{ color: "var(--heri-teal)" }} strokeWidth={1.5} />
+                    <CheckCircle2 className="h-3 w-3" style={{ color: "var(--emerald)" }} strokeWidth={1.5} />
                   ) : s === "EXECUTED" ? (
-                    <ArrowLeftRight className="h-3 w-3" style={{ color: "var(--heri-copper)" }} strokeWidth={1.5} />
+                    <ArrowLeftRight className="h-3 w-3" style={{ color: "var(--gold)" }} strokeWidth={1.5} />
                   ) : s === "DISMISSED" ? (
-                    <XCircle className="h-3 w-3" style={{ color: "var(--heri-terracotta)" }} strokeWidth={1.5} />
+                    <XCircle className="h-3 w-3" style={{ color: "var(--brick)" }} strokeWidth={1.5} />
                   ) : null}
                   {ar ? STATUS_LABEL[s].ar : STATUS_LABEL[s].en}
                 </button>
@@ -469,19 +419,18 @@ function ForecastStat({
     <div
       className="p-2 text-center"
       style={{
-        background: highlight ? "var(--heri-cream-2)" : "var(--heri-cream)",
-        border: `1px solid ${highlight ? "var(--heri-rule-strong)" : "var(--heri-rule)"}`,
-        borderTop: highlight ? `2px solid var(--heri-ochre)` : undefined,
+        background: highlight ? "var(--cream)" : "var(--ivory)",
+        border: `1px solid ${highlight ? "var(--line)" : "var(--line)"}`,
+        borderTop: highlight ? `2px solid var(--gold)` : undefined,
       }}
     >
-      <div className="heri-eyebrow" style={{ fontSize: 9, letterSpacing: "0.08em" }}>{label}</div>
+      <div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.08em", color: "var(--ink-muted)" }}>{label}</div>
       <div
-        className="heri-number-mono mt-0.5"
-        style={{ fontSize: 15, fontWeight: 700, color: highlight ? "var(--heri-ochre-2)" : "var(--heri-ink)" }}
+        style={{ fontSize: 15, fontWeight: 700, color: highlight ? "var(--gold)" : "var(--ink)", fontFamily: "monospace", marginTop: 2 }}
       >
         {value}
       </div>
-      <div style={{ fontSize: 9, fontWeight: 600, color: "var(--heri-ink-3)" }}>{sub}</div>
+      <div style={{ fontSize: 9, fontWeight: 600, color: "var(--ink-muted)" }}>{sub}</div>
     </div>
   );
 }

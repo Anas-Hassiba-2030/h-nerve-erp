@@ -10,10 +10,9 @@ import {
   CheckCircle2,
   User as UserIcon,
 } from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
-import { HeritagePill } from "@/components/heritage";
+import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
 import { StatusBadge } from "@/components/StatusBadge";
+import "../../daylight.css";
 import { PinButton } from "@/components/PinButton";
 import { prisma } from "@/lib/db";
 import { isPinned } from "@/lib/pins";
@@ -31,13 +30,12 @@ const SEVERITY_ICON: Record<string, typeof Sparkles> = {
   INFO: Sparkles,
 };
 
-// Heritage palette — single inline-start rail per severity instead of a
-// neon gradient. Matches the insight cards on /insights.
+// Daylight palette — single inline-start rail per severity.
 const SEVERITY_RAIL: Record<string, string> = {
-  CRITICAL:    "var(--heri-terracotta)",
-  WARN:        "var(--heri-ochre-2)",
-  OPPORTUNITY: "var(--heri-teal)",
-  INFO:        "var(--heri-copper)",
+  CRITICAL:    "var(--brick)",
+  WARN:        "var(--gold)",
+  OPPORTUNITY: "var(--emerald)",
+  INFO:        "var(--gold)",
 };
 const SEVERITY_PILL: Record<string, "critical" | "warn" | "success" | "info"> = {
   CRITICAL: "critical",
@@ -89,294 +87,253 @@ export default async function InsightDetailPage({
   const pinned = await isPinned("INSIGHT", insight.id);
 
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir="rtl">
+      <DaylightHeader
         eyebrow="إشارات الذكاء"
         title={insight.title}
         subtitle={`${MODULE_AR[insight.module] ?? insight.module} • ${severityAr(insight.severity)}`}
       />
 
-      <PageContainer>
-        <div className="heri-stagger space-y-6">
-          {/* Back rail + pin */}
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <Link
-              href="/insights"
-              className="heri-focusable inline-flex items-center gap-2"
+      {/* Back + pin */}
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 8 }}>
+        <Link
+          href="/insights"
+          style={{
+            fontSize: 11,
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            color: "var(--gold)",
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <ArrowLeft className="h-3 w-3 rtl:rotate-180" strokeWidth={1.5} />
+          العودة إلى الإشارات
+        </Link>
+        <PinButton
+          entityType="INSIGHT"
+          entityId={insight.id}
+          label={insight.title}
+          href={`/insights/${insight.id}`}
+          icon="Sparkles"
+          initial={pinned}
+          tone="default"
+          locale="ar"
+        />
+      </div>
+
+      {/* Hero panel */}
+      <div className="panel reveal" style={{ position: "relative", padding: "28px 32px" }}>
+        <span
+          aria-hidden
+          style={{ position: "absolute", top: 0, bottom: 0, insetInlineStart: 0, width: 3, background: rail }}
+        />
+        <div style={{ marginInlineStart: 8, display: "flex", flexWrap: "wrap", alignItems: "flex-start", gap: 20 }}>
+          <div
+            style={{
+              display: "flex",
+              width: 56,
+              height: 56,
+              flexShrink: 0,
+              alignItems: "center",
+              justifyContent: "center",
+              color: rail,
+              border: "1px solid var(--line)",
+              background: "var(--cream)",
+            }}
+          >
+            <Icon className="h-6 w-6" strokeWidth={1.5} />
+          </div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
+              <span className={`tag ${pillTone === "success" ? "ok" : pillTone === "info" ? "ok" : "gold"}`} style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}>
+                {severityAr(insight.severity)}
+              </span>
+              <span className="tag ok" style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}>
+                {MODULE_AR[insight.module] ?? insight.module}
+              </span>
+              <StatusBadge status={insight.status} />
+            </div>
+            <h2
               style={{
-                fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-                fontSize: 11,
-                letterSpacing: "0.16em",
-                textTransform: "uppercase",
-                color: "var(--heri-copper)",
-                textDecoration: "none",
+                marginTop: 12,
+                fontSize: "clamp(22px, 2.6vw, 34px)",
+                lineHeight: 1.15,
+                letterSpacing: "-0.005em",
+                fontWeight: 600,
+                color: "var(--ink)",
               }}
             >
-              <ArrowLeft className="h-3 w-3 rtl:rotate-180" strokeWidth={1.5} />
-              العودة إلى الإشارات
-            </Link>
-            <PinButton
-              entityType="INSIGHT"
-              entityId={insight.id}
-              label={insight.title}
-              href={`/insights/${insight.id}`}
-              icon="Sparkles"
-              initial={pinned}
-              tone="default"
-              locale="ar"
-            />
-          </div>
-
-          {/* Heritage hero plinth — single severity rail, cream surface, no neon */}
-          <section
-            className="heri-hero relative"
-            style={{ padding: "28px 32px" }}
-          >
-            <span
-              aria-hidden
-              className="absolute top-0 bottom-0"
-              style={{ insetInlineStart: 0, width: 3, background: rail }}
-            />
-            <div className="ms-2 flex flex-wrap items-start gap-5">
-              <div
-                className="flex h-14 w-14 shrink-0 items-center justify-center"
-                style={{
-                  color: rail,
-                  border: "1px solid var(--heri-rule-strong)",
-                  background: "var(--heri-cream-2)",
-                }}
-              >
-                <Icon className="h-6 w-6" strokeWidth={1.5} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <HeritagePill tone={pillTone}>
-                    {severityAr(insight.severity)}
-                  </HeritagePill>
-                  <HeritagePill tone="neutral">
-                    {MODULE_AR[insight.module] ?? insight.module}
-                  </HeritagePill>
-                  <StatusBadge status={insight.status} />
-                </div>
-                <h2
-                  className="mt-3"
-                  style={{
-                    fontSize: "clamp(22px, 2.6vw, 34px)",
-                    lineHeight: 1.15,
-                    letterSpacing: "-0.005em",
-                    fontWeight: 600,
-                    color: "var(--heri-ink)",
-                    textWrap: "balance" as any,
-                  }}
-                >
-                  {insight.title}
-                </h2>
-                <div
-                  className="mt-3 flex flex-wrap items-center gap-3"
-                  style={{
-                    fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-                    fontSize: 11,
-                    letterSpacing: "0.08em",
-                    color: "var(--heri-ink-3)",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  <span className="inline-flex items-center gap-1.5">
-                    <Clock className="h-3 w-3" strokeWidth={1.5} />
-                    {formatRelative(insight.createdAt)}
-                  </span>
-                  {insight.author ? (
-                    <>
-                      <span style={{ color: "var(--heri-rule-strong)" }}>·</span>
-                      <Link
-                        href={`/users/${insight.author.id}`}
-                        className="heri-focusable inline-flex items-center gap-1.5"
-                        style={{ color: "var(--heri-copper)", textDecoration: "none" }}
-                      >
-                        <UserIcon className="h-3 w-3" strokeWidth={1.5} />
-                        {insight.author.name}
-                      </Link>
-                    </>
-                  ) : null}
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Two columns */}
-          <div className="grid gap-6 lg:grid-cols-[1fr,320px]">
-            <div className="space-y-6">
-              {/* Body */}
-              <section className="heri-card">
-                <h3
-                  className="mb-3 flex items-center gap-2 heri-eyebrow"
-                  style={{ color: "var(--heri-ink-3)" }}
-                >
-                  <Brain className="h-3.5 w-3.5" style={{ color: "var(--heri-ochre)" }} strokeWidth={1.5} />
-                  التحليل الكامل
-                </h3>
-                <div
-                  className="measure whitespace-pre-line"
-                  style={{ color: "var(--heri-ink)", fontSize: 14, lineHeight: 1.65 }}
-                >
-                  {insight.body}
-                </div>
-              </section>
-
-              {/* Related */}
-              {related.length > 0 ? (
-                <section className="heri-card">
-                  <header className="mb-3 flex items-center justify-between">
-                    <h3 className="flex items-center gap-2 heri-eyebrow" style={{ color: "var(--heri-ink-3)" }}>
-                      <Sparkles className="h-3.5 w-3.5" style={{ color: "var(--heri-ochre)" }} strokeWidth={1.5} />
-                      إشارات أخرى من {MODULE_AR[insight.module] ?? insight.module}
-                    </h3>
-                    <Link
-                      href="/insights"
-                      className="heri-focusable"
-                      style={{
-                        fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-                        fontSize: 11,
-                        letterSpacing: "0.12em",
-                        color: "var(--heri-copper)",
-                        textDecoration: "none",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      كل الإشارات ←
-                    </Link>
-                  </header>
-                  <ul className="space-y-2 heri-stagger">
-                    {related.map((r) => {
-                      const rRail = SEVERITY_RAIL[r.severity] ?? SEVERITY_RAIL.INFO;
-                      const rPill = SEVERITY_PILL[r.severity] ?? "info";
-                      return (
-                        <li key={r.id}>
-                          <Link
-                            href={`/insights/${r.id}`}
-                            className="heri-focusable block relative"
-                            style={{
-                              background: "var(--heri-cream)",
-                              border: "1px solid var(--heri-rule)",
-                              textDecoration: "none",
-                              padding: "10px 14px 10px 16px",
-                            }}
-                          >
-                            <span
-                              aria-hidden
-                              className="absolute top-0 bottom-0"
-                              style={{ insetInlineStart: 0, width: 2, background: rRail }}
-                            />
-                            <div className="flex items-center gap-2">
-                              <HeritagePill tone={rPill}>{severityAr(r.severity)}</HeritagePill>
-                              <span
-                                className="truncate"
-                                style={{ color: "var(--heri-ink)", fontSize: 13, fontWeight: 600, letterSpacing: "-0.005em" }}
-                              >
-                                {r.title}
-                              </span>
-                            </div>
-                            <p
-                              className="mt-1 line-clamp-2"
-                              style={{ color: "var(--heri-ink-2)", fontSize: 12, lineHeight: 1.5 }}
-                            >
-                              {r.body}
-                            </p>
-                            <div
-                              className="mt-1"
-                              style={{
-                                fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-                                fontSize: 10,
-                                letterSpacing: "0.08em",
-                                color: "var(--heri-ink-3)",
-                                textTransform: "uppercase",
-                              }}
-                            >
-                              {formatRelative(r.createdAt)}
-                            </div>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </section>
-              ) : null}
-            </div>
-
-            <aside className="space-y-6">
-              {/* Author card */}
+              {insight.title}
+            </h2>
+            <div
+              style={{
+                marginTop: 12,
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: 12,
+                fontFamily: "monospace",
+                fontSize: 11,
+                color: "var(--ink-muted)",
+              }}
+            >
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <Clock className="h-3 w-3" strokeWidth={1.5} />
+                {formatRelative(insight.createdAt)}
+              </span>
               {insight.author ? (
-                <section className="heri-card">
-                  <h3 className="mb-3 heri-eyebrow" style={{ color: "var(--heri-ink-3)" }}>
-                    ناشر الإشارة
-                  </h3>
+                <>
+                  <span>·</span>
                   <Link
                     href={`/users/${insight.author.id}`}
-                    className="heri-focusable flex items-center gap-3 p-2 transition"
-                    style={{ textDecoration: "none" }}
+                    style={{ color: "var(--gold)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
                   >
-                    {(() => {
-                      const r = rankById(insight.author.rank);
-                      return (
-                        <div
-                          className="rank-piece"
-                          style={{ color: r.color }}
-                          title={r.ar}
-                        >
-                          {r.symbol}
-                        </div>
-                      );
-                    })()}
-                    <div className="min-w-0 flex-1">
-                      <div
-                        className="truncate"
-                        style={{ color: "var(--heri-ink)", fontSize: 13, fontWeight: 600 }}
-                      >
-                        {insight.author.name}
-                      </div>
-                      <div
-                        style={{
-                          color: "var(--heri-ink-3)",
-                          fontSize: 11,
-                          fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-                          marginTop: 2,
-                        }}
-                      >
-                        {insight.author.role} · {insight.author.xp} XP
-                      </div>
-                    </div>
+                    <UserIcon className="h-3 w-3" strokeWidth={1.5} />
+                    {insight.author.name}
                   </Link>
-                </section>
+                </>
               ) : null}
-
-              {/* Meta */}
-              <section className="heri-card">
-                <h3
-                  className="mb-3 flex items-center gap-2 heri-eyebrow"
-                  style={{ color: "var(--heri-ink-3)" }}
-                >
-                  <CheckCircle2 className="h-3.5 w-3.5" style={{ color: "var(--heri-ochre)" }} strokeWidth={1.5} />
-                  البطاقة
-                </h3>
-                <dl className="space-y-2" style={{ fontSize: 12 }}>
-                  <Fact
-                    label="الوحدة"
-                    value={MODULE_AR[insight.module] ?? insight.module}
-                  />
-                  <Fact label="الخطورة" value={severityAr(insight.severity)} />
-                  <Fact label="الحالة" value={insight.status} />
-                  <Fact label="نُشرت" value={formatDateTime(insight.createdAt)} />
-                  <Fact
-                    label="آخر تحديث"
-                    value={formatRelative(insight.updatedAt)}
-                  />
-                </dl>
-              </section>
-            </aside>
+            </div>
           </div>
         </div>
-      </PageContainer>
-    </>
+      </div>
+
+      {/* Two columns */}
+      <div style={{ display: "grid", gap: 24, gridTemplateColumns: "1fr 320px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          {/* Body */}
+          <DaylightPanel title="التحليل الكامل">
+            <div
+              style={{ color: "var(--ink)", fontSize: 14, lineHeight: 1.65, whiteSpace: "pre-line" }}
+            >
+              {insight.body}
+            </div>
+          </DaylightPanel>
+
+          {/* Related */}
+          {related.length > 0 ? (
+            <DaylightPanel
+              title={`إشارات أخرى من ${MODULE_AR[insight.module] ?? insight.module}`}
+              aside={<Link href="/insights" style={{ fontSize: 11, color: "var(--gold)", textDecoration: "none" }}>كل الإشارات ←</Link>}
+            >
+              <ul style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {related.map((r) => {
+                  const rRail = SEVERITY_RAIL[r.severity] ?? SEVERITY_RAIL.INFO;
+                  const rPill = SEVERITY_PILL[r.severity] ?? "info";
+                  return (
+                    <li key={r.id}>
+                      <Link
+                        href={`/insights/${r.id}`}
+                        style={{
+                          background: "var(--ivory)",
+                          border: "1px solid var(--line)",
+                          textDecoration: "none",
+                          padding: "10px 14px 10px 16px",
+                          display: "block",
+                          position: "relative",
+                        }}
+                      >
+                        <span
+                          aria-hidden
+                          style={{ position: "absolute", top: 0, bottom: 0, insetInlineStart: 0, width: 2, background: rRail }}
+                        />
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span className={`tag ${rPill === "success" ? "ok" : rPill === "info" ? "ok" : "gold"}`} style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}>
+                            {severityAr(r.severity)}
+                          </span>
+                          <span
+                            style={{ color: "var(--ink)", fontSize: 13, fontWeight: 600 }}
+                          >
+                            {r.title}
+                          </span>
+                        </div>
+                        <p
+                          style={{ color: "var(--ink-muted)", fontSize: 12, lineHeight: 1.5, marginTop: 4 }}
+                        >
+                          {r.body.length > 100 ? r.body.slice(0, 100) + "…" : r.body}
+                        </p>
+                        <div
+                          style={{
+                            fontFamily: "monospace",
+                            fontSize: 10,
+                            color: "var(--ink-muted)",
+                            marginTop: 4,
+                          }}
+                        >
+                          {formatRelative(r.createdAt)}
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </DaylightPanel>
+          ) : null}
+        </div>
+
+        <aside style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          {/* Author card */}
+          {insight.author ? (
+            <DaylightPanel title="ناشر الإشارة">
+              <Link
+                href={`/users/${insight.author.id}`}
+                style={{ display: "flex", alignItems: "center", gap: 12, padding: 8, textDecoration: "none" }}
+              >
+                {(() => {
+                  const r = rankById(insight.author.rank);
+                  return (
+                    <div
+                      className="rank-piece"
+                      style={{ color: r.color }}
+                      title={r.ar}
+                    >
+                      {r.symbol}
+                    </div>
+                  );
+                })()}
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div
+                    style={{ color: "var(--ink)", fontSize: 13, fontWeight: 600 }}
+                  >
+                    {insight.author.name}
+                  </div>
+                  <div
+                    style={{
+                      color: "var(--ink-muted)",
+                      fontSize: 11,
+                      fontFamily: "monospace",
+                      marginTop: 2,
+                    }}
+                  >
+                    {insight.author.role} · {insight.author.xp} XP
+                  </div>
+                </div>
+              </Link>
+            </DaylightPanel>
+          ) : null}
+
+          {/* Meta */}
+          <DaylightPanel title="البطاقة">
+            <dl style={{ fontSize: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+              <Fact
+                label="الوحدة"
+                value={MODULE_AR[insight.module] ?? insight.module}
+              />
+              <Fact label="الخطورة" value={severityAr(insight.severity)} />
+              <Fact label="الحالة" value={insight.status} />
+              <Fact label="نُشرت" value={formatDateTime(insight.createdAt)} />
+              <Fact
+                label="آخر تحديث"
+                value={formatRelative(insight.updatedAt)}
+              />
+            </dl>
+          </DaylightPanel>
+        </aside>
+      </div>
+    </DaylightShell>
   );
 }
 
@@ -392,18 +349,18 @@ function Fact({
   return (
     <div
       className="flex items-center justify-between pb-1.5 last:border-b-0"
-      style={{ borderBottom: "1px solid var(--heri-rule)" }}
+      style={{ borderBottom: "1px solid var(--line)" }}
     >
-      <dt style={{ color: "var(--heri-ink-3)" }}>{label}</dt>
+      <dt style={{ color: "var(--ink-muted)" }}>{label}</dt>
       <dd
         className="text-end"
-        style={{ color: "var(--heri-ink)", fontWeight: 600 }}
+        style={{ color: "var(--ink)", fontWeight: 600 }}
       >
         {link ? (
           <Link
             href={link}
             className="hover:underline"
-            style={{ color: "var(--heri-ochre)" }}
+            style={{ color: "var(--gold)" }}
           >
             {value}
           </Link>

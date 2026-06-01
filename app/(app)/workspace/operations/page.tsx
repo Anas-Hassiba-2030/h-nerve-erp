@@ -9,7 +9,7 @@ import { redirect } from "next/navigation";
 import {
   Milk, Hotel, Sprout, GraduationCap, AlertTriangle, ShieldCheck, Briefcase,
 } from "lucide-react";
-import { HeritageSection, HeritagePill } from "@/components/heritage";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { StatusBadge } from "@/components/StatusBadge";
 import { advanceBatchStatus } from "../actions";
 import { getUserIfRole } from "@/lib/authz";
@@ -19,6 +19,7 @@ import { getActiveWorkspaceId } from "@/lib/workspace";
 import { getAsOf } from "@/lib/timemachine";
 import { getLocale } from "@/lib/i18n.server";
 import { formatNumber, formatMoney } from "@/lib/utils";
+import "../../daylight.css";
 
 export const dynamic = "force-dynamic";
 
@@ -119,18 +120,24 @@ async function DairyOps({ ar, canMutate }: { ar: boolean; canMutate: boolean }) 
   const destTotal = destinations.reduce((a, d) => a + d.n, 0) || 1;
 
   return (
-    <div className="ws-page">
-      <section className="ws-stat-row">
-        <Kpi label={ar ? "إجمالي الدفعات" : "Total batches"} value={formatNumber(batches.length)} icon={<Milk className="h-3.5 w-3.5" />} />
-        <Kpi label={ar ? "إجمالي اللترات" : "Total liters"} value={formatNumber(Math.round(totalLiters))} />
-        <Kpi label={ar ? "نسبة اجتياز الجودة" : "QC pass rate"} value={`${qcRate}%`} accent={qcRate < 85} />
-        <Kpi label={ar ? "قرب الانتهاء" : "Near expiry"} value={formatNumber(expiring.length)} accent={expiring.length > 0} />
-      </section>
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
+        eyebrow={ar ? "العمليات" : "Operations"}
+        title={ar ? "لوحة الإنتاج" : "Production board"}
+        subtitle={ar ? "خط الإنتاج لحظياً" : "Live production line"}
+      />
+
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "إجمالي الدفعات" : "Total batches"} value={formatNumber(batches.length)} />
+        <DaylightKpi label={ar ? "إجمالي اللترات" : "Total liters"} value={formatNumber(Math.round(totalLiters))} />
+        <DaylightKpi label={ar ? "نسبة اجتياز الجودة" : "QC pass rate"} value={`${qcRate}%`} />
+        <DaylightKpi label={ar ? "قرب الانتهاء" : "Near expiry"} value={formatNumber(expiring.length)} />
+      </DaylightKpiGrid>
 
       {/* Production board */}
-      <HeritageSection
-        eyebrow={ar ? "خط الإنتاج لحظياً" : "Live production line"}
+      <DaylightPanel
         title={ar ? "لوحة الإنتاج" : "Production board"}
+        aside={ar ? "خط الإنتاج لحظياً" : "Live production line"}
       >
         <div className="ws-board">
           {byStatus.map((col) => (
@@ -192,14 +199,11 @@ async function DairyOps({ ar, canMutate }: { ar: boolean; canMutate: boolean }) 
             </div>
           ))}
         </div>
-      </HeritageSection>
+      </DaylightPanel>
 
       {/* Throughput + routing */}
-      <div className="ws-two-col">
-        <HeritageSection
-          eyebrow={ar ? "اللترات شهرياً — ٦ أشهر" : "Liters per month — 6 mo"}
-          title={ar ? "الإنتاجية" : "Throughput"}
-        >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <DaylightPanel title={ar ? "الإنتاجية" : "Throughput"} aside={ar ? "اللترات شهرياً — ٦ أشهر" : "Liters per month — 6 mo"}>
           <div className="ws-trend">
             {throughput.map((t) => (
               <div key={t.label} className="ws-trend-col">
@@ -218,12 +222,9 @@ async function DairyOps({ ar, canMutate }: { ar: boolean; canMutate: boolean }) 
               </div>
             ))}
           </div>
-        </HeritageSection>
+        </DaylightPanel>
 
-        <HeritageSection
-          eyebrow={ar ? "أين تذهب الدفعات" : "Where batches route"}
-          title={ar ? "توزيع الوجهات" : "Destination split"}
-        >
+        <DaylightPanel title={ar ? "توزيع الوجهات" : "Destination split"} aside={ar ? "أين تذهب الدفعات" : "Where batches route"}>
           <ul className="ws-dest">
             {destinations.map((d) => {
               const pct = Math.round((d.n / destTotal) * 100);
@@ -246,15 +247,12 @@ async function DairyOps({ ar, canMutate }: { ar: boolean; canMutate: boolean }) 
               );
             })}
           </ul>
-        </HeritageSection>
+        </DaylightPanel>
       </div>
 
       {/* Expiry watch + QC */}
-      <div className="ws-two-col">
-        <HeritageSection
-          eyebrow={ar ? "أولوية قصوى" : "Top priority"}
-          title={ar ? "مراقبة الصلاحية" : "Expiry watch"}
-        >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <DaylightPanel title={ar ? "مراقبة الصلاحية" : "Expiry watch"} aside={ar ? "أولوية قصوى" : "Top priority"}>
           {expiring.length === 0 ? (
             <Empty ar={ar} ok />
           ) : (
@@ -274,24 +272,21 @@ async function DairyOps({ ar, canMutate }: { ar: boolean; canMutate: boolean }) 
                       </div>
                       <div className="ws-list-sub ws-mono">{b.batchNumber}</div>
                     </div>
-                    <HeritagePill tone={dleft <= 3 ? "critical" : "warn"}>
+                    <span className={`tag ${dleft <= 3 ? "gold" : "ok"}`}>
                       {dleft <= 0
                         ? ar ? "اليوم" : "today"
                         : ar
                           ? `${dleft} يوم`
                           : `${dleft}d`}
-                    </HeritagePill>
+                    </span>
                   </li>
                 );
               })}
             </ul>
           )}
-        </HeritageSection>
+        </DaylightPanel>
 
-        <HeritageSection
-          eyebrow={ar ? "ضبط الجودة" : "Quality control"}
-          title={ar ? "توزيع الدرجات" : "Grade distribution"}
-        >
+        <DaylightPanel title={ar ? "توزيع الدرجات" : "Grade distribution"} aside={ar ? "ضبط الجودة" : "Quality control"}>
           <div className="ws-grade-grid">
             {["A", "B", "C", "D"].map((g) => {
               const n = batches.filter((b) => b.qualityGrade === g).length;
@@ -324,9 +319,9 @@ async function DairyOps({ ar, canMutate }: { ar: boolean; canMutate: boolean }) 
                 : `${gradeA} grade-A batches — ${qcRate}% within JS 1112 spec`}
             </span>
           </div>
-        </HeritageSection>
+        </DaylightPanel>
       </div>
-    </div>
+    </DaylightShell>
   );
 }
 
@@ -411,26 +406,29 @@ async function HospitalityOps({ ar }: { ar: boolean }) {
     .sort((a, b) => +new Date(a.checkIn) - +new Date(b.checkIn));
 
   return (
-    <div className="ws-page">
-      <section className="ws-stat-row">
-        <Kpi label={ar ? "الفنادق" : "Hotels"} value={formatNumber(hotels.length)} icon={<Hotel className="h-3.5 w-3.5" />} />
-        <Kpi label={ar ? "الإشغال" : "Occupancy"} value={`${occupancyPct}%`} accent={occupancyPct < 60} />
-        <Kpi label={ar ? "متوسط السعر ADR" : "ADR"} value={formatMoney(adr)} />
-        <Kpi label={ar ? "RevPAR" : "RevPAR"} value={formatMoney(revpar)} />
-      </section>
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
+        eyebrow={ar ? "العمليات — الضيافة" : "Operations — Hospitality"}
+        title={ar ? "لوحة الإشغال" : "Occupancy board"}
+        subtitle={ar ? "الإشغال الحالي لكل فندق" : "Live occupancy per property"}
+      />
+
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "الفنادق" : "Hotels"} value={formatNumber(hotels.length)} />
+        <DaylightKpi label={ar ? "الإشغال" : "Occupancy"} value={`${occupancyPct}%`} />
+        <DaylightKpi label={ar ? "متوسط السعر ADR" : "ADR"} value={formatMoney(adr)} />
+        <DaylightKpi label={ar ? "RevPAR" : "RevPAR"} value={formatMoney(revpar)} />
+      </DaylightKpiGrid>
 
       {/* Occupancy by property */}
-      <HeritageSection
-        eyebrow={ar ? "الإشغال الحالي لكل فندق" : "Live occupancy per property"}
-        title={ar ? "لوحة الإشغال" : "Occupancy board"}
-      >
+      <DaylightPanel title={ar ? "لوحة الإشغال" : "Occupancy board"} aside={ar ? "الإشغال الحالي لكل فندق" : "Live occupancy per property"}>
         <ul className="ws-dest">
           {occByHotel.map((o) => (
             <li key={o.hotel.id} className="ws-dest-row">
               <div className="ws-dest-head">
                 <span className="ws-dest-name">
                   {ar ? o.hotel.name : o.hotel.nameEn ?? o.hotel.name}
-                  <span className="ws-mono" style={{ color: "var(--heri-ink-3)", fontWeight: 400 }}>
+                  <span className="ws-mono" style={{ color: "var(--ink-muted)", fontWeight: 400 }}>
                     {"  "}· {o.hotel.city} · {o.hotel.starRating}★
                   </span>
                 </span>
@@ -443,10 +441,10 @@ async function HospitalityOps({ ar }: { ar: boolean }) {
                     width: `${o.pct}%`,
                     background:
                       o.pct >= 75
-                        ? "var(--heri-teal)"
+                        ? "var(--emerald)"
                         : o.pct >= 50
-                          ? "var(--heri-copper)"
-                          : "var(--heri-terracotta)",
+                          ? "var(--gold)"
+                          : "var(--brick)",
                   }}
                 />
               </div>
@@ -458,13 +456,10 @@ async function HospitalityOps({ ar }: { ar: boolean }) {
             </li>
           ))}
         </ul>
-      </HeritageSection>
+      </DaylightPanel>
 
-      <div className="ws-two-col">
-        <HeritageSection
-          eyebrow={ar ? "تركيبة أنواع الغرف" : "Room-type mix"}
-          title={ar ? "مزيج الحجوزات" : "Booking mix"}
-        >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <DaylightPanel title={ar ? "مزيج الحجوزات" : "Booking mix"} aside={ar ? "تركيبة أنواع الغرف" : "Room-type mix"}>
           <ul className="ws-dest">
             {roomMix.map((m) => {
               const pct = Math.round((m.n / mixTotal) * 100);
@@ -484,16 +479,13 @@ async function HospitalityOps({ ar }: { ar: boolean }) {
               );
             })}
           </ul>
-        </HeritageSection>
+        </DaylightPanel>
 
-        <HeritageSection
-          eyebrow={ar ? "أقرب ١٤ يوماً" : "Next 14 days"}
-          title={ar ? "وصولات قادمة" : "Arrival pace"}
-        >
+        <DaylightPanel title={ar ? "وصولات قادمة" : "Arrival pace"} aside={ar ? "أقرب ١٤ يوماً" : "Next 14 days"}>
           {upcoming.length === 0 ? (
-            <div className="ws-empty" data-ok="true">
+            <p style={{ fontSize: 13, color: "var(--ink-muted)", padding: "12px 0" }}>
               {ar ? "لا وصولات مجدولة قريباً." : "No arrivals scheduled soon."}
-            </div>
+            </p>
           ) : (
             <ul className="ws-list">
               {upcoming.slice(0, 12).map((b) => {
@@ -511,21 +503,21 @@ async function HospitalityOps({ ar }: { ar: boolean }) {
                         {ar ? "غرفة" : "rm"}
                       </div>
                     </div>
-                    <HeritagePill tone={din <= 2 ? "warn" : "neutral"}>
+                    <span className={`tag ${din <= 2 ? "gold" : "ok"}`}>
                       {din === 0
                         ? ar ? "اليوم" : "today"
                         : ar
                           ? `${din} يوم`
                           : `${din}d`}
-                    </HeritagePill>
+                    </span>
                   </li>
                 );
               })}
             </ul>
           )}
-        </HeritageSection>
+        </DaylightPanel>
       </div>
-    </div>
+    </DaylightShell>
   );
 }
 
@@ -578,19 +570,22 @@ async function AgricultureOps({ ar }: { ar: boolean }) {
   })).filter((col) => col.items.length > 0);
 
   return (
-    <div className="ws-page">
-      <section className="ws-stat-row">
-        <Kpi label={ar ? "المزارع" : "Farms"} value={formatNumber(farms.length)} icon={<Sprout className="h-3.5 w-3.5" />} />
-        <Kpi label={ar ? "محاصيل تنمو" : "Growing crops"} value={formatNumber(growing.length)} />
-        <Kpi label={ar ? "تحقّق الإنتاجية" : "Yield realization"} value={`${yieldReal}%`} accent={yieldReal > 0 && yieldReal < 85} />
-        <Kpi label={ar ? "قرب الحصاد" : "Near harvest"} value={formatNumber(nearHarvest.length)} accent={nearHarvest.length > 0} />
-      </section>
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
+        eyebrow={ar ? "العمليات — الزراعة" : "Operations — Agriculture"}
+        title={ar ? "لوحة الدورة" : "Crop-cycle board"}
+        subtitle={ar ? "دورة المحاصيل لحظياً" : "Live crop cycle"}
+      />
+
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "المزارع" : "Farms"} value={formatNumber(farms.length)} />
+        <DaylightKpi label={ar ? "محاصيل تنمو" : "Growing crops"} value={formatNumber(growing.length)} />
+        <DaylightKpi label={ar ? "تحقّق الإنتاجية" : "Yield realization"} value={`${yieldReal}%`} />
+        <DaylightKpi label={ar ? "قرب الحصاد" : "Near harvest"} value={formatNumber(nearHarvest.length)} />
+      </DaylightKpiGrid>
 
       {/* Crop-cycle board */}
-      <HeritageSection
-        eyebrow={ar ? "دورة المحاصيل لحظياً" : "Live crop cycle"}
-        title={ar ? "لوحة الدورة" : "Crop-cycle board"}
-      >
+      <DaylightPanel title={ar ? "لوحة الدورة" : "Crop-cycle board"} aside={ar ? "دورة المحاصيل لحظياً" : "Live crop cycle"}>
         <div className="ws-board">
           {byStatus.map((col) => (
             <div key={col.status} className="ws-board-col">
@@ -647,17 +642,14 @@ async function AgricultureOps({ ar }: { ar: boolean }) {
             </div>
           ))}
         </div>
-      </HeritageSection>
+      </DaylightPanel>
 
-      <div className="ws-two-col">
-        <HeritageSection
-          eyebrow={ar ? "أقرب ١٤ يوماً" : "Next 14 days"}
-          title={ar ? "مراقبة الحصاد" : "Harvest watch"}
-        >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <DaylightPanel title={ar ? "مراقبة الحصاد" : "Harvest watch"} aside={ar ? "أقرب ١٤ يوماً" : "Next 14 days"}>
           {nearHarvest.length === 0 ? (
-            <div className="ws-empty" data-ok="true">
+            <p style={{ fontSize: 13, color: "var(--ink-muted)", padding: "12px 0" }}>
               {ar ? "لا حصاد وشيك. كل المحاصيل ضمن دورتها." : "No imminent harvest. All crops mid-cycle."}
-            </div>
+            </p>
           ) : (
             <ul className="ws-list">
               {nearHarvest.slice(0, 12).map((c) => {
@@ -677,24 +669,21 @@ async function AgricultureOps({ ar }: { ar: boolean }) {
                         {ar ? " كغ" : " kg"}
                       </div>
                     </div>
-                    <HeritagePill tone={dh <= 5 ? "warn" : "neutral"}>
+                    <span className={`tag ${dh <= 5 ? "gold" : "ok"}`}>
                       {dh === 0 ? (ar ? "اليوم" : "today") : ar ? `${dh} يوم` : `${dh}d`}
-                    </HeritagePill>
+                    </span>
                   </li>
                 );
               })}
             </ul>
           )}
-        </HeritageSection>
+        </DaylightPanel>
 
-        <HeritageSection
-          eyebrow={ar ? "فعلي مقابل متوقّع" : "Actual vs forecast"}
-          title={ar ? "تحقّق الإنتاجية" : "Yield realization"}
-        >
+        <DaylightPanel title={ar ? "تحقّق الإنتاجية" : "Yield realization"} aside={ar ? "فعلي مقابل متوقّع" : "Actual vs forecast"}>
           {harvested.length === 0 ? (
-            <div className="ws-empty">
+            <p style={{ fontSize: 13, color: "var(--ink-muted)", padding: "12px 0" }}>
               {ar ? "لا محاصيل محصودة بعد." : "No harvested crops yet."}
-            </div>
+            </p>
           ) : (
             <ul className="ws-dest">
               {harvested.slice(0, 8).map((c) => {
@@ -715,10 +704,10 @@ async function AgricultureOps({ ar }: { ar: boolean }) {
                           width: `${Math.min(100, pct)}%`,
                           background:
                             pct >= 95
-                              ? "var(--heri-teal)"
+                              ? "var(--emerald)"
                               : pct >= 80
-                                ? "var(--heri-copper)"
-                                : "var(--heri-terracotta)",
+                                ? "var(--gold)"
+                                : "var(--brick)",
                         }}
                       />
                     </div>
@@ -732,9 +721,9 @@ async function AgricultureOps({ ar }: { ar: boolean }) {
               })}
             </ul>
           )}
-        </HeritageSection>
+        </DaylightPanel>
       </div>
-    </div>
+    </DaylightShell>
   );
 }
 
@@ -785,19 +774,22 @@ async function EducationOps({ ar }: { ar: boolean }) {
   const fundMax = Math.max(1, ...fundByCohort.map((f) => f.total));
 
   return (
-    <div className="ws-page">
-      <section className="ws-stat-row">
-        <Kpi label={ar ? "البرامج" : "Programs"} value={formatNumber(programs.length)} icon={<GraduationCap className="h-3.5 w-3.5" />} />
-        <Kpi label={ar ? "الكوهورتات" : "Cohorts"} value={formatNumber(cohorts.length)} />
-        <Kpi label={ar ? "إجمالي التمويل" : "Total funding"} value={formatMoney(totalFunding)} />
-        <Kpi label={ar ? "نشطة" : "Active"} value={formatNumber(programs.filter((p) => p.stage === "ACTIVE").length)} />
-      </section>
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
+        eyebrow={ar ? "العمليات — التعليم" : "Operations — Education"}
+        title={ar ? "لوحة المراحل" : "Stage board"}
+        subtitle={ar ? "مسار الحاضنة" : "Incubator pipeline"}
+      />
+
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "البرامج" : "Programs"} value={formatNumber(programs.length)} />
+        <DaylightKpi label={ar ? "الكوهورتات" : "Cohorts"} value={formatNumber(cohorts.length)} />
+        <DaylightKpi label={ar ? "إجمالي التمويل" : "Total funding"} value={formatMoney(totalFunding)} />
+        <DaylightKpi label={ar ? "نشطة" : "Active"} value={formatNumber(programs.filter((p) => p.stage === "ACTIVE").length)} />
+      </DaylightKpiGrid>
 
       {/* Incubator pipeline board */}
-      <HeritageSection
-        eyebrow={ar ? "مسار الحاضنة" : "Incubator pipeline"}
-        title={ar ? "لوحة المراحل" : "Stage board"}
-      >
+      <DaylightPanel title={ar ? "لوحة المراحل" : "Stage board"} aside={ar ? "مسار الحاضنة" : "Incubator pipeline"}>
         <div className="ws-board">
           {byStage.map((col) => (
             <div key={col.stage} className="ws-board-col">
@@ -832,12 +824,9 @@ async function EducationOps({ ar }: { ar: boolean }) {
             </div>
           ))}
         </div>
-      </HeritageSection>
+      </DaylightPanel>
 
-      <HeritageSection
-        eyebrow={ar ? "التمويل لكل كوهورت" : "Funding per cohort"}
-        title={ar ? "توزيع التمويل" : "Funding distribution"}
-      >
+      <DaylightPanel title={ar ? "توزيع التمويل" : "Funding distribution"} aside={ar ? "التمويل لكل كوهورت" : "Funding per cohort"}>
         <ul className="ws-dest">
           {fundByCohort.map((f) => {
             const pct = Math.round((f.total / fundMax) * 100);
@@ -861,8 +850,8 @@ async function EducationOps({ ar }: { ar: boolean }) {
             );
           })}
         </ul>
-      </HeritageSection>
-    </div>
+      </DaylightPanel>
+    </DaylightShell>
   );
 }
 
@@ -922,18 +911,21 @@ async function HoldingOps({ ar }: { ar: boolean }) {
   };
 
   return (
-    <div className="ws-page">
-      <section className="ws-stat-row">
-        <Kpi label={ar ? "الوحدات" : "Units"} value={formatNumber(companies.length)} icon={<Briefcase className="h-3.5 w-3.5" />} />
-        <Kpi label={ar ? "إيراد المجموعة ٣٠ي" : "Group rev 30d"} value={formatMoney(groupRev)} />
-        <Kpi label={ar ? "صافي المجموعة" : "Group net"} value={formatMoney(groupNet)} accent={groupNet < 0} />
-        <Kpi label={ar ? "إجمالي الموظفين" : "Total staff"} value={formatNumber(groupStaff)} />
-      </section>
-
-      <HeritageSection
-        eyebrow={ar ? "مساهمة كل وحدة بالإيراد — ٣٠ يوماً" : "Revenue contribution per unit — 30d"}
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
+        eyebrow={ar ? "العمليات — القابضة" : "Operations — Holding"}
         title={ar ? "محفظة المجموعة" : "Portfolio roll-up"}
-      >
+        subtitle={ar ? "مساهمة كل وحدة بالإيراد — ٣٠ يوماً" : "Revenue contribution per unit — 30d"}
+      />
+
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "الوحدات" : "Units"} value={formatNumber(companies.length)} />
+        <DaylightKpi label={ar ? "إيراد المجموعة ٣٠ي" : "Group rev 30d"} value={formatMoney(groupRev)} />
+        <DaylightKpi label={ar ? "صافي المجموعة" : "Group net"} value={formatMoney(groupNet)} />
+        <DaylightKpi label={ar ? "إجمالي الموظفين" : "Total staff"} value={formatNumber(groupStaff)} />
+      </DaylightKpiGrid>
+
+      <DaylightPanel title={ar ? "محفظة المجموعة" : "Portfolio roll-up"} aside={ar ? "مساهمة كل وحدة بالإيراد — ٣٠ يوماً" : "Revenue contribution per unit — 30d"}>
         <ul className="ws-dest">
           {rows.map((x) => {
             const pct = Math.round((x.rev / revMax) * 100);
@@ -954,7 +946,7 @@ async function HoldingOps({ ar }: { ar: boolean }) {
                     <div className="ws-dest-head">
                       <span className="ws-dest-name">
                         {ar ? x.c.name : x.c.nameEn ?? x.c.name}
-                        <span className="ws-mono" style={{ color: "var(--heri-ink-3)", fontWeight: 400 }}>
+                        <span className="ws-mono" style={{ color: "var(--ink-muted)", fontWeight: 400 }}>
                           {"  "}· {ar ? sec.ar : sec.en} · {formatNumber(x.headcount)} {ar ? "فرد" : "ppl"}
                         </span>
                       </span>
@@ -970,10 +962,10 @@ async function HoldingOps({ ar }: { ar: boolean }) {
                           width: `${pct}%`,
                           background:
                             x.margin >= 25
-                              ? "var(--heri-teal)"
+                              ? "var(--emerald)"
                               : x.margin >= 0
-                                ? "var(--heri-copper)"
-                                : "var(--heri-terracotta)",
+                                ? "var(--gold)"
+                                : "var(--brick)",
                         }}
                       />
                     </div>
@@ -986,42 +978,18 @@ async function HoldingOps({ ar }: { ar: boolean }) {
             );
           })}
         </ul>
-      </HeritageSection>
-    </div>
+      </DaylightPanel>
+    </DaylightShell>
   );
 }
 
 // ---------------------------------------------------------------------------
-function Kpi({
-  label, value, icon, accent,
-}: {
-  label: string;
-  value: string;
-  icon?: React.ReactNode;
-  accent?: boolean;
-}) {
-  return (
-    <div className="ws-stat">
-      <div className="ws-stat-label">
-        {icon ? <span className="ws-stat-icon">{icon}</span> : null}
-        {label}
-      </div>
-      <div
-        className="ws-stat-value"
-        style={accent ? { color: "var(--heri-terracotta)" } : undefined}
-      >
-        {value}
-      </div>
-    </div>
-  );
-}
-
 function Empty({ ar, ok }: { ar: boolean; ok?: boolean }) {
   return (
-    <div className="ws-empty" data-ok={ok ? "true" : "false"}>
+    <p style={{ fontSize: 13, color: "var(--ink-muted)", padding: "12px 0" }}>
       {ok
         ? ar ? "لا دفعات قرب الانتهاء. كل شيء ضمن المهلة." : "Nothing near expiry. All within window."
         : ar ? "لا بيانات تشغيلية لهذه الوحدة." : "No operational data for this unit."}
-    </div>
+    </p>
   );
 }

@@ -11,9 +11,9 @@ import {
   Brain, Sparkles, ListChecks, FlaskConical, Wallet, TrendingUp, Users,
   ArrowRight, FileSearch, Wheat, BookOpen,
 } from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db";
+import "../daylight.css";
 import { getLocale } from "@/lib/i18n.server";
 import { formatMoney, formatNumber, formatDate } from "@/lib/utils";
 
@@ -55,7 +55,7 @@ function highlight(text: string, q: string): React.ReactNode {
       {text.slice(0, idx)}
       <mark
         className="rounded-[3px] px-0.5"
-        style={{ background: "var(--heri-cream-2)", color: "var(--heri-ochre)" }}
+        style={{ background: "var(--cream)", color: "var(--gold)" }}
       >
         {text.slice(idx, idx + q.length)}
       </mark>
@@ -371,8 +371,8 @@ export default async function SearchPage({
     : groups;
 
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "البحث العميق" : "Deep search"}
         title={ar ? "البحث الشامل" : "Global search"}
         subtitle={
@@ -385,21 +385,19 @@ export default async function SearchPage({
             : "Search across companies, bookings, production, insights, transactions…"
         }
       />
-
-      <PageContainer>
         {/* Search input */}
         <form action="/search" method="get" className="card card-pad">
           <div className="flex flex-wrap items-stretch gap-2">
             <div
               className="relative flex flex-1 items-center gap-2 rounded-xl px-3"
               style={{
-                border: "1px solid var(--heri-rule)",
-                background: "var(--heri-cream)",
+                border: "1px solid var(--line)",
+                background: "var(--cream)",
               }}
             >
               <SearchIcon
                 className="h-4 w-4 shrink-0"
-                style={{ color: "var(--heri-ink-3)" }}
+                style={{ color: "var(--ink-muted)" }}
               />
               <input
                 name="q"
@@ -411,15 +409,15 @@ export default async function SearchPage({
                     : "Type a company, hotel, booking #, insight text…"
                 }
                 className="w-full bg-transparent py-3 text-sm font-bold outline-none"
-                style={{ color: "var(--heri-ink)" }}
+                style={{ color: "var(--ink)" }}
               />
               {q ? (
                 <Link
                   href="/search"
                   className="rounded-md px-2 py-1 text-[11px] font-bold"
                   style={{
-                    color: "var(--heri-ink-3)",
-                    background: "color-mix(in srgb, var(--heri-ink-3) 12%, transparent)",
+                    color: "var(--ink-muted)",
+                    background: "color-mix(in srgb, var(--ink-muted) 12%, transparent)",
                   }}
                 >
                   {ar ? "مسح" : "Clear"}
@@ -437,7 +435,7 @@ export default async function SearchPage({
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <span
                 className="text-[11px] font-bold uppercase tracking-wider"
-                style={{ color: "var(--heri-ink-3)" }}
+                style={{ color: "var(--ink-muted)" }}
               >
                 {ar ? "اقتراحات:" : "Try:"}
               </span>
@@ -450,9 +448,9 @@ export default async function SearchPage({
                   href={`/search?q=${encodeURIComponent(s)}`}
                   className="rounded-full px-3 py-1 text-[11px] font-bold ring-1 transition hover:scale-105"
                   style={{
-                    background: "var(--heri-cream-2)",
-                    color: "var(--heri-ochre)",
-                    borderColor: "var(--heri-ochre)",
+                    background: "var(--cream)",
+                    color: "var(--gold)",
+                    borderColor: "var(--gold)",
                   }}
                 >
                   {s}
@@ -505,17 +503,17 @@ export default async function SearchPage({
           <div className="card card-pad py-12 text-center">
             <FileSearch
               className="mx-auto mb-3 h-12 w-12"
-              style={{ color: "var(--heri-ink-3)" }}
+              style={{ color: "var(--ink-muted)" }}
             />
             <h3
               className="text-base font-semibold"
-              style={{ color: "var(--heri-ink)" }}
+              style={{ color: "var(--ink)" }}
             >
               {ar ? "ابحث في كل شيء" : "Search everything"}
             </h3>
             <p
               className="mt-1 text-xs"
-              style={{ color: "var(--heri-ink-3)" }}
+              style={{ color: "var(--ink-muted)" }}
             >
               {ar
                 ? "محرك بحث موحّد عبر 14 جدول بيانات في النظام."
@@ -529,13 +527,13 @@ export default async function SearchPage({
                   key={i}
                   className="flex aspect-square items-center justify-center rounded-xl ring-1"
                   style={{
-                    background: "var(--heri-cream-2)",
-                    borderColor: "var(--heri-rule)",
+                    background: "var(--cream)",
+                    borderColor: "var(--line)",
                   }}
                 >
                   <Icon
                     className="h-5 w-5"
-                    style={{ color: "var(--heri-ochre)" }}
+                    style={{ color: "var(--gold)" }}
                   />
                 </div>
               ))}
@@ -545,17 +543,17 @@ export default async function SearchPage({
           <div className="card card-pad py-12 text-center">
             <FileSearch
               className="mx-auto mb-3 h-12 w-12"
-              style={{ color: "var(--heri-ink-3)" }}
+              style={{ color: "var(--ink-muted)" }}
             />
             <h3
               className="text-base font-semibold"
-              style={{ color: "var(--heri-ink)" }}
+              style={{ color: "var(--ink)" }}
             >
               {ar ? `لا نتائج لـ "${q}"` : `No results for "${q}"`}
             </h3>
             <p
               className="mt-1 text-xs"
-              style={{ color: "var(--heri-ink-3)" }}
+              style={{ color: "var(--ink-muted)" }}
             >
               {ar
                 ? "جرّب كلمات مفتاحية أخرى أو رقم مرجعي أو اسم ضيف."
@@ -578,13 +576,13 @@ export default async function SearchPage({
                       <div>
                         <h3
                           className="text-[13px] font-semibold"
-                          style={{ color: "var(--heri-ink)" }}
+                          style={{ color: "var(--ink)" }}
                         >
                           {ar ? g.labelAr : g.labelEn}
                         </h3>
                         <p
                           className="text-[10.5px]"
-                          style={{ color: "var(--heri-ink-3)" }}
+                          style={{ color: "var(--ink-muted)" }}
                         >
                           {ar
                             ? `${formatNumber(g.items.length)} نتيجة`
@@ -602,24 +600,24 @@ export default async function SearchPage({
                       </Link>
                     ) : null}
                   </div>
-                  <ul className="divide-y" style={{ borderColor: "var(--heri-rule)" }}>
+                  <ul className="divide-y" style={{ borderColor: "var(--line)" }}>
                     {g.items.map((it) => (
                       <li key={it.id}>
                         <Link
                           href={it.href}
-                          className="-mx-2 flex items-center justify-between gap-3 rounded-lg px-2 py-2.5 transition hover:bg-[var(--heri-cream-2)]"
+                          className="-mx-2 flex items-center justify-between gap-3 rounded-lg px-2 py-2.5 transition hover:bg-[var(--cream)]"
                         >
                           <div className="min-w-0 flex-1">
                             <div
                               className="line-clamp-1 text-[13px] font-bold"
-                              style={{ color: "var(--heri-ink)" }}
+                              style={{ color: "var(--ink)" }}
                             >
                               {highlight(it.title, q)}
                             </div>
                             {it.subtitle ? (
                               <div
                                 className="line-clamp-1 text-[11px]"
-                                style={{ color: "var(--heri-ink-3)" }}
+                                style={{ color: "var(--ink-muted)" }}
                               >
                                 {highlight(it.subtitle, q)}
                               </div>
@@ -630,8 +628,8 @@ export default async function SearchPage({
                               className="shrink-0 rounded-md px-2 py-0.5 font-mono text-[10.5px] font-bold tabular-nums"
                               style={{
                                 background:
-                                  "color-mix(in srgb, var(--heri-ink-3) 12%, transparent)",
-                                color: "var(--heri-ink)",
+                                  "color-mix(in srgb, var(--ink-muted) 12%, transparent)",
+                                color: "var(--ink)",
                               }}
                             >
                               {it.trailing}
@@ -639,7 +637,7 @@ export default async function SearchPage({
                           ) : null}
                           <ArrowRight
                             className="h-3.5 w-3.5 shrink-0 transition group-hover:translate-x-0.5 rtl:rotate-180"
-                            style={{ color: "var(--heri-ink-3)" }}
+                            style={{ color: "var(--ink-muted)" }}
                           />
                         </Link>
                       </li>
@@ -654,14 +652,13 @@ export default async function SearchPage({
         {q ? (
           <p
             className="text-center text-[10.5px]"
-            style={{ color: "var(--heri-ink-3)" }}
+            style={{ color: "var(--ink-muted)" }}
           >
             {ar
               ? "كل فئة تعرض حتى 8 نتائج. ضيّق الكلمة المفتاحية لنتائج أدق."
               : "Each category shows up to 8 results. Narrow your query for finer matches."}
           </p>
         ) : null}
-      </PageContainer>
-    </>
+    </DaylightShell>
   );
 }

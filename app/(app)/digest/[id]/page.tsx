@@ -7,12 +7,12 @@ import {
   Newspaper,
   Sparkles,
 } from "lucide-react";
-import { Topbar } from "@/components/Topbar";
-import { PageContainer } from "@/components/PageContainer";
+import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { isSafeId } from "@/lib/authz";
 import { formatNumber } from "@/lib/utils";
+import "../../daylight.css";
 
 // Renders a digest's body. Bodies are stored as light Markdown (## headings,
 // **bold**, - bullets, _italic_) — we transform inline rather than pulling in
@@ -105,97 +105,88 @@ export default async function DigestDetailPage({
   const renderedBody = renderDigestBody(digest.body);
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "الذكاء التشغيلي" : "Operational intelligence"}
-        title={
-          ar
-            ? `الموجز الأسبوعي`
-            : `Weekly digest`
-        }
+        title={ar ? `الموجز الأسبوعي` : `Weekly digest`}
         subtitle={`${dateFmt.format(digest.weekStart)} → ${dateFmt.format(digest.weekEnd)}`}
         actions={
-          <Link href="/digest" className="btn-ghost">
+          <Link href="/digest" className="dl-btn dl-btn-secondary">
             <ArrowLeft className="h-4 w-4" />
             {ar ? "كل الموجزات" : "All digests"}
           </Link>
         }
       />
 
-      <PageContainer width="narrow">
-        {/* Hero strip */}
-        <section
-          className="relative overflow-hidden rounded-2xl p-6 text-white anim-rise-glow"
-          style={{
-            background:
-              "linear-gradient(135deg, var(--brand-deep) 0%, var(--heri-ochre) 60%, var(--heri-copper) 110%)",
-            minHeight: 160,
-          }}
-        >
-          <div className="relative">
-            <div
-              className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em]"
-              style={{
-                background: "rgba(255,255,255,0.18)",
-                border: "1px solid rgba(255,255,255,0.32)",
-                backdropFilter: "blur(6px)",
-              }}
-            >
-              <Newspaper className="h-3.5 w-3.5" />
-              {ar ? "الموجز التنفيذي" : "Executive digest"}
-            </div>
-            <div
-              className="mt-3 flex flex-wrap items-center gap-3 font-mono text-xs font-bold opacity-90"
-            >
-              <span className="inline-flex items-center gap-1">
-                <Calendar className="h-3.5 w-3.5" />
-                {dateFmt.format(digest.weekStart)} →{" "}
-                {dateFmt.format(digest.weekEnd)}
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <Brain className="h-3.5 w-3.5" />
-                {formatNumber(digest.insightCount)}{" "}
-                {ar ? "إشارة" : "signals"}
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <Sparkles className="h-3.5 w-3.5" />
-                {ar ? "صدر" : "Issued"} {issuedFmt.format(digest.createdAt)}
-              </span>
-            </div>
-            <p
-              className="mt-4 max-w-2xl text-base leading-relaxed md:text-[17px]"
-              style={{ textShadow: "0 2px 12px rgba(0,0,0,0.2)" }}
-            >
-              {digest.summary}
-            </p>
-          </div>
-        </section>
-
-        {/* Body */}
-        <article
-          className="card card-pad space-y-1"
-          style={{ color: "var(--heri-ink)" }}
-        >
+      {/* Hero strip */}
+      <div
+        className="panel reveal relative overflow-hidden text-white"
+        style={{
+          background:
+            "linear-gradient(135deg, var(--emerald) 0%, var(--gold) 60%, var(--gold-soft) 110%)",
+          minHeight: 160,
+        }}
+      >
+        <div className="relative">
           <div
-            className="digest-prose"
-            dangerouslySetInnerHTML={{ __html: renderedBody }}
-          />
-        </article>
+            className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em]"
+            style={{
+              background: "rgba(255,255,255,0.18)",
+              border: "1px solid rgba(255,255,255,0.32)",
+              backdropFilter: "blur(6px)",
+            }}
+          >
+            <Newspaper className="h-3.5 w-3.5" />
+            {ar ? "الموجز التنفيذي" : "Executive digest"}
+          </div>
+          <div
+            className="mt-3 flex flex-wrap items-center gap-3 font-mono text-xs font-bold opacity-90"
+          >
+            <span className="inline-flex items-center gap-1">
+              <Calendar className="h-3.5 w-3.5" />
+              {dateFmt.format(digest.weekStart)} →{" "}
+              {dateFmt.format(digest.weekEnd)}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Brain className="h-3.5 w-3.5" />
+              {formatNumber(digest.insightCount)}{" "}
+              {ar ? "إشارة" : "signals"}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Sparkles className="h-3.5 w-3.5" />
+              {ar ? "صدر" : "Issued"} {issuedFmt.format(digest.createdAt)}
+            </span>
+          </div>
+          <p
+            className="mt-4 max-w-2xl text-base leading-relaxed md:text-[17px]"
+            style={{ textShadow: "0 2px 12px rgba(0,0,0,0.2)" }}
+          >
+            {digest.summary}
+          </p>
+        </div>
+      </div>
 
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-              .digest-prose .digest-h2 { font-size: 18px; font-weight: 800; margin-top: 8px; margin-bottom: 8px; color: var(--brand-deep); letter-spacing: -0.01em; }
-              .digest-prose .digest-h3 { font-size: 14px; font-weight: 800; margin-top: 18px; margin-bottom: 6px; color: var(--heri-ink); letter-spacing: -0.005em; }
-              .digest-prose .digest-p { font-size: 14px; line-height: 1.7; margin-bottom: 12px; color: var(--heri-ink); }
-              .digest-prose .digest-list { padding-inline-start: 18px; margin-bottom: 12px; list-style: disc outside; }
-              .digest-prose .digest-list li { font-size: 13.5px; line-height: 1.7; margin-bottom: 4px; color: var(--heri-ink); }
-              .digest-prose strong { color: var(--heri-ink); font-weight: 800; }
-              .digest-prose em { color: var(--heri-ink-3); font-style: italic; }
-            `,
-          }}
+      {/* Body */}
+      <DaylightPanel title={ar ? "تفاصيل الموجز" : "Digest body"}>
+        <div
+          className="digest-prose"
+          dangerouslySetInnerHTML={{ __html: renderedBody }}
         />
-      </PageContainer>
-    </>
+      </DaylightPanel>
+
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            .digest-prose .digest-h2 { font-size: 18px; font-weight: 800; margin-top: 8px; margin-bottom: 8px; color: var(--emerald); letter-spacing: -0.01em; }
+            .digest-prose .digest-h3 { font-size: 14px; font-weight: 800; margin-top: 18px; margin-bottom: 6px; color: var(--ink); letter-spacing: -0.005em; }
+            .digest-prose .digest-p { font-size: 14px; line-height: 1.7; margin-bottom: 12px; color: var(--ink); }
+            .digest-prose .digest-list { padding-inline-start: 18px; margin-bottom: 12px; list-style: disc outside; }
+            .digest-prose .digest-list li { font-size: 13.5px; line-height: 1.7; margin-bottom: 4px; color: var(--ink); }
+            .digest-prose strong { color: var(--ink); font-weight: 800; }
+            .digest-prose em { color: var(--ink-muted); font-style: italic; }
+          `,
+        }}
+      />
+    </DaylightShell>
   );
 }

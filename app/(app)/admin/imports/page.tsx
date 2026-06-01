@@ -12,11 +12,12 @@ import { ArrowRight, Inbox } from "lucide-react";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import { formatDateTime, formatNumber, formatMoney2 } from "@/lib/utils";
 import { sourceMatchesSystem } from "@/lib/importMapping";
 import { ClearTestImportsButton } from "./ClearTestImportsButton";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
+import "../../daylight.css";
 
 export const dynamic = "force-dynamic";
 
@@ -60,8 +61,8 @@ export default async function ImportsAdminPage() {
   const dash = "—";
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "تكامل" : "Integrations"}
         title={ar ? "سجل الاستيراد" : "Import Log"}
         subtitle={
@@ -76,21 +77,22 @@ export default async function ImportsAdminPage() {
             extra={<ClearTestImportsButton ar={ar} />}
           />
         }
-        metrics={[
-          { label: ar ? "دفعات" : "Batches", value: formatNumber(batches.length), tone: "blue" },
-          { label: ar ? "سجلات" : "Rows", value: formatNumber(totalRows), tone: "violet" },
-          { label: ar ? "مقبول" : "Accepted", value: formatNumber(totalAccepted), tone: "emerald" },
-          { label: ar ? "مرفوض" : "Rejected", value: formatNumber(totalRejected), tone: "amber" },
-        ]}
       />
 
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "دفعات" : "Batches"} value={formatNumber(batches.length)} />
+        <DaylightKpi label={ar ? "سجلات" : "Rows"} value={formatNumber(totalRows)} />
+        <DaylightKpi label={ar ? "مقبول" : "Accepted"} value={formatNumber(totalAccepted)} />
+        <DaylightKpi label={ar ? "مرفوض" : "Rejected"} value={formatNumber(totalRejected)} />
+      </DaylightKpiGrid>
+
       {batches.length === 0 ? (
-        <div className="card card-pad flex flex-col items-center gap-3 py-16 text-center">
-          <Inbox className="h-10 w-10" style={{ color: "var(--text-muted)" }} />
-          <p className="text-sm font-bold" style={{ color: "var(--text)" }}>
+        <div className="panel reveal flex flex-col items-center gap-3 py-16 text-center">
+          <Inbox className="h-10 w-10" style={{ color: "var(--ink-muted)" }} />
+          <p className="text-sm font-bold" style={{ color: "var(--ink)" }}>
             {ar ? "لا توجد عمليات استيراد بعد" : "No imports yet"}
           </p>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+          <p className="text-xs" style={{ color: "var(--ink-muted)" }}>
             {ar
               ? "ستظهر دفعات n8n هنا بمجرد وصول أول POST."
               : "n8n batches appear here once the first POST lands."}
@@ -101,19 +103,19 @@ export default async function ImportsAdminPage() {
           {batches.map((b) => {
             const total = b.rows.length;
             return (
-              <details key={b.id} className="card overflow-hidden">
+              <details key={b.id} className="panel reveal overflow-hidden">
                 <summary
                   className="flex cursor-pointer flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3"
                   style={{ listStyle: "none" }}
                 >
                   <ArrowRight
                     className="h-3.5 w-3.5 shrink-0 transition-transform"
-                    style={{ color: "var(--text-muted)" }}
+                    style={{ color: "var(--ink-muted)" }}
                     aria-hidden
                   />
                   <span
                     className="truncate font-mono text-sm font-extrabold"
-                    style={{ color: "var(--text)" }}
+                    style={{ color: "var(--ink)" }}
                     title={b.source ?? undefined}
                   >
                     {b.source ?? (ar ? "(بدون مصدر)" : "(no source)")}
@@ -135,9 +137,9 @@ export default async function ImportsAdminPage() {
                     {b.tenantId ?? (ar ? "بدون مستأجر" : "no tenant")}
                   </span>
                   <span className="ms-auto flex flex-wrap items-center gap-2 text-[11px]">
-                    <span style={{ color: "var(--text-muted)" }}>
+                    <span style={{ color: "var(--ink-muted)" }}>
                       {ar ? "الإجمالي" : "total"}{" "}
-                      <b style={{ color: "var(--text)" }}>{formatNumber(total)}</b>
+                      <b style={{ color: "var(--ink)" }}>{formatNumber(total)}</b>
                     </span>
                     <span className="badge-emerald">
                       {ar ? "مقبول" : "ok"} {b.accepted}
@@ -147,7 +149,7 @@ export default async function ImportsAdminPage() {
                     </span>
                     <span
                       className="font-mono"
-                      style={{ color: "var(--text-muted)" }}
+                      style={{ color: "var(--ink-muted)" }}
                     >
                       {formatDateTime(b.createdAt, ar ? "ar" : "en")}
                     </span>
@@ -155,12 +157,11 @@ export default async function ImportsAdminPage() {
                 </summary>
 
                 <div
-                  className="table-wrap"
-                  style={{ borderTop: "1px solid var(--border)" }}
+                  style={{ borderTop: "1px solid var(--line)" }}
                 >
-                  <table className="w-full text-start text-xs">
+                  <table className="dl-table">
                     <thead>
-                      <tr style={{ color: "var(--text-muted)" }}>
+                      <tr style={{ color: "var(--ink-muted)" }}>
                         <th className="px-3 py-2 text-start font-bold">SKU</th>
                         <th className="px-3 py-2 text-start font-bold">
                           {ar ? "المنتج" : "Product"}
@@ -188,7 +189,7 @@ export default async function ImportsAdminPage() {
                         return (
                           <tr
                             key={r.id}
-                            style={{ borderTop: "1px solid var(--border)" }}
+                            style={{ borderTop: "1px solid var(--line)" }}
                           >
                             <td className="px-3 py-2 font-mono">
                               {r.sku ? (
@@ -201,10 +202,10 @@ export default async function ImportsAdminPage() {
                                   {r.sku}
                                 </Link>
                               ) : (
-                                <span style={{ color: "var(--text)" }}>{dash}</span>
+                                <span style={{ color: "var(--ink)" }}>{dash}</span>
                               )}
                             </td>
-                            <td className="px-3 py-2" style={{ color: "var(--text)" }}>
+                            <td className="px-3 py-2" style={{ color: "var(--ink)" }}>
                               {r.productName ?? dash}
                             </td>
                             <td className="px-3 py-2 text-end font-mono">
@@ -215,10 +216,10 @@ export default async function ImportsAdminPage() {
                                 ? formatMoney2(Number(r.unitCost))
                                 : dash}
                             </td>
-                            <td className="px-3 py-2" style={{ color: "var(--text)" }}>
+                            <td className="px-3 py-2" style={{ color: "var(--ink)" }}>
                               {r.supplier ?? dash}
                             </td>
-                            <td className="px-3 py-2" style={{ color: "var(--text)" }}>
+                            <td className="px-3 py-2" style={{ color: "var(--ink)" }}>
                               {r.warehouse ?? dash}
                             </td>
                             <td className="px-3 py-2">
@@ -251,6 +252,6 @@ export default async function ImportsAdminPage() {
           })}
         </section>
       )}
-    </>
+    </DaylightShell>
   );
 }

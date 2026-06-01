@@ -1,8 +1,5 @@
 import { Trophy, Crown, Medal, Star, Check, Lock, Sparkles, Award } from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
-import { HeriKpi } from "@/components/HeriKpi";
-import { HeritageSection, HeritagePill } from "@/components/heritage";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { CompanyCover } from "@/components/CompanyCover";
 import { RankBadge } from "@/components/RankBadge";
 import { prisma } from "@/lib/db";
@@ -11,6 +8,7 @@ import { getLocale } from "@/lib/i18n.server";
 import { RANKS, rankById, progressToNext } from "@/lib/gamification";
 import { formatNumber } from "@/lib/utils";
 import { Confetti } from "@/components/Confetti";
+import "../daylight.css";
 
 export const dynamic = "force-dynamic";
 
@@ -135,9 +133,9 @@ export default async function AchievementsPage() {
   });
 
   return (
-    <>
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
       {myRank.id === "KING" ? <Confetti pieces={80} /> : null}
-      <PageHeader
+      <DaylightHeader
         eyebrow={ar ? "الفريق والمهام" : "People & Tasks"}
         title={ar ? "الإنجازات والرتب" : "Achievements & Ranks"}
         subtitle={
@@ -147,48 +145,31 @@ export default async function AchievementsPage() {
         }
       />
 
-      <PageContainer>
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "رتبتك" : "Your rank"} value={`${myRank.symbol} ${ar ? myRank.ar : myRank.en}`} hint={`+${myRank.bonusPercent}% ${ar ? "بونص" : "bonus"}`} />
+        <DaylightKpi label="XP" value={formatNumber(me?.xp ?? 0)} hint={ar ? "نقاط الخبرة" : "experience"} />
+        <DaylightKpi label={ar ? "إنجازات مفتوحة" : "Badges unlocked"} value={formatNumber(earnedCount)} hint={`/ ${totalCount}`} />
+        <DaylightKpi label={ar ? "نسبة البونص" : "Bonus rate"} value={formatNumber(me?.bonusPercent ?? 0)} hint="%" />
+      </DaylightKpiGrid>
+
         {/* Rank + XP strip */}
-        <HeritageSection
-          eyebrow={ar ? "نظام التلعيب" : "Gamification"}
+        <DaylightPanel
           title={ar ? `${myRank.ar} · ${formatNumber(me?.xp ?? 0)} XP` : `${myRank.en} · ${formatNumber(me?.xp ?? 0)} XP`}
           aside={ar ? `+${myRank.bonusPercent}% بونص` : `+${myRank.bonusPercent}% bonus`}
-          rtl={ar}
         >
           <div className="flex items-start gap-4">
             <span className="text-4xl" aria-label={ar ? myRank.ar : myRank.en}>{myRank.symbol}</span>
-            <p style={{ fontSize: 13, lineHeight: 1.65, color: "var(--heri-ink-2)", maxWidth: 480 }}>
+            <p style={{ fontSize: 13, lineHeight: 1.65, color: "var(--ink-muted)", maxWidth: 480 }}>
               {ar
                 ? "شغفك يُقاس. كل تسجيل دخول، كل مهمة، كل فكرة تنتج XP — وكل XP يقربك من الملك."
                 : "Your effort is measured. Every login, task, idea earns XP — every XP closer to the crown."}
             </p>
           </div>
-        </HeritageSection>
-
-        {/* KPI band */}
-        <section className="grid gap-4 heri-stagger sm:grid-cols-2 xl:grid-cols-4">
-          <div className="heri-card" style={{ padding: "18px 20px" }}>
-            <div className="heri-eyebrow heri-eyebrow-ink">{ar ? "رتبتك" : "Your rank"}</div>
-            <div className="mt-3 flex items-center gap-2">
-              <span style={{ fontSize: 28 }}>{myRank.symbol}</span>
-              <span className="heri-number" style={{ fontSize: 22, fontWeight: 600, color: "var(--heri-ochre-2)" }}>
-                {ar ? myRank.ar : myRank.en}
-              </span>
-            </div>
-            <div className="heri-number-mono mt-2" style={{ fontSize: 11, color: "var(--heri-ink-3)" }}>
-              +{myRank.bonusPercent}% {ar ? "بونص" : "bonus"}
-            </div>
-          </div>
-          <HeriKpi label="XP" raw={me?.xp ?? 0} kind="number" hint={ar ? "نقاط الخبرة" : "experience"} />
-          <HeriKpi label={ar ? "إنجازات مفتوحة" : "Badges unlocked"}
-            raw={earnedCount} kind="number" hint={`/ ${totalCount}`} accent="var(--heri-teal)" />
-          <HeriKpi label={ar ? "نسبة البونص" : "Bonus rate"}
-            raw={me?.bonusPercent ?? 0} kind="number" hint="%" accent="var(--heri-ochre)" />
-        </section>
+        </DaylightPanel>
 
         {/* Rank ladder */}
-        <HeritageSection eyebrow={ar ? "السلم" : "Ladder"} title={ar ? "سلم الرتب" : "Rank ladder"} rtl={ar}>
-          <div className="grid gap-3 heri-stagger md:grid-cols-5">
+        <DaylightPanel title={ar ? "سلم الرتب" : "Rank ladder"} aside={ar ? "السلم" : "Ladder"}>
+          <div className="grid gap-3 md:grid-cols-5">
             {RANKS.map((r) => {
               const isCurrent = r.id === myRank.id;
               const xp = me?.xp ?? 0;
@@ -198,13 +179,13 @@ export default async function AchievementsPage() {
                   key={r.id}
                   className={`relative rounded-2xl p-4 text-center transition   ${isCurrent ? "ring-2 " : ""}`}
                   style={{
-                    background: reached ? "var(--heri-cream-2)" : "var(--heri-cream-2)",
-                    border: "1px solid var(--heri-rule)",
+                    background: "var(--cream)",
+                    border: "1px solid var(--line)",
                     [`--tw-ring-color` as any]: r.color,
                   }}
                 >
                   {isCurrent ? (
-                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-[var(--heri-copper)] px-2 py-0.5 text-[9px] font-bold text-[#1a0e02]">
+                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2 py-0.5 text-[9px] font-bold" style={{ background: "var(--gold)", color: "#1a0e02" }}>
                       {ar ? "أنت هنا" : "YOU"}
                     </span>
                   ) : null}
@@ -212,53 +193,29 @@ export default async function AchievementsPage() {
                     className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl text-4xl font-bold"
                     style={{
                       background: reached
-                        ? "linear-gradient(135deg, var(--heri-ochre) 0%, var(--heri-copper) 100%)"
-                        : "var(--heri-cream)",
+                        ? "linear-gradient(135deg, var(--gold) 0%, var(--gold) 100%)"
+                        : "var(--cream)",
                       color: reached ? "white" : r.color,
                       opacity: reached ? 1 : 0.4,
                     }}
                   >
                     {r.symbol}
                   </div>
-                  <div className="mt-2 text-base font-semibold" style={{ color: "var(--heri-ink)" }}>
+                  <div className="mt-2 text-base font-semibold" style={{ color: "var(--ink)" }}>
                     {ar ? r.ar : r.en}
                   </div>
-                  <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
+                  <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
                     {formatNumber(r.minXp)} XP · +{r.bonusPercent}٪
                   </div>
                 </div>
               );
             })}
           </div>
-        </HeritageSection>
+        </DaylightPanel>
 
         {/* Medal catalog — grouped by tier, highest first */}
-        <section className="space-y-6">
-          <div className="flex items-end justify-between">
-            <div>
-              <h2
-                className=" text-base font-semibold"
-                style={{ color: "var(--heri-ink)" }}
-              >
-                {ar ? "كتالوج الميداليات" : "Medal catalog"}
-              </h2>
-              <p
-                className="mt-0.5 text-[12px]"
-                style={{ color: "var(--heri-ink-3)" }}
-              >
-                {ar
-                  ? "كل ميدالية تفتح بإنجاز محدد — اعمل، أنجز، اكسب."
-                  : "Each medal unlocks via a specific milestone — work, finish, earn."}
-              </p>
-            </div>
-            <span
-              className="font-mono text-xs font-bold"
-              style={{ color: "var(--heri-ink-3)" }}
-            >
-              {earnedCount} / {totalCount}
-            </span>
-          </div>
-
+        <DaylightPanel title={ar ? "كتالوج الميداليات" : "Medal catalog"} aside={`${earnedCount} / ${totalCount}`}>
+          <div className="space-y-6">
           {TIER_ORDER.filter((t) => byTier[t].length > 0).map((tier) => {
             const items = byTier[tier];
             const visual = TIER_VISUAL[tier];
@@ -282,23 +239,23 @@ export default async function AchievementsPage() {
                   <div>
                     <div
                       className="text-sm font-semibold uppercase tracking-[0.18em]"
-                      style={{ color: "var(--heri-ink)" }}
+                      style={{ color: "var(--ink)" }}
                     >
                       {ar ? TIER_LABEL[tier].ar : TIER_LABEL[tier].en}
                     </div>
-                    <div className="text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
+                    <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
                       {tierEarned} / {items.length}{" "}
                       {ar ? "مفتوح" : "earned"}
                     </div>
                   </div>
                   <span
                     className="ms-auto h-px flex-1"
-                    style={{ background: "var(--heri-rule)" }}
+                    style={{ background: "var(--line)" }}
                     aria-hidden
                   />
                 </header>
 
-                <div className="grid gap-3 heri-stagger md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {items.map((a) => {
                     const earned = earnedIds.has(a.id);
                     const earnedAt = earnedAtById.get(a.id);
@@ -411,31 +368,14 @@ export default async function AchievementsPage() {
               </div>
             );
           })}
-        </section>
+          </div>
+        </DaylightPanel>
 
         {/* Podium leaderboard */}
-        <section className="space-y-4">
-          <div className="flex items-end justify-between">
-            <div>
-              <h2
-                className=" text-base font-semibold"
-                style={{ color: "var(--heri-ink)" }}
-              >
-                {ar ? "لوحة الصدارة" : "Leaderboard"}
-              </h2>
-              <p
-                className="mt-0.5 text-[12px]"
-                style={{ color: "var(--heri-ink-3)" }}
-              >
-                {ar ? "الأعلى XP في المجموعة" : "Top XP across the group"}
-              </p>
-            </div>
-            <Crown className="h-5 w-5" style={{ color: "var(--heri-copper)" }} />
-          </div>
-
+        <DaylightPanel title={ar ? "لوحة الصدارة" : "Leaderboard"} aside={ar ? "الأعلى XP في المجموعة" : "Top XP across the group"}>
           {/* Podium — top 3 */}
           {top3.length > 0 ? (
-            <div className="grid gap-3 heri-stagger md:grid-cols-3 md:items-end">
+            <div className="grid gap-3 md:grid-cols-3 md:items-end">
               {/* Visual order: 2nd | 1st | 3rd via DOM ordering on md+ */}
               {[1, 0, 2]
                 .map((idx) => top3[idx])
@@ -444,34 +384,18 @@ export default async function AchievementsPage() {
                   const placeIdx = top3.findIndex((x) => x.id === u.id);
                   const isMe = u.id === session.id;
                   const isFirst = placeIdx === 0;
-                  const rank = rankById(u.rank as any);
                   const color = avatarColorFor(u.avatarColor);
                   return (
                     <article
                       key={u.id}
                       className="  relative overflow-hidden rounded-2xl p-5 text-center"
                       style={{
-                        background: isMe
-                          ? "linear-gradient(135deg, var(--heri-cream-2) 0%, var(--heri-cream-2) 100%)"
-                          : "var(--heri-cream-2)",
-                        border: `1px solid ${isMe ? "var(--heri-ochre)" : "var(--heri-rule)"}`,
-                        boxShadow: isFirst
-                          ? "0 18px 40px -18px color-mix(in srgb, var(--heri-copper) 60%, transparent)"
-                          : "var(--)",
+                        background: "var(--cream)",
+                        border: `1px solid ${isMe ? "var(--gold)" : "var(--line)"}`,
                         minHeight: isFirst ? 240 : 200,
                         marginBottom: isFirst ? 0 : 12,
                       }}
                     >
-                      {isFirst ? (
-                        <span
-                          aria-hidden
-                          className="pointer-events-none absolute inset-0"
-                          style={{
-                            background:
-                              "linear-gradient(135deg, color-mix(in srgb, var(--heri-copper) 14%, transparent) 0%, transparent 60%)",
-                          }}
-                        />
-                      ) : null}
                       <div
                         className="text-4xl"
                         aria-label={`${ar ? "المرتبة" : "Rank"} ${placeIdx + 1}`}
@@ -491,13 +415,13 @@ export default async function AchievementsPage() {
                       <div className="relative mt-3">
                         <div
                           className={`font-semibold ${isFirst ? "text-base" : "text-sm"}`}
-                          style={{ color: "var(--heri-ink)" }}
+                          style={{ color: "var(--ink)" }}
                         >
                           {u.name}
                           {isMe ? (
                             <span
                               className="ms-1.5 text-[10px] font-bold"
-                              style={{ color: "var(--heri-ochre)" }}
+                              style={{ color: "var(--gold)" }}
                             >
                               ({ar ? "أنت" : "you"})
                             </span>
@@ -506,7 +430,7 @@ export default async function AchievementsPage() {
                         {u.company?.name ? (
                           <div
                             className="text-[11px]"
-                            style={{ color: "var(--heri-ink-3)" }}
+                            style={{ color: "var(--ink-muted)" }}
                           >
                             {u.company.name}
                           </div>
@@ -516,13 +440,13 @@ export default async function AchievementsPage() {
                         <RankBadge rank={u.rank as any} size="sm" showLabel={false} />
                         <span
                           className="font-mono text-sm font-bold"
-                          style={{ color: "var(--heri-ink)" }}
+                          style={{ color: "var(--ink)" }}
                         >
                           {formatNumber(u.xp)}
                         </span>
                         <span
                           className="text-[10px] font-bold"
-                          style={{ color: "var(--heri-ink-3)" }}
+                          style={{ color: "var(--ink-muted)" }}
                         >
                           XP
                         </span>
@@ -530,8 +454,8 @@ export default async function AchievementsPage() {
                       <div
                         className="relative mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
                         style={{
-                          background: "var(--heri-cream-2)",
-                          color: "var(--heri-ochre-2)",
+                          background: "var(--cream)",
+                          color: "var(--gold)",
                         }}
                       >
                         <Trophy className="h-3 w-3" />
@@ -546,12 +470,11 @@ export default async function AchievementsPage() {
 
           {/* Rest 4-10 */}
           {rest.length > 0 ? (
-            <div className="card overflow-hidden">
-              <ul className="heri-stagger divide-y divide-[var(--heri-rule)]">
+            <div className="panel reveal" style={{ padding: 0, overflow: "hidden" }}>
+              <ul className="divide-y" style={{ borderColor: "var(--line)" }}>
                 {rest.map((u, i) => {
                   const isMe = u.id === session.id;
                   const place = i + 4;
-                  const rank = rankById(u.rank as any);
                   const color = avatarColorFor(u.avatarColor);
                   return (
                     <li
@@ -560,13 +483,13 @@ export default async function AchievementsPage() {
                       style={{
                         gridTemplateColumns: "32px auto 1fr auto auto auto",
                         background: isMe
-                          ? "var(--heri-cream-2)"
+                          ? "var(--cream)"
                           : undefined,
                       }}
                     >
                       <span
                         className="font-mono text-sm font-bold"
-                        style={{ color: "var(--heri-ink-3)" }}
+                        style={{ color: "var(--ink-muted)" }}
                       >
                         {place}
                       </span>
@@ -583,13 +506,13 @@ export default async function AchievementsPage() {
                       <div className="min-w-0">
                         <div
                           className="truncate text-sm font-semibold"
-                          style={{ color: "var(--heri-ink)" }}
+                          style={{ color: "var(--ink)" }}
                         >
                           {u.name}
                           {isMe ? (
                             <span
                               className="ms-1.5 text-[10px] font-bold"
-                              style={{ color: "var(--heri-ochre)" }}
+                              style={{ color: "var(--gold)" }}
                             >
                               ({ar ? "أنت" : "you"})
                             </span>
@@ -598,7 +521,7 @@ export default async function AchievementsPage() {
                         {u.company?.name ? (
                           <div
                             className="truncate text-[11px]"
-                            style={{ color: "var(--heri-ink-3)" }}
+                            style={{ color: "var(--ink-muted)" }}
                           >
                             {u.company.name}
                           </div>
@@ -607,19 +530,19 @@ export default async function AchievementsPage() {
                       <RankBadge rank={u.rank as any} size="sm" showLabel={false} />
                       <span
                         className="font-mono text-sm font-bold"
-                        style={{ color: "var(--heri-ink)" }}
+                        style={{ color: "var(--ink)" }}
                       >
                         {formatNumber(u.xp)}{" "}
                         <span
                           className="text-[10px] font-bold"
-                          style={{ color: "var(--heri-ink-3)" }}
+                          style={{ color: "var(--ink-muted)" }}
                         >
                           XP
                         </span>
                       </span>
                       <span
                         className="inline-flex items-center gap-1 text-[11px] font-bold"
-                        style={{ color: "var(--heri-ink-3)" }}
+                        style={{ color: "var(--ink-muted)" }}
                       >
                         <Trophy className="h-3 w-3" />
                         {u._count.achievements}
@@ -630,9 +553,8 @@ export default async function AchievementsPage() {
               </ul>
             </div>
           ) : null}
-        </section>
-      </PageContainer>
-    </>
+        </DaylightPanel>
+    </DaylightShell>
   );
 }
 

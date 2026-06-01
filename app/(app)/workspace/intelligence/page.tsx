@@ -10,13 +10,14 @@ import Link from "next/link";
 import {
   BrainCircuit, AlertOctagon, Lightbulb, Target, ArrowUpRight,
 } from "lucide-react";
-import { HeritageSection, HeritagePill } from "@/components/heritage";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { dismissSignal, acceptSignal } from "../actions";
 import { getUserIfRole } from "@/lib/authz";
 import { prismaUnscoped } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/workspace";
 import { getLocale } from "@/lib/i18n.server";
 import { formatNumber } from "@/lib/utils";
+import "../../daylight.css";
 
 export const dynamic = "force-dynamic";
 
@@ -100,165 +101,118 @@ export default async function WorkspaceIntelligencePage() {
     : 0;
 
   return (
-    <div className="ws-page">
-      <section className="ws-stat-row">
-        <St
-          label={ar ? "إشارات مفتوحة" : "Open signals"}
-          v={formatNumber(open.length)}
-          icon={<BrainCircuit className="h-3.5 w-3.5" />}
-        />
-        <St
-          label={ar ? "حرجة" : "Critical"}
-          v={formatNumber(critical.length)}
-          accent={critical.length > 0}
-        />
-        <St
-          label={ar ? "خطط نشطة" : "Active plans"}
-          v={formatNumber(plans.length)}
-        />
-        <St
-          label={ar ? "متوسط الثقة" : "Avg confidence"}
-          v={`${avgConf}%`}
-        />
-      </section>
-
-      {/* Signal feed */}
-      <HeritageSection
-        eyebrow={
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
+        eyebrow={ar ? "الذكاء" : "Intelligence"}
+        title={ar ? "تغذية الإشارات" : "Signal feed"}
+        subtitle={
           ar
             ? `ما يراه الدماغ عن ${company.name}`
             : `What the brain sees about ${company.nameEn}`
         }
-        title={ar ? "تغذية الإشارات" : "Signal feed"}
-      >
-        {ranked.length === 0 ? (
-          <div className="ws-empty" data-ok="true">
-            {ar ? "لا إشارات مفتوحة لهذه الوحدة. الدماغ هادئ." : "No open signals for this unit. The brain is quiet."}
-          </div>
-        ) : (
-          <ul className="ws-signal-list">
-            {ranked.slice(0, 16).map((i) => (
-              <li key={i.id} className="ws-signal" data-sev={i.severity}>
-                <span className="ws-signal-rail" aria-hidden />
-                <div className="ws-signal-body">
-                  <div className="ws-signal-top">
-                    <HeritagePill tone={SEV_TONE[i.severity] ?? "neutral"}>
-                      {i.severity}
-                    </HeritagePill>
-                    <span className="ws-signal-module ws-mono">{i.module}</span>
-                    <span className="ws-signal-date ws-mono">
-                      {new Intl.DateTimeFormat(
-                        ar ? "ar-JO-u-nu-latn" : "en-US",
-                        { day: "numeric", month: "short" },
-                      ).format(new Date(i.createdAt))}
-                    </span>
-                  </div>
-                  <div className="ws-signal-title">{i.title}</div>
-                  <p className="ws-signal-text">
-                    {i.body.length > 220 ? i.body.slice(0, 220) + "…" : i.body}
-                  </p>
-                  {canMutate ? (
-                    <div className="ws-signal-acts">
-                      <form action={acceptSignal} className="ws-act-form">
-                        <input type="hidden" name="id" value={i.id} />
-                        <button type="submit" className="ws-act">
-                          {ar ? "اقبل وأنشئ خطة" : "Accept → plan"}
-                          <span aria-hidden>{ar ? " ←" : " →"}</span>
-                        </button>
-                      </form>
-                      <form action={dismissSignal} className="ws-act-form">
-                        <input type="hidden" name="id" value={i.id} />
-                        <button type="submit" className="ws-act ws-act-ghost">
-                          {ar ? "تجاهل" : "Dismiss"}
-                        </button>
-                      </form>
-                    </div>
-                  ) : null}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </HeritageSection>
+      />
 
-      {/* Active plans with confidence */}
-      <HeritageSection
-        eyebrow={ar ? "خطط الدماغ المقترحة لهذه الوحدة" : "Brain-proposed plans for this unit"}
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "إشارات مفتوحة" : "Open signals"} value={formatNumber(open.length)} />
+        <DaylightKpi label={ar ? "حرجة" : "Critical"} value={formatNumber(critical.length)} />
+        <DaylightKpi label={ar ? "خطط نشطة" : "Active plans"} value={formatNumber(plans.length)} />
+        <DaylightKpi label={ar ? "متوسط الثقة" : "Avg confidence"} value={`${avgConf}%`} />
+      </DaylightKpiGrid>
+
+      <DaylightPanel title={ar ? "تغذية الإشارات" : "Signal feed"}>
+        {ranked.length === 0 ? (
+          <p style={{ fontSize: 13, color: "var(--ink-muted)", padding: "12px 0" }}>
+            {ar ? "لا إشارات مفتوحة لهذه الوحدة. الدماغ هادئ." : "No open signals for this unit. The brain is quiet."}
+          </p>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {ranked.slice(0, 16).map((i) => (
+              <div key={i.id} style={{ background: "var(--ivory)", border: "1px solid var(--line)", borderRadius: 12, padding: "14px 16px", position: "relative" }}>
+                <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                  <span className={`tag ${SEV_TONE[i.severity] === "critical" ? "gold" : SEV_TONE[i.severity] === "success" ? "ok" : "ok"}`} style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}>
+                    {i.severity}
+                  </span>
+                  <span style={{ fontSize: 11, color: "var(--ink-muted)", fontFamily: "monospace" }}>{i.module}</span>
+                  <span style={{ fontSize: 11, color: "var(--ink-muted)", fontFamily: "monospace" }}>
+                    {new Intl.DateTimeFormat(
+                      ar ? "ar-JO-u-nu-latn" : "en-US",
+                      { day: "numeric", month: "short" },
+                    ).format(new Date(i.createdAt))}
+                  </span>
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)", marginBottom: 6 }}>{i.title}</div>
+                <p style={{ fontSize: 13, color: "var(--ink-muted)", lineHeight: 1.5 }}>
+                  {i.body.length > 220 ? i.body.slice(0, 220) + "…" : i.body}
+                </p>
+                {canMutate ? (
+                  <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                    <form action={acceptSignal}>
+                      <input type="hidden" name="id" value={i.id} />
+                      <button type="submit" className="dl-btn dl-btn-primary" style={{ fontSize: 12, padding: "6px 12px" }}>
+                        {ar ? "اقبل وأنشئ خطة" : "Accept → plan"}
+                      </button>
+                    </form>
+                    <form action={dismissSignal}>
+                      <input type="hidden" name="id" value={i.id} />
+                      <button type="submit" className="dl-btn dl-btn-secondary" style={{ fontSize: 12, padding: "6px 12px" }}>
+                        {ar ? "تجاهل" : "Dismiss"}
+                      </button>
+                    </form>
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        )}
+      </DaylightPanel>
+
+      <DaylightPanel
         title={ar ? "الخطط النشطة" : "Active plans"}
+        aside={ar ? "خطط الدماغ المقترحة لهذه الوحدة" : "Brain-proposed plans for this unit"}
       >
         {plans.length === 0 ? (
-          <div className="ws-empty">
+          <p style={{ fontSize: 13, color: "var(--ink-muted)", padding: "12px 0" }}>
             {ar
               ? "لا خطط نشطة تخص مقاييس هذه الوحدة الآن."
               : "No active plans touching this unit's metrics right now."}
-          </div>
+          </p>
         ) : (
-          <ul className="ws-list">
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {plans.map((p) => {
               const conf = Math.round((p.confidence ?? 0) * 100);
               const delta = Math.round((p.targetDelta ?? 0) * 100);
               return (
-                <li key={p.id} className="ws-plan">
-                  <span className="ws-plan-icon">
-                    <Target className="h-3.5 w-3.5" strokeWidth={1.7} />
-                  </span>
-                  <div className="ws-plan-main">
-                    <div className="ws-list-title">
+                <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: "1px solid var(--line)" }}>
+                  <Target className="h-3.5 w-3.5" style={{ color: "var(--emerald)", flexShrink: 0 }} strokeWidth={1.7} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>
                       {ar ? p.goal : p.goalEn ?? p.goal}
                     </div>
-                    <div className="ws-list-sub ws-mono">
+                    <div style={{ fontSize: 11, color: "var(--ink-muted)", fontFamily: "monospace", marginTop: 2 }}>
                       {p.targetMetric} · {delta > 0 ? "+" : ""}
                       {delta}% {ar ? "هدف" : "target"} · {p.status}
                     </div>
                   </div>
-                  <div className="ws-plan-conf">
-                    <div className="ws-plan-conf-bar">
-                      <span
-                        className="ws-plan-conf-fill"
-                        style={{ width: `${conf}%` }}
-                      />
-                    </div>
-                    <span className="ws-plan-conf-num ws-mono">{conf}%</span>
+                  <div style={{ textAlign: "end", flexShrink: 0 }}>
+                    <div className="dl-bar" style={{ width: 80, marginBottom: 4 }}><i style={{ width: `${conf}%` }} /></div>
+                    <span style={{ fontSize: 11, fontFamily: "monospace", color: "var(--ink-muted)" }}>{conf}%</span>
                   </div>
-                </li>
+                </div>
               );
             })}
-          </ul>
+          </div>
         )}
-      </HeritageSection>
+      </DaylightPanel>
 
-      <Link href="/brain/council" className="ws-intel-cta">
-        <span>
-          {ar
-            ? "افتح المجلس الكامل لمناقشة قرار"
-            : "Open the full council to debate a decision"}
-        </span>
-        <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.6} />
-      </Link>
-    </div>
-  );
-}
-
-function St({
-  label, v, icon, accent,
-}: {
-  label: string;
-  v: string;
-  icon?: React.ReactNode;
-  accent?: boolean;
-}) {
-  return (
-    <div className="ws-stat">
-      <div className="ws-stat-label">
-        {icon ? <span className="ws-stat-icon">{icon}</span> : null}
-        {label}
+      <div className="panel reveal" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+        <p style={{ fontSize: 13, color: "var(--ink-muted)" }}>
+          {ar ? "افتح المجلس الكامل لمناقشة قرار" : "Open the full council to debate a decision"}
+        </p>
+        <Link href="/brain/council" className="dl-btn dl-btn-primary">
+          {ar ? "مجلس الخبراء" : "Expert council"}
+          <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.6} />
+        </Link>
       </div>
-      <div
-        className="ws-stat-value"
-        style={accent ? { color: "var(--heri-terracotta)" } : undefined}
-      >
-        {v}
-      </div>
-    </div>
+    </DaylightShell>
   );
 }

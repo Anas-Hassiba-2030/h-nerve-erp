@@ -13,7 +13,7 @@ import { Prisma } from "@prisma/client";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import {
   formatDateTime,
   formatNumber,
@@ -23,6 +23,8 @@ import {
 } from "@/lib/utils";
 import { MOVEMENT_TYPES } from "@/lib/inventory";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
+
+import "../../daylight.css";
 
 export const dynamic = "force-dynamic";
 
@@ -162,8 +164,8 @@ export default async function MovementsAdminPage({
   };
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "العمليات" : "Operations"}
         title={ar ? "سجل حركات المخزون" : "Inventory Ledger"}
         subtitle={
@@ -172,24 +174,17 @@ export default async function MovementsAdminPage({
             : "Every stock change is one immutable row — quantity = SUM(delta)"
         }
         actions={<AdminFamilyNav current="/admin/movements" ar={ar} />}
-        metrics={[
-          { label: ar ? "إجمالي الحركات" : "Total movements", value: formatNumber(totalAll), tone: "blue" },
-          { label: ar ? "حركات اليوم" : "Movements today", value: formatNumber(todayCount), tone: "violet" },
-          {
-            label: ar ? "صافي تغيّر اليوم" : "Net change today",
-            value: signed(netToday),
-            tone: netToday >= 0 ? "emerald" : "amber",
-          },
-          {
-            label: ar ? "أكثر نوع اليوم" : "Top type today",
-            value: topType ? movLabel(topType) : dash,
-            tone: "emerald",
-          },
-        ]}
       />
 
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "إجمالي الحركات" : "Total movements"} value={formatNumber(totalAll)} />
+        <DaylightKpi label={ar ? "حركات اليوم" : "Movements today"} value={formatNumber(todayCount)} />
+        <DaylightKpi label={ar ? "صافي تغيّر اليوم" : "Net change today"} value={signed(netToday)} />
+        <DaylightKpi label={ar ? "أكثر نوع اليوم" : "Top type today"} value={topType ? movLabel(topType) : dash} />
+      </DaylightKpiGrid>
+
       {/* Search + filter pills */}
-      <div className="card card-pad flex flex-col gap-3">
+      <div className="panel reveal flex flex-col gap-3">
         <form method="GET" className="flex items-center gap-2">
           {typeFilter ? <input type="hidden" name="type" value={typeFilter} /> : null}
           {range !== "all" ? <input type="hidden" name="range" value={range} /> : null}
@@ -216,7 +211,7 @@ export default async function MovementsAdminPage({
         <div className="flex flex-wrap items-center gap-1.5">
           <span
             className="text-[10px] font-bold uppercase tracking-widest"
-            style={{ color: "var(--text-muted)" }}
+            style={{ color: "var(--ink-muted)" }}
           >
             {ar ? "المدة" : "Range"}
           </span>
@@ -242,7 +237,7 @@ export default async function MovementsAdminPage({
         <div className="flex flex-wrap items-center gap-1.5">
           <span
             className="text-[10px] font-bold uppercase tracking-widest"
-            style={{ color: "var(--text-muted)" }}
+            style={{ color: "var(--ink-muted)" }}
           >
             {ar ? "النوع" : "Type"}
           </span>
@@ -268,7 +263,7 @@ export default async function MovementsAdminPage({
           <div className="flex flex-wrap items-center gap-1.5">
             <span
               className="text-[10px] font-bold uppercase tracking-widest"
-              style={{ color: "var(--text-muted)" }}
+              style={{ color: "var(--ink-muted)" }}
             >
               {ar ? "المستودع" : "Warehouse"}
             </span>
@@ -292,9 +287,9 @@ export default async function MovementsAdminPage({
       </div>
 
       {rows.length === 0 ? (
-        <div className="card card-pad mt-3 flex flex-col items-center gap-3 py-16 text-center">
-          <ArrowLeftRight className="h-10 w-10" style={{ color: "var(--text-muted)" }} />
-          <p className="text-sm font-bold" style={{ color: "var(--text)" }}>
+        <div className="panel reveal mt-3 flex flex-col items-center gap-3 py-16 text-center">
+          <ArrowLeftRight className="h-10 w-10" style={{ color: "var(--ink-muted)" }} />
+          <p className="text-sm font-bold" style={{ color: "var(--ink)" }}>
             {totalAll === 0
               ? ar
                 ? "لا توجد حركات بعد"
@@ -303,7 +298,7 @@ export default async function MovementsAdminPage({
                 ? "لا نتائج مطابقة للمرشّحات"
                 : "No movements match the filters"}
           </p>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+          <p className="text-xs" style={{ color: "var(--ink-muted)" }}>
             {ar
               ? "تُسجَّل الحركات تلقائياً مع كل استيراد، أو يدوياً عبر «تسوية المخزون»."
               : "Movements are recorded automatically on import, or manually via Adjust stock."}
@@ -314,19 +309,19 @@ export default async function MovementsAdminPage({
           {rows.map((mv) => {
             const positive = mv.delta > 0;
             return (
-              <details key={mv.id} className="card overflow-hidden">
+              <details key={mv.id} className="panel reveal overflow-hidden">
                 <summary
                   className="flex cursor-pointer flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3"
                   style={{ listStyle: "none" }}
                 >
                   <ArrowRight
                     className="h-3.5 w-3.5 shrink-0"
-                    style={{ color: "var(--text-muted)" }}
+                    style={{ color: "var(--ink-muted)" }}
                     aria-hidden
                   />
                   <span
                     className="font-mono text-[11px]"
-                    style={{ color: "var(--text-muted)" }}
+                    style={{ color: "var(--ink-muted)" }}
                     title={formatDateTime(mv.occurredAt, ar ? "ar" : "en")}
                   >
                     {relTime(mv.occurredAt, ar)}
@@ -348,7 +343,7 @@ export default async function MovementsAdminPage({
                   >
                     {mv.product.sku}
                   </Link>
-                  <span className="truncate text-sm" style={{ color: "var(--text)" }}>
+                  <span className="truncate text-sm" style={{ color: "var(--ink)" }}>
                     {mv.product.name}
                   </span>
                   <span className="ms-auto flex flex-wrap items-center gap-2 text-[11px]">
@@ -358,7 +353,7 @@ export default async function MovementsAdminPage({
                     >
                       {signed(mv.delta)}
                     </span>
-                    <span className="truncate" style={{ color: "var(--text-muted)" }}>
+                    <span className="truncate" style={{ color: "var(--ink-muted)" }}>
                       {mv.reason}
                     </span>
                   </span>
@@ -366,7 +361,7 @@ export default async function MovementsAdminPage({
 
                 <div
                   className="grid gap-x-6 gap-y-2 px-4 py-3 text-xs sm:grid-cols-2"
-                  style={{ borderTop: "1px solid var(--border)" }}
+                  style={{ borderTop: "1px solid var(--line)" }}
                 >
                   <Detail label={ar ? "وقع في" : "Occurred at"}>
                     {formatDateTime(mv.occurredAt, ar ? "ar" : "en")}
@@ -477,7 +472,7 @@ export default async function MovementsAdminPage({
           })}
         </section>
       )}
-    </>
+    </DaylightShell>
   );
 }
 
@@ -494,11 +489,11 @@ function Detail({
     <div className={wide ? "sm:col-span-2" : undefined}>
       <span
         className="me-2 text-[10px] font-bold uppercase tracking-widest"
-        style={{ color: "var(--text-muted)" }}
+        style={{ color: "var(--ink-muted)" }}
       >
         {label}
       </span>
-      <span style={{ color: "var(--text)" }}>{children}</span>
+      <span style={{ color: "var(--ink)" }}>{children}</span>
     </div>
   );
 }

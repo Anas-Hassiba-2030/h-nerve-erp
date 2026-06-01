@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db";
 import { createProgram } from "../actions";
+import "../../daylight.css";
 
 export default async function NewProgramPage() {
   const companies = await prisma.company.findMany({
@@ -11,14 +12,14 @@ export default async function NewProgramPage() {
   });
 
   return (
-    <>
-      <Topbar
+    <DaylightShell>
+      <DaylightHeader
         eyebrow="حاضنة The Tank"
         title="تسجيل مشروع ناشئ"
         subtitle="انضمام مشروع جديد إلى دورة الحاضنة الحالية."
       />
       <div className="flex-1 p-6">
-        <form action={createProgram} className="card card-pad mx-auto max-w-3xl space-y-5">
+        <form action={createProgram} className="panel reveal mx-auto max-w-3xl space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <label className="label" htmlFor="companyId">الكيان الراعي</label>
@@ -84,16 +85,16 @@ export default async function NewProgramPage() {
             <textarea id="description" name="description" rows={3} className="textarea" placeholder="ماذا يبني المشروع، وما علاقته بشركات المجموعة؟" />
           </div>
 
-          <div className="flex items-center justify-between gap-3 border-t border-surface-200 pt-4">
-            <Link href="/education" className="btn-ghost">
+          <div className="flex items-center justify-between gap-3 border-t pt-4" style={{ borderColor: "var(--line)" }}>
+            <Link href="/education" className="dl-btn dl-btn-secondary">
               <ArrowLeft className="h-4 w-4" /> العودة
             </Link>
-            <button type="submit" className="btn-primary">
+            <button type="submit" className="dl-btn dl-btn-primary">
               <Save className="h-4 w-4" /> حفظ المشروع
             </button>
           </div>
         </form>
       </div>
-    </>
+    </DaylightShell>
   );
 }

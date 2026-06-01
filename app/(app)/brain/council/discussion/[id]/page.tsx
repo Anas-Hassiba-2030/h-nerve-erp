@@ -6,9 +6,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ChevronLeft, MessagesSquare } from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
-import { HeritageSection, HeritagePill } from "@/components/heritage";
+import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
+import "../../../../daylight.css";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
@@ -51,12 +50,8 @@ export default async function DiscussionPage({
   });
 
   return (
-    <>
-      <PageHeader
-        breadcrumbs={[
-          { href: "/brain/council", label: ar ? "المجلس" : "Council" },
-          { href: "#", label: ar ? "نقاش" : "Discussion" },
-        ]}
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "المجلس · نقاش" : "Council · discussion"}
         title={d.title}
         subtitle={
@@ -66,158 +61,151 @@ export default async function DiscussionPage({
         }
       />
 
-      <PageContainer>
-        {/* Original shared insight body */}
-        <HeritageSection
-          eyebrow={ar ? "الرؤية الأصلية" : "Original insight"}
-          title={d.title}
-          aside={
-            ar
-              ? `${fmt.format(d.createdAt)}`
-              : `${fmt.format(d.createdAt)}`
-          }
+      {/* Original shared insight body */}
+      <DaylightPanel
+        title={d.title}
+        aside={fmt.format(d.createdAt)}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 999, fontSize: 11.5, fontWeight: 600, color: "var(--ink-muted)", background: "rgba(100,90,80,.1)" }}>
+            {d.status === "OPEN" ? (ar ? "مفتوح" : "OPEN") : ar ? "مغلق" : "CLOSED"}
+          </span>
+          <Link
+            href="/brain/council"
+            style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--ink-muted)", textDecoration: "none" }}
+          >
+            <ChevronLeft className="h-3 w-3 inline rtl:rotate-180" />
+            {ar ? "كل المجلس" : "Back to Council"}
+          </Link>
+        </div>
+        <p
+          style={{
+            fontSize: 13.5,
+            lineHeight: 1.55,
+            color: "var(--ink)",
+          }}
         >
-          <div className="flex items-center justify-between mb-3">
-            <HeritagePill tone={d.status === "OPEN" ? "warn" : "neutral"}>
-              {d.status === "OPEN" ? (ar ? "مفتوح" : "OPEN") : ar ? "مغلق" : "CLOSED"}
-            </HeritagePill>
-            <Link
-              href="/brain/council"
-              className="heri-eyebrow"
-              style={{ color: "var(--heri-ink-3)" }}
-            >
-              <ChevronLeft className="h-3 w-3 inline rtl:rotate-180" />
-              {ar ? "كل المجلس" : "Back to Council"}
-            </Link>
-          </div>
-          <p
+          {d.body}
+        </p>
+      </DaylightPanel>
+
+      {/* Reply thread */}
+      <DaylightPanel
+        title={ar ? `${d.replies.length} رد` : `${d.replies.length} ${d.replies.length === 1 ? "reply" : "replies"}`}
+        aside={ar ? "ترتيب زمني" : "Chronological"}
+      >
+        {d.replies.length === 0 ? (
+          <div
+            className="py-8 text-center"
             style={{
-              fontSize: 13.5,
-              lineHeight: 1.55,
-              color: "var(--heri-ink)",
+              color: "var(--ink-muted)",
+              fontStyle: "italic",
+              fontSize: 13,
             }}
           >
-            {d.body}
-          </p>
-        </HeritageSection>
-
-        {/* Reply thread */}
-        <HeritageSection
-          eyebrow={ar ? "النقاش" : "Thread"}
-          title={ar ? `${d.replies.length} رد` : `${d.replies.length} ${d.replies.length === 1 ? "reply" : "replies"}`}
-          aside={ar ? "ترتيب زمني" : "Chronological"}
-        >
-          {d.replies.length === 0 ? (
-            <div
-              className="py-8 text-center"
-              style={{
-                color: "var(--heri-ink-3)",
-                fontStyle: "italic",
-                fontSize: 13,
-              }}
-            >
-              {ar ? "لا توجد ردود بعد. كن أول من يبدأ النقاش." : "No replies yet. Be the first to start the debate."}
-            </div>
-          ) : (
-            <ul className="space-y-3">
-              {d.replies.map((r) => {
-                const name = r.author?.name ?? (ar ? "مجهول" : "Unknown");
-                return (
-                  <li
-                    key={r.id}
-                    className="flex gap-3"
+            {ar ? "لا توجد ردود بعد. كن أول من يبدأ النقاش." : "No replies yet. Be the first to start the debate."}
+          </div>
+        ) : (
+          <ul className="space-y-3">
+            {d.replies.map((r) => {
+              const name = r.author?.name ?? (ar ? "مجهول" : "Unknown");
+              return (
+                <li
+                  key={r.id}
+                  className="flex gap-3"
+                  style={{
+                    padding: "10px 12px",
+                    background: "var(--cream)",
+                    border: "1px solid var(--line)",
+                    borderRadius: 12,
+                  }}
+                >
+                  <span
                     style={{
-                      padding: "10px 12px",
-                      background: "var(--heri-cream)",
-                      border: "1px solid var(--heri-rule)",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: 32,
+                      height: 32,
+                      borderRadius: "50%",
+                      background: "var(--emerald)",
+                      color: "var(--cream)",
+                      fontWeight: 700,
+                      fontSize: 11,
+                      flexShrink: 0,
                     }}
                   >
-                    <span
+                    {initialsFor(name)}
+                  </span>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div
                       style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: 32,
-                        height: 32,
-                        borderRadius: "50%",
-                        background: "var(--heri-teal)",
-                        color: "var(--heri-cream)",
-                        fontWeight: 700,
-                        fontSize: 11,
-                        flexShrink: 0,
+                        display: "flex",
+                        gap: 8,
+                        alignItems: "baseline",
+                        marginBottom: 4,
                       }}
                     >
-                      {initialsFor(name)}
-                    </span>
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: 8,
-                          alignItems: "baseline",
-                          marginBottom: 4,
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: 12.5,
-                            fontWeight: 700,
-                            color: "var(--heri-ink)",
-                          }}
-                        >
-                          {name}
-                        </span>
-                        <span
-                          className="heri-eyebrow"
-                          style={{
-                            fontSize: 10,
-                            color: "var(--heri-ink-3)",
-                          }}
-                        >
-                          {fmt.format(r.createdAt)}
-                        </span>
-                      </div>
-                      <p
+                      <span
                         style={{
                           fontSize: 12.5,
-                          lineHeight: 1.5,
-                          color: "var(--heri-ink-2)",
-                          whiteSpace: "pre-wrap",
+                          fontWeight: 700,
+                          color: "var(--ink)",
                         }}
                       >
-                        {r.body}
-                      </p>
+                        {name}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                          letterSpacing: ".1em",
+                          color: "var(--ink-muted)",
+                        }}
+                      >
+                        {fmt.format(r.createdAt)}
+                      </span>
                     </div>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </HeritageSection>
-
-        {/* Composer — Phase V3-NEW-6 — controlled (clears on send). */}
-        {canReply ? (
-          <HeritageSection
-            eyebrow={ar ? "ردك" : "Your reply"}
-            title={ar ? "أضف تعليقاً" : "Add a reply"}
-          >
-            <CouncilReplyComposer discussionId={d.id} ar={ar} />
-          </HeritageSection>
-        ) : (
-          <div
-            className="py-4 text-center"
-            style={{
-              color: "var(--heri-ink-3)",
-              fontStyle: "italic",
-              fontSize: 12.5,
-            }}
-          >
-            {ar
-              ? "الردود متاحة لدور ADMIN وEXECUTIVE فقط."
-              : "Only ADMIN + EXECUTIVE roles can post replies."}
-          </div>
+                    <p
+                      style={{
+                        fontSize: 12.5,
+                        lineHeight: 1.5,
+                        color: "var(--ink-muted)",
+                        whiteSpace: "pre-wrap",
+                      }}
+                    >
+                      {r.body}
+                    </p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         )}
-      </PageContainer>
-    </>
+      </DaylightPanel>
+
+      {/* Composer — Phase V3-NEW-6 — controlled (clears on send). */}
+      {canReply ? (
+        <DaylightPanel
+          title={ar ? "أضف تعليقاً" : "Add a reply"}
+        >
+          <CouncilReplyComposer discussionId={d.id} ar={ar} />
+        </DaylightPanel>
+      ) : (
+        <div
+          className="py-4 text-center"
+          style={{
+            color: "var(--ink-muted)",
+            fontStyle: "italic",
+            fontSize: 12.5,
+          }}
+        >
+          {ar
+            ? "الردود متاحة لدور ADMIN وEXECUTIVE فقط."
+            : "Only ADMIN + EXECUTIVE roles can post replies."}
+        </div>
+      )}
+    </DaylightShell>
   );
 }

@@ -7,9 +7,9 @@ import {
   Wallet, TrendingUp, Leaf, FlaskConical, ListChecks, Trophy,
   Activity, Search, FileText, ArrowLeftRight, Building2, Command,
 } from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { getLocale } from "@/lib/i18n.server";
+import "../daylight.css";
 
 type Shortcut = { keys: string[]; ar: string; en: string };
 
@@ -108,8 +108,8 @@ export default async function HelpPage() {
   ];
 
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "المساعدة" : "Help"}
         title={ar ? "مركز المساعدة" : "Help center"}
         subtitle={
@@ -118,18 +118,16 @@ export default async function HelpPage() {
             : "Keyboard shortcuts + module tour + frequently asked questions"
         }
       />
-
-      <PageContainer>
         {/* Keyboard shortcuts */}
         <section className="card card-pad">
           <div className="mb-3 flex items-center gap-2">
             <Keyboard
               className="h-4 w-4"
-              style={{ color: "var(--heri-ochre)" }}
+              style={{ color: "var(--gold)" }}
             />
             <h2
               className="text-[13px] font-semibold"
-              style={{ color: "var(--heri-ink)" }}
+              style={{ color: "var(--ink)" }}
             >
               {ar ? "اختصارات لوحة المفاتيح" : "Keyboard shortcuts"}
             </h2>
@@ -138,12 +136,12 @@ export default async function HelpPage() {
             {SHORTCUTS.map((s, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 transition hover:bg-[var(--heri-cream-2)]"
-                style={{ border: "1px solid var(--heri-rule)" }}
+                className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 transition hover:bg-[var(--cream)]"
+                style={{ border: "1px solid var(--line)" }}
               >
                 <span
                   className="text-[12px] font-bold"
-                  style={{ color: "var(--heri-ink)" }}
+                  style={{ color: "var(--ink)" }}
                 >
                   {ar ? s.ar : s.en}
                 </span>
@@ -153,10 +151,10 @@ export default async function HelpPage() {
                       key={j}
                       className="rounded-md px-2 py-1 font-mono text-[10px] font-semibold ring-1"
                       style={{
-                        background: "var(--heri-cream)",
-                        color: "var(--heri-ink)",
-                        borderColor: "var(--heri-rule)",
-                        boxShadow: "0 1px 0 0 var(--heri-rule)",
+                        background: "var(--cream)",
+                        color: "var(--ink)",
+                        borderColor: "var(--line)",
+                        boxShadow: "0 1px 0 0 var(--line)",
                       }}
                     >
                       {k}
@@ -173,11 +171,11 @@ export default async function HelpPage() {
           <div className="mb-3 flex items-center gap-2">
             <Command
               className="h-4 w-4"
-              style={{ color: "var(--heri-ochre)" }}
+              style={{ color: "var(--gold)" }}
             />
             <h2
               className="text-[13px] font-semibold"
-              style={{ color: "var(--heri-ink)" }}
+              style={{ color: "var(--ink)" }}
             >
               {ar ? "جولة في الوحدات" : "Module tour"}
             </h2>
@@ -199,13 +197,13 @@ export default async function HelpPage() {
                   <div className="min-w-0">
                     <div
                       className="text-[12.5px] font-semibold"
-                      style={{ color: "var(--heri-ink)" }}
+                      style={{ color: "var(--ink)" }}
                     >
                       {ar ? m.ar : m.en}
                     </div>
                     <div
                       className="line-clamp-2 text-[10.5px]"
-                      style={{ color: "var(--heri-ink-3)" }}
+                      style={{ color: "var(--ink-muted)" }}
                     >
                       {ar ? m.desc_ar : m.desc_en}
                     </div>
@@ -221,11 +219,11 @@ export default async function HelpPage() {
           <div className="mb-3 flex items-center gap-2">
             <Sparkles
               className="h-4 w-4"
-              style={{ color: "var(--heri-ochre)" }}
+              style={{ color: "var(--gold)" }}
             />
             <h2
               className="text-[13px] font-semibold"
-              style={{ color: "var(--heri-ink)" }}
+              style={{ color: "var(--ink)" }}
             >
               {ar ? "الأسئلة الشائعة" : "Frequently asked"}
             </h2>
@@ -238,19 +236,19 @@ export default async function HelpPage() {
               >
                 <summary
                   className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3 text-[12.5px] font-semibold"
-                  style={{ color: "var(--heri-ink)" }}
+                  style={{ color: "var(--ink)" }}
                 >
                   <span>{ar ? f.q_ar : f.q_en}</span>
                   <span
                     className="text-[10px] transition group-open:rotate-180"
-                    style={{ color: "var(--heri-ink-3)" }}
+                    style={{ color: "var(--ink-muted)" }}
                   >
                     ▾
                   </span>
                 </summary>
                 <div
                   className="px-4 pb-3 text-[11.5px] leading-relaxed"
-                  style={{ color: "var(--heri-ink-3)" }}
+                  style={{ color: "var(--ink-muted)" }}
                 >
                   {ar ? f.a_ar : f.a_en}
                 </div>
@@ -262,11 +260,10 @@ export default async function HelpPage() {
         {/* Footer credit */}
         <p
           className="text-center text-[10.5px]"
-          style={{ color: "var(--heri-ink-3)" }}
+          style={{ color: "var(--ink-muted)" }}
         >
           H-Nerve ERP · {ar ? "نظام الحوراني العصبي المركزي" : "Hourani Group's Central Nervous System"}
         </p>
-      </PageContainer>
-    </>
+    </DaylightShell>
   );
 }

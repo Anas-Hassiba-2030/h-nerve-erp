@@ -8,10 +8,9 @@ export const dynamic = "force-dynamic";
 // Phase 13 of docs/PHASES-INTELLIGENCE.md.
 
 import Link from "next/link";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
-import { HeritagePill } from "@/components/heritage";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db";
+import "../daylight.css";
 import { getLocale } from "@/lib/i18n.server";
 import { ChevronLeft, Plug, Search } from "lucide-react";
 import {
@@ -56,8 +55,8 @@ export default async function IntegrationsHubPage({
   const errored = integrations.filter((i) => i.status === "ERROR").length;
 
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "موصلات · سوق التكاملات" : "Connectors · Integrations hub"}
         title={ar ? "كل التكاملات في مكان واحد" : "Every connector in one marketplace"}
         subtitle={
@@ -66,25 +65,22 @@ export default async function IntegrationsHubPage({
             : "24 connectors · 2 connectable today via API key (SendGrid · Resend) · full OAuth suite rolling out per priority."
         }
       />
-
-      <PageContainer>
-        {/* Stat row */}
-        <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <Stat label={ar ? "إجمالي" : "Total"}              value={total} />
-          <Stat label={ar ? "متّصل" : "Connected"}            value={connected} accent="teal" />
-          <Stat label={ar ? "أخطاء" : "Errored"}              value={errored}   accent="terracotta" />
-          <Stat label={ar ? "تصنيفات" : "Categories"}         value={6} />
-        </section>
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "إجمالي" : "Total"}              value={String(total)} />
+        <DaylightKpi label={ar ? "متّصل" : "Connected"}            value={String(connected)} />
+        <DaylightKpi label={ar ? "أخطاء" : "Errored"}              value={String(errored)} />
+        <DaylightKpi label={ar ? "تصنيفات" : "Categories"}         value="6" />
+      </DaylightKpiGrid>
 
         {/* Filter rail */}
         <div
           className="flex flex-wrap items-center gap-1.5 px-1 py-3"
           style={{
-            borderTop: "1px solid var(--heri-rule)",
-            borderBottom: "1px solid var(--heri-rule)",
+            borderTop: "1px solid var(--line)",
+            borderBottom: "1px solid var(--line)",
           }}
         >
-          <span className="heri-eyebrow me-2">{ar ? "تصفية" : "Filter"}</span>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.14em] me-2" style={{ color: "var(--ink-muted)" }}>{ar ? "تصفية" : "Filter"}</span>
           <FilterChip
             href="/integrations"
             active={!filterCat}
@@ -108,7 +104,7 @@ export default async function IntegrationsHubPage({
 
         {/* Grid */}
         <div
-          className="grid gap-3 heri-stagger"
+          className="grid gap-3"
           style={{
             gridTemplateColumns:
               "repeat(auto-fill, minmax(min(280px, 100%), 1fr))",
@@ -154,14 +150,12 @@ export default async function IntegrationsHubPage({
                         const fs = FUNCTIONAL_STATE_LABEL[provider.functionalState];
                         return (
                           <div style={{ marginBottom: 6 }}>
-                            <HeritagePill tone={fs.tone}>
-                              {ar ? fs.ar : fs.en}
-                            </HeritagePill>
+                            <span className="tag gold">{ar ? fs.ar : fs.en}</span>
                           </div>
                         );
                       })()}
                       <div className="integration-card-footrow">
-                        <HeritagePill tone={tone}>{statusLabel}</HeritagePill>
+                        <span className="tag gold">{statusLabel}</span>
                         {!isConnected ? (
                           provider.functionalState === "READY_FOR_SETUP" || provider.functionalState === "LIVE" ? (
                             <form action={connectAndOpen} className="integration-connect-form">
@@ -219,7 +213,7 @@ export default async function IntegrationsHubPage({
                       </h3>
                       {integration?.account ? (
                         <div className="integration-card-account">
-                          <span className="heri-eyebrow heri-eyebrow-ink" style={{ fontSize: 9.5 }}>
+                          <span className="text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ fontSize: 9.5, color: "var(--ink-muted)" }}>
                             {ar ? "الحساب" : "ACCOUNT"}
                           </span>
                           <span className="integration-card-account-value">
@@ -266,8 +260,7 @@ export default async function IntegrationsHubPage({
             );
           })}
         </div>
-      </PageContainer>
-    </>
+    </DaylightShell>
   );
 }
 
@@ -285,11 +278,11 @@ function FilterChip({
   return (
     <Link
       href={href}
-      className="heri-focusable inline-flex items-center gap-2 px-3 py-1.5 transition"
+      className="inline-flex items-center gap-2 px-3 py-1.5 transition"
       style={{
-        background: active ? "var(--heri-ink)" : "var(--heri-cream)",
-        border: active ? "1px solid var(--heri-ink)" : "1px solid var(--heri-rule-strong)",
-        color: active ? "var(--heri-cream)" : "var(--heri-ink)",
+        background: active ? "var(--ink)" : "var(--cream)",
+        border: active ? "1px solid var(--ink)" : "1px solid var(--line)",
+        color: active ? "var(--cream)" : "var(--ink)",
         fontSize: 12,
         fontWeight: 500,
         textDecoration: "none",
@@ -321,22 +314,22 @@ function Stat({
   accent?: "teal" | "terracotta";
 }) {
   const color =
-    accent === "teal" ? "var(--heri-teal)"
-    : accent === "terracotta" ? "var(--heri-terracotta)"
-    : "var(--heri-ink)";
+    accent === "teal" ? "var(--emerald)"
+    : accent === "terracotta" ? "var(--brick)"
+    : "var(--ink)";
   return (
     <div
       style={{
-        background: "var(--heri-cream)",
-        border: "1px solid var(--heri-rule)",
+        background: "var(--cream)",
+        border: "1px solid var(--line)",
         padding: "12px 16px",
       }}
     >
-      <div className="heri-eyebrow heri-eyebrow-ink" style={{ fontSize: 10 }}>
+      <div className="text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--ink-muted)" }}>
         {label}
       </div>
       <div
-        className="heri-number mt-1.5"
+        className="font-mono mt-1.5"
         style={{ fontSize: 26, fontWeight: 500, color, letterSpacing: "-0.018em" }}
       >
         {value}

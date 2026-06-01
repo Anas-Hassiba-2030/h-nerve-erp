@@ -10,11 +10,13 @@ import { Prisma } from "@prisma/client";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
-import { Topbar } from "@/components/Topbar";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import { formatNumber } from "@/lib/utils";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
 import { orderStatusBadge, ORDER_STATUS_AR, ORDER_STATUS_EN } from "@/lib/utils";
 import { NewSupplierForm, EditSupplierForm, DeleteSupplierButton } from "./SupplierForms";
+
+import "../../daylight.css";
 
 export const dynamic = "force-dynamic";
 
@@ -66,8 +68,8 @@ export default async function SuppliersPage({ searchParams }: { searchParams: SP
   const oLabel = (s: string) => (ar ? ORDER_STATUS_AR : ORDER_STATUS_EN)[s] ?? s;
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "العلاقات" : "Relationships"}
         title={ar ? "المورّدون" : "Suppliers"}
         subtitle={
@@ -76,19 +78,20 @@ export default async function SuppliersPage({ searchParams }: { searchParams: SP
             : "Real entities — promoted from the Product/PO supplier strings"
         }
         actions={<AdminFamilyNav current="/admin/suppliers" ar={ar} />}
-        metrics={[
-          { label: ar ? "الإجمالي" : "Total", value: formatNumber(allCount), tone: "blue" },
-          { label: ar ? "نشط" : "Active", value: formatNumber(activeCount), tone: "emerald" },
-          { label: ar ? "منتجات مرتبطة" : "Products linked", value: formatNumber(prodLinked), tone: "violet" },
-          { label: ar ? "أوامر شراء مرتبطة" : "POs linked", value: formatNumber(poLinked), tone: "amber" },
-        ]}
       />
+
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "الإجمالي" : "Total"} value={formatNumber(allCount)} />
+        <DaylightKpi label={ar ? "نشط" : "Active"} value={formatNumber(activeCount)} />
+        <DaylightKpi label={ar ? "منتجات مرتبطة" : "Products linked"} value={formatNumber(prodLinked)} />
+        <DaylightKpi label={ar ? "أوامر شراء مرتبطة" : "POs linked"} value={formatNumber(poLinked)} />
+      </DaylightKpiGrid>
 
       <div className="mt-3">
         <NewSupplierForm tenantDefault={tenantDefault} ar={ar} />
       </div>
 
-      <div className="card card-pad mt-3">
+      <div className="panel reveal mt-3">
         <form method="GET" className="flex items-center gap-2">
           <input
             type="text"
@@ -104,24 +107,24 @@ export default async function SuppliersPage({ searchParams }: { searchParams: SP
       </div>
 
       {suppliers.length === 0 ? (
-        <div className="card card-pad mt-3 flex flex-col items-center gap-3 py-16 text-center">
-          <Factory className="h-10 w-10" style={{ color: "var(--text-muted)" }} />
-          <p className="text-sm font-bold" style={{ color: "var(--text)" }}>
+        <div className="panel reveal mt-3 flex flex-col items-center gap-3 py-16 text-center">
+          <Factory className="h-10 w-10" style={{ color: "var(--ink-muted)" }} />
+          <p className="text-sm font-bold" style={{ color: "var(--ink)" }}>
             {ar ? "لا مورّدين" : "No suppliers"}
           </p>
         </div>
       ) : (
         <section className="mt-3 flex flex-col gap-2">
           {suppliers.map((s) => (
-            <details key={s.id} className="card overflow-hidden" open={deep === s.id}>
+            <details key={s.id} className="panel reveal overflow-hidden" open={deep === s.id}>
               <summary
                 className="flex cursor-pointer flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3"
                 style={{ listStyle: "none" }}
               >
-                <ArrowRight className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--text-muted)" }} aria-hidden />
-                <span className="text-sm font-extrabold" style={{ color: "var(--text)" }}>{s.name}</span>
-                {s.email ? <span className="text-xs" style={{ color: "var(--text-muted)" }}>{s.email}</span> : null}
-                {s.phone ? <span className="font-mono text-xs" style={{ color: "var(--text-muted)" }}>{s.phone}</span> : null}
+                <ArrowRight className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--ink-muted)" }} aria-hidden />
+                <span className="text-sm font-extrabold" style={{ color: "var(--ink)" }}>{s.name}</span>
+                {s.email ? <span className="text-xs" style={{ color: "var(--ink-muted)" }}>{s.email}</span> : null}
+                {s.phone ? <span className="font-mono text-xs" style={{ color: "var(--ink-muted)" }}>{s.phone}</span> : null}
                 <span className="ms-auto flex flex-wrap items-center gap-2 text-[11px]">
                   {s.paymentTerms ? <span className="badge-slate">{s.paymentTerms}</span> : null}
                   <span className="badge-violet">{ar ? "منتجات" : "products"} {s._count.products}</span>
@@ -129,16 +132,16 @@ export default async function SuppliersPage({ searchParams }: { searchParams: SP
                 </span>
               </summary>
 
-              <div className="flex flex-col gap-4 px-4 py-3" style={{ borderTop: "1px solid var(--border)" }}>
+              <div className="flex flex-col gap-4 px-4 py-3" style={{ borderTop: "1px solid var(--line)" }}>
                 <EditSupplierForm supplier={s} ar={ar} />
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <div className="mb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                    <div className="mb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
                       {ar ? "المنتجات المرتبطة" : "Linked products"}
                     </div>
                     {s.products.length === 0 ? (
-                      <p className="text-xs" style={{ color: "var(--text-muted)" }}>{dash}</p>
+                      <p className="text-xs" style={{ color: "var(--ink-muted)" }}>{dash}</p>
                     ) : (
                       <ul className="flex flex-col gap-1 text-xs">
                         {s.products.map((p) => (
@@ -152,11 +155,11 @@ export default async function SuppliersPage({ searchParams }: { searchParams: SP
                     )}
                   </div>
                   <div>
-                    <div className="mb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                    <div className="mb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
                       {ar ? "أوامر الشراء" : "Purchase orders"}
                     </div>
                     {s.purchaseOrders.length === 0 ? (
-                      <p className="text-xs" style={{ color: "var(--text-muted)" }}>{dash}</p>
+                      <p className="text-xs" style={{ color: "var(--ink-muted)" }}>{dash}</p>
                     ) : (
                       <ul className="flex flex-col gap-1 text-xs">
                         {s.purchaseOrders.map((po) => (
@@ -180,6 +183,6 @@ export default async function SuppliersPage({ searchParams }: { searchParams: SP
           ))}
         </section>
       )}
-    </>
+    </DaylightShell>
   );
 }

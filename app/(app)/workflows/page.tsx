@@ -6,10 +6,9 @@ export const dynamic = "force-dynamic";
 // flow viewer — that surface lives at /alerts now.)
 
 import Link from "next/link";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
-import { HeritageSection, HeritagePill } from "@/components/heritage";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db";
+import "../daylight.css";
 import { getLocale } from "@/lib/i18n.server";
 import { Plus, ChevronLeft, Workflow as WorkflowIcon, Database, Trash2 } from "lucide-react";
 import {
@@ -43,8 +42,8 @@ export default async function WorkflowsPage() {
   const totalRuns = workflows.reduce((a, w) => a + w._count.runs, 0);
 
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "أتمتة · سير العمل" : "Automation · Workflows"}
         title={ar ? "خرائط الأتمتة" : "Workflow studio"}
         subtitle={
@@ -53,35 +52,28 @@ export default async function WorkflowsPage() {
             : "Wire business events to automatic actions. Triggers, conditions, actions — every flow ticks on its own."
         }
       />
-
-      <PageContainer>
         {/* Header CTA */}
-        <section className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-            <Stat label={ar ? "كل سير العمل" : "Total workflows"} value={total} />
-            <Stat label={ar ? "نشطة" : "Active"} value={active} accent="teal" />
-            <Stat label={ar ? "تشغيلات" : "Runs logged"} value={totalRuns} accent="copper" />
-          </div>
+        <DaylightKpiGrid>
+          <DaylightKpi label={ar ? "كل سير العمل" : "Total workflows"} value={String(total)} />
+          <DaylightKpi label={ar ? "نشطة" : "Active"} value={String(active)} />
+          <DaylightKpi label={ar ? "تشغيلات" : "Runs logged"} value={String(totalRuns)} />
+        </DaylightKpiGrid>
+        <div className="flex justify-end">
           <form action={createWorkflow}>
             <input type="hidden" name="name" value="New workflow" />
-            <button type="submit" className="heri-btn heri-btn-primary">
+            <button type="submit" className="dl-btn dl-btn-primary">
               <Plus className="h-4 w-4" strokeWidth={1.5} />
               {ar ? "سير عمل جديد" : "New workflow"}
             </button>
           </form>
-        </section>
+        </div>
 
         {/* Phase NS-3 — template gallery. Shows always, not just on
             empty state; serves as a "starter pack" the manager can
             clone and customise. */}
-        <HeritageSection
-          eyebrow={ar ? "قوالب جاهزة" : "Starter templates"}
+        <DaylightPanel
           title={ar ? "ابدأ من قالب" : "Start from a template"}
-          aside={
-            ar
-              ? `${TEMPLATE_GALLERY.length} قالب — تخصيص بنقرة واحدة`
-              : `${TEMPLATE_GALLERY.length} templates — one-click clone`
-          }
+          aside={ar ? `${TEMPLATE_GALLERY.length} قالب — تخصيص بنقرة واحدة` : `${TEMPLATE_GALLERY.length} templates — one-click clone`}
         >
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {TEMPLATE_GALLERY.map((t) => (
@@ -89,18 +81,18 @@ export default async function WorkflowsPage() {
                 key={t.id}
                 className="p-4 flex flex-col gap-2"
                 style={{
-                  background: "var(--heri-cream)",
-                  border: "1px solid var(--heri-rule)",
+                  background: "var(--cream)",
+                  border: "1px solid var(--line)",
                 }}
               >
-                <div className="heri-eyebrow" style={{ color: "var(--heri-ink-3)" }}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--ink-muted)" }}>
                   {ar ? t.flowAr : t.flowEn}
                 </div>
                 <h3
                   style={{
                     fontSize: 14,
                     fontWeight: 700,
-                    color: "var(--heri-ink)",
+                    color: "var(--ink)",
                     margin: 0,
                   }}
                 >
@@ -110,7 +102,7 @@ export default async function WorkflowsPage() {
                   style={{
                     fontSize: 12,
                     lineHeight: 1.5,
-                    color: "var(--heri-ink-2)",
+                    color: "var(--ink-muted)",
                     margin: 0,
                     flex: 1,
                   }}
@@ -121,7 +113,7 @@ export default async function WorkflowsPage() {
                   <input type="hidden" name="templateId" value={t.id} />
                   <button
                     type="submit"
-                    className="heri-btn heri-btn-secondary"
+                    className="dl-btn dl-btn-secondary"
                     style={{ fontSize: 11.5, padding: "6px 12px" }}
                   >
                     <Plus className="h-3 w-3" strokeWidth={1.7} />
@@ -131,28 +123,23 @@ export default async function WorkflowsPage() {
               </article>
             ))}
           </div>
-        </HeritageSection>
+        </DaylightPanel>
 
         {workflows.length === 0 ? (
-          <HeritageSection
-            eyebrow={ar ? "ابدأ" : "Start"}
+          <DaylightPanel
             title={ar ? "لا سير عمل بعد" : "No workflows yet"}
-            aside={
-              ar
-                ? "أو ابدأ من قالب أعلاه."
-                : "Or pick a template from the gallery above."
-            }
+            aside={ar ? "أو ابدأ من قالب أعلاه." : "Or pick a template from the gallery above."}
           >
             <div className="flex flex-wrap gap-3">
               <form action={createWorkflow}>
                 <input type="hidden" name="name" value="New workflow" />
-                <button type="submit" className="heri-btn heri-btn-secondary">
+                <button type="submit" className="dl-btn dl-btn-secondary">
                   <Plus className="h-4 w-4" strokeWidth={1.5} />
                   {ar ? "ابدأ من الصفر" : "Start from scratch"}
                 </button>
               </form>
             </div>
-          </HeritageSection>
+          </DaylightPanel>
         ) : (
           <div className="grid gap-3">
             {workflows.map((w) => {
@@ -166,8 +153,8 @@ export default async function WorkflowsPage() {
                   key={w.id}
                   className="relative grid gap-3 md:grid-cols-[1fr_auto_auto] md:items-center"
                   style={{
-                    background: "var(--heri-cream)",
-                    border: "1px solid var(--heri-rule)",
+                    background: "var(--cream)",
+                    border: "1px solid var(--line)",
                     padding: "16px 20px",
                     overflow: "hidden",
                   }}
@@ -178,17 +165,17 @@ export default async function WorkflowsPage() {
                     style={{
                       insetInlineStart: 0,
                       width: 3,
-                      background: w.enabled ? "var(--heri-teal)" : "var(--heri-ochre)",
+                      background: w.enabled ? "var(--emerald)" : "var(--gold)",
                     }}
                   />
                   <div className="ms-2 min-w-0">
-                    <div className="heri-eyebrow heri-eyebrow-ink">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--ink-muted)" }}>
                       {w.enabled
                         ? (ar ? "نشط" : "ACTIVE")
                         : (ar ? "مسوّدة" : "DRAFT")}
                       {w._count.runs > 0 ? (
                         <>
-                          <span style={{ color: "var(--heri-rule-strong)", margin: "0 8px" }}>·</span>
+                          <span style={{ color: "var(--line)", margin: "0 8px" }}>·</span>
                           <span>{w._count.runs} {ar ? "تشغيل" : "runs"}</span>
                         </>
                       ) : null}
@@ -199,7 +186,7 @@ export default async function WorkflowsPage() {
                         fontSize: 16,
                         fontWeight: 500,
                         letterSpacing: ar ? 0 : "-0.012em",
-                        color: "var(--heri-ink)",
+                        color: "var(--ink)",
                         lineHeight: 1.3,
                         textWrap: "balance" as any,
                         maxWidth: "55ch",
@@ -213,7 +200,7 @@ export default async function WorkflowsPage() {
                         style={{
                           fontSize: 13,
                           lineHeight: 1.55,
-                          color: "var(--heri-ink-2)",
+                          color: "var(--ink-muted)",
                           maxWidth: "65ch",
                         }}
                       >
@@ -223,13 +210,13 @@ export default async function WorkflowsPage() {
                     <div className="mt-3 flex flex-wrap items-center gap-1.5">
                       {tonePerKind.map((k) =>
                         counts[k] ? (
-                          <HeritagePill key={k} tone={KIND_TONE[k]}>
+                          <span key={k} className="tag gold">
                             {counts[k]} {k === "trigger" ? (ar ? "مُشغّل" : "trigger") : k === "condition" ? (ar ? "شرط" : "cond") : (ar ? "فعل" : "action")}
-                          </HeritagePill>
+                          </span>
                         ) : null
                       )}
                       {w.nodes.length === 0 ? (
-                        <span style={{ color: "var(--heri-ink-3)", fontStyle: "italic", fontSize: 12 }}>
+                        <span style={{ color: "var(--ink-muted)", fontStyle: "italic", fontSize: 12 }}>
                           {ar ? "فارغ — افتح الاستوديو لإضافة عقد" : "empty — open studio to add nodes"}
                         </span>
                       ) : null}
@@ -241,7 +228,7 @@ export default async function WorkflowsPage() {
                       <input type="hidden" name="id" value={w.id} />
                       <button
                         type="submit"
-                        className="heri-btn heri-btn-ghost"
+                        className="dl-btn dl-btn-secondary"
                         style={{ padding: "6px 12px", fontSize: 11 }}
                       >
                         {w.enabled
@@ -253,11 +240,11 @@ export default async function WorkflowsPage() {
                       <input type="hidden" name="id" value={w.id} />
                       <button
                         type="submit"
-                        className="heri-btn heri-btn-ghost"
+                        className="dl-btn dl-btn-secondary"
                         style={{
                           padding: "6px 12px",
                           fontSize: 11,
-                          color: "var(--heri-terracotta)",
+                          color: "var(--brick)",
                         }}
                       >
                         <Trash2 className="h-3 w-3" strokeWidth={1.5} />
@@ -267,7 +254,7 @@ export default async function WorkflowsPage() {
 
                   <Link
                     href={`/workflows/studio/${w.id}`}
-                    className="heri-btn heri-btn-primary"
+                    className="dl-btn dl-btn-primary"
                     style={{ padding: "8px 14px", fontSize: 12 }}
                   >
                     <WorkflowIcon className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -283,29 +270,28 @@ export default async function WorkflowsPage() {
             })}
           </div>
         )}
-      </PageContainer>
-    </>
+    </DaylightShell>
   );
 }
 
 function Stat({ label, value, accent }: { label: string; value: number; accent?: "teal" | "copper" }) {
   const color =
-    accent === "teal" ? "var(--heri-teal)"
-    : accent === "copper" ? "var(--heri-copper)"
-    : "var(--heri-ink)";
+    accent === "teal" ? "var(--emerald)"
+    : accent === "copper" ? "var(--gold)"
+    : "var(--ink)";
   return (
     <div
       style={{
-        background: "var(--heri-cream)",
-        border: "1px solid var(--heri-rule)",
+        background: "var(--cream)",
+        border: "1px solid var(--line)",
         padding: "12px 16px",
       }}
     >
-      <div className="heri-eyebrow heri-eyebrow-ink" style={{ fontSize: 10 }}>
+      <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ fontSize: 10, color: "var(--ink-muted)" }}>
         {label}
       </div>
       <div
-        className="heri-number mt-1.5"
+        className="font-mono mt-1.5"
         style={{ fontSize: 26, fontWeight: 500, color, letterSpacing: "-0.018em" }}
       >
         {value}

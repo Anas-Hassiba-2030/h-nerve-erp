@@ -3,9 +3,8 @@
 // Phase 6 of docs/PHASES-INTELLIGENCE.md.
 
 import Link from "next/link";
-import { PageHeader } from "@/components/PageHeader";
-import { PageContainer } from "@/components/PageContainer";
-import { HeritageSection, HeritagePill } from "@/components/heritage";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
+import "../../daylight.css";
 import { MemoryCard } from "@/components/brain/MemoryCard";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
@@ -44,8 +43,8 @@ export default async function BrainMemoryPage({
   ]);
 
   return (
-    <>
-      <PageHeader
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "الدماغ · بحيرة الذاكرة" : "Brain · Memory lake"}
         title={ar ? "ما لا يجب نسيانه" : "What must not be forgotten"}
         subtitle={
@@ -55,7 +54,6 @@ export default async function BrainMemoryPage({
         }
       />
 
-      <PageContainer>
         {total === 0 ? (
           <EmptyState ar={ar} />
         ) : (
@@ -64,11 +62,11 @@ export default async function BrainMemoryPage({
             <div
               className="flex flex-wrap items-center gap-1.5 px-1 py-3"
               style={{
-                borderTop: "1px solid var(--heri-rule)",
-                borderBottom: "1px solid var(--heri-rule)",
+                borderTop: "1px solid var(--line)",
+                borderBottom: "1px solid var(--line)",
               }}
             >
-              <span className="heri-eyebrow me-2">
+              <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--ink-muted)", marginInlineEnd: 8 }}>
                 {ar ? "تصفية" : "Filter"}
               </span>
               <FilterChip
@@ -94,7 +92,7 @@ export default async function BrainMemoryPage({
               <form action={seedMemories}>
                 <button
                   type="submit"
-                  className="heri-btn heri-btn-ghost"
+                  className="dl-btn dl-btn-secondary"
                   style={{ padding: "6px 12px", fontSize: 11 }}
                 >
                   <Database className="h-3 w-3" strokeWidth={1.5} />
@@ -104,8 +102,8 @@ export default async function BrainMemoryPage({
               <form action={clearMemories}>
                 <button
                   type="submit"
-                  className="heri-btn heri-btn-ghost"
-                  style={{ padding: "6px 12px", fontSize: 11, color: "var(--heri-terracotta)" }}
+                  className="dl-btn dl-btn-secondary"
+                  style={{ padding: "6px 12px", fontSize: 11, color: "var(--brick)" }}
                 >
                   <Trash2 className="h-3 w-3" strokeWidth={1.5} />
                   {ar ? "مسح الكل" : "Clear all"}
@@ -115,7 +113,7 @@ export default async function BrainMemoryPage({
 
             {/* Memory grid */}
             <div
-              className="grid gap-4 heri-stagger"
+              className="grid gap-4"
               style={{
                 gridTemplateColumns:
                   "repeat(auto-fit, minmax(min(420px, 100%), 1fr))",
@@ -147,8 +145,7 @@ export default async function BrainMemoryPage({
             </div>
           </>
         )}
-      </PageContainer>
-    </>
+    </DaylightShell>
   );
 }
 
@@ -166,11 +163,11 @@ function FilterChip({
   return (
     <Link
       href={href}
-      className="heri-focusable inline-flex items-center gap-2 px-3 py-1.5 transition"
+      className="inline-flex items-center gap-2 px-3 py-1.5 transition"
       style={{
-        background: active ? "var(--heri-ink)" : "var(--heri-cream)",
-        border: active ? "1px solid var(--heri-ink)" : "1px solid var(--heri-rule-strong)",
-        color: active ? "var(--heri-cream)" : "var(--heri-ink)",
+        background: active ? "var(--ink)" : "var(--cream)",
+        border: active ? "1px solid var(--ink)" : "1px solid var(--line)",
+        color: active ? "var(--cream)" : "var(--ink)",
         fontSize: 12,
         fontWeight: 500,
         letterSpacing: "-0.005em",
@@ -196,15 +193,15 @@ function FilterChip({
 function EmptyState({ ar }: { ar: boolean }) {
   return (
     <section
-      className="heri-hero"
+      className="panel reveal"
       style={{ padding: "60px 32px", textAlign: "center" }}
     >
       <div
         className="inline-flex h-12 w-12 items-center justify-center mx-auto"
         style={{
-          border: "1px solid var(--heri-rule-strong)",
-          color: "var(--heri-ochre)",
-          background: "var(--heri-cream-2)",
+          border: "1px solid var(--line)",
+          color: "var(--gold)",
+          background: "var(--ivory)",
         }}
       >
         <Brain className="h-5 w-5" strokeWidth={1.5} />
@@ -216,7 +213,7 @@ function EmptyState({ ar }: { ar: boolean }) {
           lineHeight: 1.05,
           letterSpacing: ar ? "-0.005em" : "-0.022em",
           fontWeight: ar ? 600 : 500,
-          color: "var(--heri-ink)",
+          color: "var(--ink)",
         }}
       >
         {ar ? "البحيرة فارغة." : "The lake is empty."}
@@ -226,7 +223,7 @@ function EmptyState({ ar }: { ar: boolean }) {
         style={{
           fontSize: "clamp(13px, 1vw, 14.5px)",
           lineHeight: 1.55,
-          color: "var(--heri-ink-2)",
+          color: "var(--ink-muted)",
         }}
       >
         {ar
@@ -235,7 +232,7 @@ function EmptyState({ ar }: { ar: boolean }) {
       </p>
       <div className="mt-6">
         <form action={seedMemories}>
-          <button type="submit" className="heri-btn heri-btn-primary">
+          <button type="submit" className="dl-btn dl-btn-primary">
             <Database className="h-4 w-4" strokeWidth={1.5} />
             {ar ? "ازرع البحيرة" : "Seed the lake"}
           </button>

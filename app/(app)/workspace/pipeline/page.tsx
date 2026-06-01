@@ -1,8 +1,9 @@
 // /workspace/pipeline — future-projects pipeline for this company.
 
 import { redirect } from "next/navigation";
-import { HeritageSection, HeritagePill } from "@/components/heritage";
+import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { StatusBadge } from "@/components/StatusBadge";
+import "../../daylight.css";
 import { advanceProjectStage, updateProjectBudget } from "../actions";
 import { getUserIfRole } from "@/lib/authz";
 import { prisma, prismaUnscoped } from "@/lib/db";
@@ -46,22 +47,25 @@ export default async function WorkspacePipelinePage() {
   })).filter((c) => c.items.length > 0);
 
   return (
-    <div className="ws-page">
-      <section className="ws-stat-row">
-        <St label={ar ? "إجمالي المشاريع" : "Total projects"} v={formatNumber(projects.length)} />
-        <St label={ar ? "إجمالي الميزانية" : "Total budget"} v={formatMoney(totalBudget)} />
-        <St label={ar ? "قيد التنفيذ" : "In progress"} v={formatNumber(projects.filter((p) => p.stage === "IN_PROGRESS").length)} />
-        <St label={ar ? "أولوية عالية" : "High priority"} v={formatNumber(projects.filter((p) => p.priority === "HIGH").length)} />
-      </section>
-
-      <HeritageSection
-        eyebrow={ar ? "خط مشاريع هذه الوحدة فقط" : "This unit's pipeline only"}
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
+        eyebrow={ar ? "خط المشاريع" : "Pipeline"}
         title={ar ? "مراحل المشاريع" : "Project stages"}
-      >
+        subtitle={ar ? "خط مشاريع هذه الوحدة فقط" : "This unit's pipeline only"}
+      />
+
+      <DaylightKpiGrid>
+        <DaylightKpi label={ar ? "إجمالي المشاريع" : "Total projects"} value={formatNumber(projects.length)} />
+        <DaylightKpi label={ar ? "إجمالي الميزانية" : "Total budget"} value={formatMoney(totalBudget)} />
+        <DaylightKpi label={ar ? "قيد التنفيذ" : "In progress"} value={formatNumber(projects.filter((p) => p.stage === "IN_PROGRESS").length)} />
+        <DaylightKpi label={ar ? "أولوية عالية" : "High priority"} value={formatNumber(projects.filter((p) => p.priority === "HIGH").length)} />
+      </DaylightKpiGrid>
+
+      <DaylightPanel title={ar ? "مراحل المشاريع" : "Project stages"} aside={ar ? "خط مشاريع هذه الوحدة فقط" : "This unit's pipeline only"}>
         {projects.length === 0 ? (
-          <div className="ws-empty">
+          <p style={{ fontSize: 13, color: "var(--ink-muted)", padding: "12px 0" }}>
             {ar ? "لا مشاريع مستقبلية مسجّلة." : "No future projects recorded."}
-          </div>
+          </p>
         ) : (
           <div className="ws-board">
             {byStage.map((col) => (
@@ -80,17 +84,9 @@ export default async function WorkspacePipelinePage() {
                         </span>
                       </div>
                       <div className="ws-board-card-foot">
-                        <HeritagePill
-                          tone={
-                            p.priority === "HIGH"
-                              ? "critical"
-                              : p.priority === "MEDIUM"
-                                ? "warn"
-                                : "neutral"
-                          }
-                        >
+                        <span className={`tag ${p.priority === "HIGH" ? "gold" : p.priority === "MEDIUM" ? "gold" : "ok"}`} style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}>
                           {p.priority}
-                        </HeritagePill>
+                        </span>
                         <span className="ws-mono">{formatMoney(p.budgetJod)}</span>
                       </div>
                       {canMutate ? (
@@ -106,14 +102,14 @@ export default async function WorkspacePipelinePage() {
                               className="ws-budget-input ws-mono"
                               aria-label={ar ? "ميزانية المشروع" : "Project budget"}
                             />
-                            <button type="submit" className="ws-act ws-act-ghost">
+                            <button type="submit" className="dl-btn dl-btn-secondary" style={{ fontSize: 12, padding: "4px 10px" }}>
                               {ar ? "حفظ" : "Save"}
                             </button>
                           </form>
                           {p.stage !== "LIVE" ? (
                             <form action={advanceProjectStage} className="ws-act-form">
                               <input type="hidden" name="id" value={p.id} />
-                              <button type="submit" className="ws-act">
+                              <button type="submit" className="dl-btn dl-btn-primary" style={{ fontSize: 12, padding: "4px 10px" }}>
                                 {ar ? "تقديم المرحلة" : "Advance stage"}
                                 <span aria-hidden>{ar ? " ←" : " →"}</span>
                               </button>
@@ -128,16 +124,7 @@ export default async function WorkspacePipelinePage() {
             ))}
           </div>
         )}
-      </HeritageSection>
-    </div>
-  );
-}
-
-function St({ label, v }: { label: string; v: string }) {
-  return (
-    <div className="ws-stat">
-      <div className="ws-stat-label">{label}</div>
-      <div className="ws-stat-value">{v}</div>
-    </div>
+      </DaylightPanel>
+    </DaylightShell>
   );
 }

@@ -33,13 +33,13 @@ import {
   Compass,
   Hash,
 } from "lucide-react";
-import { Topbar } from "@/components/Topbar";
-import { PageContainer } from "@/components/PageContainer";
+import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
 import { EmptyState } from "@/components/EmptyState";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { isSafeId } from "@/lib/authz";
 import { formatNumber, formatRelative } from "@/lib/utils";
+import "../daylight.css";
 
 type EntityType =
   | "COMPANY"
@@ -301,8 +301,8 @@ export default async function Audit360Page({
     const detailHref = meta.href(id);
 
     return (
-      <>
-        <Topbar
+      <DaylightShell dir={ar ? "rtl" : "ltr"}>
+        <DaylightHeader
           eyebrow={ar ? "النظام · تتبع 360" : "System · Audit 360"}
           title={ar ? "تتبع السجل" : "Record trace"}
           subtitle={
@@ -311,13 +311,12 @@ export default async function Audit360Page({
               : "Every interaction and touch on this record — across every module."
           }
           actions={
-            <Link href="/audit-360" className="btn-ghost">
+            <Link href="/audit-360" className="dl-btn dl-btn-secondary">
               <Search className="h-4 w-4" />
               {ar ? "تتبع آخر" : "Trace another"}
             </Link>
           }
         />
-        <PageContainer>
           {/* Entity card */}
           <section
             className="relative overflow-hidden rounded-2xl p-6 text-white anim-rise-glow"
@@ -423,23 +422,23 @@ export default async function Audit360Page({
             <section className="card overflow-hidden">
               <header
                 className="flex items-center justify-between px-4 py-3"
-                style={{ borderBottom: "1px solid var(--heri-rule)" }}
+                style={{ borderBottom: "1px solid var(--line)" }}
               >
                 <h3
                   className="flex items-center gap-2 text-sm font-semibold"
-                  style={{ color: "var(--heri-ink)" }}
+                  style={{ color: "var(--ink)" }}
                 >
-                  <ActivityIcon className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
+                  <ActivityIcon className="h-4 w-4" style={{ color: "var(--gold)" }} />
                   {ar ? "الجدول الزمني" : "Activity timeline"}
                 </h3>
-                <span className="font-mono text-[11px]" style={{ color: "var(--heri-ink-3)" }}>
+                <span className="font-mono text-[11px]" style={{ color: "var(--ink-muted)" }}>
                   {formatNumber(activity.length)}
                 </span>
               </header>
               {activity.length === 0 ? (
                 <div
                   className="px-4 py-6 text-center text-[12px]"
-                  style={{ color: "var(--heri-ink-3)" }}
+                  style={{ color: "var(--ink-muted)" }}
                 >
                   {ar
                     ? "لا توجد لمسات مسجلة على هذا العنصر بعد."
@@ -452,7 +451,7 @@ export default async function Audit360Page({
                     className="absolute top-0 bottom-0 w-px"
                     style={{
                       insetInlineStart: 30,
-                      background: "var(--heri-rule)",
+                      background: "var(--line)",
                     }}
                   />
                   {activity.map((a, i) => (
@@ -462,7 +461,7 @@ export default async function Audit360Page({
                       style={{
                         gridTemplateColumns: "32px 1fr auto",
                         animationDelay: `${Math.min(i, 10) * 30}ms`,
-                        borderTop: i === 0 ? "none" : "1px solid color-mix(in srgb, var(--heri-rule) 60%, transparent)",
+                        borderTop: i === 0 ? "none" : "1px solid color-mix(in srgb, var(--line) 60%, transparent)",
                       }}
                     >
                       <span
@@ -481,14 +480,14 @@ export default async function Audit360Page({
                           </span>
                           <span
                             className="text-sm font-bold"
-                            style={{ color: "var(--heri-ink)" }}
+                            style={{ color: "var(--ink)" }}
                           >
                             {ar ? a.summary : a.summaryEn ?? a.summary}
                           </span>
                         </div>
                         <div
                           className="mt-0.5 text-[11px]"
-                          style={{ color: "var(--heri-ink-3)" }}
+                          style={{ color: "var(--ink-muted)" }}
                         >
                           {a.actorName ? (
                             <span>
@@ -505,7 +504,7 @@ export default async function Audit360Page({
                       </div>
                       <span
                         className="whitespace-nowrap text-[11px] font-mono"
-                        style={{ color: "var(--heri-ink-3)" }}
+                        style={{ color: "var(--ink-muted)" }}
                       >
                         {formatRelative(a.createdAt)}
                       </span>
@@ -520,32 +519,32 @@ export default async function Audit360Page({
               <section className="card card-pad">
                 <h3
                   className="mb-3 flex items-center gap-2 text-sm font-semibold"
-                  style={{ color: "var(--heri-ink)" }}
+                  style={{ color: "var(--ink)" }}
                 >
-                  <MessageSquare className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
+                  <MessageSquare className="h-4 w-4" style={{ color: "var(--gold)" }} />
                   {ar ? "نقاشات حول السجل" : "Discussions"}
                 </h3>
                 {threads.length === 0 ? (
-                  <p className="text-[12px]" style={{ color: "var(--heri-ink-3)" }}>
+                  <p className="text-[12px]" style={{ color: "var(--ink-muted)" }}>
                     {ar
                       ? "لم يفتح أحد نقاشاً عن هذا العنصر بعد."
                       : "No discussion thread anchored to this record yet."}
                   </p>
                 ) : (
-                  <ul className="divide-y divide-[var(--heri-rule)]">
+                  <ul className="divide-y divide-[var(--line)]">
                     {threads.map((t) => (
                       <li key={t.id} className="py-2.5">
                         <Link
                           href={`/messages/${t.id}`}
                           className="block hover:underline"
-                          style={{ color: "var(--heri-ink)" }}
+                          style={{ color: "var(--ink)" }}
                         >
                           <div className="text-sm font-semibold">
                             {t.title ?? (ar ? "نقاش بدون عنوان" : "Untitled thread")}
                           </div>
                           <div
                             className="mt-0.5 flex items-center gap-3 text-[11px] font-mono"
-                            style={{ color: "var(--heri-ink-3)" }}
+                            style={{ color: "var(--ink-muted)" }}
                           >
                             <span>
                               {formatNumber(t._count.messages)}{" "}
@@ -567,12 +566,12 @@ export default async function Audit360Page({
               <section className="card card-pad">
                 <h3
                   className="mb-2 flex items-center gap-2 text-sm font-semibold"
-                  style={{ color: "var(--heri-ink)" }}
+                  style={{ color: "var(--ink)" }}
                 >
-                  <PinIcon className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
+                  <PinIcon className="h-4 w-4" style={{ color: "var(--gold)" }} />
                   {ar ? "تثبيتات" : "Pins"}
                 </h3>
-                <p className="text-[12px]" style={{ color: "var(--heri-ink-3)" }}>
+                <p className="text-[12px]" style={{ color: "var(--ink-muted)" }}>
                   {pinCount === 0
                     ? ar
                       ? "لم يثبّت أحد هذا السجل بعد."
@@ -584,8 +583,7 @@ export default async function Audit360Page({
               </section>
             </aside>
           </div>
-        </PageContainer>
-      </>
+      </DaylightShell>
     );
   }
 
@@ -642,8 +640,8 @@ export default async function Audit360Page({
   const records = [...grouped.values()].slice(0, 30);
 
   return (
-    <>
-      <Topbar
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
         eyebrow={ar ? "النظام · تتبع 360" : "System · Audit 360"}
         title={ar ? "تتبع السجلات" : "Audit 360"}
         subtitle={
@@ -652,19 +650,18 @@ export default async function Audit360Page({
             : "Pick a record to see every touch on it across every business unit."
         }
       />
-      <PageContainer>
         {/* Manual entry — paste-id form */}
         <section className="card card-pad">
           <h3
             className="mb-2 flex items-center gap-2 text-sm font-semibold"
-            style={{ color: "var(--heri-ink)" }}
+            style={{ color: "var(--ink)" }}
           >
-            <Compass className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
+            <Compass className="h-4 w-4" style={{ color: "var(--gold)" }} />
             {ar ? "تتبع سجل بمعرفه" : "Trace by record ID"}
           </h3>
           <p
             className="mb-3 text-[12px]"
-            style={{ color: "var(--heri-ink-3)" }}
+            style={{ color: "var(--ink-muted)" }}
           >
             {ar
               ? "اختر نوع السجل والصق المعرّف. يدعم الأنواع الـ 12 أدناه."
@@ -703,18 +700,18 @@ export default async function Audit360Page({
         <section className="card overflow-hidden">
           <header
             className="flex items-center justify-between px-4 py-3"
-            style={{ borderBottom: "1px solid var(--heri-rule)" }}
+            style={{ borderBottom: "1px solid var(--line)" }}
           >
             <h3
               className="flex items-center gap-2 text-sm font-semibold"
-              style={{ color: "var(--heri-ink)" }}
+              style={{ color: "var(--ink)" }}
             >
-              <ActivityIcon className="h-4 w-4" style={{ color: "var(--heri-ochre)" }} />
+              <ActivityIcon className="h-4 w-4" style={{ color: "var(--gold)" }} />
               {ar ? "أكثر السجلات تفاعلاً مؤخراً" : "Recently active records"}
             </h3>
             <span
               className="text-[11px] font-mono"
-              style={{ color: "var(--heri-ink-3)" }}
+              style={{ color: "var(--ink-muted)" }}
             >
               {formatNumber(records.length)}
             </span>
@@ -743,10 +740,10 @@ export default async function Audit360Page({
                   >
                     <Link
                       href={href}
-                      className="grid items-center gap-3 px-4 py-3 transition-colors hover:bg-[var(--heri-cream-2)]"
+                      className="grid items-center gap-3 px-4 py-3 transition-colors hover:bg-[var(--cream)]"
                       style={{
                         gridTemplateColumns: "32px 1fr auto auto",
-                        borderTop: i === 0 ? "none" : "1px solid color-mix(in srgb, var(--heri-rule) 60%, transparent)",
+                        borderTop: i === 0 ? "none" : "1px solid color-mix(in srgb, var(--line) 60%, transparent)",
                       }}
                     >
                       <span
@@ -768,14 +765,14 @@ export default async function Audit360Page({
                           </span>
                           <span
                             className="truncate text-sm font-bold"
-                            style={{ color: "var(--heri-ink)" }}
+                            style={{ color: "var(--ink)" }}
                           >
                             {ar ? r.summary : r.summaryEn ?? r.summary}
                           </span>
                         </div>
                         <div
                           className="mt-0.5 truncate text-[11px] font-mono"
-                          style={{ color: "var(--heri-ink-3)" }}
+                          style={{ color: "var(--ink-muted)" }}
                         >
                           {r.entityId}
                           {r.actorName ? <span className="ms-2">· {r.actorName}</span> : null}
@@ -783,19 +780,19 @@ export default async function Audit360Page({
                       </div>
                       <span
                         className="whitespace-nowrap text-[11px] font-bold"
-                        style={{ color: "var(--heri-ink-3)" }}
+                        style={{ color: "var(--ink-muted)" }}
                       >
                         {formatNumber(r.count)} ×
                       </span>
                       <span
                         className="whitespace-nowrap text-[11px]"
-                        style={{ color: "var(--heri-ink-3)" }}
+                        style={{ color: "var(--ink-muted)" }}
                       >
                         {formatRelative(r.lastAt)}
                       </span>
                       <ArrowRight
                         className="h-4 w-4 shrink-0 rtl:-scale-x-100"
-                        style={{ color: "var(--heri-ink-3)", gridColumn: "5" }}
+                        style={{ color: "var(--ink-muted)", gridColumn: "5" }}
                       />
                     </Link>
                   </li>
@@ -804,7 +801,6 @@ export default async function Audit360Page({
             </ul>
           )}
         </section>
-      </PageContainer>
-    </>
+    </DaylightShell>
   );
 }

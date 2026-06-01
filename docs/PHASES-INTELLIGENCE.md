@@ -527,7 +527,18 @@ The first-touch experience. Whatever a new tenant sees before they have data of 
 
 ---
 
-## Phase 22 — Brain Trustworthiness Layer (ML + Hallucination Guard)
+## Phase 22 — Brain Trustworthiness Layer (ML + Hallucination Guard) 🔄 (in progress)
+
+**Status (2026-06):** core verifier + confidence scorer landed. Live:
+- `lib/brain/verifier.ts` — claim extraction (numbers, percentages, currency) + facts-payload matching with ±2% tolerance.
+- `lib/brain/confidence.ts` — four-axis scorer (verification × freshness × density × graph support) with calibrated weights (0.45/0.25/0.20/0.10).
+- `components/brain/VerifiedBadge.tsx` — ✓/△/⚠ inline badge with per-factor breakdown tooltip.
+- `app/(app)/brain/trust/page.tsx` — trust dashboard (distribution, cache hit rate, audited claim count, recent outputs).
+- Unit tests under `lib/brain/{verifier,confidence}.test.ts` covering extraction edge cases, tolerance, freshness decay.
+
+Still to land: wire the verifier directly into `narrator.claude.ts` post-process (currently the trust page self-checks against extracted numbers); persist a `verifiedAt` + `confidenceScore` column on `Narrative`; render `VerifiedBadge` everywhere narrator text appears. Phase 22b (fine-tuning pipeline) remains a future engagement.
+
+
 
 **Pitch.** The brain's Claude API calls are fast but opaque. Phase 22 wraps every brain output in a verification layer: fact-check against the tenant's own database, confidence scoring, and a lightweight on-device ML classifier that flags suspicious claims before they reach the operator.
 
@@ -558,7 +569,9 @@ The first-touch experience. Whatever a new tenant sees before they have data of 
 
 ---
 
-## Phase 23 — Database Migration + Infrastructure Hardening
+## Phase 23 — Database Migration + Infrastructure Hardening ✅ (shipped)
+
+**Status (2026-06):** delivered. PostgreSQL is the production datasource; migrations under `prisma/migrations/` (11 applied); `app/api/health/route.ts` returns `{status,db,ts}` for Railway's uptime monitor; `railway.toml` runs `prisma migrate deploy` in the pre-deploy step. The original "1-2 days" estimate held.
 
 **Pitch.** H-Nerve ships on SQLite for development speed. Phase 23 migrates to PostgreSQL, deploys on Railway's managed database service, and adds the reliability layer (connection pooling, read replicas, automated backups) needed to handle real business data.
 
@@ -619,7 +632,9 @@ The first-touch experience. Whatever a new tenant sees before they have data of 
 
 ---
 
-## Phase 25 — GitHub Workflow Documentation (Team Onboarding)
+## Phase 25 — GitHub Workflow Documentation (Team Onboarding) ✅ (shipped)
+
+**Status (2026-06):** `docs/GITHUB-WORKFLOW.md` is live. Bilingual (Arabic-first, English alongside), nine sections covering mental model, the four moving parts (commit / branch / PR / conflict), the workflow diagram, Railway hook-in, reading a diff, FAQs, naming conventions, repo at-a-glance, and a glossary.
 
 **Pitch.** Every change to H-Nerve goes through GitHub. Phase 25 produces a permanent, bilingual guide (Arabic + English) that any new team member or executive can read to understand the full development workflow — commits, branches, pull requests, conflicts, merging, and Railway deployments.
 

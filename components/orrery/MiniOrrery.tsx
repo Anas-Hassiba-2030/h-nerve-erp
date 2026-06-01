@@ -47,6 +47,7 @@ const GROUPS: Group[] = [
       { label: "المجلس",        labelEn: "Council",   route: "/brain/council" },
       { label: "الذاكرة",       labelEn: "Memory",    route: "/brain/memory" },
       { label: "التعلّم",       labelEn: "Learning",  route: "/brain/learning" },
+      { label: "الثقة",         labelEn: "Trust",     route: "/brain/trust" },
       { label: "ذكاء الدماغ",   labelEn: "IQ",        route: "/brain/iq" },
     ],
   },

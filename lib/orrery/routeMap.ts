@@ -24,6 +24,7 @@ const STEM_MAP: Record<string, string> = {
   learning: "/brain/learning",
   benchmarks: "/brain/benchmarks",
   brainiq: "/brain/iq",
+  trust: "/brain/trust",
   narrate: "/brain", // TODO: no dedicated narrate route yet
   finance: "/finance",
   analytics: "/analytics",

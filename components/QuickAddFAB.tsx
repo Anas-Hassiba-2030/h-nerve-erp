@@ -92,6 +92,13 @@ export function QuickAddFAB({ locale }: { locale: "ar" | "en" }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, filter, active]);
 
+  // FabRail trigger — opened by the unified rail at the bottom-start corner.
+  useEffect(() => {
+    function onOpen() { setOpen(true); }
+    window.addEventListener("h-nerve:quickadd:open", onOpen);
+    return () => window.removeEventListener("h-nerve:quickadd:open", onOpen);
+  }, []);
+
   // Click-outside to close
   useEffect(() => {
     if (!open) return;
@@ -300,9 +307,13 @@ export function QuickAddFAB({ locale }: { locale: "ar" | "en" }) {
         </div>
       ) : null}
 
-      {/* The button itself */}
+      {/* The button itself — visually hidden when the unified hn-fab-rail
+          is mounted; the rail's ＋ button dispatches h-nerve:quickadd:open
+          which opens the same panel. The button stays in the DOM so that
+          the click-outside ref and ⌘N keyboard shortcut keep working. */}
       <button
         type="button"
+        data-qaf-legacy-trigger
         onClick={() => setOpen((o) => !o)}
         title={ar ? "إنشاء سريع (⌘N)" : "Quick add (⌘N)"}
         className="group relative flex h-14 w-14 items-center justify-center rounded-2xl shadow-glow transition hover:scale-105 active:scale-95"

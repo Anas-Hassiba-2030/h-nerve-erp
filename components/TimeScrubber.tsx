@@ -101,6 +101,13 @@ export function TimeScrubber({ initialAsOf, locale = "ar" }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, ar, asOf]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // FabRail trigger — opened by the unified rail at the bottom-start corner.
+  useEffect(() => {
+    function onOpen() { setOpen(true); }
+    window.addEventListener("h-nerve:timemachine:open", onOpen);
+    return () => window.removeEventListener("h-nerve:timemachine:open", onOpen);
+  }, []);
+
   const commit = useCallback(
     (next: number | null) => {
       setAsOf(next);
@@ -140,6 +147,7 @@ export function TimeScrubber({ initialAsOf, locale = "ar" }: Props) {
         } as React.CSSProperties
       }
       data-pending={pending ? "true" : "false"}
+      data-tm-legacy-pill
       role="region"
       aria-label={ar ? "آلة الزمن" : "Time machine"}
     >

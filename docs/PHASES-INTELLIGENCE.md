@@ -610,9 +610,16 @@ Still to land: wire the verifier directly into `narrator.claude.ts` post-process
 
 ---
 
-## Phase 24 — Railway Infrastructure Maximization
+## Phase 24 — Railway Infrastructure Maximization 🔄 (in progress)
 
 **Pitch.** Make full use of the Railway subscription already in place: custom domain, environment management, automated deployments, monitoring, and the PostgreSQL service from Phase 23.
+
+**Shipped in this phase:**
+- `lib/logger.ts` — structured JSON-line logger. Emits `{ ts, level, msg, ...fields }` to stdout/stderr so Railway's log aggregator can filter, alert, and search. Zero dependencies.
+- `lib/env.ts` — type-safe env access with `checkEnv()` startup validator, `hasLLMKey()`, and `appUrl()`. Surfaces missing vars clearly instead of runtime crashes.
+- `app/api/health/route.ts` (updated) — extended liveness probe: DB latency, env check, uptime, `"ok" | "degraded" | "error"` status with structured JSON body.
+- `app/api/ready/route.ts` (new) — readiness probe: stricter than `/health`. Returns 503 when DB unreachable or workspace unseeded. Suitable for Kubernetes `readinessProbe` or a stricter uptime-monitor URL.
+- `railway.toml` (updated) — `sleepApplication = false` (prevents Railway from sleeping cron-dependent services), `healthcheckTimeout` bumped to 45s, `numReplicas = 1` explicit, improved comments.
 
 **What Railway gives us that we are not yet using.**
 

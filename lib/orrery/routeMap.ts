@@ -35,6 +35,7 @@ const STEM_MAP: Record<string, string> = {
   inbox: "/inbox",
   digest: "/digest",
   employees: "/employees",
+  team: "/employees",
   admin: "/admin/tenants",
   holding: "/admin/empire",
   workspace: "/workspace",

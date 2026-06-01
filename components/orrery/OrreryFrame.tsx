@@ -1,9 +1,11 @@
 "use client";
 
 // Hosts the Orrery hub (public/orrery/index.html) full-screen. A dive arrives as a
-// postMessage and navigates to the matching Claude Design page served under /design.
-// Real identity + locale are pushed into the hub after load.
+// postMessage and navigates to the matching real app route via the single,
+// unit-tested resolver in lib/orrery/routeMap. Real identity + locale are pushed
+// into the hub after load.
 import { useEffect, useRef } from "react";
+import { mapOrreryHref } from "@/lib/orrery/routeMap";
 
 export type OrreryIdentity = {
   lang: "ar" | "en";
@@ -36,56 +38,10 @@ export function OrreryFrame({ identity }: { identity: OrreryIdentity }) {
         return;
       }
       if (data && typeof data.__orreryNav === "string") {
-        const href = data.__orreryNav.replace(/^\/+/, "");
-        // Sections rebuilt with REAL data live as real app routes (the design
-        // + the live numbers + working CRUD). Everything not yet rebuilt opens
-        // the designed mock under /design so the dive always lands on the
-        // design — real data fills in section by section as each is rebuilt.
-        const REAL_DATA_PAGES: Record<string, string> = {
-          "sections/arena.html": "/hotels",
-          "sections/maha.html": "/dairy",
-          "sections/loran.html": "/farms",
-          "sections/ahliyya.html": "/education",
-          "sections/finance.html": "/finance",
-          "sections/reports.html": "/reports",
-          "sections/analytics.html": "/analytics",
-          "sections/markets.html": "/markets",
-          "sections/compare.html": "/compare",
-          "sections/insights.html": "/insights",
-          "sections/alerts.html": "/alerts",
-          "sections/plans.html": "/plans",
-          "sections/messages.html": "/messages",
-          "sections/inbox.html": "/inbox",
-          "sections/digest.html": "/digest",
-          "sections/tasks.html": "/tasks",
-          "sections/documents.html": "/documents",
-          "sections/employees.html": "/employees",
-          "sections/team.html": "/employees",
-          // Intelligence + brain engine surfaces.
-          "sections/brain.html": "/brain",
-          "sections/brainiq.html": "/brain/iq",
-          "sections/causal.html": "/brain/graph",
-          "sections/council.html": "/brain/council",
-          "sections/memory.html": "/brain/memory",
-          "sections/learning.html": "/brain/learning",
-          "sections/benchmarks.html": "/brain/benchmarks",
-          "sections/whatif.html": "/brain/scenarios",
-          "sections/supply.html": "/supply-chain",
-          "sections/workflows.html": "/workflows",
-          "sections/integrations.html": "/integrations",
-          // Workspace + group surfaces.
-          "sections/workspace.html": "/workspace",
-          "sections/holding.html": "/companies",
-          // System + utility surfaces.
-          "sections/search.html": "/search",
-          "sections/pinned.html": "/pinned",
-          "sections/system.html": "/system",
-          "sections/trash.html": "/trash",
-          "sections/audit.html": "/admin/audit",
-          "sections/admin.html": "/admin/empire",
-          "sections/info.html": "/help",
-        };
-        window.location.assign(REAL_DATA_PAGES[href] ?? "/design/" + href);
+        // Every dive resolves through the single, unit-tested source of truth
+        // (lib/orrery/routeMap): explicit section files, the dashboard kit, and
+        // generated kids (?s=<name>) all map to real, working app routes.
+        window.location.assign(mapOrreryHref(data.__orreryNav));
       }
     }
     window.addEventListener("message", onMessage);

@@ -389,22 +389,23 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
   white-space:nowrap !important; border:0 !important;
   pointer-events:none !important; opacity:0 !important;
 }
-/* The TimeScrubber wrapper IS the pill; when it expands (is-open) we let
-   the panel render normally so the date scrubber UI is visible. */
+/* Phase 26.1 — FAB rail panels open to the SIDE of the rail, not on top
+   of it. The rail itself is at inset-inline-start:22px width:54px → the
+   first column free of the rail starts at ~90px. Each panel anchors there
+   and stacks vertically by its trigger position so a 2nd or 3rd click
+   never lands on top of a sibling rail circle. */
 [data-tm-legacy-pill].is-open{
   position:fixed !important;
-  inset-inline-start:22px !important; bottom:90px !important;
+  inset-inline-start:90px !important; bottom:22px !important;
   width:auto !important; height:auto !important;
   padding:initial !important; margin:initial !important;
   overflow:visible !important; clip:auto !important;
   white-space:normal !important;
   pointer-events:auto !important; opacity:1 !important;
 }
-/* Same trick for the QuickAddFAB wrapper — when its panel is open
-   (the .anim-fade-up child exists), let the wrapper paint. */
 .fixed.bottom-6:has(.anim-fade-up){
   position:fixed !important;
-  inset-inline-start:22px !important; bottom:90px !important;
+  inset-inline-start:90px !important; bottom:88px !important;
   width:auto !important; height:auto !important;
   padding:initial !important; margin:initial !important;
   overflow:visible !important; clip:auto !important;

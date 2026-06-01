@@ -61,6 +61,29 @@ export function OrreryFrame({ identity }: { identity: OrreryIdentity }) {
           "sections/documents.html": "/documents",
           "sections/employees.html": "/employees",
           "sections/team.html": "/employees",
+          // Intelligence + brain engine surfaces.
+          "sections/brain.html": "/brain",
+          "sections/brainiq.html": "/brain/iq",
+          "sections/causal.html": "/brain/graph",
+          "sections/council.html": "/brain/council",
+          "sections/memory.html": "/brain/memory",
+          "sections/learning.html": "/brain/learning",
+          "sections/benchmarks.html": "/brain/benchmarks",
+          "sections/whatif.html": "/brain/scenarios",
+          "sections/supply.html": "/supply-chain",
+          "sections/workflows.html": "/workflows",
+          "sections/integrations.html": "/integrations",
+          // Workspace + group surfaces.
+          "sections/workspace.html": "/workspace",
+          "sections/holding.html": "/companies",
+          // System + utility surfaces.
+          "sections/search.html": "/search",
+          "sections/pinned.html": "/pinned",
+          "sections/system.html": "/system",
+          "sections/trash.html": "/trash",
+          "sections/audit.html": "/admin/audit",
+          "sections/admin.html": "/admin/empire",
+          "sections/info.html": "/help",
         };
         window.location.assign(REAL_DATA_PAGES[href] ?? "/design/" + href);
       }

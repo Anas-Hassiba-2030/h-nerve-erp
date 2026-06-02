@@ -764,6 +764,14 @@ The FAB rail's three buttons sometimes fail to mount / disappear after a navigat
 End-to-end the app feels slow on Railway. Likely causes: every page is `dynamic = "force-dynamic"` so nothing caches; the `(app)` layout fans out N parallel Prisma queries on every nav; the Orrery hub mounts a heavy canvas + the FAB rail + the morning brief overlay + the realtime SSE connection on every page. Audit candidates: `revalidatePath` over force-dynamic where data is hourly; defer realtime SSE until first user interaction; lazy-import `MiniOrrery` / `OnboardingTour` / `DocumentDropZone` overlays.
 - Files: `app/(app)/layout.tsx`, every `page.tsx` with `force-dynamic`, `lib/realtime.ts`, the orrery canvas.
 
+**Progress (multiple passes, ✅ done so far):**
+- Deferred 5 non-critical overlays (tour, splash, morning brief, presence, drop zone) via `next/dynamic` (`components/DeferredOverlays.tsx`).
+- Deferred the realtime **SSE kickoff** (first heartbeat + connect) to `requestIdleCallback` so it no longer competes with initial render (`RealtimePresence.tsx`).
+- Removed **dead per-nav work** from the `(app)` layout left over from the Sidebar removal: a `unreadCountFor()` **DB count query** (real win), plus `sidebarCollapsed`, `fullUser`, `messages`, `enforcePerms` and their unused imports.
+- Verified already-optimized: `atmosphere.js` pauses all canvases when the tab is hidden; 25 route-level `loading.tsx` files exist; always-mounted FAB/Conversational/TimeScrubber do no mount-time network work.
+
+**Still pending (needs measurement / domain knowledge — not safe to do blind):** `force-dynamic` → `revalidate` on pages whose data is only hourly/static (risk: stale data); the Orrery iframe bundle weight (817KB `index.html` + gsap).
+
 **Effort.** 1–2 days for 26.1, 26.3–26.7. 26.2 is 1 day (port the design + CSS). 26.8 is an ongoing performance budget — initial pass 1 day, measurement loop continues.
 
 **Demo script.** "Watch — three FAB buttons, three clean panels, none overlap. Click Workspace, get a real chooser instead of being shunted off. Click your avatar, see a real profile menu. The hub labels breathe. The brain orb looks like the reference. The whole thing feels lighter."

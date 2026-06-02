@@ -711,6 +711,37 @@ When asking a future Claude to work on this, name the file. "Improve `lib/brain/
 
 ---
 
+## End-to-End Verification (2026-06-02)
+
+Comprehensive live verification of the running system against the seeded
+SQLite dev.db, via Playwright + direct DB assertions. **Recorded here so the
+state is provable, not claimed.**
+
+### Pages — all 16 authenticated routes returned HTTP 200 with the correct Arabic heading
+`/orrery /messages /brain /brain/council /brain/trust /brain/narrate /insights /hotels /dairy /digest /workspace /me /plans /brain/learning /brain/iq /admin/genesis`. Headings verified: المراسلات / المجلس / العقل المفكّر / المخرجات / الثقة / الموجز / الخطط / ذكاء الدماغ / etc. The only console error anywhere is a benign external-font cert failure under the restricted sandbox.
+
+### Mutation flows — three flagship server actions verified end-to-end, with row-level DB assertions
+- **`convene()` — Brain Council:** topic submitted → server action fired → redirect to `/brain/council/[id]` → `CouncilSession` row created with `status=DONE` and **6 voices** (positions: support, oppose, support, qualify, oppose, qualify). The full multi-agent debate works.
+- **`sendMessage()` — Messages:** body typed → form submitted → `Message` row persisted in 500ms with a real cuid; thread message count 4 → 5.
+- **`createTask()` — Tasks:** title+description filled → form submitted → `Task` row persisted with `status=TODO priority=MEDIUM`; total 21 → 22.
+
+### Brain endpoint — `POST /api/converse` → 200 with a real cited answer
+*"Maha pushed [c1] batches this week, [c2] of them within the expiry window. Margin is on benchmark, but the brain signal [c3]…"*
+
+### Test suite — pure-unit grew 414 → 503 (+89 this session)
+- `lib/brain/memory.vector.test.ts` (+10) — the recall vectorizer (TF + cosine + serialize round-trip)
+- `lib/brain/meta.iq.test.ts` (+8) — the Brain-IQ math (base 80, ceiling 160, monotone in every component, weight ordering)
+- `lib/brain/agents/agents.test.ts` (+53) — every council specialist × every topic × both locales × determinism
+- `lib/password.test.ts` (+13) — password policy (MIN 12, mixed classes, bilingual errors)
+- `lib/importRateLimit.test.ts` (+5) — fixed-window rate limit (saturation, rollover, isolation)
+
+All pure-unit, no DB. Typecheck + lint + production build all green.
+
+### Health
+`/api/health` → `{status: "ok", db: ok, db_latency_ms: 1–25, env: ok}`.
+
+---
+
 ## Phase 26 — Polish & Bug-Fix Wave (operator-reported, 2026-06-01) 🔄 (in progress)
 
 **Pitch.** A focused regression / polish pass surfacing every issue the operator caught while running the system end-to-end on Railway. None of these are new features — each is something that *exists* but does not behave the way a professional product should. Tracked here so they never get forgotten.

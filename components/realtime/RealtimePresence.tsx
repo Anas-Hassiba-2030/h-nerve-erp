@@ -168,6 +168,8 @@ export function RealtimePresence({ user, locale = "ar" }: Props) {
     let pollHandle: number | null = null;
     let beatHandle: number | null = null;
     let usingFallback = false;
+    // Phase 26.8 — canceller for the deferred transport kickoff (see below).
+    let cancelStart: (() => void) | null = null;
 
     function applyScope(data: Scope) {
       setPeers(data.sessions);
@@ -195,7 +197,6 @@ export function RealtimePresence({ user, locale = "ar" }: Props) {
       const hidden = document.visibilityState === "hidden";
       beatHandle = window.setTimeout(scheduleBeat, hidden ? 60_000 : 20_000);
     }
-    scheduleBeat(); // announce immediately, then on the heartbeat
 
     // --- inbound: legacy GET poll, used only as an SSE fallback ---
     function startPolling() {
@@ -245,11 +246,35 @@ export function RealtimePresence({ user, locale = "ar" }: Props) {
       };
     }
 
-    if (typeof EventSource !== "undefined") startSSE();
-    else startPolling();
+    // Phase 26.8 — defer the transport kickoff (first heartbeat + SSE
+    // connect) to browser idle so it doesn't compete with initial render.
+    // Worst case: presence appears ~1-2s later. EventSource auto-reconnect
+    // and the heartbeat schedule are unaffected.
+    function startTransport() {
+      if (!alive) return;
+      scheduleBeat(); // announce presence, then heartbeat on a timer
+      if (typeof EventSource !== "undefined") startSSE();
+      else startPolling();
+    }
+    const ric = (window as any).requestIdleCallback as
+      | ((cb: () => void, opts?: { timeout: number }) => number)
+      | undefined;
+    const cic = (window as any).cancelIdleCallback as
+      | ((handle: number) => void)
+      | undefined;
+    if (typeof ric === "function") {
+      const h = ric(startTransport, { timeout: 2000 });
+      cancelStart = () => {
+        if (typeof cic === "function") cic(h);
+      };
+    } else {
+      const h = window.setTimeout(startTransport, 1200);
+      cancelStart = () => window.clearTimeout(h);
+    }
 
     return () => {
       alive = false;
+      if (cancelStart) cancelStart();
       if (es) es.close();
       if (pollHandle != null) window.clearTimeout(pollHandle);
       if (beatHandle != null) window.clearTimeout(beatHandle);

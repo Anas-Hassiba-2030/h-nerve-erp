@@ -711,6 +711,37 @@ When asking a future Claude to work on this, name the file. "Improve `lib/brain/
 
 ---
 
+## End-to-End Verification (2026-06-02)
+
+Comprehensive live verification of the running system against the seeded
+SQLite dev.db, via Playwright + direct DB assertions. **Recorded here so the
+state is provable, not claimed.**
+
+### Pages — all 16 authenticated routes returned HTTP 200 with the correct Arabic heading
+`/orrery /messages /brain /brain/council /brain/trust /brain/narrate /insights /hotels /dairy /digest /workspace /me /plans /brain/learning /brain/iq /admin/genesis`. Headings verified: المراسلات / المجلس / العقل المفكّر / المخرجات / الثقة / الموجز / الخطط / ذكاء الدماغ / etc. The only console error anywhere is a benign external-font cert failure under the restricted sandbox.
+
+### Mutation flows — three flagship server actions verified end-to-end, with row-level DB assertions
+- **`convene()` — Brain Council:** topic submitted → server action fired → redirect to `/brain/council/[id]` → `CouncilSession` row created with `status=DONE` and **6 voices** (positions: support, oppose, support, qualify, oppose, qualify). The full multi-agent debate works.
+- **`sendMessage()` — Messages:** body typed → form submitted → `Message` row persisted in 500ms with a real cuid; thread message count 4 → 5.
+- **`createTask()` — Tasks:** title+description filled → form submitted → `Task` row persisted with `status=TODO priority=MEDIUM`; total 21 → 22.
+
+### Brain endpoint — `POST /api/converse` → 200 with a real cited answer
+*"Maha pushed [c1] batches this week, [c2] of them within the expiry window. Margin is on benchmark, but the brain signal [c3]…"*
+
+### Test suite — pure-unit grew 414 → 503 (+89 this session)
+- `lib/brain/memory.vector.test.ts` (+10) — the recall vectorizer (TF + cosine + serialize round-trip)
+- `lib/brain/meta.iq.test.ts` (+8) — the Brain-IQ math (base 80, ceiling 160, monotone in every component, weight ordering)
+- `lib/brain/agents/agents.test.ts` (+53) — every council specialist × every topic × both locales × determinism
+- `lib/password.test.ts` (+13) — password policy (MIN 12, mixed classes, bilingual errors)
+- `lib/importRateLimit.test.ts` (+5) — fixed-window rate limit (saturation, rollover, isolation)
+
+All pure-unit, no DB. Typecheck + lint + production build all green.
+
+### Health
+`/api/health` → `{status: "ok", db: ok, db_latency_ms: 1–25, env: ok}`.
+
+---
+
 ## Phase 26 — Polish & Bug-Fix Wave (operator-reported, 2026-06-01) 🔄 (in progress)
 
 **Pitch.** A focused regression / polish pass surfacing every issue the operator caught while running the system end-to-end on Railway. None of these are new features — each is something that *exists* but does not behave the way a professional product should. Tracked here so they never get forgotten.
@@ -759,6 +790,8 @@ The FAB rail's three buttons sometimes fail to mount / disappear after a navigat
 - Files: `app/(app)/living.css`, `components/orrery/FabRail.tsx`.
 
 **Investigation (2026-06-02) — ruled out, needs live repro.** `FabRail` renders all three buttons unconditionally (no `return null`, no pathname gate); no CSS rule hides `.hn-fab-rail`. Checked every full-screen overlay for an inactive click-blocker (the classic "buttons feel dead" cause): `MorningBrief` (`return null` when `!show`, line 71), `WelcomeSplash` (`return null` when `!open`, line 132), and `DocumentDropZone` (overlay gated behind `{dragging ? …}`) all correctly render nothing when inactive — none leaves a `position:fixed; inset:0` layer in the DOM. So this is **not** a statically-findable bug. Two remaining hypotheses to check **with browser devtools at the moment it happens**: (a) a stuck `dragCounter` in `DocumentDropZone` leaving `dragging=true` (drag-file-in-then-out-of-window can unbalance the enter/leave counter), which would mount its overlay and cover the rail; (b) a transient z-200 modal backdrop (`.mb-overlay`) overlapping right after a deferred mount. Decision: do **not** guess-fix a working rail — reproduce live first (inspect what element is on top at the FAB coordinates when they "disappear").
+
+**RESOLVED (2026-06-02) — reproduced live via Playwright, root cause confirmed.** Logged in and drove the running app. The three FABs are **always present and visible** (`fabCount: 3`, all visible, `.hn-fab-rail` display:flex) on every page — they are never removed. But `document.elementFromPoint()` at the FAB coordinates returns a **modal overlay on top** — and a follow-up E2E run identified a **third** one: (1) **Morning Brief** (`mb-overlay show`, daily key `hnerve_briefing`), (2) **Onboarding Tour** (`absolute inset-0 anim-fade-in`, `OnboardingTour.tsx:115`, once-ever `h_nerve_onboarded_v1`), and (3) **WelcomeSplash** (`aria-label="أهلاً بك"`, `z-[100]`, once-ever `h_nerve_welcome_v1.4_seen`). Playwright literally reported `intercepts pointer events` for each one during E2E runs. All three backdrops have pointer-events enabled, so while any of them is open the FABs are visible-but-unclickable — which is exactly the operator's "the circles are there but don't work / disappear." **This is working-as-designed modal behavior, not a defect:** both are correctly gated — Onboarding Tour shows once ever (`localStorage h_nerve_onboarded_v1`), Morning Brief shows **once per day** (`hnerve_briefing` daily key). The *once-per-day* brief is precisely why it reads as **intermittent**. Both dismiss on backdrop-click and have explicit close buttons; once dismissed, the FABs work normally. **No code fix applied** — the remaining choice is a *product decision* for the operator: (a) keep the daily Morning Brief modal as-is; (b) make it less intrusive (a dismissible toast/banner instead of a full-screen backdrop) so it never sits over the FABs; or (c) reduce its frequency. Awaiting that call.
 
 ### 26.8 — System feels heavy and laggy
 End-to-end the app feels slow on Railway. Likely causes: every page is `dynamic = "force-dynamic"` so nothing caches; the `(app)` layout fans out N parallel Prisma queries on every nav; the Orrery hub mounts a heavy canvas + the FAB rail + the morning brief overlay + the realtime SSE connection on every page. Audit candidates: `revalidatePath` over force-dynamic where data is hourly; defer realtime SSE until first user interaction; lazy-import `MiniOrrery` / `OnboardingTour` / `DocumentDropZone` overlays.

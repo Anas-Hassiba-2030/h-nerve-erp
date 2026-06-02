@@ -19,8 +19,6 @@ import { DeferredOverlays } from "@/components/DeferredOverlays";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getLocale, getMessages } from "@/lib/i18n.server";
 import { readFlash } from "@/lib/toast";
-import { SIDEBAR_COOKIE } from "@/lib/sidebarPref";
-import { unreadCountFor } from "@/lib/messages";
 import { getViewAsTenant, getTenantThemeCookie } from "@/lib/tenancy";
 import { THEME_PRESETS, themeCssVars, type ThemeKey } from "@/lib/brand/themes";
 import { permsEnforced, effectiveCanAccess } from "@/lib/permissions";
@@ -75,9 +73,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const locale = getLocale();
   const messages = getMessages(locale);
   const initialFlash = readFlash();
-  const sidebarCollapsed =
-    cookies().get(SIDEBAR_COOKIE)?.value === "collapsed";
-  const unreadMessages = await unreadCountFor(session.id).catch(() => 0);
 
   // Phase 16 — Time Machine cursor (cookie-driven). Banner surfaces only
   // when traveling; pill is always visible.

@@ -1,0 +1,179 @@
+# H-Nerve — Re-Infrastructure Plan & Strategic Memory
+
+> **Status:** strategic handoff document. Written 2026-06-02 for the upcoming
+> "re-infrastructure the right way" working session.
+> **Purpose:** this is the *non-parametric memory* for the rebuild. Everything
+> Anas and Claude agreed on lives here so a fresh session (or a new engineer)
+> can execute without re-deriving context. When we rebuild, we generate the
+> execution prompts **from this file** plus the spec set it defines.
+
+---
+
+## 0. Why this document exists (the core principle)
+
+A chat session is **parametric memory** — opaque, drifting, gone when the
+session ends. Documents in the repo are **non-parametric memory** —
+inspectable, durable, and any engineer or fresh AI session can pick them up.
+(This is the exact lesson from the RAG book analysis below.)
+
+**The agreed "right way" to rebuild:**
+1. **Documents are the source of truth, not the chat session.**
+2. **A fresh session executing against tight specs beats a long session
+   carrying everything in its head** (long sessions suffer context rot — we
+   saw it: the #83 squash race that dropped commits).
+3. **Do NOT rebuild from zero.** There is a working, deployed system with 414
+   passing tests and months of fixes. Instead:
+   - **Derive the specs FROM the working code** (accurate, not aspirational).
+   - Then **refactor / harden / rebuild module-by-module, one PR per module**,
+     in focused fresh sessions, using the current system as the reference for
+     "what it must still do."
+4. **The session is just the worker; the documents are the asset.**
+
+---
+
+## 1. The re-infrastructure session plan (what to do in ~4 hours)
+
+When Anas returns to "re-infrastructure the system the right way," the plan is:
+
+1. **Generate the `docs/spec/` set** (see §3). Start with the two highest-value,
+   least-ambiguous, auto-derivable docs:
+   - **Data Model / ERD** — derived from `prisma/schema.prisma`.
+   - **API / Server-Action contract catalog** — derived from every
+     `app/(app)/<resource>/actions.ts` and `app/api/**/route.ts`.
+2. Scaffold the **PRD template + ADR records + bilingual glossary** for Anas to
+   fill product intent into.
+3. Layer in the **RAG re-architecture** (see §2) as a set of ADRs + a phased
+   plan, since the brain's retrieval layer is the biggest structural upgrade.
+4. From the finished spec set, **generate per-module execution prompts** for
+   fresh sessions ("build module X against `docs/spec/...`").
+
+The bet (Anas's words): *"It's not going to take a lot of time since you have
+the files and the full picture — we're just going to generate the prompts."*
+That bet only pays off if the spec set in §3 is complete first.
+
+---
+
+## 2. RAG re-architecture — how Retrieval-Augmented Generation improves H-Nerve
+
+Source: full read of the RAG textbook (24 chapters) cross-referenced against
+`lib/brain/`. The brain is already a "compound AI system"; what's missing is
+**true non-parametric retrieval over the company's own knowledge.** Today the
+narrator works from a hand-assembled `facts` payload (`narrator.ts`), never
+reading the company's documents — that is exactly the "private data" gap the
+book names as the #1 enterprise motivation for RAG.
+
+**Prioritized roadmap (impact ÷ effort):**
+
+| Pri | Upgrade | Book ch | H-Nerve touch-point | Effort |
+|----|---|---|---|---|
+| 1 | **pgvector + real embeddings** for Memory (replace bag-of-words cosine) | 5, 6 | `memory.live.ts`, `Memory.vectorJson` → `vector(N)` | Low (already scaffolded; Postgres unblocks it) |
+| 2 | **Python-dict subgraph serialization** (67.9% vs 26.1% JSON accuracy) | 14.7 | narrator/council prompt assembly | Very low |
+| 3 | **Document retrieval** into narrator + council (read contracts, policies, past decisions, Living Protocol clauses) | 1, 3 | `Document` model → new retriever | Medium |
+| 4 | **Graph RAG** over the existing causal graph (HippoRAG Personalized PageRank for multi-hop; GraphRAG community summaries for global sensemaking) | 14 | `BrainNode` / `BrainEdge` | Medium–High |
+| 5 | **CRAG retrieval evaluator + fallback** (Correct / Ambiguous / Incorrect) | 11 | extends Phase 22 verifier | Medium |
+| 6 | **Decomposed RAG eval** (context-relevance, faithfulness, answer-relevance) into Brain IQ | 21 | `meta.reflector.ts`, trust dashboard | Medium |
+| 7 | **Tenant access control + corpus-poisoning defenses** (critical because federation = cross-tenant learning) | 23 | federation, retrieval layer | Medium |
+
+**Key alignments we already have (don't rebuild — extend):**
+- **Phase 22 Trust Layer = RAG faithfulness/groundedness** (Ch 21) and
+  **Self-RAG's `IsSup` token** (Ch 11). The verifier + confidence scorer are
+  ahead of the curve here.
+- **Causal graph = a knowledge graph** → Graph RAG (Ch 14) is a *direct* match.
+  Almost no ERP has this; it's the differentiator.
+- **Council = multi-agent / Corrective RAG** (Ch 16). Moderator = the
+  supervisor/reflection gate. Give each industry-pack expert a retriever tool.
+- **Memory = CoALA episodic memory**; causal graph + docs = semantic; feedback/
+  meta = procedural; `BrainContext` = working. Time Machine `as-of` cursor maps
+  naturally to **bi-temporal** tracking (Zep/Graphiti, Ch 16.4).
+
+**Book cautions to honor:**
+- "RAG for facts, finetuning for form" — H-Nerve's gap is *facts*, so RAG first;
+  the bilingual editorial voice is *form* (finetune much later, if ever).
+- Don't stuff everything into long context ("lost-in-the-middle"); retrieval
+  scales sub-linearly.
+- Compound error in agentic loops (95%/step → 60% over 10 steps) → keep
+  human-in-the-loop for write actions. The brain's **read-mostly boundary
+  already enforces this** — preserve it.
+- "Reliability is architectural, not a model property" — the read-mostly +
+  Moderator-as-supervisor design is exactly right; lean into it.
+
+---
+
+## 3. The document set engineers/developers need to build without coming back
+
+**The test for "done":** *if a competent engineer who never met Anas read this,
+would they make the same call he would — or guess?* If they'd guess, it has a gap.
+
+Best practice = a layered spec stack, in-repo, reviewed in PRs, each with an
+owner + last-updated date, linking rather than duplicating.
+
+### Tier 1 — Product & Scope (WHAT/WHY)
+1. **Vision / Product Brief** (1 page) — problem, user, the one differentiator, success.
+2. **PRD** (per capability) — user stories with **testable acceptance criteria**
+   (Given/When/Then), **explicit non-goals**, edge cases, success metrics. *The
+   single doc that prevents ~80% of mid-build questions.*
+3. **Roadmap / Phasing** — ✅ have it (`PHASES-INTELLIGENCE.md`).
+
+### Tier 2 — Domain & Data (LANGUAGE/SHAPE)
+4. **Domain Glossary / Ubiquitous Language** — every term once, **bilingual
+   (Arabic/English) with locked translations** (uniquely high rework source here).
+5. **Data Model / ERD** — entities, fields, relationships, **invariants**,
+   lifecycle (soft-delete, tenancy keys, string-enums). Schema exists; the
+   *rules* aren't written down.
+
+### Tier 3 — Architecture & Contracts (HOW)
+6. **System Architecture / Tech Design** — partly in `CLAUDE.md` + `BLUEPRINT.md`.
+7. **ADRs (Architecture Decision Records)** — one immutable record per decision
+   (why iron-session not NextAuth; why string columns not enums; why read-mostly
+   brain). Currently *scattered inside* `CLAUDE.md` — extract as numbered records.
+8. **API & Interface Contracts** — every server action + `app/api/` route:
+   input schema, output, errors, auth/role. **Biggest gap.**
+9. **Design System / UI Spec** — ✅ have it (`DESIGN-SKILL.md`), strong.
+
+### Tier 4 — Quality, Security, Ops (GUARANTEES)
+10. **Test Strategy & Definition of Done** — coverage, test pyramid, PR gate.
+11. **Security & Threat Model** — authn/authz, tenancy isolation, brain/RAG
+    attack surface (corpus poisoning for federation), compliance. Partly
+    `ISOLATION.md`.
+12. **Runbook / Deployment / Ops** — ✅ have them (`RUNBOOK.md`, `DEPLOYMENT.md`,
+    `READINESS.md`).
+13. **Developer Onboarding (day-1 setup)** — partly `CLAUDE.md` + `.env.example`.
+
+### Gap summary — what to generate in the re-infra session
+**Have (strong):** roadmap, design system, partial architecture, ops/deploy,
+git workflow, tenancy rules.
+**Missing (the "comes back to ask" gaps), in priority order:**
+1. **PRD with testable acceptance criteria + non-goals** (#1 interruption source)
+2. **API / Server-Action contract catalog** (biggest technical gap)
+3. **Data Model / ERD narrative**
+4. **Bilingual Domain Glossary** (critical for the RTL/Arabic stack)
+5. **ADRs** extracted as immutable records
+6. **Test Strategy + Definition of Done**
+7. **Security / Threat Model** (esp. brain + federation)
+
+### Cross-cutting best practices
+- Single source of truth per concern — link, never duplicate (duplicates drift → cause questions).
+- Docs live in the repo, reviewed in the same PR as the code they describe.
+- A **Decision Log** so settled questions never reopen.
+- Acceptance criteria are executable (Given/When/Then) — they double as the test spec.
+- Every doc: owner + last-updated date.
+- **Write the non-goals** — most "should we also…?" interruptions die here.
+
+---
+
+## 4. Quick reference — what already exists
+
+| Concern | File(s) |
+|---|---|
+| Conventions / architecture guide | `CLAUDE.md` |
+| Design language | `docs/DESIGN-SKILL.md` |
+| Phase roadmap | `docs/PHASES-INTELLIGENCE.md` |
+| Brain architecture | `docs/BLUEPRINT.md`, `lib/brain/README.md`, `lib/brain/Brain.ts` |
+| Multi-tenancy rules | `docs/ISOLATION.md` |
+| Git workflow (bilingual) | `docs/GITHUB-WORKFLOW.md` |
+| Ops / deploy | `docs/RUNBOOK.md`, `docs/DEPLOYMENT.md`, `docs/READINESS.md` |
+| Operating protocol (plain language) | `docs/OPERATING-PROTOCOL.md` |
+| Polish/bug backlog | `docs/PHASES-INTELLIGENCE.md` § Phase 26 |
+
+When the re-infra session starts: read this file, then generate `docs/spec/`
+(ERD + API catalog first), then build module-by-module against it.

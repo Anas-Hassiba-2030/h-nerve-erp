@@ -1,6 +1,10 @@
 /* H-Nerve type stack — Heritage Modern primary, Industrial Precision secondary.
-   See docs/DESIGN-SKILL.md §2.5 for the bilingual pairing rationale. */
-@import url("https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Reem+Kufi:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;900&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800;9..144,900&family=Inter+Tight:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+   See docs/DESIGN-SKILL.md §2.5 for the bilingual pairing rationale.
+   The font CSS itself is loaded from <head> in app/layout.tsx via
+   preconnect + <link rel="stylesheet"> (not an @import here) because
+   @import is render-blocking — each page would wait for that round trip.
+   Moving the load to <head> lets the browser open the
+   fonts.googleapis.com connection in parallel with parsing this stylesheet. */
 
 @tailwind base;
 @tailwind components;

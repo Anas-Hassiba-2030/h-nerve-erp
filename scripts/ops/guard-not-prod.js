@@ -18,7 +18,7 @@ function readDatabaseUrl() {
   // npm scripts don't auto-load .env (only `prisma` does). Parse the
   // first uncommented DATABASE_URL= line so the guard sees what Prisma
   // will actually use.
-  const envPath = path.join(__dirname, "..", ".env");
+  const envPath = path.join(__dirname, "..", "..", ".env");
   if (!fs.existsSync(envPath)) return "";
   for (const line of fs.readFileSync(envPath, "utf8").split(/\r?\n/)) {
     const t = line.trim();

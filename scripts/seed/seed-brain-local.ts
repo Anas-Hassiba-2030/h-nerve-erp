@@ -10,14 +10,14 @@
 // Idempotent-ish: the seed helpers each clear+rebuild their own tables. Safe
 // to re-run. Local-only; do not commit the data.
 
-import { prisma } from "../lib/db";
-import { seedBrainGraph } from "../lib/brain/seedGraph";
-import { seedMemoryLake } from "../lib/brain/seedMemories";
-import { seedFeedback } from "../lib/brain/seedFeedback";
-import { learnPatterns } from "../lib/brain/feedback.live";
-import { seedFederation } from "../lib/brain/seedFederation";
-import { aggregate } from "../lib/brain/federation.live";
-import { council } from "../lib/brain/council.live";
+import { prisma } from "@/lib/db";
+import { seedBrainGraph } from "@/lib/brain/seedGraph";
+import { seedMemoryLake } from "@/lib/brain/seedMemories";
+import { seedFeedback } from "@/lib/brain/seedFeedback";
+import { learnPatterns } from "@/lib/brain/feedback.live";
+import { seedFederation } from "@/lib/brain/seedFederation";
+import { aggregate } from "@/lib/brain/federation.live";
+import { council } from "@/lib/brain/council.live";
 
 async function step(label: string, fn: () => Promise<unknown>) {
   process.stdout.write(`• ${label} … `);

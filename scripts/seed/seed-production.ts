@@ -24,7 +24,7 @@
 
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { ACCT } from "../lib/accounting";
+import { ACCT } from "@/lib/accounting";
 
 const prisma = new PrismaClient();
 

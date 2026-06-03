@@ -62,7 +62,7 @@ the automated i18n edits — all fixed and re-verified:
 |---|---|
 | `tsc --noEmit` (Postgres client) | 0 errors |
 | `next build` | compiles |
-| `scripts/build-orrery.mjs` rebuild | idempotent |
+| `scripts/build/build-orrery.mjs` rebuild | idempotent |
 | `npm test` | 392 / 392 pass |
 | AR + EN render, all surfaces | no errors |
 | CRUD (create/edit company, create transaction) | writes to DB |

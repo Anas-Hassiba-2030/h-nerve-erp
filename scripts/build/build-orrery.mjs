@@ -13,7 +13,7 @@ import { readFileSync, writeFileSync, copyFileSync, mkdirSync, readdirSync } fro
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const REF_DIR = join(ROOT, "docs/design/orrery");
 const REF = join(REF_DIR, "index.html");
 const RES = join(REF_DIR, "resources");

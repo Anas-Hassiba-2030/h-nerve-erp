@@ -9,8 +9,8 @@
 //   6. Inspect the trace
 
 import { PrismaClient } from "@prisma/client";
-import { runWorkflow } from "../lib/workflows/runtime";
-import { seedWorkflows } from "../lib/workflows/seed";
+import { runWorkflow } from "@/lib/workflows/runtime";
+import { seedWorkflows } from "@/lib/workflows/seed";
 
 const prisma = new PrismaClient();
 

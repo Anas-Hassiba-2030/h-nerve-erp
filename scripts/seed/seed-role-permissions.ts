@@ -7,7 +7,7 @@
 //   npx tsx scripts/seed-role-permissions.ts
 
 import { PrismaClient } from "@prisma/client";
-import { canAccess, GATED_ROLES, type PermRole } from "../lib/permissions";
+import { canAccess, GATED_ROLES, type PermRole } from "@/lib/permissions";
 
 const prisma = new PrismaClient();
 

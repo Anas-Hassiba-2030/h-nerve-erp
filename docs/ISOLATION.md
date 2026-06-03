@@ -91,7 +91,7 @@ NOT see another tenant's rows, follow this checklist:
    middleware and de-syncs over time.
 
 6. **Test** — append a per-tenant count check to
-   `scripts/test-isolation.ts` so the per-tenant numbers stay visible.
+   `scripts/test/test-isolation.ts` so the per-tenant numbers stay visible.
 
 7. **Seed** — if the demo seed creates rows for this model, include
    `tenantId` in the upsert. Prefer hardcoding to the seed's tenant
@@ -127,7 +127,7 @@ NOT see another tenant's rows, follow this checklist:
 
 ## Verifying isolation locally
 
-`npx tsx scripts/test-isolation.ts` reads the prod Neon DB and prints
+`npx tsx scripts/test/test-isolation.ts` reads the prod Neon DB and prints
 per-tenant counts plus simulated-middleware proofs for Hotel scoping
 (F2) and Product scoping (F3). Run after every isolation-relevant
 change.

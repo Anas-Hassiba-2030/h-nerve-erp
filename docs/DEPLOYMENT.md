@@ -43,7 +43,7 @@ branch and retry.
 
 ### 3. Seed production data (one-time, non-destructive)
 
-`scripts/seed-production.ts` is upsert-only — safe to re-run, never
+`scripts/seed/seed-production.ts` is upsert-only — safe to re-run, never
 wipes. Requires a strong `SEED_ADMIN_PASSWORD` (refuses missing / <12
 chars / `admin123`).
 

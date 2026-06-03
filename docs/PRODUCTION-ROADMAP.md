@@ -176,7 +176,7 @@ nothing is dropped.
 sparklines) + sector ops (hospitality/dairy/agri/education/holding) +
 future-projects pipeline + unit team + drill-downs. enterWorkspace lands
 here. Browser-verified live (Arena: all sections render, no console
-errors, screenshot `docs/smoke-2026-05-16/06-command-center.png`).
+errors).
 Original spec below.
 Feedback: entering a company just scoped the *group* dashboard; it felt
 generic, not "a fully detailed المها ERP that analyzes everything."

@@ -151,6 +151,29 @@ function renderBrainText(
   });
 }
 
+// Pick a warm female voice for the spoken answer. Browsers ship different
+// voice sets, so we match the locale first, then prefer the well-known
+// feminine voices by name; fall back gracefully to any locale voice, then any.
+function pickWarmFemaleVoice(
+  voices: SpeechSynthesisVoice[],
+  ar: boolean,
+): SpeechSynthesisVoice | null {
+  if (!voices?.length) return null;
+  const prefix = ar ? "ar" : "en";
+  const inLocale = voices.filter((v) => v.lang?.toLowerCase().startsWith(prefix));
+  const pool = inLocale.length ? inLocale : voices;
+  // Known feminine voice names across Chrome / Edge / Safari / Android + Arabic.
+  const FEMALE =
+    /female|woman|girl|samantha|victoria|karen|tessa|fiona|moira|serena|allison|ava|susan|zira|aria|jenny|michelle|sonia|google (uk|us) english|hoda|salma|amira|laila|hala|maryam|zahra/i;
+  return (
+    pool.find((v) => FEMALE.test(v.name)) ||
+    pool.find((v) => /google/i.test(v.name)) ||
+    pool[0] ||
+    voices[0] ||
+    null
+  );
+}
+
 export function Conversational({ locale = "ar" }: { locale?: "ar" | "en" }) {
   const ar = locale === "ar";
   const [open, setOpen] = useState(false);
@@ -166,7 +189,21 @@ export function Conversational({ locale = "ar" }: { locale?: "ar" | "en" }) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const transcriptRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  // Available TTS voices load asynchronously; cache them + refresh on change.
+  const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
   const [spokenPos, setSpokenPos] = useState<SpokenPos>(null);
+
+  // Load the browser's TTS voices (populated asynchronously) so we can pick a
+  // warm female voice for spoken answers.
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    const load = () => {
+      voicesRef.current = window.speechSynthesis.getVoices();
+    };
+    load();
+    window.speechSynthesis.addEventListener?.("voiceschanged", load);
+    return () => window.speechSynthesis?.removeEventListener?.("voiceschanged", load);
+  }, []);
   const sessionId = useMemo(() => {
     if (typeof window === "undefined") return "ssr";
     let id = window.localStorage.getItem(SESSION_KEY);
@@ -278,9 +315,16 @@ export function Conversational({ locale = "ar" }: { locale?: "ar" | "en" }) {
       } catch {}
       const utter = new SpeechSynthesisUtterance(text);
       utter.lang = ar ? "ar-SA" : "en-US";
-      utter.rate = 1.02;
-      utter.pitch = 1.0;
-      utter.volume = 0.95;
+      // Warm female voice: a touch slower and higher-pitched for a soft,
+      // pleasant delivery rather than the flat default.
+      const voice = pickWarmFemaleVoice(
+        voicesRef.current.length ? voicesRef.current : window.speechSynthesis.getVoices(),
+        ar,
+      );
+      if (voice) utter.voice = voice;
+      utter.rate = 0.94;
+      utter.pitch = 1.25;
+      utter.volume = 1.0;
 
       // Word boundaries are reported as charIndex offsets into utter.text.
       // Map each charIndex to a word-counter position.

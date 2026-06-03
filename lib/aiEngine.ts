@@ -16,7 +16,25 @@ export type EngineInsight = {
   title_en: string;
   body_ar: string;
   body_en: string;
+  /** [0,1] — engine's confidence in this signal; drives the TrustChip. */
+  confidence?: number;
 };
+
+/**
+ * Default confidence by severity for engine-generated insights. CRITICAL fires
+ * on hard thresholds (e.g. batches near expiry), so it's high-confidence;
+ * OPPORTUNITY/WARN are pattern-based and modestly less certain; INFO is
+ * background colour. Callers can pass an explicit `confidence` to override.
+ */
+export function confidenceFor(severity: EngineInsight["severity"]): number {
+  switch (severity) {
+    case "CRITICAL":   return 0.9;
+    case "WARN":       return 0.72;
+    case "OPPORTUNITY":return 0.66;
+    case "INFO":
+    default:           return 0.55;
+  }
+}
 
 const fmtNum = (n: number) =>
   new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(n);
@@ -384,6 +402,7 @@ export async function persistInsights(
         severity: ins.severity,
         title,
         body,
+        confidence: ins.confidence ?? confidenceFor(ins.severity),
         authorId,
         status: "OPEN",
       },

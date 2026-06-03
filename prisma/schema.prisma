@@ -320,6 +320,11 @@ model AIInsight {
   // back to the Arabic title/body at render time.
   titleEn     String?
   bodyEn      String?
+  // Phase 22 — engine's confidence in this signal, [0,1]. Drives the
+  // TrustChip on /insights. Nullable: user-authored insights leave it null
+  // (the chip then hides), engine-authored ones populate it from
+  // confidenceFor(severity) in lib/aiEngine.ts.
+  confidence  Float?
   authorId    String?
   author      User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
   status      String   @default("OPEN")

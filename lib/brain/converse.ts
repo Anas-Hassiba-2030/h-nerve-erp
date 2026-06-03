@@ -463,6 +463,7 @@ export async function ask(input: AskInput): Promise<AskResult> {
       scope: session.scope,
       k: 3,
       minScore: 0.08,
+      locale,
     }).catch(() => [] as DocHit[]),
   ]);
 

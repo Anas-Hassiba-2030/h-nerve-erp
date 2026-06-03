@@ -35,6 +35,35 @@ export type DocHit = {
   snippet: DocSnippet | null;
 };
 
+/** Compact, prompt-ready shape handed to council agents / narrator. */
+export type DocContext = {
+  /** Citation tag the model can reference, e.g. "doc1". */
+  ref: string;
+  title: string;
+  kind: string;
+  snippet: string;
+};
+
+/**
+ * Turn ranked document hits into a compact, locale-aware context list for
+ * prompting (council agents, narrator). Pure — no DB, no network — so it
+ * unit-tests directly. Drops hits with no usable snippet/title.
+ */
+export function docHitsToContext(hits: DocHit[], locale: "ar" | "en" = "ar"): DocContext[] {
+  const out: DocContext[] = [];
+  for (let i = 0; i < hits.length; i++) {
+    const h = hits[i];
+    const title = (locale === "en" ? h.titleEn || h.title : h.title) || h.titleEn || "";
+    const snippet =
+      (locale === "en" ? h.snippet?.textEn || h.snippet?.text : h.snippet?.text) ||
+      h.snippet?.textEn ||
+      "";
+    if (!title && !snippet) continue;
+    out.push({ ref: `doc${i + 1}`, title, kind: h.kind, snippet: snippet.slice(0, 240) });
+  }
+  return out;
+}
+
 export type DocRetrieveOptions = {
   /** Restrict to one document scope (company/module). Omit for all in-tenant. */
   scope?: string;
@@ -44,6 +73,8 @@ export type DocRetrieveOptions = {
   minScore?: number;
   /** Cap how many documents we pull from the DB before ranking (default 200). */
   maxCandidates?: number;
+  /** Query language — selects the clause text snippet selection scores against (default "ar"). */
+  locale?: "ar" | "en";
 };
 
 type LoadedDoc = {
@@ -87,7 +118,11 @@ function docToText(d: LoadedDoc): string {
  * to the query. Falls back to the summary, then the title. Keeps citations
  * pointed at a concrete sentence rather than the whole blob.
  */
-async function bestSnippet(d: LoadedDoc, qVec: number[]): Promise<DocSnippet | null> {
+async function bestSnippet(
+  d: LoadedDoc,
+  qVec: number[],
+  locale: "ar" | "en",
+): Promise<DocSnippet | null> {
   const candidates: DocSnippet[] = [];
   for (const c of d.clauses) {
     if (c.quote) {
@@ -99,7 +134,11 @@ async function bestSnippet(d: LoadedDoc, qVec: number[]): Promise<DocSnippet | n
     if (d.title) return { text: d.title, textEn: d.titleEn ?? undefined, kind: "title" };
     return null;
   }
-  const vecs = await getEmbedder().embed(candidates.map((c) => c.text));
+  // Score against the query in the query's own language: an English query
+  // matches the English clause text far better than its Arabic original.
+  const scoringText = (c: DocSnippet) =>
+    locale === "en" ? c.textEn || c.text : c.text;
+  const vecs = await getEmbedder().embed(candidates.map(scoringText));
   let best = 0;
   let bestScore = -Infinity;
   for (let i = 0; i < candidates.length; i++) {
@@ -125,6 +164,7 @@ export async function retrieveDocuments(
   const k = Math.max(1, opts.k ?? 4);
   const minScore = opts.minScore ?? 0.06;
   const maxCandidates = Math.max(1, opts.maxCandidates ?? 200);
+  const locale = opts.locale ?? "ar";
   if (!query.trim()) return [];
 
   let docs: LoadedDoc[];
@@ -166,7 +206,7 @@ export async function retrieveDocuments(
   const hits: DocHit[] = [];
   for (const r of ranked) {
     const d = r.meta!.doc as LoadedDoc;
-    const snippet = qVec ? await bestSnippet(d, qVec) : null;
+    const snippet = qVec ? await bestSnippet(d, qVec, locale) : null;
     hits.push({
       documentId: d.id,
       title: d.title ?? d.titleEn ?? "(untitled)",

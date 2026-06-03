@@ -556,7 +556,7 @@ export default async function UserDetailPage({
                           className="truncate font-bold"
                           style={{ color: "var(--ink)" }}
                         >
-                          {f.productLabel}
+                          {en ? (f.productLabelEn || f.productLabel) : f.productLabel}
                         </span>
                         <span className="font-mono text-[10px]" style={{ color: "var(--ink-muted)" }}>
                           {Math.round(f.confidence * 100)}٪

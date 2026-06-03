@@ -283,7 +283,7 @@ export default async function DashboardPage({
     }),
     ...forecasts.slice(0, 4).map((f): ActivityItem => ({
       id: f.id, kind: "FORECAST",
-      title: f.productLabel,
+      title: ar ? f.productLabel : (f.productLabelEn || f.productLabel),
       sub: `${ar ? f.source.name : (f.source.nameEn || f.source.name)} → ${ar ? f.target.name : (f.target.nameEn || f.target.name)} · ${formatNumber(f.predictedDemand)} ${f.unit}`,
       href: "/supply-chain", time: f.createdAt,
     })),
@@ -598,7 +598,7 @@ export default async function DashboardPage({
                         className="line-clamp-1"
                         style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)", letterSpacing: "-0.005em" }}
                       >
-                        {f.productLabel}
+                        {ar ? f.productLabel : (f.productLabelEn || f.productLabel)}
                       </div>
                       <span
                         style={{ fontSize: 11, fontWeight: 600, color: "var(--gold)", fontVariantNumeric: "tabular-nums" }}

@@ -105,6 +105,7 @@ export default async function WorkspaceCommandPage() {
             select: {
               id: true,
               productLabel: true,
+              productLabelEn: true,
               predictedDemand: true,
               unit: true,
               source: { select: { name: true, nameEn: true } },
@@ -358,7 +359,7 @@ export default async function WorkspaceCommandPage() {
                       <span style={{ fontFamily: "monospace" }}>{po.poNumber}</span>
                     </div>
                     <div style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)", marginTop: 4 }}>
-                      {po.sourceForecast?.productLabel ?? (ar ? "طلب" : "Order")}
+                      {(ar ? po.sourceForecast?.productLabel : (po.sourceForecast?.productLabelEn || po.sourceForecast?.productLabel)) ?? (ar ? "طلب" : "Order")}
                       {po.sourceForecast ? (
                         <span style={{ color: "var(--ink-muted)", fontWeight: 500 }}>
                           {" "}— {formatNumber(po.sourceForecast.predictedDemand)} {po.sourceForecast.unit}

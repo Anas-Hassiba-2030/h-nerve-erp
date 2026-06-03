@@ -24,6 +24,11 @@ When the user says **"improve the brain"**, that means `lib/brain/Brain.ts` and 
 
 Anas is studying ERP and will bring source material (the "13 ERP modules" + functionality) ~early-mid June 2026 to plan a final enrichment wave. **When he mentions ERP study / sources / modules, surface `docs/PHASES-INTELLIGENCE.md` § Phase 27** and plan it with him. Don't start it before the sources arrive.
 
+## Design backlog (Anas's animation priorities)
+
+- **Login redesign** — a heavily-animated, cinematic "living nervous system" login. The full design brief Anas feeds to Claude Design lives in **`docs/prompts/LOGIN-REDESIGN.md`**. The login page (`app/(auth)/login/`) is being redesigned **in Claude Design** — coordinate, don't blindly overwrite it.
+- **Phase 28 — The Companion ("the soul")** — a roaming ambient animated light-being that adds personality. See `docs/PHASES-INTELLIGENCE.md` § Phase 28. Lower priority than the login.
+
 ## Health & open items
 
 Current engineering health + the prioritized open-item backlog live in

@@ -21,6 +21,7 @@ import { llmConfig } from "@/lib/brain/llm";
 import { Users2, ChevronLeft, MessagesSquare, ArrowRight } from "lucide-react";
 import { convene } from "./actions";
 import { CouncilStage } from "./CouncilStage";
+import { TrustChip } from "@/components/brain/TrustChip";
 import "../../daylight.css";
 import "./council-design.css";
 
@@ -466,9 +467,8 @@ export default async function BrainCouncilIndex() {
                       {typeof s.confidence === "number" ? (
                         <>
                           <span style={{ color: "var(--line)" }}>·</span>
-                          <span>
-                            {ar ? "ثقة" : "conf"} {(s.confidence * 100).toFixed(0)}%
-                          </span>
+                          {/* Phase 22 — trust-coded recommendation chip */}
+                          <TrustChip score={s.confidence} locale={ar ? "ar" : "en"} />
                         </>
                       ) : null}
                       {s.usedLiveLlm ? (

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { formatNumber, pickLocale } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
 import { commit, abandon, markStepDone, markStepBlocked } from "./actions";
+import { TrustChip } from "@/components/brain/TrustChip";
 import "../daylight.css";
 import "./plans.css";
 
@@ -81,6 +82,8 @@ export default async function PlansPage() {
                       </div>
                     </div>
                     <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      {/* Phase 22 — projected-impact trust at a glance */}
+                      <TrustChip score={plan.confidence} locale={ar ? "ar" : "en"} />
                       {committed ? (
                         <span className={`br-chip ${st.chip}`}>{ar ? st.ar : st.en}</span>
                       ) : (

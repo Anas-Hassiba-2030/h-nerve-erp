@@ -191,7 +191,12 @@ function makeRemoteEmbedder(
 }
 
 function geminiEmbedder(key: string): Embedder {
-  const model = process.env.GEMINI_EMBED_MODEL?.trim() || "text-embedding-004";
+  // gemini-embedding-001 is the current GA model (text-embedding-004 is retired
+  // for newer keys). It defaults to 3072 dims; we request a lighter 1536 to
+  // keep stored memory vectors compact — makeRemoteEmbedder L2-normalizes,
+  // which Google requires for any reduced dimensionality. Both overridable.
+  const model = process.env.GEMINI_EMBED_MODEL?.trim() || "gemini-embedding-001";
+  const outputDimensionality = Number(process.env.GEMINI_EMBED_DIM) || 1536;
   return makeRemoteEmbedder(`gemini:${model}`, 96, async (texts) => {
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:batchEmbedContents?key=${encodeURIComponent(key)}`,
@@ -199,7 +204,11 @@ function geminiEmbedder(key: string): Embedder {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          requests: texts.map((t) => ({ model: `models/${model}`, content: { parts: [{ text: t }] } })),
+          requests: texts.map((t) => ({
+            model: `models/${model}`,
+            content: { parts: [{ text: t }] },
+            outputDimensionality,
+          })),
         }),
       },
     );

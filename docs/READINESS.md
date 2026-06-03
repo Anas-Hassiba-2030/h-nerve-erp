@@ -1,5 +1,13 @@
 # H-Nerve — Production Readiness Assessment
 
+> ⚠️ **HISTORICAL SNAPSHOT (2026-05-15).** Several gaps below are now **closed** —
+> for the current state see **`docs/AUDIT-2026-06.md`**. Specifically: the AI is
+> live (ANTHROPIC + Gemini keys set); the admin console is hard-gated to ADMIN
+> (#4 resolved); the DB is **PostgreSQL with migrations** on Railway (#5);
+> there are **580+ automated tests + CI** (#6/#7); `vercel.json` was removed
+> (Railway). The brain also gained a full RAG layer (#97–#123). The kept items
+> below — Document-Intelligence parser, deeper integration wiring — remain valid.
+
 _Assessed 2026-05-15 against the actual codebase (not the roadmap)._
 
 ## One-line verdict

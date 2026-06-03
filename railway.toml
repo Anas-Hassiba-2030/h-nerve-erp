@@ -5,11 +5,13 @@ builder = "nixpacks"
 buildCommand = "npm install && prisma generate && next build"
 
 [deploy]
-# Run pending migrations, then seed the demo data ONLY if the DB is empty
-# (scripts/seed-if-empty.ts is a no-op once seeded — never wipes real data).
-# The seed is wrapped so a hiccup can never block the deploy.
+# Run pending migrations, seed the demo data ONLY if the DB is empty
+# (scripts/seed-if-empty.ts is a no-op once seeded — never wipes real data),
+# then ALWAYS ensure the admin/owner accounts exist & can sign in
+# (scripts/ensure-admins.ts — idempotent login safety net that fixes lockouts).
+# Both are wrapped so a hiccup can never block the deploy.
 # Railway injects DATABASE_URL and other linked-service vars at this phase.
-preDeployCommand = "prisma migrate deploy && (npx tsx scripts/seed-if-empty.ts || true)"
+preDeployCommand = "prisma migrate deploy && (npx tsx scripts/seed-if-empty.ts || true) && (npx tsx scripts/ensure-admins.ts || true)"
 startCommand = "next start -p ${PORT:-3000}"
 
 # Liveness probe — Railway restarts the container if this returns non-2xx.

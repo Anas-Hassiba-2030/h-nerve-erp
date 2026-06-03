@@ -5,6 +5,7 @@ import { findUserByEmail, verifyPassword } from "@/lib/auth";
 import { getSession, type SessionUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import { resolveTenantSlugForUser, TENANT_COOKIE } from "@/lib/tenancy";
+import { isOwnerEmail } from "@/lib/owner";
 import { cookies } from "next/headers";
 import { WORKSPACE_COOKIE } from "@/lib/workspace";
 
@@ -30,6 +31,18 @@ export async function loginAction(formData: FormData) {
     redirect(
       `/login?error=${encodeURIComponent("بيانات اعتماد غير صحيحة")}&email=${encodeURIComponent(email)}`
     );
+  }
+
+  // Owner auto-admin: the product owner is always ADMIN regardless of
+  // signup order. Promote the row once so the rest of the app (and future
+  // logins) see ADMIN. See lib/owner.ts.
+  if (isOwnerEmail(user.email) && user.role !== "ADMIN") {
+    try {
+      await prisma.user.update({ where: { id: user.id }, data: { role: "ADMIN" } });
+      user.role = "ADMIN";
+    } catch {
+      /* non-fatal — fall through with existing role */
+    }
   }
 
   // Phase 4 — deactivated accounts cannot sign in.

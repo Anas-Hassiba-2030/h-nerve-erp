@@ -166,6 +166,25 @@ export async function seedOperator() {
       lastLoginAt: at(0, 9),
     },
   });
+  // Product owner — Anas's real login, always ADMIN (see lib/owner.ts).
+  // Password: admin123 (or SEED_ADMIN_PASSWORD). Lets the owner sign in
+  // on a freshly-seeded production with their own email.
+  const owner = await prisma.user.create({
+    data: {
+      email: "anashasiba91@gmail.com",
+      name: "أنس حسيبة",
+      passwordHash: adminHash,
+      role: "ADMIN",
+      title: "المالك · مهندس النظام",
+      companyId: hHolding.id,
+      avatarColor: "gold",
+      rank: "KING",
+      xp: 1000,
+      loginCount: 1,
+      bonusPercent: 12,
+      lastLoginAt: at(0, 9),
+    },
+  });
   const ceo = await prisma.user.create({
     data: {
       email: "ceo@hourani.jo",
@@ -263,7 +282,7 @@ export async function seedOperator() {
     },
   });
 
-  const users = [admin, ceo, arenaGm, mahaGm, loranGm, staffMember, newHire];
+  const users = [admin, owner, ceo, arenaGm, mahaGm, loranGm, staffMember, newHire];
 
   // -------------------------------------------------------------------
   // CONVERSATIONS — so /messages isn't empty on a fresh seed.

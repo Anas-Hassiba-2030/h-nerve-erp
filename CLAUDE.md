@@ -24,6 +24,13 @@ When the user says **"improve the brain"**, that means `lib/brain/Brain.ts` and 
 
 Anas is studying ERP and will bring source material (the "13 ERP modules" + functionality) ~early-mid June 2026 to plan a final enrichment wave. **When he mentions ERP study / sources / modules, surface `docs/PHASES-INTELLIGENCE.md` § Phase 27** and plan it with him. Don't start it before the sources arrive. (Also pending, marked "later": elevating `anashasiba91@gmail.com` to ADMIN in the seed.)
 
+## Health & open items
+
+Current engineering health + the prioritized open-item backlog live in
+**`docs/AUDIT-2026-06.md`** (lint/types/tests/build all green; in-progress
+phases 21/22/24/26; infra recommendations). Read it for "where do we stand /
+what's left."
+
 ## Re-infrastructure ("rebuild the right way") — read this first
 
 When the user talks about **re-infrastructuring / rebuilding the system the right way**, the RAG/book analysis, the document set engineers need, or generating execution prompts for a rebuild → **`docs/RE-INFRASTRUCTURE-PLAN.md` is the source of truth.** It captures everything agreed: the docs-first / fresh-session rebuild philosophy (don't rebuild from zero — derive specs from the working code, then refactor module-by-module), the prioritized RAG re-architecture roadmap, and the 13-document spec stack with its gap analysis. The re-infra session plan: generate `docs/spec/` (Data Model/ERD + API contract catalog first), then build against it.
@@ -53,7 +60,7 @@ The App Router uses **four** groups, each with its own `layout.tsx`:
 
 - `app/(auth)/` — public (login, signup, `/logout` route handler). Auth-only chrome.
 - `app/(app)/` — every authenticated operator page. The layout calls `getCurrentUser()`, redirects to `/login` on empty session, then renders Sidebar + Topbar + global overlays (ToastProvider, OnboardingTour, QuickAddFAB, Conversational, TimeScrubber/TimeMachineBanner, ViewAsBanner, RealtimePresence, DocumentDropZone). **Adding a new authenticated page = drop a folder under `app/(app)/<thing>/page.tsx`** — auth and chrome are inherited.
-- `app/(admin)/` — superadmin console (Phase 11). **Sleek Operator** vocabulary (`docs/DESIGN-SKILL.md` §1.F), cyan-on-near-black, no operator chrome. Houses `/admin/tenants`, `/admin/empire`, `/admin/system`. Currently demo-gated to any logged-in user; production will hard-gate to `role === "ADMIN"`.
+- `app/(admin)/` — superadmin console (Phase 11). **Sleek Operator** vocabulary (`docs/DESIGN-SKILL.md` §1.F), cyan-on-near-black, no operator chrome. Houses `/admin/tenants`, `/admin/empire`, `/admin/system`. **Hard-gated to `role === "ADMIN"`** (`app/(admin)/layout.tsx` redirects non-admins to `/dashboard`).
 - `app/(theater)/` — fullscreen Decision Theater (Phase 9). No sidebar, no footer — the user steps **out** of the dashboard into a magazine spread. ESC returns them.
 - `app/m/` — mobile-first surface (Phase 14, see `lib/mobile/today.ts`).
 - `app/page.tsx` — bare router: signed-in → `/orrery` (the Orrery hub), otherwise → `/login`.

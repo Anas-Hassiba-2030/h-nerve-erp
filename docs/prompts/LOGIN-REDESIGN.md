@@ -101,3 +101,44 @@ light). Layer it (back → front), all GPU-cheap (transform/opacity only):
 
 Make it feel **alive, coordinated, and unmistakably H-Nerve.** Restraint is the
 luxury — a few perfect motions beat a hundred noisy ones.
+
+---
+
+## ITERATION 2 — fixes from the first review (paste this next)
+
+The first pass is close, but three things break the "astonish in 5 seconds"
+goal. Fix these precisely and push the polish further.
+
+**1. The sector strip looks cheap.** Right now the sectors (Hospitality · Dairy
+· Smart Agriculture · Education · Markets · ESG) render as large, plain,
+underlined inline words — it reads like a row of broken links, not a premium
+brand. Redesign it as a **whisper-quiet caption**: small uppercase, generous
+letter-spacing (~0.18em), muted gold (`--accent` at ~55% opacity), separated by
+thin `·` dots, on ONE centered line — no underlines, no link styling, ~11px.
+It should feel like an engraving under the brand, not a navbar. On mobile it may
+wrap to two lines or shrink; never let it dominate.
+
+**2. The nucleus + orbit rings collide with the card.** The hexagon and its
+rings overlap the top edge of the login card awkwardly (hard clipping, ambiguous
+depth). Fix the composition so it reads as deliberate: the **nucleus sits as a
+crown clearly ABOVE the card** with breathing room, and the orbital rings either
+(a) stay fully above/behind the card with soft, *un-clipped* edges, or (b) pass
+behind a frosted-glass card with real z-depth and a feathered mask so no ring
+edge ever hard-cuts on the card border. No element should look "stuck" to the
+card. Center the whole stack as one balanced vertical rhythm:
+logo → wordmark → tagline → sectors → card.
+
+**3. It must astonish — go further on motion + payoff.**
+- **Parallax:** the cosmos (nebula, synapse field, dust) drifts subtly with
+  mouse / device tilt — depth that makes it feel like a window, not a wallpaper.
+- **The sign-in payoff is the hook:** on success, the light pulse → nucleus
+  flare → **camera dives through the orbital rings into the cosmos** must be
+  genuinely cinematic (smooth zoom + motion-blur streak + fade), because it sets
+  up the Orrery they're about to see. This transition is the money shot — make
+  it gorgeous.
+- **First 0.5s:** the very first frame should already look alive (nebula
+  pre-warmed), then the overture refines it. Never a flash of plain background.
+
+Keep everything else (palette, bilingual RTL, frosted card, no create-account
+button, ANAS MK HASIBA footer, reduced-motion fallback). Restraint everywhere
+EXCEPT the sign-in dive, which is allowed to be a showstopper.

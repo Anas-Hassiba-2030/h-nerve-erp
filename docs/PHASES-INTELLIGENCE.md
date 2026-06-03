@@ -909,3 +909,36 @@ Brain IQ / `ragQuality` so its glow literally reflects how confident the system 
 visual language (the Spark should look like it came from the same universe).
 **Effort.** ~2–4 days for a tasteful v1 (idle + drift + 3–4 event reactions +
 reduced-motion + dismiss). Risk: easy to over-do — keep it subtle or cut it.
+
+---
+
+## Phase 27b — "The Core" hub + orrery node (ERP data back-office) 🔭 (BACKLOG — operator-flagged 2026-06-03)
+
+> Anas: the ERP data/admin modules (`/admin/imports`, accounts, journal,
+> products, movements, warehouses, purchase-orders, sales-orders, customers,
+> mappings) are only reachable via tenants/settings, and the imports screen
+> "looks shit." Wants it (a) reachable **as an orbit on the Orrery hub** with a
+> name that describes its job, and (b) a nicer interface — ideally folded into
+> the Phase 27 modules work so we don't iterate back and forth.
+
+**The name.** This area is the operational system-of-record: ingestion +
+ledger + master data + transactions. Proposed orrery planet: **"The Core"
+(النواة)** — the dense data nucleus at the center of the system. (Plainer
+investor-facing alternative: **"Operations" (العمليات)**. Anas picks.)
+
+**Scope (do with the Phase 27 module wave):**
+1. **A real hub page** `app/(app)/core/` (or `/operations`) — a single landing
+   that tiles every ERP back-office module (imports, accounts, journal,
+   products, movements, warehouses, POs, SOs, customers, suppliers, mappings)
+   with counts + quick actions, in Heritage Modern. Today there is no index —
+   you reach modules only by deep link.
+2. **Orrery node:** add a planet to the hub (`public/orrery/index.html` is the
+   built artifact — edit the source under `docs/design/orrery/` and re-run
+   `scripts/build/build-orrery.mjs`) and add its label → route in
+   `lib/orrery/routeMap.ts` `NAME_MAP` (e.g. `"النواة": "/core"`).
+3. **Polish the imports + module screens** to the dashboard's bar (KPI strip,
+   hairline tiles) instead of the current bare look.
+
+**Depends on.** Best bundled with Phase 27 (the modules get a coherent home as
+they land). **Effort.** Hub page ~1 day; orrery node ~½ day; per-module polish
+scales with module count.

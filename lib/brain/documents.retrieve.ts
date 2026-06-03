@@ -15,6 +15,7 @@
 import { prisma } from "@/lib/db";
 import { rankByRelevance, type RetrievalHit } from "./retriever";
 import { getEmbedder, cosineSim } from "./embeddings";
+import { sanitizeForPrompt } from "./ragGuard";
 
 export type DocSnippet = {
   /** Verbatim quote (or summary line) most relevant to the query. */
@@ -59,7 +60,10 @@ export function docHitsToContext(hits: DocHit[], locale: "ar" | "en" = "ar"): Do
       h.snippet?.textEn ||
       "";
     if (!title && !snippet) continue;
-    out.push({ ref: `doc${i + 1}`, title, kind: h.kind, snippet: snippet.slice(0, 240) });
+    // Phase RAG-7 — neutralize any prompt-injection markers in the
+    // user-uploaded snippet before it becomes LLM/agent prompt context.
+    const safe = sanitizeForPrompt(snippet, 240);
+    out.push({ ref: `doc${i + 1}`, title: sanitizeForPrompt(title, 120).text, kind: h.kind, snippet: safe.text });
   }
   return out;
 }

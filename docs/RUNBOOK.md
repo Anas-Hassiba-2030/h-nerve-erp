@@ -130,7 +130,7 @@ When a new business-data model lands on `prisma/schema.prisma`:
    `lib/workspaceScope.ts`.
 4. Add a vitest case in `lib/workspaceScope.test.ts` for find/create.
 5. Make sure pages/actions use `prisma`, not `prismaUnscoped`.
-6. Append a per-tenant count to `scripts/test-isolation.ts`.
+6. Append a per-tenant count to `scripts/test/test-isolation.ts`.
 7. If the demo seed touches this model, include `tenantId` in the upsert.
 
 Full rationale + the two scoping planes are in `docs/ISOLATION.md`.

@@ -4,7 +4,7 @@
 // the cron uses, runnable locally without CRON_SECRET. Useful for pitch
 // prep after seeding.
 
-import { runBrainAnalysis } from "../lib/intelligence/engine";
+import { runBrainAnalysis } from "@/lib/intelligence/engine";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();

@@ -11,7 +11,7 @@
 
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { passwordError } from "../lib/password";
+import { passwordError } from "@/lib/password";
 
 async function main() {
   const email = (process.argv[2] || "").trim().toLowerCase();

@@ -21,7 +21,7 @@ async function main() {
       return;
     }
     console.log("[seed-if-empty] empty DB detected — seeding demo data…");
-    const { seedOperator } = await import("../prisma/seed");
+    const { seedOperator } = await import("@/prisma/seed");
     await seedOperator();
     console.log("[seed-if-empty] ✓ seeded.");
   } catch (e) {

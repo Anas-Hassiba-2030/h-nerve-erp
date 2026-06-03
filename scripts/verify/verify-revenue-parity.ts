@@ -5,7 +5,7 @@
 // will render.
 
 import { PrismaClient } from "@prisma/client";
-import { getCompanyRevenue30dMap, notionalValuationFromRevenue30d } from "../lib/finance";
+import { getCompanyRevenue30dMap, notionalValuationFromRevenue30d } from "@/lib/finance";
 
 const prisma = new PrismaClient();
 

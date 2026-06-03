@@ -1,6 +1,6 @@
 # Workflows studio — smoke test
 
-`scripts/test-workflow-studio.ts` exercises the full studio lifecycle:
+`scripts/test/test-workflow-studio.ts` exercises the full studio lifecycle:
 
 1. Seed example workflows (`lib/workflows/seed.seedWorkflows`)
 2. Create a fresh workflow row

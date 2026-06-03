@@ -15,7 +15,7 @@
 // is warm. Re-runnable: reuses the same DEMO forecast signal.
 
 import { PrismaClient } from "@prisma/client";
-import { approveForecastWithBridge } from "../lib/supply/bridge";
+import { approveForecastWithBridge } from "@/lib/supply/bridge";
 
 const prisma = new PrismaClient();
 

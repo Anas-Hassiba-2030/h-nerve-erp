@@ -4,13 +4,13 @@
 // aren't empty. Calls each subsystem's library entry point directly
 // (bypasses the server-action requireUser gate). Safe to re-run.
 
-import { seedBrainGraph } from "../lib/brain/seedGraph";
-import { seedFederation } from "../lib/brain/seedFederation";
-import { seedFeedback } from "../lib/brain/seedFeedback";
-import { seedMemoryLake } from "../lib/brain/seedMemories";
-import { aggregate } from "../lib/brain/federation.live";
-import { learnPatterns } from "../lib/brain/feedback.live";
-import { runBrainAnalysis } from "../lib/intelligence/engine";
+import { seedBrainGraph } from "@/lib/brain/seedGraph";
+import { seedFederation } from "@/lib/brain/seedFederation";
+import { seedFeedback } from "@/lib/brain/seedFeedback";
+import { seedMemoryLake } from "@/lib/brain/seedMemories";
+import { aggregate } from "@/lib/brain/federation.live";
+import { learnPatterns } from "@/lib/brain/feedback.live";
+import { runBrainAnalysis } from "@/lib/intelligence/engine";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();

@@ -271,16 +271,20 @@ export default async function DashboardPage({
 
   // === Activity stream items ===
   const activity: ActivityItem[] = [
-    ...recentInsights.slice(0, 4).map((i): ActivityItem => ({
-      id: i.id, kind: "INSIGHT", severity: i.severity as any,
-      title: i.title,
-      sub: i.body.slice(0, 70) + (i.body.length > 70 ? "…" : ""),
-      href: "/insights", time: i.createdAt,
-    })),
+    ...recentInsights.slice(0, 4).map((i): ActivityItem => {
+      const it = ar ? i.title : (i.titleEn || i.title);
+      const ib = ar ? i.body : (i.bodyEn || i.body);
+      return {
+        id: i.id, kind: "INSIGHT", severity: i.severity as any,
+        title: it,
+        sub: ib.slice(0, 70) + (ib.length > 70 ? "…" : ""),
+        href: "/insights", time: i.createdAt,
+      };
+    }),
     ...forecasts.slice(0, 4).map((f): ActivityItem => ({
       id: f.id, kind: "FORECAST",
       title: f.productLabel,
-      sub: `${f.source.name} → ${f.target.name} · ${formatNumber(f.predictedDemand)} ${f.unit}`,
+      sub: `${ar ? f.source.name : (f.source.nameEn || f.source.name)} → ${ar ? f.target.name : (f.target.nameEn || f.target.name)} · ${formatNumber(f.predictedDemand)} ${f.unit}`,
       href: "/supply-chain", time: f.createdAt,
     })),
   ].sort((a, b) => b.time.getTime() - a.time.getTime()).slice(0, 6);
@@ -292,7 +296,7 @@ export default async function DashboardPage({
       .slice(0, 2)
       .map((i): AlertItem => ({
         id: i.id, kind: "INSIGHT_CRITICAL", severity: "CRITICAL",
-        title: i.title, sub: ar ? "إشارة حرجة" : "Critical insight",
+        title: ar ? i.title : (i.titleEn || i.title), sub: ar ? "إشارة حرجة" : "Critical insight",
         href: "/insights", time: i.createdAt,
       })),
     ...farms
@@ -301,7 +305,7 @@ export default async function DashboardPage({
       .map((f): AlertItem => ({
         id: f.id, kind: "FARM",
         severity: f.alertLevel === "CRITICAL" ? "CRITICAL" : "WARN",
-        title: f.name,
+        title: ar ? f.name : (f.nameEn || f.name),
         sub: ar
           ? `رطوبة ${f.soilMoisture ?? "—"}٪ · حرارة ${f.tempC ?? "—"}°`
           : `Moisture ${f.soilMoisture ?? "—"}% · Temp ${f.tempC ?? "—"}°`,
@@ -342,7 +346,7 @@ export default async function DashboardPage({
       id: b.id,
       date: b.checkIn,
       kind: "BOOKING",
-      title: ar ? `حجز: ${b.guestName} في ${b.hotel.name}` : `Booking: ${b.guestName} @ ${b.hotel.name}`,
+      title: ar ? `حجز: ${b.guestName} في ${b.hotel.name}` : `Booking: ${b.guestName} @ ${b.hotel.nameEn || b.hotel.name}`,
       href: "/hotels",
     })),
     ...expiringDairyAll.map((b): CalendarEvent => ({
@@ -356,7 +360,7 @@ export default async function DashboardPage({
       id: c.id,
       date: c.expectedHarvest,
       kind: "HARVEST",
-      title: ar ? `حصاد ${c.name} في ${c.farm.name}` : `Harvest: ${c.name} @ ${c.farm.name}`,
+      title: ar ? `حصاد ${c.name} في ${c.farm.name}` : `Harvest: ${c.name} @ ${c.farm.nameEn || c.farm.name}`,
       href: `/farms/${c.farmId}`,
     })),
     ...myTasksDue
@@ -606,9 +610,9 @@ export default async function DashboardPage({
                       className="mt-1 flex items-center gap-1.5"
                       style={{ fontSize: 10.5, color: "var(--ink-muted)" }}
                     >
-                      <span className="truncate">{f.source.name}</span>
+                      <span className="truncate">{ar ? f.source.name : (f.source.nameEn || f.source.name)}</span>
                       <span style={{ color: "var(--line)" }}>→</span>
-                      <span className="truncate">{f.target.name}</span>
+                      <span className="truncate">{ar ? f.target.name : (f.target.nameEn || f.target.name)}</span>
                       <span style={{ color: "var(--line)" }}>·</span>
                       <span>{(f.confidence * 100).toFixed(0)}%</span>
                     </div>

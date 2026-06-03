@@ -2,15 +2,14 @@
 //
 // The Voice & Conversational Layer overlay.
 //
-// Triggered by ⌘J (or Ctrl+J). Slides up from the bottom in 280ms with an
-// ink-on-cream split: the user's input docks at the top, the brain's
-// answers write themselves line-by-line below. ESC closes.
+// Triggered by ⌘J (or Ctrl+J). A centered night-emerald panel with two
+// columns: a cosmic "thinking brain" orb (العقل المفكّر) beside the chat.
+// ESC closes.
 //
-// Aesthetic: Brutalist Confidence per docs/DESIGN-SKILL.md §1.H —
-// stark black, electric yellow accent, mono everything, 0px corners,
-// hard offset shadows, all-caps mono headers. Intentionally jarring next
-// to the Heritage rest of the app: the user knows they're talking to the
-// engine, not the dashboard.
+// Aesthetic: the Claude Design "مستشار الدماغ" advisor
+// (docs/design/system/advisor.html) — night-emerald field, gold accents,
+// brain answers in the display serif with gold citation chips. Ported into
+// the live app so the conversational overlay matches the standalone advisor.
 //
 // Voice in/out via Web Speech API (SpeechRecognition + speechSynthesis).
 // While the brain reads aloud, an ochre underline tracks the spoken word
@@ -491,6 +490,28 @@ export function Conversational({ locale = "ar" }: { locale?: "ar" | "en" }) {
           </div>
         </header>
 
+        {/* Body — two columns: the thinking orb + the chat */}
+        <div className="cv-body">
+          {/* Orb side — the cosmic "thinking brain" (Claude Design advisor) */}
+          <div className="cv-orb-side" aria-hidden="true">
+            <div className="cv-orb-aura" />
+            <div className="cv-orb-wrap">
+              <div className="cv-orb-label">
+                {ar ? "العقل المفكّر" : "THE THINKING BRAIN"}
+              </div>
+              <div className={`cv-orb ${pending ? "is-thinking" : ""}`}>
+                <span className="cv-orb-ring" />
+              </div>
+              <div className="cv-orb-state">
+                {pending
+                  ? ar ? "يفكّر…" : "thinking…"
+                  : ar ? "في انتظار سؤالك" : "awaiting your question"}
+              </div>
+            </div>
+          </div>
+
+          {/* Chat side — transcript + composer */}
+          <div className="cv-chat-side">
         {/* Transcript */}
         <div className="cv-transcript" ref={transcriptRef}>
           {visibleTurns.length === 0 ? (
@@ -665,6 +686,8 @@ export function Conversational({ locale = "ar" }: { locale?: "ar" | "en" }) {
             <span>{ar ? "اسأل" : "ASK"}</span>
           </button>
         </form>
+          </div>
+        </div>
       </div>
     </div>
   );

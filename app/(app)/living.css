@@ -165,11 +165,11 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
    The FAB rail (Ask the Brain / + / ⏱) lives at bottom-start, so they sit
    on opposite corners and never collide. */
 .dl-topctl{
-  position:fixed; bottom:22px; inset-inline-end:22px; z-index:70;
+  position:fixed; top:14px; inset-inline-end:22px; z-index:70;
   display:inline-flex; align-items:center; gap:10px;
 }
 @media (max-width:640px){
-  .dl-topctl{ bottom:14px; inset-inline-end:12px; gap:6px; }
+  .dl-topctl{ top:10px; inset-inline-end:12px; gap:6px; }
 }
 .dl-topctl .orbit-return{ position:static; } /* it's positioned by the wrapper now */
 .dl-langwrap{

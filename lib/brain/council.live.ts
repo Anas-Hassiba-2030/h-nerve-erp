@@ -15,6 +15,7 @@ import { SPECIALIST_AGENTS, runAgent, runModerator } from "./agents";
 import type { Council, CouncilSession, AgentVoice } from "./council";
 import { log } from "@/lib/logger";
 import { llmConfig } from "./llm";
+import { retrieveDocuments, docHitsToContext, type DocContext } from "./documents.retrieve";
 
 class LiveCouncil implements Council {
   async convene(topic: string, contextRefs: string[] = []): Promise<CouncilSession> {
@@ -153,7 +154,9 @@ async function buildAgentContext(
   locale: "ar" | "en"
 ) {
   // Pull the most central nodes (Companies + Hotels + Forecasts) plus any explicit refs.
-  const [companies, hotels, dairyBatches, farms, openInsights, forecasts, transactions] = await Promise.all([
+  // Phase RAG-3 — also retrieve the tenant's documents most relevant to the
+  // topic, so each agent can ground its argument in real contract/policy text.
+  const [companies, hotels, dairyBatches, farms, openInsights, forecasts, transactions, docHits] = await Promise.all([
     prisma.company.findMany(),
     prisma.hotel.findMany(),
     prisma.dairyBatch.findMany({ orderBy: { expiryDate: "asc" }, take: 5 }),
@@ -167,7 +170,9 @@ async function buildAgentContext(
     prisma.transaction.findMany({
       where: { occurredAt: { gte: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) } },
     }),
+    retrieveDocuments(topic, { k: 4, minScore: 0.06, locale }).catch(() => []),
   ]);
+  const documents: DocContext[] = docHitsToContext(docHits, locale);
 
   const totalRevenue = transactions
     .filter((t) => t.kind === "REVENUE")
@@ -202,7 +207,7 @@ async function buildAgentContext(
     ...forecasts.map((f) => ({ id: f.id, kind: "Forecast", label: f.productLabel })),
   ];
 
-  return { summary, metrics, relevantNodes };
+  return { summary, metrics, relevantNodes, documents };
 }
 
 function safeJson(s: string | null | undefined): any[] {

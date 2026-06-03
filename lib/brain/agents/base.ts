@@ -8,6 +8,7 @@
 
 import { callLlm, extractJson, type LlmRequest } from "../llm";
 import type { AgentVoice } from "../council";
+import type { DocContext } from "../documents.retrieve";
 
 export type AgentInput = {
   topic: string;
@@ -16,9 +17,30 @@ export type AgentInput = {
     summary: string;
     metrics: Record<string, number | string>;
     relevantNodes: Array<{ id: string; kind: string; label: string }>;
+    // Phase RAG-3 — retrieved snippets from the tenant's own documents
+    // (contracts, policies, reports). Agents cite these by ref ("doc1").
+    documents?: DocContext[];
   };
   locale: "ar" | "en";
 };
+
+/**
+ * Merge the top retrieved document in as an evidence item so it's visible on
+ * every voice — even in stub mode where the deterministic fallback can't read
+ * the document context. Pure; never exceeds 3 evidence items; idempotent
+ * (won't duplicate a ref already cited). Phase RAG-3.
+ */
+export function withDocumentEvidence(
+  evidence: AgentVoice["evidence"],
+  documents: DocContext[] | undefined,
+): AgentVoice["evidence"] {
+  const base = Array.isArray(evidence) ? evidence.slice(0, 3) : [];
+  const top = documents?.[0];
+  if (!top) return base;
+  if (base.some((e) => e.ref === top.ref)) return base.slice(0, 3);
+  const label = top.snippet ? `${top.title}: ${top.snippet.slice(0, 80)}` : top.title;
+  return [...base, { ref: top.ref, label, weight: 0.5 }].slice(0, 3);
+}
 
 export type AgentDef = {
   id: string;
@@ -35,6 +57,7 @@ export type AgentDef = {
 export const COUNCIL_INSTRUCTION_EN = `
 You are a member of an executive council convened to deliberate on a strategic question.
 Speak in editorial English (or Arabic if asked). Be specific. Cite metrics when you have them.
+When the provided documents support your point, cite them by ref (e.g. doc1) in your evidence — quote only what the document actually says.
 Do not preface with "As an AI". Do not list bullet points. Write as a senior advisor would speak.
 
 Respond ONLY with a JSON object of this shape:
@@ -51,6 +74,7 @@ Maximum 3 evidence items. Do not include any text outside the JSON object.
 export const COUNCIL_INSTRUCTION_AR = `
 أنت عضو في مجلس تنفيذي يجتمع للتداول في سؤال استراتيجي.
 تكلّم بنبرة تحريرية احترافية. كُن محدداً. اذكر الأرقام عند توفّرها.
+عند وجود مستندات تدعم رأيك، استشهد بها عبر المُعرّف (مثل doc1) ضمن الأدلة — واقتبس فقط ما تقوله المستندات فعلاً.
 لا تبدأ بـ"بصفتي ذكاءً اصطناعياً". لا تستخدم نقاطاً. اكتب كما يتحدث مستشار كبير.
 
 أجب بكائن JSON فقط بهذا الشكل:
@@ -73,6 +97,8 @@ export async function runAgent(def: AgentDef, input: AgentInput): Promise<AgentV
     context: {
       metrics: input.context.metrics,
       relevantNodes: input.context.relevantNodes.slice(0, 12),
+      // Phase RAG-3 — retrieved document snippets the agent may cite.
+      documents: (input.context.documents ?? []).slice(0, 4),
     },
     expectJson: true,
     maxTokens: 600,
@@ -91,6 +117,7 @@ export async function runAgent(def: AgentDef, input: AgentInput): Promise<AgentV
     evidence: AgentVoice["evidence"];
   }>(res.text);
 
+  const docs = input.context.documents;
   if (!parsed) {
     const fallback = def.stubVoice(input);
     return {
@@ -98,7 +125,7 @@ export async function runAgent(def: AgentDef, input: AgentInput): Promise<AgentV
       speakerLabel: { ar: def.speakerLabelAr, en: def.speakerLabelEn },
       position: fallback.position,
       thesis: fallback.thesis,
-      evidence: fallback.evidence,
+      evidence: withDocumentEvidence(fallback.evidence, docs),
     };
   }
 
@@ -107,6 +134,6 @@ export async function runAgent(def: AgentDef, input: AgentInput): Promise<AgentV
     speakerLabel: { ar: def.speakerLabelAr, en: def.speakerLabelEn },
     position: parsed.position,
     thesis: parsed.thesis,
-    evidence: Array.isArray(parsed.evidence) ? parsed.evidence.slice(0, 3) : [],
+    evidence: withDocumentEvidence(parsed.evidence, docs),
   };
 }

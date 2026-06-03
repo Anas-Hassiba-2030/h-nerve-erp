@@ -66,9 +66,9 @@ book names as the #1 enterprise motivation for RAG.
 
 | Pri | Upgrade | Book ch | H-Nerve touch-point | Effort |
 |----|---|---|---|---|
-| 1 | **pgvector + real embeddings** for Memory (replace bag-of-words cosine) | 5, 6 | `memory.live.ts`, `Memory.vectorJson` → `vector(N)` | Low (already scaffolded; Postgres unblocks it) |
+| 1 | ✅ **DONE (RAG-1, #97)** — **real embeddings + dense cosine** for Memory (pluggable embedder seam in `lib/brain/embeddings.ts`; recall scores dense vectors, legacy bag-of-words rows still work). Native `pgvector` column is the remaining scale step. | 5, 6 | `memory.live.ts`, `Memory.vectorJson` | Low |
 | 2 | **Python-dict subgraph serialization** (67.9% vs 26.1% JSON accuracy) | 14.7 | narrator/council prompt assembly | Very low |
-| 3 | **Document retrieval** into narrator + council (read contracts, policies, past decisions, Living Protocol clauses) | 1, 3 | `Document` model → new retriever | Medium |
+| 3 | ✅ **DONE (RAG-2, #99)** — **document retrieval** into the conversational brain. `lib/brain/retriever.ts` (pure ranking core) + `lib/brain/documents.retrieve.ts` (DB-backed, scope-filtered) → `converse.ts` surfaces real clauses as drill-through `DOCUMENT` citations and feeds quoted snippets to the LLM. Seeded a demo corpus. **Next: extend the same retriever into narrator + council.** | 1, 3 | `Document` model → `retriever.ts` / `documents.retrieve.ts` | Medium |
 | 4 | **Graph RAG** over the existing causal graph (HippoRAG Personalized PageRank for multi-hop; GraphRAG community summaries for global sensemaking) | 14 | `BrainNode` / `BrainEdge` | Medium–High |
 | 5 | **CRAG retrieval evaluator + fallback** (Correct / Ambiguous / Incorrect) | 11 | extends Phase 22 verifier | Medium |
 | 6 | **Decomposed RAG eval** (context-relevance, faithfulness, answer-relevance) into Brain IQ | 21 | `meta.reflector.ts`, trust dashboard | Medium |

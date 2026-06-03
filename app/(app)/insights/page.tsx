@@ -12,6 +12,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
+import { TrustChip } from "@/components/brain/TrustChip";
 import {
   generateInsightPlan,
   setInsightStatus,
@@ -115,6 +116,8 @@ export default async function InsightsPage() {
                 return (
                   <div key={i.id} className="br-row" style={open ? undefined : { opacity: 0.5 }}>
                     <span className={`br-chip ${chip}`}>{sevLabel}</span>
+                    {/* Phase 22 — engine confidence; chip hides when null */}
+                    <TrustChip score={i.confidence} locale={ar ? "ar" : "en"} />
                     <div className="rt">
                       <div className="tt">{ar ? i.title : (i.titleEn || i.title)}</div>
                       <div className="ts">{moduleLabel}{open ? "" : (ar ? " · مُغلق" : " · Closed")}</div>

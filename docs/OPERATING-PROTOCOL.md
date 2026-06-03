@@ -36,7 +36,7 @@ mostly this + the remote database (see §6).
 | `docs/READINESS.md` | Honest "is it production-ready" assessment |
 | `docs/PRODUCTION-ROADMAP.md` | The phase plan + status (single source of truth) |
 | `docs/PITCH-WALKTHROUGH.md` | Screen-by-screen pitch review + screenshots |
-| `docs/SMOKE-2026-05-16.md` | Last full test (PASS) |
+| `docs/AUDIT-2026-06.md` | Latest health snapshot (lint/types/tests/build green) |
 | `docs/PERFORMANCE.md` | Why it felt laggy + the fix order |
 
 Everything is committed to git on the `main` branch. When you reopen the

@@ -266,6 +266,63 @@ export async function seedOperator() {
   const users = [admin, ceo, arenaGm, mahaGm, loranGm, staffMember, newHire];
 
   // -------------------------------------------------------------------
+  // CONVERSATIONS — so /messages isn't empty on a fresh seed.
+  // A few realistic direct threads between the seeded team, each with a
+  // short exchange. Deterministic timestamps via at().
+  // -------------------------------------------------------------------
+  const convoSeeds: Array<{ a: typeof admin; b: typeof admin; title: string; msgs: Array<[typeof admin, string]> }> = [
+    {
+      a: admin, b: ceo, title: "إقفال الربع الثاني",
+      msgs: [
+        [ceo, "أنس، أحتاج ملخص أداء المجموعة قبل اجتماع المجلس الخميس."],
+        [admin, "جاهز. أرينا فوق المستهدف بـ٤٪، المها على المعيار، ولوران تحسّنت بعد معالجة الرطوبة."],
+        [ceo, "ممتاز. ركّز على هامش الألبان في العرض."],
+      ],
+    },
+    {
+      a: admin, b: arenaGm, title: "إشغال أرينا صوفيا",
+      msgs: [
+        [arenaGm, "حجوزات صوفيا ارتفعت مع موسم المؤتمرات — نحتاج طاقم إضافي."],
+        [admin, "وافِق على التوظيف المؤقت، وأبلغ المها لأن الطلب على الجبن سيرتفع بعد ٣ أسابيع."],
+      ],
+    },
+    {
+      a: admin, b: mahaGm, title: "دفعات اللبنة",
+      msgs: [
+        [mahaGm, "دفعتا لبنة على بُعد ٣ أيام من الانتهاء — أقترح خصم أو تحويل لأرينا."],
+        [admin, "حوّلها لأرينا صوفيا، الطلب هناك يستوعبها. تجنّبنا الهدر."],
+        [mahaGm, "تمام، جاري التنفيذ."],
+      ],
+    },
+    {
+      a: ceo, b: loranGm, title: "دفيئة لوران",
+      msgs: [
+        [loranGm, "رطوبة الدفيئة استقرّت فوق ٤٥٪ بعد الصيانة."],
+        [ceo, "شكراً ليلى، تابعي القراءات أسبوعياً."],
+      ],
+    },
+  ];
+  for (let ti = 0; ti < convoSeeds.length; ti++) {
+    const c = convoSeeds[ti];
+    const thread = await prisma.messageThread.create({
+      data: {
+        kind: "DIRECT",
+        title: c.title,
+        createdById: c.a.id,
+        createdAt: at(-(ti + 2)),
+        updatedAt: at(-(ti)),
+        participants: { create: [{ userId: c.a.id }, { userId: c.b.id }] },
+      },
+    });
+    for (let mi = 0; mi < c.msgs.length; mi++) {
+      const [author, body] = c.msgs[mi];
+      await prisma.message.create({
+        data: { threadId: thread.id, authorId: author.id, body, createdAt: at(-(ti), 9 + mi) },
+      });
+    }
+  }
+
+  // -------------------------------------------------------------------
   // HOTELS + BOOKINGS
   // -------------------------------------------------------------------
   const arenaAmman = await prisma.hotel.create({

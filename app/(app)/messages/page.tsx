@@ -23,6 +23,7 @@ import { formatNumber } from "@/lib/utils";
 import { getLocale } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { ConvoComposer } from "./ConvoComposer";
+import { startDirectThread } from "./actions";
 import "../daylight.css";
 import "./messages.css";
 
@@ -51,6 +52,16 @@ export default async function MessagesPage() {
   const locale = getLocale();
   const ar = locale === "ar";
   const session = await getCurrentUser();
+
+  // Other users to start a direct conversation with (excludes me).
+  const otherUsers = session
+    ? await prisma.user.findMany({
+        where: { id: { not: session.id } },
+        select: { id: true, name: true },
+        orderBy: { name: "asc" },
+        take: 50,
+      })
+    : [];
 
   // ── existing Prisma data fetching (unchanged) ──
   const threads = await prisma.messageThread.findMany({
@@ -145,9 +156,26 @@ export default async function MessagesPage() {
           <div className="panel ms-threads">
             <div className="ms-threads-head">
               <h2>{ar ? "المحادثات" : "Conversations"}</h2>
-              <Link className="ms-new" href="/team">
-                ＋ {ar ? "محادثة جديدة" : "New conversation"}
-              </Link>
+              {/* New conversation — inline picker (was a broken /team link).
+                  Pick a teammate → startDirectThread opens/creates the thread. */}
+              <details className="ms-new-wrap">
+                <summary className="ms-new">
+                  ＋ {ar ? "محادثة جديدة" : "New conversation"}
+                </summary>
+                <form action={startDirectThread} className="ms-new-form">
+                  <select name="toUserId" required defaultValue="" className="ms-new-select">
+                    <option value="" disabled>
+                      {ar ? "اختر زميلاً…" : "Pick a teammate…"}
+                    </option>
+                    {otherUsers.map((u) => (
+                      <option key={u.id} value={u.id}>{u.name}</option>
+                    ))}
+                  </select>
+                  <button type="submit" className="ms-new-go">
+                    {ar ? "ابدأ" : "Start"}
+                  </button>
+                </form>
+              </details>
             </div>
             <div className="ms-thread-list">
               {threads.length === 0 ? (

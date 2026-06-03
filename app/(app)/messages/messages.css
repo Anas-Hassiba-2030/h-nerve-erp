@@ -131,3 +131,12 @@
 .dl-page .ms-empty .s{font-size:12.5px;opacity:.7;max-width:42ch}
 
 @media (prefers-reduced-motion:reduce){.dl-page .msg{animation:none}.dl-page .thr .unread{animation:none}.dl-page .typing span{animation:none}}
+
+/* New-conversation inline picker (replaces the old broken /team link) */
+.dl-page .ms-new-wrap{position:relative}
+.dl-page .ms-new-wrap > summary{list-style:none}
+.dl-page .ms-new-wrap > summary::-webkit-details-marker{display:none}
+.dl-page .ms-new-form{position:absolute;inset-inline-end:0;top:calc(100% + 8px);z-index:20;display:flex;gap:8px;align-items:center;
+  background:var(--surface-elevated,#0e2620);border:1px solid rgba(194,163,90,.35);border-radius:14px;padding:10px;box-shadow:0 12px 30px rgba(0,0,0,.4);min-width:260px}
+.dl-page .ms-new-select{flex:1;background:rgba(13,31,26,.6);border:1px solid rgba(194,163,90,.25);border-radius:10px;color:#fff;font-size:13px;padding:8px 10px;outline:none}
+.dl-page .ms-new-go{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#241b06;border:0;border-radius:10px;font-weight:700;font-size:13px;padding:8px 14px;cursor:pointer}

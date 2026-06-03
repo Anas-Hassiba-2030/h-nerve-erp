@@ -21,6 +21,7 @@ import { prisma } from "@/lib/db";
 import { callLlm } from "./llm";
 import { retrieveDocuments, type DocHit } from "./documents.retrieve";
 import { evaluateRetrieval } from "./crag";
+import { sanitizeForPrompt } from "./ragGuard";
 
 export type Citation = {
   id: string;          // "c1", "c2", … (referenced from the answer text)
@@ -505,7 +506,8 @@ export async function ask(input: AskInput): Promise<AskResult> {
           ref: c.id,
           title: c.label,
           kind: usedDocs[i]?.kind,
-          snippet: usedDocs[i]?.snippet?.text,
+          // Phase RAG-7 — sanitize uploaded text before it enters the prompt.
+          snippet: sanitizeForPrompt(usedDocs[i]?.snippet?.text ?? "", 240).text,
         })),
       },
       maxTokens: 320,
@@ -527,7 +529,7 @@ export async function ask(input: AskInput): Promise<AskResult> {
       locale === "ar"
         ? top.snippet?.text
         : top.snippet?.textEn || top.snippet?.text;
-    const snippet = snippetRaw?.slice(0, 140) ?? "";
+    const snippet = sanitizeForPrompt(snippetRaw ?? "", 140).text;
     const hedged = crag.quality === "ambiguous";
     if (locale === "ar") {
       const lead = hedged ? "قد يتقاطع هذا مع" : "ومن المستندات المرفقة، يتقاطع هذا مع";

@@ -12,6 +12,26 @@ const at = (offsetDays: number, hour = 12) => {
   return d;
 };
 const ref = (prefix: string, n: number) => `${prefix}-${String(n).padStart(5, "0")}`;
+
+// Deterministic PRNG (mulberry32) seeded with a fixed value so every reseed
+// produces the *same* numbers — trustworthy demo data, not random noise.
+// Replaces Math.random() everywhere downstream (we monkey-patch globally
+// for the duration of the seed run, then restore).
+const SEED_VALUE = 0x4ec0_1234;
+function makePrng(seed: number) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const _seedPrng = makePrng(SEED_VALUE);
+const _realRandom = Math.random;
+Math.random = _seedPrng; // restored at the end of seedOperator()
+
 const rand = (min: number, max: number) => Math.round(min + Math.random() * (max - min));
 const randF = (min: number, max: number) => +(min + Math.random() * (max - min)).toFixed(2);
 
@@ -960,6 +980,11 @@ export async function seedOperator() {
   console.log("  staff@hourani.jo  / admin123  (فيل ♝, 95 XP)");
   console.log("  newhire@hourani.jo / admin123 (بيدق ♟, 28 XP)");
   console.log(`\nالشركات: ${allCompanies.length}, المستخدمون: ${users.length}, المشاريع المستقبلية: ${futureProjects.length}, الأسهم: ${stocks.length}\n`);
+
+  // Restore the real Math.random so subsequent imports of this module
+  // don't see a seeded PRNG. (Required when the /admin/genesis server
+  // action calls seedOperator() inside a live Next.js process.)
+  Math.random = _realRandom;
 }
 
 // Run only when invoked directly as a CLI script (npx tsx prisma/seed.ts).

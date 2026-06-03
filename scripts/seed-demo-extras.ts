@@ -21,6 +21,18 @@ import { PrismaClient, Prisma } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// Deterministic PRNG — same trick as prisma/seed.ts so the demo extras
+// are reproducible (trustworthy) instead of jittering on every reseed.
+const _realRandom = Math.random;
+let _a = 0x4ec0_5678;
+Math.random = function () {
+  _a |= 0; _a = (_a + 0x6D2B79F5) | 0;
+  let t = _a;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+
 function did(...parts: (string | number)[]) {
   return `demo-extras-${parts.join("-")}`;
 }
@@ -337,6 +349,7 @@ async function main() {
   console.log(`\nWrote: tx=${txCount}, programs=${progCount}, insights=${insightCount}, activity=${actCount}, bookings(+)=${bookCount}`);
 
   await prisma.$disconnect();
+  Math.random = _realRandom;
 }
 
 main().catch((e) => { console.error("SEED FAILED:", e); process.exit(1); });

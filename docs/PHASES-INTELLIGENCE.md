@@ -720,10 +720,15 @@ state is provable, not claimed.**
 ### Pages — all 16 authenticated routes returned HTTP 200 with the correct Arabic heading
 `/orrery /messages /brain /brain/council /brain/trust /brain/narrate /insights /hotels /dairy /digest /workspace /me /plans /brain/learning /brain/iq /admin/genesis`. Headings verified: المراسلات / المجلس / العقل المفكّر / المخرجات / الثقة / الموجز / الخطط / ذكاء الدماغ / etc. The only console error anywhere is a benign external-font cert failure under the restricted sandbox.
 
-### Mutation flows — three flagship server actions verified end-to-end, with row-level DB assertions
+### Mutation flows — six server actions verified end-to-end, with row-level DB assertions
 - **`convene()` — Brain Council:** topic submitted → server action fired → redirect to `/brain/council/[id]` → `CouncilSession` row created with `status=DONE` and **6 voices** (positions: support, oppose, support, qualify, oppose, qualify). The full multi-agent debate works.
-- **`sendMessage()` — Messages:** body typed → form submitted → `Message` row persisted in 500ms with a real cuid; thread message count 4 → 5.
-- **`createTask()` — Tasks:** title+description filled → form submitted → `Task` row persisted with `status=TODO priority=MEDIUM`; total 21 → 22.
+- **`sendMessage()` — Messages:** new thread + body submitted → `Message` row persisted with a real cuid.
+- **`createTask()` — Tasks:** title+description filled → form submitted → `Task` row persisted with `status=TODO priority=MEDIUM`.
+- **`createInsight()` — Insights:** title+body → `AIInsight` row created (6→7).
+- **`generateNewDigest()` — Digest:** form submitted → brain generated a `Digest` row (0→1).
+- **`createProject()` — Projects:** companyId+title → `FutureProject` row created (10→11).
+
+All re-verified after the full data wipe + deterministic reseed (2026-06-02), so they pass against fresh seed data, not a hand-tweaked DB.
 
 ### Brain endpoint — `POST /api/converse` → 200 with a real cited answer
 *"Maha pushed [c1] batches this week, [c2] of them within the expiry window. Margin is on benchmark, but the brain signal [c3]…"*

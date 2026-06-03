@@ -312,6 +312,11 @@ model AIInsight {
   severity    String   @default("INFO")
   title       String
   body        String
+  // Phase i18n — English copies so the insight feed translates with the UI.
+  // Nullable: legacy/user-generated insights without an English version fall
+  // back to the Arabic title/body at render time.
+  titleEn     String?
+  bodyEn      String?
   authorId    String?
   author      User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
   status      String   @default("OPEN")

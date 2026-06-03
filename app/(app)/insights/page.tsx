@@ -116,7 +116,7 @@ export default async function InsightsPage() {
                   <div key={i.id} className="br-row" style={open ? undefined : { opacity: 0.5 }}>
                     <span className={`br-chip ${chip}`}>{sevLabel}</span>
                     <div className="rt">
-                      <div className="tt">{i.title}</div>
+                      <div className="tt">{ar ? i.title : (i.titleEn || i.title)}</div>
                       <div className="ts">{moduleLabel}{open ? "" : (ar ? " · مُغلق" : " · Closed")}</div>
                     </div>
                     {open ? (

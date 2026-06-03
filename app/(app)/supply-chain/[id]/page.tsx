@@ -21,6 +21,7 @@ import {
   formatPercent,
   formatShortDate,
   formatRelative,
+  localizeUnit,
 } from "@/lib/utils";
 import { getCompanyBrand } from "@/lib/companyBrand";
 import { rankById } from "@/lib/gamification";
@@ -179,7 +180,7 @@ export default async function ForecastDetailPage({
                 className="text-xs font-bold"
                 style={{ color: "var(--gold)" }}
               >
-                {f.unit}
+                {localizeUnit(f.unit, !en)}
               </div>
               <div className="my-2 flex items-center gap-1">
                 <span
@@ -229,7 +230,7 @@ export default async function ForecastDetailPage({
 
         {/* KPIs */}
         <DaylightKpiGrid>
-          <DaylightKpi label={en ? "Predicted Demand" : "الطلب المتوقع"} value={`${formatNumber(f.predictedDemand)} ${f.unit}`} />
+          <DaylightKpi label={en ? "Predicted Demand" : "الطلب المتوقع"} value={`${formatNumber(f.predictedDemand)} ${localizeUnit(f.unit, !en)}`} />
           <DaylightKpi label={en ? "Confidence Level" : "مستوى الثقة"} value={formatPercent(conf, 0)} />
           <DaylightKpi
             label={en ? "Period Duration" : "مدة الفترة"}
@@ -280,7 +281,7 @@ export default async function ForecastDetailPage({
                             <StatusBadge status={r.status} />
                           </div>
                           <span className="font-mono text-xs font-bold" style={{ color: "var(--ink)" }}>
-                            {formatNumber(r.predictedDemand)} {r.unit}
+                            {formatNumber(r.predictedDemand)} {localizeUnit(r.unit, !en)}
                           </span>
                         </div>
                         <div className="text-[11px] font-mono" style={{ color: "var(--ink-muted)" }}>
@@ -310,7 +311,7 @@ export default async function ForecastDetailPage({
               </div>
               <div className="text-[11px] text-center" style={{ color: "var(--ink-muted)" }}>
                 {formatNumber(periodDays)} {en ? "days • avg" : "يوم • متوسط"}{" "}
-                {formatNumber(f.predictedDemand / periodDays)} {f.unit}{en ? "/day" : "/يوم"}
+                {formatNumber(f.predictedDemand / periodDays)} {localizeUnit(f.unit, !en)}{en ? "/day" : "/يوم"}
               </div>
             </DaylightPanel>
 
@@ -342,7 +343,7 @@ export default async function ForecastDetailPage({
             <DaylightPanel title={en ? "Summary" : "البطاقة"}>
               <dl className="space-y-2 text-xs">
                 <Fact label={en ? "Product" : "المنتج"} value={en ? (f.productLabelEn || f.productLabel) : f.productLabel} />
-                <Fact label={en ? "Unit" : "الوحدة"} value={f.unit} />
+                <Fact label={en ? "Unit" : "الوحدة"} value={localizeUnit(f.unit, !en)} />
                 <Fact label={en ? "Category" : "التصنيف"} value={categoryLabel} />
                 <Fact label={en ? "Status" : "الحالة"} value={f.status} />
                 <Fact label={en ? "Published" : "نُشر"} value={formatRelative(f.createdAt)} />

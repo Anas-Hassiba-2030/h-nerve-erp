@@ -42,6 +42,7 @@ import {
   VERTICALS_EN,
   TIERS_EN,
   loc,
+  localizeUnit,
 } from "@/lib/utils";
 import { getCompanyBrand } from "@/lib/companyBrand";
 import "../../daylight.css";
@@ -586,7 +587,7 @@ export default async function CompanyDetailPage({
                             <span style={{ color: "var(--ink-muted)" }}>→ {f.target.code}</span>
                           </div>
                           <span className="font-mono text-[10px]" style={{ color: "var(--ink-muted)" }}>
-                            {formatNumber(f.predictedDemand)} {f.unit}
+                            {formatNumber(f.predictedDemand)} {localizeUnit(f.unit, !en)}
                           </span>
                         </li>
                       ))}
@@ -613,7 +614,7 @@ export default async function CompanyDetailPage({
                             <span style={{ color: "var(--ink-muted)" }}>← {f.source.code}</span>
                           </div>
                           <span className="font-mono text-[10px]" style={{ color: "var(--ink-muted)" }}>
-                            {formatNumber(f.predictedDemand)} {f.unit}
+                            {formatNumber(f.predictedDemand)} {localizeUnit(f.unit, !en)}
                           </span>
                         </li>
                       ))}

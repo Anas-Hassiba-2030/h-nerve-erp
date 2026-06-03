@@ -17,6 +17,7 @@ import {
   formatDateTime,
   formatNumber,
   formatMoney2,
+  localizeUnit,
   ORDER_STATUS_AR,
   ORDER_STATUS_EN,
   orderStatusBadge,
@@ -241,7 +242,7 @@ export default async function PurchaseOrdersPage({
                       {ar ? "من تنبؤ" : "From forecast"}
                     </span>
                     <span style={{ color: "var(--ink)" }}>
-                      {ar ? po.sourceForecast.productLabel : (po.sourceForecast.productLabelEn || po.sourceForecast.productLabel)} — {formatNumber(po.sourceForecast.predictedDemand)} {po.sourceForecast.unit}
+                      {ar ? po.sourceForecast.productLabel : (po.sourceForecast.productLabelEn || po.sourceForecast.productLabel)} — {formatNumber(po.sourceForecast.predictedDemand)} {localizeUnit(po.sourceForecast.unit, ar)}
                     </span>
                     <span style={{ color: "var(--ink-muted)" }}>
                       {ar ? "للفترة" : "for"} {formatDateTime(po.sourceForecast.periodEnd, ar ? "ar" : "en")}

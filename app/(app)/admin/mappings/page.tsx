@@ -5,8 +5,9 @@
 // component. Mutations via ./actions.ts server actions. JSON columns
 // are String (codebase convention) so we JSON.parse for display.
 //
-// TODO(Phase 11): per-tenant authz — any ADMIN/EXECUTIVE/MANAGER can
-// currently edit any tenant's mapping.
+// Phase 11 authz — tenant scope enforced in ./actions.ts via
+// resolveAdminTenantId(); listing here is filtered by the scoped prisma
+// client (TenantImportMapping is in TENANT_SCOPED_MODELS).
 
 import { redirect } from "next/navigation";
 import { ArrowRight, Plus, ListChecks } from "lucide-react";

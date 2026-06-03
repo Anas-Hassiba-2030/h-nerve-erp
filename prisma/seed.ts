@@ -1164,6 +1164,44 @@ export async function seedOperator() {
     });
   }
 
+  // -------------------------------------------------------------------
+  // INTEGRATIONS — a logical connector stack for the group, so the
+  // /integrations page and the brain's INTEGRATION topic aren't empty.
+  // Provider keys match lib/integrations/catalog.ts. One ERROR + one
+  // EXPIRED make the "reconnect" advisory path demonstrable.
+  // -------------------------------------------------------------------
+  const integrationSeeds: Array<{
+    providerKey: string;
+    status: string;
+    account: string;
+    scopes: string[];
+    errorCount: number;
+    connectedDaysAgo: number;
+    lastUsedDaysAgo: number;
+  }> = [
+    { providerKey: "slack",           status: "CONNECTED", account: "hourani-group",         scopes: ["chat:write", "channels:read"], errorCount: 0, connectedDaysAgo: 90, lastUsedDaysAgo: 0 },
+    { providerKey: "gmail",           status: "CONNECTED", account: "ops@hourani.jo",         scopes: ["gmail.send"],                   errorCount: 0, connectedDaysAgo: 120, lastUsedDaysAgo: 1 },
+    { providerKey: "stripe",          status: "CONNECTED", account: "Hourani Payments",       scopes: ["charges:read", "payouts:read"], errorCount: 0, connectedDaysAgo: 60, lastUsedDaysAgo: 2 },
+    { providerKey: "mqtt",            status: "CONNECTED", account: "loran-sensors",          scopes: [],                               errorCount: 0, connectedDaysAgo: 45, lastUsedDaysAgo: 0 },
+    { providerKey: "google_calendar", status: "CONNECTED", account: "ceo@hourani.jo",         scopes: ["calendar.events"],              errorCount: 0, connectedDaysAgo: 30, lastUsedDaysAgo: 3 },
+    { providerKey: "whatsapp",        status: "ERROR",     account: "+962-7-MAHA",            scopes: ["messages:send"],                errorCount: 4, connectedDaysAgo: 50, lastUsedDaysAgo: 6 },
+    { providerKey: "quickbooks",      status: "EXPIRED",   account: "Hourani Holding Books",  scopes: ["accounting"],                   errorCount: 1, connectedDaysAgo: 200, lastUsedDaysAgo: 40 },
+  ];
+  for (const ig of integrationSeeds) {
+    await prisma.integration.create({
+      data: {
+        scope: "default",
+        providerKey: ig.providerKey,
+        status: ig.status,
+        scopesJson: JSON.stringify(ig.scopes),
+        account: ig.account,
+        errorCount: ig.errorCount,
+        connectedAt: ig.status === "NOT_CONNECTED" ? null : at(-ig.connectedDaysAgo, 10),
+        lastUsedAt: at(-ig.lastUsedDaysAgo, 13),
+      },
+    });
+  }
+
   // -- Phase 20: the Living Protocol constitution (group-wide, tenantId="default")
   await prisma.protocolClause.createMany({
     data: DEFAULT_PROTOCOL_CLAUSES.map((c) => ({
@@ -1184,7 +1222,7 @@ export async function seedOperator() {
   console.log("  ceo@hourani.jo    / admin123  (ملك ♚, 1100 XP)");
   console.log("  staff@hourani.jo  / admin123  (فيل ♝, 95 XP)");
   console.log("  newhire@hourani.jo / admin123 (بيدق ♟, 28 XP)");
-  console.log(`\nالشركات: ${allCompanies.length}, المستخدمون: ${users.length}, المشاريع المستقبلية: ${futureProjects.length}, الأسهم: ${stocks.length}, المستندات: ${docSeeds.length}\n`);
+  console.log(`\nالشركات: ${allCompanies.length}, المستخدمون: ${users.length}, المشاريع المستقبلية: ${futureProjects.length}, الأسهم: ${stocks.length}, المستندات: ${docSeeds.length}, التكاملات: ${integrationSeeds.length}\n`);
 
   // Restore the real Math.random so subsequent imports of this module
   // don't see a seeded PRNG. (Required when the /admin/genesis server

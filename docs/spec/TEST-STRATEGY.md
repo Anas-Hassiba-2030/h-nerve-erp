@@ -2,7 +2,7 @@
 
 > **Purpose:** state what is tested, how, to what standard, and what "done"
 > means — so a developer knows the bar without asking. Grounded in the actual
-> setup (`vitest.config.ts`, the `lib/**/*.test.ts` suite, 414 passing tests).
+> setup (`vitest.config.ts`, the `lib/**/*.test.ts` suite, 580+ passing tests (run `npm test` for the live count)).
 > Owner: platform. Last-updated: 2026-06-02.
 > Part of the spec set in `docs/RE-INFRASTRUCTURE-PLAN.md` §3.
 
@@ -24,7 +24,7 @@ tenant-isolation decision is a pure function *precisely so* it can be proven
 without a database (see ADR-005). The same pattern holds for the brain's
 `verifier.ts` / `confidence.ts` (Phase 22).
 
-**Current state:** ~24 test files across `lib/` and `lib/brain/`, **414 tests**,
+**Current state:** ~24 test files across `lib/` and `lib/brain/`, **580+ tests**,
 all green. They run in ~3 seconds.
 
 ---
@@ -89,7 +89,7 @@ runs on every commit; DB/e2e run in CI.
 ## 5. Definition of Done (the PR acceptance gate)
 
 A change is **done** when:
-- [ ] `npm test` is green (414+ tests).
+- [ ] `npm test` is green (580+ tests).
 - [ ] `npx tsc --noEmit` is clean (typecheck).
 - [ ] `npm run lint` is clean.
 - [ ] `next build` exits 0 (for changes touching app/components/pages).

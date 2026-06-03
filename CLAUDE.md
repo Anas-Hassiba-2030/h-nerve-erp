@@ -15,14 +15,14 @@ UI is bilingual (ar/en) with RTL. Default theme is **Heritage Modern** (`docs/DE
 These files are the source of truth. Reference them by path in any conversation about this project:
 
 1. **`docs/DESIGN-SKILL.md`** — the design language. Heritage Modern is the default. Eight aesthetic vocabularies are documented; pick ONE per surface; never mix.
-2. **`docs/PHASES-INTELLIGENCE.md`** — the 20-phase master plan for everything beyond the current state. Brain phases (1-10), platform phases (11-15), theater phases (16-19), empire phase (20).
+2. **`docs/PHASES-INTELLIGENCE.md`** — the master plan (Phases 1–27 across five waves: **A** Brain 1–10, **B** Platform 11–15, **C** Theater 16–19, **D** Empire 20, **E** Genesis & Hardening 21–26, plus **Phase 27** ERP modules — backlog). On top of this, a **RAG re-architecture** (RAG-1…RAG-7) is fully shipped — see the Brain section below. Health + open items: `docs/AUDIT-2026-06.md`.
 3. **`lib/brain/README.md`** + **`lib/brain/Brain.ts`** — the brain architecture. The single import path the rest of the app reaches for.
 
 When the user says **"improve the brain"**, that means `lib/brain/Brain.ts` and its subsystem files. When the user says **"apply the design skill to X"**, that means `docs/DESIGN-SKILL.md` § the appropriate vocabulary.
 
 ## ⏰ Standing reminder — Phase 27 (ERP modules)
 
-Anas is studying ERP and will bring source material (the "13 ERP modules" + functionality) ~early-mid June 2026 to plan a final enrichment wave. **When he mentions ERP study / sources / modules, surface `docs/PHASES-INTELLIGENCE.md` § Phase 27** and plan it with him. Don't start it before the sources arrive. (Also pending, marked "later": elevating `anashasiba91@gmail.com` to ADMIN in the seed.)
+Anas is studying ERP and will bring source material (the "13 ERP modules" + functionality) ~early-mid June 2026 to plan a final enrichment wave. **When he mentions ERP study / sources / modules, surface `docs/PHASES-INTELLIGENCE.md` § Phase 27** and plan it with him. Don't start it before the sources arrive.
 
 ## Health & open items
 
@@ -40,7 +40,7 @@ When the user talks about **re-infrastructuring / rebuilding the system the righ
 ```bash
 npm run dev         # Next dev server on http://localhost:3000
 npm run build       # prisma generate + db push + next build
-npm run db:push     # sync schema -> SQLite (dev.db) without a migration
+npm run db:push     # sync schema -> local dev DB without a migration (guarded against prod)
 npm run db:seed     # run prisma/seed.ts (creates Hourani sample data + admin@hourani.jo / admin123)
 npm run db:reset    # nuke + recreate + reseed
 npm run db:studio   # Prisma Studio
@@ -85,8 +85,26 @@ This is its own architectural pillar. `Brain.ts` is the conductor; subsystems li
 | `memory.ts` / `memory.live.ts` | 6 | Episodic recall of analogous past situations. |
 | `feedback.ts` / `feedback.live.ts` | 7 | User reactions become training signal. |
 | `federation.live.ts` | 8 | Cross-tenant anonymized pattern learning. |
-| `meta.ts` / `meta.reflector.ts` | 10 | Self-reflection; owns the Brain IQ score. |
+| `meta.ts` / `meta.reflector.ts` | 10 | Self-reflection; owns the Brain IQ score. `BrainIQ.ragQuality` carries RAG telemetry. |
 | `agents/*.ts` | — | Industry packs: HospitalityExpert, DairyExpert, AgriExpert, FinanceBrain, RiskOfficer, Moderator. **Domain knowledge lives here, not in the core.** |
+
+#### The RAG layer (shipped — `docs/RE-INFRASTRUCTURE-PLAN.md` §2)
+
+Retrieval-Augmented Generation makes the brain answer from the tenant's **own** data. All pure cores are unit-tested; the `.live` files touch the DB.
+
+| File | Role |
+|------|------|
+| `embeddings.ts` | The embedder seam. `getEmbedder()` → a real provider when a key is set (**Gemini** `gemini-embedding-001` → OpenAI → Voyage, with `GEMINI_API_KEY`/`OPENAI_API_KEY`/`VOYAGE_API_KEY`), else a deterministic local hash embedder. Falls back to local on any API error. |
+| `retriever.ts` | Pure `rankByRelevance` — embed query + items, rank by cosine. |
+| `documents.retrieve.ts` | DB-backed document retrieval (`Document` + clauses) → `converse.ts` + the council. |
+| `graphrag.ts` / `graphrag.live.ts` | Graph RAG: Personalized PageRank (HippoRAG) over the causal graph → relevant multi-hop subgraph. |
+| `crag.ts` | Corrective RAG: grade retrieval Correct/Ambiguous/Incorrect; drop weak matches before grounding. |
+| `ragEval.ts` / `ragEval.live.ts` | Decomposed RAG eval (context-relevance / faithfulness / answer-relevance) → `BrainIQ.ragQuality`. |
+| `ragGuard.ts` | Retrieval security: redact prompt-injection in retrieved text; tenant-scope + anti-dominance. |
+| `serialize.ts` | Renders prompt context as a Python literal (read more accurately than JSON). |
+| `converse.ts` | The conversational brain behind `/api/converse` (the "Talk to the Brain" overlay). |
+
+**Note:** retrieval is fully semantic only when an embedding key is set; otherwise it uses the local fallback (works, but rougher). The causal graph must be populated (`scripts/seed/seed-brain-local.ts`) for Graph RAG to have nodes.
 
 **Boundary rule:** the Brain is **read-mostly**. It proposes; it does not mutate domain data directly. All mutations go through the existing server actions in `app/(app)/<resource>/actions.ts`. This keeps the brain auditable, replayable, and safe to self-tune.
 
@@ -95,7 +113,7 @@ UI surfaces for the brain (`app/(app)/brain/*`, `app/(theater)/theater/*`) lean 
 ### Cross-cutting infrastructure (`lib/`)
 
 - **Auth**: cookie-session via `iron-session` (`lib/session.ts`), not NextAuth. Passwords hashed with `bcryptjs` (`lib/auth.ts`). Roles `"ADMIN" | "EXECUTIVE" | "MANAGER" | "STAFF"` typed in `SessionUser`, stored as a plain string column. SQLite + Prisma do not support enums; **always use string columns + TS unions** for role/status/sector/etc.
-- **DB**: SQLite at `prisma/dev.db` via Prisma 5. Swap to Postgres later by changing `datasource db` in `prisma/schema.prisma` and re-running `db:push`. Models are defined in `prisma/schema.prisma`; `lib/db.ts` exports the shared `prisma` client.
+- **DB**: **PostgreSQL in production** (Railway, Phase 23) — `prisma/schema.prisma` has `provider = "postgresql"` and migrations live under `prisma/migrations/` (`prisma migrate deploy` runs on every Railway deploy). **Local dev can flip** the provider to `sqlite` + `DATABASE_URL="file:./dev.db"` and use `db:push` (no migration) for speed — flip it back to `postgresql` before committing. Models are in `prisma/schema.prisma`; `lib/db.ts` exports the shared scoped `prisma` client.
 - **Multi-tenancy** (`lib/tenancy.ts`, `lib/brand/themes.ts`, Phase 11): single-tenant by default. The `Tenant` model + `view-as` cookie let a superadmin preview any tenant's theme without subdomain switching. The `(app)` layout reads the cookie and applies CSS-var overrides at the wrapper.
 - **i18n** (`lib/i18n.ts` + `lib/i18n.server.ts`): cookie-driven (`h_nerve_locale`). Messages are a hardcoded dictionary — no external runtime. Default is **Arabic with RTL**; English is secondary.
 - **Theming** (`lib/theme.ts` + `lib/theme.server.ts` + `lib/brand/themes.ts`): cookie-driven (`h_nerve_theme`). Multiple presets (harmony, midnight, royal, amber, ocean, carbon, rose) plus tenant themes. Heritage is the canonical default.
@@ -115,7 +133,7 @@ Tailwind with H-Nerve brand classes in `app/globals.css` (`.btn`, `.btn-primary`
 - **`Topbar` (`components/Topbar.tsx`) is the shared page header** — every authenticated page should render one with title (Arabic), optional subtitle, and an actions slot. Don't ship a page without it.
 - **`lib/utils.ts` provides `cn()`, `formatMoney()`, `formatDate()`, `formatNumber()`, `generateNumber()`, `arabicMonth()`** — use these rather than reimplementing.
 - **All UI text defaults to Arabic.** English appears as a secondary label only when the data is genuinely English (emails, codes, ISO).
-- **String columns over enums** for any role/status/sector/tier — SQLite + Prisma don't do enums.
+- **String columns + TS unions over DB enums** for any role/status/sector/tier — keeps the schema portable to the sqlite dev provider and migrations simple.
 - **Don't introduce new auth providers, ORMs, or state libraries without asking** — the stack is intentionally minimal.
 - **Don't bypass the brain's read-mostly boundary.** If a brain subsystem needs to change domain data, it calls a server action; it doesn't write directly.
 - **All Prisma queries must go through `prisma` (the scoped client) unless they're explicitly cross-tenant.** `prismaUnscoped` is reserved for the Empire dashboard, the workspace switcher, the system-dump API, the brain engine running from cron, and the operator layout's banner lookups. Every `prismaUnscoped` call site must carry a `// CROSS-TENANT INTENT:` comment. New tenant-keyed models go in `TENANT_SCOPED_MODELS` (`lib/workspaceScope.ts`); see `docs/ISOLATION.md` for the full checklist.
@@ -123,8 +141,10 @@ Tailwind with H-Nerve brand classes in `app/globals.css` (`.btn`, `.btn-primary`
 
 ## Default credentials (seeded)
 
-- Email: `admin@hourani.jo`
-- Password: `admin123`
+- Demo admin: `admin@hourani.jo` / `admin123`
+- Owner (always ADMIN, auto-promoted): `anashasiba91@gmail.com` / `SEED_ADMIN_PASSWORD` (else `admin123`)
+
+The deploy bootstrap (`railway.toml` preDeploy) guarantees these on every deploy via `scripts/seed/`: `seed-if-empty.ts` (seed empty DB), `ensure-admins.ts` (admins can always sign in), `ensure-demo-docs.ts` (top up demo documents). See `lib/owner.ts`.
 
 ## graphify
 

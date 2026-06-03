@@ -11,6 +11,7 @@
 // living.css (imported by the page) supplies the .hn-fab* styles.
 
 import type { Locale } from "@/lib/i18n";
+import "./orrery-fabs.css";
 import { FabRail } from "@/components/orrery/FabRail";
 import { Conversational } from "@/components/Conversational";
 import { QuickAddFAB } from "@/components/QuickAddFAB";

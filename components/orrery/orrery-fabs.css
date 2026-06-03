@@ -1,0 +1,36 @@
+/* Orrery-hub FAB placement — co-located so it always bundles with the page.
+   On the hub route the living.css .hn-fab-rail positioning was getting
+   overridden (the rail floated to the top-left over the logo). Force it
+   firmly to the bottom-LEFT corner, matching the rest of the app, and keep
+   it above the iframe. Also hard-hide any leaked legacy triggers. */
+/* Force physical bottom-LEFT regardless of text direction. Using [dir]
+   selectors raises specificity above living.css's logical-property rule,
+   which in RTL was resolving to the right edge. */
+.hn-fab-rail,
+[dir="rtl"] .hn-fab-rail,
+[dir="ltr"] .hn-fab-rail,
+html .hn-fab-rail {
+  position: fixed !important;
+  top: auto !important;
+  bottom: 22px !important;
+  left: 22px !important;
+  right: auto !important;
+  inset-inline-start: 22px !important;  /* harmless; physical left wins below */
+  inset-inline-end: auto !important;
+  z-index: 90 !important;
+  flex-direction: column !important;
+}
+/* In RTL the logical start = right, so neutralize it and re-assert left. */
+[dir="rtl"] .hn-fab-rail { inset-inline-start: auto !important; inset-inline-end: auto !important; left: 22px !important; right: auto !important; }
+@media (max-width: 640px) {
+  .hn-fab-rail, [dir="rtl"] .hn-fab-rail { bottom: 14px !important; left: 12px !important; }
+}
+/* the FAB rail is the only trigger on the hub — suppress the standalone
+   QuickAdd / TimeScrubber wrappers so nothing leaks to a wrong corner. */
+[data-qaf-legacy-trigger],
+[data-tm-legacy-pill]:not(.is-open) {
+  position: fixed !important;
+  width: 1px !important; height: 1px !important;
+  overflow: hidden !important; opacity: 0 !important;
+  pointer-events: none !important;
+}

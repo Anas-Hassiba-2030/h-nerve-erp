@@ -813,3 +813,51 @@ End-to-end the app feels slow on Railway. Likely causes: every page is `dynamic 
 **Effort.** 1–2 days for 26.1, 26.3–26.7. 26.2 is 1 day (port the design + CSS). 26.8 is an ongoing performance budget — initial pass 1 day, measurement loop continues.
 
 **Demo script.** "Watch — three FAB buttons, three clean panels, none overlap. Click Workspace, get a real chooser instead of being shunted off. Click your avatar, see a real profile menu. The hub labels breathe. The brain orb looks like the reference. The whole thing feels lighter."
+
+---
+
+## Phase 27 — ERP Module Expansion (the standard 13-module taxonomy) 🔭 (BACKLOG — sources pending, ~1 week out)
+
+> **⏰ REMINDER FOR FUTURE CLAUDE:** Anas is actively studying ERP and will bring
+> source material (the "13 ERP modules" + other functionality) in roughly a week.
+> When he returns with those sources, **surface this phase** and we plan the
+> expansion together. This is intended as a *final enrichment wave* — mapping
+> H-Nerve onto the canonical ERP module taxonomy and adding the tools/sections we
+> don't yet have. Do not start it before the sources arrive; just remember it.
+
+**Pitch.** H-Nerve grew organically around the Hourani Group's sectors. Phase 27
+steps back and aligns the product with the **standard ERP module taxonomy** an
+ERP curriculum teaches, so nothing essential is missing and the platform reads as
+a complete ERP to anyone who knows the field.
+
+**The standard ERP modules** (the reference checklist — Anas's sources will refine
+this). Marked with what H-Nerve already has vs. gaps to fill:
+
+| # | Module | H-Nerve today |
+|---|---|---|
+| 1 | **Finance & Accounting** (GL, AP/AR, journals) | ✅ ledger, journal entries, financial periods |
+| 2 | **Procurement / Purchasing** | ✅ purchase orders, suppliers |
+| 3 | **Inventory Management** | ✅ products, inventory movements, warehouses |
+| 4 | **Order Management / Sales** | ✅ sales orders, customers |
+| 5 | **Supply Chain Management** | ✅ supply-chain + forecasts + cross-tenant bridge |
+| 6 | **Manufacturing / Production (MRP)** | 🟠 partial (dairy batches) — no general BOM/MRP |
+| 7 | **Human Resources / HCM** (payroll, leave, org) | 🔴 gap — only users/roles/employees list |
+| 8 | **CRM** (leads, pipeline, opportunities) | 🔴 gap — customers exist, no pipeline |
+| 9 | **Project Management** | 🟠 future-projects exist; no tasks/gantt depth |
+| 10 | **Asset Management** (fixed assets, maintenance) | 🔴 gap |
+| 11 | **Warehouse Management (WMS)** | 🟠 warehouses exist; no bin/pick/pack |
+| 12 | **Business Intelligence / Reporting** | ✅ analytics, reports, the Brain |
+| 13 | **Quality / Compliance / Document Mgmt** | 🟠 documents + protocol clauses; no QMS |
+
+**Likely highest-value additions** (pending Anas's sources): a proper **HR/HCM**
+module, a **CRM pipeline**, and **fixed-asset management** — the three clearest
+gaps above. Each new module follows the canonical pattern (Companies/Hotels CRUD
++ a brain agent pack + a section in the orrery hub).
+
+**Files (when we build it).** New `app/(app)/<module>/` sections + server actions,
+new Prisma models, new `lib/brain/agents/*` packs per module, orrery routeMap +
+ConstellationRail entries.
+
+**Depends on.** Nothing blocking — but best done *after* the RAG re-architecture
+(so new modules are retrieval-aware from day one) and *after* Anas's study sources
+land. **Effort.** Scales with how many gap-modules we add (HR alone ≈ 3–5 days).

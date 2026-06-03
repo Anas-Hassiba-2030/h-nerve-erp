@@ -2,12 +2,13 @@
 // The local embedder must be deterministic, dense, L2-normalized, and
 // cosine-comparable — the contract the real provider will also satisfy.
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import {
   localEmbed,
   localEmbedder,
   cosineSim,
   getEmbedder,
+  hasEmbeddingProvider,
   EMBED_DIM,
 } from "./embeddings";
 
@@ -68,5 +69,50 @@ describe("getEmbedder / localEmbedder contract", () => {
     expect(out.length).toBe(2);
     expect(out[0].length).toBe(EMBED_DIM);
     expect(out[1].length).toBe(EMBED_DIM);
+  });
+});
+
+describe("real provider selection (Gemini / OpenAI / Voyage)", () => {
+  const KEYS = ["GEMINI_API_KEY", "GOOGLE_API_KEY", "OPENAI_API_KEY", "VOYAGE_API_KEY", "EMBEDDING_API_KEY"];
+  afterEach(() => {
+    for (const k of KEYS) delete process.env[k];
+    vi.unstubAllGlobals();
+  });
+
+  it("no key → local embedder", () => {
+    expect(getEmbedder().name).toBe("local-hash-v1");
+    expect(hasEmbeddingProvider()).toBe(false);
+  });
+
+  it("GEMINI_API_KEY → gemini embedder, and hasEmbeddingProvider is true", () => {
+    process.env.GEMINI_API_KEY = "test-key";
+    expect(getEmbedder().name).toMatch(/^gemini:/);
+    expect(hasEmbeddingProvider()).toBe(true);
+  });
+
+  it("OPENAI_API_KEY → openai embedder", () => {
+    process.env.OPENAI_API_KEY = "test-key";
+    expect(getEmbedder().name).toMatch(/^openai:/);
+  });
+
+  it("VOYAGE_API_KEY → voyage embedder", () => {
+    process.env.VOYAGE_API_KEY = "test-key";
+    expect(getEmbedder().name).toMatch(/^voyage:/);
+  });
+
+  it("Gemini takes precedence when several keys are set", () => {
+    process.env.OPENAI_API_KEY = "o";
+    process.env.VOYAGE_API_KEY = "v";
+    process.env.GEMINI_API_KEY = "g";
+    expect(getEmbedder().name).toMatch(/^gemini:/);
+  });
+
+  it("a real provider falls back to local vectors when the API call fails", async () => {
+    process.env.GEMINI_API_KEY = "bad-key";
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network down")));
+    const [v] = await getEmbedder().embed(["Maha dairy cold chain"]);
+    // Fallback returns a local EMBED_DIM vector — retrieval degrades, never crashes.
+    expect(v.length).toBe(EMBED_DIM);
+    expect(v).toEqual(localEmbed("Maha dairy cold chain"));
   });
 });

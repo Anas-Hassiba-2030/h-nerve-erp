@@ -34,8 +34,18 @@ export function formatNumber(value: number, fractionDigits = 0) {
   }).format(value || 0);
 }
 
-export function formatPercent(value: number, fractionDigits = 0) {
-  return new Intl.NumberFormat(NUM_LOCALE, {
+// Measurement units are stored as free text (Arabic or English symbol).
+// Render them in the active locale so "1,850 لتر" reads "1,850 L" in English
+// and English-stored units read in Arabic when ar. Unknown units pass through.
+const UNIT_AR_TO_EN: Record<string, string> = { "لتر": "L", "كغ": "kg", "كجم": "kg", "طن": "t", "وحدة": "unit" };
+const UNIT_EN_TO_AR: Record<string, string> = { L: "لتر", l: "لتر", liter: "لتر", litre: "لتر", kg: "كغ", t: "طن", ton: "طن", unit: "وحدة" };
+export function localizeUnit(unit: string | null | undefined, ar: boolean): string {
+  if (!unit) return "";
+  const u = unit.trim();
+  return (ar ? UNIT_EN_TO_AR[u] : UNIT_AR_TO_EN[u]) ?? u;
+}
+
+export function formatPercent(value: number, fractionDigits = 0) {  return new Intl.NumberFormat(NUM_LOCALE, {
     style: "percent",
     maximumFractionDigits: fractionDigits,
   }).format(value);

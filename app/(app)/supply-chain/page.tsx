@@ -13,7 +13,7 @@ import { ForecastCardClient } from "./ForecastCardClient";
 import { getCompanyBrand } from "@/lib/companyBrand";
 import { getLocale } from "@/lib/i18n.server";
 import { prisma } from "@/lib/db";
-import { formatNumber, formatPercent, formatShortDate } from "@/lib/utils";
+import { formatNumber, formatPercent, formatShortDate, localizeUnit } from "@/lib/utils";
 import "../daylight.css";
 import "./supply.css";
 import {
@@ -233,7 +233,7 @@ function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc:
     <>
       <span className="tag gold">{catLabel}</span>
       <span>
-        {(ar ? "الكمية " : "Qty ") + formatNumber(f.predictedDemand) + " " + f.unit}
+        {(ar ? "الكمية " : "Qty ") + formatNumber(f.predictedDemand) + " " + localizeUnit(f.unit, ar)}
       </span>
       {f.sourcedPO ? (
         <Link
@@ -296,7 +296,7 @@ function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc:
       <ForecastExplainer
         signal={f.signal}
         predictedDemand={f.predictedDemand}
-        unit={f.unit}
+        unit={localizeUnit(f.unit, ar)}
         confidence={f.confidence}
         productLabel={ar ? f.productLabel : (f.productLabelEn || f.productLabel)}
         sourceCompany={ar ? f.source.name : f.source.nameEn}

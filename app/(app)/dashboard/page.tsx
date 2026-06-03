@@ -22,7 +22,7 @@ import { listPins } from "@/lib/pins";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale, getMessages } from "@/lib/i18n.server";
-import { formatMoney, formatNumber, formatPercent } from "@/lib/utils";
+import { formatMoney, formatNumber, formatPercent, localizeUnit } from "@/lib/utils";
 import { rankById } from "@/lib/gamification";
 import { computeIQ } from "@/lib/brain/meta.reflector";
 import "../daylight.css";
@@ -284,7 +284,7 @@ export default async function DashboardPage({
     ...forecasts.slice(0, 4).map((f): ActivityItem => ({
       id: f.id, kind: "FORECAST",
       title: ar ? f.productLabel : (f.productLabelEn || f.productLabel),
-      sub: `${ar ? f.source.name : (f.source.nameEn || f.source.name)} → ${ar ? f.target.name : (f.target.nameEn || f.target.name)} · ${formatNumber(f.predictedDemand)} ${f.unit}`,
+      sub: `${ar ? f.source.name : (f.source.nameEn || f.source.name)} → ${ar ? f.target.name : (f.target.nameEn || f.target.name)} · ${formatNumber(f.predictedDemand)} ${localizeUnit(f.unit, ar)}`,
       href: "/supply-chain", time: f.createdAt,
     })),
   ].sort((a, b) => b.time.getTime() - a.time.getTime()).slice(0, 6);
@@ -603,7 +603,7 @@ export default async function DashboardPage({
                       <span
                         style={{ fontSize: 11, fontWeight: 600, color: "var(--gold)", fontVariantNumeric: "tabular-nums" }}
                       >
-                        {formatNumber(f.predictedDemand)} {f.unit}
+                        {formatNumber(f.predictedDemand)} {localizeUnit(f.unit, ar)}
                       </span>
                     </div>
                     <div

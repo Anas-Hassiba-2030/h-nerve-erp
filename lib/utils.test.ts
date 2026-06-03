@@ -6,6 +6,7 @@ import { describe, it, expect } from "vitest";
 import {
   cn, formatMoney, formatNumber, formatPercent, formatDate,
   generateNumber, ar, loc, pickLocale, statusBadgeClass, severityBadge,
+  localizeUnit,
 } from "./utils";
 
 describe("pickLocale — paired bilingual DB fields", () => {
@@ -88,5 +89,15 @@ describe("dictionary + class helpers", () => {
   it("cn() merges and de-dupes tailwind classes", () => {
     expect(cn("a", "b")).toBe("a b");
     expect(cn("p-2", "p-4")).toBe("p-4");
+  });
+
+  it("localizeUnit() maps Arabic↔English unit symbols, passes unknowns through", () => {
+    expect(localizeUnit("لتر", false)).toBe("L");
+    expect(localizeUnit("كغ", false)).toBe("kg");
+    expect(localizeUnit("L", true)).toBe("لتر");
+    expect(localizeUnit("kg", true)).toBe("كغ");
+    expect(localizeUnit("لتر", true)).toBe("لتر"); // already Arabic, ar → unchanged
+    expect(localizeUnit("widgets", false)).toBe("widgets"); // unknown passes through
+    expect(localizeUnit("", false)).toBe("");
   });
 });

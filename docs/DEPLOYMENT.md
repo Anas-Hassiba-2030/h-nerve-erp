@@ -1,118 +1,104 @@
-# DEPLOYMENT — Phase 11 (Vercel + Neon PostgreSQL)
+# DEPLOYMENT — Railway + Railway PostgreSQL
 
-Production runbook for H-Nerve ERP. The app stays on **iron-session**
-(no NextAuth) and **single-tenant by default**. For a fast offline pitch
-demo, do NOT use this — revert to SQLite per
-`docs/OPERATING-PROTOCOL.md §6`.
+Production runbook for H-Nerve ERP. The app uses **iron-session** (no
+NextAuth) and is **single-tenant by default**. Production runs on **Railway**
+with Railway's managed **PostgreSQL** plugin. For a fast offline demo, revert
+to SQLite per `docs/OPERATING-PROTOCOL.md §6`.
+
+> History: an earlier plan targeted Vercel + Neon; the project now runs on
+> Railway. The old `vercel.json` was removed. (The legacy Vercel/Neon ops
+> procedures still live in `docs/RUNBOOK.md` and are being migrated.)
 
 ## Architecture
 
-- **DB:** Neon PostgreSQL. `prisma/schema.prisma` `datasource` uses
-  `url = DATABASE_URL` (POOLED / pgbouncer, runtime) and
-  `directUrl = DIRECT_URL` (DIRECT, migrations only).
-- **Migrations:** real migration files in `prisma/migrations/`. Vercel
-  applies them at build via `prisma migrate deploy` (NOT `db push`).
-- **Host:** Vercel, region `iad1` (see `vercel.json`). Build command:
-  `prisma generate && prisma migrate deploy && next build`.
-- **Money:** the 7 money columns are `@db.Decimal(12, 2)` →
-  `DECIMAL(12,2)` (only valid on Postgres). `*Json` columns stay
-  `String`/`TEXT` (codebase convention — NOT Prisma `Json`/`JSONB`).
+- **Host:** Railway, GitHub-connected — pushing to `main` auto-deploys.
+- **DB:** Railway PostgreSQL plugin. `DATABASE_URL` is auto-injected into the
+  service. `prisma/schema.prisma` uses `provider = "postgresql"`,
+  `url = DATABASE_URL`.
+- **Migrations:** real files in `prisma/migrations/`, applied by
+  `prisma migrate deploy` in the deploy step (NOT `db push`).
+- **Money:** the money columns are `@db.Decimal(12,2)` (Postgres only). `*Json`
+  columns stay `String`/`TEXT` (codebase convention — not Prisma `Json`/`JSONB`).
 
-## One-time setup
+## `railway.toml` (the deploy contract)
 
-### 1. Neon
+- **build:** `npm install && prisma generate && next build`
+- **preDeploy:** `prisma migrate deploy` then three idempotent bootstrap
+  scripts (wrapped so a hiccup can't block the deploy):
+  - `scripts/seed/seed-if-empty.ts` — seed the full demo dataset only if the DB is empty.
+  - `scripts/seed/ensure-admins.ts` — guarantee the admin/owner accounts can sign in.
+  - `scripts/seed/ensure-demo-docs.ts` — top up the demo documents if the table is empty.
+- **start:** `next start -p ${PORT}`
+- **healthcheck:** `GET /api/health` (Railway restarts on non-2xx).
 
-Create a project at console.neon.tech (region: AWS `us-east-1`, closest
-to Vercel `iad1`). From Connection Details copy BOTH:
-
-- `DATABASE_URL` — Pooled connection ON; ends `...-pooler...neon.tech/
-  neondb?sslmode=require` → append `&pgbouncer=true`.
-- `DIRECT_URL` — Pooled connection OFF (no `-pooler`).
-
-### 2. Migrate (local, against Neon)
-
-With both URLs in local `.env`:
-
-```
-npx prisma migrate dev --name init-postgres   # first time only
-```
-
-Creates + applies `prisma/migrations/<ts>_init_postgres/`. If Neon
-errors `P3014` (shadow DB), set `shadowDatabaseUrl` to a second Neon
-branch and retry.
-
-### 3. Seed production data (one-time, non-destructive)
-
-`scripts/seed/seed-production.ts` is upsert-only — safe to re-run, never
-wipes. Requires a strong `SEED_ADMIN_PASSWORD` (refuses missing / <12
-chars / `admin123`).
-
-```
-SEED_ADMIN_PASSWORD=... npm run seed:prod
-```
-
-Seeds: Chart of Accounts (8 accounts, codes from `lib/accounting.ts`
-`ACCT`), admin `admin@hourani.jo`, tenant `hourani-hotels` (ACTIVE),
-warehouse `Amman Main` / `AMM-A`. The opaque tenant label
-`hourani-hotels` MUST match what the n8n import payload sends.
-
-## Deploy (Vercel)
-
-```
-npx vercel login
-npx vercel link
-# set Production env vars (table below)
-npx vercel --prod
-```
-
-### Production environment variables
+## Production environment variables (Railway → service → Variables)
 
 | Name | Source | Required | Note |
 |------|--------|----------|------|
-| `DATABASE_URL` | Neon POOLED (`&pgbouncer=true`) | yes | runtime queries |
-| `DIRECT_URL` | Neon DIRECT (no `-pooler`) | yes | `migrate deploy` at build |
+| `DATABASE_URL` | Railway Postgres plugin | yes | auto-injected when you attach the DB |
 | `SESSION_PASSWORD` | random ≥32 chars | **yes** | app HARD-FAILS to boot without it (`lib/session.ts`) |
+| `SEED_ADMIN_PASSWORD` | random ≥12 chars | yes | the owner account's password (`ensure-admins.ts`); do not use `admin123` |
 | `IMPORT_API_TOKEN` | random hex | yes | bearer for `POST /api/import/test`; unset → 503 |
-| `NEXT_PUBLIC_APP_URL` | the Vercel URL | yes | post-logout redirect; set after first deploy, then redeploy |
+| `NEXT_PUBLIC_APP_URL` | the Railway URL (e.g. `https://hnerve.up.railway.app`) | yes | post-logout redirect + absolute links |
+| `ANTHROPIC_API_KEY` | console.anthropic.com | recommended | UNSET → Brain stub mode, $0 spend. Set for live Brain (cap via `BRAIN_MAX_LLM_CALLS`) |
+| `GEMINI_API_KEY` | aistudio.google.com | recommended | RAG embeddings (semantic search). Or `OPENAI_API_KEY` / `VOYAGE_API_KEY`. Unset → local fallback (rougher) |
+| `CRON_SECRET` | random hex | for cron | bearer the scheduler sends to `/api/brain/cron` (see below) |
 | `NEXT_PUBLIC_DISABLE_INTRO` | — | no | omit/empty so real users get onboarding |
-| `ANTHROPIC_API_KEY` | console.anthropic.com | no | UNSET → Brain stub mode, $0 spend. Set only for live Brain (burns credit); cap with `BRAIN_MAX_LLM_CALLS` |
-
-`SEED_ADMIN_PASSWORD` is NOT a Vercel var — seeding runs locally against
-Neon, once.
 
 Generate secrets:
 ```
 node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"  # SESSION_PASSWORD
-node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"        # IMPORT_API_TOKEN
+node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"        # IMPORT_API_TOKEN / CRON_SECRET
 ```
+
+## Deploy
+
+1. Attach the **PostgreSQL** plugin to the project (injects `DATABASE_URL`).
+2. Set the env vars above.
+3. Push to `main` (or click **Deploy**). The preDeploy step migrates + seeds.
+4. Verify (below). First sign-in: `admin@hourani.jo` / `admin123`, or your
+   owner email / `SEED_ADMIN_PASSWORD`.
+
+> First-time-only full seed: `scripts/seed/seed-production.ts` is upsert-only
+> (`npm run seed:prod`, requires `SEED_ADMIN_PASSWORD`). The deploy bootstrap
+> usually makes this unnecessary.
+
+## ⏰ Scheduled Brain refresh (`/api/brain/cron`) — needs a scheduler
+
+The brain's scheduled refresh endpoint (`GET /api/brain/cron`, guarded by
+`CRON_SECRET`) was previously triggered by Vercel Cron. **Railway has no
+built-in cron**, so this is NOT firing until you set one up. Options:
+
+- A **Railway cron service** (separate service, schedule `0 3 * * *`, command:
+  `curl -fsS -H "Authorization: Bearer $CRON_SECRET" $NEXT_PUBLIC_APP_URL/api/brain/cron`), or
+- An external scheduler (cron-job.org / a GitHub Actions `schedule`) hitting
+  the same URL with the bearer header.
+
+Set `CRON_SECRET` in Railway and on the caller. On-demand refresh still works
+via `/admin/brain` → "Run analysis".
 
 ## Verify
 
-- `GET /api/health` → `{ "status": "ok", "db": "connected" }` (503 = DB
-  unreachable).
-- `/login` loads → sign in `admin@hourani.jo` → `/dashboard` loads.
+- `GET /api/health` → `{ "status": "ok", "db": "connected" }` (503 = DB unreachable).
+- `/login` loads → sign in → `/dashboard` loads.
 
 ## n8n (Phase 10 ingestion)
 
-The old Cloudflare tunnel URL is dead. In the n8n Cloud workflow's HTTP
-Request node:
-
-- URL → `https://<app>.vercel.app/api/import/test`
-- Header `Authorization: Bearer <IMPORT_API_TOKEN>` (the production value
-  set in Vercel).
+In the n8n workflow's HTTP Request node:
+- URL → `https://<app>.up.railway.app/api/import/test`
+- Header `Authorization: Bearer <IMPORT_API_TOKEN>` (the production value).
 
 ## Security checklist
 
 - `.env` is gitignored — never commit real secrets. `.env.production.example`
   is the safe template.
-- Any secret pasted in chat (Neon password, API key) is compromised —
-  rotate in the Neon / Anthropic dashboards after the pitch.
-- `next.config.mjs` ships HSTS, `X-Frame-Options: DENY`, COOP,
-  `nosniff`, restrictive `Permissions-Policy`. CSP is deliberately
-  deferred (see the file header).
+- Any secret pasted in chat or a screenshot is compromised — rotate it in the
+  provider dashboard (Anthropic / Google AI Studio / Railway).
+- `next.config.mjs` ships HSTS, `X-Frame-Options: DENY`, COOP, `nosniff`,
+  restrictive `Permissions-Policy`.
 
-## Local SQLite revert (offline pitch)
+## Local SQLite revert (offline demo)
 
-Per `docs/OPERATING-PROTOCOL.md §6`: in `.env` comment the Neon pair and
-uncomment `DATABASE_URL="file:./dev.db"`; in `prisma/schema.prisma` set
-`provider = "sqlite"` (drop `directUrl`); run `npm run db:reset`.
+Per `docs/OPERATING-PROTOCOL.md §6`: in `.env` set `DATABASE_URL="file:./dev.db"`;
+in `prisma/schema.prisma` set `provider = "sqlite"`; run `npm run db:reset`.
+Flip both back to `postgresql` before committing.

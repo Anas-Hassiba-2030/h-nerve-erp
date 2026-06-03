@@ -1,17 +1,18 @@
 // GET /api/brain/cron  — scheduled Brain refresh.
 //
-// Phase 10 deferred item: the spec called for the rule engine to run on
-// a 15-minute schedule, not only on demand. Vercel Cron hits this route
-// (see `crons` in vercel.json). Vercel automatically attaches
-// `Authorization: Bearer $CRON_SECRET` to scheduled invocations when the
-// CRON_SECRET env var is set, so we reject anything without it — this
-// endpoint must not be publicly triggerable (it writes BrainInsight
-// rows, though still within the Brain's read-only-on-operational-data
-// boundary — see lib/intelligence/engine.ts).
+// Phase 10 deferred item: the spec called for the rule engine to run on a
+// schedule, not only on demand. A scheduler hits this route with
+// `Authorization: Bearer $CRON_SECRET`; we reject anything without it, so the
+// endpoint can't be publicly triggered (it writes BrainInsight rows, though
+// still within the Brain's read-only-on-operational-data boundary — see
+// lib/intelligence/engine.ts).
 //
-// On-demand refresh still exists (the /admin/brain "Run analysis"
-// button); this is the unattended path. If the Vercel plan clamps cron
-// frequency, the manual button remains the fallback.
+// NOTE: Railway has no built-in cron, so this only fires when a scheduler is
+// wired up (a Railway cron service or external cron hitting this URL with the
+// bearer header). See docs/DEPLOYMENT.md § "Scheduled Brain refresh".
+//
+// On-demand refresh still exists (the /admin/brain "Run analysis" button) and
+// is the fallback when no scheduler is configured.
 
 import { NextRequest, NextResponse } from "next/server";
 import { runBrainAnalysis } from "@/lib/intelligence/engine";

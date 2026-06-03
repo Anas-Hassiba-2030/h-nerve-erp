@@ -8,6 +8,7 @@
 // Phase 3 of docs/PHASES-INTELLIGENCE.md.
 
 import { log } from "@/lib/logger";
+import { toPyLiteral } from "./serialize";
 
 const DEFAULT_MODEL = "claude-sonnet-4-6";
 const ANTHROPIC_VERSION = "2023-06-01";
@@ -137,7 +138,9 @@ export async function callLlm(req: LlmRequest, stub: StubGenerator): Promise<Llm
 
 function serializeUser(user: string, context: Record<string, unknown> | undefined): string {
   if (!context || Object.keys(context).length === 0) return user;
-  return `${user}\n\n# CONTEXT\n${JSON.stringify(context, null, 2)}`;
+  // Phase RAG-2-tail — render context as a Python literal, not JSON. LLMs read
+  // structured/graph context substantially more accurately this way (ch. 14.7).
+  return `${user}\n\n# CONTEXT (Python literal)\n${toPyLiteral(context)}`;
 }
 
 /**

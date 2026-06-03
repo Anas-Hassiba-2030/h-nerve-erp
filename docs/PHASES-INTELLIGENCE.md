@@ -861,3 +861,51 @@ ConstellationRail entries.
 **Depends on.** Nothing blocking — but best done *after* the RAG re-architecture
 (so new modules are retrieval-aware from day one) and *after* Anas's study sources
 land. **Effort.** Scales with how many gap-modules we add (HR alone ≈ 3–5 days).
+
+---
+
+## Phase 28 — The Companion ("the soul") 🔭 (BACKLOG — Anas's idea, 2026-06-03)
+
+> **Anas's words:** *"Why not add a bit of animation that will sit in the corner
+> and move around the website? It will add a soul into it… like the photon one,
+> but in our way."* Captured here so it's not lost. **Lower priority than the
+> login redesign** (`docs/prompts/LOGIN-REDESIGN.md`) — that comes first.
+
+**Pitch.** Give H-Nerve a **living presence** — a small, ambient animated
+companion that drifts around the app, idles in a corner, and reacts to what's
+happening. It is the *visible body of the Brain*: when the system thinks, the
+companion thinks; when an insight fires, it notices. Done with restraint, it
+turns a polished ERP into one that feels **alive and personal**.
+
+**The character (one idea — "the Spark / الشرارة").** A single **photon of
+emerald-gold light** — a glowing mote with a soft comet-trail and a faint
+synapse halo, echoing the login's "nervous-system cosmos" and the Orrery. Not a
+cartoon mascot; an abstract *light-being* that fits Heritage Modern. It:
+- **Idles** in a screen corner, breathing/floating (tiny parallax bob).
+- **Drifts** along a gentle path occasionally, or darts toward a just-arrived
+  toast / new insight / the Brain FAB, then settles back.
+- **Reacts to real events** (read-only, never intrusive): pulses when the Brain
+  runs, brightens on a council recommendation, dims when the system is idle,
+  does a quick celebratory flare on a completed plan / achievement.
+- **Personality, lightly:** rare, charming micro-moments (a slow blink, a curious
+  lean toward the cursor) — Pixar-lamp restraint, *never* a Clippy.
+
+**Hard requirements (so it adds soul, not annoyance).**
+- **Dismissible + remembered:** a one-click hide; persist the preference. Off by
+  default for first-time users until they opt in (or on by default but trivially
+  muted — decide with Anas).
+- **`prefers-reduced-motion`:** fully static (or hidden) — no exceptions.
+- **Performance:** `transform`/`opacity` only, pause on hidden tab, near-zero CPU
+  when idle, never blocks clicks (pointer-events: none except its own hit area).
+- **Never covers content or steals focus**; lives above chrome but below modals.
+- **Theme-aware** via the existing CSS-var tokens; mirror motion in RTL.
+
+**Where it plugs in.** A single global client component mounted in the
+`(app)` layout (sibling to the other overlays). It can subscribe to the existing
+realtime/toast channel to know when to react. Optional: tie its "mood" to the
+Brain IQ / `ragQuality` so its glow literally reflects how confident the system is.
+
+**Depends on.** Nothing blocking. Best **after** the login redesign sets the
+visual language (the Spark should look like it came from the same universe).
+**Effort.** ~2–4 days for a tasteful v1 (idle + drift + 3–4 event reactions +
+reduced-motion + dismiss). Risk: easy to over-do — keep it subtle or cut it.

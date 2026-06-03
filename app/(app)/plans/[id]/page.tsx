@@ -23,6 +23,7 @@ import { prisma } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { pickLocale } from "@/lib/utils";
 import { commit, abandon, deletePlan } from "../actions";
+import { TrustChip } from "@/components/brain/TrustChip";
 import "../../daylight.css";
 
 const METRIC_LABEL: Record<string, { ar: string; en: string }> = {
@@ -109,6 +110,8 @@ export default async function PlanDetailPage({
           {ar ? "العودة إلى الخطط" : "All plans"}
         </Link>
         <div className="flex items-center gap-2">
+          {/* Phase 22 — projection trust at a glance */}
+          <TrustChip score={plan.confidence} locale={ar ? "ar" : "en"} showLabel />
           <span className={`tag ${plan.status === "DONE" || plan.status === "ACTIVE" ? "ok" : "gold"}`}>
             {ar ? STATUS_LABEL[plan.status]?.ar : STATUS_LABEL[plan.status]?.en}
           </span>

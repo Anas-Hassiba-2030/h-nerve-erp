@@ -6,20 +6,23 @@
 // + must be a flat object) before write, with a toast on bad input —
 // we never persist malformed JSON, and never 500 the page for it.
 //
-// TODO(Phase 11): per-tenant authz — currently any ADMIN/EXECUTIVE/
-// MANAGER may edit any tenant's mapping. No per-tenant scoping yet.
+// Phase 11 authz — tenant scope is enforced via resolveAdminTenantId(): a
+// pinned user is forced to their own tenantSlug, foreign ids get overridden,
+// only a cross-tenant ADMIN may target an arbitrary tenantId.
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
 import { prisma } from "@/lib/db";
 import { flashToast } from "@/lib/toast";
+import { resolveAdminTenantId } from "@/lib/adminActionScope";
 
 async function gate() {
   const user = await getCurrentUser();
   if (!user || !["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) {
     throw new Error("forbidden");
   }
+  return user;
 }
 
 function ok(ar: boolean, label: string) {
@@ -47,9 +50,12 @@ function normalizeJsonObject(raw: string): string | null {
 }
 
 export async function createMapping(formData: FormData): Promise<void> {
-  await gate();
+  const user = await gate();
   const ar = getLocale() === "ar";
-  const tenantId = String(formData.get("tenantId") ?? "").trim().slice(0, 64);
+  // Phase 11 authz — pinned user can only create a mapping in their own tenant.
+  const scope = resolveAdminTenantId(user, String(formData.get("tenantId") ?? ""));
+  if (!scope) return fail(ar, ar ? "المستأجر مطلوب" : "tenantId is required");
+  const tenantId = scope.tenantId.slice(0, 64);
   const sourceSystem = String(formData.get("sourceSystem") ?? "")
     .trim()
     .slice(0, 64);
@@ -58,8 +64,8 @@ export async function createMapping(formData: FormData): Promise<void> {
   const fieldMapRaw = String(formData.get("fieldMapJson") ?? "{}");
   const defaultsRaw = String(formData.get("defaultsJson") ?? "").trim();
 
-  if (!tenantId || !sourceSystem) {
-    return fail(ar, ar ? "المستأجر ونظام المصدر مطلوبان" : "tenantId and sourceSystem are required");
+  if (!sourceSystem) {
+    return fail(ar, ar ? "نظام المصدر مطلوب" : "sourceSystem is required");
   }
   const fieldMapJson = normalizeJsonObject(fieldMapRaw);
   if (!fieldMapJson) {

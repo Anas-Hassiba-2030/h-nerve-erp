@@ -8,13 +8,15 @@
 // e.g. "Receive rejected: ..."). Movement-writing transitions also
 // revalidate /admin/movements + /admin/products since stock moved.
 //
-// TODO(Phase 11): per-tenant authz — any ADMIN/EXECUTIVE/MANAGER may act
-// on any tenant's PO (same posture as mappings/products actions).
+// Phase 11 authz — tenant scope is enforced via resolveAdminTenantId(): a
+// pinned user is FORCED to their own tenantSlug, foreign ids get overridden,
+// only a cross-tenant ADMIN (no tenantSlug) may target an arbitrary tenantId.
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
 import { prisma } from "@/lib/db";
+import { resolveAdminTenantId } from "@/lib/adminActionScope";
 import {
   createPO,
   findOrCreateSupplier,
@@ -49,9 +51,13 @@ function toast(label: string) {
 }
 
 export async function createPurchaseOrder(formData: FormData): Promise<void> {
-  await gate();
+  const user = await gate();
   const ar = getLocale() === "ar";
-  const tenantId = String(formData.get("tenantId") ?? "").trim();
+  // Phase 11 authz — never trust a submitted tenantId; resolve against the
+  // session. Pinned user → forced to own tenantSlug; cross-tenant ADMIN may pass through.
+  const scope = resolveAdminTenantId(user, String(formData.get("tenantId") ?? ""));
+  if (!scope) return toast(ar ? "⚠ المستأجر مطلوب" : "⚠ Tenant is required");
+  const tenantId = scope.tenantId;
   const supplierId = String(formData.get("supplierId") ?? "").trim();
   const supplierName = String(formData.get("supplier") ?? "").trim();
   const expectedRaw = String(formData.get("expectedAt") ?? "").trim();
@@ -78,7 +84,7 @@ export async function createPurchaseOrder(formData: FormData): Promise<void> {
     // Supplier. Both paths converge on a real supplierId.
     let resolvedSupplierId = supplierId;
     if (!resolvedSupplierId) {
-      if (!tenantId) return toast(ar ? "⚠ المستأجر مطلوب" : "⚠ Tenant is required");
+      // tenantId is guaranteed by the resolveAdminTenantId check at top.
       if (!supplierName)
         return toast(ar ? "⚠ المورّد مطلوب" : "⚠ Supplier is required");
       resolvedSupplierId = (

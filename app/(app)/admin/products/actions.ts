@@ -8,8 +8,9 @@
 // recalc failure rolls the movement back. Movements stay append-only;
 // a "correction" is just another signed ADJUSTMENT, never an edit.
 //
-// TODO(Phase 11): per-tenant authz — currently any ADMIN/EXECUTIVE/
-// MANAGER may adjust any tenant's product (same posture as mappings).
+// Phase 11 authz — the Product lookup (line ~63) uses the scoped prisma
+// client (Product is in TENANT_SCOPED_MODELS), so a pinned user simply 404s
+// on a foreign-tenant productId. Cross-tenant ADMIN intentionally has no pin.
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUser, type SessionUser } from "@/lib/session";

@@ -5,20 +5,24 @@
 // + revalidate, friendly toast on the unique-name collision, soft
 // delete blocked while the supplier still has non-cancelled POs.
 //
-// TODO(Phase 11): per-tenant authz — any ADMIN/EXECUTIVE/MANAGER may
-// edit any tenant's supplier (same posture as the rest of the family).
+// Phase 11 authz — tenant scope enforced via resolveAdminTenantId() on
+// createSupplier; update/delete operate by id and are scoped at the Prisma
+// client (Supplier is in TENANT_SCOPED_MODELS in lib/workspaceScope.ts), so a
+// foreign-tenant row simply 404s for a pinned user.
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
 import { prisma } from "@/lib/db";
 import { flashToast } from "@/lib/toast";
+import { resolveAdminTenantId } from "@/lib/adminActionScope";
 
 async function gate() {
   const user = await getCurrentUser();
   if (!user || !["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) {
     throw new Error("forbidden");
   }
+  return user;
 }
 
 function ok(label: string) {
@@ -44,12 +48,15 @@ function fields(formData: FormData) {
 }
 
 export async function createSupplier(formData: FormData): Promise<void> {
-  await gate();
+  const user = await gate();
   const ar = getLocale() === "ar";
-  const tenantId = String(formData.get("tenantId") ?? "").trim().slice(0, 64);
+  // Phase 11 authz — pinned user can only create a supplier in their own tenant.
+  const scope = resolveAdminTenantId(user, String(formData.get("tenantId") ?? ""));
+  if (!scope) return fail(ar ? "المستأجر مطلوب" : "tenantId is required");
+  const tenantId = scope.tenantId.slice(0, 64);
   const f = fields(formData);
-  if (!tenantId || !f.name) {
-    return fail(ar ? "المستأجر والاسم مطلوبان" : "tenantId and name are required");
+  if (!f.name) {
+    return fail(ar ? "الاسم مطلوب" : "name is required");
   }
   try {
     await prisma.supplier.create({ data: { tenantId, ...f } });

@@ -20,6 +20,10 @@ These files are the source of truth. Reference them by path in any conversation 
 
 When the user says **"improve the brain"**, that means `lib/brain/Brain.ts` and its subsystem files. When the user says **"apply the design skill to X"**, that means `docs/DESIGN-SKILL.md` § the appropriate vocabulary.
 
+## ⏰ Standing reminder — Phase 27 (ERP modules)
+
+Anas is studying ERP and will bring source material (the "13 ERP modules" + functionality) ~early-mid June 2026 to plan a final enrichment wave. **When he mentions ERP study / sources / modules, surface `docs/PHASES-INTELLIGENCE.md` § Phase 27** and plan it with him. Don't start it before the sources arrive. (Also pending, marked "later": elevating `anashasiba91@gmail.com` to ADMIN in the seed.)
+
 ## Re-infrastructure ("rebuild the right way") — read this first
 
 When the user talks about **re-infrastructuring / rebuilding the system the right way**, the RAG/book analysis, the document set engineers need, or generating execution prompts for a rebuild → **`docs/RE-INFRASTRUCTURE-PLAN.md` is the source of truth.** It captures everything agreed: the docs-first / fresh-session rebuild philosophy (don't rebuild from zero — derive specs from the working code, then refactor module-by-module), the prioritized RAG re-architecture roadmap, and the 13-document spec stack with its gap analysis. The re-infra session plan: generate `docs/spec/` (Data Model/ERD + API contract catalog first), then build against it.

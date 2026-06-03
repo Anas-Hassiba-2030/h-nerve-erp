@@ -17,6 +17,7 @@ import { log } from "@/lib/logger";
 import { llmConfig } from "./llm";
 import { retrieveDocuments, docHitsToContext, type DocContext } from "./documents.retrieve";
 import { retrieveGraphContext } from "./graphrag.live";
+import { evaluateRetrieval } from "./crag";
 
 class LiveCouncil implements Council {
   async convene(topic: string, contextRefs: string[] = []): Promise<CouncilSession> {
@@ -173,7 +174,10 @@ async function buildAgentContext(
     }),
     retrieveDocuments(topic, { k: 4, minScore: 0.06, locale }).catch(() => []),
   ]);
-  const documents: DocContext[] = docHitsToContext(docHits, locale);
+  // Phase RAG-5 — Corrective RAG: only let the council cite documents the
+  // evaluator judged relevant. A weak/irrelevant top match is dropped rather
+  // than handed to every agent as evidence.
+  const documents: DocContext[] = docHitsToContext(evaluateRetrieval(docHits).keep, locale);
 
   // Phase RAG-4 — multi-hop causal context from the brain graph for this topic.
   const graph = await retrieveGraphContext(topic, { k: 8, topSeeds: 3 }).catch(() => ({

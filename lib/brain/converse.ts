@@ -20,6 +20,7 @@
 import { prisma } from "@/lib/db";
 import { callLlm } from "./llm";
 import { retrieveDocuments, type DocHit } from "./documents.retrieve";
+import { evaluateRetrieval } from "./crag";
 
 export type Citation = {
   id: string;          // "c1", "c2", … (referenced from the answer text)
@@ -472,10 +473,16 @@ export async function ask(input: AskInput): Promise<AskResult> {
   // a more natural answer when ANTHROPIC_API_KEY is present.
   const stubResult = stubAnswer(input.question, facts, locale);
 
-  // RAG "augment": turn retrieved documents into citations the operator can
-  // drill into, and a compact, quoted context block for the LLM. We append
-  // the doc citations after the stub's so their ids continue the sequence.
-  const docCitations: Citation[] = docHits.map((h, i) => ({
+  // Phase RAG-5 — Corrective RAG. Grade the retrieval before we ground on it.
+  // INCORRECT retrieval is dropped entirely (don't cite an irrelevant doc);
+  // AMBIGUOUS is kept but hedged and lowers confidence; CORRECT is used as-is.
+  const crag = evaluateRetrieval(docHits);
+  const usedDocs = crag.keep;
+
+  // RAG "augment": turn the APPROVED retrieved documents into citations the
+  // operator can drill into, and a compact, quoted context block for the LLM.
+  // We append the doc citations after the stub's so their ids continue.
+  const docCitations: Citation[] = usedDocs.map((h, i) => ({
     id: `c${stubResult.citations.length + i + 1}`,
     source: "DOCUMENT",
     label: locale === "ar" ? (h.title || h.titleEn || "مستند") : (h.titleEn || h.title || "Document"),
@@ -497,8 +504,8 @@ export async function ask(input: AskInput): Promise<AskResult> {
         documents: docCitations.map((c, i) => ({
           ref: c.id,
           title: c.label,
-          kind: docHits[i]?.kind,
-          snippet: docHits[i]?.snippet?.text,
+          kind: usedDocs[i]?.kind,
+          snippet: usedDocs[i]?.snippet?.text,
         })),
       },
       maxTokens: 320,
@@ -510,27 +517,40 @@ export async function ask(input: AskInput): Promise<AskResult> {
   // When running on the stub (no LLM key), the deterministic answer won't
   // weave in the retrieved docs on its own. Append one grounded sentence so
   // the document retrieval is visible end-to-end even in the demo state.
+  // CRAG governs the wording: a CORRECT match states the link plainly, an
+  // AMBIGUOUS one hedges ("may relate to"), and a dropped one says nothing.
   let answerText = llm.text;
-  if (llm.isStub && docHits.length > 0) {
-    const top = docHits[0];
+  if (llm.isStub && usedDocs.length > 0) {
+    const top = usedDocs[0];
     const ref = docCitations[0].id;
     const snippetRaw =
       locale === "ar"
         ? top.snippet?.text
         : top.snippet?.textEn || top.snippet?.text;
     const snippet = snippetRaw?.slice(0, 140) ?? "";
-    answerText +=
-      locale === "ar"
-        ? ` ومن المستندات المرفقة، يتقاطع هذا مع «${top.title}» ${`[${ref}]`}${snippet ? `: «${snippet}»` : ""}.`
-        : ` From the uploaded documents, this intersects “${top.titleEn || top.title}” ${`[${ref}]`}${snippet ? `: “${snippet}”` : ""}.`;
+    const hedged = crag.quality === "ambiguous";
+    if (locale === "ar") {
+      const lead = hedged ? "قد يتقاطع هذا مع" : "ومن المستندات المرفقة، يتقاطع هذا مع";
+      answerText += ` ${lead} «${top.title}» ${`[${ref}]`}${snippet ? `: «${snippet}»` : ""}.`;
+    } else {
+      const lead = hedged ? "This may relate to" : "From the uploaded documents, this intersects";
+      answerText += ` ${lead} “${top.titleEn || top.title}” ${`[${ref}]`}${snippet ? `: “${snippet}”` : ""}.`;
+    }
   }
+
+  // Reflect retrieval quality in the turn confidence: an answer leaning on
+  // ambiguous retrieval should read a touch less certain.
+  const confidence =
+    usedDocs.length > 0 && crag.quality === "ambiguous"
+      ? Number((stubResult.confidence * (0.85 + 0.15 * crag.groundingConfidence)).toFixed(3))
+      : stubResult.confidence;
 
   const brainTurn: ConverseTurn = {
     role: "brain",
     text: answerText,
     ts: new Date().toISOString(),
     citations: allCitations,
-    confidence: stubResult.confidence,
+    confidence,
     stub: llm.isStub,
     ms: Date.now() - t0,
   };

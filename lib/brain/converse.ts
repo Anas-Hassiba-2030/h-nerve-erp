@@ -19,6 +19,7 @@
 
 import { prisma } from "@/lib/db";
 import { callLlm } from "./llm";
+import { retrieveDocuments, type DocHit } from "./documents.retrieve";
 
 export type Citation = {
   id: string;          // "c1", "c2", … (referenced from the answer text)
@@ -29,7 +30,8 @@ export type Citation = {
     | "BOOKING"
     | "BATCH"
     | "FORECAST"
-    | "STAT";
+    | "STAT"
+    | "DOCUMENT";
   label: string;       // human-readable label, bilingual-aware
   value?: string;      // optional numeric/short value displayed in the chip
   href: string;        // where Tab drills to
@@ -451,24 +453,52 @@ export async function ask(input: AskInput): Promise<AskResult> {
   };
   session.turns.push(userTurn);
 
-  // Pull facts in parallel with assembling the prompt
-  const facts = await pullFacts();
+  // Pull structured facts and retrieve relevant uploaded documents in
+  // parallel. The documents are the RAG "retrieve" stage (Phase RAG-2):
+  // semantic search over the tenant's contracts/invoices/reports via the
+  // embedding seam. Their snippets ground the answer in real clauses.
+  const [facts, docHits] = await Promise.all([
+    pullFacts(),
+    retrieveDocuments(input.question, {
+      scope: session.scope,
+      k: 3,
+      minScore: 0.08,
+    }).catch(() => [] as DocHit[]),
+  ]);
 
   // Build the prompt — we always use the stub generator's payload as the
   // factual ground truth; the LLM gets the same fact pack so it can write
   // a more natural answer when ANTHROPIC_API_KEY is present.
   const stubResult = stubAnswer(input.question, facts, locale);
 
+  // RAG "augment": turn retrieved documents into citations the operator can
+  // drill into, and a compact, quoted context block for the LLM. We append
+  // the doc citations after the stub's so their ids continue the sequence.
+  const docCitations: Citation[] = docHits.map((h, i) => ({
+    id: `c${stubResult.citations.length + i + 1}`,
+    source: "DOCUMENT",
+    label: locale === "ar" ? (h.title || h.titleEn || "مستند") : (h.titleEn || h.title || "Document"),
+    value: h.kind,
+    href: `/documents/${h.documentId}`,
+  }));
+  const allCitations = [...stubResult.citations, ...docCitations];
+
   const llm = await callLlm(
     {
       system:
         locale === "ar"
-          ? "أنت H-Nerve — الدماغ المحادث لمنظومة ERP. أجِب في 3 جمل بالضبط. استخدم إحالات مرجعية بصيغة [c1] [c2] للأرقام والادعاءات. لا تخترع أرقاماً. اكتب بنبرة هادئة، صريحة، عملية."
-          : "You are H-Nerve, the conversational brain of an ERP. Answer in exactly 3 sentences. Use [c1] [c2] reference markers for numbers and claims. Never invent numbers. Tone: calm, plain, operational.",
+          ? "أنت H-Nerve — الدماغ المحادث لمنظومة ERP. أجِب في 3 جمل بالضبط. استخدم إحالات مرجعية بصيغة [c1] [c2] للأرقام والادعاءات وللاستشهاد بالمستندات. لا تخترع أرقاماً ولا بنوداً؛ استشهد فقط بالمستندات المرفقة. اكتب بنبرة هادئة، صريحة، عملية."
+          : "You are H-Nerve, the conversational brain of an ERP. Answer in exactly 3 sentences. Use [c1] [c2] reference markers for numbers, claims, and document citations. Never invent numbers or clauses; cite only the documents provided. Tone: calm, plain, operational.",
       user: input.question,
       context: {
         priorTurns: session.turns.slice(-MAX_TURNS_PER_SESSION),
         facts,
+        documents: docCitations.map((c, i) => ({
+          ref: c.id,
+          title: c.label,
+          kind: docHits[i]?.kind,
+          snippet: docHits[i]?.snippet?.text,
+        })),
       },
       maxTokens: 320,
       temperature: 0.5,
@@ -476,11 +506,29 @@ export async function ask(input: AskInput): Promise<AskResult> {
     () => stubResult.text,
   );
 
+  // When running on the stub (no LLM key), the deterministic answer won't
+  // weave in the retrieved docs on its own. Append one grounded sentence so
+  // the document retrieval is visible end-to-end even in the demo state.
+  let answerText = llm.text;
+  if (llm.isStub && docHits.length > 0) {
+    const top = docHits[0];
+    const ref = docCitations[0].id;
+    const snippetRaw =
+      locale === "ar"
+        ? top.snippet?.text
+        : top.snippet?.textEn || top.snippet?.text;
+    const snippet = snippetRaw?.slice(0, 140) ?? "";
+    answerText +=
+      locale === "ar"
+        ? ` ومن المستندات المرفقة، يتقاطع هذا مع «${top.title}» ${`[${ref}]`}${snippet ? `: «${snippet}»` : ""}.`
+        : ` From the uploaded documents, this intersects “${top.titleEn || top.title}” ${`[${ref}]`}${snippet ? `: “${snippet}”` : ""}.`;
+  }
+
   const brainTurn: ConverseTurn = {
     role: "brain",
-    text: llm.text,
+    text: answerText,
     ts: new Date().toISOString(),
-    citations: stubResult.citations,
+    citations: allCitations,
     confidence: stubResult.confidence,
     stub: llm.isStub,
     ms: Date.now() - t0,

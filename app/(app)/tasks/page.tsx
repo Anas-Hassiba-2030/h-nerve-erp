@@ -83,7 +83,7 @@ export default async function TasksPage() {
     const ownerName = t.assignee?.name ?? (ar ? "—" : "—");
     return {
       id: t.id,
-      title: t.title,
+      title: ar ? t.title : (t.titleEn || t.title),
       prio: DOMAIN_PRIO[t.priority] ?? "med",
       owner: ownerName,
       ownerGlyph: initialGlyph(ownerName),

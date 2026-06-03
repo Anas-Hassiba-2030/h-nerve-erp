@@ -322,7 +322,7 @@ export default async function DashboardPage({
       .slice(0, 2)
       .map((t): AlertItem => ({
         id: t.id, kind: "TASK_OVERDUE", severity: "WARN",
-        title: t.title,
+        title: ar ? t.title : (t.titleEn || t.title),
         sub: ar ? "مهمة متأخرة" : "Overdue task",
         href: "/tasks", time: t.dueAt ?? undefined,
       })),
@@ -369,7 +369,7 @@ export default async function DashboardPage({
         id: t.id,
         date: t.dueAt!,
         kind: "TASK",
-        title: t.title,
+        title: ar ? t.title : (t.titleEn || t.title),
         href: "/tasks",
       })),
   ];
@@ -518,7 +518,7 @@ export default async function DashboardPage({
                             className="line-clamp-1"
                             style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)", letterSpacing: "-0.005em" }}
                           >
-                            {t.title}
+                            {ar ? t.title : (t.titleEn || t.title)}
                           </div>
                           <div
                             className="mt-0.5"

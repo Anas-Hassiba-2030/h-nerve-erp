@@ -332,6 +332,9 @@ model AIInsight {
 model Task {
   id          String   @id @default(cuid())
   title       String
+  // Phase i18n — English copy so task lists translate with the UI. Nullable:
+  // user-created tasks without an English title fall back to `title`.
+  titleEn     String?
   description String?
   // "CORE" (mandated) or "SIDE" (bonus, optional)
   kind        String   @default("CORE")

@@ -906,33 +906,33 @@ export async function seedOperator() {
   // -------------------------------------------------------------------
   const tasks = [
     // Admin (Anas)
-    { title: "مراجعة لوحة H-Nerve التنفيذية", kind: "CORE", status: "DONE", priority: "HIGH", module: "DASHBOARD", points: 20, assigneeId: admin.id, completedAt: at(-2, 11), dueAt: at(-2, 18) },
-    { title: "تشغيل المحرك التنبؤي وتحقق التنبؤات", kind: "CORE", status: "DONE", priority: "URGENT", module: "SUPPLY", points: 30, assigneeId: admin.id, completedAt: at(-1, 14) },
-    { title: "تحديث وثيقة استراتيجية H-Nerve SaaS", kind: "SIDE", status: "IN_PROGRESS", priority: "MEDIUM", module: "PROJECTS", points: 25, assigneeId: admin.id, dueAt: at(7, 18) },
-    { title: "إعداد عرض تقديمي لمجلس الإدارة", kind: "CORE", status: "TODO", priority: "URGENT", module: "DASHBOARD", points: 40, assigneeId: admin.id, dueAt: at(3, 10) },
+    { title: "مراجعة لوحة H-Nerve التنفيذية", titleEn: "Review the H-Nerve executive dashboard", kind: "CORE", status: "DONE", priority: "HIGH", module: "DASHBOARD", points: 20, assigneeId: admin.id, completedAt: at(-2, 11), dueAt: at(-2, 18) },
+    { title: "تشغيل المحرك التنبؤي وتحقق التنبؤات", titleEn: "Run the forecast engine and validate predictions", kind: "CORE", status: "DONE", priority: "URGENT", module: "SUPPLY", points: 30, assigneeId: admin.id, completedAt: at(-1, 14) },
+    { title: "تحديث وثيقة استراتيجية H-Nerve SaaS", titleEn: "Update the H-Nerve SaaS strategy document", kind: "SIDE", status: "IN_PROGRESS", priority: "MEDIUM", module: "PROJECTS", points: 25, assigneeId: admin.id, dueAt: at(7, 18) },
+    { title: "إعداد عرض تقديمي لمجلس الإدارة", titleEn: "Prepare the board of directors presentation", kind: "CORE", status: "TODO", priority: "URGENT", module: "DASHBOARD", points: 40, assigneeId: admin.id, dueAt: at(3, 10) },
     // CEO
-    { title: "اعتماد ميزانية توسعة فنادق العقبة", kind: "CORE", status: "IN_PROGRESS", priority: "URGENT", module: "PROJECTS", points: 50, assigneeId: ceo.id, dueAt: at(5, 15) },
-    { title: "اجتماع الشركاء البلغاريين", kind: "CORE", status: "DONE", priority: "HIGH", module: "HOTELS", points: 25, assigneeId: ceo.id, completedAt: at(-3, 16) },
-    { title: "مراجعة تقارير ESG ربع سنوية", kind: "CORE", status: "TODO", priority: "MEDIUM", module: "SUSTAINABILITY", points: 20, assigneeId: ceo.id, dueAt: at(10, 17) },
+    { title: "اعتماد ميزانية توسعة فنادق العقبة", titleEn: "Approve the Aqaba hotels expansion budget", kind: "CORE", status: "IN_PROGRESS", priority: "URGENT", module: "PROJECTS", points: 50, assigneeId: ceo.id, dueAt: at(5, 15) },
+    { title: "اجتماع الشركاء البلغاريين", titleEn: "Bulgarian partners meeting", kind: "CORE", status: "DONE", priority: "HIGH", module: "HOTELS", points: 25, assigneeId: ceo.id, completedAt: at(-3, 16) },
+    { title: "مراجعة تقارير ESG ربع سنوية", titleEn: "Review quarterly ESG reports", kind: "CORE", status: "TODO", priority: "MEDIUM", module: "SUSTAINABILITY", points: 20, assigneeId: ceo.id, dueAt: at(10, 17) },
     // Arena GM
-    { title: "حملة تسويقية موسم الربيع", kind: "CORE", status: "IN_PROGRESS", priority: "HIGH", module: "HOTELS", points: 30, assigneeId: arenaGm.id, dueAt: at(8, 17) },
-    { title: "زيارة فندق صوفيا — تدقيق الجودة", kind: "SIDE", status: "TODO", priority: "MEDIUM", module: "HOTELS", points: 20, assigneeId: arenaGm.id, dueAt: at(14, 12) },
-    { title: "تحديث قائمة الأطعمة في البحر الميت", kind: "CORE", status: "DONE", priority: "MEDIUM", module: "HOTELS", points: 15, assigneeId: arenaGm.id, completedAt: at(-1, 12) },
+    { title: "حملة تسويقية موسم الربيع", titleEn: "Spring season marketing campaign", kind: "CORE", status: "IN_PROGRESS", priority: "HIGH", module: "HOTELS", points: 30, assigneeId: arenaGm.id, dueAt: at(8, 17) },
+    { title: "زيارة فندق صوفيا — تدقيق الجودة", titleEn: "Sofia hotel visit — quality audit", kind: "SIDE", status: "TODO", priority: "MEDIUM", module: "HOTELS", points: 20, assigneeId: arenaGm.id, dueAt: at(14, 12) },
+    { title: "تحديث قائمة الأطعمة في البحر الميت", titleEn: "Update the Dead Sea food menu", kind: "CORE", status: "DONE", priority: "MEDIUM", module: "HOTELS", points: 15, assigneeId: arenaGm.id, completedAt: at(-1, 12) },
     // Maha GM
-    { title: "اختبار خط الجبن البريميوم الجديد", kind: "CORE", status: "IN_PROGRESS", priority: "HIGH", module: "DAIRY", points: 35, assigneeId: mahaGm.id, dueAt: at(6, 16) },
-    { title: "تدقيق جودة 12 دفعة هذا الأسبوع", kind: "CORE", status: "TODO", priority: "URGENT", module: "DAIRY", points: 25, assigneeId: mahaGm.id, dueAt: at(2, 18) },
-    { title: "اقتراح تنويع منتج الزبادي اليوناني", kind: "SIDE", status: "TODO", priority: "LOW", module: "PROJECTS", points: 20, assigneeId: mahaGm.id, dueAt: at(20, 12) },
+    { title: "اختبار خط الجبن البريميوم الجديد", titleEn: "Test the new premium cheese line", kind: "CORE", status: "IN_PROGRESS", priority: "HIGH", module: "DAIRY", points: 35, assigneeId: mahaGm.id, dueAt: at(6, 16) },
+    { title: "تدقيق جودة 12 دفعة هذا الأسبوع", titleEn: "Quality-audit 12 batches this week", kind: "CORE", status: "TODO", priority: "URGENT", module: "DAIRY", points: 25, assigneeId: mahaGm.id, dueAt: at(2, 18) },
+    { title: "اقتراح تنويع منتج الزبادي اليوناني", titleEn: "Propose a Greek-yogurt product line", kind: "SIDE", status: "TODO", priority: "LOW", module: "PROJECTS", points: 20, assigneeId: mahaGm.id, dueAt: at(20, 12) },
     // Loran GM
-    { title: "صيانة دفيئة لوران 1 — منظومة الري", kind: "CORE", status: "DONE", priority: "HIGH", module: "FARMS", points: 25, assigneeId: loranGm.id, completedAt: at(-2, 9) },
-    { title: "اختبار حساسات IoT الجديدة من Agrify", kind: "SIDE", status: "IN_PROGRESS", priority: "MEDIUM", module: "FARMS", points: 30, assigneeId: loranGm.id, dueAt: at(9, 15) },
-    { title: "مراجعة معدلات الحصاد لمحصول البطاطا", kind: "CORE", status: "DONE", priority: "MEDIUM", module: "FARMS", points: 15, assigneeId: loranGm.id, completedAt: at(-4, 13) },
+    { title: "صيانة دفيئة لوران 1 — منظومة الري", titleEn: "Loran greenhouse 1 maintenance — irrigation system", kind: "CORE", status: "DONE", priority: "HIGH", module: "FARMS", points: 25, assigneeId: loranGm.id, completedAt: at(-2, 9) },
+    { title: "اختبار حساسات IoT الجديدة من Agrify", titleEn: "Test the new Agrify IoT sensors", kind: "SIDE", status: "IN_PROGRESS", priority: "MEDIUM", module: "FARMS", points: 30, assigneeId: loranGm.id, dueAt: at(9, 15) },
+    { title: "مراجعة معدلات الحصاد لمحصول البطاطا", titleEn: "Review harvest rates for the potato crop", kind: "CORE", status: "DONE", priority: "MEDIUM", module: "FARMS", points: 15, assigneeId: loranGm.id, completedAt: at(-4, 13) },
     // Staff
-    { title: "إعداد محتوى وسائل التواصل الأسبوعية", kind: "CORE", status: "IN_PROGRESS", priority: "MEDIUM", module: "HOTELS", points: 15, assigneeId: staffMember.id, dueAt: at(2, 15) },
-    { title: "تحليل أداء حملة Facebook Ads", kind: "CORE", status: "TODO", priority: "MEDIUM", module: "HOTELS", points: 18, assigneeId: staffMember.id, dueAt: at(4, 14) },
-    { title: "مقترح حملة LinkedIn للوفود الخليجية", kind: "SIDE", status: "TODO", priority: "LOW", module: "PROJECTS", points: 22, assigneeId: staffMember.id, dueAt: at(15, 12) },
+    { title: "إعداد محتوى وسائل التواصل الأسبوعية", titleEn: "Prepare the weekly social media content", kind: "CORE", status: "IN_PROGRESS", priority: "MEDIUM", module: "HOTELS", points: 15, assigneeId: staffMember.id, dueAt: at(2, 15) },
+    { title: "تحليل أداء حملة Facebook Ads", titleEn: "Analyze Facebook Ads campaign performance", kind: "CORE", status: "TODO", priority: "MEDIUM", module: "HOTELS", points: 18, assigneeId: staffMember.id, dueAt: at(4, 14) },
+    { title: "مقترح حملة LinkedIn للوفود الخليجية", titleEn: "LinkedIn campaign proposal for Gulf delegations", kind: "SIDE", status: "TODO", priority: "LOW", module: "PROJECTS", points: 22, assigneeId: staffMember.id, dueAt: at(15, 12) },
     // New hire
-    { title: "إكمال التدريب التعريفي على H-Nerve", kind: "CORE", status: "IN_PROGRESS", priority: "HIGH", module: "SETTINGS", points: 10, assigneeId: newHire.id, dueAt: at(5, 17) },
-    { title: "أول تقرير عن مخزون أحد منتجات المها", kind: "CORE", status: "TODO", priority: "MEDIUM", module: "DAIRY", points: 12, assigneeId: newHire.id, dueAt: at(7, 15) },
+    { title: "إكمال التدريب التعريفي على H-Nerve", titleEn: "Complete the H-Nerve onboarding training", kind: "CORE", status: "IN_PROGRESS", priority: "HIGH", module: "SETTINGS", points: 10, assigneeId: newHire.id, dueAt: at(5, 17) },
+    { title: "أول تقرير عن مخزون أحد منتجات المها", titleEn: "First inventory report on a Maha product", kind: "CORE", status: "TODO", priority: "MEDIUM", module: "DAIRY", points: 12, assigneeId: newHire.id, dueAt: at(7, 15) },
   ];
   for (const t of tasks) {
     await prisma.task.create({ data: t });

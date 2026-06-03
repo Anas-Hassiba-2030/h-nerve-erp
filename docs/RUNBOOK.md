@@ -1,8 +1,14 @@
 # RUNBOOK — Operations
 
-Operational procedures for the Vercel + Neon production deployment.
-Pairs with `docs/DEPLOYMENT.md` (one-time setup). This file is the
-"something is wrong / something must be rotated" reference.
+> ⚠️ **LEGACY (Vercel + Neon).** Production now runs on **Railway + Railway
+> PostgreSQL** — see `docs/DEPLOYMENT.md` for the current setup. The procedures
+> below (secret rotation via `vercel env`, Neon PITR, Vercel logs) still
+> describe the *old* host and are kept for reference until they're rewritten
+> for Railway (tracked in `docs/AUDIT-2026-06.md`). The concepts (rotate
+> secrets, back up the DB, triage health) carry over; only the commands differ.
+
+Operational procedures. Pairs with `docs/DEPLOYMENT.md` (one-time setup). This
+file is the "something is wrong / something must be rotated" reference.
 
 ---
 
@@ -103,17 +109,15 @@ settings, or alias it — do not blanket-disable protection.
 
 ## 5. Scheduled Brain analysis — cron caveat
 
-`vercel.json` registers `/api/brain/cron` at `0 3 * * *` (daily,
-03:00 UTC). The route is auth-gated on `CRON_SECRET` (Vercel attaches
-`Authorization: Bearer $CRON_SECRET` to scheduled calls; set that env
-var or the route fail-closes with 503).
+`/api/brain/cron` runs the scheduled Brain refresh, auth-gated on
+`CRON_SECRET` (the caller must send `Authorization: Bearer $CRON_SECRET`; the
+route fail-closes with 503 otherwise).
 
-The schedule is **daily because the account is on the Hobby plan**,
-which *hard-rejects the deploy* for any sub-daily cron (a `*/15`
-expression fails the build with "Hobby accounts are limited to daily
-cron jobs" — not a silent clamp). For tighter cadence, upgrade to Pro
-and change the expression, or use the on-demand **Run analysis**
-button on `/admin/brain`, which calls the same engine.
+**Railway has no built-in cron**, so this only fires when you wire a scheduler
+to it — a Railway cron service or an external scheduler (cron-job.org / a
+GitHub Actions `schedule`) hitting the URL with the bearer header. See
+`docs/DEPLOYMENT.md` § "Scheduled Brain refresh". Until then, use the on-demand
+**Run analysis** button on `/admin/brain`, which calls the same engine.
 
 ---
 

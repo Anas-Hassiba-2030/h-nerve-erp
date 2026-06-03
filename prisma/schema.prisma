@@ -254,6 +254,9 @@ model SupplyForecast {
   target          Company  @relation("ForecastTarget", fields: [targetCompanyId], references: [id], onDelete: Cascade)
   category        String
   productLabel    String
+  // Phase i18n — English copy so forecast labels translate with the UI.
+  // Nullable: engine-generated forecasts without one fall back to productLabel.
+  productLabelEn  String?
   unit            String   @default("kg")
   predictedDemand Float
   confidence      Float    @default(0.7)

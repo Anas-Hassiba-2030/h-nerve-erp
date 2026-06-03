@@ -87,6 +87,7 @@ export default async function TrashPage() {
           select: {
             id: true,
             productLabel: true,
+            productLabelEn: true,
             deletedAt: true,
             source: { select: { name: true } },
             target: { select: { name: true } },
@@ -95,6 +96,7 @@ export default async function TrashPage() {
       : Promise.resolve([] as Array<{
           id: string;
           productLabel: string;
+          productLabelEn: string | null;
           deletedAt: Date | null;
           source: { name: string };
           target: { name: string };
@@ -127,7 +129,7 @@ export default async function TrashPage() {
     ...forecasts.map<TrashItem>((f) => ({
       entity: "forecast",
       id: f.id,
-      label: f.productLabel,
+      label: ar ? f.productLabel : (f.productLabelEn || f.productLabel),
       sub: `${f.source.name} → ${f.target.name}`,
       deletedAt: (f.deletedAt as Date).toISOString(),
     })),

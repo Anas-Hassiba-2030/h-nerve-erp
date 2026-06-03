@@ -216,9 +216,9 @@ async function resolveEntity(
     case "FORECAST": {
       const r = await prisma.supplyForecast.findUnique({
         where: { id },
-        select: { productLabel: true, status: true },
+        select: { productLabel: true, productLabelEn: true, status: true },
       });
-      return r ? { label: r.productLabel, sub: r.status } : null;
+      return r ? { label: getLocale() === "ar" ? r.productLabel : (r.productLabelEn || r.productLabel), sub: r.status } : null;
     }
     case "INSIGHT": {
       const r = await prisma.aIInsight.findUnique({

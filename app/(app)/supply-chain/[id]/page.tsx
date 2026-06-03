@@ -108,7 +108,7 @@ export default async function ForecastDetailPage({
     <DaylightShell dir={en ? "ltr" : "rtl"}>
       <DaylightHeader
         eyebrow={en ? "Predictive Supply Chain" : "سلسلة التوريد التنبؤية"}
-        title={f.productLabel}
+        title={en ? (f.productLabelEn || f.productLabel) : f.productLabel}
         subtitle={`${sourceName} → ${targetName}`}
         actions={
           <div className="flex items-center gap-2">
@@ -119,7 +119,7 @@ export default async function ForecastDetailPage({
             <PinButton
               entityType="FORECAST"
               entityId={f.id}
-              label={f.productLabel}
+              label={en ? (f.productLabelEn || f.productLabel) : f.productLabel}
               href={`/supply-chain/${f.id}`}
               icon="Brain"
               initial={pinned}
@@ -276,7 +276,7 @@ export default async function ForecastDetailPage({
                       <Link href={`/supply-chain/${r.id}`} className="block hover:underline">
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex min-w-0 items-center gap-2">
-                            <span className="truncate text-sm font-bold" style={{ color: "var(--ink)" }}>{r.productLabel}</span>
+                            <span className="truncate text-sm font-bold" style={{ color: "var(--ink)" }}>{en ? (r.productLabelEn || r.productLabel) : r.productLabel}</span>
                             <StatusBadge status={r.status} />
                           </div>
                           <span className="font-mono text-xs font-bold" style={{ color: "var(--ink)" }}>
@@ -341,7 +341,7 @@ export default async function ForecastDetailPage({
             {/* Meta */}
             <DaylightPanel title={en ? "Summary" : "البطاقة"}>
               <dl className="space-y-2 text-xs">
-                <Fact label={en ? "Product" : "المنتج"} value={f.productLabel} />
+                <Fact label={en ? "Product" : "المنتج"} value={en ? (f.productLabelEn || f.productLabel) : f.productLabel} />
                 <Fact label={en ? "Unit" : "الوحدة"} value={f.unit} />
                 <Fact label={en ? "Category" : "التصنيف"} value={categoryLabel} />
                 <Fact label={en ? "Status" : "الحالة"} value={f.status} />

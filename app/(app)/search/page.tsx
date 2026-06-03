@@ -255,7 +255,7 @@ export default async function SearchPage({
         labelAr: "التنبؤات", labelEn: "Forecasts",
         items: forecasts.map((x) => ({
           id: x.id, href: `/supply-chain/${x.id}`,
-          title: x.productLabel,
+          title: ar ? x.productLabel : (x.productLabelEn || x.productLabel),
           subtitle: `${x.source.name} → ${x.target.name} · ${(x.confidence * 100).toFixed(0)}%`,
           trailing: `${formatNumber(x.predictedDemand)} ${x.unit}`,
         })),

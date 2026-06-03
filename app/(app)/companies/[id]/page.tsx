@@ -581,7 +581,7 @@ export default async function CompanyDetailPage({
                           <div className="flex min-w-0 items-center gap-1.5">
                             <ArrowUpRight className="h-3 w-3 shrink-0" style={{ color: "#0a8e54" }} />
                             <span className="truncate font-bold" style={{ color: "var(--ink)" }}>
-                              {f.productLabel}
+                              {en ? (f.productLabelEn || f.productLabel) : f.productLabel}
                             </span>
                             <span style={{ color: "var(--ink-muted)" }}>→ {f.target.code}</span>
                           </div>
@@ -608,7 +608,7 @@ export default async function CompanyDetailPage({
                           <div className="flex min-w-0 items-center gap-1.5">
                             <ArrowDownRight className="h-3 w-3 shrink-0" style={{ color: "#c0392b" }} />
                             <span className="truncate font-bold" style={{ color: "var(--ink)" }}>
-                              {f.productLabel}
+                              {en ? (f.productLabelEn || f.productLabel) : f.productLabel}
                             </span>
                             <span style={{ color: "var(--ink-muted)" }}>← {f.source.code}</span>
                           </div>

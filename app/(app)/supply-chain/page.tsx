@@ -220,7 +220,7 @@ function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc:
 
   const title = ar
     ? `${f.productLabel}: ${f.source.name} ← ${f.target.name}`
-    : `${f.productLabel}: ${f.source.nameEn} ← ${f.target.nameEn}`;
+    : `${f.productLabelEn || f.productLabel}: ${f.source.nameEn} ← ${f.target.nameEn}`;
 
   const ring = (
     <>
@@ -298,7 +298,7 @@ function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc:
         predictedDemand={f.predictedDemand}
         unit={f.unit}
         confidence={f.confidence}
-        productLabel={f.productLabel}
+        productLabel={ar ? f.productLabel : (f.productLabelEn || f.productLabel)}
         sourceCompany={ar ? f.source.name : f.source.nameEn}
         targetCompany={ar ? f.target.name : f.target.nameEn}
         category={catLabel}

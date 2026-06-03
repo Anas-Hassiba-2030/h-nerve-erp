@@ -89,7 +89,7 @@ export default async function PurchaseOrdersPage({
         // Phase NS-1 — bridge POs carry no lines; product/qty/date read
         // through the SupplyForecast that drafted them.
         sourceForecast: {
-          select: { id: true, productLabel: true, predictedDemand: true, unit: true, periodEnd: true },
+          select: { id: true, productLabel: true, productLabelEn: true, predictedDemand: true, unit: true, periodEnd: true },
         },
       },
     }),
@@ -241,7 +241,7 @@ export default async function PurchaseOrdersPage({
                       {ar ? "من تنبؤ" : "From forecast"}
                     </span>
                     <span style={{ color: "var(--ink)" }}>
-                      {po.sourceForecast.productLabel} — {formatNumber(po.sourceForecast.predictedDemand)} {po.sourceForecast.unit}
+                      {ar ? po.sourceForecast.productLabel : (po.sourceForecast.productLabelEn || po.sourceForecast.productLabel)} — {formatNumber(po.sourceForecast.predictedDemand)} {po.sourceForecast.unit}
                     </span>
                     <span style={{ color: "var(--ink-muted)" }}>
                       {ar ? "للفترة" : "for"} {formatDateTime(po.sourceForecast.periodEnd, ar ? "ar" : "en")}

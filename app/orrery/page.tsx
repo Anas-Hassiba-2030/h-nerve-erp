@@ -4,6 +4,10 @@ import { getCurrentUser } from "@/lib/session";
 import { getLocale } from "@/lib/i18n.server";
 import { brainIqAt } from "@/lib/timemachine";
 import { OrreryFrame, type OrreryIdentity } from "@/components/orrery/OrreryFrame";
+import { OrreryFabs } from "@/components/orrery/OrreryFabs";
+// The FAB rail + panels live in the (app) layout; the Orrery hub is outside it,
+// so we pull in living.css here for the .hn-fab* styles and overlay the rail.
+import "../(app)/living.css";
 
 export const metadata: Metadata = {
   title: "H-Nerve · المدار",
@@ -46,7 +50,12 @@ export default async function OrreryPage() {
     iq,
   };
 
-  return <OrreryFrame identity={identity} />;
+  return (
+    <>
+      <OrreryFrame identity={identity} />
+      <OrreryFabs locale={locale} />
+    </>
+  );
 }
 
 function toArabicDigits(s: string): string {

@@ -14,6 +14,7 @@
 import { prisma } from "@/lib/db";
 import { callLlm, extractJson, type LlmRequest } from "./llm";
 import { scoreFromComponents, clamp01, type IQComponents } from "./meta.iq";
+import { computeRagQuality, type RagQuality } from "./ragEval.live";
 
 // ─────────────────────────────────────────────────────────────────────
 // IQ computation — the four components are derived here from the DB;
@@ -29,6 +30,10 @@ export type BrainIQ = {
   components: IQComponents;
   trend: "rising" | "flat" | "falling";
   lastComputedAt: Date;
+  // Phase RAG-6 — decomposed RAG-quality telemetry (faithfulness/trust of the
+  // brain's retrieval-grounded answers). Reported alongside the IQ; it does
+  // NOT alter the pinned headline `score` formula (meta.iq.ts).
+  ragQuality: RagQuality;
 };
 
 const ACCEPT_KINDS = new Set([
@@ -52,7 +57,7 @@ const REJECT_KINDS = new Set([
 export async function computeIQ(scope: string = "default"): Promise<BrainIQ> {
   const since = new Date(Date.now() - 30 * 24 * 3600 * 1000);
 
-  const [feedback, plansAll, plansCommitted, plansDone, patterns, history] = await Promise.all([
+  const [feedback, plansAll, plansCommitted, plansDone, patterns, history, ragQuality] = await Promise.all([
     prisma.brainFeedback.findMany({ where: { scope, ts: { gte: since } } }),
     prisma.plan.count({ where: { createdAt: { gte: since } } }),
     prisma.plan.count({ where: { createdAt: { gte: since }, status: { in: ["ACTIVE", "DONE"] } } }),
@@ -63,6 +68,7 @@ export async function computeIQ(scope: string = "default"): Promise<BrainIQ> {
       orderBy: { snappedAt: "desc" },
       take: 2,
     }),
+    computeRagQuality(scope),
   ]);
 
   const accept = feedback.filter((f) => ACCEPT_KINDS.has(f.kind)).length;
@@ -93,7 +99,7 @@ export async function computeIQ(scope: string = "default"): Promise<BrainIQ> {
           ? "falling"
           : "flat";
 
-  return { score, components, trend, lastComputedAt: new Date() };
+  return { score, components, trend, lastComputedAt: new Date(), ragQuality };
 }
 
 // scoreFromComponents + clamp01 now live in ./meta.iq (pure, zero-import,

@@ -1,17 +1,36 @@
 // memory.live.ts — concrete MemoryLake implementation.
 //
-// We don't have pgvector on SQLite, so we use a simple but effective
-// in-process bag-of-words cosine vectorizer. This works well for small
-// corpora (<10k memories) and gives recallable, interpretable results
-// without an external embedding API. When migrating to Postgres, swap
-// the vectorizer for a real embedding endpoint and the cosine math for
-// pgvector's `<=>` operator — the public API of this module stays the
-// same.
+// Phase RAG-1: recall runs on DENSE embeddings via the pluggable seam in
+// ./embeddings (getEmbedder()). New memories are stored as a dense vector
+// (vectorVersion 2) in vectorJson and scored with cosineSim in-process;
+// when an embedding API key (VOYAGE/OPENAI) is set, getEmbedder() returns a
+// real provider and recall becomes truly semantic with zero changes here.
+// Legacy bag-of-words rows (vectorVersion 1) still score via the original
+// sparse path below, so the upgrade is backward-compatible. (A native
+// pgvector column is a later scale optimization; in-process cosine is fine
+// for the corpus sizes we have, and stays SQLite-compatible for dev.)
 //
 // Phase 6 of docs/PHASES-INTELLIGENCE.md.
 
 import { prisma } from "@/lib/db";
 import type { Memory, MemoryLake, RecallQuery } from "./memory";
+// Phase RAG-1: recall now runs on dense embeddings via the pluggable seam.
+// New memories store a dense vector (vectorVersion 2); legacy sparse rows
+// (version 1) still score via the bag-of-words path below.
+import { getEmbedder, cosineSim } from "./embeddings";
+
+/** Embed one string into a dense, L2-normalized vector via the active embedder. */
+async function embedText(text: string): Promise<number[]> {
+  const [v] = await getEmbedder().embed([text || ""]);
+  return v ?? [];
+}
+
+/** A stored vectorJson is either a dense array (v2) or the legacy {terms,weights} (v1). */
+function isDenseJson(json: string | null | undefined): boolean {
+  if (!json) return false;
+  const t = json.trimStart();
+  return t.startsWith("[");
+}
 
 // ─────────────────────────────────────────────────────────────────────
 // Vectorizer — bag-of-words with sublinear TF and length normalization.
@@ -131,7 +150,8 @@ class LiveMemoryLake implements MemoryLake {
       tags,
       module: m.module,
     });
-    const vec = vectorize(corpus);
+    const dense = await embedText(corpus);
+    const vectorJson = JSON.stringify(dense);
 
     await prisma.memory.upsert({
       where: { id: m.id },
@@ -149,8 +169,8 @@ class LiveMemoryLake implements MemoryLake {
         entityRefsJson: JSON.stringify(m.entityRefs ?? []),
         outcomeMetric: m.outcome?.metric ?? null,
         outcomeDelta: m.outcome?.delta ?? null,
-        vectorJson: serialize(vec),
-        vectorVersion: 1,
+        vectorJson,
+        vectorVersion: 2,
       },
       update: {
         module: m.module,
@@ -163,7 +183,8 @@ class LiveMemoryLake implements MemoryLake {
         entityRefsJson: JSON.stringify(m.entityRefs ?? []),
         outcomeMetric: m.outcome?.metric ?? null,
         outcomeDelta: m.outcome?.delta ?? null,
-        vectorJson: serialize(vec),
+        vectorJson,
+        vectorVersion: 2,
       },
     });
   }
@@ -173,8 +194,11 @@ class LiveMemoryLake implements MemoryLake {
     const minSim = q.minSimilarity ?? 0.05;
     const filterTags = q.filterTags ?? [];
 
-    const queryVec = vectorize(q.situation);
-    if (queryVec.size === 0) return [];
+    // Dense query embedding (Phase RAG-1). Keep a lazy sparse vector too so
+    // any legacy (v1) rows still score via the old bag-of-words path.
+    const queryDense = await embedText(q.situation);
+    const queryDenseEmpty = queryDense.every((x) => x === 0);
+    let querySparse: Map<string, number> | null = null;
 
     // Pull the candidate set. For small corpora this is fine. When the
     // table grows, prune by tag/module first.
@@ -191,9 +215,22 @@ class LiveMemoryLake implements MemoryLake {
 
     const scored: Array<{ row: any; similarity: number }> = [];
     for (const r of rows) {
-      const v = deserialize(r.vectorJson);
-      if (v.size === 0) continue;
-      let sim = cosine(queryVec, v);
+      let sim: number;
+      if (isDenseJson(r.vectorJson)) {
+        // v2 dense embedding path
+        if (queryDenseEmpty) continue;
+        let stored: number[];
+        try { stored = JSON.parse(r.vectorJson); } catch { continue; }
+        if (!Array.isArray(stored) || stored.length === 0) continue;
+        sim = cosineSim(queryDense, stored);
+      } else {
+        // legacy v1 sparse bag-of-words path
+        if (!querySparse) querySparse = vectorize(q.situation);
+        if (querySparse.size === 0) continue;
+        const v = deserialize(r.vectorJson);
+        if (v.size === 0) continue;
+        sim = cosine(querySparse, v);
+      }
       // Mild boost for tag overlap.
       if (filterTags.length > 0) {
         const tags = safeStringArray(r.tagsJson);

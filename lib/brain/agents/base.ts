@@ -20,6 +20,9 @@ export type AgentInput = {
     // Phase RAG-3 — retrieved snippets from the tenant's own documents
     // (contracts, policies, reports). Agents cite these by ref ("doc1").
     documents?: DocContext[];
+    // Phase RAG-4 — multi-hop causal context from the brain graph: the nodes
+    // most relevant to the topic and the causal links among them.
+    graph?: { nodes: Array<{ kind: string; label: string }>; links: string[] };
   };
   locale: "ar" | "en";
 };
@@ -99,6 +102,8 @@ export async function runAgent(def: AgentDef, input: AgentInput): Promise<AgentV
       relevantNodes: input.context.relevantNodes.slice(0, 12),
       // Phase RAG-3 — retrieved document snippets the agent may cite.
       documents: (input.context.documents ?? []).slice(0, 4),
+      // Phase RAG-4 — multi-hop causal context (related nodes + links).
+      causalGraph: input.context.graph ?? undefined,
     },
     expectJson: true,
     maxTokens: 600,

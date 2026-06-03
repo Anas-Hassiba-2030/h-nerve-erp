@@ -16,6 +16,7 @@ import type { Council, CouncilSession, AgentVoice } from "./council";
 import { log } from "@/lib/logger";
 import { llmConfig } from "./llm";
 import { retrieveDocuments, docHitsToContext, type DocContext } from "./documents.retrieve";
+import { retrieveGraphContext } from "./graphrag.live";
 
 class LiveCouncil implements Council {
   async convene(topic: string, contextRefs: string[] = []): Promise<CouncilSession> {
@@ -174,6 +175,12 @@ async function buildAgentContext(
   ]);
   const documents: DocContext[] = docHitsToContext(docHits, locale);
 
+  // Phase RAG-4 — multi-hop causal context from the brain graph for this topic.
+  const graph = await retrieveGraphContext(topic, { k: 8, topSeeds: 3 }).catch(() => ({
+    nodes: [],
+    links: [],
+  }));
+
   const totalRevenue = transactions
     .filter((t) => t.kind === "REVENUE")
     .reduce((a, b) => a + b.amount, 0);
@@ -207,7 +214,16 @@ async function buildAgentContext(
     ...forecasts.map((f) => ({ id: f.id, kind: "Forecast", label: f.productLabel })),
   ];
 
-  return { summary, metrics, relevantNodes, documents };
+  return {
+    summary,
+    metrics,
+    relevantNodes,
+    documents,
+    graph: {
+      nodes: graph.nodes.map((n) => ({ kind: n.kind, label: n.label })),
+      links: graph.links,
+    },
+  };
 }
 
 function safeJson(s: string | null | undefined): any[] {

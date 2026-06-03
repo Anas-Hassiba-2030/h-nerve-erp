@@ -619,7 +619,7 @@ function pageShell({
       </div>
       <div class="footer-bar">
         ${ar ? "بدعم من" : "Powered by"}
-        H-Nerve · ${ar ? "مجموعة الحوراني" : "Hourani Group"} ·
+        H-Nerve · ${ar ? "أنس م.ك. حصيبة" : "Anas MK Hasiba"} ·
         © ${now.getFullYear()}
       </div>
     </footer>

@@ -47,7 +47,7 @@ function bannerLines(brandKey: string, title: string, recordCount: number, local
     `# ║ ${pad(`Report-ID: ${reportId}`, W - 4)} ║`,
     `# ║ ${pad(`Brand    : ${brand.emblem} ${brand.emblemSymbol ?? ""}  ${brand.motto.slice(0, 50)}`, W - 4)} ║`,
     `# ╠${fill}╣`,
-    `# ║ ${pad("Powered by H-Nerve · Hourani Group", W - 4)} ║`,
+    `# ║ ${pad("Powered by H-Nerve · Anas MK Hasiba", W - 4)} ║`,
     `# ║ ${pad(`${PERSONAL_BRANDS.ANAS_AI.nameEn} · ${PERSONAL_BRANDS.HASIBA_G.nameEn}`, W - 4)} ║`,
     `# ║ ${pad(ar ? "تقرير سرّي · للقيادة التنفيذية فقط" : "Confidential · For executive leadership only", W - 4)} ║`,
     `# ╚${fill}╝`,

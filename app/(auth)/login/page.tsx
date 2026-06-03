@@ -86,7 +86,7 @@ export default async function LoginPage({
       ) : null}
 
       <div className="anim-fade-in text-center text-[10px] uppercase tracking-[0.25em] text-white/55" style={{ animationDelay: ".5s" }}>
-        {m["auth.poweredBy"]} · {ar ? "مجموعة الحوراني · إتش-نيرف" : "Hourani Group · H-Nerve"}
+        {m["auth.poweredBy"]} · {ar ? "أنس م.ك. حصيبة · إتش-نيرف" : "Anas MK Hasiba · H-Nerve"}
       </div>
     </div>
   );

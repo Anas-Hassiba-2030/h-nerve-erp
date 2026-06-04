@@ -63,6 +63,12 @@ describe("mapOrreryHref", () => {
     expect(mapOrreryHref("/brain/graph")).toBe("/brain/graph");
   });
 
+  it("resolves /logout to itself so the orrery sign-out always hits the route handler", () => {
+    // The orrery menu sends __orreryNav:"/logout"; OrreryFrame also hard-routes
+    // it directly, but lock the resolver too so neither path can regress.
+    expect(mapOrreryHref("/logout")).toBe("/logout");
+  });
+
   it("falls back safely for unknown hrefs", () => {
     expect(mapOrreryHref("sections/does-not-exist.html")).toBe(ORRERY_FALLBACK_ROUTE);
     expect(mapOrreryHref("")).toBe(ORRERY_FALLBACK_ROUTE);

@@ -83,6 +83,14 @@ export function DocumentDropZone({ locale = "ar" }: { locale?: "ar" | "en" }) {
   // Track drag-enter / leave at the window level. The counter pattern
   // avoids the dragleave-on-children flicker.
   useEffect(() => {
+    // Force the overlay closed. Guards the "FABs look dead" report (Phase
+    // 26.7): a drag that leaves the window without a balanced dragleave/drop
+    // could otherwise leave dragCounter > 0, pinning the full-screen overlay
+    // open over the FAB rail.
+    function forceReset() {
+      dragCounter.current = 0;
+      setDragging(false);
+    }
     function onEnter(e: DragEvent) {
       if (!hasFile(e)) return;
       dragCounter.current++;
@@ -90,6 +98,13 @@ export function DocumentDropZone({ locale = "ar" }: { locale?: "ar" | "en" }) {
     }
     function onLeave(e: DragEvent) {
       if (!hasFile(e)) return;
+      // relatedTarget === null means the cursor left the document entirely
+      // (dragged back out of the browser window) — reset hard, don't just
+      // decrement, since the matching dragenter may never have balanced.
+      if (e.relatedTarget === null) {
+        forceReset();
+        return;
+      }
       dragCounter.current = Math.max(0, dragCounter.current - 1);
       if (dragCounter.current === 0) setDragging(false);
     }
@@ -100,8 +115,7 @@ export function DocumentDropZone({ locale = "ar" }: { locale?: "ar" | "en" }) {
     function onDrop(e: DragEvent) {
       if (!hasFile(e)) return;
       e.preventDefault();
-      dragCounter.current = 0;
-      setDragging(false);
+      forceReset();
       const file = e.dataTransfer?.files?.[0];
       if (file) handleFile(file);
     }
@@ -109,11 +123,17 @@ export function DocumentDropZone({ locale = "ar" }: { locale?: "ar" | "en" }) {
     window.addEventListener("dragleave", onLeave);
     window.addEventListener("dragover", onOver);
     window.addEventListener("drop", onDrop);
+    // Belt-and-suspenders: drag end, tab blur, or the drag aborting outside
+    // the window all clear a possibly-stuck overlay.
+    window.addEventListener("dragend", forceReset);
+    window.addEventListener("blur", forceReset);
     return () => {
       window.removeEventListener("dragenter", onEnter);
       window.removeEventListener("dragleave", onLeave);
       window.removeEventListener("dragover", onOver);
       window.removeEventListener("drop", onDrop);
+      window.removeEventListener("dragend", forceReset);
+      window.removeEventListener("blur", forceReset);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

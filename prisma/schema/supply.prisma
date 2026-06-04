@@ -1,0 +1,37 @@
+// =====================================================================
+// PREDICTIVE SUPPLY CHAIN
+// =====================================================================
+
+model SupplyForecast {
+  id              String   @id @default(cuid())
+  sourceCompanyId String
+  source          Company  @relation("ForecastSource", fields: [sourceCompanyId], references: [id], onDelete: Cascade)
+  targetCompanyId String
+  target          Company  @relation("ForecastTarget", fields: [targetCompanyId], references: [id], onDelete: Cascade)
+  category        String
+  productLabel    String
+  // Phase i18n — English copy so forecast labels translate with the UI.
+  // Nullable: engine-generated forecasts without one fall back to productLabel.
+  productLabelEn  String?
+  unit            String   @default("kg")
+  predictedDemand Float
+  confidence      Float    @default(0.7)
+  periodStart     DateTime
+  periodEnd       DateTime
+  signal          String
+  status          String   @default("DRAFT")
+  generatedById   String?
+  generatedBy     User?    @relation(fields: [generatedById], references: [id], onDelete: SetNull)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+
+  // Phase NS-1 — cross-tenant supply-chain → purchase-order bridge.
+  // Approving a forecast whose target company maps to an in-system
+  // tenant drafts a PurchaseOrder on the BUYER's tenant. linkedPurchaseOrderId
+  // is a denormalized convenience scalar (no FK); the authoritative link
+  // is PurchaseOrder.sourceForecastId (@unique). Both are written
+  // atomically in approveForecast — never one without the other.
+  linkedPurchaseOrderId String?
+  sourcedPO             PurchaseOrder? @relation("ForecastSourcedPO")
+}

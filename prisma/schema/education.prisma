@@ -1,0 +1,20 @@
+// =====================================================================
+// EDUCATION
+// =====================================================================
+
+model Program {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name        String
+  nameEn      String?
+  founder     String
+  vertical    String   @default("OTHER")
+  stage       String   @default("INTAKE")
+  cohort      String   @default("2026")
+  fundingJod  Float    @default(0)
+  teamSize    Int      @default(1)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

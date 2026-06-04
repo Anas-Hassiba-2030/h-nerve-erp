@@ -1,0 +1,45 @@
+// =====================================================================
+// AGRICULTURE
+// =====================================================================
+
+model Farm {
+  id            String   @id @default(cuid())
+  companyId     String
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name          String
+  nameEn        String?
+  type          String
+  location      String
+  areaDunum     Float    @default(0)
+  tempC         Float?
+  humidity      Float?
+  soilMoisture  Float?
+  alertLevel    String   @default("OK")
+  lastReadAt    DateTime?
+  description   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  crops Crop[]
+}
+
+model Crop {
+  id              String   @id @default(cuid())
+  farmId          String
+  farm            Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  // Phase F4 — denormalized tenant slug. Backfilled from
+  // Farm.companyId → Company.code via the same migration as Booking.
+  tenantId        String
+  name            String
+  variety         String?
+  plantedAt       DateTime
+  expectedHarvest DateTime
+  expectedYieldKg Float    @default(0)
+  actualYieldKg   Float?
+  status          String   @default("GROWING")
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([tenantId])
+}

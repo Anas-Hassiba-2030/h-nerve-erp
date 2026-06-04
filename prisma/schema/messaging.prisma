@@ -1,0 +1,83 @@
+// =====================================================================
+// INTERNAL MESSAGING — peer-to-peer chat between officials
+// =====================================================================
+
+model MessageThread {
+  id          String   @id @default(cuid())
+  // "DIRECT" | "GROUP" | "ENTITY"  (ENTITY = pinned to a specific record like a forecast/booking/etc.)
+  kind        String   @default("DIRECT")
+  // For ENTITY threads — what record does this discussion attach to?
+  entityType  String?
+  entityId    String?
+  // Optional title (for groups/entity threads)
+  title       String?
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  participants ThreadParticipant[]
+  messages     Message[]
+
+  @@index([entityType, entityId])
+}
+
+model ThreadParticipant {
+  id          String        @id @default(cuid())
+  threadId    String
+  thread      MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Last time this user opened the thread — drives unread count
+  lastReadAt  DateTime?
+  // True when user muted this thread
+  muted       Boolean       @default(false)
+  joinedAt    DateTime      @default(now())
+
+  @@unique([threadId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id        String        @id @default(cuid())
+  threadId  String
+  thread    MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  body      String
+  // Phase V3-P12 — optional inline image attached at compose time.
+  // Files land at /public/uploads/messages/{messageId}.{ext}; URL is
+  // saved here. Rendered as <img> inside the bubble.
+  imageUrl  String?
+  // Optional reference — a forecast id, booking ref, etc., the author wants to highlight
+  refType   String?
+  refId     String?
+  // For reactions later
+  meta      String?
+  createdAt DateTime      @default(now())
+  editedAt  DateTime?
+  deletedAt DateTime?
+
+  @@index([threadId, createdAt])
+  @@index([authorId])
+}
+
+// =====================================================================
+// PINS — per-user favorites/bookmarks across any entity in the system
+// =====================================================================
+
+model Pin {
+  id         String   @id @default(cuid())
+  userId     String
+  // "COMPANY" | "HOTEL" | "BOOKING" | "DAIRY" | "FARM" | "PROGRAM" | "FORECAST" | "INSIGHT" | "TASK" | "PROJECT" | "TRANSACTION"
+  entityType String
+  entityId   String
+  // Cached display values so we don't have to join across many tables.
+  label      String
+  labelEn    String?
+  href       String
+  icon       String?  // lucide icon key
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, entityType, entityId])
+  @@index([userId])
+}

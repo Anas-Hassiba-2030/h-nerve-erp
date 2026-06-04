@@ -1,0 +1,81 @@
+// =====================================================================
+// WORKFLOW STUDIO — Phase 12 of docs/PHASES-INTELLIGENCE.md
+// Visual triggers → conditions → actions. Each tenant can compose any
+// number of workflows. Runs are persisted with a node-by-node trace so
+// the canvas can replay them on test runs.
+// =====================================================================
+
+model Workflow {
+  id            String   @id @default(cuid())
+  scope         String   @default("default")
+  name          String
+  description   String?
+  enabled       Boolean  @default(false)
+  // "DRAFT" | "ACTIVE" | "ARCHIVED"
+  status        String   @default("DRAFT")
+
+  nodes         WorkflowNode[]
+  edges         WorkflowEdge[]
+  runs          WorkflowRun[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastRunAt     DateTime?
+  runCount      Int      @default(0)
+
+  @@index([scope, status])
+}
+
+model WorkflowNode {
+  id           String   @id @default(cuid())
+  workflowId   String
+  workflow     Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  // "trigger" | "condition" | "action"
+  kind         String
+  // Identifier of the registered template, e.g. "dairy.expiry_within".
+  templateKey  String
+  // Optional display override; defaults to template label.
+  label        String?
+  // JSON params payload — shape defined per template.
+  configJson   String   @default("{}")
+  // Visual position; auto-laid-out when null.
+  posX         Float?
+  posY         Float?
+
+  outboundEdges WorkflowEdge[] @relation("EdgeFromNode")
+  inboundEdges  WorkflowEdge[] @relation("EdgeToNode")
+
+  createdAt    DateTime @default(now())
+
+  @@index([workflowId])
+}
+
+model WorkflowEdge {
+  id           String   @id @default(cuid())
+  workflowId   String
+  workflow     Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  fromNodeId   String
+  fromNode     WorkflowNode @relation("EdgeFromNode", fields: [fromNodeId], references: [id], onDelete: Cascade)
+  toNodeId     String
+  toNode       WorkflowNode @relation("EdgeToNode",   fields: [toNodeId],   references: [id], onDelete: Cascade)
+
+  @@unique([workflowId, fromNodeId, toNodeId])
+  @@index([workflowId])
+}
+
+model WorkflowRun {
+  id           String   @id @default(cuid())
+  workflowId   String
+  workflow     Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  // "RUNNING" | "SUCCESS" | "FAILED" | "DRY_RUN"
+  status       String
+  // "manual" | "test" | "schedule:<cron>" | "event:<id>"
+  triggeredBy  String?
+  startedAt    DateTime @default(now())
+  completedAt  DateTime?
+  durationMs   Int?
+  // JSON array of trace events: [{nodeId, kind, status, message, ms}, …]
+  traceJson    String   @default("[]")
+
+  @@index([workflowId, startedAt])
+}

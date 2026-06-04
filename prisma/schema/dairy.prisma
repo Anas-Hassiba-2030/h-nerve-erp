@@ -1,0 +1,22 @@
+// =====================================================================
+// DAIRY
+// =====================================================================
+
+model DairyBatch {
+  id             String   @id @default(cuid())
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  batchNumber    String   @unique
+  product        String
+  productAr      String
+  quantityLiters Float    @default(0)
+  qualityGrade   String   @default("A")
+  fatContent     Float    @default(3.5)
+  productionDate DateTime
+  expiryDate     DateTime
+  status         String   @default("IN_PRODUCTION")
+  destination    String?
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}

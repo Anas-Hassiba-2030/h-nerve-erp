@@ -72,7 +72,7 @@ The revert path is **already prepared** in two files:
    DATABASE_URL="file:./dev.db"                            <- uncomment this
    ```
 
-2. In **`prisma/schema.prisma`** (the `datasource db` block near the
+2. In **`prisma/schema/schema.prisma`** (the `datasource db` block near the
    top) — change the provider back to SQLite:
 
    ```prisma
@@ -140,7 +140,7 @@ app, and it does not affect any real data or feature.
 ## TL;DR for the pitch laptop
 
 ```bash
-# 1. point at the local DB (edit .env + prisma/schema.prisma as in Step B)
+# 1. point at the local DB (edit .env + prisma/schema/schema.prisma as in Step B)
 npm run db:push
 npm run db:seed
 

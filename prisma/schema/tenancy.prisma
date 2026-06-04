@@ -1,0 +1,108 @@
+// =====================================================================
+// TENANCY — Phase 11 of docs/PHASES-INTELLIGENCE.md
+// White-label backbone. Each tenant gets a slug, a theme preset, a set
+// of industry packs, and a five-step provisioning trail.
+// =====================================================================
+
+model Tenant {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  name           String
+  adminEmail     String
+  region         String   @default("MENA")
+  tier           String   @default("standard")
+  // "PROVISIONING" | "ACTIVE" | "SUSPENDED" | "ARCHIVED"
+  status         String   @default("PROVISIONING")
+  inviteToken    String?
+  seededCount    Int      @default(0)
+
+  steps          TenantStep[]
+  theme          TenantTheme?
+  packs          TenantPack[]
+
+  createdAt      DateTime @default(now())
+  activatedAt    DateTime?
+  updatedAt      DateTime @updatedAt
+
+  @@index([status])
+  @@index([region])
+}
+
+model TenantStep {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orderIndex    Int
+  // "subdomain" | "schema" | "seed" | "theme" | "invite"
+  key           String
+  labelEn       String
+  labelAr       String
+  // "PENDING" | "RUNNING" | "DONE" | "FAILED"
+  status        String   @default("PENDING")
+  startedAt     DateTime?
+  completedAt   DateTime?
+  durationMs    Int?
+
+  @@unique([tenantId, key])
+  @@index([tenantId, orderIndex])
+}
+
+model TenantTheme {
+  id           String   @id @default(cuid())
+  tenantId     String   @unique
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  // "heritage" | "ocean" | "ember" | "forest" | "monolith" | "pearl"
+  preset       String   @default("heritage")
+  // Custom palette overrides as JSON.
+  paletteJson  String   @default("{}")
+  emblem       String   @default("◆")
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model TenantPack {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  // "hospitality" | "dairy" | "agri" | "education" | "finance"
+  packKey   String
+  enabled   Boolean  @default(true)
+
+  @@unique([tenantId, packKey])
+  @@index([packKey])
+}
+
+// =====================================================================
+// TENANT IMPORT MAPPING — per (tenantId, sourceSystem) field-name
+// translation, applied by the import endpoint BEFORE Zod (Phase 4).
+// Opt-in: no row, or active=false → payload passes through unchanged.
+// tenantId is an OPAQUE label, no Tenant FK (same precedent as Phase 3
+// Product). JSON is stored as String — codebase-wide convention
+// (SQLite has no JSON type; cf. ImportRow.rowData, *Json columns).
+// =====================================================================
+model TenantImportMapping {
+  id           String   @id @default(cuid())
+  tenantId     String
+  // Short identifier the tenant picks, e.g. "maha-erp". Matched against
+  // the batch `source` by prefix at import time.
+  sourceSystem String
+  // Human label: "Maha Dairy stock export".
+  description  String?
+
+  // JSON object string { "their_field": "our_field" }, e.g.
+  // {"Item Code":"sku","Stock Level":"quantity","السعر":"unitCost"}.
+  fieldMapJson String   @default("{}")
+  // Optional JSON object string of fallback values for missing fields,
+  // e.g. {"warehouse":"Amman-A"}. Null/absent → no defaults.
+  defaultsJson String?
+
+  // Disabled mappings are ignored (payload passes through as-is).
+  active       Boolean  @default(true)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([tenantId, sourceSystem])
+  @@index([tenantId, active])
+}

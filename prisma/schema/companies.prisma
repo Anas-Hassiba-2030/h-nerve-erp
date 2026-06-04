@@ -1,0 +1,37 @@
+// =====================================================================
+// HOURANI GROUP — HOLDINGS REGISTRY
+// =====================================================================
+
+model Company {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  nameEn      String
+  // "HOSPITALITY" | "DAIRY" | "AGRICULTURE" | "EDUCATION" | "INVESTMENT" | "TRADE"
+  sector      String
+  country     String   @default("JO")
+  city        String?
+  foundedYear Int?
+  employees   Int      @default(0)
+  // "ACTIVE" | "PAUSED" | "RAMPING"
+  status      String   @default("ACTIVE")
+  description String?
+  brandColor  String   @default("emerald")
+  // ticker (optional) — links into MarketStock for live tracking
+  ticker      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users         User[]
+  hotels        Hotel[]
+  dairyBatches  DairyBatch[]
+  farms         Farm[]
+  programs      Program[]
+  transactions  Transaction[]
+  forecastsOut  SupplyForecast[] @relation("ForecastSource")
+  forecastsIn   SupplyForecast[] @relation("ForecastTarget")
+  futureProjects FutureProject[]
+  esgScores     SustainabilityScore[]
+  marketStocks  MarketStock[]
+  alertRules    AlertRule[]
+}

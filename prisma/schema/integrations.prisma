@@ -1,0 +1,61 @@
+// =====================================================================
+// INTEGRATIONS HUB — Phase 13 of docs/PHASES-INTELLIGENCE.md
+// One row per (scope, providerKey). Each integration has scoped
+// credentials, settings, and a usage log so we can show "last activity"
+// and per-provider failure rates.
+// =====================================================================
+
+model Integration {
+  id            String   @id @default(cuid())
+  scope         String   @default("default")
+  // Provider key from the catalog: "slack" | "stripe" | "plaid" | etc.
+  providerKey   String
+  // "NOT_CONNECTED" | "CONNECTED" | "ERROR" | "EXPIRED"
+  status        String   @default("NOT_CONNECTED")
+  // JSON array of granted scopes — provider-specific.
+  scopesJson    String   @default("[]")
+  // Display-only account label, e.g. workspace name or email.
+  account       String?
+  // Per-provider settings JSON — channels, default sender, etc.
+  settingsJson  String   @default("{}")
+
+  credential    IntegrationCredential?
+  logs          IntegrationLog[]
+
+  connectedAt   DateTime?
+  lastUsedAt    DateTime?
+  errorCount    Int      @default(0)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([scope, providerKey])
+  @@index([scope, status])
+}
+
+model IntegrationCredential {
+  id            String   @id @default(cuid())
+  integrationId String   @unique
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  // Encrypted token blob. In dev this is a placeholder string.
+  tokenBlob     String
+  expiresAt     DateTime?
+  rotatedAt     DateTime @default(now())
+}
+
+model IntegrationLog {
+  id            String   @id @default(cuid())
+  integrationId String
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  // "connect" | "disconnect" | "send" | "receive" | "error"
+  kind          String
+  // 1-line operator-readable summary.
+  message       String
+  // Optional payload digest (never the full payload).
+  payloadDigest String?
+  // ms duration of the call (when applicable).
+  ms            Int?
+  ts            DateTime @default(now())
+
+  @@index([integrationId, ts])
+}

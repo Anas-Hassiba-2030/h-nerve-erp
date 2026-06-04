@@ -1,0 +1,263 @@
+// =====================================================================
+// FINANCE
+// =====================================================================
+
+model Transaction {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  reference   String   @unique
+  kind        String
+  category    String
+  amount      Float
+  currency    String   @default("JOD")
+  description String?
+  occurredAt  DateTime
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Phase 11 — finance lists filter by company and sort by occurredAt.
+  @@index([companyId, occurredAt])
+  @@index([createdById])
+}
+
+// =====================================================================
+// ACCOUNTING (Phase 8) — double-entry. Posted JournalEntries are
+// immutable (decision #2); SUM(debits)=SUM(credits) enforced in code
+// before POSTED. tenantId opaque (no Tenant FK — family precedent).
+// Money = Decimal(12,2), applied at the Phase 11 Postgres cutover.
+// =====================================================================
+model LedgerAccount {
+  id          String   @id @default(cuid())
+  tenantId    String
+  code        String // "1001", "2001"
+  name        String
+  type        String // ASSET | LIABILITY | EQUITY | REVENUE | EXPENSE | COGS
+  description String?
+  active      Boolean  @default(true)
+  // Phase 9 decision #5: optional warehouse scope for a future
+  // sub-ledger. Transfers post NO journal entries (total inventory
+  // value is unchanged) — this column is forward-provisioning only.
+  warehouseId String?
+
+  lines       JournalLine[]
+
+  createdAt   DateTime @default(now())
+
+  @@unique([tenantId, code])
+  @@index([tenantId, type])
+}
+
+model FinancialPeriod {
+  id        String   @id @default(cuid())
+  tenantId  String
+  year      Int
+  month     Int // 1-12
+  status    String   @default("OPEN") // OPEN | CLOSED
+
+  entries   JournalEntry[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, year, month])
+  @@index([tenantId, status])
+  @@index([tenantId, year])
+}
+
+model JournalEntry {
+  id          String   @id @default(cuid())
+  tenantId    String
+  periodId    String
+  description String
+  reference   String? // PO/SO number, etc.
+  status      String   @default("POSTED") // DRAFT | POSTED
+  reversesId  String?
+
+  period      FinancialPeriod @relation(fields: [periodId], references: [id])
+  lines       JournalLine[]
+  reverses    JournalEntry?   @relation("Reversal", fields: [reversesId], references: [id])
+  reversedBy  JournalEntry[]  @relation("Reversal")
+
+  postedAt    DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId, periodId])
+  @@index([tenantId, reference])
+  @@index([tenantId, status])
+}
+
+model JournalLine {
+  id             String   @id @default(cuid())
+  journalEntryId String
+  accountId      String
+  debit          Decimal  @default(0)
+  credit         Decimal  @default(0)
+  memo           String?
+
+  entry          JournalEntry  @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+  account        LedgerAccount @relation(fields: [accountId], references: [id])
+
+  @@index([journalEntryId])
+  @@index([accountId])
+}
+
+// =====================================================================
+// PURCHASE ORDERS — procurement (Phase 6). DRAFT → SENT → PARTIAL →
+// RECEIVED → CANCELLED. Only RECEIVED/PARTIAL receipts write RECEIVED
+// inventory movements (via lib/inventory.ts). supplier is an OPAQUE
+// string (becomes an FK in Phase 7, same precedent as Product.tenantId).
+// deletedAt column only — not registered in lib/softDelete.ts (no trash
+// UI), consistent with Product / InventoryMovement.
+// =====================================================================
+model PurchaseOrder {
+  id          String   @id @default(cuid())
+  tenantId    String
+  poNumber    String   @unique
+  supplierId  String
+  // DRAFT | SENT | PARTIAL | RECEIVED | CANCELLED
+  status      String   @default("DRAFT")
+  orderedAt   DateTime @default(now())
+  expectedAt  DateTime?
+  note        String?
+
+  // Phase NS-1 — back-link to the SupplyForecast that drafted this PO
+  // (null for manually-created POs). Authoritative side of the 1:1
+  // bridge relation. A bridge PO is intentionally line-less: product /
+  // quantity / unit / delivery read through sourceForecast.
+  sourceForecastId String?         @unique
+  sourceForecast   SupplyForecast? @relation("ForecastSourcedPO", fields: [sourceForecastId], references: [id], onDelete: SetNull)
+
+  lines       PurchaseOrderLine[]
+  supplierRef Supplier  @relation(fields: [supplierId], references: [id])
+
+  deletedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId, status])
+  @@index([tenantId, supplierId])
+  @@index([tenantId, orderedAt])
+}
+
+model PurchaseOrderLine {
+  id          String   @id @default(cuid())
+  poId        String
+  productId   String
+  quantity    Int      // ordered
+  receivedQty Int      @default(0)
+  // Money, precision/scale (12,2). Applied at the Phase 11 Postgres
+  // cutover (precedent: Product.unitCost / ImportRow.unitCost).
+  unitCost    Decimal?
+
+  po          PurchaseOrder @relation(fields: [poId], references: [id], onDelete: Cascade)
+  product     Product       @relation(fields: [productId], references: [id])
+
+  @@index([poId])
+  @@index([productId])
+}
+
+// =====================================================================
+// SALES ORDERS — fulfillment (Phase 6). DRAFT → CONFIRMED → PARTIAL →
+// FULFILLED → CANCELLED. Only FULFILLED/PARTIAL fulfillment writes SOLD
+// movements (negative delta). Stock availability is checked at create
+// and again at CONFIRMED. customer is an OPAQUE string (FK in Phase 7).
+// =====================================================================
+model SalesOrder {
+  id          String   @id @default(cuid())
+  tenantId    String
+  soNumber    String   @unique
+  customerId  String
+  // DRAFT | CONFIRMED | PARTIAL | FULFILLED | CANCELLED
+  status      String   @default("DRAFT")
+  orderedAt   DateTime @default(now())
+  requiredBy  DateTime?
+  note        String?
+
+  lines       SalesOrderLine[]
+  customerRef Customer  @relation(fields: [customerId], references: [id])
+
+  deletedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId, status])
+  @@index([tenantId, customerId])
+  @@index([tenantId, orderedAt])
+}
+
+model SalesOrderLine {
+  id            String   @id @default(cuid())
+  soId          String
+  productId     String
+  quantity      Int      // ordered
+  fulfilledQty  Int      @default(0)
+  // Money, precision/scale (12,2). Phase 11 Postgres cutover (precedent above).
+  unitPrice     Decimal?
+
+  so            SalesOrder @relation(fields: [soId], references: [id], onDelete: Cascade)
+  product       Product    @relation(fields: [productId], references: [id])
+
+  @@index([soId])
+  @@index([productId])
+}
+
+// =====================================================================
+// SUPPLIER / CUSTOMER — real entities (Phase 7). Promotes the opaque
+// supplier/customer strings on Product/PurchaseOrder/SalesOrder to
+// tenant-scoped FK tables. Forward relation fields are supplierRef /
+// customerRef (the scalar names supplier/customer stay as legacy
+// columns until the Schema-2 drop, so the relation can't reuse them).
+// paymentTerms is a plain string (Phase 8 formalizes). Soft-delete via
+// deletedAt; not registered in lib/softDelete.ts (no trash UI),
+// consistent with Product / InventoryMovement / PO / SO.
+// =====================================================================
+model Supplier {
+  id            String   @id @default(cuid())
+  tenantId      String
+  name          String
+  email         String?
+  phone         String?
+  address       String?
+  paymentTerms  String?  // "Net 30" | "COD" | "Prepaid" — plain string
+  notes         String?
+
+  // Phase NS-1 — when this supplier IS another in-system tenant (e.g.
+  // the Hotels tenant's "Maha Dairy" supplier maps to the maha-dairy
+  // tenant), this stores that tenant's SLUG. Null for external suppliers.
+  // Opaque slug string (NOT a Tenant FK) to match the procurement
+  // schema's tenantId-as-slug convention end-to-end.
+  linkedTenantId String?
+
+  products       Product[]
+  purchaseOrders PurchaseOrder[]
+
+  deletedAt     DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId, deletedAt])
+  @@index([linkedTenantId])
+}
+
+model Customer {
+  id            String   @id @default(cuid())
+  tenantId      String
+  name          String
+  email         String?
+  phone         String?
+  address       String?
+  paymentTerms  String?
+  notes         String?
+
+  salesOrders   SalesOrder[]
+
+  deletedAt     DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId, deletedAt])
+}

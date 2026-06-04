@@ -1,0 +1,528 @@
+// =====================================================================
+// THE BRAIN — causal graph substrate (Phase 1 of docs/PHASES-INTELLIGENCE.md)
+// Every business entity becomes a BrainNode; relationships are BrainEdges
+// with weight ∈ [-1,1] and confidence ∈ [0,1]. This is the substrate the
+// simulator propagates over and the narrator cites.
+// =====================================================================
+
+model BrainNode {
+  id            String   @id @default(cuid())
+  // "Hotel" | "Booking" | "Room" | "DairyBatch" | "MilkSource" | "Farm" |
+  // "Crop" | "SensorReading" | "Program" | "Cohort" | "Transaction" |
+  // "Account" | "Forecast" | "Plan" | "Insight" | "Company" | "User"
+  kind          String
+  // The id of the underlying domain row (when applicable).
+  refId         String?
+  label         String
+  // Small bag of numbers/labels per node, JSON-encoded, e.g.
+  // {"occupancy":0.78,"sector":"HOSPITALITY","revenue":127335}
+  payloadJson   String   @default("{}")
+  // Optional centrality / "weight in the system" — recomputed periodically.
+  importance    Float    @default(0)
+  // When this snapshot of the node was taken.
+  ts            DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  outgoing      BrainEdge[] @relation("EdgeFrom")
+  incoming      BrainEdge[] @relation("EdgeTo")
+
+  @@index([kind])
+  @@index([refId])
+  @@index([ts])
+}
+
+model BrainEdge {
+  id              String   @id @default(cuid())
+  fromId          String
+  from            BrainNode @relation("EdgeFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  toId            String
+  to              BrainNode @relation("EdgeTo", fields: [toId], references: [id], onDelete: Cascade)
+  // "structural" (FK from schema) | "causal" (hand-authored) | "learned" | "manual"
+  kind            String   @default("structural")
+  // Direction-aware causal weight: positive = more source → more target.
+  weight          Float    @default(0)
+  // [0,1] — how confident the brain is that this edge is real.
+  confidence      Float    @default(0.6)
+  // How many observations support this edge (used by feedback loop).
+  evidenceCount   Int      @default(0)
+  // Free-form description used by the narrator when citing this edge.
+  rationale       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([fromId, toId, kind])
+  @@index([fromId])
+  @@index([toId])
+  @@index([kind])
+}
+
+// =====================================================================
+// THE COUNCIL — Phase 3 of docs/PHASES-INTELLIGENCE.md
+// A panel of domain agents debates each decision; a moderator synthesizes.
+// Sessions are persisted so users can replay any past deliberation.
+// =====================================================================
+
+// Phase V3-P5 — operator-shared insight threads. Users on /insights /
+// /alerts / /admin/brain click the "Share to Council" button and a row
+// lands here. /brain/council renders them as a thread list above the
+// system-generated CouncilSession deliberations.
+model CouncilDiscussion {
+  id             String   @id @default(cuid())
+  tenantId       String
+  insightId      String?
+  sharedByUserId String?
+  sharedBy       User?    @relation("CouncilShares", fields: [sharedByUserId], references: [id], onDelete: SetNull)
+  title          String
+  body           String
+  status         String   @default("OPEN") // "OPEN" | "CLOSED"
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  replies        CouncilReply[]
+
+  @@index([tenantId])
+  @@index([createdAt])
+  @@index([insightId])
+}
+
+// Phase V3-NEW-5 — replies on shared CouncilDiscussion threads. Each
+// reply is tenant-scoped (inherits the parent thread's tenantId, but
+// stored denormalized for direct middleware scoping).
+model CouncilReply {
+  id            String   @id @default(cuid())
+  tenantId      String
+  discussionId  String
+  discussion    CouncilDiscussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  authorUserId  String?
+  author        User?    @relation("CouncilReplies", fields: [authorUserId], references: [id], onDelete: SetNull)
+  body          String
+  createdAt     DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([discussionId, createdAt])
+}
+
+model CouncilSession {
+  id              String   @id @default(cuid())
+  topic           String
+  // JSON array of BrainNode ids that scope the discussion (subgraph refs).
+  contextRefs     String   @default("[]")
+  // The synthesized recommendation produced by the Moderator.
+  recommendation  String?
+  // [0,1] — moderator's confidence in the recommendation.
+  confidence      Float?
+  // Optional dissent note when one agent strongly disagreed.
+  dissentNote     String?
+  // "RUNNING" | "DONE" | "FAILED"
+  status          String   @default("RUNNING")
+  ranAt           DateTime @default(now())
+  durationMs      Int?
+  // Whether any voice in the session was a real LLM call (vs stub).
+  usedLiveLlm     Boolean  @default(false)
+
+  voices          CouncilVoice[]
+
+  createdAt       DateTime @default(now())
+
+  @@index([ranAt])
+  @@index([status])
+}
+
+model CouncilVoice {
+  id              String   @id @default(cuid())
+  sessionId       String
+  session         CouncilSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  // "hospitality-expert" | "dairy-expert" | "agri-expert" | "finance-brain" | "risk-officer" | "moderator"
+  agentId         String
+  speakerLabelAr  String
+  speakerLabelEn  String
+  // "support" | "oppose" | "qualify" | "moderate"
+  position        String
+  // The agent's main argument — editorial paragraph.
+  thesis          String
+  // JSON array of evidence items: [{ ref, weight, label }, ...]
+  evidenceJson    String   @default("[]")
+
+  orderIndex      Int      @default(0)
+  llmModel        String?
+  isStub          Boolean  @default(false)
+
+  createdAt       DateTime @default(now())
+
+  @@index([sessionId, orderIndex])
+}
+
+// =====================================================================
+// THE NARRATOR — editorial cache (Phase 4 of docs/PHASES-INTELLIGENCE.md)
+// Same input always returns the same prose until the row expires. Keeps
+// LLM cost bounded and tooltip latency at zero on repeat hovers.
+// =====================================================================
+
+model Narrative {
+  id          String   @id @default(cuid())
+  // Tenant scope. Default for single-tenant deployments.
+  scope       String   @default("default")
+  // What the narrative is ABOUT — "revenue" | "occupancy" | "dairy-expiry" | etc.
+  topic       String
+  // "headline" (6-12 words) | "editorial" (60-120 words) | "executive" (200-400 words)
+  register    String
+  locale      String   // "ar" | "en"
+  // Stable hash of the structured facts input — SHA-1 of canonical JSON.
+  factsHash   String
+  text        String
+  model       String?
+  isStub      Boolean  @default(false)
+  ms          Int?
+  // Phase 22 — Brain Trustworthiness Layer. Verification telemetry the
+  // narrator records on every write. Defaults preserve existing rows.
+  // 0..1, fraction of claims that grounded against the facts payload.
+  trustScore   Float    @default(0.5)
+  trustLabel   String   @default("medium") // "high" | "medium" | "low"
+  claimsTotal  Int      @default(0)
+  claimsMatched Int     @default(0)
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+
+  @@unique([scope, topic, register, locale, factsHash])
+  @@index([expiresAt])
+  @@index([scope, topic])
+  @@index([trustLabel])
+}
+
+// =====================================================================
+// THE PLANNER — Phase 5 of docs/PHASES-INTELLIGENCE.md
+// Insights become committed action plans with owners, deadlines, target
+// outcome, and a rollback condition. The brain proposes; the user commits.
+// =====================================================================
+
+model Plan {
+  id                      String   @id @default(cuid())
+
+  // What this plan is trying to accomplish (1 line, bilingual).
+  goal                    String
+  goalEn                  String?
+
+  // Editorial paragraph explaining why we're doing this.
+  rationale               String?
+  rationaleEn             String?
+
+  // Target outcome — the metric we expect to move and by how much, by when.
+  targetMetric            String   // "occupancy" | "revenue" | "expiry_risk" | "margin" | etc.
+  targetDelta             Float    // signed relative change e.g. +0.12 = +12%
+  targetDeadline          DateTime
+
+  // Simulator-projected delta (Phase 2) for the same metric.
+  projectedDelta          Float?
+  // [0,1] confidence in the projection (chained from underlying edges).
+  confidence              Float?
+
+  // Rollback — if this trigger fires after commit, we revert.
+  rollbackCondition       String?
+  rollbackConditionEn     String?
+
+  // "DRAFT" | "ACTIVE" | "DONE" | "ABANDONED" | "ROLLED_BACK"
+  status                  String   @default("DRAFT")
+
+  // Source of this plan (optional — what produced it).
+  sourceInsightId         String?
+  sourceCouncilSessionId  String?
+
+  createdAt               DateTime @default(now())
+  committedAt             DateTime?
+  completedAt             DateTime?
+
+  // Author / committer (optional — who pressed Commit).
+  committedById           String?
+
+  steps                   PlanStep[]
+
+  @@index([status])
+  @@index([sourceInsightId])
+  @@index([sourceCouncilSessionId])
+  @@index([createdAt])
+}
+
+model PlanStep {
+  id            String   @id @default(cuid())
+  planId        String
+  plan          Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  orderIndex    Int
+
+  // The action to take, in the active voice (1-2 sentences).
+  action        String
+  actionEn      String?
+
+  // The role responsible (e.g. "PROCUREMENT", "CFO", "OPS_DAIRY", "OPS_HOTEL").
+  // Roles are intentionally string-typed so industry packs can register their own.
+  ownerRole     String
+
+  // Optional concrete user assignment.
+  ownerUserId   String?
+
+  // How long this step is expected to take (estimator input).
+  durationDays  Int      @default(7)
+
+  // "PENDING" | "IN_PROGRESS" | "DONE" | "BLOCKED"
+  status        String   @default("PENDING")
+
+  notes         String?
+
+  createdAt     DateTime @default(now())
+  completedAt   DateTime?
+
+  @@index([planId, orderIndex])
+  @@index([status])
+}
+
+// =====================================================================
+// THE MEMORY LAKE — Phase 6 of docs/PHASES-INTELLIGENCE.md
+// Long-term episodic memory. Every meaningful past event lives here with
+// a stored vector. New situations search the lake for analogies.
+// =====================================================================
+
+model Memory {
+  id            String   @id @default(cuid())
+  // When the remembered event occurred.
+  occurredAt    DateTime
+  // "HOTELS" | "DAIRY" | "FARMS" | "EDUCATION" | "FINANCE" | "GROUP" | etc.
+  module        String
+  // Bilingual headline (1 line, present tense, narrative voice).
+  headlineAr    String
+  headlineEn    String
+  // Bilingual body — 2-4 sentences telling the story.
+  bodyAr        String
+  bodyEn        String
+  // Bilingual lesson — the takeaway for future situations.
+  lessonAr      String?
+  lessonEn      String?
+  // JSON array of tags for fast filtering: ["dairy","expiry","margin"].
+  tagsJson      String   @default("[]")
+  // JSON array of BrainNode/domain-entity ids this memory references.
+  entityRefsJson String  @default("[]")
+  // Outcome (the metric that moved + signed delta).
+  outcomeMetric String?
+  outcomeDelta  Float?
+  // Stored vector (JSON array of floats). For SQLite we store as JSON;
+  // when migrating to Postgres+pgvector this becomes a real vector(N) column.
+  vectorJson    String   @default("[]")
+  vectorVersion Int      @default(1)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([occurredAt])
+  @@index([module])
+}
+
+// =====================================================================
+// THE FEEDBACK LOOP — Phase 7 of docs/PHASES-INTELLIGENCE.md
+// Every user action on a brain artefact becomes training signal. The
+// pattern analyzer turns the feedback log into human-readable rules that
+// reweight future brain output.
+// =====================================================================
+
+model BrainFeedback {
+  id           String   @id @default(cuid())
+  ts           DateTime @default(now())
+  scope        String   @default("default")
+  userId       String?
+  // "INSIGHT_DISMISSED" | "INSIGHT_HELPFUL" | "INSIGHT_RESOLVED"
+  // | "PLAN_COMMITTED" | "PLAN_ABANDONED" | "PLAN_COMPLETED"
+  // | "PLAN_STEP_DONE" | "PLAN_STEP_BLOCKED"
+  // | "RECOMMENDATION_OVERRIDDEN" | "OUTCOME_RIGHT" | "OUTCOME_WRONG"
+  // | "MEMORY_USEFUL" | "MEMORY_IRRELEVANT"
+  kind         String
+  // The id of the entity the feedback is about (insight/plan/etc.).
+  targetRef    String
+  // "insight" | "plan" | "council" | "memory"
+  targetType   String?
+  module       String?  // domain module the target sits in
+  category     String?  // semantic category — "margin_low" | "expiry" | "ramp" | etc.
+  signalDelta  Float?   // signed magnitude of the action's signal
+  note         String?
+  metadataJson String?
+
+  @@index([scope, ts])
+  @@index([scope, kind])
+  @@index([scope, module, kind])
+  @@index([targetType, targetRef])
+}
+
+model BrainPattern {
+  id              String   @id @default(cuid())
+  scope           String   @default("default")
+  // Bilingual statement of what the brain learned.
+  statementEn     String
+  statementAr     String?
+  // Machine-actionable rule, JSON. e.g.
+  // {"action":"suppress_alert","module":"FINANCE","category":"margin_low","threshold":0.05}
+  ruleJson        String   @default("{}")
+  // What kinds of feedback events back this pattern.
+  kindsJson       String   @default("[]")
+  evidenceCount   Int      @default(0)
+  confidence      Float    @default(0.5)
+  module          String?
+  // "ENABLED" | "DISABLED" | "UNLEARNED"
+  status          String   @default("ENABLED")
+  authoredBy      String   @default("auto") // "auto" | "user"
+
+  firstObservedAt DateTime
+  lastObservedAt  DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([scope, status])
+  @@index([scope, module])
+}
+
+// =====================================================================
+// CROSS-ORG FEDERATION — Phase 8 of docs/PHASES-INTELLIGENCE.md
+// Privacy-preserving cross-tenant pattern learning. Each org opts in
+// explicitly. Only patterns backed by ≥ K peers ever surface, and only
+// the aggregate (no per-peer attribution) ever crosses the boundary.
+// =====================================================================
+
+model FederationOptIn {
+  id            String   @id @default(cuid())
+  scope         String   @unique @default("default")
+  // "ENABLED" | "DISABLED" | "PENDING_REVIEW"
+  status        String   @default("DISABLED")
+  agreedToTerms Boolean  @default(false)
+  agreedAt      DateTime?
+  agreedById    String?
+  // JSON array of module names this org consents to share/receive: ["HOTELS","DAIRY",...]
+  shareModules  String   @default("[]")
+  // Differential-privacy epsilon budget (simplified — counts down from budgetMax).
+  budgetUsed    Float    @default(0)
+  budgetMax     Float    @default(1.0)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model FederationPeer {
+  id                String   @id @default(cuid())
+  // Anonymized peer token — never the real tenant id, never reversible.
+  peerToken         String   @unique
+  // Tier descriptor used to group peers: "hotels-300-700-mena-midluxury"
+  tier              String
+  region            String
+  size              String
+  vertical          String
+  // JSON array of pattern keys this peer has contributed.
+  contributionsJson String   @default("[]")
+  joinedAt          DateTime @default(now())
+  lastActiveAt      DateTime @default(now())
+
+  @@index([tier])
+  @@index([vertical])
+}
+
+model FederationPattern {
+  id              String   @id @default(cuid())
+  // Stable cluster key so re-aggregation upserts in place.
+  clusterKey      String   @unique
+  // Bilingual editorial statement of the cross-org learning.
+  statementEn     String
+  statementAr     String?
+  // Tier descriptor (JSON).
+  tierJson        String   @default("{}")
+  module          String?
+  category        String?
+  // K-anonymity: peerCount must be >= kAnonymity for the pattern to surface.
+  peerCount       Int
+  averageDelta    Float
+  confidence      Float
+  kAnonymity      Int      @default(5)
+  noiseEpsilon    Float    @default(0.5)
+  // Which org scope can see this benchmark (defaults to all).
+  visibleTo       String   @default("default")
+  generatedAt     DateTime @default(now())
+  expiresAt       DateTime
+
+  @@index([visibleTo, module])
+  @@index([expiresAt])
+}
+
+// =====================================================================
+// THE META BRAIN — Phase 10 of docs/PHASES-INTELLIGENCE.md
+// THE CAPSTONE. The brain reads its own performance log weekly, proposes
+// adjustments to its own weights, exposes a public IQ score that climbs
+// when the brain is improving. The only subsystem that can rewrite the
+// brain itself.
+// =====================================================================
+
+model BrainIQHistory {
+  id              String   @id @default(cuid())
+  scope           String   @default("default")
+  // Snapshot date — typically end-of-week.
+  snappedAt       DateTime
+  // The headline number — sales-friendly range of ~70..200.
+  iq              Int
+  // Components (each in [0,1] before being weighted into IQ).
+  accuracy        Float
+  decisionVelocity Float
+  outcomeQuality  Float
+  userTrust       Float
+  // What was the dominant input that moved IQ this snapshot?
+  drivenBy        String?  // "accuracy" | "velocity" | "outcome" | "trust" | "rebalance"
+  note            String?
+  createdAt       DateTime @default(now())
+
+  @@index([scope, snappedAt])
+}
+
+model BrainWeight {
+  id          String   @id @default(cuid())
+  scope       String   @default("default")
+  // Identifier for the weight target. e.g.
+  // "agent:dairy-expert"        | "edge:abc-xyz"
+  // "narrator.editorial.tone"   | "memory.expiry.boost"
+  target      String
+  // Current value (interpretation depends on target).
+  value       Float
+  // Where the value came from. "default" | "auto-tuned" | "user-override"
+  origin      String   @default("default")
+  // Bump-only version — increments on every change.
+  version     Int      @default(1)
+  // Optional human-readable description, used in the diff log.
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([scope, target])
+}
+
+model SelfTuningReport {
+  id              String   @id @default(cuid())
+  scope           String   @default("default")
+  ranAt           DateTime @default(now())
+  windowDays      Int      @default(7)
+
+  // What the meta brain noticed (JSON array of editorial sentences).
+  observationsJson      String   @default("[]")
+  // Proposed adjustments (JSON array — each entry: {target, field, from, to, rationale, confidence}).
+  proposedAdjustmentsJson String @default("[]")
+  // Optional editorial paragraph the meta brain wrote about itself.
+  editorialEn     String?
+  editorialAr     String?
+
+  iqBefore        Int
+  iqAfterIfApplied Int
+  iqAfterApplied  Int?
+
+  // "DRAFT" | "APPROVED" | "REJECTED" | "AUTO_APPLIED"
+  status          String   @default("DRAFT")
+  reviewerNote    String?
+  reviewedById    String?
+  reviewedAt      DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([scope, ranAt])
+  @@index([scope, status])
+}

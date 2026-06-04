@@ -25,11 +25,27 @@ const INJECTION_PATTERNS: RegExp[] = [
   /\bnew\s+(?:instructions?|system\s+prompt)\b/gi,
   /\bsystem\s*:/gi,
   /\bassistant\s*:/gi,
+  // "forget / override the previous instructions" — variants beyond ignore/disregard.
+  /\bforget\s+(?:all\s+)?(?:everything|(?:the\s+)?(?:previous|prior|above)(?:\s+(?:instructions?|context|prompts?))?)\b/gi,
+  /\boverride\s+(?:all\s+)?(?:the\s+)?(?:previous|prior|above|system)\s+(?:instructions?|rules?|prompts?|settings?)\b/gi,
+  // System-prompt exfiltration — kept specific (requires a your/system/above qualifier)
+  // so benign "show the operating instructions" does NOT trip.
+  /\b(?:reveal|repeat|print|show|output|expose|disclose)\s+(?:me\s+)?(?:your|the\s+system|the\s+above|the\s+initial)\s+(?:system\s+)?(?:prompt|instructions?)\b/gi,
+  // Covert-action injection — "do not tell the user", "without informing the operator".
+  /\b(?:do\s+not|don'?t)\s+(?:tell|inform|notify|reveal\s+to)\s+(?:the\s+)?(?:user|operator|human|anyone)\b/gi,
+  /\bwithout\s+(?:telling|informing|notifying|alerting)\s+(?:the\s+)?(?:user|operator|human|anyone)\b/gi,
+  // Jailbreak persona triggers.
+  /\b(?:developer|dan|jailbreak)\s+mode\b/gi,
   // Arabic markers — no \b anchors: Arabic letters aren't JS \w, so word
   // boundaries don't bind around them.
   /(?:تجاهل|تجاهلي)\s+(?:كل\s+)?(?:التعليمات|الأوامر)/g,
+  /(?:انس|انسى|تناس)[ً-ْ]*\s*(?:كل\s+)?(?:التعليمات|الأوامر|ما\s+سبق)/g,
   /أنت\s+الآن/g,
   /<\/?(?:system|instruction|prompt)[^>]*>/gi,
+  // Chat-template / control tokens smuggled into retrieved text.
+  /<\|[^|>]*\|>/g,                                            // <|im_start|>, <|system|>, <|endoftext|>
+  /\[\/?INST\]/gi,                                            // [INST] / [/INST]
+  /(?:^|\n)\s*#{1,6}\s*(?:system|instruction|assistant)\b/gi, // "### System:" markdown header
 ];
 
 export type InjectionScan = {

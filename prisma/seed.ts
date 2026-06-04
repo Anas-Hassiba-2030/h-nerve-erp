@@ -36,6 +36,59 @@ Math.random = _seedPrng; // restored at the end of seedOperator()
 const rand = (min: number, max: number) => Math.round(min + Math.random() * (max - min));
 const randF = (min: number, max: number) => +(min + Math.random() * (max - min)).toFixed(2);
 
+/**
+ * Restore the genuine Math.random. Importing this module patches Math.random to
+ * the seeded PRNG (so the builders are deterministic); seedOperator() restores
+ * it at the end. The additive path (seedSectors.ts) calls this after it runs so
+ * a live Next.js process isn't left with a seeded global RNG.
+ */
+export function restoreRandom() {
+  Math.random = _realRandom;
+}
+
+// ---------------------------------------------------------------------------
+// Decomposition (C9).
+//
+// The build phase of the seed is split into composable, named per-sector
+// functions that all share a small `ctx` carrying the parents they need
+// (companies, users, the seeded PRNG state lives in module scope). They run
+// in the SAME ORDER seedOperator() always used, so the global Math.random()
+// call sequence — and therefore the produced data — is byte-identical to the
+// pre-decomposition monolith. The incremental path (seedMissingSectors) reuses
+// these exact functions for the subset of sectors that are missing.
+//
+// `prisma` is passed in via ctx so the same builders work against the CLI
+// client (this module) and any client the incremental orchestrator supplies.
+// ---------------------------------------------------------------------------
+
+// Named company/user shapes are kept loose (Prisma's runtime row types) so the
+// extraction stays a thin move of existing blocks rather than a type rewrite.
+type SeedCompanies = {
+  arena: any;
+  maha: any;
+  loran: any;
+  aau: any;
+  hHolding: any;
+};
+type SeedUsers = {
+  admin: any;
+  owner: any;
+  ceo: any;
+  arenaGm: any;
+  mahaGm: any;
+  loranGm: any;
+  staffMember: any;
+  newHire: any;
+};
+
+export type SeedCtx = {
+  prisma: PrismaClient;
+  companies: SeedCompanies;
+  allCompanies: any[];
+  users: SeedUsers;
+  allUsers: any[];
+};
+
 export async function seedOperator() {
   // -- Wipe (FK-safe order)
   await prisma.protocolClause.deleteMany();
@@ -65,6 +118,46 @@ export async function seedOperator() {
   await prisma.user.deleteMany();
   await prisma.company.deleteMany();
 
+  // -------------------------------------------------------------------
+  // BUILD PHASE — decomposed into per-sector builders that run in the SAME
+  // ORDER as the original monolith, so the seeded PRNG sequence (and thus the
+  // produced data) is byte-identical. seedPeople() creates the shared parents
+  // (companies + users) and returns the ctx every other sector consumes.
+  // -------------------------------------------------------------------
+  const ctx = await seedPeople(prisma);
+  await seedHospitality(ctx);
+  await seedDairy(ctx);
+  await seedAgri(ctx);
+  await seedEducation(ctx);
+  await seedIntelligence(ctx);
+
+  console.log("\n✓ تم زرع بيانات H-Nerve ERP الكاملة بنجاح.\n");
+  console.log("بيانات الدخول الرئيسية:");
+  console.log("  admin@hourani.jo  / admin123  (ملك ♚, 920 XP)");
+  console.log("  ceo@hourani.jo    / admin123  (ملك ♚, 1100 XP)");
+  console.log("  staff@hourani.jo  / admin123  (فيل ♝, 95 XP)");
+  console.log("  newhire@hourani.jo / admin123 (بيدق ♟, 28 XP)");
+
+  // Restore the real Math.random so subsequent imports of this module
+  // don't see a seeded PRNG. (Required when the /admin/genesis server
+  // action calls seedOperator() inside a live Next.js process.)
+  Math.random = _realRandom;
+}
+
+// ===========================================================================
+// PER-SECTOR BUILDERS
+// Each takes the shared ctx (prisma + parents). Bodies are the original,
+// unchanged build blocks — only the surrounding scope moved. They reference
+// the module-level seeded helpers (at, ref, rand, randF, today), so the
+// Math.random() draw order is preserved across the whole run.
+// ===========================================================================
+
+/**
+ * People + companies layer. Creates the five companies, the eight users, and
+ * the seeded conversation threads, then returns the SeedCtx everything else
+ * needs. (Idempotent variant lives in seedSectors.ts for the additive path.)
+ */
+async function seedPeople(prisma: PrismaClient): Promise<SeedCtx> {
   // -------------------------------------------------------------------
   // COMPANIES
   // -------------------------------------------------------------------
@@ -342,6 +435,20 @@ export async function seedOperator() {
     }
   }
 
+  return {
+    prisma,
+    companies: { arena, maha, loran, aau, hHolding },
+    allCompanies,
+    users: { admin, owner, ceo, arenaGm, mahaGm, loranGm, staffMember, newHire },
+    allUsers: users,
+  };
+}
+
+/** Hospitality sector — hotels + calculated occupancy/history bookings. */
+export async function seedHospitality(ctx: SeedCtx) {
+  const { prisma } = ctx;
+  const { arena } = ctx.companies;
+
   // -------------------------------------------------------------------
   // HOTELS + BOOKINGS
   // -------------------------------------------------------------------
@@ -479,6 +586,12 @@ export async function seedOperator() {
     }
   }
   await prisma.booking.createMany({ data: bookingRows });
+}
+
+/** Dairy sector — Maha production batches. */
+export async function seedDairy(ctx: SeedCtx) {
+  const { prisma } = ctx;
+  const { maha } = ctx.companies;
 
   // -------------------------------------------------------------------
   // DAIRY BATCHES
@@ -513,6 +626,12 @@ export async function seedOperator() {
       },
     });
   }
+}
+
+/** Agriculture sector — Loran/AAU farms + crops. */
+export async function seedAgri(ctx: SeedCtx) {
+  const { prisma } = ctx;
+  const { loran, aau } = ctx.companies;
 
   // -------------------------------------------------------------------
   // FARMS + CROPS
@@ -584,6 +703,12 @@ export async function seedOperator() {
       { farmId: openFieldLoran.id, tenantId: "loran-agri", name: "بصل", variety: "Texas Grano", plantedAt: at(-60, 8), expectedHarvest: at(20, 8), expectedYieldKg: 9000, status: "GROWING" },
     ],
   });
+}
+
+/** Education sector — Tank Incubator programs. */
+export async function seedEducation(ctx: SeedCtx) {
+  const { prisma } = ctx;
+  const { aau } = ctx.companies;
 
   // -------------------------------------------------------------------
   // PROGRAMS — Tank Incubator
@@ -597,6 +722,19 @@ export async function seedOperator() {
       { companyId: aau.id, name: "EduPay", nameEn: "EduPay", founder: "ليث جرادات", vertical: "FINTECH", stage: "INTAKE", cohort: "2026-S1", fundingJod: 3000, teamSize: 2, description: "تقسيط الأقساط الجامعية — قيد التحقق التنظيمي." },
     ],
   });
+}
+
+/**
+ * Cross-cutting intelligence + finance layer. Supply forecasts, transactions,
+ * insights, future projects, market stocks, sustainability scores, achievements,
+ * tasks, brain IQ history + plans, demo documents, integrations, and the living
+ * protocol constitution — the tail of the original build, kept in order.
+ */
+export async function seedIntelligence(ctx: SeedCtx) {
+  const { prisma, allCompanies } = ctx;
+  const { arena, maha, loran, aau, hHolding } = ctx.companies;
+  const { admin, ceo, arenaGm, mahaGm, loranGm, staffMember, newHire } = ctx.users;
+  const users = ctx.allUsers;
 
   // -------------------------------------------------------------------
   // SUPPLY FORECASTS
@@ -1096,18 +1234,7 @@ export async function seedOperator() {
     })),
   });
 
-  console.log("\n✓ تم زرع بيانات H-Nerve ERP الكاملة بنجاح.\n");
-  console.log("بيانات الدخول الرئيسية:");
-  console.log("  admin@hourani.jo  / admin123  (ملك ♚, 920 XP)");
-  console.log("  ceo@hourani.jo    / admin123  (ملك ♚, 1100 XP)");
-  console.log("  staff@hourani.jo  / admin123  (فيل ♝, 95 XP)");
-  console.log("  newhire@hourani.jo / admin123 (بيدق ♟, 28 XP)");
   console.log(`\nالشركات: ${allCompanies.length}, المستخدمون: ${users.length}, المشاريع المستقبلية: ${futureProjects.length}, الأسهم: ${stocks.length}, المستندات: ${docCount}, التكاملات: ${integrationSeeds.length}\n`);
-
-  // Restore the real Math.random so subsequent imports of this module
-  // don't see a seeded PRNG. (Required when the /admin/genesis server
-  // action calls seedOperator() inside a live Next.js process.)
-  Math.random = _realRandom;
 }
 
 // Run only when invoked directly as a CLI script (npx tsx prisma/seed.ts).

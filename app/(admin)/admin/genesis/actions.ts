@@ -3,13 +3,18 @@
 // Phase 21 — Genesis Seed.
 // Superadmin-only actions behind the /admin/genesis wizard.
 //
-//   • runGenesisSeed   — DESTRUCTIVE full reseed (wipes + rebuilds the Hourani
-//                        demo dataset). Guarded by an explicit confirmation
-//                        token so a stray click can never wipe live data.
-//   • topUpDemoCorpus  — IDEMPOTENT, non-destructive. Inserts the demo document
-//                        corpus only when the Document table is empty (mirrors
-//                        scripts/seed/ensure-demo-docs.ts), so it fixes a bare
-//                        workspace without ever touching uploaded data.
+//   • runGenesisSeed     — DESTRUCTIVE full reseed (wipes + rebuilds the Hourani
+//                          demo dataset). Guarded by an explicit confirmation
+//                          token so a stray click can never wipe live data.
+//   • seedMissingGenesis — ADDITIVE, IDEMPOTENT. Reads live counts, finds the
+//                          EMPTY recipe sectors, ensures shared parents exist
+//                          (find-or-create, NO wipe), then builds only those
+//                          missing sectors. Fills a sparse workspace without
+//                          ever deleting or overwriting existing data.
+//   • topUpDemoCorpus    — IDEMPOTENT, non-destructive. Inserts the demo document
+//                          corpus only when the Document table is empty (mirrors
+//                          scripts/seed/ensure-demo-docs.ts), so it fixes a bare
+//                          workspace without ever touching uploaded data.
 //
 // Boundary: these run through the unscoped Prisma instance because genesis
 // operates across the whole workspace, mirroring how `npm run db:seed` works.
@@ -37,6 +42,28 @@ export async function runGenesisSeed(formData: FormData): Promise<void> {
 
   await seedOperator();
   redirect("/admin/genesis?seeded=1");
+}
+
+export async function seedMissingGenesis(): Promise<void> {
+  await requireAdmin();
+
+  // CROSS-TENANT INTENT: additive genesis fills the default-scope demo dataset
+  // across the whole workspace, exactly like the deploy-time seed — but it only
+  // creates EMPTY sectors and never wipes, so it's safe with no confirm token.
+  const { prismaUnscoped } = await import("@/lib/db");
+  const { seedMissingSectors } = await import("@/prisma/seedSectors");
+
+  let result;
+  try {
+    result = await seedMissingSectors(prismaUnscoped);
+  } catch {
+    redirect("/admin/genesis?fill=error");
+  }
+
+  if (result.nothingToDo) {
+    redirect("/admin/genesis?fill=skip");
+  }
+  redirect(`/admin/genesis?fill=${result.built.length}`);
 }
 
 export async function topUpDemoCorpus(): Promise<void> {

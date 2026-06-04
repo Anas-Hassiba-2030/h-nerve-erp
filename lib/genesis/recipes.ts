@@ -185,3 +185,22 @@ export function requiredCountKeys(): string[] {
   }
   return [...keys];
 }
+
+/**
+ * Incremental-seed planning (DB-free, pure).
+ *
+ * Given live database counts, decide which recipe SECTORS an additive,
+ * non-destructive seed should build. The rule mirrors the wizard's status
+ * diff: a sector is selected only when it is `status === "empty"` (no presence
+ * on ANY of its lines). Sectors that are `partial` or `complete` are left
+ * untouched — the incremental path never overwrites existing data.
+ *
+ * Returns the sector ids in their canonical GENESIS_RECIPES order, so the
+ * caller runs missing sectors in the same dependency-safe sequence the full
+ * seed uses (people/companies first, then operating sectors).
+ */
+export function planIncrementalSeed(counts: Record<string, number>): string[] {
+  const summary = summarizeGenesis(counts);
+  // Preserve GENESIS_RECIPES order (summary.sectors already follows it).
+  return summary.sectors.filter((s) => s.status === "empty").map((s) => s.id);
+}

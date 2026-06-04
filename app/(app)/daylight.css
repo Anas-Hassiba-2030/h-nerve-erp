@@ -118,3 +118,140 @@ body:has(.dl-page) .flex.min-h-screen.flex-1.flex-col.nerve-bg { flex: 1 1 100% 
 .dl-page { max-width: 1240px; margin-inline: auto; padding-inline: clamp(16px, 3vw, 34px); }
 /* the fixed ↺ Orbit pill is the nav home on full-bleed pages — lift it above content */
 body:has(.dl-page) .orbit-return { z-index: 70; }
+
+/* ════════════════════════════════════════════════════════════════
+   /admin/imports — the live ingest console. All styles below are
+   scoped under .dl-page so they never leak.
+   ════════════════════════════════════════════════════════════════ */
+
+/* Section sub-nav (the AdminFamily on its own row, breathable). */
+.dl-page .dl-subnav {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding: 12px 16px; margin-bottom: 22px;
+  background: var(--ivory); border: 1px solid var(--line); border-radius: 14px;
+  overflow-x: auto;
+}
+.dl-page .dl-subnav > div { gap: 6px !important; }
+.dl-page .dl-subnav a { white-space: nowrap; }
+
+/* Inline & block code styling that matches Heritage. */
+.dl-page .dl-code-inline {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11.5px; padding: 2px 7px; border-radius: 6px;
+  background: var(--ivory); color: var(--emerald); border: 1px solid var(--line);
+}
+.dl-page .dl-code-block {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12.5px; line-height: 1.55; color: var(--ink);
+  background: var(--ivory); border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px 16px; margin-top: 10px; overflow-x: auto;
+  direction: ltr; text-align: start;
+}
+
+/* Webhook panel — URL row, hint, sample, actions. */
+.dl-page .dl-webhook { display: flex; flex-direction: column; gap: 16px; }
+.dl-page .dl-webhook-row {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px;
+  padding: 12px 14px; background: var(--ivory);
+  border: 1px solid var(--line); border-radius: 12px;
+}
+.dl-page .dl-webhook-method {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11.5px; font-weight: 700; letter-spacing: .06em;
+  padding: 4px 10px; border-radius: 999px;
+  color: var(--cream); background: var(--emerald);
+}
+.dl-page .dl-webhook-url {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13.5px; color: var(--ink); direction: ltr; text-align: start;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.dl-page .dl-webhook-hint { font-size: 13px; color: var(--ink-muted); line-height: 1.6; max-width: 72ch; }
+.dl-page .dl-sample > summary {
+  cursor: pointer; font-size: 12.5px; font-weight: 600; color: var(--emerald);
+  list-style: none; display: inline-flex; align-items: center; gap: 6px;
+}
+.dl-page .dl-sample > summary::before { content: "▸"; font-size: 10px; transition: transform .2s; }
+.dl-page .dl-sample[open] > summary::before { transform: rotate(90deg); }
+.dl-page .dl-webhook-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* Filter bar — plain GET form, server-rendered. */
+.dl-page .dl-filters {
+  display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 14px;
+  background: var(--cream); border: 1px solid var(--line); border-radius: 14px;
+  padding: 16px 18px; margin-bottom: 18px; align-items: end;
+}
+@media (max-width: 880px) { .dl-page .dl-filters { grid-template-columns: 1fr 1fr; } .dl-page .dl-filter-search { grid-column: 1 / -1; } }
+.dl-page .dl-filter-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.dl-page .dl-filter-field label {
+  font-size: 11px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--ink-muted);
+}
+.dl-page .dl-filter-field input,
+.dl-page .dl-filter-field select {
+  font: inherit; font-size: 13.5px; color: var(--ink);
+  background: var(--ivory); border: 1px solid var(--line); border-radius: 10px;
+  padding: 9px 12px; outline: none; transition: border-color .2s, background .2s;
+}
+.dl-page .dl-filter-field input:focus,
+.dl-page .dl-filter-field select:focus { border-color: var(--gold); background: var(--cream); }
+.dl-page .dl-filter-actions { display: flex; gap: 8px; align-items: end; }
+
+/* Batches list. */
+.dl-page .dl-batches { display: flex; flex-direction: column; gap: 12px; }
+.dl-page .dl-batches-meta {
+  font-size: 12px; color: var(--ink-muted); padding-inline-start: 4px;
+}
+.dl-page .dl-batch {
+  background: var(--cream); border: 1px solid var(--line); border-radius: 14px;
+  overflow: hidden; transition: border-color .2s, box-shadow .2s;
+}
+.dl-page .dl-batch:hover { border-color: rgba(194,163,90,.4); box-shadow: 0 14px 36px -28px rgba(31,77,63,.35); }
+.dl-page .dl-batch[data-status="rej"] { border-inline-start: 3px solid var(--brick); }
+.dl-page .dl-batch[data-status="partial"] { border-inline-start: 3px solid var(--gold); }
+.dl-page .dl-batch[data-status="ok"] { border-inline-start: 3px solid var(--sage); }
+.dl-page .dl-batch-summary {
+  display: grid; grid-template-columns: 16px minmax(0, 2fr) 110px auto auto;
+  align-items: center; gap: 14px;
+  padding: 14px 16px; cursor: pointer; list-style: none;
+}
+.dl-page .dl-batch-summary::-webkit-details-marker { display: none; }
+.dl-page .dl-batch-caret { width: 14px; height: 14px; transition: transform .2s; }
+.dl-page .dl-batch[open] .dl-batch-caret { transform: rotate(90deg); }
+.dl-page .dl-batch-id { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.dl-page .dl-batch-source {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13.5px; font-weight: 700; color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.dl-page .dl-batch-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.dl-page .dl-batch-bar {
+  height: 6px; border-radius: 999px; background: rgba(168,106,92,.18); overflow: hidden;
+  border: 1px solid var(--line);
+}
+.dl-page .dl-batch-bar > i {
+  display: block; height: 100%;
+  background: linear-gradient(90deg, var(--sage), var(--emerald-soft));
+}
+.dl-page .dl-batch-counts {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-variant-numeric: tabular-nums;
+}
+.dl-page .dl-batch-total { font-size: 11.5px; color: var(--ink-muted); }
+.dl-page .dl-batch-total b { color: var(--ink); }
+.dl-page .dl-batch-time {
+  display: flex; flex-direction: column; align-items: end; gap: 2px;
+  font-size: 11.5px; color: var(--ink-muted);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+.dl-page .dl-batch-time-abs { font-size: 10.5px; opacity: .7; }
+.dl-page .dl-batch-body { border-top: 1px solid var(--line); background: var(--ivory); }
+.dl-page .dl-batch-err { margin-inline-start: 8px; color: var(--brick); font-size: 12px; }
+@media (max-width: 880px) {
+  .dl-page .dl-batch-summary {
+    grid-template-columns: 16px 1fr; row-gap: 8px;
+  }
+  .dl-page .dl-batch-bar, .dl-page .dl-batch-counts, .dl-page .dl-batch-time {
+    grid-column: 2; align-items: start; flex-direction: row;
+  }
+}

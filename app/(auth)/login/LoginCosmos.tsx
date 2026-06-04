@@ -43,7 +43,10 @@ function SubmitButton({ label }: { label: string }) {
   return (
     <button className="btn ov d5" type="submit" disabled={pending} aria-busy={pending}>
       <span className="sheen" />
-      <span>{label}</span>
+      <span>
+        {label}
+        {pending ? <span className="dots" aria-hidden="true" /> : null}
+      </span>
     </button>
   );
 }
@@ -66,6 +69,8 @@ export function LoginCosmos({
   const nucleusRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLFormElement>(null);
   const sparkRef = useRef<((x: number, y: number) => void) | null>(null);
+  const misfireRef = useRef<((x: number, y: number) => void) | null>(null);
+  const interactedRef = useRef(false);
 
   const [state, formAction] = useFormState<LoginState, FormData>(loginAction, {
     ok: false,
@@ -105,6 +110,10 @@ export function LoginCosmos({
       card.classList.remove("shake");
       void card.offsetWidth;
       card.classList.add("shake");
+    }
+    if (nuc) {
+      const r = nuc.getBoundingClientRect();
+      misfireRef.current?.(r.left + r.width / 2, r.top + r.height / 2);
     }
     if (nuc) {
       nuc.style.filter = "grayscale(.4) brightness(.7)";
@@ -204,6 +213,17 @@ export function LoginCosmos({
       if (reduce || !nodes.length) return;
       const s = nodes[(Math.random() * nodes.length) | 0];
       sparks.push({ x: s.x, y: s.y, tx: tx * DPR, ty: ty * DPR, t: 0, sp: 0.03 + Math.random() * 0.02 });
+    };
+    // a "misfire": red sparks burst outward from a point (the nucleus) on a failed sign-in
+    misfireRef.current = (cx: number, cy: number) => {
+      if (reduce) return;
+      const ox = cx * DPR,
+        oy = cy * DPR;
+      for (let i = 0; i < 14; i++) {
+        const a = Math.random() * TAU,
+          d = (70 + Math.random() * 90) * DPR;
+        sparks.push({ x: ox, y: oy, tx: ox + Math.cos(a) * d, ty: oy + Math.sin(a) * d, t: 0, sp: 0.02 + Math.random() * 0.02, red: true });
+      }
     };
 
     function par() {
@@ -554,10 +574,10 @@ export function LoginCosmos({
         const x = s.x + (s.tx - s.x) * s.t,
           y = s.y + (s.ty - s.y) * s.t;
         c.shadowBlur = 10 * DPR;
-        c.shadowColor = "rgba(224,192,137,.9)";
-        c.fillStyle = "rgba(224,192,137,.95)";
+        c.shadowColor = s.red ? "rgba(184,92,56,.95)" : "rgba(224,192,137,.9)";
+        c.fillStyle = s.red ? "rgba(214,108,70," + (1 - s.t).toFixed(3) + ")" : "rgba(224,192,137,.95)";
         c.beginPath();
-        c.arc(x, y, 1.6 * DPR, 0, TAU);
+        c.arc(x, y, (s.red ? 2 : 1.6) * DPR, 0, TAU);
         c.fill();
         c.shadowBlur = 0;
         if (s.t >= 1) sparks.splice(si, 1);
@@ -575,11 +595,13 @@ export function LoginCosmos({
       removeEventListener("deviceorientation", onTilt);
       document.removeEventListener("visibilitychange", onVis);
       sparkRef.current = null;
+      misfireRef.current = null;
     };
   }, []);
 
   // ── micro-interactions on the inputs ──
   function onFieldFocus(e: React.FocusEvent<HTMLInputElement>) {
+    interactedRef.current = true;
     const r = e.currentTarget.getBoundingClientRect();
     sparkRef.current?.(r.left + r.width / 2, r.top + r.height / 2);
   }
@@ -606,6 +628,29 @@ export function LoginCosmos({
       localStorage.setItem("hn_login_sky", dawn ? "dawn" : "night");
     } catch {}
   }, [dawn]);
+
+  // Desktop autofocus (skip touch so we don't pop the mobile keyboard) +
+  // an idle "thinking" heartbeat on the nucleus that stops once the user engages.
+  useEffect(() => {
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let focusId: ReturnType<typeof setTimeout> | undefined;
+    if (matchMedia("(pointer:fine)").matches) {
+      focusId = setTimeout(() => {
+        if (interactedRef.current) return;
+        rootRef.current?.querySelector<HTMLInputElement>("#lc-email")?.focus();
+      }, 1300); // after the entrance overture settles
+    }
+    let beat: ReturnType<typeof setInterval> | undefined;
+    if (!reduce) {
+      beat = setInterval(() => {
+        if (!interactedRef.current) pulseNucleus();
+      }, 3200);
+    }
+    return () => {
+      if (focusId) clearTimeout(focusId);
+      if (beat) clearInterval(beat);
+    };
+  }, []);
 
   return (
     <div ref={rootRef} className="login-cosmos play" lang={ar ? "ar" : "en"} dir={ar ? "rtl" : "ltr"}>
@@ -791,7 +836,10 @@ const CSS = `
 .login-cosmos .btn{position:relative;width:100%;border:0;cursor:pointer;border-radius:12px;overflow:hidden;padding:13px;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:.02em;color:#fff;background:linear-gradient(135deg,var(--emerald),var(--emerald-deep));box-shadow:0 12px 30px -12px rgba(15,122,90,.8);transition:transform .2s,box-shadow .2s}
 .login-cosmos .btn:hover{transform:translateY(-2px);box-shadow:0 18px 40px -14px rgba(15,122,90,.95)}
 .login-cosmos .btn:active{transform:translateY(0) scale(.99)}
-.login-cosmos .btn:disabled{opacity:.7;cursor:progress}
+.login-cosmos .btn:disabled{opacity:.85;cursor:progress}
+.login-cosmos .btn .dots{display:inline-block;width:1.4em;text-align:start;vertical-align:bottom}
+.login-cosmos .btn .dots::after{content:"";animation:lcDots 1.1s steps(4,end) infinite}
+@keyframes lcDots{0%{content:""}25%{content:"·"}50%{content:"··"}75%{content:"···"}100%{content:""}}
 .login-cosmos .btn .sheen{position:absolute;inset:0;background:linear-gradient(115deg,transparent 32%,rgba(224,192,137,.5) 50%,transparent 68%);transform:translateX(-130%)}
 .login-cosmos .btn:hover .sheen{transform:translateX(130%);transition:transform .6s ease}
 .login-cosmos[dir="rtl"] .btn:hover .sheen{transform:translateX(-130%)}

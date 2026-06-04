@@ -5,10 +5,10 @@ import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPa
 import { CompanyCover } from "@/components/CompanyCover";
 import { Sparkline } from "@/components/Sparkline";
 import "../../daylight.css";
-import { prisma } from "@/lib/db";
-import { formatMoney, formatNumber, formatPercent, formatShortDate } from "@/lib/utils";
-import { getLocale } from "@/lib/i18n.server";
-import { getCompanyBrand } from "@/lib/companyBrand";
+import { prisma } from "@/lib/db/db";
+import { formatMoney, formatNumber, formatPercent, formatShortDate } from "@/lib/utils/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCompanyBrand } from "@/lib/utils/companyBrand";
 
 export default async function AnalyticsCompanyPage({ params }: { params: { id: string } }) {
   const ar = getLocale() === "ar";

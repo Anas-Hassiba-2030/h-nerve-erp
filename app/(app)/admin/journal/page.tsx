@@ -7,11 +7,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, BookOpenCheck } from "lucide-react";
 import { Prisma } from "@prisma/client";
-import { getLocale } from "@/lib/i18n.server";
-import { getCurrentUser } from "@/lib/session";
-import { prisma } from "@/lib/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/db";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
-import { formatMoney2, formatNumber, formatDateTime } from "@/lib/utils";
+import { formatMoney2, formatNumber, formatDateTime } from "@/lib/utils/utils";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
 
 import "../../daylight.css";

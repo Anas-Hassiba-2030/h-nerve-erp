@@ -3,7 +3,7 @@
 // chess-piece symbol that subtly orbits.
 
 import { RankBadge } from "@/components/RankBadge";
-import { rankById, RANKS, progressToNext } from "@/lib/gamification";
+import { rankById, RANKS, progressToNext } from "@/lib/utils/gamification";
 
 export function ProfileHero({
   name,

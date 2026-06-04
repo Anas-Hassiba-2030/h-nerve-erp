@@ -2,10 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireUser } from "@/lib/session";
-import { requireRole } from "@/lib/authz";
-import { prisma } from "@/lib/db";
-import { scoped } from "@/lib/logger";
+import { requireUser } from "@/lib/auth/session";
+import { requireRole } from "@/lib/auth/authz";
+import { prisma } from "@/lib/db/db";
+import { scoped } from "@/lib/utils/logger";
 
 const docLog = scoped("docintel");
 import {

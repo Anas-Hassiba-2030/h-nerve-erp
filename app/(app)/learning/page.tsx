@@ -9,7 +9,7 @@
 
 import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { LearningPatterns } from "@/components/brain/LearningPatterns";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import "../daylight.css";
 
 export const dynamic = "force-dynamic";

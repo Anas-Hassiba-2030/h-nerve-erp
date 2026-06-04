@@ -12,7 +12,7 @@ import {
 import {
   CORE_VARS, HERITAGE_VARS, DEPTH_VARS, ANIMATIONS, EXEC_CARD_TONES,
 } from "@/lib/design/tokens";
-import { THEME_LIST } from "@/lib/theme";
+import { THEME_LIST } from "@/lib/theme/theme";
 import { THEME_PRESETS } from "@/lib/brand/themes";
 
 /* The three presets shipped by this design infrastructure — highlighted. */

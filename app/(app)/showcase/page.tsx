@@ -11,7 +11,7 @@
 import Link from "next/link";
 import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { ArrowUpRight, Brain, Layers, Theater, Crown } from "lucide-react";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import "../daylight.css";
 
 type Phase = {

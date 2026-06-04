@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { TIME_MACHINE_COOKIE } from "@/lib/timemachine";
+import { TIME_MACHINE_COOKIE } from "@/lib/utils/timemachine";
 
 const COOKIE_OPTS = {
   path: "/",

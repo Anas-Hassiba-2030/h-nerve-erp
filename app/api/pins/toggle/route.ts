@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { togglePin, type PinEntityType } from "@/lib/pins";
-import { getCurrentUser } from "@/lib/session";
+import { togglePin, type PinEntityType } from "@/lib/utils/pins";
+import { getCurrentUser } from "@/lib/auth/session";
 
 const PIN_TYPES = [
   "COMPANY", "HOTEL", "BOOKING", "DAIRY", "FARM", "PROGRAM",

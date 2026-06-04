@@ -31,7 +31,7 @@
 
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { ownerEmails } from "@/lib/owner";
+import { ownerEmails } from "@/lib/auth/owner";
 
 const DEMO_ADMIN_EMAIL = "admin@hourani.jo";
 const DEMO_ADMIN_PASSWORD = "admin123";

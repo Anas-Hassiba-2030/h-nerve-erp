@@ -6,10 +6,10 @@
 // added or left inactive.
 
 import { revalidatePath } from "next/cache";
-import { getCurrentUser } from "@/lib/session";
-import { getLocale } from "@/lib/i18n.server";
-import { prisma } from "@/lib/db";
-import { flashToast } from "@/lib/toast";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { flashToast } from "@/lib/utils/toast";
 
 const TYPES = ["ASSET", "LIABILITY", "EQUITY", "REVENUE", "EXPENSE", "COGS"];
 

@@ -1,6 +1,6 @@
 import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { createProject } from "../actions";
 import { ProjectForm } from "../ProjectForm";
 import "../../daylight.css";

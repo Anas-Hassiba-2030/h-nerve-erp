@@ -8,11 +8,11 @@ export const dynamic = "force-dynamic";
 // + .br-row result rows). Real data is fed by the Prisma queries below.
 
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import "../daylight.css";
 import "./search.css";
-import { getLocale } from "@/lib/i18n.server";
-import { formatMoney, formatNumber, formatDate } from "@/lib/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { formatMoney, formatNumber, formatDate } from "@/lib/utils/utils";
 
 type ResultItem = {
   id: string;

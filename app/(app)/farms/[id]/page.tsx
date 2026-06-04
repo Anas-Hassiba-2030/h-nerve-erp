@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
@@ -16,8 +16,8 @@ import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPa
 import { StatusBadge } from "@/components/StatusBadge";
 import { DeleteButton } from "@/components/DeleteButton";
 import { PinButton } from "@/components/PinButton";
-import { prisma } from "@/lib/db";
-import { isPinned } from "@/lib/pins";
+import { prisma } from "@/lib/db/db";
+import { isPinned } from "@/lib/utils/pins";
 import {
   FARM_TYPES_AR,
   formatNumber,
@@ -25,7 +25,7 @@ import {
   formatShortDate,
   FARM_TYPES_EN,
   loc,
-} from "@/lib/utils";
+} from "@/lib/utils/utils";
 import { updateSensors, deleteCrop } from "../actions";
 import "../../daylight.css";
 

@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import "../../daylight.css";
-import { ROLES_AR, ROLES_EN, loc } from "@/lib/utils";
+import { ROLES_AR, ROLES_EN, loc } from "@/lib/utils/utils";
 import { getUserDetail } from "./data";
 import { UserHero } from "./_components/UserHero";
 import { UserKpis } from "./_components/UserKpis";

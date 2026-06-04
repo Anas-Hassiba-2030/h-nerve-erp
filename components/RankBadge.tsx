@@ -1,5 +1,5 @@
-import { rankById, type Rank } from "@/lib/gamification";
-import { getLocale } from "@/lib/i18n.server";
+import { rankById, type Rank } from "@/lib/utils/gamification";
+import { getLocale } from "@/lib/i18n/i18n.server";
 
 // BILINGUAL: rank name + bonus suffix flip AR/EN. Locale from the optional
 // `locale` prop or the h_nerve_locale cookie (server component). Previously the

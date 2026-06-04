@@ -15,10 +15,10 @@ export const dynamic = "force-dynamic";
 // side .on toggle) so no client runtime is required.
 
 import Link from "next/link";
-import { getCurrentUser } from "@/lib/session";
-import { getLocale } from "@/lib/i18n.server";
-import { prisma } from "@/lib/db";
-import { ar as arAr, ROLES_AR } from "@/lib/utils";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { ar as arAr, ROLES_AR } from "@/lib/utils/utils";
 import "../daylight.css";
 import "./system.css";
 

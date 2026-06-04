@@ -12,7 +12,7 @@ import {
   formatMoney,
   formatShortDate,
   localizeUnit,
-} from "@/lib/utils";
+} from "@/lib/utils/utils";
 import type { CompanyDetail } from "../data";
 
 const PROJECT_STAGE_AR: Record<string, string> = {

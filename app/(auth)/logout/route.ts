@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getSession } from "@/lib/session";
+import { getSession } from "@/lib/auth/session";
 import { cookies } from "next/headers";
-import { WORKSPACE_COOKIE } from "@/lib/workspace";
-import { TENANT_COOKIE } from "@/lib/tenancy";
+import { WORKSPACE_COOKIE } from "@/lib/tenancy/workspace";
+import { TENANT_COOKIE } from "@/lib/tenancy/tenancy";
 
 // Phase F-Polish — sign out across both POST (sidebar form) and GET
 // (direct nav). Two bugs fixed:

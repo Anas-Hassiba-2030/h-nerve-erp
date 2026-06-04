@@ -8,11 +8,11 @@
 // nothing to say back to the user beyond the revalidated list.
 
 import { revalidatePath } from "next/cache";
-import { getCurrentUser } from "@/lib/session";
-import { prisma } from "@/lib/db";
-import { hashPassword } from "@/lib/auth";
-import { passwordError } from "@/lib/password";
-import type { FormState } from "@/lib/formState";
+import { getCurrentUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/db";
+import { hashPassword } from "@/lib/auth/auth";
+import { passwordError } from "@/lib/auth/password";
+import type { FormState } from "@/lib/utils/formState";
 import { isRole } from "./roles";
 
 async function gate() {

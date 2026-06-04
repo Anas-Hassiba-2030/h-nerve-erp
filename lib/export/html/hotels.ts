@@ -1,6 +1,6 @@
 import "server-only";
-import { prisma } from "@/lib/db";
-import { hotelsAnalytics, type ExportAnalytics } from "@/lib/exportAnalytics";
+import { prisma } from "@/lib/db/db";
+import { hotelsAnalytics, type ExportAnalytics } from "@/lib/export/exportAnalytics";
 import { tableFromRows, NUM } from "./shell";
 
 export async function renderHotels(ar: boolean): Promise<{

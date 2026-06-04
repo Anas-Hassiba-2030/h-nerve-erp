@@ -8,8 +8,8 @@
 //   Response: { "ok": true, "email": "...", "role": "ADMIN" }
 
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { hashPassword } from "@/lib/auth";
+import { prisma } from "@/lib/db/db";
+import { hashPassword } from "@/lib/auth/auth";
 import bcrypt from "bcryptjs";
 
 const CHART_OF_ACCOUNTS = [

@@ -1,5 +1,5 @@
 import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { createBatch } from "../actions";
 import { BatchForm } from "../BatchForm";
 import "../../daylight.css";

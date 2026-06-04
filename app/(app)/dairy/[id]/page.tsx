@@ -12,14 +12,14 @@ import {
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PinButton } from "@/components/PinButton";
-import { prisma } from "@/lib/db";
-import { isPinned } from "@/lib/pins";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { isPinned } from "@/lib/utils/pins";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import {
   formatNumber,
   formatShortDate,
   formatRelative,
-} from "@/lib/utils";
+} from "@/lib/utils/utils";
 import "../../daylight.css";
 
 export default async function DairyDetailPage({

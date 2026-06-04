@@ -6,8 +6,8 @@
 
 import { redirect } from "next/navigation";
 import type { Metadata, Viewport } from "next";
-import { getCurrentUser } from "@/lib/session";
-import { getLocale } from "@/lib/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getLocale } from "@/lib/i18n/i18n.server";
 
 export const metadata: Metadata = {
   title: "H-Nerve — اليوم",

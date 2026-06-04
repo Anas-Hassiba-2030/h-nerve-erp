@@ -11,7 +11,7 @@
 // this surface just needs to show *something useful* without the manager
 // having to think.
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import type { Prisma } from "@prisma/client";
 
 export type OpsTone = "sage" | "sky" | "blush" | "ochre" | "ink";

@@ -14,9 +14,9 @@ import {
   ShoppingCart, Receipt, Truck, Users, BookOpen, Landmark, Brain,
   UsersRound, ShieldCheck, ScrollText, Database,
 } from "lucide-react";
-import { prisma, prismaUnscoped } from "@/lib/db";
-import { getLocale, getMessages } from "@/lib/i18n.server";
-import { listModels } from "@/lib/db.introspect";
+import { prisma, prismaUnscoped } from "@/lib/db/db";
+import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
+import { listModels } from "@/lib/db/db.introspect";
 import { SeedDemoButton } from "@/components/SeedDemoButton";
 
 export const dynamic = "force-dynamic";

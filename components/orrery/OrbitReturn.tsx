@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { LocaleSwitch } from "@/components/LocaleSwitch";
-import type { Locale } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/i18n";
 import { MiniOrrery } from "./MiniOrrery";
 
 // Fixed control cluster shown on every (app) page — but it's the ONLY chrome on

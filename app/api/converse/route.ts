@@ -14,7 +14,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { ask } from "@/lib/brain/converse";
-import { getCurrentUser } from "@/lib/session";
+import { getCurrentUser } from "@/lib/auth/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

@@ -4,10 +4,10 @@ import { ExportMenu } from "@/components/ExportMenu";
 import {
   DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel,
 } from "@/components/orrery/daylight";
-import { prisma } from "@/lib/db";
-import { formatNumber } from "@/lib/utils";
-import { getLocale } from "@/lib/i18n.server";
-import { getCompanyBrand } from "@/lib/companyBrand";
+import { prisma } from "@/lib/db/db";
+import { formatNumber } from "@/lib/utils/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCompanyBrand } from "@/lib/utils/companyBrand";
 import "../daylight.css";
 
 export const dynamic = "force-dynamic";

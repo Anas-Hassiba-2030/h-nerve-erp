@@ -19,7 +19,7 @@ import { runBrainAnalysis } from "@/lib/intelligence/engine";
 // CROSS-TENANT INTENT: cron iterates every ACTIVE tenant so each gets
 // its own insight refresh. prismaUnscoped reaches the Tenant table
 // regardless of the (non-existent) cookie context on a cron invocation.
-import { prismaUnscoped } from "@/lib/db";
+import { prismaUnscoped } from "@/lib/db/db";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

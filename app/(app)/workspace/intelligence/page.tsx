@@ -12,11 +12,11 @@ import {
 } from "lucide-react";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { dismissSignal, acceptSignal } from "../actions";
-import { getUserIfRole } from "@/lib/authz";
-import { prismaUnscoped } from "@/lib/db";
-import { getActiveWorkspaceId } from "@/lib/workspace";
-import { getLocale } from "@/lib/i18n.server";
-import { formatNumber } from "@/lib/utils";
+import { getUserIfRole } from "@/lib/auth/authz";
+import { prismaUnscoped } from "@/lib/db/db";
+import { getActiveWorkspaceId } from "@/lib/tenancy/workspace";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { formatNumber } from "@/lib/utils/utils";
 import "../../daylight.css";
 
 export const dynamic = "force-dynamic";

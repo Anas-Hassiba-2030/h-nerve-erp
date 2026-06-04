@@ -1,6 +1,6 @@
 import "server-only";
-import { prisma } from "@/lib/db";
-import { supplyAnalytics, type ExportAnalytics } from "@/lib/exportAnalytics";
+import { prisma } from "@/lib/db/db";
+import { supplyAnalytics, type ExportAnalytics } from "@/lib/export/exportAnalytics";
 import { tableFromRows, NUM } from "./shell";
 
 export async function renderSupplyChain(ar: boolean): Promise<{

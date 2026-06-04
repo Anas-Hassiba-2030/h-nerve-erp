@@ -1,6 +1,6 @@
 import "server-only";
-import { prisma } from "@/lib/db";
-import { farmsAnalytics, type ExportAnalytics } from "@/lib/exportAnalytics";
+import { prisma } from "@/lib/db/db";
+import { farmsAnalytics, type ExportAnalytics } from "@/lib/export/exportAnalytics";
 import { tableFromRows, NUM } from "./shell";
 
 export async function renderFarms(ar: boolean): Promise<{

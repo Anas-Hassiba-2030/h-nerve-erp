@@ -15,7 +15,7 @@
 // Phase 19 of docs/PHASES-INTELLIGENCE.md.
 
 import { Crown } from "lucide-react";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { getEmpireSummary } from "@/lib/empire/summary";
 import { GroupKPIStrip } from "@/components/empire/GroupKPIStrip";
 import { SectorCard } from "@/components/empire/SectorCard";

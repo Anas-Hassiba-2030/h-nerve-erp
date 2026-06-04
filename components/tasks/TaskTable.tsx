@@ -6,7 +6,7 @@ import { HeritagePill } from "@/components/heritage";
 import { DeleteButton } from "@/components/DeleteButton";
 import { BulkActionBar, BulkCheckbox, useBulkSelect, type BulkAction } from "@/components/BulkActionBar";
 import { bulkSetTaskStatus, bulkDeleteTasks, setTaskStatus, deleteTask } from "@/app/(app)/tasks/actions";
-import { formatShortDate } from "@/lib/utils";
+import { formatShortDate } from "@/lib/utils/utils";
 
 const STATUS_ICON: Record<string, React.ReactNode> = {
   TODO:        <Clock className="h-3.5 w-3.5" strokeWidth={1.5} />,

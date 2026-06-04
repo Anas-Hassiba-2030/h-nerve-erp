@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { BrainStatusBadge } from "@/components/BrainStatusBadge";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { computeIQ } from "@/lib/brain/meta.reflector";
 import { llmConfig } from "@/lib/brain/llm";
-import { getLocale } from "@/lib/i18n.server";
-import { formatNumber } from "@/lib/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { formatNumber } from "@/lib/utils/utils";
 import { CountUp } from "./CountUp";
 import "../daylight.css";
 import "./brain-section.css";

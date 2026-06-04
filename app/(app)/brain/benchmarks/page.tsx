@@ -10,8 +10,8 @@
 
 import "../../daylight.css";
 import "./benchmarks.css";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { getOptIn } from "@/lib/brain/federation.live";
 import { Globe2, ShieldCheck, RotateCw, Database, Trash2, Building2, ArrowRight } from "lucide-react";
 import {

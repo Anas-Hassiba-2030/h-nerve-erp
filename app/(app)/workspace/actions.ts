@@ -11,8 +11,8 @@
 // defense in depth: server gate here, UI gate in the pages).
 
 import { revalidatePath } from "next/cache";
-import { requireRole } from "@/lib/authz";
-import { prisma, prismaUnscoped } from "@/lib/db";
+import { requireRole } from "@/lib/auth/authz";
+import { prisma, prismaUnscoped } from "@/lib/db/db";
 
 const BATCH_CHAIN = ["IN_PRODUCTION", "READY", "SHIPPED", "RETAIL"];
 const STAGE_CHAIN = ["IDEA", "EVALUATION", "APPROVED", "IN_PROGRESS", "LIVE"];

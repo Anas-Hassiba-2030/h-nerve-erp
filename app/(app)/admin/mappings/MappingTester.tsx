@@ -7,7 +7,7 @@
 
 import { useState } from "react";
 import { Play } from "lucide-react";
-import { applyMapping, parseMappingRow } from "@/lib/importMapping";
+import { applyMapping, parseMappingRow } from "@/lib/import/importMapping";
 
 export function MappingTester({
   fieldMapJson,

@@ -7,9 +7,9 @@
 
 import Link from "next/link";
 import { Table2 } from "lucide-react";
-import { prismaUnscoped } from "@/lib/db";
-import { getLocale, getMessages } from "@/lib/i18n.server";
-import { listModels } from "@/lib/db.introspect";
+import { prismaUnscoped } from "@/lib/db/db";
+import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
+import { listModels } from "@/lib/db/db.introspect";
 
 export const dynamic = "force-dynamic";
 

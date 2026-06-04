@@ -1,5 +1,5 @@
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
-import { formatNumber } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils/utils";
 import type { AgricultureOpsData } from "../data";
 
 export function AgricultureOps({ ar, data }: { ar: boolean; data: AgricultureOpsData }) {

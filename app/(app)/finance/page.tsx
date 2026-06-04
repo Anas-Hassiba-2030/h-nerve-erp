@@ -3,11 +3,11 @@ import { Wallet, Plus } from "lucide-react";
 import { ExportMenu } from "@/components/ExportMenu";
 import { EmptyState } from "@/components/EmptyState";
 import { TransactionTable } from "@/components/finance/TransactionTable";
-import { getLocale } from "@/lib/i18n.server";
-import { getCurrentUser } from "@/lib/session";
-import { hasRole } from "@/lib/authz";
-import { prisma } from "@/lib/db";
-import { formatMoney, formatNumber, formatPercent, loc, SECTORS_AR, SECTORS_EN } from "@/lib/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
+import { hasRole } from "@/lib/auth/authz";
+import { prisma } from "@/lib/db/db";
+import { formatMoney, formatNumber, formatPercent, loc, SECTORS_AR, SECTORS_EN } from "@/lib/utils/utils";
 import "../daylight.css";
 import "./finance.css";
 

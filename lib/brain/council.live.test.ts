@@ -31,7 +31,7 @@ const { prisma, runAgent, runModerator, llmEnabled, ROSTER } = vi.hoisted(() => 
   llmEnabled: { value: false },
 }));
 
-vi.mock("@/lib/db", () => ({ prisma }));
+vi.mock("@/lib/db/db", () => ({ prisma }));
 vi.mock("./graph.prisma", () => ({ causalGraph: {} }));
 vi.mock("./llm", () => ({
   llmConfig: () => ({ enabled: llmEnabled.value, model: llmEnabled.value ? "claude-sonnet-4-6" : null }),

@@ -1,5 +1,5 @@
 import { Activity, Shield } from "lucide-react";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 
 // Premium minimalist footer.
 //

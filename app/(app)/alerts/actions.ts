@@ -2,13 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/session";
-import { requireRole } from "@/lib/authz";
-import { ALERT_KINDS, seedDefaultRules, type AlertKind } from "@/lib/alertEngine";
-import { logActivity } from "@/lib/activityLog";
-import { flashToast } from "@/lib/toast";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { requireUser } from "@/lib/auth/session";
+import { requireRole } from "@/lib/auth/authz";
+import { ALERT_KINDS, seedDefaultRules, type AlertKind } from "@/lib/alerts/alertEngine";
+import { logActivity } from "@/lib/auth/activityLog";
+import { flashToast } from "@/lib/utils/toast";
+import { getLocale } from "@/lib/i18n/i18n.server";
 
 const updateSchema = z.object({
   id: z.string().min(1),

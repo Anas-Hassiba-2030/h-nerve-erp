@@ -3,9 +3,9 @@
 // Three sections: Know / Decide / Approve. Each holds at most three cards.
 // Pull-to-refresh re-runs the server query and re-staggers.
 
-import { requireUser } from "@/lib/session";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { requireUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { buildTodayPayload } from "@/lib/mobile/today";
 import { MobileTopbar } from "@/components/mobile/MobileTopbar";
 import { OpsSection } from "@/components/mobile/OpsSection";

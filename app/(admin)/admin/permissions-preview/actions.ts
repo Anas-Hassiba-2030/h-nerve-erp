@@ -4,9 +4,9 @@
 // Writes to RolePermission and revalidates the preview page.
 
 import { revalidatePath } from "next/cache";
-import { getCurrentUser } from "@/lib/session";
-import { prisma } from "@/lib/db";
-import { invalidatePermsCache } from "@/lib/permissions";
+import { getCurrentUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/db";
+import { invalidatePermsCache } from "@/lib/auth/permissions";
 
 export async function togglePermission(formData: FormData): Promise<void> {
   const user = await getCurrentUser();

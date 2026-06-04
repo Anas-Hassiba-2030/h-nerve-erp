@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { RankBadge } from "@/components/RankBadge";
 import { DaylightPanel } from "@/components/orrery/daylight";
-import { formatNumber } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils/utils";
 import type { DashboardData } from "@/app/(app)/dashboard/data";
 
 export function UpcomingTasksPanel({

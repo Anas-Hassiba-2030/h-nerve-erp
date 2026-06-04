@@ -1,8 +1,8 @@
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
-import { requireUser } from "@/lib/session";
-import { hasRole } from "@/lib/authz";
-import type { SoftEntity } from "@/lib/softDelete";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { requireUser } from "@/lib/auth/session";
+import { hasRole } from "@/lib/auth/authz";
+import type { SoftEntity } from "@/lib/db/softDelete";
 import { TrashClient, type TrashItem } from "./TrashClient";
 import { purgeAllExpired } from "./actions";
 import "../daylight.css";

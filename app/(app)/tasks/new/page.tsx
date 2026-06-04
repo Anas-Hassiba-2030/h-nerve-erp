@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
 import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { createTask } from "../actions";
 import "../../daylight.css";
 

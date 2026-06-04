@@ -1,8 +1,8 @@
 import { ClipboardList } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
-import { prisma } from "@/lib/db";
-import { formatNumber, pickLocale } from "@/lib/utils";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { formatNumber, pickLocale } from "@/lib/utils/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { commit, abandon, markStepDone, markStepBlocked } from "./actions";
 import { TrustChip } from "@/components/brain/TrustChip";
 import "../daylight.css";

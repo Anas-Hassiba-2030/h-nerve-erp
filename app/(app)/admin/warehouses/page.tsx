@@ -6,11 +6,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, Warehouse as WarehouseIcon } from "lucide-react";
-import { getLocale } from "@/lib/i18n.server";
-import { getCurrentUser } from "@/lib/session";
-import { prisma } from "@/lib/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/db";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
-import { formatNumber, formatDateTime } from "@/lib/utils";
+import { formatNumber, formatDateTime } from "@/lib/utils/utils";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
 import {
   NewWarehouseForm,

@@ -11,7 +11,7 @@
 //
 // Phase 10 of docs/PHASES-INTELLIGENCE.md.
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { callLlm, extractJson, type LlmRequest } from "./llm";
 import { scoreFromComponents, clamp01, type IQComponents } from "./meta.iq";
 import { computeRagQuality, type RagQuality } from "./ragEval.live";

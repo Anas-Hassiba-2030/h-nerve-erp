@@ -9,7 +9,7 @@
 //
 // Phase 8 of docs/PHASES-INTELLIGENCE.md.
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { callLlm, extractJson, type LlmRequest } from "./llm";
 
 const K_ANONYMITY = 5;

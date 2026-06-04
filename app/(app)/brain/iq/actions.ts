@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireUser } from "@/lib/session";
-import { prisma } from "@/lib/db";
+import { requireUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/db";
 import { reflect, apply, reject, computeIQ } from "@/lib/brain/meta.reflector";
 import { seedMetaHistory } from "@/lib/brain/seedMetaHistory";
 

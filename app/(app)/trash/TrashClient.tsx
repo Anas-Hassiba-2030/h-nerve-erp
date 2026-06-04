@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
-import type { SoftEntity } from "@/lib/softDelete";
+import type { SoftEntity } from "@/lib/db/softDelete";
 import {
   restoreOne,
   purgeOne,

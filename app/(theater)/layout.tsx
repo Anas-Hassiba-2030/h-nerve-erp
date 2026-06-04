@@ -5,10 +5,10 @@
 // ESC takes them back where they came from.
 
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/session";
-import { prisma } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/db";
 import { ToastProvider } from "@/components/Toast/ToastProvider";
-import { readFlash } from "@/lib/toast";
+import { readFlash } from "@/lib/utils/toast";
 
 export default async function TheaterLayout({ children }: { children: React.ReactNode }) {
   const session = await getCurrentUser();

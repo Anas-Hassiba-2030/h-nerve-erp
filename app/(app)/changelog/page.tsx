@@ -9,8 +9,8 @@ import {
   Calendar,
 } from "lucide-react";
 import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
-import { getLocale } from "@/lib/i18n.server";
-import { CHANGELOG, type ChangelogCategory } from "@/lib/changelogData";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { CHANGELOG, type ChangelogCategory } from "@/lib/utils/changelogData";
 import "../daylight.css";
 
 const CATEGORY_AR: Record<ChangelogCategory, string> = {

@@ -10,8 +10,8 @@
 // HTTP response body. A restored user is re-credentialed out-of-band.
 
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/session";
+import { prisma } from "@/lib/db/db";
+import { getCurrentUser } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 

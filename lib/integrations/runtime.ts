@@ -8,7 +8,7 @@
 //
 // Phase 13 of docs/PHASES-INTELLIGENCE.md.
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { randomBytes } from "node:crypto";
 import { getProvider } from "./catalog";
 

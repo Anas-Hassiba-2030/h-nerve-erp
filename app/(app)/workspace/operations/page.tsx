@@ -6,10 +6,10 @@
 // active company.
 
 import { redirect } from "next/navigation";
-import { getUserIfRole } from "@/lib/authz";
-import { prismaUnscoped } from "@/lib/db";
-import { getActiveWorkspaceId } from "@/lib/workspace";
-import { getLocale } from "@/lib/i18n.server";
+import { getUserIfRole } from "@/lib/auth/authz";
+import { prismaUnscoped } from "@/lib/db/db";
+import { getActiveWorkspaceId } from "@/lib/tenancy/workspace";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import {
   getDairyOpsData,
   getHospitalityOpsData,

@@ -8,7 +8,7 @@
 //
 // Phase 7 of docs/PHASES-INTELLIGENCE.md.
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 
 type SeedSpec = {
   kind: string;

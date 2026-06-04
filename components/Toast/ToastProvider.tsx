@@ -7,7 +7,7 @@ import {
   FLASH_COOKIE,
   TOAST_EVENT,
   type ToastFlash,
-} from "@/lib/toast.shared";
+} from "@/lib/utils/toast.shared";
 
 type Toast = ToastFlash & { uid: string };
 const MAX_STACK = 3;

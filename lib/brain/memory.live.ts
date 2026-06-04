@@ -12,7 +12,7 @@
 //
 // Phase 6 of docs/PHASES-INTELLIGENCE.md.
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import type { Memory, MemoryLake, RecallQuery } from "./memory";
 // Phase RAG-1: recall now runs on dense embeddings via the pluggable seam.
 // New memories store a dense vector (vectorVersion 2); legacy sparse rows

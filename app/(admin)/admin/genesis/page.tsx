@@ -12,8 +12,8 @@
 // See docs/PHASES-INTELLIGENCE.md § Phase 21.
 
 import { Sprout, CheckCircle2, FileText, AlertTriangle } from "lucide-react";
-import { prismaUnscoped } from "@/lib/db";
-import { getLocale, getMessages } from "@/lib/i18n.server";
+import { prismaUnscoped } from "@/lib/db/db";
+import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
 import { summarizeGenesis } from "@/lib/genesis/recipes";
 import { ConstellationGrid } from "@/components/genesis/Constellation";
 import { runGenesisSeed, topUpDemoCorpus, seedMissingGenesis } from "./actions";

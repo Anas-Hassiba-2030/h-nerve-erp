@@ -9,8 +9,8 @@
 // consistent rather than inventing a half-soft variant.
 
 import { revalidatePath } from "next/cache";
-import { requireRole } from "@/lib/authz";
-import { prisma } from "@/lib/db";
+import { requireRole } from "@/lib/auth/authz";
+import { prisma } from "@/lib/db/db";
 
 export async function forgetMemory(id: string): Promise<void> {
   await requireRole("MANAGER");

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import {
   Hotel,
   Milk,
@@ -20,7 +20,7 @@ import {
   VERTICALS_EN,
   TIERS_EN,
   loc,
-} from "@/lib/utils";
+} from "@/lib/utils/utils";
 import type { CompanyDetail } from "../data";
 
 export function OperationsColumn({

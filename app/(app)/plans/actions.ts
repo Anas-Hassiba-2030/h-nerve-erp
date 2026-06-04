@@ -2,8 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { requireUser } from "@/lib/session";
-import { requireRole } from "@/lib/authz";
+import { requireUser } from "@/lib/auth/session";
+import { requireRole } from "@/lib/auth/authz";
 import {
   generatePlanFromCouncil,
   generatePlanFromInsight,
@@ -13,8 +13,8 @@ import {
   blockStep as blockStepLib,
 } from "@/lib/brain/planner.live";
 import { recordFeedback } from "@/lib/brain/feedback.live";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
 
 export async function generateFromCouncil(formData: FormData): Promise<void> {
   await requireUser();

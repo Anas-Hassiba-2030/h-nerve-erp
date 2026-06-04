@@ -4,7 +4,7 @@
 // with /dashboard and /finance. Heritage Modern hairline treatment.
 
 import { HeritagePill } from "@/components/heritage";
-import { formatMoney, formatPercent, formatNumber } from "@/lib/utils";
+import { formatMoney, formatPercent, formatNumber } from "@/lib/utils/utils";
 
 export type FinanceTxn = {
   kind: string;

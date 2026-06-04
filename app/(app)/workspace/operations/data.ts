@@ -4,8 +4,8 @@
 // factored into per-sector async functions that return typed objects.
 // Behaviour-preserving: identical where/orderBy/take and identical math.
 
-import { prisma, prismaUnscoped } from "@/lib/db";
-import { getAsOf } from "@/lib/timemachine";
+import { prisma, prismaUnscoped } from "@/lib/db/db";
+import { getAsOf } from "@/lib/utils/timemachine";
 
 // ---------------------------------------------------------------------------
 // DAIRY — flagship production board

@@ -16,8 +16,8 @@ export const dynamic = "force-dynamic";
 // .ops-table / .ops-tr / .ops-cell / .ops-tag operations table. Real data
 // comes from the Prisma queries below; only the look is the design.
 
-import { getLocale } from "@/lib/i18n.server";
-import { isSafeId } from "@/lib/authz";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { isSafeId } from "@/lib/auth/authz";
 import { getAuditTrace, getRecentRecords, isValidEntity, type EntityType } from "./data";
 import { AuditTraceView } from "./_components/AuditTraceView";
 import { AuditPickerView } from "./_components/AuditPickerView";

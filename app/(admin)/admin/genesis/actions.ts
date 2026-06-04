@@ -20,7 +20,7 @@
 // operates across the whole workspace, mirroring how `npm run db:seed` works.
 
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/session";
+import { getCurrentUser } from "@/lib/auth/session";
 import { seedOperator } from "@/prisma/seed";
 
 async function requireAdmin() {
@@ -50,7 +50,7 @@ export async function seedMissingGenesis(): Promise<void> {
   // CROSS-TENANT INTENT: additive genesis fills the default-scope demo dataset
   // across the whole workspace, exactly like the deploy-time seed — but it only
   // creates EMPTY sectors and never wipes, so it's safe with no confirm token.
-  const { prismaUnscoped } = await import("@/lib/db");
+  const { prismaUnscoped } = await import("@/lib/db/db");
   const { seedMissingSectors } = await import("@/prisma/seedSectors");
 
   let result;
@@ -71,7 +71,7 @@ export async function topUpDemoCorpus(): Promise<void> {
 
   // CROSS-TENANT INTENT: genesis top-up writes the default-scope demo corpus
   // across the whole workspace, exactly like the deploy-time ensure script.
-  const { prismaUnscoped } = await import("@/lib/db");
+  const { prismaUnscoped } = await import("@/lib/db/db");
   const { seedDemoDocuments } = await import("@/prisma/seedDemoDocuments");
 
   const existing = await prismaUnscoped.document.count().catch(() => 0);

@@ -7,8 +7,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
 import { ArrowLeft, ShieldAlert, AlertTriangle, CheckCircle2, FileText } from "lucide-react";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import "../../daylight.css";
 
 const LINKED_LABEL: Record<string, { ar: string; en: string }> = {

@@ -5,8 +5,8 @@
 // read-only. Filter form is a plain GET; pagination is take/skip 50.
 
 import Link from "next/link";
-import { prisma } from "@/lib/db";
-import { getLocale, getMessages } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
 
 export const dynamic = "force-dynamic";
 

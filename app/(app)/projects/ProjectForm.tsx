@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { useFormState } from "react-dom";
 import { Field, SubmitButton, FormErrorBanner } from "@/components/forms";
-import { initialFormState, type FormState } from "@/lib/formState";
+import { initialFormState, type FormState } from "@/lib/utils/formState";
 
 type CompanyOption = { id: string; name: string };
 

@@ -9,11 +9,11 @@
 //
 // Phase 3 of docs/PHASES-INTELLIGENCE.md.
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { causalGraph } from "./graph.prisma";
 import { SPECIALIST_AGENTS, runAgent, runModerator } from "./agents";
 import type { Council, CouncilSession, AgentVoice } from "./council";
-import { log } from "@/lib/logger";
+import { log } from "@/lib/utils/logger";
 import { llmConfig } from "./llm";
 import { retrieveDocuments, docHitsToContext, type DocContext } from "./documents.retrieve";
 import { retrieveGraphContext } from "./graphrag.live";

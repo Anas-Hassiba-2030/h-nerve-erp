@@ -10,13 +10,13 @@ import { CompanyCover } from "@/components/CompanyCover";
 import { RankBadge } from "@/components/RankBadge";
 import { GaugeChart } from "@/components/charts/GaugeChart";
 import { BarChart } from "@/components/charts/BarChart";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import {
   formatNumber, formatRelative, formatShortDate,
   ROLES_AR, ROLES_EN, STATUS_AR, STATUS_EN, loc,
-} from "@/lib/utils";
-import { getLocale } from "@/lib/i18n.server";
-import { rankById, RANKS, progressToNext, nextRank } from "@/lib/gamification";
+} from "@/lib/utils/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { rankById, RANKS, progressToNext, nextRank } from "@/lib/utils/gamification";
 
 const STATUS_TONE: Record<string, string> = {
   TODO: "badge-slate", IN_PROGRESS: "badge-blue",

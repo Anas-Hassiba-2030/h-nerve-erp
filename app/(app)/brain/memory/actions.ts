@@ -1,11 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireUser } from "@/lib/session";
-import { requireRole } from "@/lib/authz";
+import { requireUser } from "@/lib/auth/session";
+import { requireRole } from "@/lib/auth/authz";
 import { seedMemoryLake } from "@/lib/brain/seedMemories";
 import { memoryLake } from "@/lib/brain/memory.live";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 
 export async function seedMemories(): Promise<void> {
   await requireUser();

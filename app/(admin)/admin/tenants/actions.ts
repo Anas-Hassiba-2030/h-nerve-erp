@@ -15,9 +15,9 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
-import { requireUser } from "@/lib/session";
-import { prisma } from "@/lib/db";
-import { scoped } from "@/lib/logger";
+import { requireUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/db";
+import { scoped } from "@/lib/utils/logger";
 
 const log = scoped("tenancy");
 import {
@@ -27,7 +27,7 @@ import {
   isValidSlug,
   tenancyCookies,
   type ProvisioningStepKey,
-} from "@/lib/tenancy";
+} from "@/lib/tenancy/tenancy";
 import { THEME_PRESETS, type ThemeKey, type PackKey } from "@/lib/brand/themes";
 
 const VALID_PACKS: PackKey[] = ["hospitality", "dairy", "agri", "education", "finance"];

@@ -9,7 +9,7 @@
 //
 // Phase 9 of docs/PHASES-INTELLIGENCE.md.
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { council as councilStore } from "@/lib/brain/council.live";
 import { narrator } from "@/lib/brain/narrator.claude";
 import { memoryLake } from "@/lib/brain/memory.live";

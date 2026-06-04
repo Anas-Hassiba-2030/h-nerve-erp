@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { formatNumber, formatRelative } from "@/lib/utils";
+import { formatNumber, formatRelative } from "@/lib/utils/utils";
 import {
   ENTITY_META,
   ACTION_TAG,

@@ -21,13 +21,13 @@ const { tx } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@/lib/db", () => ({
+vi.mock("@/lib/db/db", () => ({
   prismaUnscoped: {
     $transaction: (cb: (t: typeof tx) => unknown) => cb(tx),
   },
 }));
 
-vi.mock("@/lib/tenancy", () => ({
+vi.mock("@/lib/tenancy/tenancy", () => ({
   COMPANY_CODE_TO_TENANT_SLUG: {
     HOTELS: "hourani-hotels",
     MAHA: "maha-dairy",

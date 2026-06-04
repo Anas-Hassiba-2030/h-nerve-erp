@@ -6,11 +6,11 @@
 // reference; data comes from Prisma; mutations go through server actions
 // in ./actions.ts. The client-side behaviour lives in TasksBoard.tsx.
 
-import { prisma } from "@/lib/db";
-import { formatNumber } from "@/lib/utils";
-import { getLocale } from "@/lib/i18n.server";
-import { getCurrentUser } from "@/lib/session";
-import { rankFor, nextRank, progressToNext } from "@/lib/gamification";
+import { prisma } from "@/lib/db/db";
+import { formatNumber } from "@/lib/utils/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
+import { rankFor, nextRank, progressToNext } from "@/lib/utils/gamification";
 import { TasksBoard, type BoardTask, type BoardRank, type BoardPrio, type BoardStatus } from "./TasksBoard";
 import "../daylight.css";
 import "./tasks.css";

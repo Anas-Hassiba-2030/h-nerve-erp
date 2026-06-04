@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, CircleDashed, Loader2 } from "lucide-react";
 import { runProvisioningStep } from "../../actions";
-import type { ProvisioningStepKey } from "@/lib/tenancy";
+import type { ProvisioningStepKey } from "@/lib/tenancy/tenancy";
 
 // Module-level lock so React StrictMode's double-mount in dev doesn't
 // race the provisioning loop against itself. The second mount sees the

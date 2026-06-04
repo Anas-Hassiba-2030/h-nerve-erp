@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import type { Period } from "@/lib/period";
+import type { Period } from "@/lib/finance/period";
 
 const PERIODS: Array<{ id: Period; ar: string; en: string }> = [
   { id: "24H", ar: "24س",  en: "24h" },

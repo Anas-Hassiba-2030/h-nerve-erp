@@ -17,7 +17,7 @@
 //
 // Read-mostly: this only reads. It never mutates domain data (brain boundary).
 
-import { prismaUnscoped } from "@/lib/db"; // CROSS-TENANT INTENT: holding-company rollup across all companies/tenants
+import { prismaUnscoped } from "@/lib/db/db"; // CROSS-TENANT INTENT: holding-company rollup across all companies/tenants
 
 // ─────────────────────────────────────────────────────────────────────
 // Public shapes

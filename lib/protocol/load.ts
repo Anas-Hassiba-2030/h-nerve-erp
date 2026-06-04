@@ -5,7 +5,7 @@
 // through the scoped `prisma` client — ProtocolClause is in
 // TENANT_SCOPED_MODELS, so it auto-filters by the active tenant.
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { DEFAULT_PROTOCOL_CLAUSES } from "./clauses";
 
 export type ProtocolClauseDTO = {

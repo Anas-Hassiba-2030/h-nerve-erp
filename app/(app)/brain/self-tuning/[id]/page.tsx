@@ -10,8 +10,8 @@ import Link from "next/link";
 import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import "../../../daylight.css";
 import { DiffLog, type DiffEntry } from "@/components/brain/DiffLog";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { ArrowLeft, CheckCircle2, X } from "lucide-react";
 import { approveReport, rejectReport } from "../../iq/actions";
 

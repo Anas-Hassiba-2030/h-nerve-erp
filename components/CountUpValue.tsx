@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { formatMoney, formatNumber, formatPercent } from "@/lib/utils";
+import { formatMoney, formatNumber, formatPercent } from "@/lib/utils/utils";
 
 // Smooth count-up for a single numeric KPI. Formats every frame with the
 // SAME lib/utils formatter the server uses, so the final frame is byte-identical

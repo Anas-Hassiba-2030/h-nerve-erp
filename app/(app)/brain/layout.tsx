@@ -1,4 +1,4 @@
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { BrainBackLink } from "@/components/brain/BrainBackLink";
 
 export default function BrainLayout({ children }: { children: React.ReactNode }) {

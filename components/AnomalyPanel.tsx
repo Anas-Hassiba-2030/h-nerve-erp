@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   AlertTriangle, TrendingUp, TrendingDown, ArrowLeftRight, ChevronLeft,
 } from "lucide-react";
-import type { Anomaly } from "@/lib/anomaly";
+import type { Anomaly } from "@/lib/ai/anomaly";
 import { ShareToCouncilButton } from "./ShareToCouncilButton";
 
 const KIND_ICON = {

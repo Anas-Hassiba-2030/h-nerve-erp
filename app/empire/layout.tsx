@@ -10,8 +10,8 @@
 // beyond the gate.
 
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/session";
-import { hasRole } from "@/lib/authz";
+import { getCurrentUser } from "@/lib/auth/session";
+import { hasRole } from "@/lib/auth/authz";
 
 export default async function EmpireLayout({
   children,

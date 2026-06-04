@@ -7,7 +7,7 @@
 //
 // Phase 3 of docs/PHASES-INTELLIGENCE.md.
 
-import { log } from "@/lib/logger";
+import { log } from "@/lib/utils/logger";
 import { toPyLiteral } from "./serialize";
 
 const DEFAULT_MODEL = "claude-sonnet-4-6";

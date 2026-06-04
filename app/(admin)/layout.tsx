@@ -10,10 +10,10 @@
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/session";
-import { prisma } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/db";
 import { Building2, Settings, ArrowLeft, Crown, UsersRound, ShieldCheck, ScrollText, Sprout, Database } from "lucide-react";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getCurrentUser();

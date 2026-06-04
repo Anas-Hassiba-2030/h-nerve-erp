@@ -19,9 +19,9 @@ import {
 } from "lucide-react";
 import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { PlanGantt } from "@/components/plans/PlanGantt";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
-import { pickLocale } from "@/lib/utils";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { pickLocale } from "@/lib/utils/utils";
 import { commit, abandon, deletePlan } from "../actions";
 import { TrustChip } from "@/components/brain/TrustChip";
 import "../../daylight.css";

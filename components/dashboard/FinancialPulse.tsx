@@ -2,7 +2,7 @@
 // line, with totals and margin %. Designed to read in <2 seconds.
 
 import { ArrowUpRight, ArrowDownRight, Wallet } from "lucide-react";
-import { formatMoney } from "@/lib/utils";
+import { formatMoney } from "@/lib/utils/utils";
 
 export function FinancialPulse({
   revenueTrend,

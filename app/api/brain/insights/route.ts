@@ -17,8 +17,8 @@
 // the explicit ?tenantId= contract). Anything else gets 401.
 
 import { NextRequest, NextResponse } from "next/server";
-import { prismaUnscoped } from "@/lib/db";
-import { getCurrentUser } from "@/lib/session";
+import { prismaUnscoped } from "@/lib/db/db";
+import { getCurrentUser } from "@/lib/auth/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

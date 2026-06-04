@@ -12,9 +12,9 @@
 // Phase 20 of docs/PHASES-INTELLIGENCE.md.
 
 import { ScrollText } from "lucide-react";
-import { getLocale } from "@/lib/i18n.server";
-import { getCurrentUser } from "@/lib/session";
-import { isAdmin } from "@/lib/authz";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
+import { isAdmin } from "@/lib/auth/authz";
 import { getProtocolClauses } from "@/lib/protocol/load";
 import { ProtocolDoc } from "@/components/protocol/ProtocolDoc";
 

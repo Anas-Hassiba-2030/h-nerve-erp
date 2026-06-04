@@ -6,14 +6,14 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { requireUser } from "@/lib/session";
+import { requireUser } from "@/lib/auth/session";
 // CROSS-TENANT INTENT: the workspace switcher must see every Company
 // for validation, regardless of the active workspace. Company is not in
 // any scoped set today, but using prismaUnscoped makes the intent
 // explicit for future readers.
-import { prismaUnscoped } from "@/lib/db";
-import { WORKSPACE_COOKIE } from "@/lib/workspace";
-import { TENANT_COOKIE, COMPANY_CODE_TO_TENANT_SLUG } from "@/lib/tenancy";
+import { prismaUnscoped } from "@/lib/db/db";
+import { WORKSPACE_COOKIE } from "@/lib/tenancy/workspace";
+import { TENANT_COOKIE, COMPANY_CODE_TO_TENANT_SLUG } from "@/lib/tenancy/tenancy";
 
 export async function enterWorkspace(formData: FormData) {
   await requireUser();

@@ -13,15 +13,15 @@ import {
 } from "lucide-react";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { PinButton } from "@/components/PinButton";
-import { prisma } from "@/lib/db";
-import { isPinned } from "@/lib/pins";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { isPinned } from "@/lib/utils/pins";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import {
   formatMoney,
   formatNumber,
   formatDateTime,
   formatShortDate,
-} from "@/lib/utils";
+} from "@/lib/utils/utils";
 import "../../daylight.css";
 
 const KIND_AR: Record<string, string> = {

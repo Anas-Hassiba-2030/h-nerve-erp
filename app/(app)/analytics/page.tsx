@@ -1,9 +1,9 @@
 import { AreaLineChart } from "@/components/charts/AreaLineChart";
-import { prisma } from "@/lib/db";
-import { formatMoney, formatNumber } from "@/lib/utils";
-import { getLocale } from "@/lib/i18n.server";
-import { getCompanyBrand } from "@/lib/companyBrand";
-import { SECTORS_AR, SECTORS_EN } from "@/lib/utils";
+import { prisma } from "@/lib/db/db";
+import { formatMoney, formatNumber } from "@/lib/utils/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCompanyBrand } from "@/lib/utils/companyBrand";
+import { SECTORS_AR, SECTORS_EN } from "@/lib/utils/utils";
 import { AnalyticsCovers, type Cover } from "./AnalyticsCovers";
 import "../daylight.css";
 import "./analytics.css";

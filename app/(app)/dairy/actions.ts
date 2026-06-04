@@ -3,16 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/session";
-import { requireRole } from "@/lib/authz";
-import { generateNumber } from "@/lib/utils";
-import { logActivity } from "@/lib/activityLog";
+import { prisma } from "@/lib/db/db";
+import { requireUser } from "@/lib/auth/session";
+import { requireRole } from "@/lib/auth/authz";
+import { generateNumber } from "@/lib/utils/utils";
+import { logActivity } from "@/lib/auth/activityLog";
 import {
   parseFormState,
   formStateFromError,
   type FormState,
-} from "@/lib/formState";
+} from "@/lib/utils/formState";
 
 const batchSchema = z.object({
   companyId: z.string().min(1, "الشركة المنتجة مطلوبة"),

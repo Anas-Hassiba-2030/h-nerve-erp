@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/session";
-import { isSafeId } from "@/lib/authz";
-import { prisma } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth/session";
+import { isSafeId } from "@/lib/auth/authz";
+import { prisma } from "@/lib/db/db";
 
 // Whitelist of entity types that can host an ENTITY thread. Mirrors the set
 // of detail pages where the Discuss button is mounted. Extending later means

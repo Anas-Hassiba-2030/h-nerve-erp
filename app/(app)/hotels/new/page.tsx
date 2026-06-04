@@ -1,5 +1,5 @@
 import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { createHotel } from "../actions";
 import { HotelForm } from "../HotelForm";
 import "../../daylight.css";

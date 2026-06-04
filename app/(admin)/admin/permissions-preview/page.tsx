@@ -8,14 +8,14 @@
 // it would couple middleware to a per-request Prisma roundtrip.)
 
 import Link from "next/link";
-import { getLocale, getMessages } from "@/lib/i18n.server";
-import { prisma } from "@/lib/db";
+import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
+import { prisma } from "@/lib/db/db";
 import {
   canAccess,
   permsEnforced,
   GATED_ROLES,
   type PermRole,
-} from "@/lib/permissions";
+} from "@/lib/auth/permissions";
 import { togglePermission } from "./actions";
 
 export const dynamic = "force-dynamic";

@@ -9,7 +9,7 @@
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { composeFromCouncil, actTitle } from "@/lib/theater/director";
 import { TheaterShell } from "@/components/theater/TheaterShell";
 import { Act } from "@/components/theater/Act";

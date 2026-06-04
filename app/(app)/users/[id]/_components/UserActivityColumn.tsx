@@ -5,7 +5,7 @@ import {
   formatNumber,
   formatRelative,
   formatShortDate,
-} from "@/lib/utils";
+} from "@/lib/utils/utils";
 import type { UserDetail } from "../data";
 
 const TASK_STATUS_AR: Record<string, string> = {

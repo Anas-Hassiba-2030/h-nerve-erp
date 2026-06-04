@@ -15,7 +15,7 @@
 // so a dismissed insight stays dismissed across re-runs.
 
 import type { BrainInsight } from "@prisma/client";
-import { prismaUnscoped } from "@/lib/db";
+import { prismaUnscoped } from "@/lib/db/db";
 
 const DEFAULT_REORDER_POINT = 50;
 const STALE_DAYS = 30;

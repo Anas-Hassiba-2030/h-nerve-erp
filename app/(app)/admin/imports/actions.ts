@@ -13,10 +13,10 @@
 
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
-import { requireUser } from "@/lib/session";
-import { getLocale } from "@/lib/i18n.server";
-import { prisma } from "@/lib/db";
-import { flashToast } from "@/lib/toast";
+import { requireUser } from "@/lib/auth/session";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { flashToast } from "@/lib/utils/toast";
 
 export async function clearTestImports(): Promise<void> {
   const user = await requireUser();

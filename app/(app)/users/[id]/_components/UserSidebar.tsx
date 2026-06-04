@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { Trophy } from "lucide-react";
 import { DaylightPanel } from "@/components/orrery/daylight";
 import {
@@ -10,7 +10,7 @@ import {
   ROLES_AR,
   ROLES_EN,
   loc,
-} from "@/lib/utils";
+} from "@/lib/utils/utils";
 import type { UserDetail } from "../data";
 
 const TIER_TONE: Record<string, string> = {

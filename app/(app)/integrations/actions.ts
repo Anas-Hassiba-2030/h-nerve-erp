@@ -2,14 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireUser } from "@/lib/session";
+import { requireUser } from "@/lib/auth/session";
 import {
   connectProvider,
   disconnectProvider,
   updateSettings,
 } from "@/lib/integrations/runtime";
-import { prisma } from "@/lib/db";
-import { flashToast } from "@/lib/toast";
+import { prisma } from "@/lib/db/db";
+import { flashToast } from "@/lib/utils/toast";
 
 export async function connect(formData: FormData): Promise<void> {
   await requireUser();

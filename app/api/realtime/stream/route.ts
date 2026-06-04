@@ -16,8 +16,8 @@
 // sub-second outcome on the existing stack.
 
 import { NextRequest } from "next/server";
-import { normalizeScope, readScope, subscribe } from "@/lib/realtime";
-import { getCurrentUser } from "@/lib/session";
+import { normalizeScope, readScope, subscribe } from "@/lib/realtime/realtime";
+import { getCurrentUser } from "@/lib/auth/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

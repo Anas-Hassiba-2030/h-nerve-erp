@@ -1,12 +1,12 @@
 "use server";
 
-import { findUserByEmail, verifyPassword } from "@/lib/auth";
-import { getSession, type SessionUser } from "@/lib/session";
-import { prisma } from "@/lib/db";
-import { resolveTenantSlugForUser, TENANT_COOKIE } from "@/lib/tenancy";
-import { isOwnerEmail } from "@/lib/owner";
+import { findUserByEmail, verifyPassword } from "@/lib/auth/auth";
+import { getSession, type SessionUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/db";
+import { resolveTenantSlugForUser, TENANT_COOKIE } from "@/lib/tenancy/tenancy";
+import { isOwnerEmail } from "@/lib/auth/owner";
 import { cookies } from "next/headers";
-import { WORKSPACE_COOKIE } from "@/lib/workspace";
+import { WORKSPACE_COOKIE } from "@/lib/tenancy/workspace";
 
 // The login form drives a cinematic "dive into the cosmos" transition on the
 // client. To let the client decide WHEN to navigate (after the dive plays) and

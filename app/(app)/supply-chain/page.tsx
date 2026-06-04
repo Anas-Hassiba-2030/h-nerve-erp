@@ -10,10 +10,10 @@ import { ExportMenu } from "@/components/ExportMenu";
 import { DeleteButton } from "@/components/DeleteButton";
 import { DaylightShell } from "@/components/orrery/daylight";
 import { ForecastCardClient } from "./ForecastCardClient";
-import { getCompanyBrand } from "@/lib/companyBrand";
-import { getLocale } from "@/lib/i18n.server";
-import { prisma } from "@/lib/db";
-import { formatNumber, formatPercent, formatShortDate, localizeUnit } from "@/lib/utils";
+import { getCompanyBrand } from "@/lib/utils/companyBrand";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { formatNumber, formatPercent, formatShortDate, localizeUnit } from "@/lib/utils/utils";
 import "../daylight.css";
 import "./supply.css";
 import {

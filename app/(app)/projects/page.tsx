@@ -5,9 +5,9 @@ import { EmptyState } from "@/components/EmptyState";
 import {
   DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel,
 } from "@/components/orrery/daylight";
-import { prisma } from "@/lib/db";
-import { formatMoney, formatNumber } from "@/lib/utils";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { formatMoney, formatNumber } from "@/lib/utils/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import "../daylight.css";
 
 export const dynamic = "force-dynamic";

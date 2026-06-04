@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Palette, Check } from "lucide-react";
-import { THEME_LIST, type ThemeId, type ThemeDef } from "@/lib/theme";
+import { THEME_LIST, type ThemeId, type ThemeDef } from "@/lib/theme/theme";
 import { setTheme } from "@/app/actions/preferences";
-import type { Locale } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/i18n";
 
 export function ThemeSwitch({
   current,

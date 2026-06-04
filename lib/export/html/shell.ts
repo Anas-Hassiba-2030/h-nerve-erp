@@ -1,9 +1,9 @@
 import "server-only";
-import { COMPANY_BRANDS, PERSONAL_BRANDS } from "@/lib/companyBrand";
+import { COMPANY_BRANDS, PERSONAL_BRANDS } from "@/lib/utils/companyBrand";
 import {
   type ExportAnalytics,
-} from "@/lib/exportAnalytics";
-import { renderKpiGrid, renderTrendChart, renderDistribution, escapeHtml } from "@/lib/exportRender";
+} from "@/lib/export/exportAnalytics";
+import { renderKpiGrid, renderTrendChart, renderDistribution, escapeHtml } from "@/lib/export/exportRender";
 
 // =====================================================================
 // Branded executive HTML report — print-friendly to PDF.

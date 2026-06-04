@@ -7,10 +7,10 @@
 // changed.
 
 import { revalidatePath } from "next/cache";
-import { getCurrentUser } from "@/lib/session";
-import { getLocale } from "@/lib/i18n.server";
-import { flashToast } from "@/lib/toast";
-import { prisma } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { flashToast } from "@/lib/utils/toast";
+import { prisma } from "@/lib/db/db";
 import {
   createSO,
   findOrCreateCustomer,
@@ -19,7 +19,7 @@ import {
   cancelSO,
   type SOLineInput,
   type Fulfillment,
-} from "@/lib/orders";
+} from "@/lib/finance/orders";
 
 async function gate() {
   const user = await getCurrentUser();

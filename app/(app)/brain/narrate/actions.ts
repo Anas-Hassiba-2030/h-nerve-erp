@@ -5,7 +5,7 @@
 //
 // Phase 4 of docs/PHASES-INTELLIGENCE.md.
 
-import { requireUser } from "@/lib/session";
+import { requireUser } from "@/lib/auth/session";
 import { narrator } from "@/lib/brain/narrator.claude";
 import type { NarrativeRegister } from "@/lib/brain/narrator";
 

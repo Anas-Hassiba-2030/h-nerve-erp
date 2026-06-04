@@ -12,11 +12,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Settings, Trophy, ArrowLeft } from "lucide-react";
-import { getCurrentUser } from "@/lib/session";
-import { getLocale } from "@/lib/i18n.server";
-import { prisma } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { prisma } from "@/lib/db/db";
 import { ProfileHero } from "@/components/settings/ProfileHero";
-import { ROLES_AR } from "@/lib/utils";
+import { ROLES_AR } from "@/lib/utils/utils";
 
 export const dynamic = "force-dynamic";
 

@@ -1,5 +1,5 @@
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
-import { formatNumber, formatMoney } from "@/lib/utils";
+import { formatNumber, formatMoney } from "@/lib/utils/utils";
 import type { HospitalityOpsData } from "../data";
 
 export function HospitalityOps({ ar, data }: { ar: boolean; data: HospitalityOpsData }) {

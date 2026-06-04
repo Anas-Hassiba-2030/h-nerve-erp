@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { getLocale, isRtl } from "@/lib/i18n.server";
-import { getTheme, themeCssVars } from "@/lib/theme.server";
+import { getLocale, isRtl } from "@/lib/i18n/i18n.server";
+import { getTheme, themeCssVars } from "@/lib/theme/theme.server";
 
 export const metadata: Metadata = {
   title: "H-Nerve ERP — مجموعة الحوراني",

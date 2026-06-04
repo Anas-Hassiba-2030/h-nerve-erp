@@ -13,10 +13,10 @@
 // only a cross-tenant ADMIN (no tenantSlug) may target an arbitrary tenantId.
 
 import { revalidatePath } from "next/cache";
-import { getCurrentUser } from "@/lib/session";
-import { getLocale } from "@/lib/i18n.server";
-import { prisma } from "@/lib/db";
-import { resolveAdminTenantId } from "@/lib/adminActionScope";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { resolveAdminTenantId } from "@/lib/auth/adminActionScope";
 import {
   createPO,
   findOrCreateSupplier,
@@ -25,7 +25,7 @@ import {
   cancelPO,
   type POLineInput,
   type Receipt,
-} from "@/lib/orders";
+} from "@/lib/finance/orders";
 
 async function gate() {
   const user = await getCurrentUser();
@@ -45,7 +45,7 @@ function revalidate(stockMoved = false) {
 
 // flashToast is server-flash via cookie; import lazily to keep this file
 // focused (same helper /admin/mappings + /admin/products use).
-import { flashToast } from "@/lib/toast";
+import { flashToast } from "@/lib/utils/toast";
 function toast(label: string) {
   flashToast({ type: "info", entity: "info", label });
 }

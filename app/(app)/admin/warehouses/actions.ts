@@ -9,10 +9,10 @@
 // warehouse to it, so changing it would orphan future imports.
 
 import { revalidatePath } from "next/cache";
-import { getCurrentUser } from "@/lib/session";
-import { getLocale } from "@/lib/i18n.server";
-import { prisma } from "@/lib/db";
-import { flashToast } from "@/lib/toast";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { flashToast } from "@/lib/utils/toast";
 // WAREHOUSE_TYPES must NOT be declared OR re-exported in this "use server"
 // file — every export of a "use server" module becomes a server-action
 // reference, so the array would reach the client forms as a function

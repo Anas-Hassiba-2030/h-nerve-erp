@@ -8,9 +8,9 @@
 // doesn't try to bundle tsx. Returns JSON with the row counts.
 
 import { NextResponse } from "next/server";
-import { requireRole } from "@/lib/authz";
-import { getCurrentUser } from "@/lib/session";
-import { scoped } from "@/lib/logger";
+import { requireRole } from "@/lib/auth/authz";
+import { getCurrentUser } from "@/lib/auth/session";
+import { scoped } from "@/lib/utils/logger";
 
 const log = scoped("seed-demo");
 
@@ -31,7 +31,7 @@ export async function POST() {
     const ms = Date.now() - before;
 
     // Count what's now in the system.
-    const { prismaUnscoped } = await import("@/lib/db");
+    const { prismaUnscoped } = await import("@/lib/db/db");
     const counts = {
       tenants: await prismaUnscoped.tenant.count(),
       companies: await prismaUnscoped.company.count(),
@@ -55,7 +55,7 @@ async function runDemoSeed() {
   // hotels, and bookings. The full seed-demo.ts uses Prisma.Decimal heavily
   // and includes inventory/finance which we'll skip here for speed; the
   // user can run the full seed locally if they want everything.
-  const { prismaUnscoped: prisma } = await import("@/lib/db");
+  const { prismaUnscoped: prisma } = await import("@/lib/db/db");
 
   const TENANTS = [
     { slug: "hourani-hotels", name: "مجموعة الحوراني — الفنادق", adminEmail: "admin@hourani.jo", region: "MENA", tier: "standard" },

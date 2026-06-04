@@ -196,7 +196,7 @@ export async function seedMemoryLake(): Promise<{
       },
     });
     // Patch the Arabic lesson directly (Memory interface only carries English in `lessonLearned`).
-    const { prisma } = await import("@/lib/db");
+    const { prisma } = await import("@/lib/db/db");
     await prisma.memory.update({
       where: { id: m.id },
       data: { lessonAr: m.lessonAr },

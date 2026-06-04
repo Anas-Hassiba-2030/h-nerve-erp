@@ -5,8 +5,8 @@
 // BILINGUAL: flips AR/EN via loc(); locale from the optional `locale` prop or
 // the h_nerve_locale cookie (server component). Previously rendered Arabic only.
 
-import { loc, SECTORS_AR, SECTORS_EN } from "@/lib/utils";
-import { getLocale } from "@/lib/i18n.server";
+import { loc, SECTORS_AR, SECTORS_EN } from "@/lib/utils/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
 
 const TONE: Record<string, string> = {
   HOSPITALITY: "var(--heri-ochre)",      // gold — hospitality

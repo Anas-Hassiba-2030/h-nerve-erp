@@ -4,8 +4,8 @@
 // .panel-title and priority rows recoloured to the ivory daylight register.
 
 import { DaylightShell } from "@/components/orrery/daylight";
-import { getLocale } from "@/lib/i18n.server";
-import { ROADMAP, type RoadmapStatus } from "@/lib/roadmapData";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { ROADMAP, type RoadmapStatus } from "@/lib/utils/roadmapData";
 import "../daylight.css";
 import "./info.css";
 

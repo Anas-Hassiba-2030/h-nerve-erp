@@ -11,7 +11,7 @@
 //
 // Phase 12 of docs/PHASES-INTELLIGENCE.md.
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { TEMPLATES, type Template } from "./templates";
 
 export type RunMode = "test" | "real";

@@ -10,8 +10,8 @@
 
 import { NextResponse, type NextRequest } from "next/server";
 import { unsealData } from "iron-session";
-import { canAccess, isBreakGlass, permsEnforced } from "@/lib/permissions";
-import { rateLimit } from "@/lib/rateLimit";
+import { canAccess, isBreakGlass, permsEnforced } from "@/lib/auth/permissions";
+import { rateLimit } from "@/lib/import/rateLimit";
 
 const COOKIE = "bmv2026_session";
 const DEV_FALLBACK =

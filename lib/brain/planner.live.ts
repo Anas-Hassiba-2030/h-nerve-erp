@@ -12,7 +12,7 @@
 //
 // Phase 5 of docs/PHASES-INTELLIGENCE.md.
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { callLlm, extractJson, llmConfig, type LlmRequest } from "./llm";
 
 // ─────────────────────────────────────────────────────────────────────

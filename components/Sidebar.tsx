@@ -10,10 +10,10 @@ import {
   ChevronRight, UserSquare2, ArrowLeftRight, Search, FileText, HelpCircle,
   GitBranch, Map, Pin, MessageSquare, Bell, Workflow, Heart, Network, Zap, Target, Globe2, Plug, ScrollText, Sparkles as SparklesIcon, PlayCircle, Cpu, Palette, ScanSearch, Trash2,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { canAccess } from "@/lib/permissions";
+import { cn } from "@/lib/utils/utils";
+import { canAccess } from "@/lib/auth/permissions";
 import { Logo, LogoLockup } from "./Logo";
-import { rankById, type Rank } from "@/lib/gamification";
+import { rankById, type Rank } from "@/lib/utils/gamification";
 import { setSidebarCollapsed } from "@/app/actions/preferences";
 import { enterWorkspaceByPath } from "@/app/actions/workspace";
 

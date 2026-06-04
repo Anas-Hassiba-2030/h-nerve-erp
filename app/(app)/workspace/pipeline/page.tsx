@@ -5,11 +5,11 @@ import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPa
 import { StatusBadge } from "@/components/StatusBadge";
 import "../../daylight.css";
 import { advanceProjectStage, updateProjectBudget } from "../actions";
-import { getUserIfRole } from "@/lib/authz";
-import { prisma, prismaUnscoped } from "@/lib/db";
-import { getActiveWorkspaceId } from "@/lib/workspace";
-import { getLocale } from "@/lib/i18n.server";
-import { formatMoney, formatNumber } from "@/lib/utils";
+import { getUserIfRole } from "@/lib/auth/authz";
+import { prisma, prismaUnscoped } from "@/lib/db/db";
+import { getActiveWorkspaceId } from "@/lib/tenancy/workspace";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { formatMoney, formatNumber } from "@/lib/utils/utils";
 
 export const dynamic = "force-dynamic";
 

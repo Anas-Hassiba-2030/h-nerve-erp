@@ -14,9 +14,9 @@ import {
   Activity, Plus, Pencil, Trash2, RotateCcw, LogIn, LogOut, Download,
   Brain, Sparkles, CheckCircle2, XCircle, UserPlus, FileDown,
 } from "lucide-react";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
-import { formatDate, formatNumber } from "@/lib/utils";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { formatDate, formatNumber } from "@/lib/utils/utils";
 import "../daylight.css";
 import "./audit.css";
 

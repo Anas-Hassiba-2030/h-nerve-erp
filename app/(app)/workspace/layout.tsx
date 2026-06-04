@@ -11,10 +11,10 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeftRight, Lock } from "lucide-react";
 // CROSS-TENANT INTENT: /workspace/** pages scope explicitly by companyId — see app/(app)/workspace/layout.tsx for rationale.
-import { prismaUnscoped } from "@/lib/db";
-import { getActiveWorkspaceId } from "@/lib/workspace";
-import { getUserIfRole } from "@/lib/authz";
-import { getLocale } from "@/lib/i18n.server";
+import { prismaUnscoped } from "@/lib/db/db";
+import { getActiveWorkspaceId } from "@/lib/tenancy/workspace";
+import { getUserIfRole } from "@/lib/auth/authz";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { WorkspaceNav } from "@/components/workspace/WorkspaceNav";
 import { WorkspaceSwitcher } from "@/components/workspace/WorkspaceSwitcher";
 

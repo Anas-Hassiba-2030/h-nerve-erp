@@ -14,8 +14,8 @@
 // Phase 6 of docs/PHASES-INTELLIGENCE.md.
 
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/session";
+import { prisma } from "@/lib/db/db";
+import { getCurrentUser } from "@/lib/auth/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

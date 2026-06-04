@@ -1,14 +1,13 @@
 // Weekly executive digest generator.
 //
-// Runs the AI engine (H1–H7 from lib/aiEngine + H8–H10 from
-// lib/aiEngineExtra), assembles a group-performance summary, and
-// persists a Digest row covering the last 7 days. The result is a
-// cached, share-able snapshot of "what mattered this week."
+// Runs the AI engine (H1–H10, all from lib/aiEngine), assembles a
+// group-performance summary, and persists a Digest row covering the
+// last 7 days. The result is a cached, share-able snapshot of "what
+// mattered this week."
 
 import "server-only";
 import { prisma } from "./db";
-import { runEngine, type EngineInsight } from "./aiEngine";
-import { runEngineExtra } from "./aiEngineExtra";
+import { runEngine, runEngineExtra, type EngineInsight } from "./aiEngine";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 

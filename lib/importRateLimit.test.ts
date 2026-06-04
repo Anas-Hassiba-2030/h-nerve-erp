@@ -6,7 +6,7 @@ import {
   checkImportRate,
   IMPORT_WINDOW_MS,
   IMPORT_MAX_PER_WINDOW,
-} from "./importRateLimit";
+} from "./rateLimit";
 
 describe("import rate limit — fixed window", () => {
   it("first hit on a fresh key is allowed and starts the window", () => {

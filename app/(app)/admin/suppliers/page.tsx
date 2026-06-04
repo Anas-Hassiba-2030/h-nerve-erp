@@ -76,8 +76,9 @@ export default async function SuppliersPage({ searchParams }: { searchParams: SP
             ? "كيانات حقيقية — رُقّيت من سلاسل المورّد في المنتجات وأوامر الشراء"
             : "Real entities — promoted from the Product/PO supplier strings"
         }
-        actions={<AdminFamilyNav current="/admin/suppliers" ar={ar} />}
       />
+
+      <AdminFamilyNav current="/admin/suppliers" ar={ar} />
 
       <DaylightKpiGrid>
         <DaylightKpi label={ar ? "الإجمالي" : "Total"} value={formatNumber(allCount)} />

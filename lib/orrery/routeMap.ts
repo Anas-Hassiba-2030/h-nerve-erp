@@ -80,6 +80,11 @@ const NAME_MAP: Record<string, string> = {
   "المحذوفات": "/trash",
   "المستأجرون": "/admin/tenants",
   "الإمبراطورية": "/admin/empire",
+  // Mission Control — the back-office command deck (formerly "System Hub").
+  // Operators land here to manage users, permissions, audit, the data browser,
+  // and every ERP back-office screen. Sleek Operator vocabulary.
+  "غرفة العمليات": "/admin/system",
+  "Mission Control": "/admin/system",
 };
 
 export const ORRERY_FALLBACK_ROUTE = "/dashboard";

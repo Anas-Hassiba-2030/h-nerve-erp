@@ -138,8 +138,9 @@ export default async function PurchaseOrdersPage({
             ? "شراء من المورّدين — الاستلام يكتب حركات RECEIVED في السجل"
             : "Procurement from suppliers — receipts write RECEIVED ledger movements"
         }
-        actions={<AdminFamilyNav current="/admin/purchase-orders" ar={ar} />}
       />
+
+      <AdminFamilyNav current="/admin/purchase-orders" ar={ar} />
 
       <DaylightKpiGrid>
         <DaylightKpi label={ar ? "إجمالي الأوامر" : "Total POs"} value={formatNumber(kTotal)} />

@@ -86,8 +86,9 @@ export default async function JournalPage({ searchParams }: { searchParams: SP }
             ? "قيود مزدوجة ثابتة — مدين = دائن لكل قيد"
             : "Immutable double-entry — debits = credits per entry"
         }
-        actions={<AdminFamilyNav current="/admin/journal" ar={ar} />}
       />
+
+      <AdminFamilyNav current="/admin/journal" ar={ar} />
 
       <DaylightKpiGrid>
         <DaylightKpi label={ar ? "قيود الفترة" : "Entries (period)"} value={formatNumber(entries.length)} />

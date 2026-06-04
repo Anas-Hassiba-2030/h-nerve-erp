@@ -170,8 +170,9 @@ export default async function MovementsAdminPage({
             ? "كل تغيّر في المخزون = سطر ثابت. الكمية المعروضة = مجموع الحركات"
             : "Every stock change is one immutable row — quantity = SUM(delta)"
         }
-        actions={<AdminFamilyNav current="/admin/movements" ar={ar} />}
       />
+
+      <AdminFamilyNav current="/admin/movements" ar={ar} />
 
       <DaylightKpiGrid>
         <DaylightKpi label={ar ? "إجمالي الحركات" : "Total movements"} value={formatNumber(totalAll)} />

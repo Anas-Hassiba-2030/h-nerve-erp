@@ -180,8 +180,9 @@ export default async function ProductsAdminPage({
             ? "مصدر الحقيقة التشغيلي — يُحدَّث بالاستيراد عبر (tenantId, sku, warehouseId)"
             : "Operational source of truth — upserted by import on (tenantId, sku, warehouseId)"
         }
-        actions={<AdminFamilyNav current="/admin/products" ar={ar} />}
       />
+
+      <AdminFamilyNav current="/admin/products" ar={ar} />
 
       <DaylightKpiGrid>
         <DaylightKpi label={ar ? "منتجات" : "Products"} value={formatNumber(catalog.length)} />

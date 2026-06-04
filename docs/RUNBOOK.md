@@ -93,17 +93,41 @@ for the live URL. There is no Vercel-style per-deployment auth wall.
 
 ---
 
-## 5. Scheduled Brain analysis — cron caveat
+## 5. Scheduled Brain analysis — weekly self-tuning
 
-`/api/brain/cron` runs the scheduled Brain refresh, auth-gated on
-`CRON_SECRET` (the caller must send `Authorization: Bearer $CRON_SECRET`; the
-route fail-closes with 503 otherwise).
+`/api/brain/cron` runs the scheduled Brain refresh (Phase 10 weekly
+self-tuning), auth-gated on `CRON_SECRET` (the caller must send
+`Authorization: Bearer $CRON_SECRET`; the route fail-closes with 503 if the
+secret is unset, 401 on mismatch). It iterates every ACTIVE tenant and returns
+a one-line JSON summary.
 
-**Railway has no built-in cron**, so this only fires when you wire a scheduler
-to it — a Railway cron service or an external scheduler (cron-job.org / a
-GitHub Actions `schedule`) hitting the URL with the bearer header. See
-`docs/DEPLOYMENT.md` § "Scheduled Brain refresh". Until then, use the on-demand
-**Run analysis** button on `/admin/brain`, which calls the same engine.
+**Railway has no built-in cron**, so the scheduler lives **outside** the app.
+The committed, version-controlled choice is a **GitHub Actions scheduled
+workflow** — `.github/workflows/brain-cron.yml` — which fires Mondays 06:00 UTC
+and can be run manually via *workflow_dispatch*. It is the cheapest option that
+needs no Railway dashboard access and leaves an audit trail in the Actions tab.
+
+### One-time setup
+
+1. In the repo: **Settings → Secrets and variables → Actions** → add two
+   repository secrets:
+   - `APP_URL` — the production base URL, e.g. `https://h-nerve-erp.up.railway.app`
+     (no trailing slash).
+   - `CRON_SECRET` — the **same** value set on the Railway service env.
+2. Set `CRON_SECRET` on the Railway service (Variables tab) if not already set.
+   Generate one with `openssl rand -hex 32`.
+3. The workflow self-verifies: it asserts an HTTP 200 and prints the JSON
+   summary; a non-200 fails the job and surfaces in the Actions tab.
+
+**Change the cadence** by editing the `cron:` expression in the workflow.
+**Manual run:** Actions → *Brain weekly self-tuning* → *Run workflow*.
+
+**Alternatives** (if you prefer not to use Actions): a Railway cron *service*
+(separate service, same image, start command `curl …`), or an external probe
+(cron-job.org / Upstash QStash) hitting the same URL with the bearer header.
+
+**Fallback (no scheduler):** the on-demand **Run analysis** button on
+`/admin/brain` calls the same engine.
 
 ---
 

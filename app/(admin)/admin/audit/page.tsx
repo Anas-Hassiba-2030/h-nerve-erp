@@ -6,7 +6,7 @@
 
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale, getMessages } from "@/lib/i18n.server";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +19,9 @@ const s = (v: string | string[] | undefined) =>
   (typeof v === "string" ? v.trim() : "");
 
 export default async function AuditPage({ searchParams }: { searchParams: SP }) {
-  const ar = getLocale() === "ar";
+  const locale = getLocale();
+  const ar = locale === "ar";
+  const m = getMessages(locale);
 
   const fAction = s(searchParams.action);
   const fEntity = s(searchParams.entity);
@@ -71,7 +73,7 @@ export default async function AuditPage({ searchParams }: { searchParams: SP }) 
     <div className="admin-page">
       <header className="admin-page-head">
         <div>
-          <span className="admin-eyebrow">FEDERATION · AUDIT</span>
+          <span className="admin-eyebrow">{m["admin.eyebrow.audit"]}</span>
           <h1 className="admin-h1">{ar ? "سجل التدقيق" : "Audit log"}</h1>
           <p className="admin-sub">
             {ar

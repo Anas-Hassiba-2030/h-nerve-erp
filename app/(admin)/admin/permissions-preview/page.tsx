@@ -8,7 +8,7 @@
 // it would couple middleware to a per-request Prisma roundtrip.)
 
 import Link from "next/link";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale, getMessages } from "@/lib/i18n.server";
 import { prisma } from "@/lib/db";
 import {
   canAccess,
@@ -35,7 +35,9 @@ export default async function PermissionsPreview({
 }: {
   searchParams: { as?: string };
 }) {
-  const ar = getLocale() === "ar";
+  const locale = getLocale();
+  const ar = locale === "ar";
+  const m = getMessages(locale);
   const asRole = (
     GATED_ROLES.includes(searchParams.as as PermRole)
       ? searchParams.as
@@ -59,7 +61,7 @@ export default async function PermissionsPreview({
     <div className="admin-page">
       <header className="admin-page-head">
         <div>
-          <span className="admin-eyebrow">FEDERATION · RBAC EDITOR</span>
+          <span className="admin-eyebrow">{m["admin.eyebrow.rbac"]}</span>
           <h1 className="admin-h1">
             {ar ? "محرر الصلاحيات" : "Permissions editor"}
           </h1>

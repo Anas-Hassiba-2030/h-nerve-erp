@@ -13,7 +13,7 @@
 
 import { Sprout, CheckCircle2, FileText, AlertTriangle } from "lucide-react";
 import { prismaUnscoped } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale, getMessages } from "@/lib/i18n.server";
 import { summarizeGenesis } from "@/lib/genesis/recipes";
 import { ConstellationGrid } from "@/components/genesis/Constellation";
 import { runGenesisSeed, topUpDemoCorpus, seedMissingGenesis } from "./actions";
@@ -37,7 +37,9 @@ export default async function GenesisPage({
 }: {
   searchParams: { seeded?: string; topup?: string; error?: string; fill?: string };
 }) {
-  const ar = getLocale() === "ar";
+  const locale = getLocale();
+  const ar = locale === "ar";
+  const m = getMessages(locale);
   const justSeeded = searchParams.seeded === "1";
   const topup = searchParams.topup;
   const fill = searchParams.fill;
@@ -112,7 +114,7 @@ export default async function GenesisPage({
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="admin-page-head">
         <div>
-          <span className="admin-eyebrow">SUPERADMIN · PHASE 21</span>
+          <span className="admin-eyebrow">{m["admin.eyebrow.genesis"]}</span>
           <h1 className="admin-h1">{ar ? "بداية مساحة العمل" : "Workspace Genesis"}</h1>
           <p className="admin-sub">
             {ar

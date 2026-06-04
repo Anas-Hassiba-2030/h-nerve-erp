@@ -8,7 +8,7 @@
 import Link from "next/link";
 import { Table2 } from "lucide-react";
 import { prismaUnscoped } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale, getMessages } from "@/lib/i18n.server";
 import { listModels } from "@/lib/db.introspect";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +27,9 @@ async function countOf(prop: string): Promise<number | null> {
 }
 
 export default async function AdminDbPage() {
-  const ar = getLocale() === "ar";
+  const locale = getLocale();
+  const ar = locale === "ar";
+  const m = getMessages(locale);
   const models = listModels();
 
   const counts = await Promise.all(models.map((m) => countOf(m.prop)));
@@ -37,7 +39,7 @@ export default async function AdminDbPage() {
     <div className="admin-page">
       <header className="admin-page-head">
         <div>
-          <span className="admin-eyebrow">SUPERADMIN · DATA</span>
+          <span className="admin-eyebrow">{m["admin.eyebrow.data"]}</span>
           <h1 className="admin-h1">{ar ? "متصفّح البيانات" : "Data Browser"}</h1>
           <p className="admin-sub">
             {ar

@@ -9,7 +9,8 @@ import { requireRole } from "@/lib/authz";
 import { softDelete, softRestore, deletedLabel, restoredLabel } from "@/lib/softDelete";
 import { flashToast } from "@/lib/toast";
 import { logActivity } from "@/lib/activityLog";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale, t } from "@/lib/i18n.server";
+import { formatNumber } from "@/lib/utils";
 import { approveForecastWithBridge } from "@/lib/supply/bridge";
 
 const forecastSchema = z.object({
@@ -248,13 +249,15 @@ export async function autoGenerateForecasts(): Promise<void> {
   // Phase P4 — visible result. Same flashToast shape used elsewhere in
   // this file. Honest copy: tells the user exactly how many forecasts
   // landed (or "no busy hotels" when the heuristic skipped everyone).
+  // E14 — locale-aware via the i18n dictionary (was a stacked ar·en label).
+  const locale = getLocale();
   flashToast({
     type: "info",
     entity: "info",
     label:
       generated > 0
-        ? `${generated} forecasts generated · ${generated} توقعات`
-        : "No occupancy signal above 20% — Run engine produced no forecasts · لا إشغال يتجاوز ٢٠٪",
+        ? t("toast.err.forecastsGenerated", locale).replace("{n}", formatNumber(generated))
+        : t("toast.err.noOccupancySignal", locale),
   });
 
   revalidatePath("/supply-chain");

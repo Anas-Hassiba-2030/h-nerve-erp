@@ -8,7 +8,7 @@ import { prisma } from "@/lib/db";
 import { ArrowLeft, Eye, Trash2, Copy, Calendar } from "lucide-react";
 import { THEME_PRESETS, PACK_CATALOG, type ThemeKey } from "@/lib/brand/themes";
 import { viewAsTenant, deleteTenant } from "../actions";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale, getMessages } from "@/lib/i18n.server";
 
 const STATUS_COLOR: Record<string, string> = {
   PROVISIONING: "var(--admin-amber)",
@@ -22,7 +22,9 @@ export default async function TenantDetail({
 }: {
   params: { id: string };
 }) {
-  const ar = getLocale() === "ar";
+  const locale = getLocale();
+  const ar = locale === "ar";
+  const m = getMessages(locale);
 
   const tenant = await prisma.tenant.findUnique({
     where: { id: params.id },
@@ -142,7 +144,7 @@ export default async function TenantDetail({
       {/* Theme preview */}
       <section className="admin-section">
         <header className="admin-section-head">
-          <span className="admin-eyebrow">THEME</span>
+          <span className="admin-eyebrow">{m["admin.eyebrow.theme"]}</span>
           <h2 className="admin-h2">{ar ? preset.nameAr : preset.nameEn}</h2>
           <p className="admin-section-sub">{preset.description}</p>
         </header>
@@ -165,7 +167,7 @@ export default async function TenantDetail({
       {/* Packs */}
       <section className="admin-section">
         <header className="admin-section-head">
-          <span className="admin-eyebrow">INDUSTRY PACKS</span>
+          <span className="admin-eyebrow">{m["admin.eyebrow.industryPacks"]}</span>
           <h2 className="admin-h2">
             {ar
               ? `${tenant.packs.length} ${tenant.packs.length === 1 ? "حزمة مُفعَّلة" : "حزم مُفعَّلة"}`
@@ -194,7 +196,7 @@ export default async function TenantDetail({
       {/* Provisioning trail */}
       <section className="admin-section">
         <header className="admin-section-head">
-          <span className="admin-eyebrow">PROVISIONING TRAIL</span>
+          <span className="admin-eyebrow">{m["admin.eyebrow.provisioningTrail"]}</span>
           <h2 className="admin-h2">
             {ar ? `${tenant.steps.length} خطوات مُسجَّلة` : `${tenant.steps.length} steps recorded`}
           </h2>

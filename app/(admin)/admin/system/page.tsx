@@ -15,7 +15,7 @@ import {
   UsersRound, ShieldCheck, ScrollText, Database,
 } from "lucide-react";
 import { prisma, prismaUnscoped } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale, getMessages } from "@/lib/i18n.server";
 import { listModels } from "@/lib/db.introspect";
 import { SeedDemoButton } from "@/components/SeedDemoButton";
 
@@ -48,7 +48,9 @@ async function n(p: Promise<number>): Promise<number | null> {
 }
 
 export default async function AdminSystemPage() {
-  const ar = getLocale() === "ar";
+  const locale = getLocale();
+  const ar = locale === "ar";
+  const m = getMessages(locale);
 
   const [tenants, brainPatterns, iqRows, memories] = await Promise.all([
     prisma.tenant.count().catch(() => 0),
@@ -108,7 +110,7 @@ export default async function AdminSystemPage() {
     <div className="admin-page">
       <header className="admin-page-head">
         <div>
-          <span className="admin-eyebrow">SUPERADMIN · MISSION CONTROL</span>
+          <span className="admin-eyebrow">{m["admin.eyebrow.missionControl"]}</span>
           <h1 className="admin-h1">{ar ? "غرفة العمليات" : "Mission Control"}</h1>
           <p className="admin-sub">
             {ar

@@ -16,7 +16,7 @@ import { prismaUnscoped } from "@/lib/db";
 import { getLocale } from "@/lib/i18n.server";
 import { summarizeGenesis } from "@/lib/genesis/recipes";
 import { ConstellationGrid } from "@/components/genesis/Constellation";
-import { runGenesisSeed, topUpDemoCorpus } from "./actions";
+import { runGenesisSeed, topUpDemoCorpus, seedMissingGenesis } from "./actions";
 import { DangerReseed } from "./DangerReseed";
 
 export const dynamic = "force-dynamic";
@@ -35,11 +35,12 @@ async function safeCount(fn: () => Promise<number>): Promise<number> {
 export default async function GenesisPage({
   searchParams,
 }: {
-  searchParams: { seeded?: string; topup?: string; error?: string };
+  searchParams: { seeded?: string; topup?: string; error?: string; fill?: string };
 }) {
   const ar = getLocale() === "ar";
   const justSeeded = searchParams.seeded === "1";
   const topup = searchParams.topup;
+  const fill = searchParams.fill;
   const confirmError = searchParams.error === "confirm";
 
   // Live counts for every key the recipe catalog references.
@@ -88,6 +89,9 @@ export default async function GenesisPage({
   const summary = summarizeGenesis(counts);
   const isEmpty = summary.isEmpty;
   const totalEntities = Object.values(counts).reduce((a, b) => a + b, 0);
+  // Sectors with zero presence on every line — the additive path's targets.
+  const emptySectors = summary.sectors.filter((s) => s.status === "empty");
+  const hasGaps = !isEmpty && emptySectors.length > 0;
 
   const panel = {
     background: "var(--admin-bg-2)",
@@ -155,6 +159,26 @@ export default async function GenesisPage({
           body={ar ? "يجب تأكيد المربع قبل إعادة البذر المدمّرة." : "You must tick the acknowledgement before a destructive reseed."}
         />
       )}
+      {fill && (
+        <Banner
+          color={fill === "error" ? "#ff6b6b" : "#4ade80"}
+          icon={<Sprout size={20} style={{ color: fill === "error" ? "#ff6b6b" : "#4ade80", flexShrink: 0, marginTop: 1 }} />}
+          title={
+            fill === "skip"
+              ? ar ? "لا توجد قطاعات ناقصة" : "No missing sectors"
+              : fill === "error"
+                ? ar ? "تعذّر الإكمال" : "Fill failed"
+                : ar ? "تم إكمال القطاعات الناقصة" : "Missing sectors filled"
+          }
+          body={
+            fill === "skip"
+              ? ar ? "كل قطاع يحتوي على بيانات بالفعل — لم يتم تغيير أي شيء." : "Every sector already has data — nothing was changed."
+              : fill === "error"
+                ? ar ? "حدث خطأ غير متوقع. حاول مرة أخرى." : "An unexpected error occurred. Try again."
+                : ar ? `تمت إضافة بيانات ${fill} قطاع ناقص دون حذف أي شيء.` : `Added data for ${fill} empty sector(s) without deleting anything.`
+          }
+        />
+      )}
 
       {/* ── Sector preview (the constellations) ────────────────────────── */}
       <ConstellationGrid summary={summary} ar={ar} />
@@ -176,6 +200,26 @@ export default async function GenesisPage({
           </button>
         </form>
       </div>
+
+      {/* ── Additive fill (safe, non-destructive) ──────────────────────── */}
+      {hasGaps && (
+        <div style={panel}>
+          <div style={{ ...eyebrow, color: "var(--admin-cyan)" }}>
+            {ar ? "إكمال القطاعات الناقصة — غير مدمّر" : "Fill missing sectors — non-destructive"}
+          </div>
+          <p style={{ color: "var(--admin-text-muted)", fontSize: 13.5, lineHeight: 1.65, marginBottom: 18, maxWidth: "56ch" }}>
+            {ar
+              ? `يوجد ${emptySectors.length} قطاع فارغ: ${emptySectors.map((s) => s.ar).join("، ")}. سيبذر هذا الإجراء القطاعات الفارغة فقط، ويبقي البيانات الحالية كما هي — آمن للتكرار ولا يحذف شيئاً.`
+              : `${emptySectors.length} empty sector(s): ${emptySectors.map((s) => s.en).join(", ")}. This seeds only the empty sectors, leaves existing data untouched — safe to re-run, never deletes.`}
+          </p>
+          <form action={seedMissingGenesis}>
+            <button type="submit" className="admin-cta-primary">
+              <Sprout size={15} />
+              {ar ? "إكمال القطاعات الناقصة" : "Fill missing sectors"}
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* ── Seed / reseed ──────────────────────────────────────────────── */}
       {isEmpty ? (

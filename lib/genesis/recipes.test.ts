@@ -9,6 +9,7 @@ import {
   GENESIS_RECIPES,
   summarizeGenesis,
   requiredCountKeys,
+  planIncrementalSeed,
 } from "./recipes";
 
 const blank: Record<string, number> = {};
@@ -79,5 +80,49 @@ describe("requiredCountKeys", () => {
       expect(set.has(r.presenceKey)).toBe(true);
       for (const l of r.lines) expect(set.has(l.countKey)).toBe(true);
     }
+  });
+});
+
+describe("planIncrementalSeed", () => {
+  it("blank DB → selects every sector (all empty)", () => {
+    const plan = planIncrementalSeed(blank);
+    expect(plan).toEqual(GENESIS_RECIPES.map((r) => r.id));
+    expect(plan.length).toBe(GENESIS_RECIPES.length);
+  });
+
+  it("fully seeded DB → selects no sectors", () => {
+    const plan = planIncrementalSeed(full);
+    expect(plan).toEqual([]);
+  });
+
+  it("selects only the EMPTY sectors, skipping partial and complete", () => {
+    // hospitality: hotels present (partial — bookings missing) → NOT selected.
+    // people: users + companies present (complete) → NOT selected.
+    // every other sector has zero presence (empty) → selected.
+    const plan = planIncrementalSeed({ hotels: 3, users: 4, companies: 4 });
+    expect(plan).not.toContain("hospitality"); // partial → skipped
+    expect(plan).not.toContain("people"); // complete → skipped
+    expect(plan).toContain("dairy");
+    expect(plan).toContain("agriculture");
+    expect(plan).toContain("education");
+    expect(plan).toContain("intelligence");
+  });
+
+  it("returns sectors in canonical GENESIS_RECIPES order", () => {
+    // Light up dairy only; the rest stay empty. Order must follow the catalog.
+    const plan = planIncrementalSeed({ dairyBatches: 30, supplyForecasts: 24 });
+    const order = GENESIS_RECIPES.map((r) => r.id);
+    const expected = order.filter((id) => id !== "dairy");
+    expect(plan).toEqual(expected);
+  });
+
+  it("agrees with summarizeGenesis: a sector is planned iff it is empty", () => {
+    const counts = { farms: 4, crops: 12, programs: 8 };
+    const summary = summarizeGenesis(counts);
+    const plan = planIncrementalSeed(counts);
+    const emptyIds = summary.sectors
+      .filter((s) => s.status === "empty")
+      .map((s) => s.id);
+    expect(plan).toEqual(emptyIds);
   });
 });

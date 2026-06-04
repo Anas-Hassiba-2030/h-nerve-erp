@@ -55,6 +55,14 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
   // Phase 20 — the Living Protocol. Each tenant's constitution clauses
   // are scoped by the opaque tenantId slug like Product/BrainInsight.
   "ProtocolClause",
+  // ISOLATION-FIX — import-audit ledger. Keyed by the opaque `tenantId`
+  // slug (NULLABLE — un-attributed/legacy rows carry null). Added so a
+  // pinned operator on /admin/imports sees only their own tenant's import
+  // batches (the page reads via the scoped client) and clearTestImports'
+  // bulk delete is tenant-stamped. ADMIN (no tenant cookie) and the
+  // bearer-token import API / brain cron run with no slug → pass-through,
+  // unchanged. Null-tenant rows are simply filtered out for pinned users.
+  "ImportLog",
 ]);
 
 export type ScopeParams = { model?: string; action: string; args?: any };
@@ -233,7 +241,31 @@ export async function applyWorkspaceScope(
     return next(params);
   }
 
-  // update / delete / upsert by unique id: write-by-id guard is a
-  // documented follow-up. Pass through (read isolation is the proof).
+  // Phase F6 (companyId plane) — by-id write guard, mirroring the
+  // tenant-side guard above. update / delete / upsert by a unique {id}
+  // can't be where-stamped (id is the only unique field), so we read the
+  // target row first and reject the write when it belongs to another
+  // workspace. updateMany / deleteMany are already gated above (the
+  // where-clause is stamped). A non-string-id where (e.g. a compound
+  // unique) passes through — the key already carries the company or is
+  // intrinsically scoped through its parent.
+  if (action === "update" || action === "delete" || action === "upsert") {
+    const where = params.args?.where ?? {};
+    const idValue = where.id;
+    if (typeof idValue === "string") {
+      const savedAction = params.action;
+      const savedArgs = params.args;
+      const probe = { ...params, action: "findUnique", args: { where: { id: idValue } } } as any;
+      const row = await next(probe);
+      params.action = savedAction;
+      params.args = savedArgs;
+      if (!row || row.companyId !== workspaceId) {
+        throw new Error("Cross-workspace write blocked");
+      }
+      return next(params);
+    }
+    return next(params);
+  }
+
   return next(params);
 }

@@ -25,7 +25,7 @@ before adding a new model that holds business data.
 | Plane | Column | Cookie | Set | Models |
 |---|---|---|---|---|
 | Workspace | `companyId String` (FK to Company) | `h_nerve_workspace` | `SCOPED_MODELS` | Hotel, DairyBatch, Farm, Program, Transaction, FutureProject, SustainabilityScore |
-| Tenant | `tenantId String` (opaque slug) | `h_nerve_tenant` | `TENANT_SCOPED_MODELS` | Product, Supplier, Customer, Warehouse, PurchaseOrder, SalesOrder, InventoryMovement, LedgerAccount, FinancialPeriod, JournalEntry, TenantImportMapping, BrainInsight, Booking, Crop |
+| Tenant | `tenantId String` (opaque slug) | `h_nerve_tenant` | `TENANT_SCOPED_MODELS` | Product, Supplier, Customer, Warehouse, PurchaseOrder, SalesOrder, InventoryMovement, LedgerAccount, FinancialPeriod, JournalEntry, TenantImportMapping, BrainInsight, Booking, Crop, CouncilDiscussion, CouncilReply, ProtocolClause, ImportLog (nullable `tenantId` — null rows are filtered out for pinned operators, visible to ADMIN) |
 
 Both cookies are written at login in `app/(auth)/login/actions.ts` from
 the user's `companyId` and the resolved `tenantSlug`
@@ -59,7 +59,13 @@ Same middleware:
   write guard** runs a findUnique first; if the row's `tenantId`
   doesn't match, throw `Cross-tenant write blocked`. Compound-unique
   where-clauses (like `tenantId_sku_warehouseId`) pass through because
-  the unique key already carries the tenant.
+  the unique key already carries the tenant. **The same by-id guard now
+  exists on the `companyId` plane** for `SCOPED_MODELS` (throws
+  `Cross-workspace write blocked`) — previously the companyId by-id path
+  was an explicit pass-through "documented follow-up"; it is now closed,
+  so a pinned operator cannot update/delete another company's Hotel /
+  DairyBatch / Farm / Program / Transaction / FutureProject /
+  SustainabilityScore by guessing its id.
 
 ## How to add a new tenant-scoped model
 
@@ -140,3 +146,36 @@ change.
 - AIInsight + Plan + ActivityLog still use the workspace-pages-explicit
   filter pattern; consider folding into `TENANT_SCOPED_MODELS` after the
   next pitch.
+
+### Open cross-tenant write leaks found by the isolation audit (2026-06-04)
+
+These were confirmed by adversarial audit but need design/schema work
+beyond a behaviour-preserving sweep, so they are tracked here rather than
+hot-patched:
+
+- **`SupplyForecast` (app/(app)/supply-chain/actions.ts).** The model is
+  keyed by **two** Company FKs (`sourceCompanyId` + `targetCompanyId`),
+  not a single `companyId`/`tenantId`, so it is in neither scoped set and
+  the central guards cannot cover it. `setForecastStatus` / `deleteForecast`
+  / `restoreForecast` / `approveForecast` / `rejectForecast` mutate a
+  forecast by id with no ownership check, and `approveForecast` triggers a
+  cross-company PO/Supplier side-effect via the bridge. `createForecast`
+  trusts client `sourceCompanyId`/`targetCompanyId`. Fixing needs a
+  decision on the ownership axis (source vs target vs group/tenant) — see
+  the supply/procurement seam (`lib/supply/bridge.ts`,
+  `COMPANY_CODE_TO_TENANT_SLUG`). **Do not guess the axis** — a wrong guard
+  breaks legitimate cross-company demand forecasting.
+- **`AIInsight` workspace signals (app/(app)/workspace/actions.ts —
+  `dismissSignal` / `acceptSignal`).** `AIInsight` has **no** `companyId`
+  or `tenantId` column (only `module`), so it cannot be scoped by the
+  current mechanism; the table is effectively shared. Scoping it requires a
+  schema migration to add + backfill a tenant key (follow the
+  `20260520_add_tenant_id_to_booking_crop` template), then add it to
+  `TENANT_SCOPED_MODELS`.
+- **Defense-in-depth (HARDEN, not open leaks):** several `create` actions
+  (createBatch/createProgram/createFarm/createHotel/createProject;
+  updateCustomer/deleteCustomer/updateWarehouse) still trust a client
+  `tenantId`/`companyId`. The middleware **blocks** the foreign write
+  (throws), so there is no open leak, but they should adopt the #174
+  own-scope discipline (`resolveAdminTenantId` / own workspace) so the
+  guarantee doesn't depend on the cookie being present.

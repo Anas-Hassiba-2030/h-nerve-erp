@@ -40,6 +40,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
+  // Safety net: seedOperator() is DESTRUCTIVE (wipes operator tables). If the
+  // DB already holds data, refuse unless the caller explicitly opts in with
+  // { force: true }. This stops a leaked SEED_ADMIN_PASSWORD (e.g. shown in a
+  // screenshot) from wiping a populated production DB — an intentional
+  // pitch-reset still works by passing force.
+  if (body.force !== true) {
+    const { prismaUnscoped } = await import("@/lib/db");
+    const companies = await prismaUnscoped.company.count().catch(() => 0);
+    if (companies > 0) {
+      return NextResponse.json(
+        {
+          error:
+            'Database already has data. This endpoint WIPES operator tables. ' +
+            'Re-send with { "force": true } to confirm a destructive pitch reseed.',
+          companies,
+        },
+        { status: 409 },
+      );
+    }
+  }
+
   const started = Date.now();
   const steps: Record<string, string> = {};
   try {

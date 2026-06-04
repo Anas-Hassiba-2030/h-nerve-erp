@@ -21,6 +21,13 @@ describe("scoreFaithfulness", () => {
     expect(s).toBeGreaterThan(0);
     expect(s).toBeLessThan(1);
   });
+
+  it("grounds Arabic-numeral claims against ASCII context and vice versa", () => {
+    // Arabic-numeral answer ↔ ASCII context
+    expect(scoreFaithfulness("الإيراد بلغ ٨٤٬٠٠٠.", "annual rent 84,000 JOD")).toBe(1);
+    // ASCII answer ↔ Arabic-numeral context
+    expect(scoreFaithfulness("Revenue 84,000.", "الإيراد بلغ ٨٤٬٠٠٠ دينار")).toBe(1);
+  });
 });
 
 describe("scoreAnswerRelevance", () => {

@@ -134,7 +134,9 @@ export function bucketByMonth(
 /** Occupancy percentage (0–100, integer). 0 total rooms → 0 (no divide-by-zero). */
 export function occupancyPct(occupiedRooms: number, totalRooms: number): number {
   if (totalRooms <= 0) return 0;
-  return Math.round((occupiedRooms / totalRooms) * 100);
+  // Clamp to 0–100: overlapping/over-booked confirmed bookings can sum past
+  // totalRooms, which must not render as e.g. "127%".
+  return Math.max(0, Math.min(100, Math.round((occupiedRooms / totalRooms) * 100)));
 }
 
 // ─────────────────────────────────────────────────────────────────────

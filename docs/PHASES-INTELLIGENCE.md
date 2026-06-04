@@ -551,7 +551,16 @@ destructive) and the cinematic constellation-drop animation.
 
 ---
 
-## Phase 22 — Brain Trustworthiness Layer (ML + Hallucination Guard) 🔄 (in progress)
+## Phase 22 — Brain Trustworthiness Layer (ML + Hallucination Guard) ✅ (shipped, except 22b)
+
+**Status (2026-06-04):** ✅ shipped. The earlier "still to land" list is now stale —
+the verifier IS wired into `narrator.claude.ts` (runs on every write), the
+`Narrative` model DOES persist verification telemetry (as `trustScore` /
+`trustLabel` / `claimsTotal` / `claimsMatched` — note: not the originally
+predicted `verifiedAt`/`confidenceScore` names), and `VerifiedBadge` / `TrustChip`
+render across the council, /plans (list + detail), /insights, and /brain/narrate.
+Only **Phase 22b (fine-tuning pipeline)** remains — a future engagement that needs
+~6 months of `BrainFeedback` data.
 
 **Status (2026-06):** core verifier + confidence scorer landed. Live:
 - `lib/brain/verifier.ts` — claim extraction (numbers, percentages, currency) + facts-payload matching with ±2% tolerance.
@@ -955,3 +964,117 @@ investor-facing alternative: **"Operations" (العمليات)**. Anas picks.)
 **Depends on.** Best bundled with Phase 27 (the modules get a coherent home as
 they land). **Effort.** Hub page ~1 day; orrery node ~½ day; per-module polish
 scales with module count.
+
+**Concrete defects found (2026-06-04 audit) — fix these as the first slice:**
+- **`/admin/system` advertises "17 routes" but 13 of its cards are dead 404s**
+  (`/admin/imports`, `/admin/products`, `/admin/movements`, `/admin/warehouses`,
+  `/admin/transfers`, `/admin/mappings`, `/admin/purchase-orders`,
+  `/admin/sales-orders`, `/admin/suppliers`, `/admin/customers`, `/admin/journal`,
+  `/admin/accounts`, `/admin/brain` — none of those page dirs exist). The hub even
+  shows live count badges next to links that go nowhere. **Prune/disable the dead
+  cards or build the pages.** This is a correctness bug, not polish.
+- **`/admin/db` (the Data Browser) is not in the admin top rail** — reachable only
+  as one card inside `/admin/system`. A non-technical operator never finds it.
+  **Add it to the rail** (`app/(admin)/layout.tsx`, Database icon).
+- **Button hierarchy is inverted on `/admin/genesis`:** the destructive
+  `admin-btn-danger` renders *smaller* than the safe `admin-cta-primary`. Bump the
+  primary CTAs (`~12px 22px`, `14px`) and make the danger button visually heavier.
+- **`/admin/db` is too bare:** no section header, no search/filter over the model
+  grid, and "0 rows" vs "couldn't read" look identical. Add a heading, a
+  type-to-filter input (`.admin-input` exists), and distinct empty/error states.
+- **Inline-style sprawl:** `/admin/db` and `/admin/system` duplicate ~30 lines of
+  inline card styling; `/admin/genesis` is hand-rolled inline instead of the
+  `admin-section*` classes. Extract a shared `admin-link-card` class.
+
+---
+
+# WAVE F — THE FORGE (re-engineering & hardening)
+
+## Phase 29 — Radical Re-Engineering & Scale Hardening 🔝 (TOP PRIORITY — final phase, 2026-06-04)
+
+> Anas: "We've run out of *features* to add. The next high-leverage move is to
+> radically re-engineer the system itself — the file structure, the code quality,
+> and the size — and make sure it never struggles when 100–200 people use it.
+> This is the one to run with UltraCode (multi-agent orchestration)."
+
+**Why now.** The product surface is feature-complete enough to demo and sell. The
+remaining risk is no longer "missing capability" — it's **internal entropy**:
+god-files, a flat `lib/`, an accreted 9.8k-line global stylesheet, dead code, zero
+UI/API tests, and a database layer with no connection pooling. None of this is
+visible in a demo; all of it slows every future change and threatens reliability
+under real concurrent load. Phase 29 pays that debt down deliberately, in safe,
+test-guarded slices — **behaviour-preserving by contract** (no feature changes;
+every slice must keep `tsc` + `lint` + tests + `next build` green and produce an
+identical UI).
+
+**Hard metrics (2026-06-04 audit baseline).**
+- ~121,600 LOC of source: `app/` 66.4k · `lib/` 26.4k · `components/` 22.4k.
+- **`lib/` is flat:** 76 of 179 files sit in the root — the #1 navigability smell.
+- **`app/globals.css` = 9,851 lines** (115 `@keyframes`), plus ~4.6k lines of
+  scattered route CSS (incl. two duplicate `audit.css`). ~14.5k lines of CSS total.
+- **God-files:** `export/html/[type]/route.ts` (1,086), `workspace/operations`
+  (995), `LoginCosmos.tsx` (884), `companies/[id]` (788), `dashboard` (760),
+  `audit-360` (681), `users/[id]` (680); brain UI `Conversational` (738),
+  `CausalStudio` (705), `GraphCanvas` (682), `Scenario` (656).
+- **Confirmed dead code:** `lib/toast.client.ts` (0 refs) and `lib/alertEvaluator.ts`
+  (476 lines, 0 refs, duplicates the live `lib/alertEngine.ts`). Plus low-value
+  satellites: `aiEngineExtra.ts`, `importRateLimit.ts` (vs `rateLimit.ts`).
+- **Tests:** 55 files, **100% under `lib/`**. `app/` (134 routes, 25 API endpoints)
+  and `components/` have **zero tests** — the biggest quality gap.
+- TODO/FIXME debt is tiny (2). This is a *structure/size/quality* problem, not an
+  unfinished-work problem. (Disk: 1.4 GB is just `.next` + `node_modules` cache —
+  not a git problem.)
+
+**Workstreams (each a self-contained, test-guarded slice — ideal for parallel agents).**
+1. **Kill dead code (quick win, near-zero risk).** Delete `lib/toast.client.ts` +
+   `lib/alertEvaluator.ts`; fold `aiEngineExtra.ts`→`aiEngine.ts`,
+   `importRateLimit.ts`→`rateLimit.ts`. ~750 LOC gone, one duplicate alert path removed.
+2. **Modularize the CSS (highest single payoff).** Split `globals.css` into
+   `tokens` + `base/` + per-component files; extract the 115 keyframes into one
+   `animations.css`; dedupe the two `audit.css`. Kills the worst file and global
+   collisions.
+3. **Reorganize `lib/` into domains** (`auth/ finance/ ai/ alerts/ import/ export/
+   db/ i18n/ …`). Touches hundreds of `@/lib` imports — do it as one mechanical,
+   codemod-style pass with a green build at the end. Mirror it in a multi-file
+   Prisma schema (the 2,036-line schema is the single largest file).
+4. **Split god-files.** Export route → per-type renderers in `lib/export/`; heavy
+   pages (operations/companies/dashboard/audit-360/users) → server data modules +
+   child components; brain UI (Conversational/CausalStudio/GraphCanvas/Scenario) →
+   extract hooks from rendering.
+5. **A test floor for the untested surface.** Smoke/contract tests for the 25 API
+   routes + the top pages; this de-risks every other slice.
+6. **Scale hardening — the 100–200-user contract (see below).**
+
+**Scale hardening — answering "will it struggle at 100–200 users?"**
+Today: **10–15 concurrent users — yes, comfortably.** The render path does no heavy
+in-process compute and no blocking LLM calls; the Prisma client is a proper
+singleton; SSE is clean. **100–200 — not yet**, because:
+- **No DB connection pooling.** Railway Postgres is a *direct* connection; Prisma's
+  default pool (~9–17/instance) exhausts under load. The `.env.production.example`
+  "pgBouncer" claim is aspirational/false. **Fix:** enable **Prisma Accelerate**
+  (drop-in) or a **PgBouncer** sidecar with a `directUrl` for migrations. *This one
+  change unlocks 100–200.*
+- **Dashboard is `force-dynamic` + ~22 uncached queries/load** (grabs 15–20
+  connections at once). **Fix:** add `revalidate`/`unstable_cache` to the KPI
+  aggregates.
+- **One stray pool:** `app/api/seed/route.ts` does `new PrismaClient()` — use the
+  shared `prismaUnscoped`.
+- **Single-replica-only:** in-memory realtime store + dev-style global client.
+  **Keep `numReplicas = 1`** until the realtime store moves to Redis; horizontal
+  scaling today would split presence + multiply pools.
+- A few unbounded `findMany` on the dashboard (`transaction`, `marketStock`,
+  `activityLog`, `company`) want `take:` limits as data grows.
+
+**Definition of done.** Every slice ships behind a green gate; the app is
+demonstrably identical to use; `lib/` is domain-organized; `globals.css` is
+decomposed; dead code is gone; the API surface has a smoke-test floor; and the DB
+sits behind a pooler with the dashboard cached — verified to hold 100–200
+concurrent sessions in a load test.
+
+**Aesthetic.** None — this phase changes no pixels by design. The only visible
+artifact is speed and stability.
+
+**Effort.** Large but parallelizable — the natural UltraCode engagement: fan out
+the independent slices (1–5) across agents, serialize the risky `lib/` reorg (3),
+land the scale fixes (6) as their own PR. **Depends on.** Nothing; it's the safest
+when feature work is paused.

@@ -476,3 +476,123 @@ describe("applyWorkspaceScope — Phase ISO-2 dual-company-FK scoping (SupplyFor
     expect(calls[1].action).toBe("update");
   });
 });
+
+describe("applyWorkspaceScope — Phase ISO-4 shared-company scoping (AIInsight, NULL = group-wide)", () => {
+  function rowFakeNext(probeRow: any) {
+    const calls: any[] = [];
+    const next = async (p: any) => {
+      calls.push(JSON.parse(JSON.stringify(p)));
+      if (p.action === "findUnique") return probeRow;
+      return { ok: true };
+    };
+    return { next, calls };
+  }
+
+  it("no workspace (ADMIN / cron) => passes through unchanged, sees everything", async () => {
+    const { next, calls } = fakeNext();
+    await applyWorkspaceScope(
+      { model: "AIInsight", action: "findMany", args: { where: { status: "OPEN" } } },
+      next,
+      null,
+    );
+    expect(calls[0].args).toEqual({ where: { status: "OPEN" } });
+  });
+
+  it("findMany ANDs an OR-of-(group-wide, mine) with existing filters", async () => {
+    const { next, calls } = fakeNext();
+    await applyWorkspaceScope(
+      { model: "AIInsight", action: "findMany", args: { where: { status: "OPEN" } } },
+      next,
+      "ARENA",
+    );
+    expect(calls[0].args.where).toEqual({
+      AND: [
+        { status: "OPEN" },
+        { OR: [{ companyId: null }, { companyId: "ARENA" }] },
+      ],
+    });
+  });
+
+  it("findUnique returns a GROUP-WIDE (companyId null) insight to any workspace", async () => {
+    const { next } = rowFakeNext({ id: "i1", companyId: null });
+    const row = await applyWorkspaceScope(
+      { model: "AIInsight", action: "findUnique", args: { where: { id: "i1" } } },
+      next,
+      "LORAN",
+    );
+    expect(row).not.toBeNull();
+  });
+
+  it("findUnique returns a company-pinned insight to its OWN workspace", async () => {
+    const { next } = rowFakeNext({ id: "i1", companyId: "ARENA" });
+    const row = await applyWorkspaceScope(
+      { model: "AIInsight", action: "findUnique", args: { where: { id: "i1" } } },
+      next,
+      "ARENA",
+    );
+    expect(row).not.toBeNull();
+  });
+
+  it("findUnique HIDES a company-pinned insight from a third-party workspace", async () => {
+    const { next } = rowFakeNext({ id: "i1", companyId: "ARENA" });
+    const row = await applyWorkspaceScope(
+      { model: "AIInsight", action: "findUnique", args: { where: { id: "i1" } } },
+      next,
+      "LORAN",
+    );
+    expect(row).toBeNull();
+  });
+
+  it("create ALLOWED group-wide (companyId absent) from any workspace", async () => {
+    const { next, calls } = fakeNext();
+    await applyWorkspaceScope(
+      { model: "AIInsight", action: "create", args: { data: { title: "engine" } } },
+      next,
+      "LORAN",
+    );
+    expect(calls.length).toBe(1);
+  });
+
+  it("create ALLOWED company-pinned when it targets the active workspace", async () => {
+    const { next, calls } = fakeNext();
+    await applyWorkspaceScope(
+      { model: "AIInsight", action: "create", args: { data: { title: "x", companyId: "ARENA" } } },
+      next,
+      "ARENA",
+    );
+    expect(calls.length).toBe(1);
+  });
+
+  it("create BLOCKED when pinned to a FOREIGN company", async () => {
+    const { next } = fakeNext();
+    await expect(
+      applyWorkspaceScope(
+        { model: "AIInsight", action: "create", args: { data: { title: "x", companyId: "ARENA" } } },
+        next,
+        "LORAN",
+      ),
+    ).rejects.toThrow(/cross-workspace create/i);
+  });
+
+  it("update by-id BLOCKED on a foreign company-pinned insight", async () => {
+    const { next } = rowFakeNext({ id: "i1", companyId: "ARENA" });
+    await expect(
+      applyWorkspaceScope(
+        { model: "AIInsight", action: "update", args: { where: { id: "i1" }, data: { status: "RESOLVED" } } },
+        next,
+        "LORAN",
+      ),
+    ).rejects.toThrow(/cross-workspace write/i);
+  });
+
+  it("update by-id ALLOWED on a group-wide insight (companyId null)", async () => {
+    const { next, calls } = rowFakeNext({ id: "i1", companyId: null });
+    await applyWorkspaceScope(
+      { model: "AIInsight", action: "update", args: { where: { id: "i1" }, data: { status: "RESOLVED" } } },
+      next,
+      "LORAN",
+    );
+    expect(calls.length).toBe(2); // probe + update
+    expect(calls[1].action).toBe("update");
+  });
+});

@@ -166,21 +166,25 @@ export async function advanceProjectStage(formData: FormData): Promise<void> {
 }
 
 /**
- * Dismiss a brain signal. AIInsight isn't workspace-scoped (it carries
- * `module`, not companyId) so we use the unscoped client and only flip
- * status — never delete (soft, auditable).
+ * Dismiss a brain signal. ISO-4 — AIInsight is now workspace-scoped via the
+ * shared-company plane (NULL companyId = group-wide, else company-pinned), so
+ * we use the SCOPED client: a pinned operator sees only group-wide + own-
+ * company insights, and the by-id write guard blocks flipping a foreign
+ * company's signal. The null-check below doubles as the ownership bail (the
+ * scoped findUnique returns null for a foreign-company row). Only flips status
+ * — never deletes (soft, auditable).
  */
 export async function dismissSignal(formData: FormData): Promise<void> {
   const user = await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
 
-  const insight = await prismaUnscoped.aIInsight.findUnique({
+  const insight = await prisma.aIInsight.findUnique({
     where: { id },
   });
   if (!insight || insight.status !== "OPEN") return;
 
-  await prismaUnscoped.aIInsight.update({
+  await prisma.aIInsight.update({
     where: { id },
     data: { status: "DISMISSED" },
   });
@@ -218,7 +222,9 @@ export async function acceptSignal(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "");
   if (!id) return;
 
-  const insight = await prismaUnscoped.aIInsight.findUnique({
+  // ISO-4 — scoped read: returns null for a foreign-company insight, so the
+  // status guard below also bails on cross-company ids.
+  const insight = await prisma.aIInsight.findUnique({
     where: { id },
   });
   if (!insight || insight.status !== "OPEN") return;
@@ -248,8 +254,9 @@ export async function acceptSignal(formData: FormData): Promise<void> {
     },
   });
 
-  // Signal leaves the open feed — it's been turned into a plan.
-  await prismaUnscoped.aIInsight.update({
+  // Signal leaves the open feed — it's been turned into a plan. Scoped client
+  // → by-id write guard re-checks ownership.
+  await prisma.aIInsight.update({
     where: { id },
     data: { status: "ACTIONED" },
   });

@@ -20,10 +20,23 @@ model AIInsight {
   confidence  Float?
   authorId    String?
   author      User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  // Phase ISO-4 — workspace scoping. NULLABLE on purpose: a NULL companyId
+  // is a GROUP-WIDE insight (engine heuristics like cross-company synergy /
+  // group cash-burn, plus an ADMIN's manual notes) and stays visible across
+  // every workspace; a non-null companyId pins the insight to one company so
+  // a workspace-pinned operator only sees its own company's signals + the
+  // group-wide ones. Mirrors AlertRule.scopeCompanyId's null-is-group-wide
+  // convention. SetNull so deleting a company demotes its insights to
+  // group-wide rather than cascading them away. Scoped via the
+  // SHARED_COMPANY_SCOPED_MODELS plane in lib/tenancy/workspaceScope.ts.
+  companyId   String?
+  company     Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
   status      String   @default("OPEN")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   deletedAt   DateTime?
+
+  @@index([companyId])
 }
 
 // =====================================================================

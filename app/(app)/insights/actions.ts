@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db/db";
+import { getActiveWorkspaceId } from "@/lib/tenancy/workspace";
 import { requireUser } from "@/lib/auth/session";
 import { requireRole } from "@/lib/auth/authz";
 import { softDelete, softRestore, deletedLabel, restoredLabel } from "@/lib/db/softDelete";
@@ -28,6 +29,10 @@ export async function createInsight(formData: FormData) {
     title: formData.get("title"),
     body: formData.get("body"),
   });
+  // ISO-4 — pin a manually-authored insight to the author's active workspace
+  // so a pinned operator's signals stay company-scoped; a cross-company ADMIN
+  // (no active workspace) leaves it NULL = group-wide. The scoped middleware
+  // enforces the same rule on the write.
   const created = await prisma.aIInsight.create({
     data: {
       module: data.module,
@@ -35,6 +40,7 @@ export async function createInsight(formData: FormData) {
       title: data.title,
       body: data.body,
       authorId: user.id,
+      companyId: getActiveWorkspaceId(),
       status: "OPEN",
     },
   });
@@ -56,7 +62,12 @@ export async function setInsightStatus(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "");
   if (!id || !status) return;
+  // ISO-4 ownership — the scoped client nulls an insight outside the caller's
+  // workspace (shared-company guard), so a null row means foreign or gone.
+  // Bail before the write so a pinned operator can't flip another company's
+  // insight by id.
   const before = await prisma.aIInsight.findUnique({ where: { id } });
+  if (!before) return;
   await prisma.aIInsight.update({ where: { id }, data: { status } });
   if (before) {
     await logActivity({
@@ -107,7 +118,9 @@ export async function deleteInsight(formData: FormData) {
   const me = await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
+  // ISO-4 ownership — null row = foreign/gone; bail before soft-deleting.
   const before = await prisma.aIInsight.findUnique({ where: { id } });
+  if (!before) return;
   await softDelete("insight", id);
   if (before) {
     await logActivity({
@@ -176,17 +189,18 @@ export async function restoreInsight(formData: FormData) {
   await requireUser();
   const id = String(formData.get("id") ?? "");
   if (!id) return;
-  await softRestore("insight", id);
+  // ISO-4 ownership — findUnique returns the (soft-deleted) row only when the
+  // caller's workspace owns it or it's group-wide; null = foreign/gone, bail.
   const after = await prisma.aIInsight.findUnique({ where: { id } });
-  if (after) {
-    await logActivity({
-      action: "RESTORE",
-      entity: "INSIGHT",
-      entityId: id,
-      summary: `استعادة إشارة "${after.title}"`,
-      summaryEn: `Restored insight "${after.title}"`,
-    });
-  }
+  if (!after) return;
+  await softRestore("insight", id);
+  await logActivity({
+    action: "RESTORE",
+    entity: "INSIGHT",
+    entityId: id,
+    summary: `استعادة إشارة "${after.title}"`,
+    summaryEn: `Restored insight "${after.title}"`,
+  });
   flashToast({
     type: "restored",
     entity: "insight",

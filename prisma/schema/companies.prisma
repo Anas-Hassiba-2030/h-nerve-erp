@@ -34,4 +34,5 @@ model Company {
   esgScores     SustainabilityScore[]
   marketStocks  MarketStock[]
   alertRules    AlertRule[]
+  aiInsights    AIInsight[]
 }

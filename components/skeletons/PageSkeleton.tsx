@@ -1,4 +1,4 @@
-import { PageContainer } from "@/components/PageContainer";
+import { PageContainer } from "@/components/layout/PageContainer";
 
 // Page-level skeleton that mirrors the real PageHeader / Topbar chrome — so
 // loading.tsx pages don't shift layout when the actual page mounts.

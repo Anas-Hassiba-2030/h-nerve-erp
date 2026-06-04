@@ -1,6 +1,6 @@
 import { Bell, Plus } from "lucide-react";
-import { EmptyState } from "@/components/EmptyState";
-import { DeleteButton } from "@/components/DeleteButton";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { DeleteButton } from "@/components/ui/DeleteButton";
 import { prisma } from "@/lib/db/db";
 import { ALERT_KINDS, type AlertKind } from "@/lib/alerts/alertEngine";
 import { formatNumber } from "@/lib/utils/utils";

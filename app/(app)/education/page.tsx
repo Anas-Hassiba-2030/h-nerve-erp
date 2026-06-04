@@ -7,9 +7,9 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { GraduationCap, Plus } from "lucide-react";
-import { ExportMenu } from "@/components/ExportMenu";
-import { StatusBadge } from "@/components/StatusBadge";
-import { EmptyState } from "@/components/EmptyState";
+import { ExportMenu } from "@/components/ui/ExportMenu";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { prisma } from "@/lib/db/db";
 import { formatMoney, formatNumber } from "@/lib/utils/utils";

@@ -9,7 +9,7 @@ import {
   Sparkles,
   ChevronLeft,
 } from "lucide-react";
-import { Logo } from "@/components/Logo";
+import { Logo } from "@/components/layout/Logo";
 import { getLocale } from "@/lib/i18n/i18n.server";
 
 // Branded 404 — full-page hero with the H-Nerve mark + breadcrumb-style

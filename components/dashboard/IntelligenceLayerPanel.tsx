@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Brain } from "lucide-react";
 import { DaylightPanel } from "@/components/orrery/daylight";
-import { BrainStatusBadge } from "@/components/BrainStatusBadge";
+import { BrainStatusBadge } from "@/components/brain/BrainStatusBadge";
 import { formatNumber, localizeUnit } from "@/lib/utils/utils";
 import type { DashboardData } from "@/app/(app)/dashboard/data";
 

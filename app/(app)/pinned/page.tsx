@@ -10,7 +10,7 @@ import {
   Sparkles, ListChecks, FlaskConical, Wallet,
 } from "lucide-react";
 import Link from "next/link";
-import { PinButton } from "@/components/PinButton";
+import { PinButton } from "@/components/ui/PinButton";
 import { listPins } from "@/lib/utils/pins";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getLocale } from "@/lib/i18n/i18n.server";

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BrainStatusBadge } from "@/components/BrainStatusBadge";
+import { BrainStatusBadge } from "@/components/brain/BrainStatusBadge";
 import { prisma } from "@/lib/db/db";
 import { computeIQ } from "@/lib/brain/meta.reflector";
 import { llmConfig } from "@/lib/brain/llm";

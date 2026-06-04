@@ -10,7 +10,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/db";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import { formatNumber, orderStatusBadge, ORDER_STATUS_AR, ORDER_STATUS_EN } from "@/lib/utils/utils";
-import { AdminFamilyNav } from "@/components/AdminFamilyNav";
+import { AdminFamilyNav } from "@/components/layout/AdminFamilyNav";
 import { NewCustomerForm, EditCustomerForm, DeleteCustomerButton } from "./CustomerForms";
 import "../../daylight.css";
 

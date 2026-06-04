@@ -1,5 +1,5 @@
-import { Sparkline } from "@/components/Sparkline";
-import { ExportMenu } from "@/components/ExportMenu";
+import { Sparkline } from "@/components/ui/Sparkline";
+import { ExportMenu } from "@/components/ui/ExportMenu";
 import { prisma } from "@/lib/db/db";
 import { formatNumber } from "@/lib/utils/utils";
 import { getLocale } from "@/lib/i18n/i18n.server";

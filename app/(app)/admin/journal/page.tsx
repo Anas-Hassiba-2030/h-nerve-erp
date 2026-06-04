@@ -12,7 +12,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/db";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import { formatMoney2, formatNumber, formatDateTime } from "@/lib/utils/utils";
-import { AdminFamilyNav } from "@/components/AdminFamilyNav";
+import { AdminFamilyNav } from "@/components/layout/AdminFamilyNav";
 
 import "../../daylight.css";
 

@@ -15,15 +15,15 @@
 import dynamic from "next/dynamic";
 
 const OnboardingTour = dynamic(
-  () => import("@/components/OnboardingTour").then((m) => m.OnboardingTour),
+  () => import("@/components/layout/OnboardingTour").then((m) => m.OnboardingTour),
   { ssr: false },
 );
 const WelcomeSplash = dynamic(
-  () => import("@/components/WelcomeSplash").then((m) => m.WelcomeSplash),
+  () => import("@/components/layout/WelcomeSplash").then((m) => m.WelcomeSplash),
   { ssr: false },
 );
 const MorningBrief = dynamic(
-  () => import("@/components/MorningBrief").then((m) => m.MorningBrief),
+  () => import("@/components/brain/MorningBrief").then((m) => m.MorningBrief),
   { ssr: false },
 );
 const RealtimePresence = dynamic(
@@ -31,7 +31,7 @@ const RealtimePresence = dynamic(
   { ssr: false },
 );
 const DocumentDropZone = dynamic(
-  () => import("@/components/DocumentDropZone").then((m) => m.DocumentDropZone),
+  () => import("@/components/layout/DocumentDropZone").then((m) => m.DocumentDropZone),
   { ssr: false },
 );
 

@@ -1,5 +1,5 @@
 // Backwards-compatibility shim: existing pages import { Topbar } from
-// "@/components/Topbar". The new look-and-feel lives in PageHeader, so
+// "@/components/layout/Topbar". The new look-and-feel lives in PageHeader, so
 // Topbar simply forwards to it. This means every legacy page automatically
 // gets the new 2-row header without touching its source.
 

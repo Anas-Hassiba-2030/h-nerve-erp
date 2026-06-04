@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Wallet, Plus } from "lucide-react";
-import { ExportMenu } from "@/components/ExportMenu";
-import { EmptyState } from "@/components/EmptyState";
+import { ExportMenu } from "@/components/ui/ExportMenu";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { TransactionTable } from "@/components/finance/TransactionTable";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getCurrentUser } from "@/lib/auth/session";

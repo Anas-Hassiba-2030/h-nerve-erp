@@ -8,7 +8,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
-import { PinButton } from "@/components/PinButton";
+import { PinButton } from "@/components/ui/PinButton";
 import { enterWorkspace } from "@/app/actions/workspace";
 import { getCompanyDetail } from "./data";
 import { CompanyBrandCover } from "./_components/CompanyBrandCover";

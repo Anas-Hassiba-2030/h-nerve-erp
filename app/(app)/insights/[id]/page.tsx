@@ -11,9 +11,9 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
-import { StatusBadge } from "@/components/StatusBadge";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import "../../daylight.css";
-import { PinButton } from "@/components/PinButton";
+import { PinButton } from "@/components/ui/PinButton";
 import { prisma } from "@/lib/db/db";
 import { isPinned } from "@/lib/utils/pins";
 import {

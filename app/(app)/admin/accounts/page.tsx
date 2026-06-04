@@ -14,7 +14,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/db";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { formatMoney2, formatNumber } from "@/lib/utils/utils";
-import { AdminFamilyNav } from "@/components/AdminFamilyNav";
+import { AdminFamilyNav } from "@/components/layout/AdminFamilyNav";
 import { NewAccountForm } from "./AccountForms";
 import "../../daylight.css";
 

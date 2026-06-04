@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LocaleSwitch } from "@/components/LocaleSwitch";
+import { LocaleSwitch } from "@/components/nav/LocaleSwitch";
 import type { Locale } from "@/lib/i18n/i18n";
 import { MiniOrrery } from "./MiniOrrery";
 

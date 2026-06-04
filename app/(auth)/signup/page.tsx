@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { UserPlus } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
-import { Logo } from "@/components/Logo";
+import { Logo } from "@/components/layout/Logo";
 import { signupAction } from "./actions";
 
 export default async function SignupPage({

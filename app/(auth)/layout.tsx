@@ -1,5 +1,5 @@
-import { LocaleSwitch } from "@/components/LocaleSwitch";
-import { ThemeSwitch } from "@/components/ThemeSwitch";
+import { LocaleSwitch } from "@/components/nav/LocaleSwitch";
+import { ThemeSwitch } from "@/components/nav/ThemeSwitch";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getTheme } from "@/lib/theme/theme.server";
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { DeleteButton } from "@/components/DeleteButton";
+import { DeleteButton } from "@/components/ui/DeleteButton";
 import { deleteFarm, deleteCrop } from "./actions";
 
 // Tab shell for /farms, mirroring docs/design/system/sections/loran.html:

@@ -1,18 +1,18 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
-import { Footer } from "@/components/Footer";
+import { Footer } from "@/components/layout/Footer";
 import { ToastProvider } from "@/components/Toast/ToastProvider";
-import { QuickAddFAB } from "@/components/QuickAddFAB";
-import { ViewAsBanner } from "@/components/ViewAsBanner";
-import { Conversational } from "@/components/Conversational";
-import { TimeScrubber } from "@/components/TimeScrubber";
-import { TimeMachineBanner } from "@/components/TimeMachineBanner";
+import { QuickAddFAB } from "@/components/nav/QuickAddFAB";
+import { ViewAsBanner } from "@/components/layout/ViewAsBanner";
+import { Conversational } from "@/components/brain/Conversational";
+import { TimeScrubber } from "@/components/timemachine/TimeScrubber";
+import { TimeMachineBanner } from "@/components/timemachine/TimeMachineBanner";
 import { getAsOf } from "@/lib/utils/timemachine";
 // Phase 26.8 — non-critical overlays (tour, splash, morning brief, presence
 // SSE, drop zone) are lazy-loaded client-side to keep them off the critical
 // render path. See components/DeferredOverlays.tsx.
-import { DeferredOverlays } from "@/components/DeferredOverlays";
+import { DeferredOverlays } from "@/components/layout/DeferredOverlays";
 // CROSS-TENANT INTENT: the (app) layout reads role permissions unscoped
 // (must resolve for any companyId the cookie points at, including a
 // superadmin "view as" context).
@@ -27,7 +27,7 @@ import { OrbitReturn } from "@/components/orrery/OrbitReturn";
 import { DiveReveal } from "@/components/orrery/DiveReveal";
 import { ConstellationRail } from "@/components/orrery/ConstellationRail";
 import { FabRail } from "@/components/orrery/FabRail";
-import { MorningBrief } from "@/components/MorningBrief";
+import { MorningBrief } from "@/components/brain/MorningBrief";
 import "./living.css";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {

@@ -9,9 +9,9 @@
 // Phase 11 of docs/PHASES-INTELLIGENCE.md.
 
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { ProvisioningClient } from "./ProvisioningClient";
-import { getLocale, getMessages } from "@/lib/i18n.server";
+import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
 
 export default async function ProvisioningPage({
   params,

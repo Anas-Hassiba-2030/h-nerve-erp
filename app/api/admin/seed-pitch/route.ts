@@ -23,7 +23,7 @@
 // Re-running is safe: seedDemo/seedPitch upsert or skip-if-present; seedOperator
 // re-wipes + re-seeds deterministically.
 import { NextRequest, NextResponse } from "next/server";
-import { scoped } from "@/lib/logger";
+import { scoped } from "@/lib/utils/logger";
 
 const log = scoped("seed-pitch");
 
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
   // screenshot) from wiping a populated production DB — an intentional
   // pitch-reset still works by passing force.
   if (body.force !== true) {
-    const { prismaUnscoped } = await import("@/lib/db");
+    const { prismaUnscoped } = await import("@/lib/db/db");
     const companies = await prismaUnscoped.company.count().catch(() => 0);
     if (companies > 0) {
       return NextResponse.json(
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
     steps.gaps = "ok";
 
     // Report what now exists so the caller can confirm it landed.
-    const { prismaUnscoped: prisma } = await import("@/lib/db");
+    const { prismaUnscoped: prisma } = await import("@/lib/db/db");
     const [companies, hotels, bookings, products, suppliers, transactions, alerts, documents] =
       await Promise.all([
         prisma.company.count(),

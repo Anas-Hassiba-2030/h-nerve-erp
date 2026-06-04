@@ -14,9 +14,9 @@ import {
   DaylightKpi,
   DaylightPanel,
 } from "@/components/orrery/daylight";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
-import { formatNumber } from "@/lib/utils";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { formatNumber } from "@/lib/utils/utils";
 import { llmConfig } from "@/lib/brain/llm";
 import { Users2, ChevronLeft, MessagesSquare, ArrowRight } from "lucide-react";
 import { convene } from "./actions";

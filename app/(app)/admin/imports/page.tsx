@@ -12,9 +12,9 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { ArrowRight, Inbox, Send, Settings2, FilterX } from "lucide-react";
 import type { Prisma } from "@prisma/client";
-import { getLocale } from "@/lib/i18n.server";
-import { getCurrentUser } from "@/lib/session";
-import { prisma } from "@/lib/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/db";
 import {
   DaylightShell,
   DaylightHeader,
@@ -22,8 +22,8 @@ import {
   DaylightKpi,
   DaylightPanel,
 } from "@/components/orrery/daylight";
-import { formatDateTime, formatNumber, formatMoney2 } from "@/lib/utils";
-import { sourceMatchesSystem } from "@/lib/importMapping";
+import { formatDateTime, formatNumber, formatMoney2 } from "@/lib/utils/utils";
+import { sourceMatchesSystem } from "@/lib/import/importMapping";
 import { ClearTestImportsButton } from "./ClearTestImportsButton";
 import { CopyButton } from "./CopyButton";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";

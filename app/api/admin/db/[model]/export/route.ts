@@ -9,9 +9,9 @@
 // The [model] param is validated against the DMMF before any prisma access.
 
 import { NextRequest, NextResponse } from "next/server";
-import { prismaUnscoped } from "@/lib/db";
-import { getCurrentUser } from "@/lib/session";
-import { getModel, formatCell } from "@/lib/db.introspect";
+import { prismaUnscoped } from "@/lib/db/db";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getModel, formatCell } from "@/lib/db/db.introspect";
 
 export const dynamic = "force-dynamic";
 

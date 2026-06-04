@@ -12,7 +12,7 @@
 // Read-only: this never mutates. It respects the brain's read-mostly boundary.
 // Uses the scoped `prisma` client, so it stays tenant-safe by default.
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { rankByRelevance, type RetrievalHit } from "./retriever";
 import { getEmbedder, cosineSim } from "./embeddings";
 import { sanitizeForPrompt } from "./ragGuard";

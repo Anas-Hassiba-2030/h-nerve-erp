@@ -11,11 +11,11 @@
 // foreign-tenant row simply 404s for a pinned user.
 
 import { revalidatePath } from "next/cache";
-import { getCurrentUser } from "@/lib/session";
-import { getLocale } from "@/lib/i18n.server";
-import { prisma } from "@/lib/db";
-import { flashToast } from "@/lib/toast";
-import { resolveAdminTenantId } from "@/lib/adminActionScope";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { flashToast } from "@/lib/utils/toast";
+import { resolveAdminTenantId } from "@/lib/auth/adminActionScope";
 
 async function gate() {
   const user = await getCurrentUser();

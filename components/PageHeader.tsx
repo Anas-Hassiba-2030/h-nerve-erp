@@ -20,10 +20,10 @@ import {
 } from "./NotificationCenter";
 import { KeyboardShortcuts } from "./KeyboardShortcuts";
 import { SidebarHamburger } from "./SidebarDrawer";
-import { getLocale } from "@/lib/i18n.server";
-import { getTheme } from "@/lib/theme.server";
-import { getCurrentUser } from "@/lib/session";
-import { prisma } from "@/lib/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getTheme } from "@/lib/theme/theme.server";
+import { getCurrentUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/db";
 
 export type Crumb = { href: string; label: string };
 

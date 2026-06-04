@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { getLocale } from "@/lib/i18n.server";
-import { getCurrentUser } from "@/lib/session";
-import { hasRole } from "@/lib/authz";
-import { listDigests } from "@/lib/digest";
-import { formatNumber } from "@/lib/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
+import { hasRole } from "@/lib/auth/authz";
+import { listDigests } from "@/lib/ai/digest";
+import { formatNumber } from "@/lib/utils/utils";
 import { generateNewDigest } from "./actions";
 import "../daylight.css";
 import "./digest.css";

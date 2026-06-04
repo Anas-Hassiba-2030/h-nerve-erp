@@ -10,8 +10,8 @@
 // plain <form action={...}>, so no client runtime is required.
 
 import Link from "next/link";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { TrustChip } from "@/components/brain/TrustChip";
 import {
   generateInsightPlan,

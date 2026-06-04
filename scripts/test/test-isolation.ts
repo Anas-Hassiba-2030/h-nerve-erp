@@ -17,7 +17,7 @@
 // not threaded into the where-clause.
 
 import { PrismaClient } from "@prisma/client";
-import { applyWorkspaceScope } from "@/lib/workspaceScope";
+import { applyWorkspaceScope } from "@/lib/tenancy/workspaceScope";
 
 const prisma = new PrismaClient();
 

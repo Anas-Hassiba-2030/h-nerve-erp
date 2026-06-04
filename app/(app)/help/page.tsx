@@ -5,7 +5,7 @@
 // the ivory daylight register. First-class onboarding so new users can
 // self-serve.
 
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import "../daylight.css";
 import "./info.css";
 

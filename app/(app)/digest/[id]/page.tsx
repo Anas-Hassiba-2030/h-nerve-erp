@@ -8,10 +8,10 @@ import {
   Sparkles,
 } from "lucide-react";
 import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
-import { isSafeId } from "@/lib/authz";
-import { formatNumber } from "@/lib/utils";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { isSafeId } from "@/lib/auth/authz";
+import { formatNumber } from "@/lib/utils/utils";
 import "../../daylight.css";
 
 // Renders a digest's body. Bodies are stored as light Markdown (## headings,

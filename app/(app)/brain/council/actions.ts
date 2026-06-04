@@ -2,10 +2,10 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { requireUser } from "@/lib/session";
-import { requireRole } from "@/lib/authz";
+import { requireUser } from "@/lib/auth/session";
+import { requireRole } from "@/lib/auth/authz";
 import { council } from "@/lib/brain/council.live";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 
 export async function convene(formData: FormData): Promise<void> {
   await requireUser();

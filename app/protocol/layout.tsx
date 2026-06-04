@@ -6,7 +6,7 @@
 // the page. The <html dir lang> comes from the root layout.
 
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/session";
+import { getCurrentUser } from "@/lib/auth/session";
 
 export default async function ProtocolLayout({
   children,

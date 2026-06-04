@@ -13,8 +13,8 @@ export const dynamic = "force-dynamic";
 // Server Component: every control maps to an existing server action via a plain
 // <form action={...}>, so no client runtime is required.
 
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { PROVIDERS } from "@/lib/integrations/catalog";
 import { connect, disconnect } from "./actions";
 import "../daylight.css";

@@ -14,14 +14,14 @@ import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrer
 import { StatusBadge } from "@/components/StatusBadge";
 import "../../daylight.css";
 import { PinButton } from "@/components/PinButton";
-import { prisma } from "@/lib/db";
-import { isPinned } from "@/lib/pins";
+import { prisma } from "@/lib/db/db";
+import { isPinned } from "@/lib/utils/pins";
 import {
   formatRelative,
   formatDateTime,
   severityAr,
-} from "@/lib/utils";
-import { rankById } from "@/lib/gamification";
+} from "@/lib/utils/utils";
+import { rankById } from "@/lib/utils/gamification";
 
 const SEVERITY_ICON: Record<string, typeof Sparkles> = {
   CRITICAL: AlertTriangle,

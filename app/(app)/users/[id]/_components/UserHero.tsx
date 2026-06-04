@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Mail, Clock } from "lucide-react";
-import { getLocale } from "@/lib/i18n.server";
-import { formatNumber, formatRelative, ROLES_AR, ROLES_EN, loc } from "@/lib/utils";
-import { RANKS } from "@/lib/gamification";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { formatNumber, formatRelative, ROLES_AR, ROLES_EN, loc } from "@/lib/utils/utils";
+import { RANKS } from "@/lib/utils/gamification";
 import type { UserDetail } from "../data";
 
 export function UserHero({

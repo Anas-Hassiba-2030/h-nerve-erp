@@ -8,8 +8,8 @@ import Link from "next/link";
 import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
 import "../../daylight.css";
 import { ArrowLeft, Plug, Power, Save, ShieldCheck } from "lucide-react";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { getProvider, CATEGORIES } from "@/lib/integrations/catalog";
 import { connect, disconnect, saveSettings, connectWithApiKey } from "../actions";
 

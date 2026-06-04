@@ -1,12 +1,12 @@
 import "server-only";
-import { prisma } from "@/lib/db";
-import { COMPANY_BRANDS } from "@/lib/companyBrand";
+import { prisma } from "@/lib/db/db";
+import { COMPANY_BRANDS } from "@/lib/utils/companyBrand";
 import {
   financeAnalytics, hotelsAnalytics, dairyAnalytics, farmsAnalytics,
   supplyAnalytics, sustainabilityAnalytics, projectsAnalytics, marketsAnalytics,
   type ExportAnalytics,
-} from "@/lib/exportAnalytics";
-import { renderKpiGrid, renderTrendChart, renderDistribution, escapeHtml } from "@/lib/exportRender";
+} from "@/lib/export/exportAnalytics";
+import { renderKpiGrid, renderTrendChart, renderDistribution, escapeHtml } from "@/lib/export/exportRender";
 import { NUM, formatGroupCommentary } from "./shell";
 
 export async function renderAll(ar: boolean): Promise<{

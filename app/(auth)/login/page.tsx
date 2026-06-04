@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/session";
-import { getLocale } from "@/lib/i18n.server";
-import { getTheme } from "@/lib/theme.server";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getTheme } from "@/lib/theme/theme.server";
 import { LoginCosmos } from "./LoginCosmos";
 
 // The login is a full-screen cinematic takeover (its own sky, aurora, neural

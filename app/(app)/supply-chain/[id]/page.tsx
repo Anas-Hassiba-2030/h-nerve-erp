@@ -14,18 +14,18 @@ import {
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PinButton } from "@/components/PinButton";
-import { prisma } from "@/lib/db";
-import { isPinned } from "@/lib/pins";
+import { prisma } from "@/lib/db/db";
+import { isPinned } from "@/lib/utils/pins";
 import {
   formatNumber,
   formatPercent,
   formatShortDate,
   formatRelative,
   localizeUnit,
-} from "@/lib/utils";
-import { getCompanyBrand } from "@/lib/companyBrand";
-import { rankById } from "@/lib/gamification";
-import { getLocale } from "@/lib/i18n.server";
+} from "@/lib/utils/utils";
+import { getCompanyBrand } from "@/lib/utils/companyBrand";
+import { rankById } from "@/lib/utils/gamification";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import "../../daylight.css";
 
 const CATEGORY_AR: Record<string, string> = {

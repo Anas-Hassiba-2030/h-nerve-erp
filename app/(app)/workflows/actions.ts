@@ -2,9 +2,9 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { requireUser } from "@/lib/session";
-import { requireRole } from "@/lib/authz";
-import { prisma } from "@/lib/db";
+import { requireUser } from "@/lib/auth/session";
+import { requireRole } from "@/lib/auth/authz";
+import { prisma } from "@/lib/db/db";
 import { getTemplate, defaultParams } from "@/lib/workflows/templates";
 import { runWorkflow, type RunMode } from "@/lib/workflows/runtime";
 import { seedWorkflows } from "@/lib/workflows/seed";

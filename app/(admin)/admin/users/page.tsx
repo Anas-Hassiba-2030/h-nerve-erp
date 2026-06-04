@@ -10,10 +10,10 @@
 // CROSS-TENANT INTENT: the superadmin console must see every Company
 // to populate the user-assignment dropdown.
 import Link from "next/link";
-import { prisma, prismaUnscoped } from "@/lib/db";
+import { prisma, prismaUnscoped } from "@/lib/db/db";
 import type { Prisma } from "@prisma/client";
-import { getLocale, getMessages } from "@/lib/i18n.server";
-import { getCurrentUser } from "@/lib/session";
+import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
 import { roleLabel, ROLES } from "./roles";
 import {
   CreateUserForm,

@@ -16,8 +16,8 @@ import {
   normalizeScope,
   postComment,
   readScope,
-} from "@/lib/realtime";
-import { getCurrentUser } from "@/lib/session";
+} from "@/lib/realtime/realtime";
+import { getCurrentUser } from "@/lib/auth/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

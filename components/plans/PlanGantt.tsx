@@ -11,7 +11,7 @@
 import { CheckCircle2, AlertOctagon, Clock, Hourglass } from "lucide-react";
 import { HeritagePill } from "@/components/heritage";
 import { markStepBlocked, markStepDone } from "@/app/(app)/plans/actions";
-import { pickLocale } from "@/lib/utils";
+import { pickLocale } from "@/lib/utils/utils";
 
 const STATUS_ACCENT: Record<string, string> = {
   PENDING:     "var(--heri-rule-strong)",

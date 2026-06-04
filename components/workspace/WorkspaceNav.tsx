@@ -16,7 +16,7 @@ import {
   GitBranch,
   BrainCircuit,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 export function WorkspaceNav({ ar }: { ar: boolean }) {
   const pathname = usePathname();

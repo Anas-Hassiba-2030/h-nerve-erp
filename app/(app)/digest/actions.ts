@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireUser } from "@/lib/session";
-import { hasRole } from "@/lib/authz";
-import { generateDigest } from "@/lib/digest";
+import { requireUser } from "@/lib/auth/session";
+import { hasRole } from "@/lib/auth/authz";
+import { generateDigest } from "@/lib/ai/digest";
 
 // Spawns a fresh weekly digest. Manager-grade only — these snapshots are
 // expensive (run every heuristic) and become permanent records.

@@ -1,6 +1,6 @@
-import { getLocale } from "@/lib/i18n.server";
-import { prisma } from "@/lib/db";
-import { formatNumber } from "@/lib/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { formatNumber } from "@/lib/utils/utils";
 import "../daylight.css";
 import "./employees.css";
 

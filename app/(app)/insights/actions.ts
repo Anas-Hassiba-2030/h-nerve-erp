@@ -3,14 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/session";
-import { requireRole } from "@/lib/authz";
-import { softDelete, softRestore, deletedLabel, restoredLabel } from "@/lib/softDelete";
-import { flashToast } from "@/lib/toast";
-import { logActivity } from "@/lib/activityLog";
-import { runEngine, persistInsights } from "@/lib/aiEngine";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { requireUser } from "@/lib/auth/session";
+import { requireRole } from "@/lib/auth/authz";
+import { softDelete, softRestore, deletedLabel, restoredLabel } from "@/lib/db/softDelete";
+import { flashToast } from "@/lib/utils/toast";
+import { logActivity } from "@/lib/auth/activityLog";
+import { runEngine, persistInsights } from "@/lib/ai/aiEngine";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { recordFeedback } from "@/lib/brain/feedback.live";
 
 const insightSchema = z.object({

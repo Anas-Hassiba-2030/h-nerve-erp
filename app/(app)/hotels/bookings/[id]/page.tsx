@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
@@ -15,8 +15,8 @@ import {
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PinButton } from "@/components/PinButton";
-import { prisma } from "@/lib/db";
-import { isPinned } from "@/lib/pins";
+import { prisma } from "@/lib/db/db";
+import { isPinned } from "@/lib/utils/pins";
 import {
   formatMoney,
   formatNumber,
@@ -28,8 +28,8 @@ import {
   ROOM_TYPES_EN,
   TIERS_EN,
   loc,
-} from "@/lib/utils";
-import { getCompanyBrand } from "@/lib/companyBrand";
+} from "@/lib/utils/utils";
+import { getCompanyBrand } from "@/lib/utils/companyBrand";
 import "../../../daylight.css";
 
 const COUNTRY_NAMES: Record<string, string> = { JO: "الأردن", BG: "بلغاريا" };

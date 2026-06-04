@@ -1,4 +1,4 @@
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import {
   Users2,
   Calendar,
@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { SectorPill } from "@/components/SectorPill";
 import { StatusBadge } from "@/components/StatusBadge";
-import { formatNumber } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils/utils";
 import type { CompanyDetail } from "../data";
 
 export function CompanyBrandCover({

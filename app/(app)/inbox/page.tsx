@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/session";
-import { getLocale } from "@/lib/i18n.server";
-import { getInboxItems, type InboxItem } from "@/lib/inbox";
-import { formatNumber, formatRelative } from "@/lib/utils";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getInboxItems, type InboxItem } from "@/lib/utils/inbox";
+import { formatNumber, formatRelative } from "@/lib/utils/utils";
 import { InboxFeed, type FeedItem } from "./InboxFeed";
 import "../daylight.css";
 import "./inbox.css";

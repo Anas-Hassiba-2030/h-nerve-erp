@@ -4,8 +4,8 @@
 // (fail-soft, capped). Used by the ⌘K CommandPalette.
 
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/session";
-import { universalSearch } from "@/lib/search";
+import { getCurrentUser } from "@/lib/auth/session";
+import { universalSearch } from "@/lib/utils/search";
 
 export const dynamic = "force-dynamic";
 

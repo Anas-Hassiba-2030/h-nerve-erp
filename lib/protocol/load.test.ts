@@ -12,7 +12,7 @@ const { prisma } = vi.hoisted(() => ({
   prisma: { protocolClause: { findMany: vi.fn() } },
 }));
 
-vi.mock("@/lib/db", () => ({ prisma }));
+vi.mock("@/lib/db/db", () => ({ prisma }));
 
 import { getProtocolClauses } from "./load";
 import { DEFAULT_PROTOCOL_CLAUSES } from "./clauses";

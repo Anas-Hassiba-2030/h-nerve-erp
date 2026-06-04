@@ -1,10 +1,10 @@
 import { Bell, Plus } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { DeleteButton } from "@/components/DeleteButton";
-import { prisma } from "@/lib/db";
-import { ALERT_KINDS, type AlertKind } from "@/lib/alertEngine";
-import { formatNumber } from "@/lib/utils";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { ALERT_KINDS, type AlertKind } from "@/lib/alerts/alertEngine";
+import { formatNumber } from "@/lib/utils/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { toggleRule, seedRules, deleteRule } from "./actions";
 import "../daylight.css";
 import "./alerts.css";

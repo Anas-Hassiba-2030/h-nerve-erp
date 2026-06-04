@@ -6,7 +6,7 @@
 
 import { DaylightShell } from "@/components/orrery/daylight";
 import { WhatIfLab } from "./WhatIfLab";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import "../../daylight.css";
 import "./whatif.css";
 

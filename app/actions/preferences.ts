@@ -2,9 +2,9 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { LOCALE_COOKIE, type Locale } from "@/lib/i18n";
-import { THEME_COOKIE, THEMES, type ThemeId } from "@/lib/theme";
-import { SIDEBAR_COOKIE } from "@/lib/sidebarPref";
+import { LOCALE_COOKIE, type Locale } from "@/lib/i18n/i18n";
+import { THEME_COOKIE, THEMES, type ThemeId } from "@/lib/theme/theme";
+import { SIDEBAR_COOKIE } from "@/lib/utils/sidebarPref";
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
 

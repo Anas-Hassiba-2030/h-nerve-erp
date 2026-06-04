@@ -11,10 +11,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { PinButton } from "@/components/PinButton";
-import { listPins } from "@/lib/pins";
-import { getCurrentUser } from "@/lib/session";
-import { getLocale } from "@/lib/i18n.server";
-import { formatNumber } from "@/lib/utils";
+import { listPins } from "@/lib/utils/pins";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { formatNumber } from "@/lib/utils/utils";
 import "../daylight.css";
 import "./pinned.css";
 

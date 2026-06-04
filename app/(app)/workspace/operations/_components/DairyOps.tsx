@@ -1,7 +1,7 @@
 import { AlertTriangle, ShieldCheck } from "lucide-react";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { advanceBatchStatus } from "../../actions";
-import { formatNumber } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils/utils";
 import type { DairyOpsData } from "../data";
 import { Empty } from "./Empty";
 

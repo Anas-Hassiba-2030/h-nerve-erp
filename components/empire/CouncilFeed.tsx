@@ -4,7 +4,7 @@
 // group, newest first, each with its status and the moderator's confidence.
 // Server component, pure props. Quiet Authority.
 
-import { formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils/utils";
 import type { CouncilFeedItem } from "@/lib/empire/summary";
 
 function statusTone(status: string): "done" | "running" | "failed" {

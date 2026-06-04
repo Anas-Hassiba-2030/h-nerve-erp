@@ -5,8 +5,8 @@
 import Link from "next/link";
 import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
 import "../../daylight.css";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { ChevronLeft, Cpu } from "lucide-react";
 
 const STATUS_TONE: Record<string, "success" | "warn" | "critical" | "info" | "neutral"> = {

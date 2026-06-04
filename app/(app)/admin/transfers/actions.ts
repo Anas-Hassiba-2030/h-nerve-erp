@@ -7,11 +7,11 @@
 // tenant/warehouse/stock and throws — rolling back — on any problem.
 
 import { revalidatePath } from "next/cache";
-import { getCurrentUser } from "@/lib/session";
-import { getLocale } from "@/lib/i18n.server";
-import { prisma } from "@/lib/db";
-import { flashToast } from "@/lib/toast";
-import { createTransfer } from "@/lib/transfers";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { flashToast } from "@/lib/utils/toast";
+import { createTransfer } from "@/lib/finance/transfers";
 
 async function gate() {
   const user = await getCurrentUser();

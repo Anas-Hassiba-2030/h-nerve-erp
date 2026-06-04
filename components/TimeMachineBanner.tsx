@@ -10,7 +10,7 @@
 //
 // Phase 16 of docs/PHASES-INTELLIGENCE.md.
 
-import { brainIqDelta, formatAsOfLabel, getAsOf } from "@/lib/timemachine";
+import { brainIqDelta, formatAsOfLabel, getAsOf } from "@/lib/utils/timemachine";
 import { ClockArrowDown } from "lucide-react";
 import { ClearTravelButton } from "./TimeMachineBannerClient";
 

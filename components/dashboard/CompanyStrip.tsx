@@ -12,7 +12,7 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { Sparkline } from "@/components/Sparkline";
 import { CompanyLogo } from "@/components/brand/CompanyLogo";
-import { formatMoney } from "@/lib/utils";
+import { formatMoney } from "@/lib/utils/utils";
 
 export type CompanyStripItem = {
   id: string;

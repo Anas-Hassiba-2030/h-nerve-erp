@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Plus } from "lucide-react";
 import { THEME_PRESETS, PACK_CATALOG } from "@/lib/brand/themes";
 import { createTenant } from "../actions";
-import { getLocale, getMessages } from "@/lib/i18n.server";
+import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
 
 export default async function NewTenantPage() {
   const locale = getLocale();

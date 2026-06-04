@@ -17,7 +17,7 @@ const { prisma } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@/lib/db", () => ({ prisma }));
+vi.mock("@/lib/db/db", () => ({ prisma }));
 
 import {
   getEmpireTiles,

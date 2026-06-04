@@ -1,6 +1,6 @@
 "use client";
 
-import type { Locale } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/i18n";
 
 // Vertical FAB rail — ports Claude Design's #al-fabs (app-layer.js lines 28-32).
 // Three round buttons stacked at bottom-start: Ask the Brain, Quick Add, Time

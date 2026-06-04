@@ -11,8 +11,8 @@
 // external/programmatic consumer, per the Phase 19 spec.
 
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/session";
-import { hasRole } from "@/lib/authz";
+import { getCurrentUser } from "@/lib/auth/session";
+import { hasRole } from "@/lib/auth/authz";
 import { getEmpireSummary } from "@/lib/empire/summary";
 
 export const dynamic = "force-dynamic";

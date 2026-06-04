@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
 import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { createBooking } from "../../actions";
 import "../../../daylight.css";
 

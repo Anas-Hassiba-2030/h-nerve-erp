@@ -7,8 +7,8 @@
 // the label is correct on every page without touching call sites. Previously it
 // always rendered Arabic via ar(), which leaked Arabic in English mode.
 
-import { loc, STATUS_AR, STATUS_EN } from "@/lib/utils";
-import { getLocale } from "@/lib/i18n.server";
+import { loc, STATUS_AR, STATUS_EN } from "@/lib/utils/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
 
 type Tone = "success" | "warn" | "critical" | "info" | "neutral";
 

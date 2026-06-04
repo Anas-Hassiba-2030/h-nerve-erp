@@ -2,12 +2,12 @@ import Link from "next/link";
 import { ExportMenu } from "@/components/ExportMenu";
 import { DeleteButton } from "@/components/DeleteButton";
 import { DaylightShell } from "@/components/orrery/daylight";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import {
   formatMoney, formatNumber, formatPercent, formatShortDate,
   STATUS_AR, STATUS_EN, loc,
-} from "@/lib/utils";
-import { getLocale } from "@/lib/i18n.server";
+} from "@/lib/utils/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { deleteHotel, deleteBooking } from "./actions";
 import { ArenaTabs } from "./ArenaTabs";
 import "../daylight.css";

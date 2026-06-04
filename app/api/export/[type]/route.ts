@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/session";
-import { COMPANY_BRANDS, PERSONAL_BRANDS } from "@/lib/companyBrand";
+import { prisma } from "@/lib/db/db";
+import { getCurrentUser } from "@/lib/auth/session";
+import { COMPANY_BRANDS, PERSONAL_BRANDS } from "@/lib/utils/companyBrand";
 import {
   financeAnalytics, hotelsAnalytics, dairyAnalytics, farmsAnalytics,
   supplyAnalytics, sustainabilityAnalytics, projectsAnalytics, marketsAnalytics,
   type ExportAnalytics,
-} from "@/lib/exportAnalytics";
+} from "@/lib/export/exportAnalytics";
 
 // Branded CSV exports — header carries Hourani Group + H-Nerve marks.
 // Each module uses its own company emblem in the banner, plus an embedded

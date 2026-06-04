@@ -1,8 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireUser } from "@/lib/session";
-import { prisma } from "@/lib/db";
+import { requireUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/db";
 import { seedBrainGraph } from "@/lib/brain/seedGraph";
 
 /**

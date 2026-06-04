@@ -10,7 +10,7 @@
 // Read-only. Degrades to a neutral reading on an empty/missing table so
 // callers never special-case "no narratives yet".
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 
 export type RagQuality = {
   /** Mean fraction of narrative claims that grounded in their facts (faithfulness). */

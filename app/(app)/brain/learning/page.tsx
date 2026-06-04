@@ -10,8 +10,8 @@
 import "../../daylight.css";
 import "./learning.css";
 import { Brain, Database, Cpu, Trash2 } from "lucide-react";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { digest } from "@/lib/brain/feedback.live";
 import { LearningTrend } from "@/components/brain/LearningTrend";
 import {

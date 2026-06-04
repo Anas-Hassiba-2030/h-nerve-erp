@@ -1,5 +1,5 @@
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
-import { formatNumber, formatMoney } from "@/lib/utils";
+import { formatNumber, formatMoney } from "@/lib/utils/utils";
 import type { EducationOpsData } from "../data";
 
 export function EducationOps({ ar, data }: { ar: boolean; data: EducationOpsData }) {

@@ -1,4 +1,4 @@
-import { getCompanyBrand } from "@/lib/companyBrand";
+import { getCompanyBrand } from "@/lib/utils/companyBrand";
 
 // A branded hero strip rendered at the top of any company-scoped page.
 // Honors the per-company gradient + emblem + motto.

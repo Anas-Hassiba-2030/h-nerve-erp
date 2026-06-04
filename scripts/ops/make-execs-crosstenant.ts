@@ -3,7 +3,7 @@
 // cookie scoped their "group pulse" dashboard to an empty company. Setting
 // companyId=null makes them cross-tenant (no workspace cookie at login), so
 // the executive dashboard aggregates the WHOLE group's real seeded data.
-import { prismaUnscoped as prisma } from "@/lib/db";
+import { prismaUnscoped as prisma } from "@/lib/db/db";
 
 (async () => {
   const r = await prisma.user.updateMany({

@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { UserPlus } from "lucide-react";
-import { getCurrentUser } from "@/lib/session";
-import { getLocale, getMessages } from "@/lib/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
 import { Logo } from "@/components/Logo";
 import { signupAction } from "./actions";
 

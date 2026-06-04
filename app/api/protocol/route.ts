@@ -9,7 +9,7 @@
 // with the /protocol page so the two can never drift.
 
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/session";
+import { getCurrentUser } from "@/lib/auth/session";
 import { getProtocolClauses } from "@/lib/protocol/load";
 
 export const dynamic = "force-dynamic";

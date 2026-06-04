@@ -6,7 +6,7 @@
 //
 // Phase 1 of docs/PHASES-INTELLIGENCE.md.
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import type { CausalGraph, GraphNode, GraphEdge, NodeKind, CausalEdgeKind } from "./graph";
 
 function rowToNode(r: any): GraphNode {

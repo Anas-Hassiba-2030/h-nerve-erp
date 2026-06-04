@@ -11,11 +11,11 @@
 
 import { redirect } from "next/navigation";
 import { ArrowRight, Plus, ListChecks } from "lucide-react";
-import { getLocale } from "@/lib/i18n.server";
-import { getCurrentUser } from "@/lib/session";
-import { prisma } from "@/lib/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/db";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
-import { formatDateTime, formatNumber } from "@/lib/utils";
+import { formatDateTime, formatNumber } from "@/lib/utils/utils";
 import { MappingDeleteButton } from "./MappingDeleteButton";
 import { MappingTester } from "./MappingTester";
 import { createMapping, updateMapping, toggleMappingActive } from "./actions";

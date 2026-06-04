@@ -1,9 +1,9 @@
 import { FileText } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { DeleteButton } from "@/components/DeleteButton";
-import { prisma } from "@/lib/db";
-import { formatNumber, formatRelative } from "@/lib/utils";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { formatNumber, formatRelative } from "@/lib/utils/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { commitDocument, deleteDocument } from "./actions";
 import "../daylight.css";
 import "./documents.css";

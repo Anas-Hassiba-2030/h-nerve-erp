@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Locale } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/i18n";
 
 // Morning Briefing card — ports Claude Design's maybeBriefing() flow from
 // docs/design/system/orrery.html lines 1735-1763. Shown once per local day,

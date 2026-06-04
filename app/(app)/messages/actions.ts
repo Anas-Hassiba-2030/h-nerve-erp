@@ -3,10 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/session";
-import { ensureDirectThread, markThreadRead } from "@/lib/messages";
-import { logActivity } from "@/lib/activityLog";
+import { prisma } from "@/lib/db/db";
+import { requireUser } from "@/lib/auth/session";
+import { ensureDirectThread, markThreadRead } from "@/lib/utils/messages";
+import { logActivity } from "@/lib/auth/activityLog";
 
 const sendSchema = z.object({
   threadId: z.string().min(1),

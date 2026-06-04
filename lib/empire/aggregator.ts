@@ -13,7 +13,7 @@
 //
 // Phase 19 of docs/PHASES-INTELLIGENCE.md.
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 
 export type SparkPoint = {
   iq: number;

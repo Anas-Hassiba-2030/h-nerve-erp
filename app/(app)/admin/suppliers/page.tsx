@@ -7,13 +7,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, Factory } from "lucide-react";
 import { Prisma } from "@prisma/client";
-import { getLocale } from "@/lib/i18n.server";
-import { getCurrentUser } from "@/lib/session";
-import { prisma } from "@/lib/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/db";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
-import { formatNumber } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils/utils";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
-import { orderStatusBadge, ORDER_STATUS_AR, ORDER_STATUS_EN } from "@/lib/utils";
+import { orderStatusBadge, ORDER_STATUS_AR, ORDER_STATUS_EN } from "@/lib/utils/utils";
 import { NewSupplierForm, EditSupplierForm, DeleteSupplierButton } from "./SupplierForms";
 
 import "../../daylight.css";

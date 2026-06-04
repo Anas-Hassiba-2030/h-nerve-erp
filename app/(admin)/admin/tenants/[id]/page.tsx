@@ -4,11 +4,11 @@
 
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { ArrowLeft, Eye, Trash2, Copy, Calendar } from "lucide-react";
 import { THEME_PRESETS, PACK_CATALOG, type ThemeKey } from "@/lib/brand/themes";
 import { viewAsTenant, deleteTenant } from "../actions";
-import { getLocale, getMessages } from "@/lib/i18n.server";
+import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
 
 const STATUS_COLOR: Record<string, string> = {
   PROVISIONING: "var(--admin-amber)",

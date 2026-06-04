@@ -10,9 +10,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { prismaUnscoped } from "@/lib/db";
-import { getLocale, getMessages } from "@/lib/i18n.server";
-import { getModel, formatCell } from "@/lib/db.introspect";
+import { prismaUnscoped } from "@/lib/db/db";
+import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
+import { getModel, formatCell } from "@/lib/db/db.introspect";
 
 export const dynamic = "force-dynamic";
 

@@ -8,7 +8,7 @@
 
 import Link from "next/link";
 import { getEmpireTiles, type EmpireTile, type SparkPoint } from "@/lib/empire/aggregator";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { ArrowUpRight, Crown, Globe2 } from "lucide-react";
 
 export const dynamic = "force-dynamic";

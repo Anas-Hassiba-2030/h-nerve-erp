@@ -1,5 +1,5 @@
 import "server-only";
-import type { ExportAnalytics } from "@/lib/exportAnalytics";
+import type { ExportAnalytics } from "@/lib/export/exportAnalytics";
 import { renderFinance } from "./finance";
 import { renderHotels } from "./hotels";
 import { renderDairy } from "./dairy";

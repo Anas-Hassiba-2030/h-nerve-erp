@@ -17,7 +17,7 @@
 // `Citation` with { id, label, value, href } so Tab-key drill-through has
 // somewhere to land.
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { callLlm } from "./llm";
 import { retrieveDocuments, type DocHit } from "./documents.retrieve";
 import { evaluateRetrieval } from "./crag";

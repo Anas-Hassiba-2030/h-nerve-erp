@@ -29,7 +29,7 @@ import {
   setActive,
   deleteUser,
 } from "./actions";
-import { initialFormState } from "@/lib/formState";
+import { initialFormState } from "@/lib/utils/formState";
 import { ROLES, roleLabel } from "./roles";
 
 function RoleSelect({ value, ar }: { value?: string; ar: boolean }) {

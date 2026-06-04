@@ -8,10 +8,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/session";
-import { flashToast } from "@/lib/toast";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { requireUser } from "@/lib/auth/session";
+import { flashToast } from "@/lib/utils/toast";
+import { getLocale } from "@/lib/i18n/i18n.server";
 
 export async function shareInsightToCouncil(formData: FormData): Promise<void> {
   const me = await requireUser();

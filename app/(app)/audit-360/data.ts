@@ -19,10 +19,10 @@ import {
   User as UserIcon,
   CalendarDays,
 } from "lucide-react";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
-import { isSafeId } from "@/lib/authz";
-import { formatNumber } from "@/lib/utils";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { isSafeId } from "@/lib/auth/authz";
+import { formatNumber } from "@/lib/utils/utils";
 
 export type EntityType =
   | "COMPANY"

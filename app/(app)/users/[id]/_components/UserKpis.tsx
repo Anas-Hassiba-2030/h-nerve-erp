@@ -1,5 +1,5 @@
 import { DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
-import { formatNumber } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils/utils";
 import type { UserDetail } from "../data";
 
 export function UserKpis({

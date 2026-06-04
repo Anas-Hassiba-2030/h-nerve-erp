@@ -13,18 +13,18 @@
 // on a foreign-tenant productId. Cross-tenant ADMIN intentionally has no pin.
 
 import { revalidatePath } from "next/cache";
-import { getCurrentUser, type SessionUser } from "@/lib/session";
-import { getLocale } from "@/lib/i18n.server";
-import { prisma } from "@/lib/db";
-import { flashToast } from "@/lib/toast";
-import { recordMovement, recalcProductQuantity } from "@/lib/inventory";
+import { getCurrentUser, type SessionUser } from "@/lib/auth/session";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { flashToast } from "@/lib/utils/toast";
+import { recordMovement, recalcProductQuantity } from "@/lib/finance/inventory";
 import { Prisma } from "@prisma/client";
 import {
   postJournalEntry,
   getWeightedAverageCost,
   money,
   ACCT,
-} from "@/lib/accounting";
+} from "@/lib/finance/accounting";
 
 async function gate(): Promise<SessionUser> {
   const user = await getCurrentUser();

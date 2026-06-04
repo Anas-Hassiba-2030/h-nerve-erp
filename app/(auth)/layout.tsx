@@ -1,7 +1,7 @@
 import { LocaleSwitch } from "@/components/LocaleSwitch";
 import { ThemeSwitch } from "@/components/ThemeSwitch";
-import { getLocale } from "@/lib/i18n.server";
-import { getTheme } from "@/lib/theme.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getTheme } from "@/lib/theme/theme.server";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const locale = getLocale();

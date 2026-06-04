@@ -24,9 +24,9 @@
 // half-applied (no APPROVED-without-PO, no PO-without-back-link).
 
 import { Prisma } from "@prisma/client";
-import { prismaUnscoped } from "@/lib/db";
-import { COMPANY_CODE_TO_TENANT_SLUG } from "@/lib/tenancy";
-import { generateNumber } from "@/lib/utils";
+import { prismaUnscoped } from "@/lib/db/db";
+import { COMPANY_CODE_TO_TENANT_SLUG } from "@/lib/tenancy/tenancy";
+import { generateNumber } from "@/lib/utils/utils";
 
 export type BridgeResult =
   // forecast missing or no longer DRAFT (idempotent no-op / concurrent loser)

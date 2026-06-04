@@ -1,10 +1,10 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { hashPassword } from "@/lib/auth";
-import { passwordError } from "@/lib/password";
-import { getSession, type SessionUser } from "@/lib/session";
+import { prisma } from "@/lib/db/db";
+import { hashPassword } from "@/lib/auth/auth";
+import { passwordError } from "@/lib/auth/password";
+import { getSession, type SessionUser } from "@/lib/auth/session";
 
 export async function signupAction(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();

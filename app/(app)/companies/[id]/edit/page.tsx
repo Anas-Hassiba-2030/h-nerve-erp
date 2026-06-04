@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { CompanyForm } from "../../CompanyForm";
 import { updateCompany } from "../../actions";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import "../../../daylight.css";
 
 export default async function EditCompanyPage({ params }: { params: { id: string } }) {

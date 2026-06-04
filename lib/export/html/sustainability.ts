@@ -1,6 +1,6 @@
 import "server-only";
-import { prisma } from "@/lib/db";
-import { sustainabilityAnalytics, type ExportAnalytics } from "@/lib/exportAnalytics";
+import { prisma } from "@/lib/db/db";
+import { sustainabilityAnalytics, type ExportAnalytics } from "@/lib/export/exportAnalytics";
 import { tableFromRows, NUM } from "./shell";
 
 export async function renderSustainability(ar: boolean): Promise<{

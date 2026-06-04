@@ -3,13 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { prisma } from "@/lib/db";
-import { requireRole } from "@/lib/authz";
+import { prisma } from "@/lib/db/db";
+import { requireRole } from "@/lib/auth/authz";
 import {
   parseFormState,
   formStateFromError,
   type FormState,
-} from "@/lib/formState";
+} from "@/lib/utils/formState";
 
 const companySchema = z.object({
   code: z.string().min(2, "الكود قصير جداً (حد أدنى حرفان)").max(12, "الكود طويل (حد أقصى 12 حرف)").transform((s) => s.trim().toUpperCase()),

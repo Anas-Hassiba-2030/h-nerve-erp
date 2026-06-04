@@ -10,7 +10,7 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 
 // Branded 404 — full-page hero with the H-Nerve mark + breadcrumb-style
 // suggestions toward common destinations. Renders outside the (app) group's

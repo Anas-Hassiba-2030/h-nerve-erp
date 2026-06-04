@@ -13,8 +13,8 @@
 import "../../daylight.css";
 import "./memory.css";
 import { Brain, Database, Trash2 } from "lucide-react";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { MemoryLake, type MemoryItem } from "@/components/brain/MemoryLake";
 import { seedMemories, clearMemories } from "./actions";
 

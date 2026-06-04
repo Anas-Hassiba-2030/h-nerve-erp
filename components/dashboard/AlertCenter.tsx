@@ -6,7 +6,7 @@ import Link from "next/link";
 import {
   AlertTriangle, Clock, Sprout, Milk, Hotel, ListChecks, ChevronLeft, Shield,
 } from "lucide-react";
-import { formatRelative } from "@/lib/utils";
+import { formatRelative } from "@/lib/utils/utils";
 
 export type AlertKind = "DAIRY_EXPIRY" | "FARM" | "HOTEL_LOW" | "TASK_OVERDUE" | "INSIGHT_CRITICAL" | "FORECAST_DRAFT";
 export type AlertItem = {

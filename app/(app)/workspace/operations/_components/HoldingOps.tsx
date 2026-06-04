@@ -1,6 +1,6 @@
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { enterWorkspace } from "@/app/actions/workspace";
-import { formatNumber, formatMoney } from "@/lib/utils";
+import { formatNumber, formatMoney } from "@/lib/utils/utils";
 import type { HoldingOpsData } from "../data";
 
 export function HoldingOps({ ar, data }: { ar: boolean; data: HoldingOpsData }) {

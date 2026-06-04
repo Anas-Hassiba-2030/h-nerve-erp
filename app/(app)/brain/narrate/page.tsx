@@ -10,8 +10,8 @@
 
 import "../../daylight.css";
 import "../trust/trust.css";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { VerifiedBadge } from "@/components/brain/VerifiedBadge";
 import type { ConfidenceScore } from "@/lib/brain/confidence";
 import type { VerificationReport } from "@/lib/brain/verifier";

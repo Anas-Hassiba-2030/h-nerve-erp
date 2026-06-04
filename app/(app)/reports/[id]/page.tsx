@@ -5,10 +5,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Printer, ArrowLeft, Download, Calendar } from "lucide-react";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
-import { formatMoney, formatNumber, formatPercent, formatDate } from "@/lib/utils";
-import { getCompanyBrand } from "@/lib/companyBrand";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { formatMoney, formatNumber, formatPercent, formatDate } from "@/lib/utils/utils";
+import { getCompanyBrand } from "@/lib/utils/companyBrand";
 import "../../daylight.css";
 
 export default async function CompanyReportPage({

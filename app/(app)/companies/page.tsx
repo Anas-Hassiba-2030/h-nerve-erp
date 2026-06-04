@@ -4,12 +4,12 @@ import { ExportMenu } from "@/components/ExportMenu";
 import {
   DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel,
 } from "@/components/orrery/daylight";
-import { prisma } from "@/lib/db";
-import { formatMoney, formatNumber, loc, SECTORS_AR, SECTORS_EN } from "@/lib/utils";
-import { getLocale } from "@/lib/i18n.server";
-import { getCurrentUser } from "@/lib/session";
-import { hasRole } from "@/lib/authz";
-import { getCompanyBrand } from "@/lib/companyBrand";
+import { prisma } from "@/lib/db/db";
+import { formatMoney, formatNumber, loc, SECTORS_AR, SECTORS_EN } from "@/lib/utils/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
+import { hasRole } from "@/lib/auth/authz";
+import { getCompanyBrand } from "@/lib/utils/companyBrand";
 import "../daylight.css";
 
 export const dynamic = "force-dynamic";

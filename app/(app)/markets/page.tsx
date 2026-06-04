@@ -1,9 +1,9 @@
 import { Sparkline } from "@/components/Sparkline";
 import { ExportMenu } from "@/components/ExportMenu";
-import { prisma } from "@/lib/db";
-import { formatNumber } from "@/lib/utils";
-import { getLocale } from "@/lib/i18n.server";
-import { getCompanyRevenue30dMap, notionalValuationFromRevenue30d } from "@/lib/finance";
+import { prisma } from "@/lib/db/db";
+import { formatNumber } from "@/lib/utils/utils";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCompanyRevenue30dMap, notionalValuationFromRevenue30d } from "@/lib/finance/finance";
 import "../daylight.css";
 import "./markets.css";
 

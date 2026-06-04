@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/session";
-import { getLocale } from "@/lib/i18n.server";
-import { brainIqAt } from "@/lib/timemachine";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { brainIqAt } from "@/lib/utils/timemachine";
 import { OrreryFrame, type OrreryIdentity } from "@/components/orrery/OrreryFrame";
 import { OrreryFabs } from "@/components/orrery/OrreryFabs";
 // The FAB rail + panels live in the (app) layout; the Orrery hub is outside it,

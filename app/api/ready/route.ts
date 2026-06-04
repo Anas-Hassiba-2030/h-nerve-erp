@@ -18,8 +18,8 @@
 // Read-only, no auth.
 
 import { NextResponse } from "next/server";
-import { prismaUnscoped } from "@/lib/db";
-import { log } from "@/lib/logger";
+import { prismaUnscoped } from "@/lib/db/db";
+import { log } from "@/lib/utils/logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

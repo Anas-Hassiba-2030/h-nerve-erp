@@ -3,10 +3,10 @@
 // Sleek Operator (DESIGN-SKILL §1.F). Phase 11 of docs/PHASES-INTELLIGENCE.md.
 
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { Plus, Globe2, Eye } from "lucide-react";
 import { THEME_PRESETS, type ThemeKey } from "@/lib/brand/themes";
-import { getLocale, getMessages } from "@/lib/i18n.server";
+import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
 
 const STATUS_COLOR: Record<string, string> = {
   PROVISIONING: "var(--admin-amber)",

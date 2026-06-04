@@ -5,9 +5,9 @@
 // typed object, or null when the company doesn't exist (shell calls
 // notFound()). Behaviour-preserving.
 
-import { prisma } from "@/lib/db";
-import { isPinned } from "@/lib/pins";
-import { getCompanyBrand } from "@/lib/companyBrand";
+import { prisma } from "@/lib/db/db";
+import { isPinned } from "@/lib/utils/pins";
+import { getCompanyBrand } from "@/lib/utils/companyBrand";
 
 function yearsSince(year: number | null | undefined) {
   if (!year) return null;

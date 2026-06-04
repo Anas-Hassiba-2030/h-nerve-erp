@@ -3,11 +3,11 @@
 import { redirect } from "next/navigation";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { WorkspaceFinancials } from "@/components/workspace/WorkspaceFinancials";
-import { prisma, prismaUnscoped } from "@/lib/db";
-import { getActiveWorkspaceId } from "@/lib/workspace";
-import { getLocale } from "@/lib/i18n.server";
-import { getAsOf, formatAsOfLabel } from "@/lib/timemachine";
-import { formatMoney } from "@/lib/utils";
+import { prisma, prismaUnscoped } from "@/lib/db/db";
+import { getActiveWorkspaceId } from "@/lib/tenancy/workspace";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getAsOf, formatAsOfLabel } from "@/lib/utils/timemachine";
+import { formatMoney } from "@/lib/utils/utils";
 import "../../daylight.css";
 
 export const dynamic = "force-dynamic";

@@ -8,9 +8,9 @@ import { notFound, redirect } from "next/navigation";
 import { ChevronLeft, MessagesSquare } from "lucide-react";
 import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
 import "../../../../daylight.css";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
-import { getCurrentUser } from "@/lib/session";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
 import { replyToDiscussion } from "@/app/actions/council";
 import { CouncilReplyComposer } from "./CouncilReplyComposer";
 

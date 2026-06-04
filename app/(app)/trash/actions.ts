@@ -1,17 +1,17 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireUser } from "@/lib/session";
-import { hasRole, isSafeId, requireRole } from "@/lib/authz";
-import { prisma } from "@/lib/db";
+import { requireUser } from "@/lib/auth/session";
+import { hasRole, isSafeId, requireRole } from "@/lib/auth/authz";
+import { prisma } from "@/lib/db/db";
 import {
   hardDelete,
   hardDeleteMany,
   softRestore,
   softRestoreMany,
   type SoftEntity,
-} from "@/lib/softDelete";
-import { flashToast } from "@/lib/toast";
+} from "@/lib/db/softDelete";
+import { flashToast } from "@/lib/utils/toast";
 
 const VALID: SoftEntity[] = ["task", "project", "insight", "forecast"];
 
@@ -170,7 +170,7 @@ export async function purgeAllExpired() {
   // We can't import prisma directly into "use server" without bundling
   // concerns — the hardDeleteMany helpers walk through the same table-by-
   // table dispatch. Use the lib helper to stay consistent.
-  const { prisma } = await import("@/lib/db");
+  const { prisma } = await import("@/lib/db/db");
   const [t, p, i, f] = await Promise.all([
     prisma.task.deleteMany({ where }),
     prisma.futureProject.deleteMany({ where }),

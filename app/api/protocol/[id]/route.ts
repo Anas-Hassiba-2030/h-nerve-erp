@@ -8,10 +8,10 @@
 // seed case we upsert by (tenantId, key) so the first admin edit persists it.
 
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/session";
-import { isAdmin, isSafeId } from "@/lib/authz";
-import { getActiveTenantSlug } from "@/lib/tenancy";
+import { prisma } from "@/lib/db/db";
+import { getCurrentUser } from "@/lib/auth/session";
+import { isAdmin, isSafeId } from "@/lib/auth/authz";
+import { getActiveTenantSlug } from "@/lib/tenancy/tenancy";
 import { DEFAULT_PROTOCOL_CLAUSES } from "@/lib/protocol/clauses";
 
 export const dynamic = "force-dynamic";

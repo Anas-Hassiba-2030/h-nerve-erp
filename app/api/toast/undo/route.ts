@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/session";
-import { hasRole, isSafeId } from "@/lib/authz";
-import { softRestore, type SoftEntity } from "@/lib/softDelete";
-import { prisma } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth/session";
+import { hasRole, isSafeId } from "@/lib/auth/authz";
+import { softRestore, type SoftEntity } from "@/lib/db/softDelete";
+import { prisma } from "@/lib/db/db";
 
 const VALID: SoftEntity[] = ["task", "project", "insight", "forecast"];
 

@@ -17,14 +17,14 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { DaylightShell } from "@/components/orrery/daylight";
-import { getCurrentUser } from "@/lib/session";
-import { getLocale } from "@/lib/i18n.server";
-import { getTheme } from "@/lib/theme.server";
-import { THEME_LIST } from "@/lib/theme";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getTheme } from "@/lib/theme/theme.server";
+import { THEME_LIST } from "@/lib/theme/theme";
 import { setTheme, setLocale } from "@/app/actions/preferences";
-import { ar as arAr, ROLES_AR, formatNumber } from "@/lib/utils";
-import { rankById } from "@/lib/gamification";
-import { prisma } from "@/lib/db";
+import { ar as arAr, ROLES_AR, formatNumber } from "@/lib/utils/utils";
+import { rankById } from "@/lib/utils/gamification";
+import { prisma } from "@/lib/db/db";
 import "../daylight.css";
 import "./system.css";
 

@@ -10,7 +10,7 @@
 // Phase 4 of docs/PHASES-INTELLIGENCE.md.
 
 import { createHash } from "node:crypto";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { callLlm, llmConfig, type LlmRequest } from "./llm";
 import { verifyNarrative } from "./verifier";
 import { score as confidenceScore } from "./confidence";

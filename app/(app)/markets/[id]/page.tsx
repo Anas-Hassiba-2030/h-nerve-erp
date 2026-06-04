@@ -11,10 +11,10 @@ import {
 } from "lucide-react";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import "../../daylight.css";
-import { prisma } from "@/lib/db";
-import { formatNumber, formatRelative } from "@/lib/utils";
-import { getCompanyBrand } from "@/lib/companyBrand";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { formatNumber, formatRelative } from "@/lib/utils/utils";
+import { getCompanyBrand } from "@/lib/utils/companyBrand";
+import { getLocale } from "@/lib/i18n/i18n.server";
 
 const REGION_AR: Record<string, string> = {
   MENA: "الشرق الأوسط وشمال أفريقيا",

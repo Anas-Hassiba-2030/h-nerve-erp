@@ -5,13 +5,13 @@
 // inline. Returns a typed object, or null when the user doesn't exist
 // (shell calls notFound()). Behaviour-preserving.
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import {
   rankFor,
   nextRank,
   progressToNext,
-} from "@/lib/gamification";
-import { getCompanyBrand } from "@/lib/companyBrand";
+} from "@/lib/utils/gamification";
+import { getCompanyBrand } from "@/lib/utils/companyBrand";
 
 export async function getUserDetail(id: string) {
   const user = await prisma.user.findUnique({

@@ -8,9 +8,9 @@
 //
 // Phase 7 of docs/PHASES-INTELLIGENCE.md.
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { callLlm, extractJson, type LlmRequest } from "./llm";
-import { log } from "@/lib/logger";
+import { log } from "@/lib/utils/logger";
 import type {
   FeedbackLoop,
   FeedbackKind,

@@ -9,9 +9,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, ShoppingCart } from "lucide-react";
 import { Prisma } from "@prisma/client";
-import { getLocale } from "@/lib/i18n.server";
-import { getCurrentUser } from "@/lib/session";
-import { prisma } from "@/lib/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/db";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import {
   formatDateTime,
@@ -21,7 +21,7 @@ import {
   ORDER_STATUS_AR,
   ORDER_STATUS_EN,
   orderStatusBadge,
-} from "@/lib/utils";
+} from "@/lib/utils/utils";
 import {
   NewPOForm,
   MarkSentButton,

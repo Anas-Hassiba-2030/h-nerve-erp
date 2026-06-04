@@ -9,11 +9,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Landmark } from "lucide-react";
-import { getLocale } from "@/lib/i18n.server";
-import { getCurrentUser } from "@/lib/session";
-import { prisma } from "@/lib/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/db";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
-import { formatMoney2, formatNumber } from "@/lib/utils";
+import { formatMoney2, formatNumber } from "@/lib/utils/utils";
 import { AdminFamilyNav } from "@/components/AdminFamilyNav";
 import { NewAccountForm } from "./AccountForms";
 import "../../daylight.css";

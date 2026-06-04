@@ -7,8 +7,8 @@
 import { Calendar, MapPin, Users2, Building2, Hash } from "lucide-react";
 import { SectorPill } from "@/components/SectorPill";
 import { StatusBadge } from "@/components/StatusBadge";
-import { getCompanyBrand } from "@/lib/companyBrand";
-import { formatNumber } from "@/lib/utils";
+import { getCompanyBrand } from "@/lib/utils/companyBrand";
+import { formatNumber } from "@/lib/utils/utils";
 
 export function WorkspaceHero({
   ar,

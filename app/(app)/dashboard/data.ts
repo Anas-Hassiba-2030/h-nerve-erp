@@ -5,17 +5,17 @@
 // orderBy/take, identical aggregation math, identical locale branches.
 
 import { type TickerItem } from "@/components/LiveTicker";
-import { periodToRange, type Period } from "@/lib/period";
+import { periodToRange, type Period } from "@/lib/finance/period";
 import { type CompanyStripItem } from "@/components/dashboard/CompanyStrip";
 import { type ActivityItem } from "@/components/dashboard/ActivityStream";
 import { type AlertItem } from "@/components/dashboard/AlertCenter";
 import { type CalendarEvent } from "@/components/dashboard/UpcomingCalendar";
 import { type ActivityLogLite } from "@/components/dashboard/TodayActivity";
-import { listPins } from "@/lib/pins";
-import { prisma } from "@/lib/db";
-import { type SessionUser } from "@/lib/session";
-import { formatMoney, formatNumber, formatPercent, localizeUnit } from "@/lib/utils";
-import { rankById } from "@/lib/gamification";
+import { listPins } from "@/lib/utils/pins";
+import { prisma } from "@/lib/db/db";
+import { type SessionUser } from "@/lib/auth/session";
+import { formatMoney, formatNumber, formatPercent, localizeUnit } from "@/lib/utils/utils";
+import { rankById } from "@/lib/utils/gamification";
 import { computeIQ } from "@/lib/brain/meta.reflector";
 
 export async function getDashboardData({

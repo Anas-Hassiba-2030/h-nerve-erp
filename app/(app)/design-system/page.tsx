@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 // no decorative wrapping — so each component is shown as it truly renders.
 
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { DesignSystemShowcase } from "./DesignSystemShowcase";
 import "../daylight.css";
 

@@ -16,7 +16,7 @@
 // *what*.
 
 import { THEME_PRESETS, type ThemeKey } from "@/lib/brand/themes";
-import { THEMES, type ThemeId } from "@/lib/theme";
+import { THEMES, type ThemeId } from "@/lib/theme/theme";
 
 /* ────────────────────────────────────────────────────────────────────────
    1 · CSS VARIABLES — name → default value

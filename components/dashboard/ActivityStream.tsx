@@ -6,7 +6,7 @@ import Link from "next/link";
 import {
   Sparkles, Brain, Hotel, AlertTriangle, Lightbulb, Info, Activity,
 } from "lucide-react";
-import { formatRelative } from "@/lib/utils";
+import { formatRelative } from "@/lib/utils/utils";
 
 export type ActivityKind = "INSIGHT" | "FORECAST" | "BOOKING" | "TASK";
 export type ActivityItem = {

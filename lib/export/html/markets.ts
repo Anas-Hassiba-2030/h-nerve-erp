@@ -1,6 +1,6 @@
 import "server-only";
-import { prisma } from "@/lib/db";
-import { marketsAnalytics, type ExportAnalytics } from "@/lib/exportAnalytics";
+import { prisma } from "@/lib/db/db";
+import { marketsAnalytics, type ExportAnalytics } from "@/lib/export/exportAnalytics";
 import { tableFromRows, NUM } from "./shell";
 
 export async function renderMarkets(ar: boolean): Promise<{

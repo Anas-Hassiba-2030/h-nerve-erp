@@ -1,6 +1,6 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/session";
+import { getCurrentUser } from "@/lib/auth/session";
 import { Footer } from "@/components/Footer";
 import { ToastProvider } from "@/components/Toast/ToastProvider";
 import { QuickAddFAB } from "@/components/QuickAddFAB";
@@ -8,7 +8,7 @@ import { ViewAsBanner } from "@/components/ViewAsBanner";
 import { Conversational } from "@/components/Conversational";
 import { TimeScrubber } from "@/components/TimeScrubber";
 import { TimeMachineBanner } from "@/components/TimeMachineBanner";
-import { getAsOf } from "@/lib/timemachine";
+import { getAsOf } from "@/lib/utils/timemachine";
 // Phase 26.8 — non-critical overlays (tour, splash, morning brief, presence
 // SSE, drop zone) are lazy-loaded client-side to keep them off the critical
 // render path. See components/DeferredOverlays.tsx.
@@ -16,12 +16,12 @@ import { DeferredOverlays } from "@/components/DeferredOverlays";
 // CROSS-TENANT INTENT: the (app) layout reads role permissions unscoped
 // (must resolve for any companyId the cookie points at, including a
 // superadmin "view as" context).
-import { prisma, prismaUnscoped } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
-import { readFlash } from "@/lib/toast";
-import { getViewAsTenant, getTenantThemeCookie } from "@/lib/tenancy";
+import { prisma, prismaUnscoped } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { readFlash } from "@/lib/utils/toast";
+import { getViewAsTenant, getTenantThemeCookie } from "@/lib/tenancy/tenancy";
 import { THEME_PRESETS, themeCssVars, type ThemeKey } from "@/lib/brand/themes";
-import { permsEnforced, effectiveCanAccess } from "@/lib/permissions";
+import { permsEnforced, effectiveCanAccess } from "@/lib/auth/permissions";
 import { LivingAtmosphere } from "@/components/orrery/LivingAtmosphere";
 import { OrbitReturn } from "@/components/orrery/OrbitReturn";
 import { DiveReveal } from "@/components/orrery/DiveReveal";

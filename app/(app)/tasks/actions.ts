@@ -3,13 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/session";
-import { requireRole } from "@/lib/authz";
-import { rankFor, bonusFor } from "@/lib/gamification";
-import { softDelete, softRestore, deletedLabel, restoredLabel } from "@/lib/softDelete";
-import { flashToast } from "@/lib/toast";
-import { logActivity } from "@/lib/activityLog";
+import { prisma } from "@/lib/db/db";
+import { requireUser } from "@/lib/auth/session";
+import { requireRole } from "@/lib/auth/authz";
+import { rankFor, bonusFor } from "@/lib/utils/gamification";
+import { softDelete, softRestore, deletedLabel, restoredLabel } from "@/lib/db/softDelete";
+import { flashToast } from "@/lib/utils/toast";
+import { logActivity } from "@/lib/auth/activityLog";
 
 const taskSchema = z.object({
   title: z.string().min(1).max(160),

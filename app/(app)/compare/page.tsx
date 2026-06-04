@@ -4,10 +4,10 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { AreaLineChart } from "@/components/charts/AreaLineChart";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
-import { getCompanyBrand } from "@/lib/companyBrand";
-import { formatMoney, formatNumber, SECTORS_AR, SECTORS_EN, loc } from "@/lib/utils";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCompanyBrand } from "@/lib/utils/companyBrand";
+import { formatMoney, formatNumber, SECTORS_AR, SECTORS_EN, loc } from "@/lib/utils/utils";
 import "../daylight.css";
 import "./compare.css";
 

@@ -9,7 +9,7 @@ import {
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { LiveTicker } from "@/components/LiveTicker";
 import { PeriodSelector } from "@/components/PeriodSelector";
-import { isValidPeriod, type Period } from "@/lib/period";
+import { isValidPeriod, type Period } from "@/lib/finance/period";
 import { CompanyStrip } from "@/components/dashboard/CompanyStrip";
 import { ActivityStream } from "@/components/dashboard/ActivityStream";
 import { AlertCenter } from "@/components/dashboard/AlertCenter";
@@ -19,9 +19,9 @@ import { TodayActivity } from "@/components/dashboard/TodayActivity";
 import { UpcomingTasksPanel } from "@/components/dashboard/UpcomingTasksPanel";
 import { IntelligenceLayerPanel } from "@/components/dashboard/IntelligenceLayerPanel";
 import { BrainStatusBadge } from "@/components/BrainStatusBadge";
-import { getCurrentUser } from "@/lib/session";
-import { getLocale, getMessages } from "@/lib/i18n.server";
-import { formatMoney, formatNumber, formatPercent } from "@/lib/utils";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
+import { formatMoney, formatNumber, formatPercent } from "@/lib/utils/utils";
 import { getDashboardData } from "./data";
 import "../daylight.css";
 

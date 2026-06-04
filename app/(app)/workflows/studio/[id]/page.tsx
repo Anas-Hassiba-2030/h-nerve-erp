@@ -5,7 +5,7 @@
 // strip at the bottom. Phase 12 of docs/PHASES-INTELLIGENCE.md.
 
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import Link from "next/link";
 import { ArrowLeft, Power, Trash2, FlaskConical } from "lucide-react";
 import { templatesByKind, getTemplate } from "@/lib/workflows/templates";
@@ -13,7 +13,7 @@ import { StudioCanvas, type StudioNode, type StudioEdge } from "@/components/wor
 import { TestRunStrip } from "@/components/workflows/TestRunStrip";
 import { Palette } from "@/components/workflows/Palette";
 import { toggleWorkflow, deleteWorkflow } from "../../actions";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 
 export default async function StudioPage({ params }: { params: { id: string } }) {
   const wf = await prisma.workflow.findUnique({

@@ -3,10 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { prisma } from "@/lib/db";
-import { requireRole } from "@/lib/authz";
-import { generateNumber } from "@/lib/utils";
-import { logActivity } from "@/lib/activityLog";
+import { prisma } from "@/lib/db/db";
+import { requireRole } from "@/lib/auth/authz";
+import { generateNumber } from "@/lib/utils/utils";
+import { logActivity } from "@/lib/auth/activityLog";
 
 const txSchema = z.object({
   companyId: z.string().min(1),

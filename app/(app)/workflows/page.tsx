@@ -12,11 +12,11 @@ export const dynamic = "force-dynamic";
 // Phase 12 of docs/PHASES-INTELLIGENCE.md.
 
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { DaylightShell } from "@/components/orrery/daylight";
 import "../daylight.css";
 import "./workflows.css";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { createWorkflow, createWorkflowFromTemplate } from "./actions";
 import { TEMPLATE_GALLERY } from "@/lib/workflows/templates.gallery";
 

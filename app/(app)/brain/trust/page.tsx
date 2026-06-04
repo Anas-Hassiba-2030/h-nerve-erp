@@ -11,8 +11,8 @@
 
 import "../../daylight.css";
 import "./trust.css";
-import { prisma } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { prisma } from "@/lib/db/db";
+import { getLocale } from "@/lib/i18n/i18n.server";
 
 export const dynamic = "force-dynamic";
 

@@ -1,7 +1,7 @@
 // seed.ts — produce 2 example workflows so the index isn't empty.
 // Phase 12 of docs/PHASES-INTELLIGENCE.md.
 
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db/db";
 import { defaultParams, getTemplate } from "./templates";
 
 type SeedNode = { kind: "trigger" | "condition" | "action"; key: string; params?: Record<string, any> };

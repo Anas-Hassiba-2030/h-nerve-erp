@@ -12,7 +12,7 @@ import "../../daylight.css";
 import "./causal.css";
 import { CausalGraph } from "@/components/brain/CausalGraph";
 import { causalGraph } from "@/lib/brain/graph.prisma";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { rebuildBrainGraph } from "./actions";
 import { ConfirmRebuildForm } from "./ConfirmRebuildForm";
 import { Brain } from "lucide-react";

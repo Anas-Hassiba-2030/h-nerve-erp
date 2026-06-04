@@ -26,6 +26,12 @@ describe("extractClaims", () => {
   it("returns empty for prose without numbers", () => {
     expect(extractClaims("The narrative is silent on numbers.")).toEqual([]);
   });
+
+  it("extracts numbers written in Arabic-Indic numerals", () => {
+    const claims = extractClaims("الإيراد بلغ ٤٩٬٨٢٢ مقابل ٣٨٬٤٠٠ سابقًا.");
+    expect(claims).toHaveLength(2);
+    expect(claims.map((c) => c.shape)).toEqual(["number", "number"]);
+  });
 });
 
 describe("matchClaim", () => {
@@ -64,6 +70,14 @@ describe("matchClaim", () => {
     expect(matchClaim(c, facts)).toBeNull();
   });
 
+  it("does not falsely match unrelated sub-unit fractions (±1 floor gated to integers)", () => {
+    // 0.78 must NOT verify against the unrelated fraction delta=0.298 just because
+    // their absolute difference is < 1; it should match the real fact occupancyPct=0.78.
+    expect(matchClaim({ token: "0.78", index: 0, shape: "number" as const }, facts)?.key).toBe("occupancyPct");
+    // a fabricated fraction with no close fact stays unverified
+    expect(matchClaim({ token: "0.55", index: 0, shape: "number" as const }, facts)).toBeNull();
+  });
+
   it("flattens nested facts", () => {
     const nested = { metrics: { revenue: { value: 100 } } };
     const c = { token: "100", index: 0, shape: "number" as const };
@@ -74,6 +88,15 @@ describe("matchClaim", () => {
     const arr = { history: [10, 20, 30] };
     const c = { token: "20", index: 0, shape: "number" as const };
     expect(matchClaim(c, arr)?.key).toContain("history");
+  });
+
+  it("parses Arabic-Indic digits, decimal mark, and thousands separator", () => {
+    // ٤٩٬٨٢٢ → 49822 (Arabic thousands ٬)
+    expect(matchClaim({ token: "٤٩٬٨٢٢", index: 0, shape: "number" as const }, facts)?.key).toBe("revenue");
+    // ٠٫٧٨ → 0.78 (Arabic decimal ٫)
+    expect(matchClaim({ token: "٠٫٧٨", index: 0, shape: "number" as const }, facts)?.key).toBe("occupancyPct");
+    // ١٢ as a percent claim ↔ fractional fact 0.12
+    expect(matchClaim({ token: "١٢", index: 0, shape: "percent" as const }, { x: 0.12 })?.key).toBe("x");
   });
 });
 
@@ -100,6 +123,13 @@ describe("verifyNarrative", () => {
     const report = verifyNarrative("Pure prose, no numbers.", {});
     expect(report.total).toBe(0);
     expect(report.coverage).toBe(1);
+    expect(report.trustLevel).toBe("high");
+  });
+
+  it("grounds a claim written in Arabic-Indic numerals against ASCII facts", () => {
+    const report = verifyNarrative("الإيراد بلغ ٤٩٬٨٢٢ هذا الشهر.", { revenue: 49822 });
+    expect(report.verified).toBe(1);
+    expect(report.unverified).toBe(0);
     expect(report.trustLevel).toBe("high");
   });
 

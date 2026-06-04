@@ -261,3 +261,108 @@ describe("applyWorkspaceScope — writes cannot cross workspaces", () => {
     expect(calls[0].args.where).toEqual({ status: "OLD", companyId: "LORAN" });
   });
 });
+
+describe("applyWorkspaceScope — Phase F6 companyId by-id write guard (ISOLATION-FIX)", () => {
+  // Mirrors the tenant-side by-id guard for the companyId plane: a pinned
+  // operator must not update/delete another company's SCOPED_MODELS row by id.
+  function rowFakeNext(probeRow: any) {
+    const calls: any[] = [];
+    const next = async (p: any) => {
+      calls.push(JSON.parse(JSON.stringify(p)));
+      if (p.action === "findUnique") return probeRow;
+      return { ok: true };
+    };
+    return { next, calls };
+  }
+
+  it("update by-id BLOCKED when target belongs to another company", async () => {
+    const { next } = rowFakeNext({ id: "h1", companyId: "MAHA" });
+    await expect(
+      applyWorkspaceScope(
+        { model: "Hotel", action: "update", args: { where: { id: "h1" }, data: { name: "X" } } },
+        next,
+        "ARENA",
+      ),
+    ).rejects.toThrow(/cross-workspace write/i);
+  });
+
+  it("update by-id ALLOWED when target belongs to active workspace", async () => {
+    const { next, calls } = rowFakeNext({ id: "h1", companyId: "ARENA" });
+    await applyWorkspaceScope(
+      { model: "Hotel", action: "update", args: { where: { id: "h1" }, data: { name: "X" } } },
+      next,
+      "ARENA",
+    );
+    expect(calls.length).toBe(2); // probe + actual update
+    expect(calls[1].action).toBe("update");
+  });
+
+  it("delete by-id BLOCKED across companies (DairyBatch / Farm / Transaction class)", async () => {
+    const { next } = rowFakeNext({ id: "b1", companyId: "LORAN" });
+    await expect(
+      applyWorkspaceScope(
+        { model: "DairyBatch", action: "delete", args: { where: { id: "b1" } } },
+        next,
+        "MAHA",
+      ),
+    ).rejects.toThrow(/cross-workspace write/i);
+  });
+
+  it("by-id guard does not fire when there is no workspace cookie (ADMIN pass-through)", async () => {
+    const { next, calls } = rowFakeNext({ id: "h1", companyId: "MAHA" });
+    await applyWorkspaceScope(
+      { model: "Hotel", action: "delete", args: { where: { id: "h1" } } },
+      next,
+      null,
+    );
+    expect(calls.length).toBe(1); // straight through, no probe
+    expect(calls[0].action).toBe("delete");
+  });
+
+  it("compound-unique where (not a plain id) passes through", async () => {
+    const { next, calls } = rowFakeNext(null);
+    await applyWorkspaceScope(
+      { model: "FutureProject", action: "update", args: { where: { someCompound: { a: 1 } }, data: { stage: "X" } } },
+      next,
+      "ARENA",
+    );
+    expect(calls.length).toBe(1);
+    expect(calls[0].action).toBe("update");
+  });
+});
+
+describe("applyWorkspaceScope — ImportLog is tenant-scoped (ISOLATION-FIX / TASK C)", () => {
+  it("findMany stamps tenantId for a pinned operator", async () => {
+    const { next, calls } = fakeNext();
+    await applyWorkspaceScope(
+      { model: "ImportLog", action: "findMany", args: { where: {} } },
+      next,
+      null,
+      "maha-dairy",
+    );
+    expect(calls[0].args.where).toEqual({ tenantId: "maha-dairy" });
+  });
+
+  it("create is BLOCKED when tenantId points at another tenant", async () => {
+    const { next } = fakeNext();
+    await expect(
+      applyWorkspaceScope(
+        { model: "ImportLog", action: "create", args: { data: { endpoint: "x", tenantId: "loran-agri" } } },
+        next,
+        null,
+        "maha-dairy",
+      ),
+    ).rejects.toThrow(/cross-tenant/i);
+  });
+
+  it("no tenant cookie => ImportLog passes through (ADMIN / bearer-token import API / cron)", async () => {
+    const { next, calls } = fakeNext();
+    await applyWorkspaceScope(
+      { model: "ImportLog", action: "findMany", args: { where: { endpoint: "test" } } },
+      next,
+      null,
+      null,
+    );
+    expect(calls[0].args).toEqual({ where: { endpoint: "test" } });
+  });
+});

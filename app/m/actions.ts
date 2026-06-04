@@ -12,6 +12,11 @@ export async function dismissInsight(formData: FormData): Promise<void> {
   await requireUser();
   const id = String(formData.get("id") ?? "");
   if (!id) return;
+  // ISO-4 ownership — scoped findUnique nulls a foreign-company insight, so a
+  // null row means foreign/gone; bail before the write (no ugly throw on the
+  // mobile surface, and a pinned operator can't dismiss another company's).
+  const before = await prisma.aIInsight.findUnique({ where: { id } });
+  if (!before) return;
   await prisma.aIInsight.update({
     where: { id },
     data: { status: "DISMISSED" },

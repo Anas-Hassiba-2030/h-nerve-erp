@@ -47,36 +47,99 @@ Update local `.env` to match if you connect locally.
 
 ## 2. Database backup / restore (Railway PostgreSQL)
 
-- **Automated backups:** Railway Postgres service → **Backups** tab (cadence
-  depends on plan). Restore from a listed snapshot there.
-- **Manual snapshot before risky changes** (uses the injected URL):
-  ```bash
-  pg_dump "$DATABASE_URL" -Fc -f hnerve_$(date +%Y%m%d).dump
-  ```
-  Locally, grab the URL from the Railway dashboard (Postgres → Connect) or
-  `railway variables`.
-- **Restore a dump:**
-  ```bash
-  pg_restore --clean --no-owner -d "$DATABASE_URL" hnerve_YYYYMMDD.dump
-  ```
+### 2.1 Confirm automated backups are ON (do this once, re-check quarterly)
+
+1. Railway dashboard → the **Postgres** service → **Backups** tab.
+2. Ensure **scheduled backups** are enabled with a **daily** cadence. On the
+   current plan Railway takes daily snapshots; verify the toggle is on and note
+   the **retention window** (how many days of snapshots are kept) shown there.
+3. If the toggle is off, enable it — backups are per-service and do **not**
+   inherit from other services.
+
+> Checklist: `[ ] daily snapshots enabled · [ ] retention ≥ 7 days · [ ] last
+> snapshot < 24h old`. Re-verify after any plan change.
+
+### 2.2 Point-in-time / snapshot restore (recovery)
+
+Railway restore is **snapshot-based** (restore to the moment a snapshot was
+taken), not continuous WAL replay. To recover:
+
+1. Postgres service → **Backups** → pick the snapshot just **before** the
+   incident → **Restore**. Railway restores into the service (or offer to spin a
+   new DB from it, depending on plan).
+2. **Verify before repointing:** if restored to a new instance, connect with
+   `psql "$NEW_URL"` and spot-check row counts on `User`, `Tenant`, `Company`,
+   `Transaction` before switching traffic.
+3. Update `DATABASE_URL` in the app service Variables to the restored instance
+   (only if it changed) → redeploy.
+4. For **finer than snapshot granularity**, layer the manual dump below — take
+   one before any risky migration/seed so you have a tighter recovery point.
+
+### 2.3 Manual snapshot (belt-and-suspenders, before risky changes)
+
+```bash
+pg_dump "$DATABASE_URL" -Fc -f hnerve_$(date +%Y%m%d_%H%M).dump
+```
+Locally, grab the URL from the Railway dashboard (Postgres → Connect) or
+`railway variables`.
+
+### 2.4 Restore a manual dump
+
+```bash
+pg_restore --clean --no-owner -d "$DATABASE_URL" hnerve_YYYYMMDD_HHMM.dump
+```
+
 - Migrations are forward-only via `prisma migrate deploy` (the railway.toml
-  preDeploy step). To undo a bad migration, restore the DB (above) — do **not**
+  preDeploy step). To undo a bad migration, restore the DB (2.2/2.4) — do **not**
   hand-edit applied files under `prisma/migrations/`.
+- **Never** run `prisma db push --accept-data-loss` or `db:reset` against prod
+  (the `npm run build` script does `db push` — it's for build/codegen of the
+  client, but the `--accept-data-loss` flag means it must only ever run against
+  a disposable DB; Railway's preDeploy uses `migrate deploy`, which is safe).
 
 ---
 
-## 3. Error tracking (Sentry) — setup procedure
+## 3. Monitoring — uptime + error alerting
 
-Not yet wired (no DSN). To enable:
+The app exposes `GET /api/health` (no auth, read-only): `SELECT 1` DB liveness +
+required-env check + uptime/latency. It returns **200** `{status:"ok"}`,
+**200** `{status:"degraded"}` (up but a non-critical check failed), or **503**
+`{status:"error"}` (DB unreachable). Railway already polls it as the container
+`healthcheckPath` every 30s (railway.toml) and restarts on non-2xx.
 
-```bash
-npm i @sentry/nextjs
-npx @sentry/wizard@latest -i nextjs    # generates sentry.*.config.ts
-```
+### 3.1 Uptime probe (external — survives a full app outage)
 
-Then set `SENTRY_DSN` (+ `NEXT_PUBLIC_SENTRY_DSN`) in Railway Variables and
-redeploy. Until then, runtime errors are visible via **Railway → Deployments →
-View Logs** (or `railway logs`) — the current telemetry path.
+Railway's healthcheck only restarts the container; it can't alert you when the
+whole service is down. Add an **external uptime monitor** (Betterstack / Checkll
+/ UptimeRobot — any HTTP probe):
+
+- **URL:** `https://<prod-domain>/api/health`
+- **Method:** GET, **interval:** 1 min, **expected:** HTTP `200`
+- **Healthy assertion (stricter):** response JSON `status == "ok"` (so a
+  `degraded` 200 still pages). Most monitors support a keyword/JSON assertion.
+- **Thresholds / alert policy:**
+  - **Down** = 2 consecutive failed probes (non-200 or assertion fail) → page
+    on-call (avoids flapping on a single blip).
+  - **Latency** = warn if probe round-trip > **2s** for 5 min (DB or cold-start
+    pressure). The body's `checks.db` latency surfaces DB-specific slowness.
+  - **Recovery** = auto-resolve after 2 consecutive `200 ok`.
+
+### 3.2 Error alerting (logs → alert)
+
+Request-path errors are structured JSON on **stderr** via `lib/logger.ts`
+(`{level:"error",scope,...}` — see D13). Two paths:
+
+- **Railway-native:** Railway → service → **Observability / Logs** → add a **log
+  alert** on the filter `level:"error"` (or `status:"error"` for health) →
+  notify Slack/email. Suggested threshold: **≥ 5 `level:"error"` lines in
+  10 min**, or **any** `health: DB unreachable`.
+- **Sentry (richer, optional):** `npm i @sentry/nextjs` → `npx
+  @sentry/wizard@latest -i nextjs` → set `SENTRY_DSN` (+
+  `NEXT_PUBLIC_SENTRY_DSN`) in Railway Variables → redeploy. Gives stack traces
+  + release tracking the log filter can't. Alert on a new issue or a spike.
+
+Until an alerting channel is wired, errors are visible via **Railway →
+Deployments → View Logs** (or `railway logs`) filtered on `level:"error"`.
 
 ---
 

@@ -70,20 +70,20 @@ export function monthlyTrend(
   months = 12,
 ): { values: number[]; labels: string[] } {
   const now = new Date();
-  const dayMs = 24 * 60 * 60 * 1000;
-  const monthMs = 30 * dayMs;
   const values: number[] = [];
   const labels: string[] = [];
   const fmt = new Intl.DateTimeFormat("en-US", { month: "short" });
+  // Real calendar-month buckets (not fixed 30-day windows, which drift earlier
+  // each month and can repeat/skip a calendar month in the labels).
   for (let i = months - 1; i >= 0; i--) {
-    const from = new Date(now.getTime() - (i + 1) * monthMs);
-    const to = new Date(now.getTime() - i * monthMs);
+    const from = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const to = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
     values.push(
       items
         .filter((it) => it.date >= from && it.date < to)
         .reduce((a, x) => a + x.amount, 0),
     );
-    labels.push(fmt.format(to));
+    labels.push(fmt.format(from));
   }
   return { values, labels };
 }

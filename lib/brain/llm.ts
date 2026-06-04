@@ -80,6 +80,13 @@ export async function callLlm(req: LlmRequest, stub: StubGenerator): Promise<Llm
   }
   __llmCallCount++;
 
+  // Bound the provider call so a hung connection degrades to the stub instead
+  // of hanging the whole ask()/convene() request indefinitely. Abort lands in
+  // the catch below, which already returns the stub fallback.
+  const controller = new AbortController();
+  const timeoutMs = Number(process.env.BRAIN_LLM_TIMEOUT_MS) || 20_000;
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
   try {
     const body = {
       model: cfg.model,
@@ -98,6 +105,7 @@ export async function callLlm(req: LlmRequest, stub: StubGenerator): Promise<Llm
         "content-type": "application/json",
       },
       body: JSON.stringify(body),
+      signal: controller.signal,
     });
 
     if (!res.ok) {
@@ -133,6 +141,8 @@ export async function callLlm(req: LlmRequest, stub: StubGenerator): Promise<Llm
       isStub: true,
       ms: Date.now() - t0,
     };
+  } finally {
+    clearTimeout(timer);
   }
 }
 

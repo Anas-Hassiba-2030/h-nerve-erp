@@ -152,6 +152,12 @@ async function bestSnippet(
       best = i;
     }
   }
+  // If not even the best candidate is a positive match, don't cite a random
+  // clause as if it were relevant — fall back to the summary, then the title.
+  if (bestScore <= 0) {
+    if (d.summary) return { text: d.summary, textEn: d.summaryEn ?? undefined, kind: "summary" };
+    if (d.title) return { text: d.title, textEn: d.titleEn ?? undefined, kind: "title" };
+  }
   return candidates[best];
 }
 

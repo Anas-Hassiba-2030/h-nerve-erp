@@ -108,18 +108,28 @@ export default async function PlansPage() {
                         <div className={`plan-step ${cls}`} key={step.id}>
                           <span className="pnum">{num}</span>
                           <span className="pt">{pickLocale(ar, step.action, step.actionEn)}</span>
-                          <div className="pacts">
-                            <form action={markStepDone}>
-                              <input type="hidden" name="stepId" value={step.id} />
-                              <input type="hidden" name="planId" value={plan.id} />
-                              <button type="submit" className="pa done">{ar ? "تمّ" : "Done"}</button>
-                            </form>
-                            <form action={markStepBlocked}>
-                              <input type="hidden" name="stepId" value={step.id} />
-                              <input type="hidden" name="planId" value={plan.id} />
-                              <button type="submit" className="pa block">{ar ? "عُلّق" : "Block"}</button>
-                            </form>
-                          </div>
+                          {/* Step controls only make sense on an ACTIVE
+                              (committed) plan; a DRAFT can't have steps marked
+                              done/blocked. Per-step: hide Done once DONE, hide
+                              Block unless still PENDING. */}
+                          {plan.status === "ACTIVE" ? (
+                            <div className="pacts">
+                              {step.status !== "DONE" ? (
+                                <form action={markStepDone}>
+                                  <input type="hidden" name="stepId" value={step.id} />
+                                  <input type="hidden" name="planId" value={plan.id} />
+                                  <button type="submit" className="pa done">{ar ? "تمّ" : "Done"}</button>
+                                </form>
+                              ) : null}
+                              {step.status === "PENDING" ? (
+                                <form action={markStepBlocked}>
+                                  <input type="hidden" name="stepId" value={step.id} />
+                                  <input type="hidden" name="planId" value={plan.id} />
+                                  <button type="submit" className="pa block">{ar ? "عُلّق" : "Block"}</button>
+                                </form>
+                              ) : null}
+                            </div>
+                          ) : null}
                         </div>
                       );
                     })}

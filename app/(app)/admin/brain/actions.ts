@@ -48,7 +48,18 @@ export async function runAnalysis(formData: FormData): Promise<void> {
     String(formData.get("tenantId") ?? "").trim() || "hourani-hotels",
   );
   if (!scope) return warn(ar ? "المستأجر مطلوب" : "Tenant is required");
-  const r = await runBrainAnalysis(scope.tenantId);
+  // The engine touches the DB; a failure here would otherwise throw an
+  // uncaught 500. Convert it to a toast like the dismiss/resolve siblings.
+  let r: Awaited<ReturnType<typeof runBrainAnalysis>>;
+  try {
+    r = await runBrainAnalysis(scope.tenantId);
+  } catch (e) {
+    return warn(
+      ar
+        ? `فشل التحليل: ${e instanceof Error ? e.message : ""}`
+        : `Analysis failed: ${e instanceof Error ? e.message : ""}`,
+    );
+  }
   flashToast({
     type: "info",
     entity: "info",

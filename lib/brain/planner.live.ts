@@ -90,13 +90,15 @@ export async function completeStep(stepId: string) {
     where: { id: stepId },
     data: { status: "DONE", completedAt: new Date() },
   });
-  // If every step is done, mark the plan complete.
+  // If every step is done, mark the plan complete — but ONLY if the plan is
+  // ACTIVE (committed). A never-committed DRAFT must never reach DONE, so we
+  // scope the flip with status: "ACTIVE" (updateMany no-ops otherwise).
   const remaining = await prisma.planStep.count({
     where: { planId: step.planId, status: { not: "DONE" } },
   });
   if (remaining === 0) {
-    await prisma.plan.update({
-      where: { id: step.planId },
+    await prisma.plan.updateMany({
+      where: { id: step.planId, status: "ACTIVE" },
       data: { status: "DONE", completedAt: new Date() },
     });
   }

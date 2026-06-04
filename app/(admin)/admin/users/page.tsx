@@ -66,7 +66,7 @@ export default async function AdminUsersPage({
     ];
   }
 
-  const [users, total, companies, allCount, adminCount, inactiveCount] = await Promise.all([
+  const [users, total, companies, allManagers, allCount, adminCount, inactiveCount] = await Promise.all([
     prisma.user.findMany({
       where,
       orderBy: [{ active: "desc" }, { createdAt: "asc" }],
@@ -88,6 +88,15 @@ export default async function AdminUsersPage({
     prismaUnscoped.company.findMany({
       orderBy: { code: "asc" },
       select: { id: true, code: true, name: true, nameEn: true },
+    }),
+    // Full eligible-manager list for the "Reports to" picker — NOT the page
+    // slice. With only the 20-row slice, a user whose manager is off-page had
+    // no matching <option>, so the select fell back to "None" and Save wiped
+    // the org-chart link (data loss). The whole roster is small (admin
+    // console), so loading it unpaginated is fine.
+    prisma.user.findMany({
+      orderBy: [{ active: "desc" }, { name: "asc" }],
+      select: { id: true, name: true, role: true },
     }),
     prisma.user.count(),
     prisma.user.count({ where: { role: "ADMIN", active: true } }),
@@ -231,7 +240,7 @@ export default async function AdminUsersPage({
               </div>
 
               <div style={{ marginTop: 14, display: "grid", gap: 14 }}>
-                <EditUserForm u={u} ar={ar} companies={companies} managers={users.map((m) => ({ id: m.id, name: m.name, role: m.role }))} />
+                <EditUserForm u={u} ar={ar} companies={companies} managers={allManagers} />
                 <ResetPasswordForm id={u.id} ar={ar} />
                 <ActiveToggle id={u.id} active={u.active} ar={ar} />
                 {isMe ? null : (

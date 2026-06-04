@@ -505,6 +505,19 @@ The first-touch experience. Whatever a new tenant sees before they have data of 
 
 ## Phase 21 — The Genesis Seed (onboarding & sample-data wizard) 🔄 (in progress)
 
+**Status (2026-06).** The wizard at `/admin/genesis` now previews the dataset
+*shape* before committing: `lib/genesis/recipes.ts` is a declarative, unit-tested
+catalog (six sectors — hospitality, dairy, agriculture, education, intelligence,
+people) diffed against live DB counts via `summarizeGenesis()`, rendered as
+per-sector "constellation" cards (`components/genesis/Constellation.tsx`, Sleek
+Operator, present/partial/will-create per line). Two commit paths exist:
+**`topUpDemoCorpus`** — idempotent + non-destructive (inserts the reference
+document corpus only when none exists, mirroring `ensure-demo-docs`), and the
+destructive full reseed, now gated behind an explicit wipe acknowledgement
+(`DangerReseed` + a server-side `confirm=WIPE` token). **Still to land:** per-sector
+idempotent re-seed against the live tenant (today's `seedOperator` is monolithic +
+destructive) and the cinematic constellation-drop animation.
+
 **Pitch.** Today's `npm run db:seed` is a CLI footgun: it requires a terminal, can't be re-run from the product, and gives ADMIN users no preview of what they're about to instantiate. Phase 21 promotes seeding to a first-class onboarding surface — a bilingual wizard that shows the *shape* of the data H-Nerve is about to create, lets the operator pick which sectors to seed, and can be safely re-run (idempotent) from the product itself.
 
 **Wow moment.** A new ADMIN signs in for the first time. Instead of an empty `/orrery`, they land on **The Genesis** — a black-emerald canvas with three pulsing constellations (Hospitality · Dairy · Agriculture · Education). Each constellation expands to show the entities about to be created (companies, hotels, dairy lines, programs) as a living diagram. The operator confirms; over the next 8 seconds the constellations "drop" one by one into the database with a soft thud animation, and the orrery hub fades up around them, already populated.

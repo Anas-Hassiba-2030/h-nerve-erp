@@ -6,8 +6,8 @@ import {
 } from "lucide-react";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import "../../daylight.css";
-import { CompanyCover } from "@/components/CompanyCover";
-import { RankBadge } from "@/components/RankBadge";
+import { CompanyCover } from "@/components/empire/CompanyCover";
+import { RankBadge } from "@/components/ui/RankBadge";
 import { GaugeChart } from "@/components/charts/GaugeChart";
 import { BarChart } from "@/components/charts/BarChart";
 import { prisma } from "@/lib/db/db";

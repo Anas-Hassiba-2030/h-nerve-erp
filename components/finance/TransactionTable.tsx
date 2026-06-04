@@ -1,8 +1,8 @@
 "use client";
 
 import { Trash2 } from "lucide-react";
-import { DeleteButton } from "@/components/DeleteButton";
-import { BulkActionBar, BulkCheckbox, useBulkSelect, type BulkAction } from "@/components/BulkActionBar";
+import { DeleteButton } from "@/components/ui/DeleteButton";
+import { BulkActionBar, BulkCheckbox, useBulkSelect, type BulkAction } from "@/components/ui/BulkActionBar";
 import { bulkDeleteTransactions, deleteTransaction } from "@/app/(app)/finance/actions";
 import { formatMoney, formatShortDate } from "@/lib/utils/utils";
 

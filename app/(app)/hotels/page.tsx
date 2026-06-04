@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { ExportMenu } from "@/components/ExportMenu";
-import { DeleteButton } from "@/components/DeleteButton";
+import { ExportMenu } from "@/components/ui/ExportMenu";
+import { DeleteButton } from "@/components/ui/DeleteButton";
 import { DaylightShell } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db/db";
 import {

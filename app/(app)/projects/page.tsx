@@ -1,7 +1,7 @@
 import { Rocket, Plus } from "lucide-react";
 import Link from "next/link";
-import { ExportMenu } from "@/components/ExportMenu";
-import { EmptyState } from "@/components/EmptyState";
+import { ExportMenu } from "@/components/ui/ExportMenu";
+import { EmptyState } from "@/components/ui/EmptyState";
 import {
   DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel,
 } from "@/components/orrery/daylight";

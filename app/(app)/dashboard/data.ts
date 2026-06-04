@@ -4,7 +4,7 @@
 // single async function. Behaviour-preserving: identical where/include/
 // orderBy/take, identical aggregation math, identical locale branches.
 
-import { type TickerItem } from "@/components/LiveTicker";
+import { type TickerItem } from "@/components/ui/LiveTicker";
 import { periodToRange, type Period } from "@/lib/finance/period";
 import { type CompanyStripItem } from "@/components/dashboard/CompanyStrip";
 import { type ActivityItem } from "@/components/dashboard/ActivityStream";

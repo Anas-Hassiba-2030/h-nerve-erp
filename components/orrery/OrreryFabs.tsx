@@ -13,9 +13,9 @@
 import type { Locale } from "@/lib/i18n/i18n";
 import "./orrery-fabs.css";
 import { FabRail } from "@/components/orrery/FabRail";
-import { Conversational } from "@/components/Conversational";
-import { QuickAddFAB } from "@/components/QuickAddFAB";
-import { TimeScrubber } from "@/components/TimeScrubber";
+import { Conversational } from "@/components/brain/Conversational";
+import { QuickAddFAB } from "@/components/nav/QuickAddFAB";
+import { TimeScrubber } from "@/components/timemachine/TimeScrubber";
 
 export function OrreryFabs({ locale }: { locale: Locale }) {
   return (

@@ -7,8 +7,8 @@ import {
   GraduationCap,
   Building2,
 } from "lucide-react";
-import { StatusBadge } from "@/components/StatusBadge";
-import { EmptyState } from "@/components/EmptyState";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { EmptyState } from "@/components/ui/EmptyState";
 import {
   formatNumber,
   formatMoney,

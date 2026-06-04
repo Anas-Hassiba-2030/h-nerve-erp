@@ -1,13 +1,13 @@
 import { Trophy, Crown, Medal, Star, Check, Lock, Sparkles, Award } from "lucide-react";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
-import { CompanyCover } from "@/components/CompanyCover";
-import { RankBadge } from "@/components/RankBadge";
+import { CompanyCover } from "@/components/empire/CompanyCover";
+import { RankBadge } from "@/components/ui/RankBadge";
 import { prisma } from "@/lib/db/db";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { RANKS, rankById, progressToNext } from "@/lib/utils/gamification";
 import { formatNumber } from "@/lib/utils/utils";
-import { Confetti } from "@/components/Confetti";
+import { Confetti } from "@/components/ui/Confetti";
 import "../daylight.css";
 
 export const dynamic = "force-dynamic";

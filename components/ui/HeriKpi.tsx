@@ -1,4 +1,4 @@
-import { CountUpValue } from "@/components/CountUpValue";
+import { CountUpValue } from "@/components/ui/CountUpValue";
 
 // Heritage Modern KPI tile — the same treatment the dashboard hero uses
 // (display-serif numeral that counts up, hairline card, mono hint), packaged

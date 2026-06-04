@@ -10,7 +10,7 @@
 
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { Sparkline } from "@/components/Sparkline";
+import { Sparkline } from "@/components/ui/Sparkline";
 import { CompanyLogo } from "@/components/brand/CompanyLogo";
 import { formatMoney } from "@/lib/utils/utils";
 

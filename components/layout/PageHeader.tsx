@@ -8,18 +8,18 @@
 
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { LocaleSwitch } from "./LocaleSwitch";
-import { ThemeSwitch } from "./ThemeSwitch";
-import { CommandPalette } from "./CommandPalette";
+import { LocaleSwitch } from "@/components/nav/LocaleSwitch";
+import { ThemeSwitch } from "@/components/nav/ThemeSwitch";
+import { CommandPalette } from "@/components/nav/CommandPalette";
 // Phase V3-P1-RE — StickyScrollWatcher REMOVED (was the flicker source).
 import {
   NotificationCenter,
   type NotifInsight,
   type NotifActivity,
   type NotifTask,
-} from "./NotificationCenter";
-import { KeyboardShortcuts } from "./KeyboardShortcuts";
-import { SidebarHamburger } from "./SidebarDrawer";
+} from "@/components/nav/NotificationCenter";
+import { KeyboardShortcuts } from "@/components/nav/KeyboardShortcuts";
+import { SidebarHamburger } from "@/components/layout/SidebarDrawer";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getTheme } from "@/lib/theme/theme.server";
 import { getCurrentUser } from "@/lib/auth/session";

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { RankBadge } from "@/components/RankBadge";
+import { RankBadge } from "@/components/ui/RankBadge";
 import { DaylightPanel } from "@/components/orrery/daylight";
 import { formatNumber } from "@/lib/utils/utils";
 import type { DashboardData } from "@/app/(app)/dashboard/data";

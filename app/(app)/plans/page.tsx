@@ -1,5 +1,5 @@
 import { ClipboardList } from "lucide-react";
-import { EmptyState } from "@/components/EmptyState";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { prisma } from "@/lib/db/db";
 import { formatNumber, pickLocale } from "@/lib/utils/utils";
 import { getLocale } from "@/lib/i18n/i18n.server";

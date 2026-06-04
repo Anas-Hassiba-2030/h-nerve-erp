@@ -26,7 +26,7 @@ import { formatDateTime, formatNumber, formatMoney2 } from "@/lib/utils/utils";
 import { sourceMatchesSystem } from "@/lib/import/importMapping";
 import { ClearTestImportsButton } from "./ClearTestImportsButton";
 import { CopyButton } from "./CopyButton";
-import { AdminFamilyNav } from "@/components/AdminFamilyNav";
+import { AdminFamilyNav } from "@/components/layout/AdminFamilyNav";
 import { sendTestBatch } from "./actions";
 import "../../daylight.css";
 

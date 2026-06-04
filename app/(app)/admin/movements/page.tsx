@@ -22,7 +22,7 @@ import {
   movementBadge,
 } from "@/lib/utils/utils";
 import { MOVEMENT_TYPES } from "@/lib/finance/inventory";
-import { AdminFamilyNav } from "@/components/AdminFamilyNav";
+import { AdminFamilyNav } from "@/components/layout/AdminFamilyNav";
 
 import "../../daylight.css";
 

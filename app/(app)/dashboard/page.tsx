@@ -7,8 +7,8 @@ import {
   Hotel, Milk, Sprout, GraduationCap, TrendingUp, Trophy, Building2, Brain,
 } from "lucide-react";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
-import { LiveTicker } from "@/components/LiveTicker";
-import { PeriodSelector } from "@/components/PeriodSelector";
+import { LiveTicker } from "@/components/ui/LiveTicker";
+import { PeriodSelector } from "@/components/ui/PeriodSelector";
 import { isValidPeriod, type Period } from "@/lib/finance/period";
 import { CompanyStrip } from "@/components/dashboard/CompanyStrip";
 import { ActivityStream } from "@/components/dashboard/ActivityStream";
@@ -18,7 +18,7 @@ import { UpcomingCalendar } from "@/components/dashboard/UpcomingCalendar";
 import { TodayActivity } from "@/components/dashboard/TodayActivity";
 import { UpcomingTasksPanel } from "@/components/dashboard/UpcomingTasksPanel";
 import { IntelligenceLayerPanel } from "@/components/dashboard/IntelligenceLayerPanel";
-import { BrainStatusBadge } from "@/components/BrainStatusBadge";
+import { BrainStatusBadge } from "@/components/brain/BrainStatusBadge";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/utils/utils";

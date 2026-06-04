@@ -1,6 +1,6 @@
 import { FileText } from "lucide-react";
-import { EmptyState } from "@/components/EmptyState";
-import { DeleteButton } from "@/components/DeleteButton";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { DeleteButton } from "@/components/ui/DeleteButton";
 import { prisma } from "@/lib/db/db";
 import { formatNumber, formatRelative } from "@/lib/utils/utils";
 import { getLocale } from "@/lib/i18n/i18n.server";

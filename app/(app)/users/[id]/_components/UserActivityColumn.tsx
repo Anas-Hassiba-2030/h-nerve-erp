@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { DaylightPanel } from "@/components/orrery/daylight";
-import { StatusBadge } from "@/components/StatusBadge";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import {
   formatNumber,
   formatRelative,

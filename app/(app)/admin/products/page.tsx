@@ -24,7 +24,7 @@ import {
 } from "@/lib/utils/utils";
 import { AdjustStockForm } from "./AdjustStockForm";
 import { ReorderPointForm } from "./ReorderPointForm";
-import { AdminFamilyNav } from "@/components/AdminFamilyNav";
+import { AdminFamilyNav } from "@/components/layout/AdminFamilyNav";
 
 import "../../daylight.css";
 

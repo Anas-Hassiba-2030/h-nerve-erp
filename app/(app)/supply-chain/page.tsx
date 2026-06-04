@@ -5,9 +5,9 @@
 
 import Link from "next/link";
 import { Sankey, type SankeyNode, type SankeyLink } from "@/components/charts/Sankey";
-import { ForecastExplainer } from "@/components/ForecastExplainer";
-import { ExportMenu } from "@/components/ExportMenu";
-import { DeleteButton } from "@/components/DeleteButton";
+import { ForecastExplainer } from "@/components/brain/ForecastExplainer";
+import { ExportMenu } from "@/components/ui/ExportMenu";
+import { DeleteButton } from "@/components/ui/DeleteButton";
 import { DaylightShell } from "@/components/orrery/daylight";
 import { ForecastCardClient } from "./ForecastCardClient";
 import { getCompanyBrand } from "@/lib/utils/companyBrand";

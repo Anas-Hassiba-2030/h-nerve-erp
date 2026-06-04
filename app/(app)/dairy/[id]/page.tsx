@@ -10,8 +10,8 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
-import { StatusBadge } from "@/components/StatusBadge";
-import { PinButton } from "@/components/PinButton";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { PinButton } from "@/components/ui/PinButton";
 import { prisma } from "@/lib/db/db";
 import { isPinned } from "@/lib/utils/pins";
 import { getLocale } from "@/lib/i18n/i18n.server";

@@ -5,8 +5,8 @@
 // to Heritage Modern hairline treatment (docs/DESIGN-SKILL.md §1.D).
 
 import { Calendar, MapPin, Users2, Building2, Hash } from "lucide-react";
-import { SectorPill } from "@/components/SectorPill";
-import { StatusBadge } from "@/components/StatusBadge";
+import { SectorPill } from "@/components/ui/SectorPill";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { getCompanyBrand } from "@/lib/utils/companyBrand";
 import { formatNumber } from "@/lib/utils/utils";
 

@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { CheckCircle2, Clock, Zap, AlertTriangle, Trash2, CheckCheck } from "lucide-react";
 import { HeritagePill } from "@/components/heritage";
-import { DeleteButton } from "@/components/DeleteButton";
-import { BulkActionBar, BulkCheckbox, useBulkSelect, type BulkAction } from "@/components/BulkActionBar";
+import { DeleteButton } from "@/components/ui/DeleteButton";
+import { BulkActionBar, BulkCheckbox, useBulkSelect, type BulkAction } from "@/components/ui/BulkActionBar";
 import { bulkSetTaskStatus, bulkDeleteTasks, setTaskStatus, deleteTask } from "@/app/(app)/tasks/actions";
 import { formatShortDate } from "@/lib/utils/utils";
 

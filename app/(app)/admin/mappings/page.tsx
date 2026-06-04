@@ -19,7 +19,7 @@ import { formatDateTime, formatNumber } from "@/lib/utils/utils";
 import { MappingDeleteButton } from "./MappingDeleteButton";
 import { MappingTester } from "./MappingTester";
 import { createMapping, updateMapping, toggleMappingActive } from "./actions";
-import { AdminFamilyNav } from "@/components/AdminFamilyNav";
+import { AdminFamilyNav } from "@/components/layout/AdminFamilyNav";
 
 import "../../daylight.css";
 

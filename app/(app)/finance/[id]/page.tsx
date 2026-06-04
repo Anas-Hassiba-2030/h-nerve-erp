@@ -12,7 +12,7 @@ import {
   Tag,
 } from "lucide-react";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
-import { PinButton } from "@/components/PinButton";
+import { PinButton } from "@/components/ui/PinButton";
 import { prisma } from "@/lib/db/db";
 import { isPinned } from "@/lib/utils/pins";
 import { getLocale } from "@/lib/i18n/i18n.server";

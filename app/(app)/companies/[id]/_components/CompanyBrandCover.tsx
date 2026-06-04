@@ -4,8 +4,8 @@ import {
   Calendar,
   MapPin,
 } from "lucide-react";
-import { SectorPill } from "@/components/SectorPill";
-import { StatusBadge } from "@/components/StatusBadge";
+import { SectorPill } from "@/components/ui/SectorPill";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { formatNumber } from "@/lib/utils/utils";
 import type { CompanyDetail } from "../data";
 

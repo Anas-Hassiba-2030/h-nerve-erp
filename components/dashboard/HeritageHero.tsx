@@ -16,7 +16,7 @@ import React from "react";
 import Link from "next/link";
 import { ArrowUpRight, ArrowDownRight, Minus, Sparkles, Download } from "lucide-react";
 import { Narrate } from "@/components/brain/Narrate";
-import { CountUpValue } from "@/components/CountUpValue";
+import { CountUpValue } from "@/components/ui/CountUpValue";
 
 export type HeritageKpi = {
   label: string;

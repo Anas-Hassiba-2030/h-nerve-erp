@@ -13,7 +13,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
-import { StatusBadge } from "@/components/StatusBadge";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { prisma } from "@/lib/db/db";
 import {
   formatNumber,

@@ -2,7 +2,7 @@
 // Features: aurora gradient, animated rank progression bar, sparkle particles,
 // chess-piece symbol that subtly orbits.
 
-import { RankBadge } from "@/components/RankBadge";
+import { RankBadge } from "@/components/ui/RankBadge";
 import { rankById, RANKS, progressToNext } from "@/lib/utils/gamification";
 
 export function ProfileHero({

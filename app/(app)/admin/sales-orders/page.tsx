@@ -26,7 +26,7 @@ import {
   FulfillForm,
   CancelSOButton,
 } from "./SalesOrderForms";
-import { AdminFamilyNav } from "@/components/AdminFamilyNav";
+import { AdminFamilyNav } from "@/components/layout/AdminFamilyNav";
 
 import "../../daylight.css";
 

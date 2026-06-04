@@ -11,7 +11,7 @@ import {
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
-import { KpiCard } from "@/components/KpiCard";
+import { KpiCard } from "@/components/ui/KpiCard";
 import { formatNumber, formatMoney } from "@/lib/utils/utils";
 import type { CompanyDetail } from "../data";
 

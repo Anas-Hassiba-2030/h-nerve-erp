@@ -12,7 +12,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/db";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import { formatNumber } from "@/lib/utils/utils";
-import { AdminFamilyNav } from "@/components/AdminFamilyNav";
+import { AdminFamilyNav } from "@/components/layout/AdminFamilyNav";
 import { orderStatusBadge, ORDER_STATUS_AR, ORDER_STATUS_EN } from "@/lib/utils/utils";
 import { NewSupplierForm, EditSupplierForm, DeleteSupplierButton } from "./SupplierForms";
 

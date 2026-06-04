@@ -965,17 +965,23 @@ investor-facing alternative: **"Operations" (العمليات)**. Anas picks.)
 they land). **Effort.** Hub page ~1 day; orrery node ~½ day; per-module polish
 scales with module count.
 
-**Concrete defects found (2026-06-04 audit) — fix these as the first slice:**
-- **`/admin/system` advertises "17 routes" but 13 of its cards are dead 404s**
-  (`/admin/imports`, `/admin/products`, `/admin/movements`, `/admin/warehouses`,
-  `/admin/transfers`, `/admin/mappings`, `/admin/purchase-orders`,
-  `/admin/sales-orders`, `/admin/suppliers`, `/admin/customers`, `/admin/journal`,
-  `/admin/accounts`, `/admin/brain` — none of those page dirs exist). The hub even
-  shows live count badges next to links that go nowhere. **Prune/disable the dead
-  cards or build the pages.** This is a correctness bug, not polish.
-- **`/admin/db` (the Data Browser) is not in the admin top rail** — reachable only
-  as one card inside `/admin/system`. A non-technical operator never finds it.
-  **Add it to the rail** (`app/(admin)/layout.tsx`, Database icon).
+**Concrete defects found (2026-06-04 audit, corrected) — fix as the first slice:**
+- **The ERP back-office pages already exist** — they live under `app/(app)/admin/*`
+  (operator/Heritage shell), reachable at `/admin/imports`, `/admin/products`,
+  `/admin/movements`, `/admin/warehouses`, `/admin/transfers`, `/admin/mappings`,
+  `/admin/purchase-orders`, `/admin/sales-orders`, `/admin/suppliers`,
+  `/admin/customers`, `/admin/journal`, `/admin/accounts`, `/admin/brain`, plus an
+  in-page tab bar that cross-links them. **They are NOT dead 404s** — the
+  `/admin/system` hub links resolve. The real problem is they have **no single home
+  on the Orrery hub** (this is "The Core" work): you only reach them by deep link or
+  the tab strip. **Build the `/core` (النواة) hub page that tiles them with counts +
+  quick actions, and add the Orrery node.**
+- **Polish the import + module screens.** The import log (`/admin/imports`) is
+  functional but sparse — KPI tiles at zero with an empty state. Bring every module
+  up to the dashboard's bar (KPI strip, hairline tiles, clear empty states).
+- **`/admin/db` (the cyan Data Browser, in the `(admin)` console) is not in the
+  admin top rail** — reachable only as a card inside `/admin/system`. Add it to the
+  rail (`app/(admin)/layout.tsx`, Database icon).
 - **Button hierarchy is inverted on `/admin/genesis`:** the destructive
   `admin-btn-danger` renders *smaller* than the safe `admin-cta-primary`. Bump the
   primary CTAs (`~12px 22px`, `14px`) and make the danger button visually heavier.

@@ -312,6 +312,39 @@ export async function GET(req: NextRequest, { params }: { params: { type: string
       // No analytics — combined CSV is a flat stream by design.
       break;
     }
+    case "companies": {
+      title = "Companies — Group Portfolio";
+      const companies = await prisma.company.findMany({ orderBy: { code: "asc" } });
+      header = ["Code", "Name", "NameEn", "Sector", "City", "Employees", "Status", "Founded"];
+      rows = companies.map((c) =>
+        [c.code, c.name, c.nameEn, c.sector, c.city ?? "", c.employees, c.status, c.foundedYear ?? ""].map(csvEscape).join(","),
+      );
+      break;
+    }
+    case "employees": {
+      title = "Team — People Directory";
+      const people = await prisma.user.findMany({
+        orderBy: { createdAt: "asc" },
+        include: { company: true },
+      });
+      header = ["Name", "Email", "Role", "Title", "Company", "Active", "Joined"];
+      rows = people.map((u) =>
+        [u.name, u.email, u.role, u.title ?? "", u.company?.name ?? "", u.active ? "yes" : "no", u.createdAt.toISOString().slice(0, 10)].map(csvEscape).join(","),
+      );
+      break;
+    }
+    case "education": {
+      title = "Incubator Programs";
+      const programs = await prisma.program.findMany({
+        orderBy: { createdAt: "desc" },
+        include: { company: true },
+      });
+      header = ["Program", "Company", "Founder", "Vertical", "Stage", "Cohort", "Funding_JOD", "TeamSize"];
+      rows = programs.map((p) =>
+        [p.name, p.company.name, p.founder, p.vertical, p.stage, p.cohort, p.fundingJod, p.teamSize].map(csvEscape).join(","),
+      );
+      break;
+    }
     default:
       return new NextResponse("Unknown export type", { status: 400 });
   }

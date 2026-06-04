@@ -16,7 +16,7 @@
 // no DB/network, unit-testable. The CONTEXT-relevance axis is best sourced
 // from the retriever's own scores (CRAG grounding), so it's an input here.
 
-import { extractClaims } from "./verifier";
+import { extractClaims, normalizeDigits } from "./verifier";
 
 // Compact bilingual stopword set — kept local so this module stays import-light.
 const STOP = new Set([
@@ -48,11 +48,13 @@ export function scoreFaithfulness(answer: string, contextText: string): number {
   const claims = extractClaims(answer || "");
   if (claims.length === 0) return 1;
   const haystack = (contextText || "").toLowerCase();
-  const haystackDigits = haystack.replace(/[,،\s]/g, "");
+  // Digit-normalize so an Arabic-numeral claim (٨٤٬٠٠٠) grounds against ASCII
+  // context (84,000) and vice versa; strip thousands separators (, ، ٬) too.
+  const haystackDigits = normalizeDigits(haystack).replace(/[,،٬\s]/g, "");
   let grounded = 0;
   for (const c of claims) {
     const tok = c.token.toLowerCase();
-    const tokDigits = tok.replace(/[,،\s]/g, "");
+    const tokDigits = normalizeDigits(tok).replace(/[,،٬\s]/g, "");
     if (haystack.includes(tok) || (tokDigits && haystackDigits.includes(tokDigits))) grounded++;
   }
   return grounded / claims.length;

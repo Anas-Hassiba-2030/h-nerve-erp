@@ -172,15 +172,24 @@ export function verifyNarrative(
 // Helpers
 // ─────────────────────────────────────────────────────────────────────
 
-function parseNumeric(token: string): number | null {
-  // Normalize Arabic-Indic (٠-٩) and Extended Arabic-Indic (۰-۹) digits to ASCII and
-  // the Arabic decimal mark ٫ to ".", then strip thousands separators (, ٬ ،), the
-  // RTL mark, and whitespace.
-  const cleaned = token
+/**
+ * Map Arabic-Indic (٠-٩) and Extended Arabic-Indic (۰-۹) digits to ASCII and the
+ * Arabic decimal mark ٫ to ".". Separators and other characters are left intact.
+ * Exported so sibling RAG cores (e.g. ragEval faithfulness) treat Arabic and ASCII
+ * numerals identically — otherwise an Arabic-numeral claim fails to ground against
+ * ASCII context and vice versa.
+ */
+export function normalizeDigits(text: string): string {
+  return text
     .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660))
     .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06f0))
-    .replace(/٫/g, ".")
-    .replace(/[,،٬‏\s]/g, "");
+    .replace(/٫/g, ".");
+}
+
+function parseNumeric(token: string): number | null {
+  // Normalize Arabic numerals, then strip thousands separators (, ٬ ،), the RTL
+  // mark, and whitespace.
+  const cleaned = normalizeDigits(token).replace(/[,،٬‏\s]/g, "");
   const n = Number(cleaned);
   return Number.isFinite(n) ? n : null;
 }

@@ -210,7 +210,7 @@ export function Sidebar({
       items: [
         { href: "/admin/tenants", label: ar ? "المستأجرون" : "Tenants", icon: Building2, hint: "ADMIN" },
         { href: "/admin/empire", label: ar ? "الإمبراطورية" : "Empire", icon: Globe2, hint: "ADMIN" },
-        { href: "/admin/system", label: ar ? "النظام" : "System console", icon: Settings, hint: "ADMIN" },
+        { href: "/admin/system", label: ar ? "غرفة العمليات" : "Mission Control", icon: Settings, hint: "ADMIN" },
       ],
     };
     const i = groups.findIndex((g) => g.label === intelLabel);

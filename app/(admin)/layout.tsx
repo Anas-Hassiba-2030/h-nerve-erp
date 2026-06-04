@@ -67,7 +67,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </Link>
             <Link href="/admin/system" className="admin-rail-link">
               <Settings className="h-3.5 w-3.5" strokeWidth={1.5} />
-              {ar ? "النظام" : "System"}
+              {ar ? "غرفة العمليات" : "Mission Control"}
             </Link>
           </nav>
           <Link

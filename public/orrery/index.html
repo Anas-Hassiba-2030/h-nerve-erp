@@ -1273,8 +1273,8 @@ const GROUPS = [
      ["المركز المالي","sections/finance.html"],["التحليلات","sections/analytics.html"],["مقارنة","sections/compare.html"],["الأسواق","sections/markets.html"],["التقارير","sections/reports.html"],["الاستدامة"],["المشاريع المستقبلية"] ]},
   { id:"team", name:"الفريق", en:"Team", amb:"university", kids:[
      ["الرسائل","sections/messages.html"],["المهام","sections/tasks.html"],["صندوق الوارد","sections/inbox.html"],["الموجز","sections/digest.html"],["الإنجازات","sections/achievements.html"],["الموظفون","sections/employees.html"],["الفريق","sections/employees.html"] ]},
-  { id:"system", name:"النظام", en:"System", amb:"holding", kids:[
-     ["المستأجرون","sections/admin.html"],["الإمبراطورية","sections/holding.html"],["الإدارة ERP","sections/erp.html"],["مساحة العمل","sections/workspace.html"],["الأتمتة","sections/workflows.html"],["التكاملات","sections/integrations.html"],["التدقيق الشامل","sections/audit.html"],["سجل النشاط","sections/activity.html"],["صحة النظام","sections/system.html"],["البحث","sections/search.html"],["المثبّت","sections/pinned.html"],["المحذوفات","sections/trash.html"],["المساعدة","sections/info.html"],["خارطة الطريق","sections/roadmap.html"],["الإعدادات","sections/settings.html"] ]},
+  { id:"system", name:"غرفة العمليات", en:"Mission Control", amb:"holding", kids:[
+     ["غرفة العمليات"],["المستأجرون","sections/admin.html"],["الإمبراطورية","sections/holding.html"],["الإدارة ERP","sections/erp.html"],["مساحة العمل","sections/workspace.html"],["الأتمتة","sections/workflows.html"],["التكاملات","sections/integrations.html"],["التدقيق الشامل","sections/audit.html"],["سجل النشاط","sections/activity.html"],["صحة النظام","sections/system.html"],["البحث","sections/search.html"],["المثبّت","sections/pinned.html"],["المحذوفات","sections/trash.html"],["المساعدة","sections/info.html"],["خارطة الطريق","sections/roadmap.html"],["الإعدادات","sections/settings.html"] ]},
 ];
 // English child labels (parallel to kids order) — for the AR/EN toggle
 const KIDS_EN = {
@@ -1283,7 +1283,7 @@ const KIDS_EN = {
   intel:["Brain Hub","Insights","Alerts","Plans","Documents","Causal Graph","What-if","Council","Memory Lake","Learning","Benchmarks","Brain IQ","Narrate"],
   finance:["Financial Hub","Analytics","Compare","Markets","Reports","Sustainability","Future Projects"],
   team:["Messages","Tasks","Inbox","Digest","Achievements","Staff","Team"],
-  system:["Tenants","Empire","Admin ERP","Workspace","Workflows","Integrations","Audit 360","Activity","System Health","Search","Pinned","Trash","Help","Roadmap","Settings"],
+  system:["Mission Control","Tenants","Empire","Admin ERP","Workspace","Workflows","Integrations","Audit 360","Activity","System Health","Search","Pinned","Trash","Help","Roadmap","Settings"],
 };
 const ANCHORS = GROUPS.map(g=>({
   id:g.id, name:g.name, en:g.en, amb:g.amb,
@@ -1813,22 +1813,7 @@ document.getElementById("langToggle").addEventListener("click", ()=> setLang(LAN
 setLang("ar");
   window.__hnLangReady = true;
 
-/* insight stars surface ideas calmly — one at a time, slow enough to read + click */
-if(!reduce){
-  let insIdx=0;
-  function surfaceNext(){
-    if(!started || flying){ setTimeout(surfaceNext, 1500); return; }
-    insightEls.forEach(e=>e.classList.remove("active"));
-    const el=insightEls[insIdx % insightEls.length]; insIdx++;
-    placeCard(el, el.querySelector(".icard"));
-    el.classList.add("active");                 // streak in ~250ms
-    setTimeout(()=>{                             // visible 6s, then fade ~400ms
-      el.classList.remove("active");
-      setTimeout(surfaceNext, 2000);             // 2s gap before next
-    }, 6250);
-  }
-  setTimeout(surfaceNext, 1400);
-}
+/* insight stars disabled — popup tooltips hidden inside the cosmos view */
 
 /* ── entry timeline ── */
 function countIQ(target){

@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db/db";
+import { getActiveWorkspaceId } from "@/lib/tenancy/workspace";
+import { resolveOwnCompanyId } from "@/lib/auth/adminActionScope";
 import { requireUser } from "@/lib/auth/session";
 import { requireRole } from "@/lib/auth/authz";
 
@@ -36,7 +38,7 @@ export async function createProgram(formData: FormData) {
   });
   await prisma.program.create({
     data: {
-      companyId: data.companyId,
+      companyId: resolveOwnCompanyId(data.companyId, getActiveWorkspaceId()),
       name: data.name,
       nameEn: data.nameEn || null,
       founder: data.founder,

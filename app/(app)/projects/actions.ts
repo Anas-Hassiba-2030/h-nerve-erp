@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db/db";
+import { getActiveWorkspaceId } from "@/lib/tenancy/workspace";
+import { resolveOwnCompanyId } from "@/lib/auth/adminActionScope";
 import { requireUser } from "@/lib/auth/session";
 import { requireRole } from "@/lib/auth/authz";
 import { softDelete, softRestore, deletedLabel, restoredLabel } from "@/lib/db/softDelete";
@@ -52,7 +54,7 @@ export async function createProject(
   try {
     await prisma.futureProject.create({
       data: {
-        companyId: data.companyId,
+        companyId: resolveOwnCompanyId(data.companyId, getActiveWorkspaceId()),
         title: data.title,
         description: data.description || null,
         stage: data.stage,

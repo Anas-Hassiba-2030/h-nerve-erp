@@ -65,6 +65,12 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
   "ImportLog",
 ]);
 
+// Phase ISO-2 — models owned by TWO Company FKs at once (a bridge row).
+// A workspace is in-scope when it is EITHER endpoint (sourceCompanyId OR
+// targetCompanyId). SupplyForecast is the only such model today; the
+// endpoint field names are hard-coded in the dual block below.
+export const DUAL_COMPANY_SCOPED_MODELS = new Set<string>(["SupplyForecast"]);
+
 export type ScopeParams = { model?: string; action: string; args?: any };
 
 /**
@@ -86,6 +92,7 @@ export async function applyWorkspaceScope(
   tenantSlug: string | null = null,
   scopedModels: Set<string> = SCOPED_MODELS,
   tenantScopedModels: Set<string> = TENANT_SCOPED_MODELS,
+  dualScopedModels: Set<string> = DUAL_COMPANY_SCOPED_MODELS,
 ): Promise<any> {
   const model = params.model;
 
@@ -179,6 +186,95 @@ export async function applyWorkspaceScope(
       return next(params);
     }
 
+    return next(params);
+  }
+
+  // Phase ISO-2 — dual-company-FK scoping (SupplyForecast). The row is
+  // owned by BOTH endpoints, so a workspace is in-scope when it is EITHER
+  // the sourceCompanyId OR the targetCompanyId. Same pass-through invariant
+  // when there's no workspace cookie (ADMIN / cron).
+  if (model && dualScopedModels.has(model) && workspaceId) {
+    const action = params.action;
+    const own = {
+      OR: [{ sourceCompanyId: workspaceId }, { targetCompanyId: workspaceId }],
+    };
+    if (
+      action === "findMany" ||
+      action === "findFirst" ||
+      action === "findFirstOrThrow" ||
+      action === "count" ||
+      action === "aggregate" ||
+      action === "groupBy" ||
+      action === "updateMany" ||
+      action === "deleteMany"
+    ) {
+      params.args = params.args ?? {};
+      const base = params.args.where;
+      // AND the ownership OR with any existing where so a caller's own
+      // OR/filters are never clobbered.
+      params.args.where = base ? { AND: [base, own] } : own;
+      return next(params);
+    }
+    if (action === "findUnique" || action === "findUniqueOrThrow") {
+      const row = await next(params);
+      if (
+        row &&
+        row.sourceCompanyId !== workspaceId &&
+        row.targetCompanyId !== workspaceId
+      ) {
+        if (action === "findUniqueOrThrow") {
+          throw new Error("Record not found in the active workspace");
+        }
+        return null;
+      }
+      return row;
+    }
+    if (action === "create") {
+      const data = params.args?.data ?? {};
+      if (
+        data.sourceCompanyId !== workspaceId &&
+        data.targetCompanyId !== workspaceId
+      ) {
+        throw new Error("Cross-workspace create blocked");
+      }
+      return next(params);
+    }
+    if (action === "createMany") {
+      const d = params.args?.data;
+      const rows = Array.isArray(d) ? d : d ? [d] : [];
+      for (const r of rows) {
+        if (
+          r.sourceCompanyId !== workspaceId &&
+          r.targetCompanyId !== workspaceId
+        ) {
+          throw new Error("Cross-workspace create blocked");
+        }
+      }
+      return next(params);
+    }
+    // by-id update/delete/upsert: probe the row, allow only when the active
+    // workspace is one of its two endpoints. A non-id where passes through.
+    if (action === "update" || action === "delete" || action === "upsert") {
+      const where = params.args?.where ?? {};
+      const idValue = where.id;
+      if (typeof idValue === "string") {
+        const savedAction = params.action;
+        const savedArgs = params.args;
+        const probe = { ...params, action: "findUnique", args: { where: { id: idValue } } } as any;
+        const row = await next(probe);
+        params.action = savedAction;
+        params.args = savedArgs;
+        if (
+          !row ||
+          (row.sourceCompanyId !== workspaceId &&
+            row.targetCompanyId !== workspaceId)
+        ) {
+          throw new Error("Cross-workspace write blocked");
+        }
+        return next(params);
+      }
+      return next(params);
+    }
     return next(params);
   }
 

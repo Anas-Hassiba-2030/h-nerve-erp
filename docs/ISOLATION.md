@@ -26,6 +26,18 @@ before adding a new model that holds business data.
 |---|---|---|---|---|
 | Workspace | `companyId String` (FK to Company) | `h_nerve_workspace` | `SCOPED_MODELS` | Hotel, DairyBatch, Farm, Program, Transaction, FutureProject, SustainabilityScore |
 | Tenant | `tenantId String` (opaque slug) | `h_nerve_tenant` | `TENANT_SCOPED_MODELS` | Product, Supplier, Customer, Warehouse, PurchaseOrder, SalesOrder, InventoryMovement, LedgerAccount, FinancialPeriod, JournalEntry, TenantImportMapping, BrainInsight, Booking, Crop, CouncilDiscussion, CouncilReply, ProtocolClause, ImportLog (nullable `tenantId` — null rows are filtered out for pinned operators, visible to ADMIN) |
+| Dual-company | `sourceCompanyId` + `targetCompanyId` (two Company FKs) | `h_nerve_workspace` | `DUAL_COMPANY_SCOPED_MODELS` | SupplyForecast |
+
+**Dual-company plane (Phase ISO-2).** A `SupplyForecast` bridges two
+companies and is owned by **both** — a workspace is in-scope when it is
+**either** the `sourceCompanyId` **or** the `targetCompanyId`. Reads `AND`
+an `OR`-of-both-endpoints onto the where; `findUnique` drops a row when the
+workspace is neither endpoint; `create` requires the workspace to be one
+endpoint; the by-id write guard allows update/delete/upsert only when an
+endpoint matches. Pass-through when there's no workspace cookie (ADMIN /
+cron). The `create` rule is why auto-generate works: hotels are read
+through the companyId-scoped client, so each draft's `sourceCompanyId` is
+the operator's own workspace.
 
 Both cookies are written at login in `app/(auth)/login/actions.ts` from
 the user's `companyId` and the resolved `tenantSlug`
@@ -147,35 +159,28 @@ change.
   filter pattern; consider folding into `TENANT_SCOPED_MODELS` after the
   next pitch.
 
-### Open cross-tenant write leaks found by the isolation audit (2026-06-04)
+### Isolation audit follow-ups (2026-06-04)
 
-These were confirmed by adversarial audit but need design/schema work
-beyond a behaviour-preserving sweep, so they are tracked here rather than
-hot-patched:
-
-- **`SupplyForecast` (app/(app)/supply-chain/actions.ts).** The model is
-  keyed by **two** Company FKs (`sourceCompanyId` + `targetCompanyId`),
-  not a single `companyId`/`tenantId`, so it is in neither scoped set and
-  the central guards cannot cover it. `setForecastStatus` / `deleteForecast`
-  / `restoreForecast` / `approveForecast` / `rejectForecast` mutate a
-  forecast by id with no ownership check, and `approveForecast` triggers a
-  cross-company PO/Supplier side-effect via the bridge. `createForecast`
-  trusts client `sourceCompanyId`/`targetCompanyId`. Fixing needs a
-  decision on the ownership axis (source vs target vs group/tenant) — see
-  the supply/procurement seam (`lib/supply/bridge.ts`,
-  `COMPANY_CODE_TO_TENANT_SLUG`). **Do not guess the axis** — a wrong guard
-  breaks legitimate cross-company demand forecasting.
+- **`SupplyForecast` — CLOSED (Phase ISO-2).** Decision: a forecast is owned
+  by **both** its source and target company; a user whose active workspace
+  is `sourceCompanyId` **or** `targetCompanyId` may see/edit it. Implemented
+  as the dual-company plane (`DUAL_COMPANY_SCOPED_MODELS`, see above) plus
+  an ownership probe in all six `supply-chain/actions.ts` actions
+  (`createForecast` ownership + the by-id `setForecastStatus` /
+  `deleteForecast` / `restoreForecast` / `approveForecast` / `rejectForecast`
+  bail on a null/foreign row).
+- **`create`-action HARDEN — CLOSED (Phase ISO-3).** `createBatch` /
+  `createProgram` / `createFarm` / `createHotel` / `createProject` now route
+  the companyId through `resolveOwnCompanyId(submitted, getActiveWorkspaceId())`
+  — a pinned operator is forced to their own workspace, a cross-company
+  ADMIN keeps the submitted value — so they are correct by construction,
+  not just by the middleware backstop. (`updateCustomer` / `deleteCustomer`
+  / `updateWarehouse` take only an `id`, no client tenant/company, and are
+  already covered by the F6 by-id guard — no change needed.)
 - **`AIInsight` workspace signals (app/(app)/workspace/actions.ts —
-  `dismissSignal` / `acceptSignal`).** `AIInsight` has **no** `companyId`
-  or `tenantId` column (only `module`), so it cannot be scoped by the
-  current mechanism; the table is effectively shared. Scoping it requires a
-  schema migration to add + backfill a tenant key (follow the
-  `20260520_add_tenant_id_to_booking_crop` template), then add it to
-  `TENANT_SCOPED_MODELS`.
-- **Defense-in-depth (HARDEN, not open leaks):** several `create` actions
-  (createBatch/createProgram/createFarm/createHotel/createProject;
-  updateCustomer/deleteCustomer/updateWarehouse) still trust a client
-  `tenantId`/`companyId`. The middleware **blocks** the foreign write
-  (throws), so there is no open leak, but they should adopt the #174
-  own-scope discipline (`resolveAdminTenantId` / own workspace) so the
-  guarantee doesn't depend on the cookie being present.
+  `dismissSignal` / `acceptSignal`) — STILL OPEN.** `AIInsight` has **no**
+  `companyId`/`tenantId` column (only `module`), so it cannot be scoped by
+  the current mechanism; the table is effectively shared. Scoping it
+  requires a schema migration to add + backfill a scope key (follow the
+  `20260520_add_tenant_id_to_booking_crop` template), then add it to the
+  scoped set and gate its read/write actions.

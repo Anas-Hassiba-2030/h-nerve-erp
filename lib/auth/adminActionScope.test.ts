@@ -4,7 +4,7 @@
 //   • a non-admin with no pin gets rejected entirely.
 
 import { describe, it, expect } from "vitest";
-import { resolveAdminTenantId } from "@/lib/auth/adminActionScope";
+import { resolveAdminTenantId, resolveOwnCompanyId } from "@/lib/auth/adminActionScope";
 
 const cross = { role: "ADMIN" as const, tenantSlug: null, companyId: null };
 const pinned = { role: "MANAGER" as const, tenantSlug: "arena", companyId: "c1" };
@@ -40,5 +40,18 @@ describe("resolveAdminTenantId", () => {
   it("trims whitespace defensively", () => {
     expect(resolveAdminTenantId(pinned, "  maha  ")).toEqual({ tenantId: "arena", overridden: true });
     expect(resolveAdminTenantId(cross, "  loran  ")).toEqual({ tenantId: "loran", overridden: false });
+  });
+});
+
+describe("resolveOwnCompanyId (companyId-plane own-scope, Phase ISO-3)", () => {
+  it("pinned (active workspace set): forces the workspace, overriding a foreign companyId", () => {
+    expect(resolveOwnCompanyId("foreign-co", "own-co")).toBe("own-co");
+    expect(resolveOwnCompanyId("own-co", "own-co")).toBe("own-co");
+  });
+
+  it("cross-company ADMIN (no active workspace): keeps the submitted companyId", () => {
+    expect(resolveOwnCompanyId("any-co", null)).toBe("any-co");
+    expect(resolveOwnCompanyId("any-co", "")).toBe("any-co");
+    expect(resolveOwnCompanyId("any-co", "   ")).toBe("any-co");
   });
 });

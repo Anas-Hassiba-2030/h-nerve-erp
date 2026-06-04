@@ -53,3 +53,24 @@ export function resolveAdminTenantId(
   // Non-admin without a pinned tenant — nothing to scope to.
   return null;
 }
+
+/**
+ * Phase ISO-3 — the companyId-plane analog of resolveAdminTenantId, for
+ * SCOPED_MODELS create actions (Hotel / DairyBatch / Farm / Program /
+ * FutureProject …). A workspace-PINNED operator (an active workspace cookie
+ * is set) may only write to their OWN workspace, so a client-submitted
+ * companyId is OVERRIDDEN to it; a cross-company ADMIN (no active workspace)
+ * keeps the submitted value. The scoped-prisma middleware already blocks a
+ * foreign create — this makes the action correct by construction (#174
+ * discipline) rather than relying on the backstop.
+ *
+ * Pure (the caller passes `getActiveWorkspaceId()`) so it unit-tests in
+ * isolation.
+ */
+export function resolveOwnCompanyId(
+  submittedCompanyId: string,
+  activeWorkspaceId: string | null,
+): string {
+  const ws = (activeWorkspaceId ?? "").trim();
+  return ws.length > 0 ? ws : submittedCompanyId;
+}

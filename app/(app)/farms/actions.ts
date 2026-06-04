@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db/db";
+import { getActiveWorkspaceId } from "@/lib/tenancy/workspace";
+import { resolveOwnCompanyId } from "@/lib/auth/adminActionScope";
 import { requireRole } from "@/lib/auth/authz";
 import { logActivity } from "@/lib/auth/activityLog";
 import { COMPANY_CODE_TO_TENANT_SLUG, SECTOR_TO_TENANT_SLUG } from "@/lib/tenancy/tenancy";
@@ -48,7 +50,7 @@ export async function createFarm(formData: FormData) {
   });
   const created = await prisma.farm.create({
     data: {
-      companyId: data.companyId,
+      companyId: resolveOwnCompanyId(data.companyId, getActiveWorkspaceId()),
       name: data.name,
       nameEn: data.nameEn || null,
       type: data.type,

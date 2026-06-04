@@ -38,10 +38,21 @@ export function OrreryFrame({ identity }: { identity: OrreryIdentity }) {
         return;
       }
       if (data && typeof data.__orreryNav === "string") {
-        // Every dive resolves through the single, unit-tested source of truth
-        // (lib/orrery/routeMap): explicit section files, the dashboard kit, and
-        // generated kids (?s=<name>) all map to real, working app routes.
-        window.location.assign(mapOrreryHref(data.__orreryNav));
+        const nav = data.__orreryNav.trim();
+        // Logout is special: it MUST always be a real top-level browser
+        // navigation to the /logout route handler (which destroys the session
+        // then 303s to /login). Route it directly — never through the resolver
+        // or a client-side router push — so a future routeMap change can't
+        // silently strip the session-destroy and leave the user "logged out"
+        // but still authenticated. (A stale build once did exactly this.)
+        if (nav === "/logout") {
+          window.location.assign("/logout");
+          return;
+        }
+        // Every other dive resolves through the single, unit-tested source of
+        // truth (lib/orrery/routeMap): explicit section files, the dashboard
+        // kit, and generated kids (?s=<name>) all map to real app routes.
+        window.location.assign(mapOrreryHref(nav));
       }
     }
     window.addEventListener("message", onMessage);

@@ -74,6 +74,12 @@ export function TestRunStrip({
     }
   };
 
+  // A test run is persisted as DRY_RUN even when a node failed, so detect a
+  // failed node from the trace itself — don't show a green "success" check
+  // when a dry run actually had a failure.
+  const failedInTrace = !!result && result.trace.some((t) => t.status === "failed");
+  const runOk = !!result && (result.status === "SUCCESS" || (result.status === "DRY_RUN" && !failedInTrace));
+
   return (
     <footer className="studio-runstrip">
       <div className="studio-runstrip-head">
@@ -92,14 +98,12 @@ export function TestRunStrip({
 
         {result ? (
           <span className="studio-run-meta">
-            {result.status === "DRY_RUN" ? (
-              <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: "#9bd6c4" }} />
-            ) : result.status === "SUCCESS" ? (
-              <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: "#5bd5e0" }} />
+            {runOk ? (
+              <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: result.status === "DRY_RUN" ? "#9bd6c4" : "#5bd5e0" }} />
             ) : (
               <AlertOctagon className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: "#e85a72" }} />
             )}
-            <span>{result.status}</span>
+            <span>{result.status === "DRY_RUN" && failedInTrace ? "DRY_RUN · failed" : result.status}</span>
             <span style={{ color: "#5a6877" }}>·</span>
             <span style={{ fontVariantNumeric: "tabular-nums" }}>{result.durationMs}ms</span>
             <span style={{ color: "#5a6877" }}>·</span>

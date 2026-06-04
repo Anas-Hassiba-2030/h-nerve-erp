@@ -39,7 +39,9 @@ export default async function StudioPage({ params }: { params: { id: string } })
       labelAr: t?.labelAr ?? n.templateKey,
       module: (t?.module ?? "GROUP") as any,
       summary: t ? t.summary(safeJson(n.configJson)) : "",
-      column: (t?.defaultColumn ?? 1) as 1 | 2 | 3,
+      // Prefer the stored posX (the node's column) so a saved position is
+      // honored; fall back to the template's default column.
+      column: (n.posX ?? t?.defaultColumn ?? 1) as 1 | 2 | 3,
       orderInColumn: n.posY ?? 0,
       configJson: n.configJson,
     };

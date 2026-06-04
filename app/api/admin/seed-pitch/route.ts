@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     log.error("seed failed", { err: err?.message ?? String(err) });
     return NextResponse.json(
-      { error: err?.message ?? "Seed failed", steps },
+      { error: "Seed failed", steps },
       { status: 500 },
     );
   }

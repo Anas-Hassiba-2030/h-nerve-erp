@@ -64,10 +64,8 @@ export async function GET(
       take: CAP,
     });
   } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : String(e) },
-      { status: 500 },
-    );
+    console.error("[admin/db/export] failed:", e);
+    return NextResponse.json({ error: "export_failed" }, { status: 500 });
   }
 
   const header = cols.map((c) => csvCell(c.name)).join(",");

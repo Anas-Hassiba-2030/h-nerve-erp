@@ -26,7 +26,7 @@ export default async function SustainabilityPage() {
   const avgScore = avg((s) => s.overall);
   const avgCarbon = avg((s) => s.carbonTons);
   const avgWater = avg((s) => s.waterCubicM);
-  const avgWaste = avg((s) => s.renewablePct);
+  const avgRenewable = avg((s) => s.renewablePct);
 
   return (
     <DaylightShell dir={ar ? "rtl" : "ltr"}>
@@ -40,8 +40,8 @@ export default async function SustainabilityPage() {
       <DaylightKpiGrid>
         <DaylightKpi label={ar ? "متوسط ESG" : "Avg ESG"} value={formatNumber(avgScore)} hint={ar ? "من ١٠٠" : "out of 100"} delta={{ dir: avgScore >= 60 ? "up" : "down", text: `${avgScore}` }} />
         <DaylightKpi label={ar ? "الكربون" : "Carbon"} value={formatNumber(avgCarbon)} hint={ar ? "انبعاثات" : "emissions"} />
-        <DaylightKpi label={ar ? "المياه" : "Water"} value={formatNumber(avgWater)} hint={ar ? "كفاءة" : "efficiency"} />
-        <DaylightKpi label={ar ? "النفايات" : "Waste"} value={formatNumber(avgWaste)} hint={ar ? "إعادة تدوير" : "recycling"} />
+        <DaylightKpi label={ar ? "المياه" : "Water"} value={formatNumber(avgWater)} hint={ar ? "م³ استهلاك" : "m³ used"} />
+        <DaylightKpi label={ar ? "الطاقة المتجددة" : "Renewable"} value={formatNumber(avgRenewable)} hint={ar ? "٪ من الطاقة" : "% of energy"} />
       </DaylightKpiGrid>
 
       <DaylightPanel title={ar ? "نقاط الاستدامة حسب الشركة" : "ESG scores by company"} aside={ar ? "أحدث التقييمات" : "Latest assessments"}>
@@ -59,7 +59,7 @@ export default async function SustainabilityPage() {
                   <div className="flex items-center gap-4">
                     <ScoreChip label={ar ? "كربون" : "Carbon"} value={score.carbonTons} />
                     <ScoreChip label={ar ? "مياه" : "Water"} value={score.waterCubicM} />
-                    <ScoreChip label={ar ? "نفايات" : "Waste"} value={score.renewablePct} />
+                    <ScoreChip label={ar ? "متجددة" : "Renewable"} value={score.renewablePct} />
                     <div className="text-center">
                       <div style={{ fontSize: 24, fontWeight: 700, color: "var(--emerald)" }}>{score.overall}</div>
                       <div style={{ fontSize: 10, textTransform: "uppercase", color: "var(--ink-muted)" }}>ESG</div>

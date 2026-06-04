@@ -86,10 +86,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     if (e?.code === "P2025") {
       return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
     }
-    return NextResponse.json(
-      { error: "UPDATE_FAILED", message: e?.message ?? "unknown" },
-      { status: 500 },
-    );
+    console.error("[protocol] update failed:", e);
+    return NextResponse.json({ error: "UPDATE_FAILED" }, { status: 500 });
   }
 }
 

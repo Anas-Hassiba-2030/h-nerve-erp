@@ -129,7 +129,7 @@ export default async function WorkspaceIntelligencePage() {
             {ranked.slice(0, 16).map((i) => (
               <div key={i.id} style={{ background: "var(--ivory)", border: "1px solid var(--line)", borderRadius: 12, padding: "14px 16px", position: "relative" }}>
                 <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                  <span className={`tag ${SEV_TONE[i.severity] === "critical" ? "gold" : SEV_TONE[i.severity] === "success" ? "ok" : "ok"}`} style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}>
+                  <span className={`tag ${SEV_TONE[i.severity] === "critical" ? "crit" : SEV_TONE[i.severity] === "warn" ? "gold" : "ok"}`} style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}>
                     {i.severity}
                   </span>
                   <span style={{ fontSize: 11, color: "var(--ink-muted)", fontFamily: "monospace" }}>{i.module}</span>

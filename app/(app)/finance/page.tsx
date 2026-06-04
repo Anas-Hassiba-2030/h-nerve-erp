@@ -44,7 +44,6 @@ export default async function FinancePage() {
   const expense30 = sumKind(tx30, "EXPENSE");
   const net30 = revenue30 - expense30;
   const margin30 = revenue30 > 0 ? net30 / revenue30 : 0;
-  const cashFlow30 = revenue30 > 0 ? (revenue30 - expense30) / revenue30 : 0;
 
   const revenuePrev30 = sumKind(txPrev30, "REVENUE");
   const expensePrev30 = sumKind(txPrev30, "EXPENSE");
@@ -127,11 +126,10 @@ export default async function FinancePage() {
           </div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-label">{ar ? "التدفق النقدي" : "Cash flow"}</div>
-          <div className="kpi-val">{formatPercent(cashFlow30, 1)}</div>
+          <div className="kpi-label">{ar ? "إيراد المجموعة ٩٠ي" : "Group revenue 90d"}</div>
+          <div className="kpi-val">{formatMoney(revenue90)}</div>
           <div className="kpi-foot">
-            <span className="kpi-hint">{ar ? "من الإيراد" : "of revenue"}</span>
-            <span className={`delta ${cashFlow30 >= 0 ? "up" : "down"}`}>{cashFlow30 >= 0 ? "▲" : "▼"} {formatPercent(Math.abs(cashFlow30), 1)}</span>
+            <span className="kpi-hint">{ar ? "آخر ٩٠ يوماً" : "trailing 90 days"}</span>
           </div>
         </div>
         <div className="kpi-card">

@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+// CROSS-TENANT INTENT: the production seed bootstraps the first company +
+// admin before any tenant scope exists, so it uses the shared unscoped
+// client (not its own PrismaClient — that would leak a connection pool).
+import { prismaUnscoped as prisma } from "@/lib/db/db";
 import bcrypt from "bcryptjs";
 
 // One-time production seed endpoint.
 // Protected by SEED_ADMIN_PASSWORD env var — must match exactly.
 // Hit it once, then Railway will keep the endpoint but it becomes a no-op
 // once data exists (idempotent upserts only, no destructive deletes).
-
-const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
   const secret = process.env.SEED_ADMIN_PASSWORD;
@@ -78,9 +79,9 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ error: message }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
+    // Don't echo Prisma/DB error text back to the caller — log it server-side
+    // and return a generic message.
+    console.error("[seed] failed:", err);
+    return NextResponse.json({ error: "seed_failed" }, { status: 500 });
   }
 }

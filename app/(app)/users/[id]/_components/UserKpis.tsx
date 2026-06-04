@@ -32,16 +32,16 @@ export function UserKpis({
       />
       <DaylightKpi
         label={en ? "Rank Bonus" : "بونص الرتبة"}
-        value={`+${user.bonusPercent}٪`}
+        value={`+${user.bonusPercent}${en ? "%" : "٪"}`}
       />
       <DaylightKpi
         label={en ? "Badges" : "الأوسمة"}
         value={`${earnedCount}/${totalCount}`}
-        hint={totalCount > 0 ? `${Math.round((earnedCount / totalCount) * 100)}٪ ${en ? "complete" : "إكمال"}` : undefined}
+        hint={totalCount > 0 ? `${Math.round((earnedCount / totalCount) * 100)}${en ? "%" : "٪"} ${en ? "complete" : "إكمال"}` : undefined}
       />
       <DaylightKpi
         label={en ? "Task Completion" : "إنجاز المهام"}
-        value={`${completionRate}٪`}
+        value={`${completionRate}${en ? "%" : "٪"}`}
         hint={`${formatNumber(doneTasks)} ${en ? "of" : "من"} ${formatNumber(totalTasks)}`}
       />
     </DaylightKpiGrid>

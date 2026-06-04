@@ -93,7 +93,7 @@ export default async function AnalyticsCompanyPage({ params }: { params: { id: s
         metrics={[
           { label: ar ? "إيرادات 12ش" : "Revenue 12mo", value: formatMoney(revenue12) },
           { label: ar ? "صافي" : "Net", value: formatMoney(net12) },
-          { label: ar ? "هامش" : "Margin", value: `${(margin * 100).toFixed(1)}٪` },
+          { label: ar ? "هامش" : "Margin", value: `${(margin * 100).toFixed(1)}${ar ? "٪" : "%"}` },
         ]}
       />
 
@@ -101,7 +101,7 @@ export default async function AnalyticsCompanyPage({ params }: { params: { id: s
         <DaylightKpi label={ar ? "إيرادات (3 أشهر)" : "Revenue (3mo)"} value={formatMoney(q3)} />
         <DaylightKpi label={ar ? "إيرادات (6 أشهر)" : "Revenue (6mo)"} value={formatMoney(q6)} />
         <DaylightKpi label={ar ? "إيرادات (12 شهر)" : "Revenue (12mo)"} value={formatMoney(q12)} />
-        <DaylightKpi label={ar ? "هامش الربح" : "Profit margin"} value={`${(margin * 100).toFixed(1)}٪`} />
+        <DaylightKpi label={ar ? "هامش الربح" : "Profit margin"} value={`${(margin * 100).toFixed(1)}${ar ? "٪" : "%"}`} />
       </DaylightKpiGrid>
 
       {/* Trend strip */}

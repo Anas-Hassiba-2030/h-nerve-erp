@@ -44,17 +44,18 @@ const SEVERITY_PILL: Record<string, "critical" | "warn" | "success" | "info"> = 
   INFO: "info",
 };
 
+// Keys MUST match the module codes actually stored on AIInsight (the
+// createInsight zod enum + aiEngine output): HOTELS / DAIRY / FARMS / SUPPLY /
+// FINANCE / EDUCATION. The previous map keyed on HOSPITALITY/AGRICULTURE/…
+// which never matched, so Hotels and Farms insights rendered their raw code.
+// Mirrors MODULE_AR in app/(app)/insights/page.tsx.
 const MODULE_AR: Record<string, string> = {
-  HOSPITALITY: "الضيافة",
+  HOTELS: "الفنادق",
   DAIRY: "الألبان",
-  AGRICULTURE: "الزراعة",
-  EDUCATION: "التعليم",
-  FINANCE: "المالية",
+  FARMS: "المزارع",
   SUPPLY: "سلسلة التوريد",
-  MARKETS: "الأسواق",
-  SUSTAINABILITY: "الاستدامة",
-  PEOPLE: "الفريق",
-  GENERAL: "عام",
+  FINANCE: "المالية",
+  EDUCATION: "التعليم",
 };
 
 export default async function InsightDetailPage({

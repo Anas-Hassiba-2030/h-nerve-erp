@@ -70,6 +70,10 @@ export function DairyTabs({
 
   function cycleStatus(b: BatchRow) {
     const i = STATUS_CYCLE.indexOf(b.status as (typeof STATUS_CYCLE)[number]);
+    // A status outside the cycle (e.g. RECALLED) has index -1; advancing it
+    // would wrap to STATUS_CYCLE[0] (IN_PRODUCTION) and silently un-recall the
+    // batch. Leave non-cycle statuses untouched.
+    if (i === -1) return;
     const next = STATUS_CYCLE[(i + 1) % STATUS_CYCLE.length];
     const fd = new FormData();
     fd.set("id", b.id);

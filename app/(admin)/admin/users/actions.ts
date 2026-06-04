@@ -120,10 +120,18 @@ export async function updateUser(formData: FormData): Promise<void> {
   // Phase V3-P13 — prevent self-report (would create a cycle of len 1).
   // Deeper cycle prevention is a follow-up; UI offers a curated list.
   const safeReportsTo = reportsToId === id ? null : reportsToId;
-  await prisma.user.update({
-    where: { id },
-    data: { name, title, role, companyId, reportsToId: safeReportsTo },
-  });
+  // Defense-in-depth against the org-chart-wipe bug: only write reportsToId
+  // when the form actually submitted the field. If a future form omits the
+  // control, an absent field must NOT null an existing manager link.
+  const data: {
+    name: string;
+    title: string | null;
+    role: string;
+    companyId: string | null;
+    reportsToId?: string | null;
+  } = { name, title, role, companyId };
+  if (formData.has("reportsToId")) data.reportsToId = safeReportsTo;
+  await prisma.user.update({ where: { id }, data });
   done();
 }
 

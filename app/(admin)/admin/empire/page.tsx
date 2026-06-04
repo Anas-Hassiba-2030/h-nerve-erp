@@ -77,15 +77,8 @@ function Tile({
   const deltaSign = tile.iqDelta1w > 0 ? "+" : tile.iqDelta1w < 0 ? "−" : "·";
   const deltaAbs = Math.abs(tile.iqDelta1w);
 
-  return (
-    <Link
-      href={tile.synthetic ? "#" : `/admin/tenants`}
-      className="emp-tile"
-      data-synthetic={tile.synthetic ? "true" : "false"}
-      style={{
-        ["--emp-breath-delay" as any]: `${breathDelay}ms`,
-      } as React.CSSProperties}
-    >
+  const inner = (
+    <>
       <header className="emp-tile-head">
         <div className="emp-tile-name">
           <span className="emp-tile-title">
@@ -125,10 +118,13 @@ function Tile({
         <FootStat label={ar ? "إشارات" : "Signals"} value={tile.insightsOpen} />
         <FootStat label={ar ? "خطط" : "Plans"} value={tile.plansActive} />
         <FootStat label={ar ? "قرارات" : "Decided"} value={tile.decisions7d} />
-        <ArrowUpRight
-          className="h-3.5 w-3.5 emp-tile-arrow"
-          strokeWidth={1.4}
-        />
+        {/* The arrow signals "go" — only real (navigable) tiles get it. */}
+        {!tile.synthetic ? (
+          <ArrowUpRight
+            className="h-3.5 w-3.5 emp-tile-arrow"
+            strokeWidth={1.4}
+          />
+        ) : null}
       </footer>
 
       {/* Hover layer — last decision */}
@@ -146,6 +142,37 @@ function Tile({
           </p>
         </div>
       ) : null}
+    </>
+  );
+
+  const style = {
+    ["--emp-breath-delay" as any]: `${breathDelay}ms`,
+  } as React.CSSProperties;
+
+  // Synthetic/demo tiles point nowhere — render them as a non-interactive
+  // card instead of a <Link href="#"> that looks clickable but only jumps
+  // to the top of the page.
+  if (tile.synthetic) {
+    return (
+      <div
+        className="emp-tile"
+        data-synthetic="true"
+        aria-disabled="true"
+        style={style}
+      >
+        {inner}
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href="/admin/tenants"
+      className="emp-tile"
+      data-synthetic="false"
+      style={style}
+    >
+      {inner}
     </Link>
   );
 }

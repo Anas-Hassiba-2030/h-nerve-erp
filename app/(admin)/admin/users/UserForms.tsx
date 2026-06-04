@@ -316,25 +316,27 @@ export function EditUserForm({ u, ar, companies, managers }: { u: Row; ar: boole
           <span className="admin-label">{ar ? "الشركة (المستأجر)" : "Company (tenant)"}</span>
           <CompanySelect value={u.companyId ?? null} ar={ar} companies={companies} />
         </label>
-        {managers && managers.length > 1 ? (
-          <label className="admin-field">
-            <span className="admin-label">{ar ? "يتبع لـ" : "Reports to"}</span>
-            <select
-              name="reportsToId"
-              defaultValue={u.reportsToId ?? ""}
-              className="admin-input"
-            >
-              <option value="">{ar ? "بدون (جذر الهيكل)" : "None (org root)"}</option>
-              {managers
-                .filter((m) => m.id !== u.id)
-                .map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name} · {m.role}
-                  </option>
-                ))}
-            </select>
-          </label>
-        ) : null}
+        {/* Always render the picker (passed the FULL roster, not the page
+            slice) so the user's current manager is always a selectable option
+            — otherwise the select falls back to "None" and Save silently wipes
+            the org-chart link. */}
+        <label className="admin-field">
+          <span className="admin-label">{ar ? "يتبع لـ" : "Reports to"}</span>
+          <select
+            name="reportsToId"
+            defaultValue={u.reportsToId ?? ""}
+            className="admin-input"
+          >
+            <option value="">{ar ? "بدون (جذر الهيكل)" : "None (org root)"}</option>
+            {(managers ?? [])
+              .filter((m) => m.id !== u.id)
+              .map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name} · {m.role}
+                </option>
+              ))}
+          </select>
+        </label>
       </div>
       <button type="submit" className="admin-btn-ghost">
         <Save className="h-3.5 w-3.5" strokeWidth={1.5} />

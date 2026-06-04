@@ -37,8 +37,16 @@ export async function GET(req: NextRequest) {
   // param cannot widen that. Admins and authenticated machines may target a
   // specific tenant via ?tenantId=, or omit it for the whole group.
   const qsTenant = req.nextUrl.searchParams.get("tenantId")?.trim() || null;
-  const tenantId =
-    user && user.role !== "ADMIN" ? (user.tenantSlug ?? null) : qsTenant;
+  const isNonAdminUser = !!user && user.role !== "ADMIN";
+
+  // FAIL CLOSED: a non-admin with no resolved tenant must NOT fall through to
+  // the group-wide (no-filter) query — that would leak every tenant's
+  // BrainInsight rows. Return an empty set instead.
+  if (isNonAdminUser && !user!.tenantSlug) {
+    return NextResponse.json({ count: 0, insights: [] });
+  }
+
+  const tenantId = isNonAdminUser ? (user!.tenantSlug ?? null) : qsTenant;
 
   const insights = await prismaUnscoped.brainInsight.findMany({
     where: {

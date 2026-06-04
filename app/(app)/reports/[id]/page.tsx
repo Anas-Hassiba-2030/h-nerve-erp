@@ -4,7 +4,8 @@
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Printer, ArrowLeft, Download, Calendar } from "lucide-react";
+import { ArrowLeft, Download, Calendar } from "lucide-react";
+import PrintButton from "./PrintButton";
 import { prisma } from "@/lib/db/db";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { formatMoney, formatNumber, formatPercent, formatDate } from "@/lib/utils/utils";
@@ -505,17 +506,3 @@ function EsgBar({
   );
 }
 
-function PrintButton({ ar }: { ar: boolean }) {
-  // Tiny inline client component to trigger window.print()
-  return (
-    <form
-      action="javascript:window.print()"
-      className="contents"
-    >
-      <button type="submit" className="btn-primary btn-sm">
-        <Printer className="h-3 w-3" />
-        {ar ? "طباعة / PDF" : "Print / PDF"}
-      </button>
-    </form>
-  );
-}

@@ -4,6 +4,7 @@ import { UserPlus } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
 import { Logo } from "@/components/layout/Logo";
+import { MIN_PASSWORD_LEN } from "@/lib/auth/password";
 import { signupAction } from "./actions";
 
 export default async function SignupPage({
@@ -44,8 +45,13 @@ export default async function SignupPage({
           <input id="email" name="email" type="email" required dir="ltr" className="input" placeholder="you@hourani.jo" />
         </div>
         <div>
-          <label className="label" htmlFor="password">{m["auth.password"]} (≥ 6)</label>
-          <input id="password" name="password" type="password" minLength={6} required className="input" placeholder="••••••••" />
+          <label className="label" htmlFor="password">
+            {m["auth.password"]}{" "}
+            {locale === "ar"
+              ? `(${MIN_PASSWORD_LEN}+ حرفاً، حروف كبيرة وصغيرة وأرقام)`
+              : `(${MIN_PASSWORD_LEN}+ chars, upper, lower & digit)`}
+          </label>
+          <input id="password" name="password" type="password" minLength={MIN_PASSWORD_LEN} required className="input" placeholder="••••••••" />
         </div>
 
         <button type="submit" className="btn-primary w-full sheen">

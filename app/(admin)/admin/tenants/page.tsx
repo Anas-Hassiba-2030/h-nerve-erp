@@ -6,7 +6,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { Plus, Globe2, Eye } from "lucide-react";
 import { THEME_PRESETS, type ThemeKey } from "@/lib/brand/themes";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale, getMessages } from "@/lib/i18n.server";
 
 const STATUS_COLOR: Record<string, string> = {
   PROVISIONING: "var(--admin-amber)",
@@ -16,7 +16,9 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 export default async function TenantsIndex() {
-  const ar = getLocale() === "ar";
+  const locale = getLocale();
+  const ar = locale === "ar";
+  const m = getMessages(locale);
 
   const tenants = await prisma.tenant.findMany({
     orderBy: { createdAt: "desc" },
@@ -36,7 +38,7 @@ export default async function TenantsIndex() {
     <div className="admin-page">
       <header className="admin-page-head">
         <div>
-          <span className="admin-eyebrow">FEDERATION · TENANTS</span>
+          <span className="admin-eyebrow">{m["admin.eyebrow.tenants"]}</span>
           <h1 className="admin-h1">{ar ? "جميع المستأجرين" : "All tenants"}</h1>
           <p className="admin-sub">
             {ar

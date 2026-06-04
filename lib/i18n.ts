@@ -161,6 +161,22 @@ const messages = {
     "company.founded": "تأسست",
     "company.employees": "موظفون",
     "company.ticker": "السهم",
+
+    "admin.eyebrow.tenants": "الاتحاد · المستأجرون",
+    "admin.eyebrow.missionControl": "المشرف العام · غرفة العمليات",
+    "admin.eyebrow.audit": "الاتحاد · التدقيق",
+    "admin.eyebrow.data": "المشرف العام · البيانات",
+    "admin.eyebrow.users": "الاتحاد · المستخدمون",
+    "admin.eyebrow.genesis": "المشرف العام · المرحلة ٢١",
+    "admin.eyebrow.rbac": "الاتحاد · محرر الصلاحيات",
+    "admin.eyebrow.newTenant": "الاتحاد · مستأجر جديد",
+    "admin.eyebrow.theme": "السمة",
+    "admin.eyebrow.industryPacks": "الحزم الصناعية",
+    "admin.eyebrow.provisioningTrail": "سجل التجهيز",
+    "admin.eyebrow.provisioning": "التجهيز",
+
+    "toast.err.forecastsGenerated": "تم توليد {n} توقعات",
+    "toast.err.noOccupancySignal": "لا إشارة إشغال تتجاوز ٢٠٪ — لم يُنتج المحرك أي توقعات",
   },
   en: {
     "app.name": "H‑Nerve ERP",
@@ -318,6 +334,22 @@ const messages = {
     "company.founded": "Founded",
     "company.employees": "Employees",
     "company.ticker": "Ticker",
+
+    "admin.eyebrow.tenants": "FEDERATION · TENANTS",
+    "admin.eyebrow.missionControl": "SUPERADMIN · MISSION CONTROL",
+    "admin.eyebrow.audit": "FEDERATION · AUDIT",
+    "admin.eyebrow.data": "SUPERADMIN · DATA",
+    "admin.eyebrow.users": "FEDERATION · USERS",
+    "admin.eyebrow.genesis": "SUPERADMIN · PHASE 21",
+    "admin.eyebrow.rbac": "FEDERATION · RBAC EDITOR",
+    "admin.eyebrow.newTenant": "FEDERATION · NEW TENANT",
+    "admin.eyebrow.theme": "THEME",
+    "admin.eyebrow.industryPacks": "INDUSTRY PACKS",
+    "admin.eyebrow.provisioningTrail": "PROVISIONING TRAIL",
+    "admin.eyebrow.provisioning": "PROVISIONING",
+
+    "toast.err.forecastsGenerated": "{n} forecasts generated",
+    "toast.err.noOccupancySignal": "No occupancy signal above 20% — the engine produced no forecasts",
   },
 } as const;
 

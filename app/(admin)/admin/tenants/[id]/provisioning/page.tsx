@@ -11,14 +11,16 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { ProvisioningClient } from "./ProvisioningClient";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale, getMessages } from "@/lib/i18n.server";
 
 export default async function ProvisioningPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const ar = getLocale() === "ar";
+  const locale = getLocale();
+  const ar = locale === "ar";
+  const m = getMessages(locale);
 
   const tenant = await prisma.tenant.findUnique({
     where: { id: params.id },
@@ -33,7 +35,7 @@ export default async function ProvisioningPage({
     <div className="admin-page admin-page-narrow">
       <header className="admin-page-head">
         <div>
-          <span className="admin-eyebrow">PROVISIONING · {tenant.slug.toUpperCase()}</span>
+          <span className="admin-eyebrow">{m["admin.eyebrow.provisioning"]} · {tenant.slug.toUpperCase()}</span>
           <h1 className="admin-h1">
             {ar ? `تجهيز ${tenant.name}` : `Standing up ${tenant.name}`}
           </h1>

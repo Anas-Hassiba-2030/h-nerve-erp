@@ -12,7 +12,7 @@
 import Link from "next/link";
 import { prisma, prismaUnscoped } from "@/lib/db";
 import type { Prisma } from "@prisma/client";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale, getMessages } from "@/lib/i18n.server";
 import { getCurrentUser } from "@/lib/session";
 import { roleLabel, ROLES } from "./roles";
 import {
@@ -40,7 +40,9 @@ export default async function AdminUsersPage({
 }: {
   searchParams: SP;
 }) {
-  const ar = getLocale() === "ar";
+  const locale = getLocale();
+  const ar = locale === "ar";
+  const m = getMessages(locale);
   const me = await getCurrentUser();
 
   // Read filters off the URL.
@@ -100,7 +102,7 @@ export default async function AdminUsersPage({
     <div className="admin-page">
       <header className="admin-page-head">
         <div>
-          <span className="admin-eyebrow">FEDERATION · USERS</span>
+          <span className="admin-eyebrow">{m["admin.eyebrow.users"]}</span>
           <h1 className="admin-h1">{ar ? "إدارة المستخدمين" : "User management"}</h1>
           <p className="admin-sub">
             {ar

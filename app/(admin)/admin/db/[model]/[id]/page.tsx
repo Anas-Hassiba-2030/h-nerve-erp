@@ -11,7 +11,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { prismaUnscoped } from "@/lib/db";
-import { getLocale } from "@/lib/i18n.server";
+import { getLocale, getMessages } from "@/lib/i18n.server";
 import { getModel, formatCell } from "@/lib/db.introspect";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +28,9 @@ export default async function AdminDbRecordPage({
 }: {
   params: { model: string; id: string };
 }) {
-  const ar = getLocale() === "ar";
+  const locale = getLocale();
+  const ar = locale === "ar";
+  const m = getMessages(locale);
   const meta = getModel(params.model);
   if (!meta || !meta.idField) notFound();
 
@@ -50,7 +52,7 @@ export default async function AdminDbRecordPage({
     <div className="admin-page admin-page-narrow">
       <header className="admin-page-head">
         <div>
-          <span className="admin-eyebrow">SUPERADMIN · DATA</span>
+          <span className="admin-eyebrow">{m["admin.eyebrow.data"]}</span>
           <h1 className="admin-h1">{meta.name}</h1>
           <p className="admin-sub">
             {meta.idField}: <span style={{ color: "var(--admin-cyan)" }}>{rawId}</span>

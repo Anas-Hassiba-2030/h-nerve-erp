@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/db/db";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { PROVIDERS } from "@/lib/integrations/catalog";
-import { connect, disconnect } from "./actions";
+import { connect, connectAndOpen, disconnect } from "./actions";
 import "../daylight.css";
 import "./integrations.css";
 
@@ -122,7 +122,18 @@ export default async function IntegrationsHubPage() {
                     <button type="submit" className="ops-export">{ar ? "فصل" : "Disconnect"}</button>
                   </form>
                 ) : (
-                  <form action={connect}>
+                  // API-key providers must go through their detail page so the
+                  // key is actually validated (connectAndOpen routes them there
+                  // and does NOT pre-mark CONNECTED). Plain `connect` would fake
+                  // a CONNECTED state without ever checking a key. Other
+                  // providers keep the direct connect.
+                  <form
+                    action={
+                      provider.key === "sendgrid" || provider.key === "resend"
+                        ? connectAndOpen
+                        : connect
+                    }
+                  >
                     <input type="hidden" name="providerKey" value={provider.key} />
                     <button
                       type="submit"

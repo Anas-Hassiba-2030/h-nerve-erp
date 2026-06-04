@@ -38,7 +38,7 @@ const MODULE_LABEL: Record<string, { ar: string; en: string }> = {
   SUPPLY:    { ar: "سلسلة التوريد", en: "Supply" },
 };
 
-export function MemoryLakeBrowser({ ar }: { ar: boolean }) {
+export function MemoryLakeBrowser({ ar, canForget = false }: { ar: boolean; canForget?: boolean }) {
   const [all, setAll] = useState<ApiMemory[] | null>(null);
   const [error, setError] = useState(false);
   const [filter, setFilter] = useState<string>("");
@@ -57,10 +57,17 @@ export function MemoryLakeBrowser({ ar }: { ar: boolean }) {
   }, [load]);
 
   const onForget = (id: string) => {
-    // Optimistic removal, then the server action + reload reconciles.
+    // Optimistic removal, then the server action + reload reconciles. If the
+    // action rejects (e.g. insufficient role), reload to restore the row
+    // rather than leaving it optimistically — and never let it reject
+    // unhandled inside the transition.
     setAll((prev) => (prev ? prev.filter((m) => m.id !== id) : prev));
     startTransition(async () => {
-      await forgetMemory(id);
+      try {
+        await forgetMemory(id);
+      } catch {
+        // swallow — the reload below puts the row back if it wasn't deleted
+      }
       load();
     });
   };
@@ -140,23 +147,25 @@ export function MemoryLakeBrowser({ ar }: { ar: boolean }) {
                 lesson: m.lesson,
               }}
             />
-            <button
-              type="button"
-              onClick={() => onForget(m.id)}
-              title={ar ? "نسيان هذه الذكرى" : "Forget this memory"}
-              className="heri-focusable absolute"
-              style={{
-                top: 10,
-                insetInlineEnd: 10,
-                padding: "4px 6px",
-                background: "color-mix(in srgb, var(--heri-ink) 70%, transparent)",
-                color: "var(--heri-cream)",
-                border: "1px solid var(--heri-ochre)",
-                cursor: "pointer",
-              }}
-            >
-              <Trash2 className="h-3 w-3" strokeWidth={1.5} />
-            </button>
+            {canForget ? (
+              <button
+                type="button"
+                onClick={() => onForget(m.id)}
+                title={ar ? "نسيان هذه الذكرى" : "Forget this memory"}
+                className="heri-focusable absolute"
+                style={{
+                  top: 10,
+                  insetInlineEnd: 10,
+                  padding: "4px 6px",
+                  background: "color-mix(in srgb, var(--heri-ink) 70%, transparent)",
+                  color: "var(--heri-cream)",
+                  border: "1px solid var(--heri-ochre)",
+                  cursor: "pointer",
+                }}
+              >
+                <Trash2 className="h-3 w-3" strokeWidth={1.5} />
+              </button>
+            ) : null}
           </div>
         ))}
       </div>

@@ -5,11 +5,11 @@ import { DaylightShell } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db/db";
 import {
   formatMoney, formatNumber, formatPercent, formatShortDate,
-  STATUS_AR, STATUS_EN, loc,
 } from "@/lib/utils/utils";
 import { getLocale } from "@/lib/i18n/i18n.server";
-import { deleteHotel, deleteBooking } from "./actions";
+import { deleteHotel, deleteBooking, setBookingStatus } from "./actions";
 import { ArenaTabs } from "./ArenaTabs";
+import { BookingStatusSelect } from "./BookingStatusSelect";
 import "../daylight.css";
 import "./arena.css";
 
@@ -151,12 +151,10 @@ export default async function HotelsPage() {
         <div className="panel reveal">
           <div className="panel-head">
             <span className="panel-title">{ar ? "الإيراد مقابل المصاريف" : "Revenue vs Expenses"}</span>
-            <div className="seg">
-              <span className="seg-ind" style={{ transform: "translateX(0)", width: "33%" }} />
-              <button className="active">{ar ? "شهري" : "Monthly"}</button>
-              <button>{ar ? "ربعي" : "Quarterly"}</button>
-              <button>{ar ? "سنوي" : "Yearly"}</button>
-            </div>
+            {/* The chart is always the trailing-months view; the period
+                toggle here had no handler and changed nothing, so it's
+                removed rather than left as a dead control. */}
+            <span className="panel-hint">{ar ? "آخر الأشهر" : "Trailing months"}</span>
           </div>
           <div className="bars">
             {months.map((m, i) => (
@@ -283,7 +281,7 @@ export default async function HotelsPage() {
               <td className="num" style={{ fontSize: 12 }}>{formatShortDate(b.checkOut, lc)}</td>
               <td className="num">{formatNumber(b.rooms)}</td>
               <td className="num">{formatMoney(b.revenue)}</td>
-              <td><span className="tag info">{loc(STATUS_AR, STATUS_EN, lc, b.status)}</span></td>
+              <td><BookingStatusSelect id={b.id} status={b.status} ar={ar} action={setBookingStatus} /></td>
               <td>
                 <DeleteButton
                   action={deleteBooking}

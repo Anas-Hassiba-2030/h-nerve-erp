@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db/db";
 import { ALERT_KINDS, type AlertKind } from "@/lib/alerts/alertEngine";
 import { formatNumber } from "@/lib/utils/utils";
 import { getLocale } from "@/lib/i18n/i18n.server";
-import { toggleRule, seedRules, deleteRule } from "./actions";
+import { toggleRule, seedRules, deleteRule, updateRule } from "./actions";
 import "../daylight.css";
 import "./alerts.css";
 
@@ -80,22 +80,53 @@ export default async function AlertsPage() {
                 const sev = SEV[r.severity] ?? SEV.INFO;
                 const name = def ? (ar ? def.name_ar : def.name_en) : (ar ? r.name : (r.nameEn ?? r.name));
                 return (
-                  <div className="br-row" key={r.id} style={{ opacity: r.isActive ? 1 : 0.6 }}>
-                    <span className={`br-chip ${sev.chip}`}>{ar ? sev.ar : sev.en}</span>
-                    <div className="rt">
-                      <div className="tt">{name}</div>
-                      <div className="ts">{ar ? `أُطلقت ${formatNumber(r.triggerCount)} مرّة` : `Fired ${formatNumber(r.triggerCount)} times`}</div>
+                  <div key={r.id}>
+                    <div className="br-row" style={{ opacity: r.isActive ? 1 : 0.6 }}>
+                      <span className={`br-chip ${sev.chip}`}>{ar ? sev.ar : sev.en}</span>
+                      <div className="rt">
+                        <div className="tt">{name}</div>
+                        <div className="ts">{ar ? `أُطلقت ${formatNumber(r.triggerCount)} مرّة` : `Fired ${formatNumber(r.triggerCount)} times`}</div>
+                      </div>
+                      <form action={toggleRule}>
+                        <input type="hidden" name="id" value={r.id} />
+                        <button
+                          type="submit"
+                          className={`br-switch ${r.isActive ? "on" : ""}`}
+                          title={r.isActive ? (ar ? "إيقاف" : "Pause") : (ar ? "تفعيل" : "Activate")}
+                          aria-label={r.isActive ? (ar ? "إيقاف القاعدة" : "Pause rule") : (ar ? "تفعيل القاعدة" : "Activate rule")}
+                        />
+                      </form>
+                      <DeleteButton action={deleteRule} payload={{ id: r.id }} label={ar ? `حذف قاعدة "${r.name}"؟` : `Delete rule "${r.nameEn ?? r.name}"?`} />
                     </div>
-                    <form action={toggleRule}>
-                      <input type="hidden" name="id" value={r.id} />
-                      <button
-                        type="submit"
-                        className={`br-switch ${r.isActive ? "on" : ""}`}
-                        title={r.isActive ? (ar ? "إيقاف" : "Pause") : (ar ? "تفعيل" : "Activate")}
-                        aria-label={r.isActive ? (ar ? "إيقاف القاعدة" : "Pause rule") : (ar ? "تفعيل القاعدة" : "Activate rule")}
-                      />
-                    </form>
-                    <DeleteButton action={deleteRule} payload={{ id: r.id }} label={ar ? `حذف قاعدة "${r.name}"؟` : `Delete rule "${r.nameEn ?? r.name}"?`} />
+                    {/* ISO/audit fix — updateRule existed but was wired to no
+                        UI, so threshold/severity/cooldown could never be
+                        edited. Native <details> form, no client JS. */}
+                    <details style={{ padding: "2px 14px 10px" }}>
+                      <summary style={{ cursor: "pointer", fontSize: 12, color: "var(--ink-muted)" }}>
+                        {ar ? "تعديل العتبة / الشدّة / التهدئة" : "Edit threshold / severity / cooldown"}
+                      </summary>
+                      <form action={updateRule} style={{ display: "flex", gap: 10, alignItems: "end", flexWrap: "wrap", marginTop: 8 }}>
+                        <input type="hidden" name="id" value={r.id} />
+                        <label style={{ display: "grid", gap: 2, fontSize: 11 }}>
+                          {ar ? "العتبة" : "Threshold"}
+                          <input name="threshold" type="number" step="0.01" defaultValue={r.threshold} className="input" style={{ width: 110 }} />
+                        </label>
+                        <label style={{ display: "grid", gap: 2, fontSize: 11 }}>
+                          {ar ? "الشدّة" : "Severity"}
+                          <select name="severity" defaultValue={r.severity} className="input" style={{ width: 140 }}>
+                            <option value="INFO">INFO</option>
+                            <option value="WARN">WARN</option>
+                            <option value="CRITICAL">CRITICAL</option>
+                            <option value="OPPORTUNITY">OPPORTUNITY</option>
+                          </select>
+                        </label>
+                        <label style={{ display: "grid", gap: 2, fontSize: 11 }}>
+                          {ar ? "تهدئة (ساعات)" : "Cooldown (h)"}
+                          <input name="cooldownHours" type="number" min="0" defaultValue={r.cooldownHours} className="input" style={{ width: 110 }} />
+                        </label>
+                        <button type="submit" className="dl-btn dl-btn-primary">{ar ? "حفظ" : "Save"}</button>
+                      </form>
+                    </details>
                   </div>
                 );
               })

@@ -44,3 +44,24 @@ export const log = {
   warn:  (msg: string, fields?: Fields) => emit("warn",  msg, fields),
   error: (msg: string, fields?: Fields) => emit("error", msg, fields),
 };
+
+export type ScopedLogger = typeof log;
+
+/**
+ * A child logger that stamps `scope` (and any base fields such as
+ * `tenantId`) onto every entry — so request-path logs are filterable by
+ * subsystem and tenant in the Railway aggregator. Per-call fields win over
+ * the bound base fields.
+ *
+ *   const slog = scoped("import", { tenantId });
+ *   slog.error("batch rejected", { count });   // → {scope:"import",tenantId,count,...}
+ */
+export function scoped(scope: string, base?: Fields): ScopedLogger {
+  const merge = (fields?: Fields): Fields => ({ scope, ...base, ...fields });
+  return {
+    debug: (msg: string, fields?: Fields) => emit("debug", msg, merge(fields)),
+    info:  (msg: string, fields?: Fields) => emit("info",  msg, merge(fields)),
+    warn:  (msg: string, fields?: Fields) => emit("warn",  msg, merge(fields)),
+    error: (msg: string, fields?: Fields) => emit("error", msg, merge(fields)),
+  };
+}

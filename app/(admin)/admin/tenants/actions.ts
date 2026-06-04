@@ -17,6 +17,9 @@ import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
+import { scoped } from "@/lib/logger";
+
+const log = scoped("tenancy");
 import {
   STEP_ORDER,
   STEP_LABELS,
@@ -155,7 +158,7 @@ export async function runProvisioningStep(
     });
     return { ms: durationMs, status: "DONE" };
   } catch (e) {
-    console.error("[tenancy] step failed:", key, e);
+    log.error("step failed", { step: key, err: String(e) });
     await prisma.tenantStep.update({
       where: { id: step.id },
       data: { status: "FAILED", completedAt: new Date() },

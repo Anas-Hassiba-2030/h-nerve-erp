@@ -5,6 +5,9 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/session";
 import { requireRole } from "@/lib/authz";
 import { prisma } from "@/lib/db";
+import { scoped } from "@/lib/logger";
+
+const docLog = scoped("docintel");
 import {
   parseDocument,
   visionEnabled,
@@ -146,7 +149,7 @@ export async function uploadDocument(formData: FormData): Promise<UploadResult> 
       });
     }
   } catch (e) {
-    console.error("[docintel] entity match failed:", e);
+    docLog.error("entity match failed", { err: String(e) });
   }
 
   revalidatePath("/documents");

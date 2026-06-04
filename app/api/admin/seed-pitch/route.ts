@@ -23,6 +23,9 @@
 // Re-running is safe: seedDemo/seedPitch upsert or skip-if-present; seedOperator
 // re-wipes + re-seeds deterministically.
 import { NextRequest, NextResponse } from "next/server";
+import { scoped } from "@/lib/logger";
+
+const log = scoped("seed-pitch");
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -98,7 +101,7 @@ export async function POST(req: NextRequest) {
       login: { email: "admin@hourani.jo", password: "admin123" },
     });
   } catch (err: any) {
-    console.error("[seed-pitch] failed:", err);
+    log.error("seed failed", { err: err?.message ?? String(err) });
     return NextResponse.json(
       { error: err?.message ?? "Seed failed", steps },
       { status: 500 },

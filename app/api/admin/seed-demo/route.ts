@@ -10,6 +10,9 @@
 import { NextResponse } from "next/server";
 import { requireRole } from "@/lib/authz";
 import { getCurrentUser } from "@/lib/session";
+import { scoped } from "@/lib/logger";
+
+const log = scoped("seed-demo");
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60; // demo seed inserts ~hundreds of rows
@@ -39,7 +42,7 @@ export async function POST() {
 
     return NextResponse.json({ ok: true, ms, counts });
   } catch (err: any) {
-    console.error("[seed-demo] failed:", err);
+    log.error("seed failed", { err: err?.message ?? String(err) });
     return NextResponse.json(
       { error: err?.message ?? "Seed failed" },
       { status: 500 }

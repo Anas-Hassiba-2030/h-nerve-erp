@@ -117,15 +117,23 @@ UI surfaces for the brain (`app/(app)/brain/*`, `app/(theater)/theater/*`) lean 
 
 ### Cross-cutting infrastructure (`lib/`)
 
-- **Auth**: cookie-session via `iron-session` (`lib/session.ts`), not NextAuth. Passwords hashed with `bcryptjs` (`lib/auth.ts`). Roles `"ADMIN" | "EXECUTIVE" | "MANAGER" | "STAFF"` typed in `SessionUser`, stored as a plain string column. SQLite + Prisma do not support enums; **always use string columns + TS unions** for role/status/sector/etc.
-- **DB**: **PostgreSQL in production** (Railway, Phase 23) — `prisma/schema.prisma` has `provider = "postgresql"` and migrations live under `prisma/migrations/` (`prisma migrate deploy` runs on every Railway deploy). **Local dev can flip** the provider to `sqlite` + `DATABASE_URL="file:./dev.db"` and use `db:push` (no migration) for speed — flip it back to `postgresql` before committing. Models are in `prisma/schema.prisma`; `lib/db.ts` exports the shared scoped `prisma` client.
-- **Multi-tenancy** (`lib/tenancy.ts`, `lib/brand/themes.ts`, Phase 11): single-tenant by default. The `Tenant` model + `view-as` cookie let a superadmin preview any tenant's theme without subdomain switching. The `(app)` layout reads the cookie and applies CSS-var overrides at the wrapper.
-- **i18n** (`lib/i18n.ts` + `lib/i18n.server.ts`): cookie-driven (`h_nerve_locale`). Messages are a hardcoded dictionary — no external runtime. Default is **Arabic with RTL**; English is secondary.
-- **Theming** (`lib/theme.ts` + `lib/theme.server.ts` + `lib/brand/themes.ts`): cookie-driven (`h_nerve_theme`). Multiple presets (harmony, midnight, royal, amber, ocean, carbon, rose) plus tenant themes. Heritage is the canonical default.
-- **Time Machine** (`lib/timemachine.ts`, Phase 16): cookie-driven `as-of` cursor (`h_nerve_asof`). Pages call `getAsOf()` at SSR time and pass the Date into queries. Deliberately **not** in session — it's a local view, not identity.
-- **Soft delete** (`lib/softDelete.ts`, `lib/cleanupSoftDeletes.ts`): rows go to a Trash module before permanent deletion.
-- **Realtime** (`lib/realtime.ts` + `app/api/realtime`): SSE-based presence + live updates.
-- **Toast/flash** (`lib/toast.ts`, `lib/toast.shared.ts`, `lib/toast.client.ts`): server-side flash via cookie + `ToastProvider` on the client. Use these instead of inventing a new notification path.
+**`lib/` is organized one folder per pillar** — `ai/`, `alerts/`, `auth/`, `brain/`,
+`brand/`, `db/`, `design/`, `docintel/`, `empire/`, `export/`, `finance/`, `genesis/`,
+`i18n/`, `import/`, `integrations/`, `intelligence/`, `mobile/`, `orrery/`, `protocol/`,
+`realtime/`, `supply/`, `tenancy/`, `theater/`, `theme/`, `utils/`, `workflows/`,
+`workspace/`. There are **no loose files in `lib/` root** (B7/#162). When you add a
+helper, it belongs inside the pillar folder it serves — never at the root. Imports use
+the `@/lib/<pillar>/<file>` path.
+
+- **Auth**: cookie-session via `iron-session` (`lib/auth/session.ts`), not NextAuth. Passwords hashed with `bcryptjs` (`lib/auth/auth.ts`). Roles `"ADMIN" | "EXECUTIVE" | "MANAGER" | "STAFF"` typed in `SessionUser`, stored as a plain string column. SQLite + Prisma do not support enums; **always use string columns + TS unions** for role/status/sector/etc.
+- **DB**: **PostgreSQL in production** (Railway, Phase 23) — `prisma/schema.prisma` has `provider = "postgresql"` and migrations live under `prisma/migrations/` (`prisma migrate deploy` runs on every Railway deploy). **Local dev can flip** the provider to `sqlite` + `DATABASE_URL="file:./dev.db"` and use `db:push` (no migration) for speed — flip it back to `postgresql` before committing. Models are in `prisma/schema.prisma`; `lib/db/db.ts` exports the shared scoped `prisma` client.
+- **Multi-tenancy** (`lib/tenancy/tenancy.ts`, `lib/brand/themes.ts`, Phase 11): single-tenant by default. The `Tenant` model + `view-as` cookie let a superadmin preview any tenant's theme without subdomain switching. The `(app)` layout reads the cookie and applies CSS-var overrides at the wrapper.
+- **i18n** (`lib/i18n/i18n.ts` + `lib/i18n/i18n.server.ts`): cookie-driven (`h_nerve_locale`). Messages are a hardcoded dictionary — no external runtime. Default is **Arabic with RTL**; English is secondary.
+- **Theming** (`lib/theme/theme.ts` + `lib/theme/theme.server.ts` + `lib/brand/themes.ts`): cookie-driven (`h_nerve_theme`). Multiple presets (harmony, midnight, royal, amber, ocean, carbon, rose) plus tenant themes. Heritage is the canonical default.
+- **Time Machine** (`lib/utils/timemachine.ts`, Phase 16): cookie-driven `as-of` cursor (`h_nerve_asof`). Pages call `getAsOf()` at SSR time and pass the Date into queries. Deliberately **not** in session — it's a local view, not identity.
+- **Soft delete** (`lib/db/softDelete.ts`, `lib/db/cleanupSoftDeletes.ts`): rows go to a Trash module before permanent deletion.
+- **Realtime** (`lib/realtime/realtime.ts` + `app/api/realtime`): SSE-based presence + live updates.
+- **Toast/flash** (`lib/utils/toast.ts`, `lib/utils/toast.shared.ts`): server-side flash via cookie + `ToastProvider` on the client. Use these instead of inventing a new notification path.
 - **Path alias**: `@/*` resolves from the repo root (see `tsconfig.json`).
 
 ### Styling
@@ -136,20 +144,52 @@ Tailwind with H-Nerve brand classes in `app/globals.css` (`.btn`, `.btn-primary`
 
 - **Companies + Hotels are the canonical CRUD pattern** — list, create, edit, delete via server actions, with `Topbar` + KPI cards on the index page. Mirror them when adding new resources.
 - **`Topbar` (`components/Topbar.tsx`) is the shared page header** — every authenticated page should render one with title (Arabic), optional subtitle, and an actions slot. Don't ship a page without it.
-- **`lib/utils.ts` provides `cn()`, `formatMoney()`, `formatDate()`, `formatNumber()`, `generateNumber()`, `arabicMonth()`** — use these rather than reimplementing.
+- **`lib/utils/utils.ts` provides `cn()`, `formatMoney()`, `formatDate()`, `formatNumber()`, `generateNumber()`, `arabicMonth()`** — use these rather than reimplementing.
 - **All UI text defaults to Arabic.** English appears as a secondary label only when the data is genuinely English (emails, codes, ISO).
 - **String columns + TS unions over DB enums** for any role/status/sector/tier — keeps the schema portable to the sqlite dev provider and migrations simple.
 - **Don't introduce new auth providers, ORMs, or state libraries without asking** — the stack is intentionally minimal.
 - **Don't bypass the brain's read-mostly boundary.** If a brain subsystem needs to change domain data, it calls a server action; it doesn't write directly.
-- **All Prisma queries must go through `prisma` (the scoped client) unless they're explicitly cross-tenant.** `prismaUnscoped` is reserved for the Empire dashboard, the workspace switcher, the system-dump API, the brain engine running from cron, and the operator layout's banner lookups. Every `prismaUnscoped` call site must carry a `// CROSS-TENANT INTENT:` comment. New tenant-keyed models go in `TENANT_SCOPED_MODELS` (`lib/workspaceScope.ts`); see `docs/ISOLATION.md` for the full checklist.
+- **All Prisma queries must go through `prisma` (the scoped client) unless they're explicitly cross-tenant.** `prismaUnscoped` is reserved for the Empire dashboard, the workspace switcher, the system-dump API, the brain engine running from cron, and the operator layout's banner lookups. Every `prismaUnscoped` call site must carry a `// CROSS-TENANT INTENT:` comment. New tenant-keyed models go in `TENANT_SCOPED_MODELS` (`lib/tenancy/workspaceScope.ts`); see `docs/ISOLATION.md` for the full checklist.
 - **Pick ONE design vocabulary per surface.** Operator UI = Heritage Modern. Admin = Sleek Operator. Theater = its own editorial register. Never mix.
+
+## Organization doctrine — how this codebase stays professional
+
+These are standing rules. They are not suggestions; treat every one as an instruction
+that survives across sessions. When we learn a lesson the hard way, it gets written
+here so it never has to be re-learned.
+
+- **One folder per pillar — everywhere.** `lib/`, `components/`, and `scripts/` are
+  organized into domain folders, not flat dumps. `lib/` has zero loose root files (#162);
+  `scripts/` is split into `build/ ops/ seed/ test/ verify/`. A new file lives inside the
+  pillar it serves. If a pillar folder doesn't exist yet for genuinely new surface area,
+  create it — don't drop the file at the root "for now".
+- **Lessons become instructions.** Anything we discover that the next session would
+  otherwise repeat — a path that moved, a build trap, a deploy gotcha, a naming
+  convention — gets added to this file. The cost of writing it down once is far less
+  than re-debugging it.
+- **Green gate before every merge.** `npm run typecheck` (tsc), `npm test` (vitest), and
+  `npm run lint` must all pass; for changes that touch many files, also confirm
+  `next build`. Never merge red.
+- **PRs only — never push to `main` directly.** Branch, open a PR (draft is fine), let
+  CI go green, then merge. `main` is the Railway production trunk; treat it as sacred.
+- **Always start from `origin/main`.** Before any reorg/refactor, fetch and fast-forward.
+  A stale local checkout silently re-does or conflicts with work already merged (this has
+  bitten us — see the lib reorg #162 landing while a local copy still showed flat files).
+- **Schema stays `postgresql` in committed code.** Local dev may flip the Prisma provider
+  to `sqlite` for speed, but restore `postgresql` before committing. Migrations under
+  `prisma/migrations/` are the production source of truth.
+- **Refactors are behaviour-preserving.** Moving/renaming/extracting must not change what
+  the app does. When you move a file, rewire every importer in the same commit and prove
+  it with typecheck. Land big reorgs as their own focused PRs, one concern each.
+- **Never commit secrets or environment-specific identifiers** (tokens, API keys, internal
+  model IDs) into any tracked file — code, comments, commit messages, or PR text.
 
 ## Default credentials (seeded)
 
 - Demo admin: `admin@hourani.jo` / `admin123`
 - Owner (always ADMIN, auto-promoted): `anashasiba91@gmail.com` / `SEED_ADMIN_PASSWORD` (else `admin123`)
 
-The deploy bootstrap (`railway.toml` preDeploy) guarantees these on every deploy via `scripts/seed/`: `seed-if-empty.ts` (seed empty DB), `ensure-admins.ts` (admins can always sign in), `ensure-demo-docs.ts` (top up demo documents). See `lib/owner.ts`.
+The deploy bootstrap (`railway.toml` preDeploy) guarantees these on every deploy via `scripts/seed/`: `seed-if-empty.ts` (seed empty DB), `ensure-admins.ts` (admins can always sign in), `ensure-demo-docs.ts` (top up demo documents). See `lib/auth/owner.ts`.
 
 ## graphify
 

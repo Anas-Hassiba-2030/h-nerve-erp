@@ -26,14 +26,22 @@ function nodesFor(n: number): Array<[number, number]> {
   return pts.slice(0, Math.max(3, Math.min(pts.length, n + 2)));
 }
 
-function SectorCard({ sector, ar }: { sector: SectorSummary; ar: boolean }) {
+function SectorCard({ sector, ar, index }: { sector: SectorSummary; ar: boolean; index: number }) {
   const [open, setOpen] = useState(false);
   const st = STATUS_LABEL[sector.status];
   const nodes = nodesFor(sector.lines.length);
   const lit = sector.status !== "empty";
 
   return (
-    <div className={"gx-card" + (lit ? " gx-lit" : "")}>
+    // Constellation-drop (C10): a card whose seed has completed (status !== empty,
+    // i.e. `gx-lit`) drops into place — a brief brightness spike + a 200ms scale
+    // settle from 1.04 → 1.0. Cards stagger by index so they land one after the
+    // other, matching the moment the seeded page re-renders. Reduced motion is
+    // honoured in CSS (the card simply appears, no scale/brightness).
+    <div
+      className={"gx-card" + (lit ? " gx-lit gx-drop" : "")}
+      style={lit ? ({ "--gx-drop-delay": `${(index * 0.08).toFixed(2)}s` } as React.CSSProperties) : undefined}
+    >
       <button
         type="button"
         className="gx-head"
@@ -117,8 +125,8 @@ export function ConstellationGrid({ summary, ar }: { summary: GenesisSummary; ar
         </span>
       </div>
       <div className="gx-grid">
-        {summary.sectors.map((s) => (
-          <SectorCard key={s.id} sector={s} ar={ar} />
+        {summary.sectors.map((s, i) => (
+          <SectorCard key={s.id} sector={s} ar={ar} index={i} />
         ))}
       </div>
       <style>{CSS}</style>
@@ -133,6 +141,11 @@ const CSS = `
 .gx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
 .gx-card{background:var(--admin-bg-2);border:1px solid var(--admin-rule);border-radius:12px;overflow:hidden;transition:border-color .25s}
 .gx-card.gx-lit{border-color:var(--admin-rule-strong)}
+/* Constellation-drop (C10): completed sector card settles into place — a brief
+   brightness spike + a 200ms ease-out scale from 1.04 → 1.0 (no overshoot below
+   1.0, no spring). Staggered per card via --gx-drop-delay. */
+.gx-drop{transform-origin:50% 45%;animation:gxDrop 200ms var(--ease-out-quart,cubic-bezier(.25,1,.5,1)) var(--gx-drop-delay,0s) both}
+@keyframes gxDrop{from{opacity:0;transform:scale(1.04);filter:brightness(1.6)}to{opacity:1;transform:scale(1);filter:brightness(1)}}
 .gx-head{display:grid;grid-template-columns:64px 1fr auto;align-items:center;gap:12px;width:100%;text-align:start;cursor:pointer;background:none;border:0;padding:14px 16px;color:inherit;font:inherit}
 .gx-head:hover{background:rgba(255,255,255,.02)}
 .gx-map{width:64px;height:44px;border-radius:8px;background:radial-gradient(ellipse at 50% 40%,rgba(34,211,238,.08),transparent 70%);overflow:hidden}
@@ -157,5 +170,5 @@ const CSS = `
 .gx-line-count{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px}
 .gx-have{color:#4ade80}
 .gx-will{color:var(--admin-text-muted)}
-@media (prefers-reduced-motion:reduce){ .gx-node{animation:none!important;opacity:.8} }
+@media (prefers-reduced-motion:reduce){ .gx-node{animation:none!important;opacity:.8} .gx-drop{animation:none!important;opacity:1;transform:none;filter:none} }
 `;

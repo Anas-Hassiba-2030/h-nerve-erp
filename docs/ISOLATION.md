@@ -127,9 +127,11 @@ NOT see another tenant's rows, follow this checklist:
   and inherit the parent's tenant.
 - `MarketStock` — companyId is optional; the markets surface is
   intentionally cross-company.
-- `AIInsight`, `Plan`, `ActivityLog` — pre-F3 surfaces with their own
-  scoping rules in the workspace pages. Not yet folded into
-  TENANT_SCOPED_MODELS pending audit.
+- `AIInsight` — NOW scoped via the `SHARED_COMPANY_SCOPED_MODELS` plane
+  (Phase ISO-4): NULL companyId = group-wide, else company-pinned. It is a
+  shared-company model, not a `TENANT_SCOPED_MODELS` one.
+- `Plan`, `ActivityLog` — pre-F3 surfaces with their own scoping rules in
+  the workspace pages. Not yet folded into TENANT_SCOPED_MODELS pending audit.
 
 ## Per-tenant UX
 
@@ -155,9 +157,9 @@ change.
 - The Phase 5 route-permission map (`lib/permissions.ts`) gates routes
   but `H_NERVE_PERMS_ENFORCED` is an env flag — confirm it's `true`
   in production.
-- AIInsight + Plan + ActivityLog still use the workspace-pages-explicit
-  filter pattern; consider folding into `TENANT_SCOPED_MODELS` after the
-  next pitch.
+- Plan + ActivityLog still use the workspace-pages-explicit filter pattern;
+  consider folding into `TENANT_SCOPED_MODELS` after the next pitch.
+  (AIInsight is now scoped — Phase ISO-4, see follow-ups below.)
 
 ### Isolation audit follow-ups (2026-06-04)
 
@@ -177,10 +179,17 @@ change.
   not just by the middleware backstop. (`updateCustomer` / `deleteCustomer`
   / `updateWarehouse` take only an `id`, no client tenant/company, and are
   already covered by the F6 by-id guard — no change needed.)
-- **`AIInsight` workspace signals (app/(app)/workspace/actions.ts —
-  `dismissSignal` / `acceptSignal`) — STILL OPEN.** `AIInsight` has **no**
-  `companyId`/`tenantId` column (only `module`), so it cannot be scoped by
-  the current mechanism; the table is effectively shared. Scoping it
-  requires a schema migration to add + backfill a scope key (follow the
-  `20260520_add_tenant_id_to_booking_crop` template), then add it to the
-  scoped set and gate its read/write actions.
+- **`AIInsight` — CLOSED (Phase ISO-4).** `AIInsight` gained a **NULLABLE
+  `companyId`** (migration `20260604_insight_scope_company`: add column + FK
+  `SetNull` + index; legacy rows backfilled to NULL = group-wide, preserving
+  today's shared visibility). Scoped via the new **`SHARED_COMPANY_SCOPED_MODELS`**
+  plane: a row is in-scope iff `companyId IS NULL` (group-wide, visible in
+  every workspace) **OR** `companyId === activeWorkspace` (mirrors
+  `AlertRule.scopeCompanyId`). `createInsight` stamps the author's active
+  workspace (ADMIN → NULL = group-wide); `setInsightStatus` / `deleteInsight`
+  / `restoreInsight` bail on a null/foreign row; the workspace-signal actions
+  `dismissSignal` / `acceptSignal` now use the **scoped** client so a pinned
+  MANAGER can no longer flip a foreign company's signal by id. Bulk ops
+  (`bulkResolveInsights` / `bulkDeleteInsights`) ride the where-stamped
+  `updateMany` / soft-delete path. ADMIN / brain-cron (no workspace) →
+  pass-through, sees everything.

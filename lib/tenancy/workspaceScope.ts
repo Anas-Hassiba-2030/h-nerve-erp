@@ -71,6 +71,15 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
 // endpoint field names are hard-coded in the dual block below.
 export const DUAL_COMPANY_SCOPED_MODELS = new Set<string>(["SupplyForecast"]);
 
+// Phase ISO-4 — models with a NULLABLE `companyId` where NULL means
+// GROUP-WIDE (shared, visible in every workspace) and a non-null value pins
+// the row to one company. A workspace is in-scope for a row when the row is
+// group-wide (companyId IS NULL) OR the row's companyId is the active
+// workspace. This differs from SCOPED_MODELS (which require a non-null
+// companyId and would HIDE the group-wide rows). AIInsight is the only such
+// model today; the column name is hard-coded as `companyId` in the block.
+export const SHARED_COMPANY_SCOPED_MODELS = new Set<string>(["AIInsight"]);
+
 export type ScopeParams = { model?: string; action: string; args?: any };
 
 /**
@@ -93,6 +102,7 @@ export async function applyWorkspaceScope(
   scopedModels: Set<string> = SCOPED_MODELS,
   tenantScopedModels: Set<string> = TENANT_SCOPED_MODELS,
   dualScopedModels: Set<string> = DUAL_COMPANY_SCOPED_MODELS,
+  sharedScopedModels: Set<string> = SHARED_COMPANY_SCOPED_MODELS,
 ): Promise<any> {
   const model = params.model;
 
@@ -269,6 +279,83 @@ export async function applyWorkspaceScope(
           (row.sourceCompanyId !== workspaceId &&
             row.targetCompanyId !== workspaceId)
         ) {
+          throw new Error("Cross-workspace write blocked");
+        }
+        return next(params);
+      }
+      return next(params);
+    }
+    return next(params);
+  }
+
+  // Phase ISO-4 — shared-company scoping (AIInsight). companyId is NULLABLE:
+  // a NULL row is group-wide and stays visible in EVERY workspace; a non-null
+  // row is pinned to one company. In-scope iff companyId IS NULL OR
+  // companyId === workspaceId. Pass-through with no workspace (ADMIN / cron).
+  if (model && sharedScopedModels.has(model) && workspaceId) {
+    const action = params.action;
+    // group-wide (NULL) OR mine
+    const own = { OR: [{ companyId: null }, { companyId: workspaceId }] };
+    if (
+      action === "findMany" ||
+      action === "findFirst" ||
+      action === "findFirstOrThrow" ||
+      action === "count" ||
+      action === "aggregate" ||
+      action === "groupBy" ||
+      action === "updateMany" ||
+      action === "deleteMany"
+    ) {
+      params.args = params.args ?? {};
+      const base = params.args.where;
+      // AND the shared ownership onto any existing where so a caller's own
+      // filters are preserved.
+      params.args.where = base ? { AND: [base, own] } : own;
+      return next(params);
+    }
+    if (action === "findUnique" || action === "findUniqueOrThrow") {
+      const row = await next(params);
+      if (row && row.companyId != null && row.companyId !== workspaceId) {
+        if (action === "findUniqueOrThrow") {
+          throw new Error("Record not found in the active workspace");
+        }
+        return null;
+      }
+      return row;
+    }
+    // create: a group-wide insight (companyId null/absent) is allowed from any
+    // workspace; a company-pinned insight may only target the active workspace.
+    if (action === "create") {
+      const data = params.args?.data ?? {};
+      if (data.companyId != null && data.companyId !== workspaceId) {
+        throw new Error("Cross-workspace create blocked");
+      }
+      return next(params);
+    }
+    if (action === "createMany") {
+      const d = params.args?.data;
+      const rows = Array.isArray(d) ? d : d ? [d] : [];
+      for (const r of rows) {
+        if (r.companyId != null && r.companyId !== workspaceId) {
+          throw new Error("Cross-workspace create blocked");
+        }
+      }
+      return next(params);
+    }
+    // by-id update/delete/upsert: probe the row; allow when it is group-wide
+    // (companyId null) or belongs to the active workspace. A non-id where
+    // passes through.
+    if (action === "update" || action === "delete" || action === "upsert") {
+      const where = params.args?.where ?? {};
+      const idValue = where.id;
+      if (typeof idValue === "string") {
+        const savedAction = params.action;
+        const savedArgs = params.args;
+        const probe = { ...params, action: "findUnique", args: { where: { id: idValue } } } as any;
+        const row = await next(probe);
+        params.action = savedAction;
+        params.args = savedArgs;
+        if (!row || (row.companyId != null && row.companyId !== workspaceId)) {
           throw new Error("Cross-workspace write blocked");
         }
         return next(params);

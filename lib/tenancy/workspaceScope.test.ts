@@ -366,3 +366,113 @@ describe("applyWorkspaceScope — ImportLog is tenant-scoped (ISOLATION-FIX / TA
     expect(calls[0].args).toEqual({ where: { endpoint: "test" } });
   });
 });
+
+describe("applyWorkspaceScope — Phase ISO-2 dual-company-FK scoping (SupplyForecast)", () => {
+  function rowFakeNext(probeRow: any) {
+    const calls: any[] = [];
+    const next = async (p: any) => {
+      calls.push(JSON.parse(JSON.stringify(p)));
+      if (p.action === "findUnique") return probeRow;
+      return { ok: true };
+    };
+    return { next, calls };
+  }
+
+  it("no workspace => passes through unchanged", async () => {
+    const { next, calls } = fakeNext();
+    await applyWorkspaceScope(
+      { model: "SupplyForecast", action: "findMany", args: { where: { status: "DRAFT" } } },
+      next,
+      null,
+    );
+    expect(calls[0].args).toEqual({ where: { status: "DRAFT" } });
+  });
+
+  it("findMany ANDs an OR-of-both-endpoints with existing filters", async () => {
+    const { next, calls } = fakeNext();
+    await applyWorkspaceScope(
+      { model: "SupplyForecast", action: "findMany", args: { where: { status: "DRAFT" } } },
+      next,
+      "ARENA",
+    );
+    expect(calls[0].args.where).toEqual({
+      AND: [
+        { status: "DRAFT" },
+        { OR: [{ sourceCompanyId: "ARENA" }, { targetCompanyId: "ARENA" }] },
+      ],
+    });
+  });
+
+  it("findUnique returns the row when the workspace is the SOURCE", async () => {
+    const { next } = rowFakeNext({ id: "f1", sourceCompanyId: "ARENA", targetCompanyId: "MAHA" });
+    const row = await applyWorkspaceScope(
+      { model: "SupplyForecast", action: "findUnique", args: { where: { id: "f1" } } },
+      next,
+      "ARENA",
+    );
+    expect(row).not.toBeNull();
+  });
+
+  it("findUnique returns the row when the workspace is the TARGET", async () => {
+    const { next } = rowFakeNext({ id: "f1", sourceCompanyId: "HOTELS", targetCompanyId: "MAHA" });
+    const row = await applyWorkspaceScope(
+      { model: "SupplyForecast", action: "findUnique", args: { where: { id: "f1" } } },
+      next,
+      "MAHA",
+    );
+    expect(row).not.toBeNull();
+  });
+
+  it("findUnique hides a forecast where the workspace is NEITHER endpoint", async () => {
+    const { next } = rowFakeNext({ id: "f1", sourceCompanyId: "HOTELS", targetCompanyId: "MAHA" });
+    const row = await applyWorkspaceScope(
+      { model: "SupplyForecast", action: "findUnique", args: { where: { id: "f1" } } },
+      next,
+      "LORAN",
+    );
+    expect(row).toBeNull();
+  });
+
+  it("create BLOCKED when the workspace is neither endpoint", async () => {
+    const { next } = fakeNext();
+    await expect(
+      applyWorkspaceScope(
+        { model: "SupplyForecast", action: "create", args: { data: { sourceCompanyId: "HOTELS", targetCompanyId: "MAHA" } } },
+        next,
+        "LORAN",
+      ),
+    ).rejects.toThrow(/cross-workspace create/i);
+  });
+
+  it("create ALLOWED when the workspace is the source (e.g. auto-generate)", async () => {
+    const { next, calls } = fakeNext();
+    await applyWorkspaceScope(
+      { model: "SupplyForecast", action: "create", args: { data: { sourceCompanyId: "HOTELS", targetCompanyId: "MAHA" } } },
+      next,
+      "HOTELS",
+    );
+    expect(calls.length).toBe(1);
+  });
+
+  it("update by-id BLOCKED when neither endpoint is the workspace", async () => {
+    const { next } = rowFakeNext({ id: "f1", sourceCompanyId: "HOTELS", targetCompanyId: "MAHA" });
+    await expect(
+      applyWorkspaceScope(
+        { model: "SupplyForecast", action: "update", args: { where: { id: "f1" }, data: { status: "APPROVED" } } },
+        next,
+        "LORAN",
+      ),
+    ).rejects.toThrow(/cross-workspace write/i);
+  });
+
+  it("update by-id ALLOWED when the workspace is the target", async () => {
+    const { next, calls } = rowFakeNext({ id: "f1", sourceCompanyId: "HOTELS", targetCompanyId: "MAHA" });
+    await applyWorkspaceScope(
+      { model: "SupplyForecast", action: "update", args: { where: { id: "f1" }, data: { status: "APPROVED" } } },
+      next,
+      "MAHA",
+    );
+    expect(calls.length).toBe(2); // probe + update
+    expect(calls[1].action).toBe("update");
+  });
+});

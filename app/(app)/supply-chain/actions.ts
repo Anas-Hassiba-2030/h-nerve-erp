@@ -6,6 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db/db";
 import { requireUser } from "@/lib/auth/session";
 import { requireRole } from "@/lib/auth/authz";
+import { getActiveWorkspaceId } from "@/lib/tenancy/workspace";
 import { softDelete, softRestore, deletedLabel, restoredLabel } from "@/lib/db/softDelete";
 import { flashToast } from "@/lib/utils/toast";
 import { logActivity } from "@/lib/auth/activityLog";
@@ -25,7 +26,15 @@ const forecastSchema = z.object({
   periodEnd: z.string().min(1),
   signal: z.string().min(1).max(1000),
   status: z.enum(["DRAFT", "APPROVED", "EXECUTED", "DISMISSED"]).default("DRAFT"),
-});
+})
+  .refine((d) => new Date(d.periodEnd) > new Date(d.periodStart), {
+    message: "periodEnd must be after periodStart",
+    path: ["periodEnd"],
+  })
+  .refine((d) => d.sourceCompanyId !== d.targetCompanyId, {
+    message: "source and target companies must differ",
+    path: ["targetCompanyId"],
+  });
 
 export async function createForecast(formData: FormData) {
   const user = await requireRole("MANAGER");
@@ -42,6 +51,23 @@ export async function createForecast(formData: FormData) {
     signal: formData.get("signal"),
     status: formData.get("status") || "DRAFT",
   });
+
+  // ISO-2 — a workspace-pinned operator may only create a forecast their
+  // own company is party to (source OR target); a cross-company ADMIN
+  // (no active workspace) may bridge any two. The scoped middleware also
+  // blocks a foreign create — this just returns a graceful message first.
+  const ws = getActiveWorkspaceId();
+  if (ws && data.sourceCompanyId !== ws && data.targetCompanyId !== ws) {
+    flashToast({
+      type: "info",
+      entity: "info",
+      label:
+        getLocale() === "ar"
+          ? "⚠ يمكنك إنشاء تنبؤ لشركتك فقط"
+          : "⚠ You can only create a forecast your company is part of",
+    });
+    return;
+  }
 
   const created = await prisma.supplyForecast.create({
     data: {
@@ -77,19 +103,22 @@ export async function setForecastStatus(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "");
   if (!id || !status) return;
+  // ISO-2 ownership — the scoped client nulls a forecast outside the
+  // caller's workspace (dual-FK guard), so a null row means foreign or
+  // gone. Bail before the write so a pinned operator can't flip another
+  // company's forecast status by id.
   const before = await prisma.supplyForecast.findUnique({ where: { id } });
+  if (!before) return;
   await prisma.supplyForecast.update({ where: { id }, data: { status } });
-  if (before) {
-    await logActivity({
-      action: status === "APPROVED" ? "APPROVE" : status === "DISMISSED" ? "REJECT" : "UPDATE",
-      entity: "FORECAST",
-      entityId: id,
-      summary: `تنبؤ "${before.productLabel}" → ${status}`,
-      summaryEn: `Forecast "${before.productLabel}" → ${status}`,
-      module: "SUPPLY",
-      meta: { from: before.status, to: status },
-    });
-  }
+  await logActivity({
+    action: status === "APPROVED" ? "APPROVE" : status === "DISMISSED" ? "REJECT" : "UPDATE",
+    entity: "FORECAST",
+    entityId: id,
+    summary: `تنبؤ "${before.productLabel}" → ${status}`,
+    summaryEn: `Forecast "${before.productLabel}" → ${status}`,
+    module: "SUPPLY",
+    meta: { from: before.status, to: status },
+  });
   revalidatePath("/supply-chain");
 }
 
@@ -97,18 +126,18 @@ export async function deleteForecast(formData: FormData) {
   await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
+  // ISO-2 ownership — null row = foreign/gone; bail before soft-deleting.
   const before = await prisma.supplyForecast.findUnique({ where: { id } });
+  if (!before) return;
   await softDelete("forecast", id);
-  if (before) {
-    await logActivity({
-      action: "DELETE",
-      entity: "FORECAST",
-      entityId: id,
-      summary: `حذف تنبؤ "${before.productLabel}"`,
-      summaryEn: `Deleted forecast "${before.productLabel}"`,
-      module: "SUPPLY",
-    });
-  }
+  await logActivity({
+    action: "DELETE",
+    entity: "FORECAST",
+    entityId: id,
+    summary: `حذف تنبؤ "${before.productLabel}"`,
+    summaryEn: `Deleted forecast "${before.productLabel}"`,
+    module: "SUPPLY",
+  });
   flashToast({
     type: "deleted",
     entity: "forecast",
@@ -122,18 +151,19 @@ export async function restoreForecast(formData: FormData) {
   await requireUser();
   const id = String(formData.get("id") ?? "");
   if (!id) return;
+  // ISO-2 ownership — findUnique returns the soft-deleted row only when the
+  // caller's workspace is one of its endpoints; null = foreign/gone, bail.
+  const before = await prisma.supplyForecast.findUnique({ where: { id } });
+  if (!before) return;
   await softRestore("forecast", id);
-  const after = await prisma.supplyForecast.findUnique({ where: { id } });
-  if (after) {
-    await logActivity({
-      action: "RESTORE",
-      entity: "FORECAST",
-      entityId: id,
-      summary: `استعادة تنبؤ "${after.productLabel}"`,
-      summaryEn: `Restored forecast "${after.productLabel}"`,
-      module: "SUPPLY",
-    });
-  }
+  await logActivity({
+    action: "RESTORE",
+    entity: "FORECAST",
+    entityId: id,
+    summary: `استعادة تنبؤ "${before.productLabel}"`,
+    summaryEn: `Restored forecast "${before.productLabel}"`,
+    module: "SUPPLY",
+  });
   flashToast({
     type: "restored",
     entity: "forecast",
@@ -198,13 +228,18 @@ export async function autoGenerateForecasts(): Promise<void> {
     const periodStart = new Date(now);
     const periodEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-    // Avoid duplicate auto-drafts in the same window for the same hotel
+    // Avoid duplicate auto-drafts for the same hotel. BUGFIX: the old guard
+    // keyed on `periodStart >= now`, but a stored draft's periodStart is the
+    // PREVIOUS run's `now` (already in the past on a re-run), so it never
+    // matched and "Auto-generate" piled up duplicates. Re-key on a still-
+    // pending DRAFT for this hotel whose period hasn't ended yet
+    // (periodEnd >= now) — that catches an earlier run's drafts.
     const existing = await prisma.supplyForecast.findFirst({
       where: {
         sourceCompanyId: hotel.companyId,
         status: "DRAFT",
         deletedAt: null,
-        periodStart: { gte: now, lte: horizon },
+        periodEnd: { gte: now },
         productLabel: { contains: hotel.name },
       },
     });
@@ -338,6 +373,9 @@ export async function rejectForecast(formData: FormData): Promise<void> {
   await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
+  // ISO-2 ownership — null row = foreign/gone; bail before dismissing.
+  const f = await prisma.supplyForecast.findUnique({ where: { id } });
+  if (!f) return;
   await prisma.supplyForecast.update({
     where: { id },
     data: { status: "DISMISSED" },

@@ -243,7 +243,12 @@ export function StudioCanvas({
               const cx = (x1 + x2) / 2;
               const path = `M ${x1} ${y1} C ${cx} ${y1}, ${cx} ${y2}, ${x2} ${y2}`;
               return (
-                <g key={e.id} className="studio-edge-group">
+                <g
+                  key={e.id}
+                  className="studio-edge-group"
+                  data-from={e.fromNodeId}
+                  data-to={e.toNodeId}
+                >
                   <path
                     d={path}
                     fill="none"

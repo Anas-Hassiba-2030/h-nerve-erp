@@ -31,6 +31,7 @@ export async function approveWorkflowRetry(formData: FormData): Promise<void> {
     data: { status: "DRY_RUN" },
   });
   revalidatePath("/m");
+  revalidatePath("/m/approvals");
 }
 
 export async function reconnectIntegration(formData: FormData): Promise<void> {
@@ -42,6 +43,7 @@ export async function reconnectIntegration(formData: FormData): Promise<void> {
     data: { status: "CONNECTED", errorCount: 0 },
   });
   revalidatePath("/m");
+  revalidatePath("/m/approvals");
   revalidatePath("/integrations");
   revalidatePath(`/integrations/${providerKey}`);
 }

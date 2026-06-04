@@ -5,6 +5,7 @@ import {
   DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel,
 } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db/db";
+import { getCurrentUser } from "@/lib/auth/session";
 import { formatNumber } from "@/lib/utils/utils";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getCompanyBrand } from "@/lib/utils/companyBrand";
@@ -24,10 +25,14 @@ export default async function EmployeesPage() {
   const ar = locale === "ar";
   const lc = ar ? "ar" : "en";
 
-  const [users, companies] = await Promise.all([
+  const [me, users, companies] = await Promise.all([
+    getCurrentUser(),
     prisma.user.findMany({ orderBy: { createdAt: "asc" }, include: { company: true } }),
     prisma.company.findMany(),
   ]);
+  // "New member" routes to /admin/users, which is hard-gated to ADMIN — only
+  // show it to admins so non-admins aren't bounced to /dashboard on click.
+  const isAdmin = me?.role === "ADMIN";
 
   const byCompany = new Map<string, typeof users>();
   for (const u of users) {
@@ -50,7 +55,9 @@ export default async function EmployeesPage() {
         status={`${formatNumber(totalUsers)} ${ar ? "عضو" : "members"}`}
         actions={
           <>
-            <Link href="/admin/users" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "عضو جديد" : "New member"}</Link>
+            {isAdmin ? (
+              <Link href="/admin/users" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "عضو جديد" : "New member"}</Link>
+            ) : null}
             <ExportMenu type="employees" locale={lc} />
           </>
         }

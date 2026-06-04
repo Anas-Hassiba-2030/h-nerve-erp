@@ -11,6 +11,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { flashToast } from "@/lib/utils/toast";
 import { prisma } from "@/lib/db/db";
+import { resolveAdminTenantId } from "@/lib/auth/adminActionScope";
 import {
   createSO,
   findOrCreateCustomer,
@@ -42,9 +43,13 @@ function toast(label: string) {
 }
 
 export async function createSalesOrder(formData: FormData): Promise<void> {
-  await gate();
+  const user = await gate();
   const ar = getLocale() === "ar";
-  const tenantId = String(formData.get("tenantId") ?? "").trim();
+  // Phase 11 authz — never trust a submitted tenantId; resolve against the
+  // session. Pinned user → forced to own tenantSlug; cross-tenant ADMIN may pass through.
+  const scope = resolveAdminTenantId(user, String(formData.get("tenantId") ?? ""));
+  if (!scope) return toast(ar ? "⚠ المستأجر مطلوب" : "⚠ Tenant is required");
+  const tenantId = scope.tenantId;
   const customerId = String(formData.get("customerId") ?? "").trim();
   const customerName = String(formData.get("customer") ?? "").trim();
   const requiredRaw = String(formData.get("requiredBy") ?? "").trim();
@@ -70,7 +75,7 @@ export async function createSalesOrder(formData: FormData): Promise<void> {
     // free-text form → name → find-or-create Customer.
     let resolvedCustomerId = customerId;
     if (!resolvedCustomerId) {
-      if (!tenantId) return toast(ar ? "⚠ المستأجر مطلوب" : "⚠ Tenant is required");
+      // tenantId is guaranteed by the resolveAdminTenantId check at top.
       if (!customerName)
         return toast(ar ? "⚠ العميل مطلوب" : "⚠ Customer is required");
       resolvedCustomerId = (

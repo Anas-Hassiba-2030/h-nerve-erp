@@ -63,8 +63,9 @@ export default async function MappingsAdminPage() {
             ? "ترجمة أسماء أعمدة المصدر إلى الحقول القانونية — تُطبَّق قبل التحقق"
             : "Translate source column names to canonical fields — applied before validation"
         }
-        actions={<AdminFamilyNav current="/admin/mappings" ar={ar} />}
       />
+
+      <AdminFamilyNav current="/admin/mappings" ar={ar} />
 
       <DaylightKpiGrid>
         <DaylightKpi label={ar ? "خرائط" : "Mappings"} value={formatNumber(mappings.length)} />

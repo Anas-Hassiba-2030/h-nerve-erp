@@ -134,8 +134,9 @@ export default async function SalesOrdersPage({
             ? "بيع للعملاء — التنفيذ يكتب حركات SOLD (سالبة) في السجل"
             : "Sales to customers — fulfillment writes SOLD (negative) ledger movements"
         }
-        actions={<AdminFamilyNav current="/admin/sales-orders" ar={ar} />}
       />
+
+      <AdminFamilyNav current="/admin/sales-orders" ar={ar} />
 
       <DaylightKpiGrid>
         <DaylightKpi label={ar ? "إجمالي الأوامر" : "Total SOs"} value={formatNumber(kTotal)} />

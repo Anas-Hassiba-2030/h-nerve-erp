@@ -102,8 +102,9 @@ export default async function WarehousesPage({
             ? "مواقع المخزون الفعلية — رُقّيت من سلسلة المستودع في المنتجات"
             : "Physical stock locations — promoted from the Product.warehouse string"
         }
-        actions={<AdminFamilyNav current="/admin/warehouses" ar={ar} />}
       />
+
+      <AdminFamilyNav current="/admin/warehouses" ar={ar} />
 
       <DaylightKpiGrid>
         <DaylightKpi label={ar ? "مستودعات" : "Warehouses"} value={formatNumber(totalWh)} />

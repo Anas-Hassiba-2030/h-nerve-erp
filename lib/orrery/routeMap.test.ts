@@ -49,6 +49,15 @@ describe("mapOrreryHref", () => {
     ).toBe("/sustainability");
   });
 
+  it("maps the Mission Control admin command deck (renamed from 'System Hub')", () => {
+    expect(
+      mapOrreryHref("sections/section.html?s=" + encodeURIComponent("غرفة العمليات")),
+    ).toBe("/admin/system");
+    expect(
+      mapOrreryHref("sections/section.html?s=" + encodeURIComponent("Mission Control")),
+    ).toBe("/admin/system");
+  });
+
   it("passes through values that are already real routes", () => {
     expect(mapOrreryHref("/dashboard")).toBe("/dashboard");
     expect(mapOrreryHref("/brain/graph")).toBe("/brain/graph");

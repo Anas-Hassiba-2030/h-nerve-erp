@@ -135,13 +135,10 @@ export default async function BrainPage({ searchParams }: { searchParams: SP }) 
             ? "رؤى قائمة على القواعد — مخزون منخفض، إعادة طلب، ركود، شذوذ استيراد"
             : "Rule-based insights — low stock, reorder, stale, import anomalies"
         }
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <RunAnalysisForm tenantId={tenantDefault} ar={ar} />
-            <AdminFamilyNav current="/admin/brain" ar={ar} />
-          </div>
-        }
+        actions={<RunAnalysisForm tenantId={tenantDefault} ar={ar} />}
       />
+
+      <AdminFamilyNav current="/admin/brain" ar={ar} />
 
       <DaylightKpiGrid>
         <DaylightKpi label={ar ? "رؤى نشطة" : "Active insights"} value={formatNumber(activeCount)} />

@@ -124,15 +124,42 @@ body:has(.dl-page) .orbit-return { z-index: 70; }
    scoped under .dl-page so they never leak.
    ════════════════════════════════════════════════════════════════ */
 
-/* Section sub-nav (the AdminFamily on its own row, breathable). */
-.dl-page .dl-subnav {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
-  padding: 12px 16px; margin-bottom: 22px;
-  background: var(--ivory); border: 1px solid var(--line); border-radius: 14px;
-  overflow-x: auto;
+/* AdminFamilyNav — the back-office section bar (12 tabs in 5 clusters:
+   Ingest · Inventory · Orders · Parties · Books). Sits below the page header
+   on every admin family page (Imports, Mappings, Products, ..., Accounts).
+   The current section is highlighted in place — never hidden. */
+.dl-page .afn-bar {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 22px 28px;
+  padding: 16px 20px; margin-bottom: 22px;
+  background: var(--cream); border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: 0 8px 22px -20px rgba(31,77,63,.35);
 }
-.dl-page .dl-subnav > div { gap: 6px !important; }
-.dl-page .dl-subnav a { white-space: nowrap; }
+.dl-page .afn-cluster { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.dl-page .afn-cluster-head {
+  font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--gold); padding-inline-start: 2px;
+}
+.dl-page .afn-cluster-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.dl-page .afn-tab {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 13px; border-radius: 10px;
+  font-size: 13px; font-weight: 600; color: var(--ink-muted);
+  background: transparent; border: 1px solid transparent;
+  transition: color .2s, background .2s, border-color .2s, box-shadow .2s;
+  white-space: nowrap;
+}
+.dl-page .afn-tab:hover {
+  color: var(--ink); background: var(--ivory); border-color: var(--line);
+}
+.dl-page .afn-tab.afn-cur {
+  color: var(--emerald);
+  background: linear-gradient(180deg, var(--ivory), var(--cream));
+  border-color: rgba(194,163,90,.55);
+  box-shadow: 0 4px 12px -8px rgba(31,77,63,.45);
+}
+.dl-page .afn-tab .afn-tab-icon { opacity: .8; flex-shrink: 0; }
+.dl-page .afn-tab.afn-cur .afn-tab-icon { opacity: 1; color: var(--gold); }
+.dl-page .afn-extra { margin-inline-start: auto; align-self: flex-end; }
 
 /* Inline & block code styling that matches Heritage. */
 .dl-page .dl-code-inline {

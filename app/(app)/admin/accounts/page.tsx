@@ -104,8 +104,9 @@ export default async function AccountsPage({ searchParams }: { searchParams: SP 
             ? "الأرصدة الجارية + قائمة الدخل + الميزانية للفترة المختارة"
             : "Running balances + P&L + Balance Sheet for the selected period"
         }
-        actions={<AdminFamilyNav current="/admin/accounts" ar={ar} />}
       />
+
+      <AdminFamilyNav current="/admin/accounts" ar={ar} />
 
       <DaylightKpiGrid>
         <DaylightKpi label={ar ? "حسابات" : "Accounts"} value={formatNumber(accounts.length)} />

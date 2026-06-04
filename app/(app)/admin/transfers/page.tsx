@@ -181,8 +181,9 @@ export default async function TransfersPage({
             ? "نقل المخزون بين المستودعات — حركتان مزدوجتان لكل تحويل"
             : "Warehouse-to-warehouse stock moves — a paired movement per transfer"
         }
-        actions={<AdminFamilyNav current="/admin/transfers" ar={ar} />}
       />
+
+      <AdminFamilyNav current="/admin/transfers" ar={ar} />
 
       <DaylightKpiGrid>
         <DaylightKpi label={ar ? "تحويلات اليوم" : "Transfers today"} value={formatNumber(transfersToday)} />

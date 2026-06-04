@@ -77,8 +77,9 @@ export default async function CustomersPage({ searchParams }: { searchParams: SP
             ? "كيانات حقيقية — رُقّيت من سلاسل العميل في أوامر البيع"
             : "Real entities — promoted from the SalesOrder customer strings"
         }
-        actions={<AdminFamilyNav current="/admin/customers" ar={ar} />}
       />
+
+      <AdminFamilyNav current="/admin/customers" ar={ar} />
 
       <DaylightKpiGrid>
         <DaylightKpi label={ar ? "الإجمالي" : "Total"} value={formatNumber(allCount)} />

@@ -18,6 +18,9 @@ interface Group {
   children: Child[];
 }
 
+// Kept in sync (manually) with the main Orrery hub (public/orrery/index.html)
+// and with ConstellationRail.tsx. The mini orrery here MUST contain every
+// destination the main hub exposes so the two surfaces stay coherent.
 const GROUPS: Group[] = [
   {
     id: "sectors",
@@ -81,15 +84,33 @@ const GROUPS: Group[] = [
     ],
   },
   {
+    id: "board",
+    nameAr: "لوحة المجموعة",
+    nameEn: "Group Board",
+    children: [
+      { label: "لوحة الإدارة",   labelEn: "Dashboard", route: "/dashboard" },
+      { label: "البحث",         labelEn: "Search",    route: "/search" },
+      { label: "المثبّت",        labelEn: "Pinned",    route: "/pinned" },
+      { label: "الشركات",       labelEn: "Companies", route: "/companies" },
+      { label: "التحليلات",     labelEn: "Analytics", route: "/analytics" },
+      { label: "مقارنة",        labelEn: "Compare",   route: "/compare" },
+    ],
+  },
+  {
     id: "system",
     nameAr: "النظام",
     nameEn: "System",
     children: [
+      // Mission Control — the admin command deck (the renamed "System Hub").
+      { label: "غرفة العمليات", labelEn: "Mission Control", route: "/admin/system" },
+      { label: "الإمبراطورية",  labelEn: "Empire",       route: "/admin/empire" },
+      { label: "المستأجرون",    labelEn: "Tenants",      route: "/admin/tenants" },
       { label: "مساحة العمل",  labelEn: "Workspace",    route: "/workspace" },
       { label: "الأتمتة",      labelEn: "Workflows",    route: "/workflows" },
       { label: "التكاملات",    labelEn: "Integrations", route: "/integrations" },
       { label: "التدقيق",      labelEn: "Audit",        route: "/audit-360" },
       { label: "سجل النشاط",   labelEn: "Activity",     route: "/activity" },
+      { label: "المحذوفات",    labelEn: "Trash",        route: "/trash" },
       { label: "الإعدادات",    labelEn: "Settings",     route: "/settings" },
       { label: "المساعدة",     labelEn: "Help",         route: "/help" },
       { label: "خارطة الطريق", labelEn: "Roadmap",      route: "/roadmap" },

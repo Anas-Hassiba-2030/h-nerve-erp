@@ -174,9 +174,7 @@ export default async function ImportsAdminPage({
       />
 
       {/* ── Section sub-nav (the AdminFamily, on its own row, breathable) ─ */}
-      <nav className="dl-subnav reveal" aria-label={ar ? "تنقّل الإدارة" : "Back-office sections"}>
-        <AdminFamilyNav current="/admin/imports" ar={ar} />
-      </nav>
+      <AdminFamilyNav current="/admin/imports" ar={ar} />
 
       {/* ── KPIs ─────────────────────────────────────────────────────── */}
       <DaylightKpiGrid>

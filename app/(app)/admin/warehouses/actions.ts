@@ -13,6 +13,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { prisma } from "@/lib/db/db";
 import { flashToast } from "@/lib/utils/toast";
+import { resolveAdminTenantId } from "@/lib/auth/adminActionScope";
 // WAREHOUSE_TYPES must NOT be declared OR re-exported in this "use server"
 // file — every export of a "use server" module becomes a server-action
 // reference, so the array would reach the client forms as a function
@@ -25,6 +26,7 @@ async function gate() {
   if (!user || !["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) {
     throw new Error("forbidden");
   }
+  return user;
 }
 function ok(label: string) {
   flashToast({ type: "info", entity: "info", label });
@@ -45,20 +47,24 @@ function editFields(formData: FormData) {
 }
 
 export async function createWarehouse(formData: FormData): Promise<void> {
-  await gate();
+  const user = await gate();
   const ar = getLocale() === "ar";
-  const tenantId = String(formData.get("tenantId") ?? "").trim().slice(0, 64);
+  // Phase 11 authz — never trust a submitted tenantId; resolve against the
+  // session. Pinned user → forced to own tenantSlug; cross-tenant ADMIN may pass through.
+  const scope = resolveAdminTenantId(user, String(formData.get("tenantId") ?? ""));
+  if (!scope) return fail(ar ? "المستأجر مطلوب" : "tenantId is required");
+  const tenantId = scope.tenantId.slice(0, 64);
   const code = String(formData.get("code") ?? "")
     .trim()
     .toUpperCase()
     .slice(0, 24);
   const { name, address, type, active } = editFields(formData);
 
-  if (!tenantId || !code || !name) {
+  if (!code || !name) {
     return fail(
       ar
-        ? "المستأجر والرمز والاسم مطلوبة"
-        : "tenantId, code and name are required",
+        ? "الرمز والاسم مطلوبة"
+        : "code and name are required",
     );
   }
   if (!WAREHOUSE_TYPES.includes(type as (typeof WAREHOUSE_TYPES)[number])) {

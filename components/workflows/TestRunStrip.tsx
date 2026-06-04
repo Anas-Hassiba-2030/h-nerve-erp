@@ -154,6 +154,12 @@ export function TestRunStrip({
 function animateTokens(firedNodeIds: Set<string>) {
   const groups = document.querySelectorAll<SVGGElement>(".studio-edge-group");
   groups.forEach((g) => {
+    // Only animate edges whose BOTH endpoints actually fired in this run, so
+    // the token motion mirrors the real trace instead of lighting every edge.
+    // (StudioCanvas stamps data-from / data-to with the edge's node ids.)
+    const from = g.dataset.from;
+    const to = g.dataset.to;
+    if (!from || !to || !firedNodeIds.has(from) || !firedNodeIds.has(to)) return;
     // Each .studio-edge-group has a path and a .studio-token circle.
     const token = g.querySelector<SVGCircleElement>(".studio-token");
     if (!token) return;

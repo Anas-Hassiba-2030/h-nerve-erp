@@ -349,8 +349,12 @@ export function Scenario({
             <button className="wi-btn wi-btn-secondary" onClick={handleReset} disabled={solving}>
               {ar ? "إعادة الضبط" : "Reset"}
             </button>
-            <button className="wi-btn wi-btn-primary" onClick={handleSave}>
-              {saved ? (ar ? "✓ حُفظ" : "✓ Saved") : ar ? "احفظ كسيناريو" : "Save scenario"}
+            <button
+              className="wi-btn wi-btn-primary"
+              onClick={handleSave}
+              disabled={!source || totalAffected === 0}
+            >
+              {saved ? (ar ? "✓ نُسخ" : "✓ Copied") : ar ? "انسخ السيناريو" : "Copy scenario"}
             </button>
           </div>
         </div>

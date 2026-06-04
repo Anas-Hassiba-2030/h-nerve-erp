@@ -10,6 +10,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { prisma } from "@/lib/db/db";
 import { flashToast } from "@/lib/utils/toast";
+import { resolveAdminTenantId } from "@/lib/auth/adminActionScope";
 
 const TYPES = ["ASSET", "LIABILITY", "EQUITY", "REVENUE", "EXPENSE", "COGS"];
 
@@ -24,15 +25,19 @@ export async function createLedgerAccount(formData: FormData): Promise<void> {
     revalidatePath("/admin/accounts");
   };
 
-  const tenantId = String(formData.get("tenantId") ?? "").trim().slice(0, 64);
+  // Phase 11 authz — never trust a submitted tenantId; resolve against the
+  // session. Pinned user → forced to own tenantSlug; cross-tenant ADMIN may pass through.
+  const scope = resolveAdminTenantId(user, String(formData.get("tenantId") ?? ""));
+  if (!scope) return fail(ar ? "المستأجر مطلوب" : "tenantId is required");
+  const tenantId = scope.tenantId.slice(0, 64);
   const code = String(formData.get("code") ?? "").trim().slice(0, 20);
   const name = String(formData.get("name") ?? "").trim().slice(0, 120);
   const type = String(formData.get("type") ?? "").trim().toUpperCase();
   const description =
     String(formData.get("description") ?? "").trim().slice(0, 200) || null;
 
-  if (!tenantId || !code || !name) {
-    return fail(ar ? "المستأجر والرمز والاسم مطلوبة" : "tenantId, code and name are required");
+  if (!code || !name) {
+    return fail(ar ? "الرمز والاسم مطلوبة" : "code and name are required");
   }
   if (!TYPES.includes(type)) {
     return fail(ar ? `النوع يجب أن يكون أحد: ${TYPES.join(", ")}` : `type must be one of: ${TYPES.join(", ")}`);

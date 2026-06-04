@@ -9,12 +9,14 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { prisma } from "@/lib/db/db";
 import { flashToast } from "@/lib/utils/toast";
+import { resolveAdminTenantId } from "@/lib/auth/adminActionScope";
 
 async function gate() {
   const user = await getCurrentUser();
   if (!user || !["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) {
     throw new Error("forbidden");
   }
+  return user;
 }
 
 function ok(label: string) {
@@ -40,12 +42,16 @@ function fields(formData: FormData) {
 }
 
 export async function createCustomer(formData: FormData): Promise<void> {
-  await gate();
+  const user = await gate();
   const ar = getLocale() === "ar";
-  const tenantId = String(formData.get("tenantId") ?? "").trim().slice(0, 64);
+  // Phase 11 authz — never trust a submitted tenantId; resolve against the
+  // session. Pinned user → forced to own tenantSlug; cross-tenant ADMIN may pass through.
+  const scope = resolveAdminTenantId(user, String(formData.get("tenantId") ?? ""));
+  if (!scope) return fail(ar ? "المستأجر مطلوب" : "tenantId is required");
+  const tenantId = scope.tenantId.slice(0, 64);
   const f = fields(formData);
-  if (!tenantId || !f.name) {
-    return fail(ar ? "المستأجر والاسم مطلوبان" : "tenantId and name are required");
+  if (!f.name) {
+    return fail(ar ? "الاسم مطلوب" : "name is required");
   }
   try {
     await prisma.customer.create({ data: { tenantId, ...f } });

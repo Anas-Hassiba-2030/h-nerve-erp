@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Keyboard, X, Search, Bell, Settings, Globe, Palette, LogOut, ListChecks } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Keyboard, X, Search, Settings, ListChecks } from "lucide-react";
 
 type Shortcut = {
   keys: string[];
@@ -9,6 +10,19 @@ type Shortcut = {
   en: string;
   icon?: any;
   group: "ar:نظام,en:System" | "ar:تنقّل,en:Navigation" | "ar:إجراءات,en:Actions";
+};
+
+// "G then X" navigation targets — implemented in the keydown handler below.
+// Every target is a real route under app/(app)/. Keep this map and the
+// Navigation rows in SHORTCUTS in sync.
+const GO_MAP: Record<string, string> = {
+  d: "/dashboard",
+  c: "/companies",
+  h: "/hotels",
+  m: "/markets",
+  i: "/insights",
+  t: "/tasks",
+  s: "/settings",
 };
 
 const SHORTCUTS: Shortcut[] = [
@@ -24,30 +38,58 @@ const SHORTCUTS: Shortcut[] = [
   { keys: ["G", "S"], ar: "الإعدادات", en: "Settings", icon: Settings, group: "ar:تنقّل,en:Navigation" },
   { keys: ["⌘/Ctrl", "N"], ar: "إنشاء جديد", en: "Create new", icon: ListChecks, group: "ar:إجراءات,en:Actions" },
   { keys: ["⌘/Ctrl", "B"], ar: "طي الشريط الجانبي", en: "Toggle sidebar", group: "ar:إجراءات,en:Actions" },
-  { keys: ["⌘/Ctrl", "L"], ar: "تبديل اللغة", en: "Toggle language", icon: Globe, group: "ar:إجراءات,en:Actions" },
-  { keys: ["⌘/Ctrl", "."], ar: "تبديل السمة", en: "Toggle theme", icon: Palette, group: "ar:إجراءات,en:Actions" },
 ];
 
 export function KeyboardShortcuts({ locale = "en" }: { locale?: "ar" | "en" }) {
   const [open, setOpen] = useState(false);
   const ar = locale === "ar";
+  const router = useRouter();
+  // Timestamp of the last bare "g" press — the first half of a "g then x"
+  // navigation chord. A second key within the window completes the jump.
+  const gPendingAt = useRef(0);
+  const G_CHORD_MS = 1200;
 
-  // Open on "?" press
+  // Open on "?" press; handle the "g then x" navigation chord.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       // Ignore when typing in inputs/textareas
       const target = e.target as HTMLElement;
       const inField = ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) || target.isContentEditable;
-      if (e.key === "?" && !inField && !e.metaKey && !e.ctrlKey) {
+      const bare = !e.metaKey && !e.ctrlKey && !e.altKey;
+
+      if (e.key === "?" && !inField && bare) {
         e.preventDefault();
         setOpen((o) => !o);
-      } else if (e.key === "Escape" && open) {
-        setOpen(false);
+        return;
       }
+      if (e.key === "Escape" && open) {
+        setOpen(false);
+        return;
+      }
+
+      // "g then x" navigation — only when not typing and no modifier held.
+      if (inField || !bare) return;
+      const key = e.key.toLowerCase();
+      if (key === "g") {
+        gPendingAt.current = Date.now();
+        return;
+      }
+      if (gPendingAt.current && Date.now() - gPendingAt.current <= G_CHORD_MS) {
+        const dest = GO_MAP[key];
+        if (dest) {
+          e.preventDefault();
+          gPendingAt.current = 0;
+          setOpen(false);
+          router.push(dest);
+          return;
+        }
+      }
+      // Any other key cancels a half-finished chord.
+      gPendingAt.current = 0;
     }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, router]);
 
   // Group shortcuts
   const grouped = SHORTCUTS.reduce<Record<string, Shortcut[]>>((acc, s) => {

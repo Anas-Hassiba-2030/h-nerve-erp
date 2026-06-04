@@ -235,8 +235,34 @@ export function useScenario({
     animateDeltaTo(DEFAULT_DELTA, 900);
   }
 
+  // "Save" copies a plain-text summary of the current what-if to the
+  // clipboard — there is no scenario store to persist to, so copying is the
+  // honest action (the operator pastes it into a note, council, or chat).
   const [saved, setSaved] = useState(false);
   function handleSave() {
+    const pct = (delta * 100).toFixed(0);
+    const sign = delta >= 0 ? "+" : "";
+    const lines = [
+      ar ? "سيناريو ماذا-لو" : "What-if scenario",
+      source
+        ? ar
+          ? `المصدر: ${source.label} (${sign}${pct}٪)`
+          : `Source: ${source.label} (${sign}${pct}%)`
+        : "",
+      ar ? `مؤشر المخاطرة: ${riskIndex}` : `Risk index: ${riskIndex}`,
+      ar ? `عدد المتأثرين: ${totalAffected}` : `Affected nodes: ${totalAffected}`,
+      ...top3.map((r) => {
+        const d = (r.projectedDelta * 100).toFixed(0);
+        const s = r.projectedDelta >= 0 ? "+" : "";
+        return `• ${r.node.label}: ${s}${d}%`;
+      }),
+    ].filter(Boolean);
+    try {
+      void navigator.clipboard?.writeText(lines.join("\n"));
+    } catch {
+      // Clipboard blocked (insecure context / permissions) — still flash so
+      // the tap is acknowledged; the summary just isn't on the clipboard.
+    }
     setSaved(true);
     window.setTimeout(() => setSaved(false), 1600);
   }

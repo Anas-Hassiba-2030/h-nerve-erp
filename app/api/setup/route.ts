@@ -85,8 +85,10 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ ok: true, email: user.email, role: user.role });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message ?? "Setup failed" }, { status: 500 });
+  } catch (err: unknown) {
+    // Log the detail server-side; don't leak DB/Prisma error text to the client.
+    console.error("[setup] failed:", err);
+    return NextResponse.json({ error: "Setup failed" }, { status: 500 });
   }
 }
 

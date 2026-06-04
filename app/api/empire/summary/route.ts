@@ -38,9 +38,7 @@ export async function GET(req: Request) {
       headers: { "Cache-Control": "no-store" },
     });
   } catch (e: any) {
-    return NextResponse.json(
-      { error: "AGGREGATION_FAILED", message: e?.message ?? "unknown" },
-      { status: 500 },
-    );
+    console.error("[empire/summary] aggregation failed:", e);
+    return NextResponse.json({ error: "AGGREGATION_FAILED" }, { status: 500 });
   }
 }

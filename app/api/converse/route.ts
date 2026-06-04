@@ -51,9 +51,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const result = await ask({ sessionId, question, scope, locale });
-  return NextResponse.json({
-    brainTurn: result.brainTurn,
-    sessionTurns: result.session.turns,
-  });
+  try {
+    const result = await ask({ sessionId, question, scope, locale });
+    return NextResponse.json({
+      brainTurn: result.brainTurn,
+      sessionTurns: result.session.turns,
+    });
+  } catch (e) {
+    // The brain can fail (LLM provider down, DB hiccup). Don't let it surface
+    // as an unhandled 500 with a framework stack — log server-side, return a
+    // generic error the overlay can show calmly.
+    console.error("[converse] ask failed:", e);
+    return NextResponse.json({ error: "brain_unavailable" }, { status: 500 });
+  }
 }

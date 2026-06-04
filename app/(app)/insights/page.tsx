@@ -61,6 +61,12 @@ export default async function InsightsPage() {
   // Detected in the last 24h — the reference's "رُصدت اليوم" slot.
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const todayCount = insights.filter((i) => i.createdAt >= since).length;
+  // Resolution rate — share of recent signals that have been handled (no
+  // longer OPEN). A real metric from the data, replacing a hardcoded figure.
+  const decidedCount = insights.filter((i) => i.status !== "OPEN").length;
+  const resolutionRate = insights.length
+    ? Math.round((decidedCount / insights.length) * 100)
+    : 0;
 
   const openIds = openInsights.map((i) => i.id);
 
@@ -83,7 +89,7 @@ export default async function InsightsPage() {
           <div className="br-kpi"><div className="v">{num(openCount, ar)}</div><div className="k">{ar ? "إشارات مفتوحة" : "Open signals"}</div></div>
           <div className="br-kpi"><div className="v">{num(criticalCount, ar)}</div><div className="k">{ar ? "حرجة" : "Critical"}</div></div>
           <div className="br-kpi"><div className="v">{num(todayCount, ar)}</div><div className="k">{ar ? "رُصدت اليوم" : "Detected today"}</div></div>
-          <div className="br-kpi"><div className="v">{ar ? "٨٤٪" : "84%"}</div><div className="k">{ar ? "دقة المحرك" : "Engine accuracy"}</div></div>
+          <div className="br-kpi"><div className="v">{ar ? `${toArabicDigits(resolutionRate)}٪` : `${resolutionRate}%`}</div><div className="k">{ar ? "معدّل المعالجة" : "Resolution rate"}</div></div>
         </div>
 
         <div className="br-controls">

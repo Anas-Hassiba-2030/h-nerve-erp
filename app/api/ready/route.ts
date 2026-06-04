@@ -5,12 +5,16 @@
 // Health = "the process is alive and DB is reachable."
 // Readiness = "the deployment is ready to serve real traffic."
 //
-// Fails (503) when:
-//   - DB is unreachable.
-//   - The workspace has never been seeded (no companies in the DB).
-//     An unseeded deployment returns an empty dashboard — better to
-//     route traffic away and surface an ops alert.
-//   - LLM_API_KEY is missing (brain is disabled entirely).
+// Fails hard (503, status "not_ready") only when:
+//   - DB is unreachable. A deploy that can't reach its database must not
+//     receive traffic.
+//
+// Returns 200 with status "ready_degraded" (serves traffic, but flags an
+// ops warning) when:
+//   - The workspace has never been seeded (no companies). The app still
+//     renders; the seed bootstrap usually fills this in on first deploy, so
+//     we don't want to wedge the deploy on an empty DB.
+//   - No LLM key is set (the brain is disabled, but the rest of the ERP works).
 //
 // Use this as a Kubernetes readinessProbe or a stricter uptime-monitor
 // target. Railway healthcheckPath uses /api/health (liveness only).

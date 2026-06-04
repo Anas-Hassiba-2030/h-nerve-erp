@@ -37,7 +37,8 @@ export default async function AnalyticsHubPage() {
     const margin = revenue > 0 ? net / revenue : 0;
     const fcCount = forecasts.filter((f) => f.sourceCompanyId === c.id || f.targetCompanyId === c.id).length;
     const lastEsg = [...esg].reverse().find((s) => s.companyId === c.id)?.overall ?? 0;
-    // year-over-year growth: last quarter vs the quarter before it
+    // quarter-over-quarter growth: the most recent quarter vs the one before it
+    // (trend[0] is the oldest month, trend[11] the most recent).
     const recent = trend.slice(9).reduce((a, v) => a + v, 0);
     const prior = trend.slice(6, 9).reduce((a, v) => a + v, 0);
     const growth = prior > 0 ? Math.round(((recent - prior) / prior) * 100) : 0;
@@ -78,17 +79,21 @@ export default async function AnalyticsHubPage() {
     pct: groupRevenue > 0 ? Math.round((d.revenue / groupRevenue) * 100) : 0,
   }));
 
-  // benchmarks vs sector average (reference "المعايير المرجعية")
+  // benchmarks vs the group average (reference "المعايير المرجعية")
   const avgMargin = active.length ? active.reduce((a, x) => a + x.margin, 0) / active.length : 0;
   const withEsg = active.filter((d) => d.lastEsg > 0);
   const avgEsg = withEsg.length ? withEsg.reduce((a, x) => a + x.lastEsg, 0) / withEsg.length : 0;
+  // Revenue benchmark: the leading company's revenue as a share of the average
+  // company's revenue — a real "X% of avg" figure, not a hardcoded one.
+  const avgRevenue = active.length ? groupRevenue / active.length : 0;
+  const revLeadPct = avgRevenue > 0 ? Math.round(((topRevenue?.revenue ?? 0) / avgRevenue) * 100) : 0;
   const GOLD = "var(--gold)";
   const EM = "var(--emerald)";
   const benchmarks = [
-    { label: ar ? "الإيراد" : "Revenue", val: 88, disp: ar ? "١١٨٪ من المتوسط" : "118% of avg", color: GOLD },
+    { label: ar ? "الإيراد" : "Revenue", val: Math.max(0, Math.min(100, revLeadPct)), disp: ar ? `${formatNumber(revLeadPct)}٪ من المتوسط` : `${revLeadPct}% of avg`, color: GOLD },
     { label: ar ? "الهامش" : "Margin", val: Math.round(avgMargin * 100), disp: `${Math.round(avgMargin * 100)}%`, color: EM },
     { label: "ESG", val: Math.round(avgEsg), disp: `${Math.round(avgEsg)} / 100`, color: GOLD },
-    { label: ar ? "النموّ السنوي" : "YoY growth", val: Math.max(0, Math.min(100, fastest?.growth ?? 0)), disp: `${(fastest?.growth ?? 0) >= 0 ? "+" : ""}${formatNumber(fastest?.growth ?? 0)}%`, color: EM },
+    { label: ar ? "النموّ الفصلي" : "QoQ growth", val: Math.max(0, Math.min(100, fastest?.growth ?? 0)), disp: `${(fastest?.growth ?? 0) >= 0 ? "+" : ""}${formatNumber(fastest?.growth ?? 0)}%`, color: EM },
   ];
 
   // revenue bars (group revenue per month)

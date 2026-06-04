@@ -44,7 +44,7 @@ export async function POST() {
   } catch (err: any) {
     log.error("seed failed", { err: err?.message ?? String(err) });
     return NextResponse.json(
-      { error: err?.message ?? "Seed failed" },
+      { error: "Seed failed" },
       { status: 500 }
     );
   }

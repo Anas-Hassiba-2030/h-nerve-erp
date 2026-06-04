@@ -59,7 +59,13 @@ export function CompanyStrip({
   return (
     <div
       className="grid gap-3 heri-stagger"
-      style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+      style={{
+        // Auto-fit wrapping: every tile keeps a readable minimum width and the
+        // row wraps to a second line instead of crushing 10 companies into one
+        // strip (which truncated revenue + orphaned the ops unit + clipped the
+        // health pill). With few companies the tiles stretch to fill the width.
+        gridTemplateColumns: "repeat(auto-fit, minmax(216px, 1fr))",
+      }}
     >
       {items.map((c) => {
         const accent = RAIL[c.code] ?? RAIL_DEFAULT;
@@ -167,33 +173,32 @@ export function CompanyStrip({
               </div>
             </div>
 
-            {/* BOTTOM — ops metric + health pill */}
-            <div className="ms-2 mt-3 flex items-center justify-between gap-2">
+            {/* BOTTOM — ops metric (label over value, never orphans the unit) + health pill */}
+            <div className="ms-2 mt-3 flex items-end justify-between gap-2">
               <div className="min-w-0">
-                <span
-                  style={{
-                    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace",
-                    fontSize: 10.5,
-                    color: "var(--heri-ink-3)",
-                    letterSpacing: "0.04em",
-                  }}
+                <div
+                  className="heri-eyebrow heri-eyebrow-ink truncate"
+                  style={{ fontSize: 9 }}
+                  title={c.ops.label}
                 >
                   {c.ops.label}
-                </span>{" "}
-                <span
+                </div>
+                <div
+                  className="mt-1 truncate"
                   style={{
                     fontFamily: "'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace",
-                    fontSize: 11,
+                    fontSize: 12.5,
                     fontWeight: 600,
                     color: "var(--heri-ink)",
                     fontVariantNumeric: "tabular-nums",
                   }}
+                  title={c.ops.value}
                 >
                   {c.ops.value}
-                </span>
+                </div>
               </div>
               <span
-                className="heri-pill"
+                className="heri-pill shrink-0"
                 style={{ color: healthHex }}
                 title={ar ? HEALTH_AR[c.health] : HEALTH_EN[c.health]}
               >

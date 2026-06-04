@@ -73,6 +73,7 @@ export default async function ForecastDetailPage({
     where: {
       category: f.category,
       id: { not: f.id },
+      deletedAt: null, // don't surface soft-deleted forecasts in the related list
     },
     orderBy: { createdAt: "desc" },
     take: 6,

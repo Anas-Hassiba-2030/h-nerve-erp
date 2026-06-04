@@ -163,7 +163,10 @@ export async function createWorkflowFromTemplate(formData: FormData): Promise<vo
       status: "DRAFT",
       nodes: { create: nodeCreates },
     },
-    include: { nodes: { orderBy: { createdAt: "asc" } } },
+    // Order by posY (the input-array index), NOT createdAt: a single nested
+    // create gives every row an identical now() on Postgres, so createdAt has
+    // no deterministic tiebreaker and edges could wire between the wrong nodes.
+    include: { nodes: { orderBy: { posY: "asc" } } },
   });
 
   for (const e of t.edges) {

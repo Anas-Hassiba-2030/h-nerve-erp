@@ -39,7 +39,10 @@ async function seedOne(args: {
       status: args.enabled ? "ACTIVE" : "DRAFT",
       nodes: { create: nodeCreates },
     },
-    include: { nodes: { orderBy: { createdAt: "asc" } } },
+    // Order by posY (the input-array index), NOT createdAt: a single nested
+    // create gives every row an identical now() on Postgres, so createdAt has
+    // no deterministic tiebreaker and edges could wire between the wrong nodes.
+    include: { nodes: { orderBy: { posY: "asc" } } },
   });
 
   // Build edges by index → node id.

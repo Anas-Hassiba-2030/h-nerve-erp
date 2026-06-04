@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { findUserByEmail, verifyPassword } from "@/lib/auth";
 import { getSession, type SessionUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
@@ -9,28 +8,37 @@ import { isOwnerEmail } from "@/lib/owner";
 import { cookies } from "next/headers";
 import { WORKSPACE_COOKIE } from "@/lib/workspace";
 
-export async function loginAction(formData: FormData) {
+// The login form drives a cinematic "dive into the cosmos" transition on the
+// client. To let the client decide WHEN to navigate (after the dive plays) and
+// to shake the card on a real failure, the action RETURNS state instead of
+// redirecting: { ok:true } on success (session cookies are already set, the
+// client then navigates to /orrery), or { ok:false, error } on failure.
+export type LoginState = { ok: boolean; error?: string; email?: string };
+
+export async function loginAction(
+  _prev: LoginState | undefined,
+  formData: FormData,
+): Promise<LoginState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
+  const ar = (cookies().get("h_nerve_locale")?.value ?? "ar") !== "en";
 
   if (!email || !password) {
-    redirect(
-      `/login?error=${encodeURIComponent("البريد الإلكتروني وكلمة المرور مطلوبان")}&email=${encodeURIComponent(email)}`
-    );
+    return {
+      ok: false,
+      email,
+      error: ar ? "البريد الإلكتروني وكلمة المرور مطلوبان" : "Email and password are required",
+    };
   }
 
   const user = await findUserByEmail(email);
   if (!user) {
-    redirect(
-      `/login?error=${encodeURIComponent("بيانات اعتماد غير صحيحة")}&email=${encodeURIComponent(email)}`
-    );
+    return { ok: false, email, error: ar ? "بيانات اعتماد غير صحيحة" : "Invalid credentials" };
   }
 
   const ok = await verifyPassword(password, user.passwordHash);
   if (!ok) {
-    redirect(
-      `/login?error=${encodeURIComponent("بيانات اعتماد غير صحيحة")}&email=${encodeURIComponent(email)}`
-    );
+    return { ok: false, email, error: ar ? "بيانات اعتماد غير صحيحة" : "Invalid credentials" };
   }
 
   // Owner auto-admin: the product owner is always ADMIN regardless of
@@ -47,9 +55,11 @@ export async function loginAction(formData: FormData) {
 
   // Phase 4 — deactivated accounts cannot sign in.
   if (!user.active) {
-    redirect(
-      `/login?error=${encodeURIComponent("هذا الحساب معطّل. تواصل مع مدير النظام.")}&email=${encodeURIComponent(email)}`
-    );
+    return {
+      ok: false,
+      email,
+      error: ar ? "هذا الحساب معطّل. تواصل مع مدير النظام." : "This account is disabled. Contact your administrator.",
+    };
   }
 
   const session = await getSession();
@@ -120,5 +130,7 @@ export async function loginAction(formData: FormData) {
     /* swallow */
   }
 
-  redirect("/orrery");
+  // Success: cookies are set on this response. The client plays the dive
+  // animation, then navigates to /orrery with the fresh session.
+  return { ok: true };
 }

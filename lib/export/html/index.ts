@@ -8,6 +8,9 @@ import { renderSupplyChain } from "./supplyChain";
 import { renderSustainability } from "./sustainability";
 import { renderProjects } from "./projects";
 import { renderMarkets } from "./markets";
+import { renderCompanies } from "./companies";
+import { renderEmployees } from "./employees";
+import { renderEducation } from "./education";
 import { renderAll } from "./all";
 
 export type ExportRenderResult = {
@@ -30,6 +33,9 @@ export const EXPORT_RENDERERS: Record<string, ExportRenderer> = {
   sustainability: renderSustainability,
   projects: renderProjects,
   markets: renderMarkets,
+  companies: renderCompanies,
+  employees: renderEmployees,
+  education: renderEducation,
   all: renderAll,
 };
 

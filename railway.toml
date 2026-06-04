@@ -12,7 +12,7 @@ buildCommand = "npm install && prisma generate && next build"
 # (scripts/seed/ensure-demo-docs.ts — fixes DBs seeded before the doc corpus existed).
 # All wrapped so a hiccup can never block the deploy.
 # Railway injects DATABASE_URL and other linked-service vars at this phase.
-preDeployCommand = "prisma migrate deploy && (npx tsx scripts/seed/seed-if-empty.ts || true) && (npx tsx scripts/seed/ensure-admins.ts || true) && (npx tsx scripts/seed/ensure-demo-docs.ts || true)"
+preDeployCommand = "prisma migrate deploy && (npx tsx scripts/seed/seed-if-empty.ts || true) && (npx tsx scripts/seed/ensure-admins.ts || true) && (npx tsx scripts/seed/ensure-demo-docs.ts || true) && (npx tsx scripts/seed/seed-erp-demo.ts || true)"
 startCommand = "next start -p ${PORT:-3000}"
 
 # Liveness probe — Railway restarts the container if this returns non-2xx.

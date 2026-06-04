@@ -25,6 +25,13 @@ export type CragVerdict<T extends { score: number }> = {
   /** Highest hit score seen (0 when nothing retrieved). */
   topScore: number;
   /**
+   * Gap between the top hit and the runner-up (`topScore - secondScore`). A lone
+   * hit reports its full score (gap over an empty field). A large margin means the
+   * top match clearly dominates; a near-zero margin means a flat field of
+   * near-ties — weaker discrimination. Feeds the ambiguous-band grounding score.
+   */
+  margin: number;
+  /**
    * A grounding-confidence multiplier in [0,1] for the downstream answer:
    * 1 when retrieval is strong, ~0.6 when ambiguous, 0 when dropped. Multiply
    * your base confidence by this so weak retrieval visibly lowers trust.
@@ -56,11 +63,13 @@ export function evaluateRetrieval<T extends { score: number }>(
   const ambiguousKeep = Math.max(1, opts.ambiguousKeep ?? 2);
 
   if (!hits.length) {
-    return { quality: "incorrect", action: "drop", topScore: 0, groundingConfidence: 0, keep: [] };
+    return { quality: "incorrect", action: "drop", topScore: 0, margin: 0, groundingConfidence: 0, keep: [] };
   }
 
   const sorted = [...hits].sort((a, b) => b.score - a.score);
   const topScore = sorted[0].score;
+  const secondScore = sorted[1]?.score ?? 0;
+  const margin = topScore - secondScore;
 
   if (topScore >= correctAt) {
     // Keep every hit that's itself reasonably strong (≥ ambiguousAt).
@@ -69,25 +78,34 @@ export function evaluateRetrieval<T extends { score: number }>(
       quality: "correct",
       action: "use",
       topScore,
+      margin,
       groundingConfidence: 1,
       keep: keep.length ? keep : [sorted[0]],
     };
   }
 
   if (topScore >= ambiguousAt) {
-    // Scale 0.5→0.8 across the ambiguous band so a near-correct match reads warmer.
-    const frac = (topScore - ambiguousAt) / Math.max(correctAt - ambiguousAt, 1e-6);
-    const groundingConfidence = 0.5 + 0.3 * clamp01(frac);
+    // Two signals decide how warm an ambiguous match reads, scaled into 0.5→0.8:
+    //   • thresholdFrac — how close topScore sits to the CORRECT boundary.
+    //   • marginFrac    — how strongly the top hit dominates the runner-up
+    //                     (relative to its own score). A flat field of near-ties
+    //                     discriminates poorly and should read cooler than a
+    //                     single hit that clearly stands out at the same topScore.
+    // Weighted 70/30 toward the threshold (absolute strength still leads).
+    const thresholdFrac = clamp01((topScore - ambiguousAt) / Math.max(correctAt - ambiguousAt, 1e-6));
+    const marginFrac = clamp01(topScore > 0 ? margin / topScore : 0);
+    const groundingConfidence = 0.5 + 0.3 * (0.7 * thresholdFrac + 0.3 * marginFrac);
     return {
       quality: "ambiguous",
       action: "blend",
       topScore,
+      margin,
       groundingConfidence,
       keep: sorted.slice(0, ambiguousKeep),
     };
   }
 
-  return { quality: "incorrect", action: "drop", topScore, groundingConfidence: 0, keep: [] };
+  return { quality: "incorrect", action: "drop", topScore, margin, groundingConfidence: 0, keep: [] };
 }
 
 function clamp01(x: number): number {

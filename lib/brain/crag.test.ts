@@ -56,4 +56,23 @@ describe("evaluateRetrieval", () => {
     const far = evaluateRetrieval([hit("a", 0.101)]).groundingConfidence;
     expect(near).toBeGreaterThan(far);
   });
+
+  it("reports the top/second margin", () => {
+    expect(evaluateRetrieval([hit("a", 0.32), hit("b", 0.14)]).margin).toBeCloseTo(0.18, 5);
+    // lone hit: gap over an empty field == its own score
+    expect(evaluateRetrieval([hit("a", 0.13)]).margin).toBeCloseTo(0.13, 5);
+    expect(evaluateRetrieval([]).margin).toBe(0);
+  });
+
+  it("a dominant top hit reads warmer than a flat field at the same top score", () => {
+    // same topScore (0.14), same threshold fraction — only the margin differs.
+    const dominant = evaluateRetrieval([hit("a", 0.14), hit("b", 0.1)]);
+    const flat = evaluateRetrieval([hit("a", 0.14), hit("b", 0.135)]);
+    expect(dominant.quality).toBe("ambiguous");
+    expect(flat.quality).toBe("ambiguous");
+    expect(dominant.groundingConfidence).toBeGreaterThan(flat.groundingConfidence);
+    // both still bounded within the ambiguous band
+    expect(flat.groundingConfidence).toBeGreaterThan(0.5);
+    expect(dominant.groundingConfidence).toBeLessThan(0.8);
+  });
 });

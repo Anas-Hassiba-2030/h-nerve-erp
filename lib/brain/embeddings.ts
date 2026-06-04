@@ -174,10 +174,20 @@ function makeRemoteEmbedder(
         for (const part of chunk(toEmbed, batchSize)) {
           for (const v of await call(part)) vecs.push(l2normalize(v));
         }
+        // A partial provider response (fewer vectors than inputs) would mix
+        // provider-dim vectors with 256-dim local fallbacks in the same result,
+        // making cosineSim compare across dimensions and return noise. If the
+        // count doesn't match exactly, fail into the catch so the WHOLE batch
+        // falls back to local — one consistent dimensionality, nothing cached
+        // under the provider key.
+        if (vecs.length !== toEmbed.length) {
+          throw new Error(
+            `embedder ${name} returned ${vecs.length}/${toEmbed.length} vectors`,
+          );
+        }
         missing.forEach((origIdx, j) => {
-          const v = vecs[j] ?? localEmbed(texts[origIdx]);
-          cacheSet(`${name}:${texts[origIdx]}`, v);
-          out[origIdx] = v;
+          cacheSet(`${name}:${texts[origIdx]}`, vecs[j]);
+          out[origIdx] = vecs[j];
         });
       } catch (err) {
         warnOnce(name, err);

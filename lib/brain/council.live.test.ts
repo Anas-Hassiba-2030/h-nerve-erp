@@ -21,7 +21,7 @@ const { prisma, runAgent, runModerator, llmEnabled, ROSTER } = vi.hoisted(() => 
     farm: { findMany: vi.fn() },
     aIInsight: { findMany: vi.fn() },
     supplyForecast: { findMany: vi.fn() },
-    transaction: { findMany: vi.fn() },
+    transaction: { findMany: vi.fn(), groupBy: vi.fn() },
     councilSession: { create: vi.fn(), update: vi.fn(), findUnique: vi.fn() },
     councilVoice: { create: vi.fn() },
     $transaction: vi.fn(),
@@ -71,6 +71,8 @@ function wireHappy() {
   ]) {
     m.findMany.mockResolvedValue([]);
   }
+  // Revenue/expense are now summed via groupBy (no row load) — empty = 0/0.
+  prisma.transaction.groupBy.mockResolvedValue([]);
   prisma.councilSession.create.mockResolvedValue({
     id: "sess-1",
     ranAt: new Date(Date.UTC(2026, 4, 29)),

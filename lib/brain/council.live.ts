@@ -158,7 +158,7 @@ async function buildAgentContext(
   // Pull the most central nodes (Companies + Hotels + Forecasts) plus any explicit refs.
   // Phase RAG-3 — also retrieve the tenant's documents most relevant to the
   // topic, so each agent can ground its argument in real contract/policy text.
-  const [companies, hotels, dairyBatches, farms, openInsights, forecasts, transactions, docHits] = await Promise.all([
+  const [companies, hotels, dairyBatches, farms, openInsights, forecasts, txnSums, docHits] = await Promise.all([
     prisma.company.findMany(),
     prisma.hotel.findMany(),
     prisma.dairyBatch.findMany({ orderBy: { expiryDate: "asc" }, take: 5 }),
@@ -169,8 +169,12 @@ async function buildAgentContext(
       take: 5,
     }),
     prisma.supplyForecast.findMany({ where: { status: "APPROVED" }, take: 5 }),
-    prisma.transaction.findMany({
+    // Sum revenue/expense in the DB rather than loading 90 days of rows into
+    // memory just to reduce them — the window can scale to thousands of rows.
+    prisma.transaction.groupBy({
+      by: ["kind"],
       where: { occurredAt: { gte: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) } },
+      _sum: { amount: true },
     }),
     retrieveDocuments(topic, { k: 4, minScore: 0.06, locale }).catch(() => []),
   ]);
@@ -185,12 +189,10 @@ async function buildAgentContext(
     links: [],
   }));
 
-  const totalRevenue = transactions
-    .filter((t) => t.kind === "REVENUE")
-    .reduce((a, b) => a + b.amount, 0);
-  const totalExpense = transactions
-    .filter((t) => t.kind === "EXPENSE")
-    .reduce((a, b) => a + b.amount, 0);
+  const sumByKind = (k: string) =>
+    txnSums.find((r) => r.kind === k)?._sum.amount ?? 0;
+  const totalRevenue = sumByKind("REVENUE");
+  const totalExpense = sumByKind("EXPENSE");
 
   const farmsAlerting = farms.filter((f) => f.alertLevel !== "OK").length;
 

@@ -161,18 +161,20 @@ export function renderDistribution(buckets: DistributionBucket[], ar: boolean): 
     .map((b) => {
       const pct = total > 0 ? (Math.abs(b.value) / total) * 100 : 0;
       const widthPct = (Math.abs(b.value) / max) * 100;
-      const isNeg = b.value < 0;
+      // Negatives keep two decimals (a precise debit), non-negatives use the
+      // grouped integer format. (The old `b.value < 0 ? … : "+"` inner branch
+      // was dead — `isNeg` already guaranteed the value was negative.)
+      const valueStr =
+        b.value < 0
+          ? b.value.toFixed(2)
+          : new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(b.value);
       return `
         <div class="dist-row">
           <span class="dist-label">${escapeHtml(b.label)}</span>
           <div class="dist-bar-wrap">
             <div class="dist-bar" style="width:${widthPct.toFixed(1)}%;background:${b.color}"></div>
           </div>
-          <span class="dist-value">${
-            isNeg
-              ? (b.value < 0 ? b.value.toFixed(2) : "+" + b.value.toFixed(2))
-              : new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(b.value)
-          }</span>
+          <span class="dist-value">${valueStr}</span>
           <span class="dist-pct">${pct.toFixed(1)}%</span>
         </div>
       `;

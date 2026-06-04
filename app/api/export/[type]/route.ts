@@ -15,7 +15,15 @@ import {
 
 function csvEscape(v: any): string {
   if (v == null) return "";
-  const s = String(v);
+  let s = String(v);
+  // Neutralize spreadsheet formula injection: a cell starting with = + - @ (or
+  // tab/CR) is evaluated as a formula by Excel/Sheets. Prefix such cells with a
+  // single quote so they're treated as text — but leave plain numbers alone so
+  // negative figures still sum correctly in the exported sheet.
+  const isPlainNumber = /^-?\d+(\.\d+)?$/.test(s);
+  if (!isPlainNumber && /^[=+\-@\t\r]/.test(s)) {
+    s = "'" + s;
+  }
   if (s.includes(",") || s.includes('"') || s.includes("\n")) {
     return `"${s.replace(/"/g, '""')}"`;
   }

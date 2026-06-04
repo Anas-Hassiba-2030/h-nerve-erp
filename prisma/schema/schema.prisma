@@ -1,0 +1,13 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+datasource db {
+  // PRODUCTION: Railway injects DATABASE_URL automatically. No DIRECT_URL needed.
+  // Neon users: append `?pgbouncer=true&connection_limit=1` to DATABASE_URL and
+  // run migrations against the non-pooled connection separately.
+  // LOCAL DEV: provider="sqlite", DATABASE_URL="file:./dev.db".
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}

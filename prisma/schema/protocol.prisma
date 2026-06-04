@@ -1,0 +1,30 @@
+// =====================================================================
+// THE LIVING PROTOCOL — Phase 20 of docs/PHASES-INTELLIGENCE.md.
+// The self-updating company constitution: a small set of governing
+// clauses (procurement policy, hospitality standards, data governance,
+// supplier criteria, crisis response) that a tenant's ADMIN edits inline.
+// Arabic-first (title/body), English mirror optional. `tenantId` is the
+// same OPAQUE Tenant.slug label as Product/BrainInsight (no FK) — the
+// model is registered in TENANT_SCOPED_MODELS so the scoped client
+// auto-filters by the active tenant. `version` bumps on every admin edit.
+// =====================================================================
+model ProtocolClause {
+  id        String   @id @default(cuid())
+  tenantId  String   @default("default")
+  // "procurement" | "hospitality" | "data-governance" | "supplier" | "crisis"
+  key       String
+  // Arabic-first display copy; English mirror is secondary/optional.
+  title     String
+  titleEn   String?
+  body      String
+  bodyEn    String?
+  // Display order in the constitution.
+  orderIndex Int     @default(0)
+  // Bumps by 1 on every admin edit — the "living" version counter.
+  version   Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, key])
+  @@index([tenantId, orderIndex])
+}

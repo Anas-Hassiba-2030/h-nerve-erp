@@ -110,7 +110,7 @@ task. You don't have to diagnose it yourself.
   Europe → a bit slower locally.
 - **For a fast local pitch demo** you can switch back to the local file
   database: in `.env` comment the Neon `DATABASE_URL`, uncomment the
-  `file:./dev.db` line; in `prisma/schema.prisma` set `provider = "sqlite"`;
+  `file:./dev.db` line; in `prisma/schema/schema.prisma` set `provider = "sqlite"`;
   run `npm run db:reset`. (The revert steps are written in those files.)
 - Keep Postgres for the actual pilot/production. Use SQLite if the laptop
   demo needs to feel instant.

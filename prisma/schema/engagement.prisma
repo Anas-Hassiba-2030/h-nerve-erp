@@ -1,0 +1,134 @@
+// =====================================================================
+// TASKS — gamified work for employees
+// =====================================================================
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  // Phase i18n — English copy so task lists translate with the UI. Nullable:
+  // user-created tasks without an English title fall back to `title`.
+  titleEn     String?
+  description String?
+  // "CORE" (mandated) or "SIDE" (bonus, optional)
+  kind        String   @default("CORE")
+  // "TODO" | "IN_PROGRESS" | "DONE" | "BLOCKED"
+  status      String   @default("TODO")
+  // "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+  priority    String   @default("MEDIUM")
+  // sector tag links task to its module
+  module      String   @default("GENERAL")
+  points      Int      @default(10)
+  dueAt       DateTime?
+  completedAt DateTime?
+  assigneeId  String?
+  assignee    User?    @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  // Phase 11 — inbox queries my open tasks by assignee/status, sorts dueAt.
+  @@index([assigneeId, status])
+  @@index([dueAt])
+}
+
+// =====================================================================
+// ACHIEVEMENTS — chess ranks + medals
+// =====================================================================
+
+model Achievement {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  nameEn      String
+  description String
+  // "BRONZE" | "SILVER" | "GOLD" | "PLATINUM"
+  tier        String   @default("BRONZE")
+  icon        String   @default("Trophy")
+  threshold   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  earned UserAchievement[]
+}
+
+model UserAchievement {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  earnedAt      DateTime    @default(now())
+
+  @@unique([userId, achievementId])
+}
+
+// =====================================================================
+// FUTURE PROJECTS — pipeline per company
+// =====================================================================
+
+model FutureProject {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  // "IDEA" | "RESEARCH" | "PLANNED" | "APPROVED" | "IN_PROGRESS" | "ON_HOLD" | "DONE"
+  stage       String   @default("IDEA")
+  budgetJod   Float    @default(0)
+  priority    String   @default("MEDIUM")
+  startQuarter String?  // e.g. "2026-Q3"
+  targetQuarter String? // e.g. "2027-Q2"
+  kpis        String?  // free text
+  ownerName   String?
+  progressPct Float    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+}
+
+// =====================================================================
+// MARKETS — global + regional stocks tracking
+// =====================================================================
+
+model MarketStock {
+  id         String   @id @default(cuid())
+  ticker     String   @unique
+  label      String
+  labelAr    String?
+  exchange   String   // "NYSE" | "NASDAQ" | "ASE" | "TADAWUL" | "DFM"
+  currency   String   @default("USD")
+  lastPrice  Float    @default(0)
+  changePct  Float    @default(0)
+  // optional link to a Hourani company
+  companyId  String?
+  company    Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  region     String   @default("MENA") // "MENA" | "EU" | "US" | "ASIA"
+  // serialized JSON of recent prices for sparkline
+  history    String   @default("[]")
+  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now())
+}
+
+// =====================================================================
+// SUSTAINABILITY — ESG scoring per company per period
+// =====================================================================
+
+model SustainabilityScore {
+  id              String   @id @default(cuid())
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  // "Q1" | "Q2" | "Q3" | "Q4" | "H1" | "H2" | "FY"
+  period          String
+  year            Int
+  environmentalScore Float   @default(0)  // 0-100
+  socialScore     Float    @default(0)
+  governanceScore Float    @default(0)
+  overall         Float    @default(0)
+  carbonTons      Float    @default(0)
+  waterCubicM     Float    @default(0)
+  renewablePct    Float    @default(0)
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([companyId, period, year])
+}

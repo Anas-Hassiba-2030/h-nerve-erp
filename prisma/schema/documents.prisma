@@ -1,0 +1,91 @@
+// =====================================================================
+// DOCUMENT INTELLIGENCE — Phase 18 of docs/PHASES-INTELLIGENCE.md
+// One row per uploaded document. Each parse produces a single
+// DocExtraction with the structured fields we recovered, plus zero or
+// more DocClause rows for risk clauses we want to surface in the UI.
+// =====================================================================
+
+model Document {
+  id           String   @id @default(cuid())
+  scope        String   @default("default")
+  // "contract" | "invoice" | "lab_report" | "spreadsheet" | "other"
+  kind         String   @default("other")
+  // Original filename as uploaded.
+  fileName     String
+  fileSize     Int      @default(0)
+  mimeType     String?
+  // Free-text title we surfaced (from the file or extraction).
+  title        String?
+  titleEn      String?
+  // The narrator's one-paragraph summary.
+  summary      String?
+  summaryEn    String?
+  // "PARSING" | "READY" | "FAILED" — pass-through status the UI shows.
+  status       String   @default("PARSING")
+  // What module / company this got linked to ("LORAN", "MAHA", "ARENA", etc).
+  linkedTo     String?
+
+  // Phase NS-8 — Document → Graph. After parse, the extracted vendor/party
+  // names are fuzzy-matched against the tenant's Supplier/Customer rows
+  // (lib/docintel/match.ts). These denormalized scalars hold the best
+  // match (id + name) plus the match score; null when nothing cleared the
+  // threshold. Opaque ids (NO FK relation) — matches the codebase's
+  // opaque-supplier precedent, keeps the migration additive, and keeps the
+  // auto-link advisory rather than a hard constraint the operator can't undo.
+  matchedSupplierId   String?
+  matchedSupplierName String?
+  matchedCustomerId   String?
+  matchedCustomerName String?
+  matchConfidence     Float?
+
+  // ms it took to parse — informational only.
+  parsedMs     Int?
+  uploadedById String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+
+  extraction   DocExtraction?
+  clauses      DocClause[]
+
+  @@index([scope, status])
+  @@index([scope, kind])
+  @@index([createdAt])
+}
+
+model DocExtraction {
+  id          String   @id @default(cuid())
+  documentId  String   @unique
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  // Structured fields — JSON dictionary keyed by extraction kind.
+  // For a contract: { parties: [...], effectiveDate, termMonths, totalValue, ... }
+  // For an invoice: { vendor, invoiceNumber, dueDate, total, currency, ... }
+  // We keep it as JSON for pluggability — industry packs add their own keys.
+  fieldsJson  String   @default("{}")
+  // The raw narrator-style headline ("14-page supplier agreement, 3-year term").
+  headline    String?
+  headlineEn  String?
+  createdAt   DateTime @default(now())
+}
+
+model DocClause {
+  id          String   @id @default(cuid())
+  documentId  String
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  // "risk" | "obligation" | "termination" | "renewal" | "indemnity" | "data" | "info"
+  kind        String   @default("info")
+  // The actual quote, verbatim from the doc (truncated to ~280 chars).
+  quote       String
+  quoteEn     String?
+  // What page / section we found it in.
+  page        Int?
+  // Severity for the UI — "low" | "medium" | "high"
+  severity    String   @default("low")
+  // Editorial gloss the narrator wrote about it.
+  note        String?
+  noteEn      String?
+  orderIndex  Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([documentId, orderIndex])
+}

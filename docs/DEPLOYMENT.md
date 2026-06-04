@@ -13,7 +13,7 @@ to SQLite per `docs/OPERATING-PROTOCOL.md §6`.
 
 - **Host:** Railway, GitHub-connected — pushing to `main` auto-deploys.
 - **DB:** Railway PostgreSQL plugin. `DATABASE_URL` is auto-injected into the
-  service. `prisma/schema.prisma` uses `provider = "postgresql"`,
+  service. `prisma/schema/schema.prisma` uses `provider = "postgresql"`,
   `url = DATABASE_URL`.
 - **Migrations:** real files in `prisma/migrations/`, applied by
   `prisma migrate deploy` in the deploy step (NOT `db push`).
@@ -100,5 +100,5 @@ In the n8n workflow's HTTP Request node:
 ## Local SQLite revert (offline demo)
 
 Per `docs/OPERATING-PROTOCOL.md §6`: in `.env` set `DATABASE_URL="file:./dev.db"`;
-in `prisma/schema.prisma` set `provider = "sqlite"`; run `npm run db:reset`.
+in `prisma/schema/schema.prisma` set `provider = "sqlite"`; run `npm run db:reset`.
 Flip both back to `postgresql` before committing.

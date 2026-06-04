@@ -1,0 +1,203 @@
+// =====================================================================
+// PRODUCT — operational source of truth. The import endpoint upserts
+// into this by (tenantId, sku); ImportLog/ImportRow remain the audit
+// trail. tenantId is an OPAQUE caller-supplied label (matches
+// ImportLog.tenantId + docs/IMPORT-PIPELINE.md) — deliberately NOT a
+// Tenant FK: Tenant.id is a cuid, the table is empty (single-tenant by
+// default), and the n8n payload sends "hourani-hotels". A hard FK would
+// P2003 every import. Composite-unique + indexed gives dedup and
+// tenant-scoped queries without the harmful constraint.
+// =====================================================================
+model Product {
+  id              String    @id @default(cuid())
+  tenantId        String
+  sku             String
+  name            String
+  quantity        Int       @default(0)
+  // Phase 10: Brain low-stock threshold. Null → the engine uses 50.
+  reorderPoint    Int?
+  // Money, precision/scale (12,2). Applied at the Phase 11 Postgres
+  // cutover (same precedent as ImportRow.unitCost).
+  unitCost        Decimal?
+  // supplierId is nullable BY DESIGN (decision #7): import rows with no
+  // supplier field have no Supplier. All current products are linked.
+  supplierId      String?
+  // Phase 9: every product lives at exactly one Warehouse. The SAME sku
+  // in two warehouses = two Product rows (see @@unique below). The
+  // legacy `warehouse` string was dropped after the backfill.
+  warehouseId     String
+
+  // Provenance / audit linkage.
+  firstImportedAt DateTime  @default(now())
+  lastImportedAt  DateTime  @default(now())
+  // Spec's "importHistory count" — # of imports that touched this row.
+  importCount     Int       @default(1)
+
+  // Soft-delete column only. Wiring into lib/softDelete.ts is deferred
+  // (no delete UI this phase, per the task).
+  deletedAt       DateTime?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  importRows      ImportRow[]
+  movements       InventoryMovement[]
+  poLines         PurchaseOrderLine[]
+  soLines         SalesOrderLine[]
+  supplierRef     Supplier? @relation(fields: [supplierId], references: [id])
+  warehouseRef    Warehouse @relation(fields: [warehouseId], references: [id])
+
+  @@unique([tenantId, sku, warehouseId])
+  @@index([tenantId, deletedAt])
+  @@index([tenantId, supplierId])
+  @@index([tenantId, warehouseId])
+}
+
+// =====================================================================
+// INVENTORY MOVEMENT — append-only stock ledger (Phase 5). Every stock
+// change is one immutable row; Product.quantity becomes a denormalized
+// cache = SUM(delta) WHERE productId AND deletedAt IS NULL. Mistakes are
+// corrected by a compensating reverse movement, never an edit/delete
+// (decision #1). tenantId is the same OPAQUE caller label as Product /
+// ImportLog — no Tenant FK. sourceImportLogId/documentRef are opaque
+// text for now (documentRef → FK in Phase 6, same precedent).
+// Movement type is a string enum per the CLAUDE.md SQLite rule.
+// =====================================================================
+model InventoryMovement {
+  id                String   @id @default(cuid())
+  tenantId          String
+  productId         String
+  // IMPORT | RECEIVED | SOLD | TRANSFER_OUT | TRANSFER_IN | ADJUSTMENT
+  // | DAMAGED | RETURN_FROM_CUSTOMER | RETURN_TO_SUPPLIER
+  type              String
+  // Signed: positive = stock in, negative = stock out.
+  delta             Int
+  reason            String
+  occurredAt        DateTime @default(now())
+
+  // Provenance.
+  sourceImportLogId String?
+  note              String?
+  userId            String?
+  documentRef       String?
+  // Costed inflows only (IMPORT from r.unitCost, RECEIVED from PO line).
+  // Drives weighted-average COGS (Phase 8). Null = excluded from the
+  // costing pool. precision/scale (12,2) — Phase 11 Postgres cutover.
+  unitCost          Decimal?
+  // Phase 9: which warehouse this movement happened at — backfilled
+  // from the product's warehouseId. transferRef links a paired
+  // TRANSFER_OUT / TRANSFER_IN created in the same transaction.
+  warehouseId       String?
+  transferRef       String?
+
+  // Append-only (decision #1): no edit/delete UI. deletedAt exists for
+  // exceptional admin correction only; recalc excludes soft-deleted rows.
+  deletedAt         DateTime?
+  createdAt         DateTime @default(now())
+
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, productId, occurredAt])
+  @@index([tenantId, type, occurredAt])
+  @@index([productId, deletedAt])
+  @@index([tenantId, warehouseId])
+  @@index([transferRef])
+}
+
+// =====================================================================
+// WAREHOUSE — physical stock location (Phase 9). Tenant-scoped, opaque
+// tenantId (no Tenant FK — same precedent as Product/InventoryMovement).
+// `type` is a string enum per the CLAUDE.md SQLite rule. Soft-delete
+// column only; a warehouse with products can't be deleted (enforced in
+// the server action, not the schema). The legacy Product.warehouse
+// string is migrated into Product.warehouseId by
+// scripts/migrate-warehouses.ts (one-shot, not committed).
+// =====================================================================
+model Warehouse {
+  id        String    @id @default(cuid())
+  tenantId  String
+  code      String // "AMM-A", "ZRQ-B"
+  name      String // "Amman Main", "Zarqa Cold Storage"
+  address   String?
+  type      String    @default("MAIN") // MAIN | COLD | DRY | TRANSIT
+  active    Boolean   @default(true)
+
+  products  Product[]
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([tenantId, code])
+  @@index([tenantId, active])
+}
+
+// =====================================================================
+// IMPORT LOG — one row per external-import POST (POST
+// /api/import/test). Bearer-authenticated ingestion endpoint; this is
+// the audit trail of what came in, how much was accepted/rejected and
+// why. No companyId → not workspace-scoped (system-level).
+// SQLite has no JSON type, so `errors` is a JSON string.
+// =====================================================================
+model ImportLog {
+  id        String   @id @default(cuid())
+  // Which import endpoint produced this row ("test" for now).
+  endpoint  String   @default("test")
+  // Optional caller-supplied label (body.source) — who/what sent it.
+  source    String?
+  // Caller-supplied tenant label from the POST body. NOT a Tenant FK —
+  // it is an opaque, caller-controlled string (length-capped on write,
+  // never auto-creates a Tenant row).
+  tenantId  String?
+  accepted  Int      @default(0)
+  rejected  Int      @default(0)
+  // JSON-stringified Array<{ index: number; error: string }>.
+  errors    String?
+  // "OK" | "PARTIAL" | "REJECTED"
+  status    String   @default("OK")
+  // Best-effort requester IP for the audit trail.
+  ip        String?
+  createdAt DateTime @default(now())
+
+  // One row per record in the batch (structured + raw).
+  rows      ImportRow[]
+
+  @@index([createdAt])
+  @@index([endpoint])
+  @@index([tenantId])
+}
+
+// =====================================================================
+// IMPORT ROW — one row per record inside an ImportLog batch. The
+// endpoint lifts known fields into structured columns so /admin/imports
+// can query them, and keeps the verbatim record in `rowData` for
+// debugging. Cascade-deleted with its parent batch.
+// =====================================================================
+model ImportRow {
+  id          String    @id @default(cuid())
+  importLogId String
+  importLog   ImportLog @relation(fields: [importLogId], references: [id], onDelete: Cascade)
+  // Structured columns lifted from the record.
+  sku         String?
+  productName String?
+  quantity    Int?
+  // Money, precision/scale (12,2). Applied at the Phase 11 Postgres
+  // cutover (was a bare Decimal on the sqlite provider).
+  unitCost    Decimal?
+  supplier    String?
+  warehouse   String?
+  // Verbatim record JSON, kept for debugging (SQLite has no JSON type).
+  rowData     String    @default("{}")
+  // "ACCEPTED" | "REJECTED"
+  status      String    @default("ACCEPTED")
+  // Rejection reason when status = "REJECTED".
+  error       String?
+  // Live-product linkage. Null for rejected rows and pre-Phase-3 rows.
+  productId   String?
+  product     Product?  @relation(fields: [productId], references: [id])
+  createdAt   DateTime  @default(now())
+
+  @@index([importLogId])
+  @@index([sku])
+  @@index([productId])
+}

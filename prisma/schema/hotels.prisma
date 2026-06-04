@@ -1,0 +1,50 @@
+// =====================================================================
+// HOSPITALITY
+// =====================================================================
+
+model Hotel {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name        String
+  nameEn      String?
+  city        String
+  country     String   @default("JO")
+  tier        String   @default("BUSINESS")
+  totalRooms  Int      @default(0)
+  starRating  Int      @default(4)
+  baselineADR Float    @default(120)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bookings Booking[]
+}
+
+model Booking {
+  id        String   @id @default(cuid())
+  hotelId   String
+  hotel     Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  // Phase F4 — denormalized tenant slug. Backfilled from
+  // Hotel.companyId → Company.code via the migration in
+  // prisma/migrations/20260520_add_tenant_id_to_booking_crop.
+  // Required by the workspaceScope middleware (TENANT_SCOPED_MODELS).
+  tenantId  String
+  reference String   @unique
+  guestName String
+  roomType  String   @default("STANDARD")
+  rooms     Int      @default(1)
+  guests    Int      @default(2)
+  checkIn   DateTime
+  checkOut  DateTime
+  revenue   Float    @default(0)
+  status    String   @default("CONFIRMED")
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Phase 11 — bookings list joins hotel and sorts/filters by checkIn.
+  @@index([hotelId])
+  @@index([checkIn])
+  @@index([tenantId])
+}

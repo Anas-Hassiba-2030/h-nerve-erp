@@ -1,0 +1,93 @@
+// =====================================================================
+// IDENTITY & ACCESS — gamified
+// =====================================================================
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  // "ADMIN" | "EXECUTIVE" | "MANAGER" | "STAFF"
+  role         String   @default("STAFF")
+  // Phase 4 — deactivated accounts cannot log in (checked in loginAction).
+  active       Boolean  @default(true)
+  companyId    String?
+  company      Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  title        String?
+  avatarColor  String   @default("emerald")
+
+  // -- Gamification (chess ranks)
+  // "PAWN" | "BISHOP" | "KNIGHT" | "QUEEN" | "KING"
+  rank         String   @default("PAWN")
+  xp           Int      @default(0)
+  loginCount   Int      @default(0)
+  bonusPercent Float    @default(0)
+  lastLoginAt  DateTime?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([active])
+  @@index([reportsToId])
+
+  transactions Transaction[]
+  forecasts    SupplyForecast[]
+  insights     AIInsight[]
+  tasks        Task[] @relation("TaskAssignee")
+  achievements UserAchievement[]
+  threads      ThreadParticipant[]
+  messages     Message[]
+  alertRules   AlertRule[]
+
+  // Phase V3-P13 — org-tree self-relation.
+  reportsToId  String?
+  reportsTo    User?   @relation("UserReports", fields: [reportsToId], references: [id], onDelete: SetNull)
+  reports      User[]  @relation("UserReports")
+
+  // Phase V3-P5 — shared-to-Council threads authored by this user.
+  councilShares  CouncilDiscussion[] @relation("CouncilShares")
+  // Phase V3-NEW-5 — replies posted on Council threads.
+  councilReplies CouncilReply[]      @relation("CouncilReplies")
+}
+
+// Phase P5 — interactive role-route permissions. Replaces the
+// hardcoded POLICY map in lib/permissions.ts when present. Seeded from
+// the hardcoded defaults via scripts/seed-role-permissions.ts; UI at
+// /admin/permissions-preview toggles cells in place.
+model RolePermission {
+  id        String   @id @default(cuid())
+  role      String   // "ADMIN" | "EXECUTIVE" | "MANAGER" | "STAFF"
+  path      String   // "/hotels", "/admin/products", ...
+  allowed   Boolean
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+
+  @@unique([role, path])
+  @@index([role])
+}
+
+// =====================================================================
+// ACTIVITY LOG — audit trail across the system
+// =====================================================================
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  // "CREATE" | "UPDATE" | "DELETE" | "RESTORE" | "LOGIN" | "EXPORT" | "FORECAST" | "INSIGHT"
+  action      String
+  // "BOOKING" | "DAIRY" | "FARM" | "PROGRAM" | "FORECAST" | "INSIGHT" | "TASK" | "PROJECT" | "TRANSACTION" | "USER" | "COMPANY"
+  entity      String
+  entityId    String?
+  // human-friendly summary in Arabic
+  summary     String
+  summaryEn   String?
+  // serialized JSON of metadata (before/after)
+  meta        String?
+  actorId     String?
+  actorName   String?
+  module      String?  // sector/section
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entity, entityId])
+  @@index([actorId])
+}

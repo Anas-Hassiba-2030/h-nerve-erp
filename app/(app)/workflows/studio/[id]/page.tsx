@@ -14,6 +14,8 @@ import { TestRunStrip } from "@/components/workflows/TestRunStrip";
 import { Palette } from "@/components/workflows/Palette";
 import { toggleWorkflow, deleteWorkflow } from "../../actions";
 import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
+import { hasRole } from "@/lib/auth/authz";
 
 export default async function StudioPage({ params }: { params: { id: string } }) {
   const wf = await prisma.workflow.findUnique({
@@ -28,6 +30,10 @@ export default async function StudioPage({ params }: { params: { id: string } })
 
   const locale = getLocale();
   const ar = locale === "ar";
+  const session = await getCurrentUser();
+  // deleteNode / deleteEdge / deleteWorkflow are MANAGER-gated; only show
+  // their affordances to users who can actually run them.
+  const canManage = hasRole(session, "MANAGER");
 
   const studioNodes: StudioNode[] = wf.nodes.map((n) => {
     const t = getTemplate(n.templateKey);
@@ -76,16 +82,18 @@ export default async function StudioPage({ params }: { params: { id: string } })
               {wf.enabled ? "Disable" : "Enable"}
             </button>
           </form>
-          <form action={deleteWorkflow}>
-            <input type="hidden" name="id" value={wf.id} />
-            <button
-              type="submit"
-              className="studio-btn-ghost"
-              style={{ color: "#e85a72" }}
-            >
-              <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
-            </button>
-          </form>
+          {canManage ? (
+            <form action={deleteWorkflow}>
+              <input type="hidden" name="id" value={wf.id} />
+              <button
+                type="submit"
+                className="studio-btn-ghost"
+                style={{ color: "#e85a72" }}
+              >
+                <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+              </button>
+            </form>
+          ) : null}
         </div>
       </header>
 
@@ -107,6 +115,7 @@ export default async function StudioPage({ params }: { params: { id: string } })
             nodes={studioNodes}
             edges={studioEdges}
             ar={ar}
+            canManage={canManage}
           />
         </section>
       </div>

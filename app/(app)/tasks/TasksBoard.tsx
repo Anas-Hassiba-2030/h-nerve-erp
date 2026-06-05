@@ -12,6 +12,7 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { TOAST_EVENT, type ToastFlash } from "@/lib/utils/toast.shared";
 import {
   createTask,
   setTaskStatus,
@@ -250,6 +251,47 @@ export function TasksBoard({
     });
   }
 
+  // Inline composer submit — posts through the real createTask server action
+  // (the form previously "posted" to /tasks/new, a GET-only page, with field
+  // names the action never reads, so nothing was ever created). Only sends the
+  // fields createTask actually consumes; assignee defaults to the current user.
+  function handleCompose(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const raw = new FormData(form);
+    const title = String(raw.get("title") ?? "").trim();
+    if (!title) return;
+    const fd = new FormData();
+    fd.set("title", title);
+    fd.set("priority", String(raw.get("priority") ?? "MEDIUM"));
+    fd.set("points", String(raw.get("points") ?? "40"));
+    startTransition(async () => {
+      try {
+        await createTask(fd); // redirects to /tasks on success (refreshes the board)
+        setComposerOpen(false);
+        form.reset();
+        router.refresh();
+      } catch (err) {
+        // Let Next's redirect signal pass through to perform the navigation.
+        const digest = (err as { digest?: string } | null)?.digest;
+        if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) throw err;
+        // Real failure (e.g. role gate / validation) — surface it instead of
+        // failing silently.
+        window.dispatchEvent(
+          new CustomEvent<ToastFlash>(TOAST_EVENT, {
+            detail: {
+              type: "info",
+              entity: "info",
+              label: ar
+                ? "تعذّر إنشاء المهمة (تحقق من الصلاحيات)"
+                : "Couldn't create the task (check your permissions)",
+            },
+          }),
+        );
+      }
+    });
+  }
+
   // ── per-row interactions ──
   function toggleSelect(id: string) {
     setSelected((prev) => {
@@ -345,8 +387,8 @@ export function TasksBoard({
           <span className="h-xp">XP</span>
         </div>
 
-        {/* inline composer — opens the existing create flow */}
-        <form action={labels.newHref} className={"tk-composer" + (composerOpen ? " show" : "")}>
+        {/* inline composer — creates a task via the createTask server action */}
+        <form onSubmit={handleCompose} className={"tk-composer" + (composerOpen ? " show" : "")}>
           <span></span>
           <input name="title" className="c-title" placeholder={labels.composer.title} autoFocus={composerOpen} />
           <select name="priority" className="c-prio" defaultValue="MEDIUM">
@@ -356,7 +398,7 @@ export function TasksBoard({
           </select>
           <input name="owner" className="c-owner" placeholder={ar ? "المالك" : "Owner"} />
           <input name="due" className="c-due" placeholder={ar ? "غداً" : "Tomorrow"} />
-          <span className="c-stat"></span>
+          <button type="submit" className="c-stat" title={ar ? "إضافة المهمة" : "Add task"} style={{ cursor: "pointer" }}>＋</button>
           <input name="points" className="c-xp" type="number" defaultValue={40} min={10} max={200} />
         </form>
 

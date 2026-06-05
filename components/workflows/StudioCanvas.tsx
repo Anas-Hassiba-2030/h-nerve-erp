@@ -15,6 +15,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { addEdge, deleteEdge, deleteNode } from "@/app/(app)/workflows/actions";
+import { TOAST_EVENT, type ToastFlash } from "@/lib/utils/toast.shared";
 import { Plug, GitBranch, Zap, X, Cable } from "lucide-react";
 
 export type StudioNode = {
@@ -59,14 +60,35 @@ export function StudioCanvas({
   nodes: initialNodes,
   edges: initialEdges,
   ar,
+  canManage,
 }: {
   workflowId: string;
   nodes: StudioNode[];
   edges: StudioEdge[];
   ar: boolean;
+  // MANAGER+ can delete nodes/edges; below that the delete affordances are
+  // hidden (the server actions are role-gated, so showing them would be a
+  // dead button). Wiring/adding stays available to everyone (requireUser).
+  canManage: boolean;
 }) {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // Defense-in-depth: even though delete buttons are hidden for non-managers,
+  // surface a clear message instead of a silent no-op if a role-gated action
+  // ever rejects.
+  function notifyDenied() {
+    if (typeof window === "undefined") return;
+    window.dispatchEvent(
+      new CustomEvent<ToastFlash>(TOAST_EVENT, {
+        detail: {
+          type: "info",
+          entity: "info",
+          label: ar ? "ليس لديك صلاحية لتعديل سير العمل" : "You don't have permission to edit workflows",
+        },
+      }),
+    );
+  }
 
   // Group nodes by column.
   const layout = useMemo(() => {
@@ -152,16 +174,24 @@ export function StudioCanvas({
     const fd = new FormData();
     fd.set("id", edgeId);
     fd.set("workflowId", workflowId);
-    await deleteEdge(fd);
-    router.refresh();
+    try {
+      await deleteEdge(fd);
+      router.refresh();
+    } catch {
+      notifyDenied();
+    }
   };
 
   const onDeleteNode = async (id: string) => {
     const fd = new FormData();
     fd.set("id", id);
     fd.set("workflowId", workflowId);
-    await deleteNode(fd);
-    router.refresh();
+    try {
+      await deleteNode(fd);
+      router.refresh();
+    } catch {
+      notifyDenied();
+    }
   };
 
   const isEmpty = initialNodes.length === 0;
@@ -281,25 +311,27 @@ export function StudioCanvas({
                       opacity: 0,
                     }}
                   />
-                  {/* Delete affordance — visible on hover */}
-                  <foreignObject
-                    x={cx - 11}
-                    y={(y1 + y2) / 2 - 11}
-                    width={22}
-                    height={22}
-                    className="studio-edge-x"
-                  >
-                    <button
-                      onClick={(ev) => {
-                        ev.stopPropagation();
-                        onDeleteEdge(e.id);
-                      }}
-                      className="studio-edge-x-btn"
-                      title="Remove wire"
+                  {/* Delete affordance — visible on hover (MANAGER+ only) */}
+                  {canManage ? (
+                    <foreignObject
+                      x={cx - 11}
+                      y={(y1 + y2) / 2 - 11}
+                      width={22}
+                      height={22}
+                      className="studio-edge-x"
                     >
-                      <X className="h-2.5 w-2.5" strokeWidth={2} />
-                    </button>
-                  </foreignObject>
+                      <button
+                        onClick={(ev) => {
+                          ev.stopPropagation();
+                          onDeleteEdge(e.id);
+                        }}
+                        className="studio-edge-x-btn"
+                        title="Remove wire"
+                      >
+                        <X className="h-2.5 w-2.5" strokeWidth={2} />
+                      </button>
+                    </foreignObject>
+                  ) : null}
                 </g>
               );
             })}
@@ -450,25 +482,27 @@ export function StudioCanvas({
                     />
                   ) : null}
 
-                  {/* Delete node button (top-right corner of card) */}
-                  <foreignObject
-                    x={p.x + NODE_W - 22}
-                    y={p.y + 4}
-                    width={18}
-                    height={18}
-                    className="studio-node-x"
-                  >
-                    <button
-                      onClick={(ev) => {
-                        ev.stopPropagation();
-                        onDeleteNode(n.id);
-                      }}
-                      className="studio-node-x-btn"
-                      title="Delete node"
+                  {/* Delete node button (top-right corner of card) — MANAGER+ only */}
+                  {canManage ? (
+                    <foreignObject
+                      x={p.x + NODE_W - 22}
+                      y={p.y + 4}
+                      width={18}
+                      height={18}
+                      className="studio-node-x"
                     >
-                      <X className="h-2.5 w-2.5" strokeWidth={2} />
-                    </button>
-                  </foreignObject>
+                      <button
+                        onClick={(ev) => {
+                          ev.stopPropagation();
+                          onDeleteNode(n.id);
+                        }}
+                        className="studio-node-x-btn"
+                        title="Delete node"
+                      >
+                        <X className="h-2.5 w-2.5" strokeWidth={2} />
+                      </button>
+                    </foreignObject>
+                  ) : null}
                 </g>
               );
             })}

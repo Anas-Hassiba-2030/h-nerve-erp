@@ -56,11 +56,15 @@ export function LoginCosmos({
   skyDawn,
   initialEmail,
   initialError,
+  dest = "/orrery",
 }: {
   ar: boolean;
   skyDawn: boolean;
   initialEmail: string;
   initialError: string;
+  /** Post-login destination (already sanitized by the page). Honors the
+   *  ?to= deep-link — e.g. /m sends mobile users back to the mobile app. */
+  dest?: string;
 }) {
   const t = strings(ar);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -92,9 +96,9 @@ export function LoginCosmos({
     root?.classList.add("dive");
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const delay = reduce ? 150 : 1150;
-    const id = setTimeout(() => window.location.assign("/orrery"), delay);
+    const id = setTimeout(() => window.location.assign(dest), delay);
     return () => clearTimeout(id);
-  }, [state.ok]);
+  }, [state.ok, dest]);
 
   // Failure → surface the message, shake the card, briefly dim the nucleus.
   useEffect(() => {

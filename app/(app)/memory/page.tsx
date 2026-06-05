@@ -13,12 +13,17 @@
 import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { MemoryLakeBrowser } from "@/components/brain/MemoryLakeBrowser";
 import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
 import "../daylight.css";
 
 export const dynamic = "force-dynamic";
 
-export default function MemoryPage() {
+export default async function MemoryPage() {
   const ar = getLocale() === "ar";
+  // forgetMemory requires MANAGER+; only show the "forget" control to those
+  // roles so a STAFF user isn't handed a button that silently rejects.
+  const user = await getCurrentUser();
+  const canForget = !!user && ["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role);
   return (
     <DaylightShell dir={ar ? "rtl" : "ltr"}>
       <DaylightHeader
@@ -30,7 +35,7 @@ export default function MemoryPage() {
             : "Loaded live from the /api/memory endpoint. Filter by unit, or forget what no longer serves."
         }
       />
-      <MemoryLakeBrowser ar={ar} />
+      <MemoryLakeBrowser ar={ar} canForget={canForget} />
     </DaylightShell>
   );
 }

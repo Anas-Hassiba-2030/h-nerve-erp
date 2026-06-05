@@ -2,12 +2,14 @@ import { Rocket, Plus } from "lucide-react";
 import Link from "next/link";
 import { ExportMenu } from "@/components/ui/ExportMenu";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { DeleteButton } from "@/components/ui/DeleteButton";
 import {
   DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel,
 } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db/db";
 import { formatMoney, formatNumber } from "@/lib/utils/utils";
 import { getLocale } from "@/lib/i18n/i18n.server";
+import { deleteProject } from "./actions";
 import "../daylight.css";
 
 export const dynamic = "force-dynamic";
@@ -73,6 +75,16 @@ export default async function ProjectsPage() {
                 <div className="mt-3 flex items-center justify-between" style={{ fontSize: 12 }}>
                   <span style={{ color: "var(--ink-muted)" }}>{ar ? p.company.name : p.company.nameEn}</span>
                   <span style={{ fontFamily: "monospace", fontWeight: 700, color: "var(--ink)" }}>{formatMoney(p.budgetJod)}</span>
+                </div>
+                {/* Delete control — projects had no remove affordance (the
+                    deleteProject action existed but was wired to nothing). */}
+                <div className="mt-3 flex justify-end">
+                  <DeleteButton
+                    action={deleteProject}
+                    payload={{ id: p.id }}
+                    label={ar ? `حذف مشروع "${p.title}"؟` : `Delete project "${p.title}"?`}
+                    description={ar ? "سيُنقل المشروع إلى سلة المهملات." : "The project will be moved to trash."}
+                  />
                 </div>
               </div>
             ))}

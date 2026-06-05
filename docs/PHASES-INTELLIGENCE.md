@@ -503,20 +503,21 @@ These hold across every phase. Violations are bugs.
 
 The first-touch experience. Whatever a new tenant sees before they have data of their own.
 
-## Phase 21 — The Genesis Seed (onboarding & sample-data wizard) 🔄 (in progress)
+## Phase 21 — The Genesis Seed (onboarding & sample-data wizard) ✅ SHIPPED
 
-**Status (2026-06).** The wizard at `/admin/genesis` now previews the dataset
-*shape* before committing: `lib/genesis/recipes.ts` is a declarative, unit-tested
-catalog (six sectors — hospitality, dairy, agriculture, education, intelligence,
-people) diffed against live DB counts via `summarizeGenesis()`, rendered as
-per-sector "constellation" cards (`components/genesis/Constellation.tsx`, Sleek
-Operator, present/partial/will-create per line). Two commit paths exist:
-**`topUpDemoCorpus`** — idempotent + non-destructive (inserts the reference
-document corpus only when none exists, mirroring `ensure-demo-docs`), and the
-destructive full reseed, now gated behind an explicit wipe acknowledgement
-(`DangerReseed` + a server-side `confirm=WIPE` token). **Still to land:** per-sector
-idempotent re-seed against the live tenant (today's `seedOperator` is monolithic +
-destructive) and the cinematic constellation-drop animation.
+**Status (2026-06).** Fully shipped. The wizard at `/admin/genesis` previews the
+dataset *shape* before committing: `lib/genesis/recipes.ts` is a declarative,
+unit-tested catalog (six sectors — hospitality, dairy, agriculture, education,
+intelligence, people) diffed against live DB counts via `summarizeGenesis()`,
+rendered as per-sector "constellation" cards (`components/genesis/Constellation.tsx`,
+Sleek Operator, present/partial/will-create per line). Three commit paths:
+**`topUpDemoCorpus`** — idempotent + non-destructive; **`seedMissingGenesis`** —
+additive per-sector idempotent re-seed (finds empty sectors, builds only those,
+no wipe); and the destructive full reseed gated behind an explicit wipe
+acknowledgement (`DangerReseed` + a server-side `confirm=WIPE` token). The
+cinematic **constellation-drop animation** (`gxDrop` keyframe in
+`Constellation.tsx`) plays as seeded cards land staggered — opacity + scale
+settle from 1.04 → 1.0 with a brightness spike, reduced-motion honoured.
 
 **Pitch.** Today's `npm run db:seed` is a CLI footgun: it requires a terminal, can't be re-run from the product, and gives ADMIN users no preview of what they're about to instantiate. Phase 21 promotes seeding to a first-class onboarding surface — a bilingual wizard that shows the *shape* of the data H-Nerve is about to create, lets the operator pick which sectors to seed, and can be safely re-run (idempotent) from the product itself.
 

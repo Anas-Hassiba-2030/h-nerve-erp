@@ -17,8 +17,8 @@ const REGION_TAG_EN: Record<string, string> = { MENA: "Regional", US: "Internati
 export default async function MarketsPage() {
   const ar = getLocale() === "ar";
   const [stocks, companies] = await Promise.all([
-    prisma.marketStock.findMany({ orderBy: [{ region: "asc" }, { changePct: "desc" }], include: { company: true } }),
-    prisma.company.findMany({ orderBy: { code: "asc" }, select: { id: true, code: true, name: true, nameEn: true, sector: true, employees: true } }),
+    prisma.marketStock.findMany({ orderBy: [{ region: "asc" }, { changePct: "desc" }], include: { company: true }, take: 200 }),
+    prisma.company.findMany({ orderBy: { code: "asc" }, select: { id: true, code: true, name: true, nameEn: true, sector: true, employees: true }, take: 100 }),
   ]);
 
   const revenueMap = await getCompanyRevenue30dMap(companies.map((c) => c.id));

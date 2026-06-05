@@ -61,6 +61,7 @@ export default async function HotelsPage() {
     ? await prisma.transaction.findMany({
         where: { companyId: { in: companyIds }, occurredAt: { gte: sixMonthsAgo } },
         select: { kind: true, amount: true, occurredAt: true },
+        take: 2000,
       })
     : [];
 

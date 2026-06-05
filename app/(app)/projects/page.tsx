@@ -29,6 +29,7 @@ export default async function ProjectsPage() {
     where: { deletedAt: null },
     orderBy: { updatedAt: "desc" },
     include: { company: true },
+    take: 200,
   });
 
   const totalBudget = projects.reduce((a, p) => a + p.budgetJod, 0);

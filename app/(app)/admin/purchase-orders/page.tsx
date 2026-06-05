@@ -69,16 +69,19 @@ export default async function PurchaseOrdersPage({
     prisma.purchaseOrder.findMany({
       where: { deletedAt: null },
       select: { status: true, updatedAt: true },
+      take: 2000,
     }),
     prisma.product.findMany({
       where: { deletedAt: null },
       select: { id: true, sku: true, name: true, quantity: true, tenantId: true },
       orderBy: { sku: "asc" },
+      take: 500,
     }),
     prisma.supplier.findMany({
       where: { deletedAt: null },
       select: { id: true, name: true },
       orderBy: { name: "asc" },
+      take: 200,
     }),
     prisma.purchaseOrder.findMany({
       where,

@@ -34,6 +34,7 @@ export default async function JournalPage({ searchParams }: { searchParams: SP }
 
   const periods = await prisma.financialPeriod.findMany({
     orderBy: [{ year: "desc" }, { month: "desc" }],
+    take: 60,
   });
   const openCount = periods.filter((p) => p.status === "OPEN").length;
   const fmtP = (y: number, m: number) => `${y}-${String(m).padStart(2, "0")}`;

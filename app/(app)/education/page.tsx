@@ -49,7 +49,7 @@ export default async function EducationPage() {
   const ar = locale === "ar";
   const lc: "ar" | "en" = ar ? "ar" : "en";
 
-  const programs = await prisma.program.findMany({ orderBy: { createdAt: "desc" }, include: { company: true } });
+  const programs = await prisma.program.findMany({ orderBy: { createdAt: "desc" }, include: { company: true }, take: 200 });
 
   const accelerating = programs.filter((p) => p.stage === "ACCELERATING").length;
   const graduated = programs.filter((p) => p.stage === "GRADUATED").length;

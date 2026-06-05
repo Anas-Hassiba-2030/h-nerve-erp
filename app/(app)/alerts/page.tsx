@@ -26,6 +26,7 @@ export default async function AlertsPage() {
   const rules = await prisma.alertRule.findMany({
     orderBy: [{ isActive: "desc" }, { createdAt: "asc" }],
     include: { scopeCompany: true, createdBy: true },
+    take: 200,
   });
 
   const active = rules.filter((r) => r.isActive).length;

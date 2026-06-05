@@ -44,6 +44,7 @@ export default async function HotelsPage() {
         select: { revenue: true, status: true, rooms: true, checkIn: true },
       },
     },
+    take: 100,
   });
 
   const recentBookings = await prisma.booking.findMany({
@@ -61,6 +62,7 @@ export default async function HotelsPage() {
     ? await prisma.transaction.findMany({
         where: { companyId: { in: companyIds }, occurredAt: { gte: sixMonthsAgo } },
         select: { kind: true, amount: true, occurredAt: true },
+        take: 2000,
       })
     : [];
 

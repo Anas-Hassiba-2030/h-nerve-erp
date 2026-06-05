@@ -26,6 +26,7 @@ export default async function CompaniesPage() {
   const companies = await prisma.company.findMany({
     orderBy: { createdAt: "asc" },
     include: { _count: { select: { hotels: true, farms: true, dairyBatches: true, programs: true, transactions: true } } },
+    take: 100,
   });
 
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);

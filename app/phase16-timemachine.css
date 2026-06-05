@@ -1,0 +1,393 @@
+/* =================================================================
+   PHASE 16 — THE TIME MACHINE
+   Heritage Modern body, Brutalist Confidence date pill.
+   - Floating "Now" pill bottom-end on every authenticated page
+   - Click to expand into a date scrubber
+   - An ochre rail fills around the pill as you scrub backward
+   - Top banner appears when as-of != now
+   See docs/PHASES-INTELLIGENCE.md Phase 16.
+   ================================================================= */
+
+.tm-pill {
+  position: fixed;
+  /* QuickAddFAB sits at bottom:24px, h-14 (56px) on the SAME side in
+     both directions (it uses physical ltr:left/rtl:right while this
+     pill uses logical inset-inline-start). Stack the pill clear above
+     the FAB instead of fighting over the corner. */
+  bottom: 96px;
+  inset-inline-start: 18px;
+  z-index: 70;
+  font-family: "Inter Tight", "Inter", "Noto Sans Arabic", system-ui, sans-serif;
+}
+
+.tm-pill-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px 7px 11px;
+  background: var(--heri-ink, #1a1a1a);
+  color: var(--heri-cream, #f4ede0);
+  border: 1px solid var(--heri-ink, #1a1a1a);
+  border-radius: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  /* Hard offset shadow per Brutalist Confidence */
+  box-shadow: 4px 4px 0 var(--heri-copper, #b3733e);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  overflow: hidden;
+}
+[dir="rtl"] .tm-pill-trigger {
+  box-shadow: -4px 4px 0 var(--heri-copper, #b3733e);
+}
+.tm-pill-trigger:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--heri-copper, #b3733e);
+}
+[dir="rtl"] .tm-pill-trigger:hover {
+  transform: translate(1px, -1px);
+  box-shadow: -5px 5px 0 var(--heri-copper, #b3733e);
+}
+.tm-pill-trigger:focus-visible {
+  outline: 2px solid var(--heri-copper, #b3733e);
+  outline-offset: 2px;
+}
+
+/* The ochre rail at the bottom of the pill. Width is set inline as the
+   --tm-fill custom property, computed from how far back the cursor is. */
+.tm-rail {
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: 0;
+  height: 2px;
+  width: var(--tm-fill, 0%);
+  background: var(--heri-copper, #b3733e);
+  transition: width 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.tm-pill.is-live .tm-rail { display: none; }
+
+.tm-pill-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--heri-copper, #b3733e);
+}
+.tm-pill.is-live .tm-pill-icon { color: var(--heri-cream, #f4ede0); opacity: 0.7; }
+.tm-pill-text {
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+.tm-pill-back {
+  margin-inline-start: 4px;
+  padding: 1px 6px;
+  background: var(--heri-copper, #b3733e);
+  color: var(--heri-ink, #1a1a1a);
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+.tm-pill[data-pending="true"] .tm-pill-trigger {
+  opacity: 0.7;
+}
+
+/* ---- Expanded popover ---- */
+.tm-pill-pop {
+  width: 320px;
+  background: var(--heri-cream, #f4ede0);
+  color: var(--heri-ink, #1a1a1a);
+  border: 1px solid var(--heri-ink, #1a1a1a);
+  border-radius: 0;
+  box-shadow: 6px 6px 0 var(--heri-copper, #b3733e);
+  animation: tm-pop-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+[dir="rtl"] .tm-pill-pop {
+  box-shadow: -6px 6px 0 var(--heri-copper, #b3733e);
+}
+@keyframes tm-pop-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tm-pop-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--heri-ink, #1a1a1a);
+  color: var(--heri-cream, #f4ede0);
+}
+.tm-pop-eyebrow {
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--heri-copper, #b3733e);
+  font-weight: 700;
+}
+.tm-pop-close {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--heri-cream, #f4ede0);
+  border: 1px solid var(--heri-rule-strong, #5a5448);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+.tm-pop-close:hover {
+  background: var(--heri-copper, #b3733e);
+  color: var(--heri-ink, #1a1a1a);
+  border-color: var(--heri-copper, #b3733e);
+}
+
+.tm-pop-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.tm-pop-date {
+  display: grid;
+  grid-template-columns: 32px 1fr 32px;
+  align-items: stretch;
+  gap: 0;
+}
+.tm-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--heri-cream-2, #ebe2cf);
+  color: var(--heri-ink, #1a1a1a);
+  border: 1px solid var(--heri-ink, #1a1a1a);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+.tm-step:hover {
+  background: var(--heri-ink, #1a1a1a);
+  color: var(--heri-copper, #b3733e);
+}
+.tm-date-input {
+  background: var(--heri-cream, #f4ede0);
+  color: var(--heri-ink, #1a1a1a);
+  border: 1px solid var(--heri-ink, #1a1a1a);
+  border-inline-start: none;
+  border-inline-end: none;
+  padding: 6px 8px;
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-align: center;
+  width: 100%;
+  outline: none;
+  border-radius: 0;
+}
+.tm-date-input:focus {
+  background: #fff;
+}
+
+.tm-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: var(--heri-rule-strong, #5a5448);
+  cursor: pointer;
+  border-radius: 0;
+}
+.tm-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--heri-copper, #b3733e);
+  border: 2px solid var(--heri-ink, #1a1a1a);
+  border-radius: 0;
+  cursor: pointer;
+  transition: transform 140ms ease;
+}
+.tm-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.18);
+}
+.tm-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: var(--heri-copper, #b3733e);
+  border: 2px solid var(--heri-ink, #1a1a1a);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.tm-pop-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 4px;
+}
+.tm-pop-back {
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--heri-ink-2, #4a4434);
+  font-variant-numeric: tabular-nums;
+}
+.tm-pop-now {
+  background: var(--heri-copper, #b3733e);
+  color: var(--heri-ink, #1a1a1a);
+  border: 1px solid var(--heri-ink, #1a1a1a);
+  padding: 5px 10px;
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 140ms ease, transform 140ms ease;
+}
+.tm-pop-now:hover {
+  background: var(--heri-ink, #1a1a1a);
+  color: var(--heri-copper, #b3733e);
+  transform: translateY(-1px);
+}
+.tm-pop-now:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---- Top banner when traveling ---- */
+.tm-banner {
+  position: sticky;
+  top: 0;
+  z-index: 65;
+  background: var(--heri-ink, #1a1a1a);
+  color: var(--heri-cream, #f4ede0);
+  border-bottom: 2px solid var(--heri-copper, #b3733e);
+  animation: tm-banner-in 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes tm-banner-in {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+.tm-banner-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 18px;
+  max-width: 1480px;
+  margin: 0 auto;
+}
+.tm-banner-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: var(--heri-copper, #b3733e);
+  color: var(--heri-ink, #1a1a1a);
+  flex: 0 0 22px;
+}
+.tm-banner-text {
+  margin: 0;
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12.5px;
+  letter-spacing: 0.005em;
+}
+.tm-banner-eyebrow {
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--heri-copper, #b3733e);
+  font-weight: 700;
+}
+.tm-banner-date {
+  font-weight: 600;
+  color: var(--heri-cream, #f4ede0);
+}
+.tm-banner-sep { color: rgba(255,255,255,0.35); }
+.tm-banner-iq, .tm-banner-iq-now {
+  color: rgba(255,255,255,0.85);
+  font-variant-numeric: tabular-nums;
+}
+.tm-banner-iq strong, .tm-banner-iq-now strong {
+  color: var(--heri-copper, #b3733e);
+  font-weight: 700;
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.04em;
+}
+.tm-banner-iq-delta {
+  margin-inline-start: 6px;
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  padding: 1px 5px;
+  border: 1px solid rgba(255,255,255,0.18);
+}
+.tm-banner-iq-delta[data-dir="down"] {
+  color: #d68a8a;
+  border-color: rgba(214,138,138,0.35);
+}
+.tm-banner-iq-delta[data-dir="up"] {
+  color: #a8d8a8;
+  border-color: rgba(168,216,168,0.35);
+}
+.tm-banner-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  background: transparent;
+  color: var(--heri-cream, #f4ede0);
+  border: 1px solid rgba(255,255,255,0.22);
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+.tm-banner-clear:hover {
+  background: var(--heri-copper, #b3733e);
+  color: var(--heri-ink, #1a1a1a);
+  border-color: var(--heri-copper, #b3733e);
+}
+
+/* ---- Chart-morph easing token ---- */
+:root {
+  --tm-chart-ease: cubic-bezier(0.16, 1, 0.3, 1); /* ease-out-quart */
+}
+
+/* Pages opting in can wrap their numeric KPIs / chart paths with the
+   .tm-morph class — values transition over 200ms when the as-of cookie
+   changes (the layout re-renders, replaces the value, and the existing
+   text node animates color/opacity). For numeric tween morphing, a
+   client component is required. This token unifies the easing curve. */
+.tm-morph {
+  transition: opacity 200ms var(--tm-chart-ease),
+              color 200ms var(--tm-chart-ease),
+              transform 200ms var(--tm-chart-ease);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .tm-pill-pop, .tm-banner, .tm-rail, .tm-morph {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -38,6 +38,7 @@ export default async function WorkspacePipelinePage() {
 
   const projects = await prisma.futureProject.findMany({
     orderBy: { budgetJod: "desc" },
+    take: 200,
   });
   const totalBudget = projects.reduce((a, p) => a + (p.budgetJod ?? 0), 0);
   const byStage = STAGE_ORDER.map((s) => ({

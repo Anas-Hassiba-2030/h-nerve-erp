@@ -78,11 +78,13 @@ export default async function ProductsAdminPage({
     prisma.product.findMany({
       where: { deletedAt: null },
       select: { quantity: true, warehouseRef: { select: { code: true } } },
+      take: 2000,
     }),
     prisma.supplier.findMany({
       where: { deletedAt: null },
       select: { id: true, name: true },
       orderBy: { name: "asc" },
+      take: 200,
     }),
     prisma.product.findMany({
       where,

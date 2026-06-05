@@ -93,7 +93,7 @@ export default async function AchievementsPage() {
       where: { id: session.id },
       include: { achievements: { include: { achievement: true } } },
     }),
-    prisma.achievement.findMany({ orderBy: { threshold: "asc" } }),
+    prisma.achievement.findMany({ orderBy: { threshold: "asc" }, take: 100 }),
     prisma.user.findMany({
       orderBy: { xp: "desc" },
       include: { company: true, _count: { select: { achievements: true } } },

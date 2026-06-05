@@ -26,6 +26,7 @@ export default async function TenantsIndex() {
       theme: true,
       _count: { select: { packs: true } },
     },
+    take: 200,
   });
 
   const stats = {

@@ -1,0 +1,36 @@
+/* =================================================================
+   PHASE 10 — THE META BRAIN
+   IQ trend chart line draw + last-dot pulse + IQ underline draw +
+   self-tuning diff row stagger + diff-log type-in reveal.
+   See docs/PHASES-INTELLIGENCE.md Phase 10.
+   ================================================================= */
+@keyframes iq-draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes iq-pulse {
+  0%, 100% { transform: scale(1);   opacity: 1;   }
+  50%      { transform: scale(1.4); opacity: 0.55; }
+}
+@keyframes iq-rule-draw {
+  from { transform: scaleX(0); transform-origin: left; }
+  to   { transform: scaleX(1); transform-origin: left; }
+}
+[dir="rtl"] .brain-iq-rule { animation-name: iq-rule-draw-rtl; }
+@keyframes iq-rule-draw-rtl {
+  from { transform: scaleX(0); transform-origin: right; }
+  to   { transform: scaleX(1); transform-origin: right; }
+}
+@keyframes diff-row-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes diff-type {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .diff-log-row,
+  .brain-iq-rule {
+    animation-duration: 0.001ms !important;
+  }
+}

@@ -6,7 +6,7 @@ import { createTransaction } from "../actions";
 import "../../daylight.css";
 
 export default async function NewTransactionPage() {
-  const companies = await prisma.company.findMany({ orderBy: { name: "asc" } });
+  const companies = await prisma.company.findMany({ orderBy: { name: "asc" }, take: 100 });
   const today = new Date().toISOString().slice(0, 10);
 
   return (

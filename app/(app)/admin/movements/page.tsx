@@ -82,6 +82,7 @@ export default async function MovementsAdminPage({
   const allWarehouses = await prisma.warehouse.findMany({
     select: { id: true, code: true },
     orderBy: { code: "asc" },
+    take: 100,
   });
   const whMap = new Map(allWarehouses.map((w) => [w.id, w.code]));
   const whCodes = [...new Set(allWarehouses.map((w) => w.code))];

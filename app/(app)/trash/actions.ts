@@ -171,17 +171,25 @@ export async function purgeAllExpired() {
   // concerns — the hardDeleteMany helpers walk through the same table-by-
   // table dispatch. Use the lib helper to stay consistent.
   const { prisma } = await import("@/lib/db/db");
-  const [t, p, i, f] = await Promise.all([
-    prisma.task.deleteMany({ where }),
-    prisma.futureProject.deleteMany({ where }),
-    prisma.aIInsight.deleteMany({ where }),
-    prisma.supplyForecast.deleteMany({ where }),
-  ]);
-  const total = t.count + p.count + i.count + f.count;
-  flashToast({
-    type: "info",
-    entity: "info",
-    label: `تم تفريغ ${total} عنصر منتهي الصلاحية`,
-  });
+  try {
+    const [t, p, i, f] = await Promise.all([
+      prisma.task.deleteMany({ where }),
+      prisma.futureProject.deleteMany({ where }),
+      prisma.aIInsight.deleteMany({ where }),
+      prisma.supplyForecast.deleteMany({ where }),
+    ]);
+    const total = t.count + p.count + i.count + f.count;
+    flashToast({
+      type: "info",
+      entity: "info",
+      label: `تم تفريغ ${total} عنصر منتهي الصلاحية`,
+    });
+  } catch (e) {
+    flashToast({
+      type: "info",
+      entity: "info",
+      label: `تعذّر تفريغ السلة: ${(e as Error).message || "خطأ غير معروف"}`,
+    });
+  }
   revalidatePath("/trash");
 }

@@ -10,6 +10,7 @@ export default async function NewProjectPage() {
   const companies = await prisma.company.findMany({
     orderBy: { name: "asc" },
     select: { id: true, name: true },
+    take: 100,
   });
   return (
     <DaylightShell dir={ar ? "rtl" : "ltr"}>

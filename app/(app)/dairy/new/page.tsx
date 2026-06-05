@@ -9,6 +9,7 @@ export default async function NewBatchPage() {
     where: { sector: { in: ["DAIRY", "AGRICULTURE", "INVESTMENT"] } },
     orderBy: { name: "asc" },
     select: { id: true, name: true },
+    take: 100,
   });
 
   return (

@@ -9,6 +9,7 @@ export default async function NewProgramPage() {
   const companies = await prisma.company.findMany({
     where: { sector: { in: ["EDUCATION", "INVESTMENT"] } },
     orderBy: { name: "asc" },
+    take: 100,
   });
 
   return (

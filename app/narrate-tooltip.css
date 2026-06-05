@@ -1,0 +1,211 @@
+/* =================================================================
+   NARRATE TOOLTIP — Phase 4 of docs/PHASES-INTELLIGENCE.md.
+   Two-stage hover tooltip. Stage 1 = summary line. Stage 2 = editorial
+   paragraph that grows in via clip-path with ease-out-expo.
+   ================================================================= */
+.narrate {
+  outline: none;
+}
+.narrate-tip {
+  position: absolute;
+  inset-inline-start: 0;
+  z-index: 60;
+  display: block;
+  background: var(--heri-cream);
+  border: 1px solid var(--heri-rule-strong);
+  padding: 14px 18px 16px;
+  width: max-content;
+  max-width: min(520px, 92vw);
+  color: var(--heri-ink);
+  /* Use the Heritage display family for editorial body. */
+  font-family: "Fraunces", "Tiempos Headline", Georgia, serif;
+  font-size: 14px;
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+  pointer-events: none;
+  /* Box-grow easing: width is set by content, but height is animated via
+     min-height transitions when state flips to "editorial". */
+  animation: narrate-pop 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  box-shadow: 0 1px 0 var(--heri-rule);
+}
+.narrate-tip[data-placement="bottom"] {
+  top: calc(100% + 10px);
+}
+.narrate-tip[data-placement="top"] {
+  bottom: calc(100% + 10px);
+}
+@keyframes narrate-pop {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Top hairline rail */
+.narrate-rail {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: var(--heri-ochre);
+  display: block;
+}
+
+.narrate-eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--heri-copper);
+}
+
+.narrate-summary {
+  display: block;
+  font-family: "Fraunces", "Tiempos Headline", Georgia, serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--heri-ink);
+  letter-spacing: -0.01em;
+  max-width: 48ch;
+}
+
+.narrate-divider {
+  display: block;
+  height: 1px;
+  background: var(--heri-rule);
+  margin: 12px 0 10px;
+  /* Draw across when the editorial reveals */
+  transform-origin: left center;
+  animation: narrate-divider-draw 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes narrate-divider-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+[dir="rtl"] .narrate-divider {
+  transform-origin: right center;
+}
+
+.narrate-editorial {
+  display: block;
+  font-family: "Fraunces", "Tiempos Headline", Georgia, serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--heri-ink-2);
+  max-width: 65ch;
+  /* The "wipe" reveal — editorial body uncovers from the start. */
+  clip-path: inset(0 100% 0 0);
+  opacity: 0;
+  animation: narrate-editorial-reveal 720ms cubic-bezier(0.16, 1, 0.3, 1) 80ms both;
+}
+[dir="rtl"] .narrate-editorial {
+  clip-path: inset(0 0 0 100%);
+}
+@keyframes narrate-editorial-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+}
+[dir="rtl"] .narrate-editorial {
+  animation-name: narrate-editorial-reveal-rtl;
+}
+@keyframes narrate-editorial-reveal-rtl {
+  from {
+    clip-path: inset(0 0 0 100%);
+    opacity: 0;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+}
+
+/* Italic Arabic editorial uses Reem Kufi for display character */
+[lang="ar"] .narrate-editorial,
+.narrate-editorial[lang="ar"] {
+  font-family: "Reem Kufi", "Aref Ruqaa", "Fraunces", serif;
+}
+
+.narrate-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--heri-rule);
+}
+.narrate-foot-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--heri-ink-3);
+  background: var(--heri-cream-2);
+  border: 1px solid var(--heri-rule);
+}
+
+/* Skeleton */
+.narrate-skel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+.narrate-skel-line {
+  height: 0.95em;
+  background: linear-gradient(
+    90deg,
+    var(--heri-cream-2) 0%,
+    var(--heri-rule) 50%,
+    var(--heri-cream-2) 100%
+  );
+  background-size: 240% 100%;
+  animation: narrate-skel-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes narrate-skel-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+/* Reduced motion */
+.narrate-tip[data-reduced-motion="true"],
+.narrate-tip[data-reduced-motion="true"] .narrate-divider,
+.narrate-tip[data-reduced-motion="true"] .narrate-editorial,
+.narrate-tip[data-reduced-motion="true"] .narrate-skel-line {
+  animation-duration: 0.001ms !important;
+  animation-delay: 0ms !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .narrate-tip,
+  .narrate-divider,
+  .narrate-editorial,
+  .narrate-skel-line {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+  }
+}

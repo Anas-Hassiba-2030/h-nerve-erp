@@ -17,9 +17,9 @@ export default async function ComparePage({ searchParams }: { searchParams: { a?
 
   const [companies, transactions, esg, allFarms, allHotels, allDairy, allPrograms, allForecasts] = await Promise.all([
     prisma.company.findMany({ orderBy: { name: "asc" } }),
-    prisma.transaction.findMany({ where: { occurredAt: { gte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000) } } }),
-    prisma.sustainabilityScore.findMany({ orderBy: [{ year: "asc" }, { period: "asc" }] }),
-    prisma.farm.findMany(), prisma.hotel.findMany(), prisma.dairyBatch.findMany(), prisma.program.findMany(), prisma.supplyForecast.findMany(),
+    prisma.transaction.findMany({ where: { occurredAt: { gte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000) } }, orderBy: { occurredAt: "desc" }, take: 3000 }),
+    prisma.sustainabilityScore.findMany({ orderBy: [{ year: "asc" }, { period: "asc" }], take: 500 }),
+    prisma.farm.findMany({ take: 100 }), prisma.hotel.findMany({ take: 100 }), prisma.dairyBatch.findMany({ take: 200 }), prisma.program.findMany({ take: 100 }), prisma.supplyForecast.findMany({ take: 500 }),
   ]);
 
   const computed = companies.map((c) => {

@@ -47,6 +47,7 @@ export default async function MappingsAdminPage() {
 
   const mappings = await prisma.tenantImportMapping.findMany({
     orderBy: [{ tenantId: "asc" }, { createdAt: "desc" }],
+    take: 200,
   });
 
   const activeCount = mappings.filter((m) => m.active).length;

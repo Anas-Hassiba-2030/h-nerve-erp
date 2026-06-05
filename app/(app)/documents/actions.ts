@@ -142,8 +142,8 @@ export async function uploadDocument(formData: FormData): Promise<UploadResult> 
   let matchedCustomer: Match | null = null;
   try {
     const [suppliers, customers] = await Promise.all([
-      prisma.supplier.findMany({ where: { deletedAt: null }, select: { id: true, name: true } }),
-      prisma.customer.findMany({ where: { deletedAt: null }, select: { id: true, name: true } }),
+      prisma.supplier.findMany({ where: { deletedAt: null }, select: { id: true, name: true }, take: 200 }),
+      prisma.customer.findMany({ where: { deletedAt: null }, select: { id: true, name: true }, take: 200 }),
     ]);
     const m = matchDocumentEntities(parsed.fields, suppliers, customers);
     matchedSupplier = m.supplier;

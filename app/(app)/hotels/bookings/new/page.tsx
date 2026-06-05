@@ -9,6 +9,7 @@ export default async function NewBookingPage() {
   const hotels = await prisma.hotel.findMany({
     orderBy: { name: "asc" },
     include: { company: true },
+    take: 100,
   });
 
   const today = new Date().toISOString().slice(0, 10);

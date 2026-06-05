@@ -17,9 +17,9 @@ export default async function ReportsIndexPage() {
   const ar = locale === "ar";
 
   const [companies, transactions, esg] = await Promise.all([
-    prisma.company.findMany({ orderBy: { createdAt: "asc" } }),
-    prisma.transaction.findMany({ where: { occurredAt: { gte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000) } } }),
-    prisma.sustainabilityScore.findMany(),
+    prisma.company.findMany({ orderBy: { createdAt: "asc" }, take: 100 }),
+    prisma.transaction.findMany({ where: { occurredAt: { gte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000) } }, orderBy: { occurredAt: "desc" }, take: 3000 }),
+    prisma.sustainabilityScore.findMany({ take: 500 }),
   ]);
 
   const revenueByCompany = new Map<string, number>();

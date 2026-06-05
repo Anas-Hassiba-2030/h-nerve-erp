@@ -31,6 +31,7 @@ export default async function FarmsPage() {
   const farms = await prisma.farm.findMany({
     orderBy: { createdAt: "asc" },
     include: { company: true, crops: { orderBy: { expectedHarvest: "asc" } } },
+    take: 100,
   });
 
   const totalArea = farms.reduce((acc, f) => acc + f.areaDunum, 0);

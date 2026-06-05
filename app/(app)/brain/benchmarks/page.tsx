@@ -37,10 +37,11 @@ export default async function BrainBenchmarksPage() {
 
   const [optIn, peers, patterns] = await Promise.all([
     getOptIn("default"),
-    prisma.federationPeer.findMany(),
+    prisma.federationPeer.findMany({ take: 100 }),
     prisma.federationPattern.findMany({
       where: { visibleTo: "default" },
       orderBy: [{ peerCount: "desc" }, { confidence: "desc" }],
+      take: 200,
     }),
   ]);
 

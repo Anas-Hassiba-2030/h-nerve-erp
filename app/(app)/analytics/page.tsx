@@ -17,10 +17,10 @@ export default async function AnalyticsHubPage() {
   const start12mo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
 
   const [companies, transactions, forecasts, esg] = await Promise.all([
-    prisma.company.findMany({ orderBy: { name: "asc" } }),
+    prisma.company.findMany({ orderBy: { name: "asc" }, take: 100 }),
     prisma.transaction.findMany({ where: { occurredAt: { gte: start12mo } }, orderBy: { occurredAt: "desc" }, take: 3000 }),
     prisma.supplyForecast.findMany({ take: 500 }),
-    prisma.sustainabilityScore.findMany({ orderBy: [{ year: "asc" }, { period: "asc" }] }),
+    prisma.sustainabilityScore.findMany({ orderBy: [{ year: "asc" }, { period: "asc" }], take: 500 }),
   ]);
 
   const data = companies.map((c) => {

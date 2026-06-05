@@ -29,8 +29,8 @@ export default async function FinancePage() {
 
   const [transactions, monthTx, allCompanies] = await Promise.all([
     prisma.transaction.findMany({ orderBy: { occurredAt: "desc" }, include: { company: true, createdBy: true }, take: 60 }),
-    prisma.transaction.findMany({ where: { occurredAt: { gte: sixMonthsAgo } }, select: { kind: true, amount: true, occurredAt: true } }),
-    prisma.company.findMany({ orderBy: { name: "asc" } }),
+    prisma.transaction.findMany({ where: { occurredAt: { gte: sixMonthsAgo } }, select: { kind: true, amount: true, occurredAt: true }, orderBy: { occurredAt: "desc" }, take: 3000 }),
+    prisma.company.findMany({ orderBy: { name: "asc" }, take: 100 }),
   ]);
 
   const inRange = (d: Date, from: Date, to?: Date) => d >= from && (to ? d < to : true);

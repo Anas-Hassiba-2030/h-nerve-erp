@@ -44,6 +44,7 @@ export default async function HotelsPage() {
         select: { revenue: true, status: true, rooms: true, checkIn: true },
       },
     },
+    take: 100,
   });
 
   const recentBookings = await prisma.booking.findMany({

@@ -85,3 +85,30 @@ page now renders all 8 memory cards + heading, zero function errors in the log.
 
 Bug-class scan: grepped `app/` for other `Template/render/format: (…) =>` props
 crossing into client components — no other instances; `countTemplate` was unique.
+
+---
+
+## Batch 2 — intelligence "where did it go" flows (2026-06-05, code-trace)
+
+Focus: every create / commit / convene / generate control must leave the user
+where the thing now lives, or toast its destination.
+
+| Surface | Control | Before | After |
+|---|---|---|---|
+| /insights | Generate plan | redirects to /plans | ✅ already correct (Batch 1 verified) |
+| /brain/council | Convene | redirects to /brain/council/[id] | ✅ already correct (lands on the new session) |
+| /plans | **Commit** | flips DRAFT→ACTIVE silently — no toast, no try/catch | ✅ **fixed**: try/catch + toast naming the plan ("now active") |
+| /plans | **Abandon** | silent, no try/catch | ✅ **fixed**: try/catch + toast |
+| /plans | **Step "Done"** | silent | ✅ **fixed**: try/catch + toast ("Step done" / "Plan fully completed ✓") |
+| /plans | **Step "Block"** | silent | ✅ **fixed**: try/catch + toast |
+| /plans | Generate from insight/council | redirects to /plans/[id] | ✅ already correct |
+
+The Commit fix is the one the user called out: the plan does flip to ACTIVE in
+place (chip + KPI update + it re-sorts up the list), but with no toast the click
+read as "nothing happened." Now it confirms by name and new state.
+
+### Found-but-deferred (silent destructive actions — NOT yet fixed)
+Logged so they aren't lost; fix in a later batch (they're delete-confirmations,
+a different class than the create/commit destinations this batch targets):
+- /brain/memory `clearMemories` — `deleteMany` + revalidate, **no toast**.
+- /brain/council `deleteSession` — `delete` + revalidate, **no toast, no confirm**.

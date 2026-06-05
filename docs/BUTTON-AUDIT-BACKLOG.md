@@ -251,3 +251,42 @@ were the only two).
 Lesson: a Server Component may pass STRINGS and SERVER ACTIONS to a Client
 Component — never plain functions. To catch this class, grep the label-callback
 shape `\w+:\s*\(...\)\s*=>\s*(ar|backtick|quote)`, not just specific key names.
+
+---
+
+## UI-repair pass (2026-06-05) — unstyled pages, org tree, linkage
+
+### Unstyled pages — ROOT cause (one fix, whole class)
+globals.css listed every feature stylesheet as an `@import` block ~960 lines
+down, AFTER real CSS. `@import` is only valid at the top of a file, so the prod
+build silently dropped the whole block — admin, empire, workflow, integrations,
+theater, mobile, documents all shipped unstyled. Fixed by moving the `@import`s
+to the top (#213), proven with a local `next build` (dropped selectors went
+ABSENT→PRESENT, 356→540 KB) and verified styled on prod. Belt-and-suspenders
+direct imports also landed for admin (#211) + workflow (#212).
+
+### /users org tree — flat → real hierarchy
+The tree component + CSS were already correct (top-down chart with gold
+connectors), but every user had `reportsToId = null`, so all were roots → a flat
+vertical stack. Fixed with `scripts/seed/ensure-org-hierarchy.ts` (deploy-time,
+idempotent, guarded): top = highest-XP EXECUTIVE; MANAGER/ADMIN → top; STAFF →
+their company's MANAGER. Never overwrites an existing link.
+
+### Linkage map — every create/commit/approve/accept goes somewhere visible
+| Action | Destination |
+|---|---|
+| /insights Generate plan | redirect → /plans/[id] |
+| /plans Generate from insight/council | redirect → /plans/[id] |
+| /plans **Commit** | toast "Plan committed — now active: X" + flips in place |
+| /brain/council Convene | redirect → /brain/council/[id] |
+| /digest Generate | redirect → /digest/[id] |
+| /documents Commit (add to ledger) | redirect → /documents/[id] |
+| /workspace **Accept signal** | toast "Draft plan created in Plans: X" |
+| /supply-chain **Approve forecast** | toast "Forecast approved — PO ####" |
+| /brain/iq Approve report | toast + revalidates /brain/self-tuning/[id] |
+| /admin/brain Resolve/Dismiss | toast |
+| /admin/genesis Seed / Re-seed / Fill | query-param banner (admin has no ToastProvider) |
+
+Status-flips (set-status, advance-stage, dismiss) re-render the row/feed visibly.
+Minor remaining: mobile `/m` dismiss/approve actions have no toast (item leaves
+the list, so still visible) — logged, low priority.

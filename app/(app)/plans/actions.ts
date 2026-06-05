@@ -15,27 +15,61 @@ import {
 import { recordFeedback } from "@/lib/brain/feedback.live";
 import { prisma } from "@/lib/db/db";
 import { getLocale } from "@/lib/i18n/i18n.server";
+import { flashToast } from "@/lib/utils/toast";
 
 export async function generateFromCouncil(formData: FormData): Promise<void> {
   await requireUser();
   const sessionId = String(formData.get("sessionId") ?? "");
-  if (!sessionId) throw new Error("sessionId required");
   const locale = getLocale() as "ar" | "en";
-  const plan = await generatePlanFromCouncil(sessionId, locale);
+  const ar = locale === "ar";
+  if (!sessionId) {
+    flashToast({ type: "info", entity: "info", id: "gen", label: ar ? "معرف الجلسة مفقود" : "Session id missing" });
+    revalidatePath("/plans");
+    return;
+  }
+  let planId: string | null = null;
+  try {
+    const plan = await generatePlanFromCouncil(sessionId, locale);
+    planId = plan.id;
+  } catch (e) {
+    flashToast({
+      type: "info", entity: "info", id: "gen",
+      label: ar ? `تعذّر توليد الخطة: ${(e as Error).message}` : `Could not generate plan: ${(e as Error).message}`,
+    });
+    revalidatePath("/plans");
+    return;
+  }
   revalidatePath("/plans");
   revalidatePath(`/brain/council/${sessionId}`);
-  redirect(`/plans/${plan.id}`);
+  redirect(`/plans/${planId}`);
 }
 
 export async function generateFromInsight(formData: FormData): Promise<void> {
   await requireUser();
   const insightId = String(formData.get("insightId") ?? "");
-  if (!insightId) throw new Error("insightId required");
   const locale = getLocale() as "ar" | "en";
-  const plan = await generatePlanFromInsight(insightId, locale);
+  const ar = locale === "ar";
+  if (!insightId) {
+    flashToast({ type: "info", entity: "info", id: "gen", label: ar ? "معرف الإشارة مفقود" : "Insight id missing" });
+    revalidatePath("/plans");
+    return;
+  }
+  let planId: string | null = null;
+  try {
+    const plan = await generatePlanFromInsight(insightId, locale);
+    planId = plan.id;
+  } catch (e) {
+    flashToast({
+      type: "info", entity: "info", id: "gen",
+      label: ar ? `تعذّر توليد الخطة: ${(e as Error).message}` : `Could not generate plan: ${(e as Error).message}`,
+    });
+    revalidatePath("/plans");
+    revalidatePath("/insights");
+    return;
+  }
   revalidatePath("/plans");
   revalidatePath("/insights");
-  redirect(`/plans/${plan.id}`);
+  redirect(`/plans/${planId}`);
 }
 
 export async function commit(formData: FormData): Promise<void> {

@@ -101,19 +101,25 @@ export async function setBatchStatus(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "");
   if (!id || !status) return;
+  // The scoped client returns null for batches outside the caller's workspace
+  // (or soft-deleted). Bail before the write so a workspace-pinned operator
+  // can't flip another company's batch by id, and so the update doesn't
+  // explode on a missing row.
   const before = await prisma.dairyBatch.findUnique({ where: { id } });
-  await prisma.dairyBatch.update({ where: { id }, data: { status } });
-  if (before) {
-    await logActivity({
-      action: "UPDATE",
-      entity: "DAIRY",
-      entityId: id,
-      summary: `تحديث حالة دفعة ${before.batchNumber} → ${status}`,
-      summaryEn: `Batch ${before.batchNumber} status → ${status}`,
-      module: "DAIRY",
-      meta: { from: before.status, to: status },
-    });
+  if (!before) {
+    revalidatePath("/dairy");
+    return;
   }
+  await prisma.dairyBatch.update({ where: { id }, data: { status } });
+  await logActivity({
+    action: "UPDATE",
+    entity: "DAIRY",
+    entityId: id,
+    summary: `تحديث حالة دفعة ${before.batchNumber} → ${status}`,
+    summaryEn: `Batch ${before.batchNumber} status → ${status}`,
+    module: "DAIRY",
+    meta: { from: before.status, to: status },
+  });
   revalidatePath("/dairy");
 }
 

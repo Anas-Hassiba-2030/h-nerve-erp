@@ -180,6 +180,8 @@ export async function restoreForecast(formData: FormData) {
 // =================================================================
 export async function autoGenerateForecasts(): Promise<void> {
   const user = await requireUser();
+  const locale = getLocale();
+  const ar = locale === "ar";
   const now = new Date();
   const horizon = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
   // Phase P4 — count newly-created forecasts so we can toast a real
@@ -187,30 +189,50 @@ export async function autoGenerateForecasts(): Promise<void> {
   // page wondering whether the click did anything.
   let generated = 0;
 
-  const [hotels, maha, loran] = await Promise.all([
-    prisma.hotel.findMany({
-      include: {
-        company: true,
-        bookings: {
-          where: {
-            checkIn: { lte: horizon },
-            checkOut: { gte: now },
-            status: { in: ["CONFIRMED", "CHECKED_IN", "PENDING"] },
+  let hotels: any[] = [];
+  let maha: { id: string } | null = null;
+  let loran: { id: string } | null = null;
+  try {
+    [hotels, maha, loran] = await Promise.all([
+      prisma.hotel.findMany({
+        include: {
+          company: true,
+          bookings: {
+            where: {
+              checkIn: { lte: horizon },
+              checkOut: { gte: now },
+              status: { in: ["CONFIRMED", "CHECKED_IN", "PENDING"] },
+            },
           },
         },
-      },
-    }),
-    prisma.company.findFirst({ where: { sector: "DAIRY" } }),
-    prisma.company.findFirst({ where: { sector: "AGRICULTURE" } }),
-  ]);
+      }),
+      prisma.company.findFirst({ where: { sector: "DAIRY" } }),
+      prisma.company.findFirst({ where: { sector: "AGRICULTURE" } }),
+    ]);
+  } catch (e) {
+    flashToast({
+      type: "info", entity: "info",
+      label: ar
+        ? `تعذّر استرجاع البيانات: ${(e as Error).message}`
+        : `Could not load source data: ${(e as Error).message}`,
+    });
+    revalidatePath("/supply-chain");
+    return;
+  }
 
   if (!maha || !loran) {
+    flashToast({
+      type: "info", entity: "info",
+      label: ar
+        ? "بيانات الموردين ناقصة — شركة ألبان أو زراعة مفقودة."
+        : "Supplier data incomplete — dairy or agri company missing.",
+    });
     revalidatePath("/supply-chain");
     return;
   }
 
   for (const hotel of hotels) {
-    const occupiedRooms = hotel.bookings.reduce((acc, b) => acc + b.rooms, 0);
+    const occupiedRooms = hotel.bookings.reduce((acc: number, b: { rooms: number }) => acc + b.rooms, 0);
     if (!hotel.totalRooms) continue;
     const occupancy = Math.min(occupiedRooms / hotel.totalRooms, 1);
     // Phase P4 — lowered from 0.55 so the demo doesn't silently skip
@@ -285,7 +307,6 @@ export async function autoGenerateForecasts(): Promise<void> {
   // this file. Honest copy: tells the user exactly how many forecasts
   // landed (or "no busy hotels" when the heuristic skipped everyone).
   // E14 — locale-aware via the i18n dictionary (was a stacked ar·en label).
-  const locale = getLocale();
   flashToast({
     type: "info",
     entity: "info",

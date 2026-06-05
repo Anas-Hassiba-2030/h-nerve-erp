@@ -8,6 +8,8 @@ import { getActiveWorkspaceId } from "@/lib/tenancy/workspace";
 import { resolveOwnCompanyId } from "@/lib/auth/adminActionScope";
 import { requireUser } from "@/lib/auth/session";
 import { requireRole } from "@/lib/auth/authz";
+import { flashToast } from "@/lib/utils/toast";
+import { getLocale } from "@/lib/i18n/i18n.server";
 
 const programSchema = z.object({
   companyId: z.string().min(1),
@@ -69,6 +71,24 @@ export async function deleteProgram(formData: FormData) {
   await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
-  await prisma.program.delete({ where: { id } });
+  const ar = getLocale() === "ar";
+  try {
+    await prisma.program.delete({ where: { id } });
+    flashToast({
+      type: "info",
+      entity: "info",
+      id,
+      label: ar ? "حُذف البرنامج" : "Program deleted",
+    });
+  } catch (e) {
+    flashToast({
+      type: "info",
+      entity: "info",
+      id,
+      label: ar
+        ? `تعذّر الحذف: ${(e as Error).message}`
+        : `Delete failed: ${(e as Error).message}`,
+    });
+  }
   revalidatePath("/education");
 }

@@ -171,8 +171,19 @@ export async function deleteInsight(formData: FormData) {
 
 export async function bulkResolveInsights(ids: string[]) {
   const me = await requireRole("MANAGER");
-  if (!ids.length) return;
-  await prisma.aIInsight.updateMany({
+  const locale = getLocale();
+  const ar = locale === "ar";
+  if (!ids.length) {
+    flashToast({
+      type: "info",
+      entity: "insight",
+      id: "bulk-resolve",
+      label: ar ? "لا توجد إشارات مفتوحة لإغلاقها" : "No open signals to resolve",
+    });
+    revalidatePath("/insights");
+    return;
+  }
+  const result = await prisma.aIInsight.updateMany({
     where: { id: { in: ids } },
     data: { status: "RESOLVED" },
   });
@@ -184,12 +195,22 @@ export async function bulkResolveInsights(ids: string[]) {
     summaryEn: `Bulk resolved ${ids.length} insights`,
     meta: { ids, count: ids.length },
   });
+  flashToast({
+    type: "info",
+    entity: "insight",
+    id: "bulk-resolve",
+    label: ar
+      ? `حُلّت ${result.count} إشارات`
+      : `Resolved ${result.count} signals`,
+  });
   revalidatePath("/insights");
   revalidatePath("/dashboard");
 }
 
 export async function bulkDeleteInsights(ids: string[]) {
   const me = await requireRole("MANAGER");
+  const locale = getLocale();
+  const ar = locale === "ar";
   if (!ids.length) return;
   for (const id of ids) {
     await softDelete("insight", id);
@@ -201,6 +222,12 @@ export async function bulkDeleteInsights(ids: string[]) {
     summary: `حذف جماعي لـ ${ids.length} إشارات`,
     summaryEn: `Bulk deleted ${ids.length} insights`,
     meta: { ids, count: ids.length },
+  });
+  flashToast({
+    type: "info",
+    entity: "insight",
+    id: "bulk-delete",
+    label: ar ? `حُذفت ${ids.length} إشارات` : `Deleted ${ids.length} signals`,
   });
   revalidatePath("/insights");
 }
@@ -237,25 +264,39 @@ export async function generateInsightPlan(formData: FormData) {
   const lc: "ar" | "en" = locale === "ar" ? "ar" : "en";
   if (!id) return;
 
-  const { generatePlanFromInsight } = await import("@/lib/brain/planner.live");
-  const plan = await generatePlanFromInsight(id, lc);
+  // Every failure path must surface a toast — a silent throw makes the click
+  // look broken even when the auth + DB layer are working correctly.
+  try {
+    const { generatePlanFromInsight } = await import("@/lib/brain/planner.live");
+    const plan = await generatePlanFromInsight(id, lc);
 
-  await logActivity({
-    action: "INSIGHT",
-    entity: "INSIGHT",
-    entityId: plan.id,
-    summary: `خطة مولّدة من إشارة: ${plan.goal}`,
-    summaryEn: `Plan generated from insight: ${(plan as any).goalEn ?? plan.goal}`,
-  });
+    await logActivity({
+      action: "INSIGHT",
+      entity: "INSIGHT",
+      entityId: plan.id,
+      summary: `خطة مولّدة من إشارة: ${plan.goal}`,
+      summaryEn: `Plan generated from insight: ${(plan as any).goalEn ?? plan.goal}`,
+    });
 
-  flashToast({
-    type: "info",
-    entity: "info",
-    id: plan.id,
-    label: lc === "ar"
-      ? `خطة جديدة: ${plan.goal}`
-      : `New plan: ${(plan as any).goalEn ?? plan.goal}`,
-  });
+    flashToast({
+      type: "info",
+      entity: "info",
+      id: plan.id,
+      label: lc === "ar"
+        ? `خطة جديدة: ${plan.goal}`
+        : `New plan: ${(plan as any).goalEn ?? plan.goal}`,
+    });
+  } catch (e) {
+    const msg = (e as Error).message || "unknown";
+    flashToast({
+      type: "info",
+      entity: "insight",
+      id,
+      label: lc === "ar"
+        ? `تعذّر توليد الخطة: ${msg}`
+        : `Could not generate plan: ${msg}`,
+    });
+  }
 
   revalidatePath("/insights");
   revalidatePath("/plans");
@@ -267,24 +308,39 @@ export async function runAiEngine() {
   const locale = getLocale();
   const lc: "ar" | "en" = locale === "ar" ? "ar" : "en";
 
-  const generated = await runEngine();
-  const { created, skipped } = await persistInsights(generated, user.id, lc);
+  // The engine runs ~10 parallel heuristics; if any one throws (schema drift,
+  // missing table, scoping mismatch) Promise.all rejects and the whole action
+  // dies silently. Catch + toast so the user always sees the click landed.
+  try {
+    const generated = await runEngine();
+    const { created, skipped } = await persistInsights(generated, user.id, lc);
 
-  await logActivity({
-    action: "INSIGHT",
-    entity: "INSIGHT",
-    summary: `محرك AI: ${created} إشارة جديدة (${skipped} مكررة)`,
-    summaryEn: `AI engine: ${created} new insights (${skipped} skipped)`,
-  });
+    await logActivity({
+      action: "INSIGHT",
+      entity: "INSIGHT",
+      summary: `محرك AI: ${created} إشارة جديدة (${skipped} مكررة)`,
+      summaryEn: `AI engine: ${created} new insights (${skipped} skipped)`,
+    });
 
-  flashToast({
-    type: "info",
-    entity: "insight",
-    id: "ai-engine",
-    label: lc === "ar"
-      ? `محرك الذكاء: ${created} إشارة جديدة${skipped ? ` · ${skipped} مكررة تم تخطيها` : ""}`
-      : `AI engine: ${created} new insights${skipped ? ` · ${skipped} duplicates skipped` : ""}`,
-  });
+    flashToast({
+      type: "info",
+      entity: "insight",
+      id: "ai-engine",
+      label: lc === "ar"
+        ? `محرك الذكاء: ${created} إشارة جديدة${skipped ? ` · ${skipped} مكررة تم تخطيها` : ""}`
+        : `AI engine: ${created} new insights${skipped ? ` · ${skipped} duplicates skipped` : ""}`,
+    });
+  } catch (e) {
+    const msg = (e as Error).message || "unknown";
+    flashToast({
+      type: "info",
+      entity: "insight",
+      id: "ai-engine",
+      label: lc === "ar"
+        ? `تعذّر تشغيل المحرك: ${msg}`
+        : `Engine failed: ${msg}`,
+    });
+  }
 
   revalidatePath("/insights");
   revalidatePath("/dashboard");

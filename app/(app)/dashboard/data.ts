@@ -50,7 +50,7 @@ export async function getDashboardData({
     upcomingBookings, expiringDairyAll, harvestingCrops,
   ] = await Promise.all([
     session ? prisma.user.findUnique({ where: { id: session.id } }) : null,
-    prisma.company.findMany({ orderBy: { createdAt: "asc" } }),
+    prisma.company.findMany({ orderBy: { createdAt: "asc" }, take: 50 }),
     prisma.hotel.aggregate({ _sum: { totalRooms: true } }),
     prisma.booking.aggregate({ _sum: { rooms: true }, where: { status: { in: ["CONFIRMED", "CHECKED_IN"] } } }),
     prisma.booking.aggregate({
@@ -66,8 +66,8 @@ export async function getDashboardData({
       orderBy: { expiryDate: "asc" },
       take: 3,
     }),
-    prisma.farm.findMany({ orderBy: { createdAt: "asc" } }),
-    prisma.program.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.farm.findMany({ orderBy: { createdAt: "asc" }, take: 50 }),
+    prisma.program.findMany({ orderBy: { createdAt: "desc" }, take: 50 }),
     prisma.supplyForecast.findMany({
       where: { status: { in: ["DRAFT", "APPROVED"] } },
       include: { source: true, target: true },
@@ -81,9 +81,9 @@ export async function getDashboardData({
     prisma.transaction.findMany({
       where: { occurredAt: { gte: new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000) } },
     }),
-    prisma.marketStock.findMany({ where: { companyId: { not: null } }, include: { company: true } }),
-    prisma.sustainabilityScore.findMany({ orderBy: [{ year: "asc" }, { period: "asc" }] }),
-    prisma.futureProject.findMany(),
+    prisma.marketStock.findMany({ where: { companyId: { not: null } }, include: { company: true }, take: 100 }),
+    prisma.sustainabilityScore.findMany({ orderBy: [{ year: "asc" }, { period: "asc" }], take: 200 }),
+    prisma.futureProject.findMany({ take: 100 }),
     session ? prisma.task.findMany({
       where: { assigneeId: session.id, status: { not: "DONE" } },
       orderBy: { dueAt: "asc" },
@@ -94,17 +94,20 @@ export async function getDashboardData({
       where: { checkIn: { gte: now, lte: next28Days } },
       include: { hotel: true },
       orderBy: { checkIn: "asc" },
+      take: 100,
     }),
     // All dairy expiring within 28d
     prisma.dairyBatch.findMany({
       where: { expiryDate: { gte: now, lte: next28Days }, status: { not: "RECALLED" } },
       orderBy: { expiryDate: "asc" },
+      take: 100,
     }),
     // Crops with harvest in next 28d
     prisma.crop.findMany({
       where: { expectedHarvest: { gte: now, lte: next28Days }, status: "GROWING" },
       include: { farm: true },
       orderBy: { expectedHarvest: "asc" },
+      take: 100,
     }),
   ]);
 

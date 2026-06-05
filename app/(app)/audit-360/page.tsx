@@ -22,7 +22,7 @@ import { getAuditTrace, getRecentRecords, isValidEntity, type EntityType } from 
 import { AuditTraceView } from "./_components/AuditTraceView";
 import { AuditPickerView } from "./_components/AuditPickerView";
 import "../daylight.css";
-import "./audit.css";
+import "../audit.css";
 
 export default async function Audit360Page({
   searchParams,

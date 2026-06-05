@@ -8,6 +8,15 @@
 //
 // Phase 11 of docs/PHASES-INTELLIGENCE.md.
 
+// IMPORTANT — import the admin CSS DIRECTLY here, not via globals.css's
+// @import. In the production build Next does NOT inline globals.css @imports
+// into the page's CSS chunk, so an admin page loaded ONLY the base globals
+// bundle and rendered as raw unstyled HTML (the .admin-shell / .admin-rail /
+// .admin-page / .emp-* rules were absent). Same failure + same fix as the
+// orrery panels (PR #202). A direct import binds the CSS to the (admin) route
+// group's chunk so it always ships.
+import "../phase11-admin.css";
+import "../phase19-empire.css";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";

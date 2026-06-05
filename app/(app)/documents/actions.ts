@@ -74,16 +74,29 @@ export async function uploadDocument(formData: FormData): Promise<UploadResult> 
   // 2. Run the parser. Read the file bytes ONLY when Vision is on and
   // the type is vision-eligible — otherwise the stub path never pays
   // the up-to-25MB arrayBuffer allocation.
+  // The parser can throw on malformed input / vision-API failure. If we let
+  // it bubble, the Document row stays stuck in PARSING forever and the user
+  // sees a half-broken entry with no explanation — flip to FAILED + rethrow.
   const useVision = visionEnabled() && isVisionEligible(file.type);
   const bytes = useVision
     ? Buffer.from(await file.arrayBuffer())
     : undefined;
-  const parsed = await parseDocument({
-    fileName: file.name,
-    fileSize: file.size,
-    mimeType: file.type,
-    bytes,
-  });
+  let parsed;
+  try {
+    parsed = await parseDocument({
+      fileName: file.name,
+      fileSize: file.size,
+      mimeType: file.type,
+      bytes,
+    });
+  } catch (e) {
+    await prisma.document.update({
+      where: { id: doc.id },
+      data: { status: "FAILED" },
+    }).catch(() => {});
+    docLog.error("parseDocument failed", { err: String(e), docId: doc.id });
+    throw e;
+  }
 
   // 3. Persist the parse result.
   const updated = await prisma.document.update({

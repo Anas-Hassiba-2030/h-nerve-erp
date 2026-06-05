@@ -58,7 +58,7 @@ export default async function EmployeesPage() {
             {isAdmin ? (
               <Link href="/admin/users" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "عضو جديد" : "New member"}</Link>
             ) : null}
-            <ExportMenu type="employees" locale={lc} />
+            <ExportMenu type="employees" locale={lc} variant="heritage" />
           </>
         }
       />

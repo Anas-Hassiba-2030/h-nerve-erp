@@ -35,26 +35,64 @@
 .dl-page .em-tab.on{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#241b06;opacity:1;border-color:transparent}
 
 /* org tree */
-.dl-page .em-tree-wrap{overflow:auto;padding:14px 0}
+.dl-page .em-tree-wrap{overflow-x:auto;overflow-y:visible;padding:24px 16px 32px;background:rgba(10,24,19,.35);border-radius:20px;border:1px solid rgba(194,163,90,.16)}
 .dl-page .tree{display:flex;flex-direction:column;align-items:center;min-width:max-content;margin:0 auto;animation:breathe 8s ease-in-out infinite;transform-origin:top center}
 @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.012)}}
 .dl-page .tnode{display:flex;flex-direction:column;align-items:center;position:relative}
-.dl-page .tcard{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;cursor:pointer;
-  background:linear-gradient(160deg,rgba(20,46,38,.7),rgba(13,31,26,.62));border:1px solid rgba(194,163,90,.22);transition:border-color .25s,box-shadow .25s,transform .25s;white-space:nowrap}
-.dl-page .tcard:hover{border-color:rgba(194,163,90,.55);box-shadow:0 0 22px rgba(220,195,138,.3);transform:translateY(-2px)}
-.dl-page .tav{width:38px;height:38px;flex:0 0 38px;border-radius:50%;display:grid;place-items:center;font-size:16px;font-weight:700;color:#fff;background:linear-gradient(140deg,rgba(46,107,87,.95),rgba(13,31,26,.95));border:1.5px solid rgba(194,163,90,.3);position:relative}
+
+/* root-level cards get a gold accent to mark them as top of hierarchy */
+.dl-page .tree > .tnode > .tcard{border-color:rgba(194,163,90,.55);box-shadow:0 0 28px -8px rgba(194,163,90,.28)}
+
+/* cards */
+.dl-page .tcard{display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:16px;cursor:pointer;
+  background:linear-gradient(160deg,rgba(20,46,38,.75),rgba(13,31,26,.65));border:1px solid rgba(194,163,90,.22);transition:border-color .25s,box-shadow .25s,transform .25s;white-space:nowrap;min-width:160px}
+.dl-page .tcard:hover{border-color:rgba(194,163,90,.65);box-shadow:0 0 28px rgba(220,195,138,.35);transform:translateY(-2px)}
+
+/* role-based card accent stripes */
+.dl-page .tcard[data-role="ADMIN"]{border-color:rgba(194,163,90,.6);background:linear-gradient(160deg,rgba(30,58,46,.85),rgba(13,31,26,.72))}
+.dl-page .tcard[data-role="EXECUTIVE"]{border-color:rgba(126,155,134,.45)}
+.dl-page .tcard[data-role="MANAGER"]{border-color:rgba(194,163,90,.3)}
+
+/* avatar */
+.dl-page .tav{width:40px;height:40px;flex:0 0 40px;border-radius:50%;display:grid;place-items:center;font-size:16px;font-weight:700;color:#fff;background:linear-gradient(140deg,rgba(46,107,87,.95),rgba(13,31,26,.95));border:1.5px solid rgba(194,163,90,.35);position:relative}
+.dl-page .tcard[data-role="ADMIN"] .tav{background:linear-gradient(140deg,#1f4d3f,#0a1813);border-color:var(--gold)}
+.dl-page .tcard[data-role="EXECUTIVE"] .tav{background:linear-gradient(140deg,rgba(46,107,87,.9),rgba(20,42,34,.9))}
 .dl-page .tav .pres{position:absolute;bottom:0;inset-inline-end:0;width:9px;height:9px;border-radius:50%;background:var(--sage);border:2px solid #0d1f1a;animation:prespulse 2.4s ease-in-out infinite}
 @keyframes prespulse{0%,100%{box-shadow:0 0 0 0 rgba(126,155,134,.6)}50%{box-shadow:0 0 0 4px rgba(126,155,134,0)}}
-.dl-page .tinfo .tn{font-size:13px;font-weight:700;color:#fff}
-.dl-page .tinfo .tr{font-size:10.5px;color:var(--gold-soft);opacity:.8}
-.dl-page .tbadge{font-size:14px;margin-inline-start:4px}
-.dl-page .tkids{display:flex;gap:18px;margin-top:22px;position:relative;transition:opacity .3s}
+
+/* card text */
+.dl-page .tinfo{min-width:0}
+.dl-page .tinfo .tn{font-size:13.5px;font-weight:700;color:#fff;display:block}
+.dl-page .tinfo .tr{font-size:10.5px;color:var(--gold-soft);opacity:.9;display:block;margin-top:1px}
+.dl-page .tbadge{font-size:15px;margin-inline-start:4px;opacity:.85}
+
+/* connectors — horizontal children row */
+.dl-page .tkids{display:flex;gap:24px;margin-top:28px;position:relative;padding-top:28px;transition:opacity .3s;align-items:flex-start}
 .dl-page .tnode.collapsed > .tkids{display:none}
-.dl-page .tnode > .tkids::before{content:"";position:absolute;top:-22px;left:50%;width:1.5px;height:22px;background:rgba(194,163,90,.4);transform:translateX(-50%)}
-.dl-page .tkids > .tnode::before{content:"";position:absolute;top:-22px;left:50%;width:1.5px;height:22px;background:rgba(194,163,90,.4);transform:translateX(-50%)}
-.dl-page .tkids::after{content:"";position:absolute;top:-22px;left:10%;right:10%;height:1.5px;background:rgba(194,163,90,.4)}
-.dl-page .tnode.has-kids > .tcard::after{content:"▾";margin-inline-start:6px;color:var(--gold-soft);font-size:11px;transition:transform .3s}
+
+/* vertical line from parent card down to horizontal bar */
+.dl-page .tnode > .tkids::before{
+  content:"";position:absolute;top:0;left:50%;width:2px;height:28px;
+  background:linear-gradient(to bottom,rgba(194,163,90,.6),rgba(194,163,90,.4));
+  transform:translateX(-50%)}
+
+/* horizontal bar that spans all sibling stems */
+.dl-page .tkids::after{
+  content:"";position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent 0%,rgba(194,163,90,.4) 8%,rgba(194,163,90,.4) 92%,transparent 100%)}
+
+/* vertical stem on each child up to the horizontal bar */
+.dl-page .tkids > .tnode{padding-top:0;margin-top:0}
+.dl-page .tkids > .tnode::before{
+  content:"";position:absolute;top:-28px;left:50%;width:2px;height:28px;
+  background:rgba(194,163,90,.4);transform:translateX(-50%)}
+
+/* collapse caret */
+.dl-page .tnode.has-kids > .tcard::after{content:"▾";margin-inline-start:8px;color:var(--gold-soft);font-size:11px;transition:transform .3s;opacity:.8}
 .dl-page .tnode.collapsed.has-kids > .tcard::after{transform:rotate(-90deg)}
+
+/* tab utility — used by OrgTabsClient */
+.dl-page .hidden{display:none}
 
 /* list grid */
 .dl-page .em-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}

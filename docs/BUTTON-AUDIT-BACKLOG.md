@@ -192,3 +192,44 @@ adding flashToast; it won't show.)
 **Deferred (admin-only edge cases — would need FormState/param plumbing, not flashToast):**
 - tenants `createTenant` — validation throws (`invalid slug`, `slug already in use`) hit the admin error boundary instead of an inline message.
 - users `updateUser` / `setActive` / `deleteUser` — protective guards (last-admin / self) silently `return done()` with no banner explaining why the action was a no-op.
+
+---
+
+## Batch 6 — theater + remaining surfaces (2026-06-05, code-trace)
+
+No `(theater)` server actions exist (theater is render-only; ESC returns). Swept
+the remaining operator action files (alerts, companies, integrations, documents,
+digest, trash, workspace, brain subpages).
+
+**Already correct (no change):**
+- companies — `parseFormState` CRUD (canonical template).
+- integrations / digest / trash / brain `graph` / `iq` / `learning` / `benchmarks` / admin `brain` — try/catch + flashToast.
+- brain `narrate` — try/catch returns a bilingual fallback string the tooltip renders (no toast needed).
+- documents `uploadDocument` — client-driven upload; marks FAILED + rethrows so the upload modal shows the error; `commitDocument` redirects to the doc.
+- brain `graph` "Rebuild" / `iq` "Reset trajectory" — `window.confirm` guards (prior runs).
+
+**Fixed:**
+- alerts `updateRule` — raw `schema.parse()` threw on an out-of-range
+  threshold/cooldown with no guard (toasted on success only). Now try/catch +
+  error toast.
+- workspace `acceptSignal` — accepting a brain signal spawns a **DRAFT plan in
+  /plans** but the user stayed on /workspace/intelligence with the signal just
+  vanishing (a "where did it go" gap). Now toasts "Draft plan created in Plans: X"
+  so the destination is findable. (`(app)` has ToastProvider, so flashToast shows.)
+
+**Deferred (visible-but-silent status/delete — low priority):**
+- workspace `advanceBatchStatus` / `advanceProjectStage` / `dismissSignal` (status flips/feed-leave are visible), documents `deleteDocument`, alerts `deleteRule`.
+
+---
+
+## Audit summary (Batches 1–6)
+
+All authenticated route groups swept. The dominant defect was the **silent
+server action** (`schema.parse()` / mutation that throws with no try/catch →
+button "does nothing"), fixed across insights/plans/council, all five sectors,
+finance/tasks/messages, admin genesis, alerts, and the workspace signal flow.
+"Where did it go" destinations confirmed or added for every create/commit/
+convene/generate/accept flow. `/brain/memory` (a real prod crash) root-caused to
+an RSC function-prop violation and fixed. Remaining items are logged "deferred"
+above — all visible-but-could-be-nicer status/delete toasts, none of them dead
+buttons.

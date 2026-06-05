@@ -39,25 +39,37 @@ export async function toggleRule(formData: FormData) {
 
 export async function updateRule(formData: FormData) {
   await requireUser();
-  const data = updateSchema.parse({
-    id: formData.get("id"),
-    threshold: formData.get("threshold"),
-    severity: formData.get("severity") || "WARN",
-    cooldownHours: formData.get("cooldownHours") || 24,
-  });
-  await prisma.alertRule.update({
-    where: { id: data.id },
-    data: {
-      threshold: data.threshold,
-      severity: data.severity,
-      cooldownHours: data.cooldownHours,
-    },
-  });
   const locale = getLocale();
+  const id = String(formData.get("id") ?? "");
+  // updateSchema.parse() throws on an out-of-range threshold/cooldown; without
+  // a guard the rule-settings form re-renders silently. Toast on either path.
+  try {
+    const data = updateSchema.parse({
+      id: formData.get("id"),
+      threshold: formData.get("threshold"),
+      severity: formData.get("severity") || "WARN",
+      cooldownHours: formData.get("cooldownHours") || 24,
+    });
+    await prisma.alertRule.update({
+      where: { id: data.id },
+      data: {
+        threshold: data.threshold,
+        severity: data.severity,
+        cooldownHours: data.cooldownHours,
+      },
+    });
+  } catch {
+    flashToast({
+      type: "info", entity: "insight", id: id || "rule",
+      label: locale === "ar" ? "تعذّر حفظ القاعدة — تحقّق من القيم" : "Couldn't save rule — check the values",
+    });
+    revalidatePath("/alerts");
+    return;
+  }
   flashToast({
     type: "info",
     entity: "insight",
-    id: data.id,
+    id: id || "rule",
     label:
       locale === "ar"
         ? "تم حفظ إعدادات القاعدة"

@@ -13,6 +13,8 @@
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/authz";
 import { prisma, prismaUnscoped } from "@/lib/db/db";
+import { flashToast } from "@/lib/utils/toast";
+import { getLocale } from "@/lib/i18n/i18n.server";
 
 const BATCH_CHAIN = ["IN_PRODUCTION", "READY", "SHIPPED", "RETAIL"];
 const STAGE_CHAIN = ["IDEA", "EVALUATION", "APPROVED", "IN_PROGRESS", "LIVE"];
@@ -276,6 +278,16 @@ export async function acceptSignal(formData: FormData): Promise<void> {
       targetDelta,
     },
   );
+  // "Where did it go" — accepting a signal removes it from THIS feed but creates
+  // a DRAFT plan on a different page (/plans). Point the user there by name so
+  // the new plan is findable instead of seeming to vanish.
+  const ar = getLocale() === "ar";
+  flashToast({
+    type: "info", entity: "info", id: plan.id,
+    label: ar
+      ? `أُنشئت خطة مسوّدة في «الخطط»: ${plan.goal}`
+      : `Draft plan created in Plans: ${plan.goalEn ?? plan.goal}`,
+  });
   revalidatePath("/workspace/intelligence");
   revalidatePath("/plans");
 }

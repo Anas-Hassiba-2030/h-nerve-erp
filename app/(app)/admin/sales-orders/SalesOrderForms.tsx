@@ -75,16 +75,28 @@ export function NewSOForm({
           </label>
           <label className="flex flex-col gap-1 text-[11px] font-bold">
             {ar ? "العميل" : "Customer"}
-            <select name="customerId" required defaultValue="" className="input text-xs">
-              <option value="" disabled>
-                {ar ? "— اختر عميلاً —" : "— select customer —"}
-              </option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
+            {customers.length > 0 ? (
+              <select name="customerId" required defaultValue="" className="input text-xs">
+                <option value="" disabled>
+                  {ar ? "— اختر عميلاً —" : "— select customer —"}
                 </option>
-              ))}
-            </select>
+                {customers.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              // No customers yet — a required empty <select> would be
+              // unsubmittable. Fall back to a free-text name that the action's
+              // find-or-create path turns into a Customer.
+              <input
+                name="customer"
+                required
+                placeholder={ar ? "اسم العميل (سيُنشأ تلقائياً)" : "Customer name (auto-created)"}
+                className="input text-xs"
+              />
+            )}
           </label>
           <label className="flex flex-col gap-1 text-[11px] font-bold">
             {ar ? "مطلوب بحلول" : "Required by"}

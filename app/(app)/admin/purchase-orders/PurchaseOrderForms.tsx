@@ -76,16 +76,27 @@ export function NewPOForm({
           </label>
           <label className="flex flex-col gap-1 text-[11px] font-bold">
             {ar ? "المورّد" : "Supplier"}
-            <select name="supplierId" required defaultValue="" className="input text-xs">
-              <option value="" disabled>
-                {ar ? "— اختر مورّداً —" : "— select supplier —"}
-              </option>
-              {suppliers.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
+            {suppliers.length > 0 ? (
+              <select name="supplierId" required defaultValue="" className="input text-xs">
+                <option value="" disabled>
+                  {ar ? "— اختر مورّداً —" : "— select supplier —"}
                 </option>
-              ))}
-            </select>
+                {suppliers.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              // No suppliers yet — a required empty <select> is unsubmittable.
+              // Free-text name → the action's find-or-create supplier path.
+              <input
+                name="supplier"
+                required
+                placeholder={ar ? "اسم المورّد (سيُنشأ تلقائياً)" : "Supplier name (auto-created)"}
+                className="input text-xs"
+              />
+            )}
           </label>
           <label className="flex flex-col gap-1 text-[11px] font-bold">
             {ar ? "متوقع في" : "Expected at"}

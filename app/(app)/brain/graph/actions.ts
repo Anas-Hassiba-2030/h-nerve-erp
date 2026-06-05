@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/db";
 import { seedBrainGraph } from "@/lib/brain/seedGraph";
+import { flashToast } from "@/lib/utils/toast";
+import { getLocale } from "@/lib/i18n/i18n.server";
 
 /**
  * Form-friendly variant: returns void so it can be used directly in
@@ -12,7 +14,19 @@ import { seedBrainGraph } from "@/lib/brain/seedGraph";
  */
 export async function rebuildBrainGraph(): Promise<void> {
   await requireUser();
-  await seedBrainGraph();
+  const ar = getLocale() === "ar";
+  try {
+    await seedBrainGraph();
+  } catch (e) {
+    flashToast({
+      type: "info",
+      entity: "info",
+      id: "rebuild-graph",
+      label: ar
+        ? `تعذّر إعادة بناء الرسم البياني: ${(e as Error).message || "خطأ"}`
+        : `Graph rebuild failed: ${(e as Error).message || "error"}`,
+    });
+  }
   revalidatePath("/brain/graph");
 }
 

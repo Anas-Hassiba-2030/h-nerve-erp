@@ -6,10 +6,26 @@ import { requireRole } from "@/lib/auth/authz";
 import { seedMemoryLake } from "@/lib/brain/seedMemories";
 import { memoryLake } from "@/lib/brain/memory.live";
 import { prisma } from "@/lib/db/db";
+import { flashToast } from "@/lib/utils/toast";
+import { getLocale } from "@/lib/i18n/i18n.server";
 
 export async function seedMemories(): Promise<void> {
   await requireUser();
-  await seedMemoryLake();
+  const ar = getLocale() === "ar";
+  try {
+    await seedMemoryLake();
+  } catch (e) {
+    flashToast({
+      type: "info",
+      entity: "info",
+      id: "seed-memories",
+      label: ar
+        ? `تعذّر بذر الذاكرة: ${(e as Error).message || "خطأ"}`
+        : `Memory seed failed: ${(e as Error).message || "error"}`,
+    });
+    revalidatePath("/brain/memory");
+    return;
+  }
   revalidatePath("/brain/memory");
   revalidatePath("/insights");
 }

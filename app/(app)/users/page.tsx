@@ -1,6 +1,7 @@
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { prisma } from "@/lib/db/db";
 import { formatNumber } from "@/lib/utils/utils";
+import { OrgTabsClient } from "./OrgTabsClient";
 import "../daylight.css";
 import "./employees.css";
 
@@ -63,7 +64,7 @@ export default async function UsersPage() {
     const role = isAr ? (ROLE_AR[u.role] ?? u.role) : (ROLE_EN[u.role] ?? u.role);
     return (
       <div key={u.id} className={`tnode${kids.length ? " has-kids" : ""}`}>
-        <div className="tcard" data-id={u.id}>
+        <div className="tcard" data-id={u.id} data-role={u.role}>
           <span className="tav">
             {u.name.slice(0, 1)}
             {u.active ? <span className="pres" /> : null}
@@ -71,9 +72,9 @@ export default async function UsersPage() {
           <span className="tinfo">
             <span className="tn">{u.name}</span>
             <span className="tr">{u.title ?? role}</span>
+            {sector ? <span className="tr" style={{ opacity: 0.55, fontSize: "9.5px" }}>{sector}</span> : null}
           </span>
           <span className="tbadge">{RANK_GLYPH[u.rank] ?? "♟"}</span>
-          {sector ? <span className="tbadge" /> : null}
         </div>
         {kids.length ? (
           <div className="tkids">{kids.map((k) => renderNode(k))}</div>
@@ -115,56 +116,52 @@ export default async function UsersPage() {
           </div>
         </div>
 
-        <div className="em-tabs">
-          <button className="em-tab on" data-t="tree">
-            {isAr ? "الهيكل التنظيمي" : "Org structure"}
-          </button>
-          <button className="em-tab" data-t="list">
-            {isAr ? "قائمة الأعضاء" : "Member list"}
-          </button>
-        </div>
-
-        <div id="treeView" className="em-tree-wrap">
-          <div className="tree">{roots.map((u) => renderNode(u))}</div>
-        </div>
-
-        <div id="listView">
-          <div className="em-controls">
-            <input
-              className="em-search"
-              placeholder={isAr ? "بحث بالاسم أو الدور…" : "Search by name or role…"}
-            />
-          </div>
-          <div className="em-grid" id="grid">
-            {users.map((u) => {
-              const sector = u.company?.name ?? "—";
-              const role = isAr ? (ROLE_AR[u.role] ?? u.role) : (ROLE_EN[u.role] ?? u.role);
-              return (
-                <div key={u.id} className="mcard" data-id={u.id}>
-                  <div className="mhead">
-                    <span className="mav">
-                      {u.name.slice(0, 1)}
-                      {u.active ? <span className="pres" /> : null}
-                    </span>
-                    <div>
-                      <div className="mn">
-                        {u.name} <span className="tbadge">{RANK_GLYPH[u.rank] ?? "♟"}</span>
+        <OrgTabsClient
+          treeLabel={isAr ? "الهيكل التنظيمي" : "Org structure"}
+          listLabel={isAr ? "قائمة الأعضاء" : "Member list"}
+          treeContent={
+            <div className="tree">{roots.map((u) => renderNode(u))}</div>
+          }
+          listContent={
+            <>
+              <div className="em-controls">
+                <input
+                  className="em-search"
+                  placeholder={isAr ? "بحث بالاسم أو الدور…" : "Search by name or role…"}
+                />
+              </div>
+              <div className="em-grid">
+                {users.map((u) => {
+                  const sector = u.company?.name ?? "—";
+                  const role = isAr ? (ROLE_AR[u.role] ?? u.role) : (ROLE_EN[u.role] ?? u.role);
+                  return (
+                    <div key={u.id} className="mcard">
+                      <div className="mhead">
+                        <span className="mav">
+                          {u.name.slice(0, 1)}
+                          {u.active ? <span className="pres" /> : null}
+                        </span>
+                        <div>
+                          <div className="mn">
+                            {u.name} <span className="tbadge">{RANK_GLYPH[u.rank] ?? "♟"}</span>
+                          </div>
+                          <div className="mr">{u.title ?? role}</div>
+                        </div>
                       </div>
-                      <div className="mr">{u.title ?? role}</div>
+                      <div className="mmeta">
+                        <span className="sector">{sector}</span>
+                        <span>{formatNumber(u.xp ?? 0)} XP</span>
+                        <span>
+                          {isAr ? "دخول" : "logins"} {formatNumber(u.loginCount ?? 0)}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="mmeta">
-                    <span className="sector">{sector}</span>
-                    <span>{formatNumber(u.xp ?? 0)} XP</span>
-                    <span>
-                      {isAr ? "دخول" : "logins"} {formatNumber(u.loginCount ?? 0)}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+                  );
+                })}
+              </div>
+            </>
+          }
+        />
       </div>
 
       <div className="em-backdrop" id="backdrop" />

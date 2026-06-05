@@ -17,10 +17,12 @@ export function ExportMenu({
   type,
   companyCode = "HH",
   locale,
+  variant = "sleek",
 }: {
   type: string;
   companyCode?: string;
   locale: "ar" | "en";
+  variant?: "sleek" | "heritage";
 }) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<{ top: number; left: number; right: number } | null>(null);
@@ -123,14 +125,22 @@ export function ExportMenu({
         ref={btnRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[11px] font-extrabold uppercase tracking-[0.16em] transition"
-        style={{
-          background: open ? "#0f172a" : "#ffffff",
-          color: open ? "#ffffff" : "#0f172a",
-          border: "1.5px solid #0f172a",
-          borderRadius: 0,
-          boxShadow: "0 1px 0 rgba(0,0,0,0.06)",
-        }}
+        className={
+          variant === "heritage"
+            ? "dl-btn dl-btn-secondary inline-flex items-center gap-1.5 transition"
+            : "inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[11px] font-extrabold uppercase tracking-[0.16em] transition"
+        }
+        style={
+          variant === "sleek"
+            ? {
+                background: open ? "#0f172a" : "#ffffff",
+                color: open ? "#ffffff" : "#0f172a",
+                border: "1.5px solid #0f172a",
+                borderRadius: 0,
+                boxShadow: "0 1px 0 rgba(0,0,0,0.06)",
+              }
+            : undefined
+        }
         aria-expanded={open}
       >
         <Download className="h-3.5 w-3.5" />

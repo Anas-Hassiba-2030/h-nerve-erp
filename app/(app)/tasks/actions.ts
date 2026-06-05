@@ -13,6 +13,7 @@ import { logActivity } from "@/lib/auth/activityLog";
 
 const taskSchema = z.object({
   title: z.string().min(1).max(160),
+  titleEn: z.string().max(160).optional().or(z.literal("")),
   description: z.string().max(1000).optional().or(z.literal("")),
   kind: z.enum(["CORE", "SIDE"]).default("CORE"),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).default("MEDIUM"),
@@ -26,6 +27,7 @@ export async function createTask(formData: FormData) {
   const user = await requireRole("MANAGER");
   const data = taskSchema.parse({
     title: formData.get("title"),
+    titleEn: formData.get("titleEn") ?? "",
     description: formData.get("description") ?? "",
     kind: formData.get("kind") || "CORE",
     priority: formData.get("priority") || "MEDIUM",
@@ -37,6 +39,7 @@ export async function createTask(formData: FormData) {
   const created = await prisma.task.create({
     data: {
       title: data.title,
+      titleEn: data.titleEn || null,
       description: data.description || null,
       kind: data.kind,
       priority: data.priority,

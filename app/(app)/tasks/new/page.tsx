@@ -19,8 +19,12 @@ export default async function NewTaskPage() {
       <div className="flex-1 p-6">
         <form action={createTask} className="card card-pad mx-auto max-w-2xl space-y-5">
           <div>
-            <label className="label" htmlFor="title">{ar ? "العنوان" : "Title"}</label>
-            <input id="title" name="title" required className="input" />
+            <label className="label" htmlFor="title">{ar ? "العنوان (عربي)" : "Title (Arabic)"}</label>
+            <input id="title" name="title" required className="input" dir="rtl" />
+          </div>
+          <div>
+            <label className="label" htmlFor="titleEn">{ar ? "العنوان (إنجليزي)" : "Title (English)"}</label>
+            <input id="titleEn" name="titleEn" className="input" dir="ltr" placeholder={ar ? "اختياري — يُعرض للمستخدمين الإنجليزيين" : "Optional — shown in English UI"} />
           </div>
           <div>
             <label className="label" htmlFor="description">{ar ? "الوصف" : "Description"}</label>

@@ -18,7 +18,7 @@ import { prisma } from "@/lib/db/db";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { formatDate, formatNumber } from "@/lib/utils/utils";
 import "../daylight.css";
-import "./audit.css";
+import "../audit.css";
 
 const ACTION_META: Record<
   string,

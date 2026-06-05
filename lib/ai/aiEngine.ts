@@ -563,11 +563,11 @@ export async function runEngineExtra(): Promise<EngineInsight[]> {
 }
 
 /** Persist the generated insights as AIInsight rows, deduping against
- *  existing OPEN insights with identical title in the last 24 hours. */
+ *  existing OPEN insights with identical Arabic title in the last 24 hours.
+ *  Always saves both languages: title/body (Arabic primary) + titleEn/bodyEn. */
 export async function persistInsights(
   insights: EngineInsight[],
   authorId: string | null,
-  locale: "ar" | "en" = "ar",
 ): Promise<{ created: number; skipped: number }> {
   if (insights.length === 0) return { created: 0, skipped: 0 };
 
@@ -581,9 +581,7 @@ export async function persistInsights(
   let created = 0;
   let skipped = 0;
   for (const ins of insights) {
-    const title = locale === "ar" ? ins.title_ar : ins.title_en;
-    const body = locale === "ar" ? ins.body_ar : ins.body_en;
-    if (existingTitles.has(title.trim().toLowerCase())) {
+    if (existingTitles.has(ins.title_ar.trim().toLowerCase())) {
       skipped += 1;
       continue;
     }
@@ -591,8 +589,10 @@ export async function persistInsights(
       data: {
         module: ins.module,
         severity: ins.severity,
-        title,
-        body,
+        title: ins.title_ar,
+        titleEn: ins.title_en || null,
+        body: ins.body_ar,
+        bodyEn: ins.body_en || null,
         confidence: ins.confidence ?? confidenceFor(ins.severity),
         authorId,
         status: "OPEN",

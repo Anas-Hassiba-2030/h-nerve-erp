@@ -313,7 +313,7 @@ export async function runAiEngine() {
   // dies silently. Catch + toast so the user always sees the click landed.
   try {
     const generated = await runEngine();
-    const { created, skipped } = await persistInsights(generated, user.id, lc);
+    const { created, skipped } = await persistInsights(generated, user.id);
 
     await logActivity({
       action: "INSIGHT",

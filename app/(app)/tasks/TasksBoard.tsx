@@ -403,7 +403,11 @@ export function TasksBoard({
         </form>
 
         <div id="rows">
-          {shown.map((t) => (
+          {shown.length === 0 ? (
+            <div style={{ padding: "48px 20px", textAlign: "center", color: "var(--ink-muted)", fontSize: 13 }}>
+              {ar ? "لا مهام تطابق هذا الفلتر" : "No tasks match this filter"}
+            </div>
+          ) : shown.map((t) => (
             <div
               key={t.id}
               className={"tk-row" + (t.status === "done" ? " done" : "")}

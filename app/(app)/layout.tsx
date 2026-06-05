@@ -13,6 +13,7 @@ import { getAsOf } from "@/lib/utils/timemachine";
 // SSE, drop zone) are lazy-loaded client-side to keep them off the critical
 // render path. See components/DeferredOverlays.tsx.
 import { DeferredOverlays } from "@/components/layout/DeferredOverlays";
+import { Companion } from "@/components/companion/Companion";
 // CROSS-TENANT INTENT: the (app) layout reads role permissions unscoped
 // (must resolve for any companyId the cookie points at, including a
 // superadmin "view as" context).
@@ -141,6 +142,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         userId={dbUser.id}
         userName={dbUser.name ?? (locale === "ar" ? "أ. الحوراني" : "A. Al-Hourani")}
       />
+      {/* Phase 28 — The Companion (الشرارة). Ambient photon, dismissible,
+          prefers-reduced-motion aware. */}
+      <Companion />
     </div>
   );
 }

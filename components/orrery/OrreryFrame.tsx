@@ -81,6 +81,9 @@ export function OrreryFrame({ identity }: { identity: OrreryIdentity }) {
         padding: 0,
         display: "block",
         background: "#0D1F1A",
+        // Explicit low z-index: the iframe must always sit BELOW the separate
+        // .orrery-fab-layer (which carries the brain/time/quick-add panels).
+        zIndex: 0,
       }}
     />
   );

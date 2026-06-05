@@ -1,3 +1,16 @@
+/* ── The FAB layer sits ABOVE the entire iframe ──────────────────────────
+   The Orrery hub renders the fullscreen iframe (.orrery-host) and the FAB
+   rail + its panels (.orrery-fab-layer) as two SEPARATE body-level layers.
+   This layer is forced to a very high z-index so the brain veil + time pill
+   + quick-add panels always paint above the iframe's compositing layer.
+   `!important` beats living.css `body > *{z-index:1}` (ID-inflated specificity
+   2,0,1). position:relative makes the z-index take effect without disturbing
+   the fixed positioning of the panels inside. */
+.orrery-fab-layer {
+  position: relative !important;
+  z-index: 2147483000 !important;
+}
+
 /* Orrery-hub FAB placement — co-located so it always bundles with the page.
    On the hub route the living.css .hn-fab-rail positioning was getting
    overridden (the rail floated to the top-left over the logo). Force it

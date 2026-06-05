@@ -50,22 +50,33 @@ export default async function OrreryPage() {
     iq,
   };
 
-  // IMPORTANT: wrap in a real element. The Orrery is the ONE authenticated
-  // surface rendered OUTSIDE the (app) layout, so its children would otherwise
-  // be DIRECT children of <body>. living.css ships
-  //   body > *:not(#living-bg):not(#ambient-bg){ position:relative; z-index:1 }
-  // whose ID-based :not() inflates specificity to (2,0,1) — high enough to
-  // override `.cv-root{position:fixed;z-index:100}` and the time-machine pill,
-  // collapsing the brain veil + time pill behind the fixed full-screen iframe
-  // (the brain/time FAB circles "did nothing"). One wrapper div means only the
-  // div matches `body > *`; the fixed overlays nest inside and keep their
-  // authored stacking. (In the (app) layout the panels are already nested, so
-  // this bug is Orrery-only.)
+  // The Orrery is the ONE authenticated surface rendered OUTSIDE the (app)
+  // layout, so its children would otherwise be DIRECT children of <body>.
+  //
+  // The brain + time FAB panels kept rendering BEHIND the fullscreen iframe.
+  // Root cause (verified across the whole chain): the FAB panels and the iframe
+  // are both `position:fixed`. A single shared wrapper puts them in the SAME
+  // stacking context — and in real browsers an <iframe>'s own compositing layer
+  // can paint OVER same-context siblings even when their z-index is higher. So
+  // raising `.cv-root{z-index:100}` above the iframe within one wrapper was not
+  // enough (that was the earlier fix; it looked right on paper but still failed
+  // live, because the iframe layer won).
+  //
+  // The robust fix: two SEPARATE body-level layers. The iframe lives in
+  // `.orrery-host`; the FAB rail + all its panels live in `.orrery-fab-layer`,
+  // which orrery-fabs.css pins to a very high z-index with !important (to beat
+  // living.css's `body > *{z-index:1}`, specificity 2,0,1). The ENTIRE FAB layer
+  // — and therefore every panel inside it — now sits above the ENTIRE iframe
+  // layer, independent of any same-context iframe-compositing quirk.
   return (
-    <div className="orrery-host">
-      <OrreryFrame identity={identity} />
-      <OrreryFabs locale={locale} />
-    </div>
+    <>
+      <div className="orrery-host">
+        <OrreryFrame identity={identity} />
+      </div>
+      <div className="orrery-fab-layer">
+        <OrreryFabs locale={locale} />
+      </div>
+    </>
   );
 }
 

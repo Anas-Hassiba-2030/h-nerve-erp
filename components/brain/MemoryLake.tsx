@@ -40,7 +40,6 @@ type Props = {
     sector: string; outcome: string; year: string; all: string;
     good: string; bad: string;
     searchPlaceholder: string;
-    countTemplate: (shown: string, total: string) => string;
     empty: string;
   };
 };
@@ -219,7 +218,16 @@ export function MemoryLake({ ar, memories, domains, years, labels }: Props) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <span className="cnt">{labels.countTemplate(arN(shown), arN(memories.length))}</span>
+          {/* Count string is built HERE (client side) from `ar`, not passed in
+              as a function prop — a Server Component cannot pass a function to a
+              Client Component (it throws "Functions cannot be passed directly to
+              Client Components"), which crashed /brain/memory the moment it had
+              any rows to render. */}
+          <span className="cnt">
+            {ar
+              ? `${arN(shown)} من ${arN(memories.length)} ذكرى`
+              : `${arN(shown)} of ${arN(memories.length)} memories`}
+          </span>
         </div>
       </div>
 

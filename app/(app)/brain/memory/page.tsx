@@ -151,8 +151,9 @@ export default async function BrainMemoryPage() {
             searchPlaceholder: ar
               ? "اسأل الذاكرة… (مثال: هبوط إيراد، توسّع إنتاج، خطر هدر)"
               : "Ask the memory… (e.g. revenue drop, expansion, waste risk)",
-            countTemplate: (shown, total) =>
-              ar ? `${shown} من ${total} ذكرى` : `${shown} of ${total} memories`,
+            // NOTE: no function props here — MemoryLake is a Client Component and
+            // a Server Component cannot hand it a function (it throws and crashes
+            // the page). The "X of Y memories" count is built inside MemoryLake.
             empty: ar ? "لا ذكريات مطابقة. جرّب بحثاً آخر." : "No matching memories. Try a different query.",
           }}
         />

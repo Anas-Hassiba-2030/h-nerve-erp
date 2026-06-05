@@ -889,7 +889,7 @@ land. **Effort.** Scales with how many gap-modules we add (HR alone ≈ 3–5 da
 
 ---
 
-## Phase 28 — The Companion ("the soul") 🔭 (BACKLOG — Anas's idea, 2026-06-03)
+## Phase 28 — The Companion ("the soul") ✅ v1 SHIPPED (2026-06-05)
 
 > **Anas's words:** *"Why not add a bit of animation that will sit in the corner
 > and move around the website? It will add a soul into it… like the photon one,

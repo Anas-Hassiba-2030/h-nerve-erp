@@ -208,6 +208,7 @@ export async function autoGenerateForecasts(): Promise<void> {
             },
           },
         },
+        take: 100,
       }),
       prisma.company.findFirst({ where: { sector: "DAIRY" } }),
       prisma.company.findFirst({ where: { sector: "AGRICULTURE" } }),

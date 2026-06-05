@@ -61,6 +61,7 @@ export default async function TransfersPage({
           deletedAt: true,
         },
         orderBy: { code: "asc" },
+        take: 100,
       }),
       prisma.product.findMany({
         where: { deletedAt: null },

@@ -96,6 +96,7 @@ export default async function ImportsAdminPage({
     prisma.tenantImportMapping.findMany({
       where: { active: true },
       select: { tenantId: true, sourceSystem: true },
+      take: 100,
     }),
     prisma.importLog.count(),
     prisma.importLog.findFirst({ orderBy: { createdAt: "desc" }, select: { createdAt: true } }),

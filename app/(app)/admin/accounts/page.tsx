@@ -38,8 +38,9 @@ export default async function AccountsPage({ searchParams }: { searchParams: SP 
   const [periods, accounts] = await Promise.all([
     prisma.financialPeriod.findMany({
       orderBy: [{ year: "desc" }, { month: "desc" }],
+      take: 120,
     }),
-    prisma.ledgerAccount.findMany({ orderBy: { code: "asc" } }),
+    prisma.ledgerAccount.findMany({ orderBy: { code: "asc" }, take: 500 }),
   ]);
   const active =
     periods.find((p) => fmtP(p.year, p.month) === periodSel) ?? periods[0] ?? null;

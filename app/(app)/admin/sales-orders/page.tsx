@@ -67,16 +67,19 @@ export default async function SalesOrdersPage({
     prisma.salesOrder.findMany({
       where: { deletedAt: null },
       select: { status: true, updatedAt: true },
+      take: 2000,
     }),
     prisma.product.findMany({
       where: { deletedAt: null },
       select: { id: true, sku: true, name: true, quantity: true, tenantId: true },
       orderBy: { sku: "asc" },
+      take: 500,
     }),
     prisma.customer.findMany({
       where: { deletedAt: null },
       select: { id: true, name: true },
       orderBy: { name: "asc" },
+      take: 200,
     }),
     prisma.salesOrder.findMany({
       where,

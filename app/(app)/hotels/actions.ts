@@ -10,6 +10,8 @@ import { requireUser } from "@/lib/auth/session";
 import { requireRole } from "@/lib/auth/authz";
 import { generateNumber } from "@/lib/utils/utils";
 import { logActivity } from "@/lib/auth/activityLog";
+import { flashToast } from "@/lib/utils/toast";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { COMPANY_CODE_TO_TENANT_SLUG, SECTOR_TO_TENANT_SLUG } from "@/lib/tenancy/tenancy";
 import {
   parseFormState,
@@ -118,60 +120,76 @@ export async function deleteHotel(formData: FormData) {
 
 export async function createBooking(formData: FormData) {
   await requireRole("MANAGER");
-  const data = bookingSchema.parse({
-    hotelId: formData.get("hotelId"),
-    guestName: formData.get("guestName"),
-    roomType: formData.get("roomType") || "STANDARD",
-    rooms: formData.get("rooms") ?? 1,
-    guests: formData.get("guests") ?? 2,
-    checkIn: formData.get("checkIn"),
-    checkOut: formData.get("checkOut"),
-    revenue: formData.get("revenue") ?? 0,
-    status: formData.get("status") || "CONFIRMED",
-    notes: formData.get("notes") ?? "",
-  });
+  const ar = getLocale() === "ar";
+  // bookingSchema.parse() + the check-out>check-in guard both throw; without a
+  // catch the booking form silently re-renders with no message. Toast on any
+  // failure so the button never looks dead.
+  try {
+    const data = bookingSchema.parse({
+      hotelId: formData.get("hotelId"),
+      guestName: formData.get("guestName"),
+      roomType: formData.get("roomType") || "STANDARD",
+      rooms: formData.get("rooms") ?? 1,
+      guests: formData.get("guests") ?? 2,
+      checkIn: formData.get("checkIn"),
+      checkOut: formData.get("checkOut"),
+      revenue: formData.get("revenue") ?? 0,
+      status: formData.get("status") || "CONFIRMED",
+      notes: formData.get("notes") ?? "",
+    });
 
-  const checkIn = new Date(data.checkIn);
-  const checkOut = new Date(data.checkOut);
-  if (checkOut <= checkIn) {
-    throw new Error("تاريخ المغادرة يجب أن يكون بعد تاريخ الوصول.");
+    const checkIn = new Date(data.checkIn);
+    const checkOut = new Date(data.checkOut);
+    if (checkOut <= checkIn) {
+      throw new Error("checkout-before-checkin");
+    }
+
+    // Phase F4 — derive tenantId from the parent hotel's company.
+    const parentHotel = await prisma.hotel.findUnique({
+      where: { id: data.hotelId },
+      select: { company: { select: { code: true, sector: true } } },
+    });
+    const tenantSlug =
+      (parentHotel && COMPANY_CODE_TO_TENANT_SLUG[parentHotel.company.code]) ||
+      (parentHotel && SECTOR_TO_TENANT_SLUG[parentHotel.company.sector]) ||
+      "hourani-hotels";
+
+    const booking = await prisma.booking.create({
+      data: {
+        hotelId: data.hotelId,
+        tenantId: tenantSlug,
+        reference: generateNumber("BK"),
+        guestName: data.guestName,
+        roomType: data.roomType,
+        rooms: data.rooms,
+        guests: data.guests,
+        checkIn,
+        checkOut,
+        revenue: data.revenue,
+        status: data.status,
+        notes: data.notes || null,
+      },
+    });
+    await logActivity({
+      action: "CREATE",
+      entity: "BOOKING",
+      entityId: booking.id,
+      summary: `حجز جديد ${booking.reference} للضيف ${data.guestName}`,
+      summaryEn: `New booking ${booking.reference} for ${data.guestName}`,
+      module: "HOSPITALITY",
+      meta: { revenue: data.revenue, rooms: data.rooms },
+    });
+  } catch (e) {
+    const dateErr = (e as Error)?.message === "checkout-before-checkin";
+    flashToast({
+      type: "info", entity: "info", id: "create-booking",
+      label: dateErr
+        ? (ar ? "تاريخ المغادرة يجب أن يكون بعد تاريخ الوصول" : "Check-out must be after check-in")
+        : (ar ? "تعذّر إنشاء الحجز — تحقّق من المدخلات" : "Couldn't create booking — check the inputs"),
+    });
+    revalidatePath("/hotels");
+    return;
   }
-
-  // Phase F4 — derive tenantId from the parent hotel's company.
-  const parentHotel = await prisma.hotel.findUnique({
-    where: { id: data.hotelId },
-    select: { company: { select: { code: true, sector: true } } },
-  });
-  const tenantSlug =
-    (parentHotel && COMPANY_CODE_TO_TENANT_SLUG[parentHotel.company.code]) ||
-    (parentHotel && SECTOR_TO_TENANT_SLUG[parentHotel.company.sector]) ||
-    "hourani-hotels";
-
-  const booking = await prisma.booking.create({
-    data: {
-      hotelId: data.hotelId,
-      tenantId: tenantSlug,
-      reference: generateNumber("BK"),
-      guestName: data.guestName,
-      roomType: data.roomType,
-      rooms: data.rooms,
-      guests: data.guests,
-      checkIn,
-      checkOut,
-      revenue: data.revenue,
-      status: data.status,
-      notes: data.notes || null,
-    },
-  });
-  await logActivity({
-    action: "CREATE",
-    entity: "BOOKING",
-    entityId: booking.id,
-    summary: `حجز جديد ${booking.reference} للضيف ${data.guestName}`,
-    summaryEn: `New booking ${booking.reference} for ${data.guestName}`,
-    module: "HOSPITALITY",
-    meta: { revenue: data.revenue, rooms: data.rooms },
-  });
   revalidatePath("/hotels");
   redirect("/hotels");
 }

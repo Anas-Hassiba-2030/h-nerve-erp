@@ -26,32 +26,45 @@ const programSchema = z.object({
 
 export async function createProgram(formData: FormData) {
   await requireRole("MANAGER");
-  const data = programSchema.parse({
-    companyId: formData.get("companyId"),
-    name: formData.get("name"),
-    nameEn: formData.get("nameEn") ?? "",
-    founder: formData.get("founder"),
-    vertical: formData.get("vertical") || "OTHER",
-    stage: formData.get("stage") || "INTAKE",
-    cohort: formData.get("cohort") || "2026",
-    fundingJod: formData.get("fundingJod") ?? 0,
-    teamSize: formData.get("teamSize") ?? 1,
-    description: formData.get("description") ?? "",
-  });
-  await prisma.program.create({
-    data: {
-      companyId: resolveOwnCompanyId(data.companyId, getActiveWorkspaceId()),
-      name: data.name,
-      nameEn: data.nameEn || null,
-      founder: data.founder,
-      vertical: data.vertical,
-      stage: data.stage,
-      cohort: data.cohort,
-      fundingJod: data.fundingJod,
-      teamSize: data.teamSize,
-      description: data.description || null,
-    },
-  });
+  const ar = getLocale() === "ar";
+  // schema.parse() throws on invalid input; without this guard the button just
+  // re-renders the form with no message (silent "does nothing"). Toast on any
+  // validation/DB failure so the click always produces visible feedback.
+  try {
+    const data = programSchema.parse({
+      companyId: formData.get("companyId"),
+      name: formData.get("name"),
+      nameEn: formData.get("nameEn") ?? "",
+      founder: formData.get("founder"),
+      vertical: formData.get("vertical") || "OTHER",
+      stage: formData.get("stage") || "INTAKE",
+      cohort: formData.get("cohort") || "2026",
+      fundingJod: formData.get("fundingJod") ?? 0,
+      teamSize: formData.get("teamSize") ?? 1,
+      description: formData.get("description") ?? "",
+    });
+    await prisma.program.create({
+      data: {
+        companyId: resolveOwnCompanyId(data.companyId, getActiveWorkspaceId()),
+        name: data.name,
+        nameEn: data.nameEn || null,
+        founder: data.founder,
+        vertical: data.vertical,
+        stage: data.stage,
+        cohort: data.cohort,
+        fundingJod: data.fundingJod,
+        teamSize: data.teamSize,
+        description: data.description || null,
+      },
+    });
+  } catch {
+    flashToast({
+      type: "info", entity: "info", id: "create-program",
+      label: ar ? "تعذّر إنشاء البرنامج — تحقّق من المدخلات" : "Couldn't create program — check the inputs",
+    });
+    revalidatePath("/education");
+    return;
+  }
   revalidatePath("/education");
   redirect("/education");
 }

@@ -36,6 +36,7 @@ export default async function WorkflowsPage() {
       nodes: true,
       _count: { select: { runs: true } },
     },
+    take: 200,
   });
 
   const total = workflows.length;

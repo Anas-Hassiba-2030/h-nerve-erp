@@ -47,6 +47,7 @@ export async function GET(req: NextRequest) {
     const tenants = await prismaUnscoped.tenant.findMany({
       where: { status: "ACTIVE" },
       select: { slug: true },
+      take: 200,
     });
     const perTenant: Array<{ tenantId: string; generated: number; updated: number; unchanged: number }> = [];
     let totGen = 0, totUpd = 0, totUnc = 0;

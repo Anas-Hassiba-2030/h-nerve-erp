@@ -37,6 +37,7 @@ export default async function UsersPage() {
   const users = (await prisma.user.findMany({
     orderBy: { createdAt: "asc" },
     include: { company: true },
+    take: 500,
   })) as unknown as Member[];
 
   const isAr = getLocale() === "ar";

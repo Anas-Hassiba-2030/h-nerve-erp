@@ -8,7 +8,7 @@ import "../../daylight.css";
 
 export default async function NewTaskPage() {
   const ar = getLocale() === "ar";
-  const users = await prisma.user.findMany({ orderBy: { name: "asc" } });
+  const users = await prisma.user.findMany({ orderBy: { name: "asc" }, take: 200 });
   return (
     <DaylightShell dir={ar ? "rtl" : "ltr"}>
       <DaylightHeader

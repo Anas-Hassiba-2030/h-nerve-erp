@@ -46,7 +46,7 @@ export async function getUserDetail(id: string) {
     forecasts,
     insights,
   ] = await Promise.all([
-    prisma.achievement.findMany({ orderBy: { threshold: "asc" } }),
+    prisma.achievement.findMany({ orderBy: { threshold: "asc" }, take: 100 }),
     prisma.userAchievement.findMany({
       where: { userId: user.id },
       include: { achievement: true },

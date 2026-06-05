@@ -88,6 +88,7 @@ export default async function AdminUsersPage({
     prismaUnscoped.company.findMany({
       orderBy: { code: "asc" },
       select: { id: true, code: true, name: true, nameEn: true },
+      take: 200,
     }),
     // Full eligible-manager list for the "Reports to" picker — NOT the page
     // slice. With only the 20-row slice, a user whose manager is off-page had

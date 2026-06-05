@@ -13,6 +13,7 @@ export default async function NewCropPage({
   const farms = await prisma.farm.findMany({
     orderBy: { name: "asc" },
     include: { company: true },
+    take: 100,
   });
 
   const today = new Date().toISOString().slice(0, 10);

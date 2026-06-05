@@ -64,6 +64,7 @@ export default async function WorkspaceLayout({
   const allCompanies = await prismaUnscoped.company.findMany({
     select: { id: true, code: true, name: true, nameEn: true, sector: true },
     orderBy: { name: "asc" },
+    take: 200,
   });
 
   const locale = getLocale();

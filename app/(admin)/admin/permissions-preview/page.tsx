@@ -48,7 +48,7 @@ export default async function PermissionsPreview({
   // CROSS-TENANT INTENT: RolePermission is global config, not tenant
   // data; reading via the scoped `prisma` client is harmless because
   // RolePermission isn't in any TENANT_SCOPED_MODELS set.
-  const rows = await prisma.rolePermission.findMany();
+  const rows = await prisma.rolePermission.findMany({ take: 200 });
   const byKey = new Map(rows.map((r) => [`${r.role}:${r.path}`, r.allowed]));
 
   function effective(role: string, path: string): boolean {

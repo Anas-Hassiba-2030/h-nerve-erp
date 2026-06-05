@@ -8,7 +8,7 @@ import "../../daylight.css";
 
 export default async function NewForecastPage() {
   const ar = getLocale() === "ar";
-  const companies = await prisma.company.findMany({ orderBy: { name: "asc" } });
+  const companies = await prisma.company.findMany({ orderBy: { name: "asc" }, take: 100 });
   const today = new Date().toISOString().slice(0, 10);
   const week = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 

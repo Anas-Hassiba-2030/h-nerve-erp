@@ -43,6 +43,7 @@ export default async function IntegrationsHubPage() {
 
   const integrations = await prisma.integration.findMany({
     include: { _count: { select: { logs: true } } },
+    take: 100,
   });
   const byProvider = new Map(integrations.map((i) => [i.providerKey, i]));
 

@@ -263,6 +263,7 @@ export type AgricultureOpsData = Awaited<ReturnType<typeof getAgricultureOpsData
 export async function getEducationOpsData(_ar: boolean) {
   const programs = await prisma.program.findMany({
     orderBy: { createdAt: "desc" },
+    take: 200,
   });
 
   const totalFunding = programs.reduce((a, p) => a + (p.fundingJod ?? 0), 0);
@@ -323,6 +324,7 @@ export type EducationOpsData = Awaited<ReturnType<typeof getEducationOpsData>>;
 export async function getHoldingOpsData(_ar: boolean) {
   const companies = await prismaUnscoped.company.findMany({
     orderBy: { employees: "desc" },
+    take: 200,
   });
   // Time-Machine aware — the 30d portfolio window ends at the cursor,
   // so the roll-up shows the group as it stood on that past day.

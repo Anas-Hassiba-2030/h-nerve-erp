@@ -9,6 +9,7 @@ export default async function NewHotelPage() {
     where: { sector: { in: ["HOSPITALITY", "INVESTMENT"] } },
     orderBy: { name: "asc" },
     select: { id: true, name: true },
+    take: 100,
   });
 
   return (

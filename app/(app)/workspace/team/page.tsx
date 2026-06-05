@@ -35,6 +35,7 @@ export default async function WorkspaceTeamPage() {
     where: { companyId: workspaceId },
     select: { name: true, email: true, role: true, title: true, rank: true, xp: true },
     orderBy: { xp: "desc" },
+    take: 200,
   });
 
   const byRole = team.reduce<Record<string, number>>((m, u) => {
@@ -48,6 +49,7 @@ export default async function WorkspaceTeamPage() {
     where: { deletedAt: null, stage: { not: "DONE" } },
     orderBy: [{ priority: "asc" }, { budgetJod: "desc" }],
     select: { id: true, title: true, stage: true, ownerName: true, budgetJod: true },
+    take: 200,
   });
   const memberNames = Array.from(
     new Set(team.map((u) => u.name).filter(Boolean)),

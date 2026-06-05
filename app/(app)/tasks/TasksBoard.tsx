@@ -49,12 +49,10 @@ type Labels = {
   stat: Record<BoardStatus, string>;
   searchPlaceholder: string;
   add: string;
-  selected: (n: string) => string;
   bulkDone: string;
   bulkDoing: string;
   bulkDel: string;
   congrats: string;
-  rankUp: (name: string) => string;
   composer: { title: string };
   newHref: string;
 };
@@ -462,7 +460,11 @@ export function TasksBoard({
       </div>
 
       <div className={"tk-bulk" + (selected.size ? " show" : "")} id="bulk">
-        <span className="cnt">{labels.selected(toLocale(selected.size))}</span>
+        {/* Built HERE (client) from `ar`, not passed as a function prop — a
+            Server Component can't hand a function to a Client Component (it
+            throws "Functions cannot be passed directly to Client Components"
+            and crashed the whole /tasks page). */}
+        <span className="cnt">{ar ? `${toLocale(selected.size)} محدّد` : `${toLocale(selected.size)} selected`}</span>
         <button type="button" data-act="done" onClick={() => bulkAction("done")}>
           {labels.bulkDone}
         </button>
@@ -479,7 +481,7 @@ export function TasksBoard({
         <span className="pc">{toast?.pc ?? rank.symbol}</span>
         <div className="tx">
           <b>{labels.congrats}</b>
-          <span>{toast?.msg ?? labels.rankUp(rank.name)}</span>
+          <span>{toast?.msg ?? (ar ? `ترقّيت إلى ${rank.name}` : `Promoted to ${rank.name}`)}</span>
         </div>
       </div>
 

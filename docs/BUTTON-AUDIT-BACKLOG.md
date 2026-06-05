@@ -233,3 +233,21 @@ convene/generate/accept flow. `/brain/memory` (a real prod crash) root-caused to
 an RSC function-prop violation and fixed. Remaining items are logged "deferred"
 above — all visible-but-could-be-nicer status/delete toasts, none of them dead
 buttons.
+
+### Prod verification (post-merge) — second RSC crash caught + fixed
+
+Watching the Railway deploy + sweeping every audited page on live prod surfaced a
+SECOND instance of the `/brain/memory` bug class: **`/tasks` was crashing** into
+the error boundary. The tasks page passed `labels.selected: (n) => …` and
+`labels.rankUp: (name) => …` — functions — into the client `<TasksBoard>` (same
+RSC violation as memory's `countTemplate`; the Batch-1 grep keyed on
+`Template/render/format` and missed these names).
+
+Fixed: build both strings inside TasksBoard from `ar`; drop the function props.
+Re-grepped the precise shape (arrow returning a string/ternary as a property
+value) across all `app/`+`components/` `.tsx` → **zero remaining** (memory + tasks
+were the only two).
+
+Lesson: a Server Component may pass STRINGS and SERVER ACTIONS to a Client
+Component — never plain functions. To catch this class, grep the label-callback
+shape `\w+:\s*\(...\)\s*=>\s*(ar|backtick|quote)`, not just specific key names.

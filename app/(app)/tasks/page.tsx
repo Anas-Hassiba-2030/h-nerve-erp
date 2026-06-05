@@ -131,12 +131,13 @@ export default async function TasksPage() {
             stat: { todo: ar ? "قيد الانتظار" : "To do", doing: ar ? "قيد التنفيذ" : "In progress", done: ar ? "مكتمل" : "Done" },
             searchPlaceholder: ar ? "بحث في المهام…" : "Search tasks…",
             add: ar ? "＋ مهمة جديدة" : "＋ New task",
-            selected: (n) => ar ? `${n} محدّد` : `${n} selected`,
+            // NOTE: no function props — TasksBoard is a Client Component and a
+            // Server Component cannot pass it a function (RSC throws and crashes
+            // the page). The "N selected" + rank-up strings are built inside it.
             bulkDone: ar ? "حدّد كمكتمل" : "Mark done",
             bulkDoing: ar ? "حدّد قيد التنفيذ" : "Mark in-progress",
             bulkDel: ar ? "حذف" : "Delete",
             congrats: ar ? "تهانينا!" : "Congratulations!",
-            rankUp: (name) => ar ? `ترقّيت إلى ${name}` : `Promoted to ${name}`,
             composer: { title: ar ? "عنوان المهمة…" : "Task title…" },
             newHref: "/tasks/new",
           }}

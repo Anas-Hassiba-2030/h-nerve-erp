@@ -34,14 +34,25 @@ export async function narrate(input: NarrateInput): Promise<NarrateResult> {
   const summary = input.summary?.slice(0, 240);
   const facts = sanitizeFacts(input.facts);
 
-  const result = await narrator().write({
-    topic,
-    register: input.register ?? "editorial",
-    locale: input.locale,
-    facts,
-    summary,
-    citations: input.citations?.slice(0, 8),
-  });
+  let result;
+  try {
+    result = await narrator().write({
+      topic,
+      register: input.register ?? "editorial",
+      locale: input.locale,
+      facts,
+      summary,
+      citations: input.citations?.slice(0, 8),
+    });
+  } catch {
+    return {
+      text: input.locale === "ar" ? "تعذّر توليد السرد — المحرك في وضع الاستعداد." : "Narrative unavailable — engine in standby.",
+      cacheHit: false,
+      isStub: true,
+      ms: 0,
+      wordCount: 0,
+    };
+  }
 
   return {
     text: result.text,

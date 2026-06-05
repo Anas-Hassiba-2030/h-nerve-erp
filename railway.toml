@@ -13,13 +13,17 @@ buildCommand = "npm install && prisma generate && next build"
 # All wrapped so a hiccup can never block the deploy.
 # Railway injects DATABASE_URL and other linked-service vars at this phase.
 #
-# The trailing three top-ups fill sections a pre-existing prod DB never got
+# The trailing top-ups fill sections a pre-existing prod DB never got
 # (seed-if-empty no-ops once companies exist):
+#   • ensure-sectors     → /hotels /dairy /farms /education + intelligence
+#     (additive idempotent seedMissingSectors — find-or-creates parents, fills
+#     ONLY empty sectors, never wipes). Runs EARLY so hotels exist before the
+#     content top-ups that depend on them.
 #   • ensure-brain-seed → /brain/* (count-guarded on an empty causal graph, so
 #     it never clears accumulated brain signal; skips runBrainAnalysis = no AI spend)
 #   • seed-markets       → /markets   (marketStock.upsert — idempotent)
 #   • seed-v3-extras     → /projects + council (futureProject/councilDiscussion.upsert)
-preDeployCommand = "prisma migrate deploy && (npx tsx scripts/seed/seed-if-empty.ts || true) && (npx tsx scripts/seed/ensure-admins.ts || true) && (npx tsx scripts/seed/ensure-demo-docs.ts || true) && (npx tsx scripts/seed/ensure-supply-forecasts.ts || true) && (npx tsx scripts/seed/seed-erp-demo.ts || true) && (npx tsx scripts/seed/seed-demo-content.ts || true) && (npx tsx scripts/seed/ensure-brain-seed.ts || true) && (npx tsx scripts/seed/seed-markets.ts || true) && (npx tsx scripts/seed/seed-v3-extras.ts || true)"
+preDeployCommand = "prisma migrate deploy && (npx tsx scripts/seed/seed-if-empty.ts || true) && (npx tsx scripts/seed/ensure-admins.ts || true) && (npx tsx scripts/seed/ensure-sectors.ts || true) && (npx tsx scripts/seed/ensure-demo-docs.ts || true) && (npx tsx scripts/seed/ensure-supply-forecasts.ts || true) && (npx tsx scripts/seed/seed-erp-demo.ts || true) && (npx tsx scripts/seed/seed-demo-content.ts || true) && (npx tsx scripts/seed/ensure-brain-seed.ts || true) && (npx tsx scripts/seed/seed-markets.ts || true) && (npx tsx scripts/seed/seed-v3-extras.ts || true)"
 startCommand = "next start -p ${PORT:-3000}"
 
 # Liveness probe — Railway restarts the container if this returns non-2xx.

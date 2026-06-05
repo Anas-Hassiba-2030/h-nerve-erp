@@ -18,6 +18,10 @@ dev.log
 # DB (SQLite dev artifact — schema lives in prisma/schema.prisma)
 prisma/dev.db
 prisma/dev.db-journal
+# Prisma uses a schema FOLDER (prisma/schema/), so a local sqlite dev DB
+# lands here, not at prisma/ root. Ignore it so the binary never gets committed.
+prisma/schema/dev.db
+prisma/schema/dev.db-journal
 
 # OS / editor
 .DS_Store

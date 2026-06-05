@@ -39,64 +39,77 @@ const forecastSchema = z.object({
 
 export async function createForecast(formData: FormData) {
   const user = await requireRole("MANAGER");
-  const data = forecastSchema.parse({
-    sourceCompanyId: formData.get("sourceCompanyId"),
-    targetCompanyId: formData.get("targetCompanyId"),
-    category: formData.get("category"),
-    productLabel: formData.get("productLabel"),
-    productLabelEn: formData.get("productLabelEn") ?? "",
-    unit: formData.get("unit") || "kg",
-    predictedDemand: formData.get("predictedDemand"),
-    confidence: formData.get("confidence") ?? 0.7,
-    periodStart: formData.get("periodStart"),
-    periodEnd: formData.get("periodEnd"),
-    signal: formData.get("signal"),
-    status: formData.get("status") || "DRAFT",
-  });
+  const ar = getLocale() === "ar";
+  // forecastSchema.parse() throws on invalid input or a failed .refine
+  // (periodEnd<periodStart, same source/target). Without this guard the throw
+  // re-renders the form silently. Wrap so the button always gives feedback.
+  try {
+    const data = forecastSchema.parse({
+      sourceCompanyId: formData.get("sourceCompanyId"),
+      targetCompanyId: formData.get("targetCompanyId"),
+      category: formData.get("category"),
+      productLabel: formData.get("productLabel"),
+      productLabelEn: formData.get("productLabelEn") ?? "",
+      unit: formData.get("unit") || "kg",
+      predictedDemand: formData.get("predictedDemand"),
+      confidence: formData.get("confidence") ?? 0.7,
+      periodStart: formData.get("periodStart"),
+      periodEnd: formData.get("periodEnd"),
+      signal: formData.get("signal"),
+      status: formData.get("status") || "DRAFT",
+    });
 
-  // ISO-2 — a workspace-pinned operator may only create a forecast their
-  // own company is party to (source OR target); a cross-company ADMIN
-  // (no active workspace) may bridge any two. The scoped middleware also
-  // blocks a foreign create — this just returns a graceful message first.
-  const ws = getActiveWorkspaceId();
-  if (ws && data.sourceCompanyId !== ws && data.targetCompanyId !== ws) {
-    flashToast({
-      type: "info",
-      entity: "info",
-      label:
-        getLocale() === "ar"
+    // ISO-2 — a workspace-pinned operator may only create a forecast their
+    // own company is party to (source OR target); a cross-company ADMIN
+    // (no active workspace) may bridge any two. The scoped middleware also
+    // blocks a foreign create — this just returns a graceful message first.
+    const ws = getActiveWorkspaceId();
+    if (ws && data.sourceCompanyId !== ws && data.targetCompanyId !== ws) {
+      flashToast({
+        type: "info",
+        entity: "info",
+        label: ar
           ? "⚠ يمكنك إنشاء تنبؤ لشركتك فقط"
           : "⚠ You can only create a forecast your company is part of",
+      });
+      revalidatePath("/supply-chain");
+      return;
+    }
+
+    const created = await prisma.supplyForecast.create({
+      data: {
+        sourceCompanyId: data.sourceCompanyId,
+        targetCompanyId: data.targetCompanyId,
+        category: data.category,
+        productLabel: data.productLabel,
+        productLabelEn: data.productLabelEn || null,
+        unit: data.unit,
+        predictedDemand: data.predictedDemand,
+        confidence: data.confidence,
+        periodStart: new Date(data.periodStart),
+        periodEnd: new Date(data.periodEnd),
+        signal: data.signal,
+        status: data.status,
+        generatedById: user.id,
+      },
     });
+    await logActivity({
+      action: "FORECAST",
+      entity: "FORECAST",
+      entityId: created.id,
+      summary: `تنبؤ جديد: ${data.productLabel} — ${data.predictedDemand} ${data.unit}`,
+      summaryEn: `Forecast: ${data.productLabel} — ${data.predictedDemand} ${data.unit}`,
+      module: "SUPPLY",
+      meta: { confidence: data.confidence, category: data.category },
+    });
+  } catch {
+    flashToast({
+      type: "info", entity: "info", id: "create-forecast",
+      label: ar ? "تعذّر إنشاء التنبؤ — تحقّق من المدخلات والتواريخ" : "Couldn't create forecast — check the inputs and dates",
+    });
+    revalidatePath("/supply-chain");
     return;
   }
-
-  const created = await prisma.supplyForecast.create({
-    data: {
-      sourceCompanyId: data.sourceCompanyId,
-      targetCompanyId: data.targetCompanyId,
-      category: data.category,
-      productLabel: data.productLabel,
-      productLabelEn: data.productLabelEn || null,
-      unit: data.unit,
-      predictedDemand: data.predictedDemand,
-      confidence: data.confidence,
-      periodStart: new Date(data.periodStart),
-      periodEnd: new Date(data.periodEnd),
-      signal: data.signal,
-      status: data.status,
-      generatedById: user.id,
-    },
-  });
-  await logActivity({
-    action: "FORECAST",
-    entity: "FORECAST",
-    entityId: created.id,
-    summary: `تنبؤ جديد: ${data.productLabel} — ${data.predictedDemand} ${data.unit}`,
-    summaryEn: `Forecast: ${data.productLabel} — ${data.predictedDemand} ${data.unit}`,
-    module: "SUPPLY",
-    meta: { confidence: data.confidence, category: data.category },
-  });
   revalidatePath("/supply-chain");
   redirect("/supply-chain");
 }

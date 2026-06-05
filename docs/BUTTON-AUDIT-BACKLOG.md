@@ -112,3 +112,34 @@ Logged so they aren't lost; fix in a later batch (they're delete-confirmations,
 a different class than the create/commit destinations this batch targets):
 - /brain/memory `clearMemories` — `deleteMany` + revalidate, **no toast**.
 - /brain/council `deleteSession` — `delete` + revalidate, **no toast, no confirm**.
+
+---
+
+## Batch 3 — sector operators (2026-06-05, code-trace, all 5 sectors)
+
+Audited every server action in hotels / dairy / farms / education / supply-chain.
+
+**Silent-create bug class (fixed):** six actions called `schema.parse()` (which
+throws on invalid input or a failed `.refine`) and `prisma.x.create()` with **no
+try/catch** — on any bad input or DB error the form just re-rendered with zero
+feedback (the #1 "button does nothing" class). All now wrap parse+create in
+try/catch + `flashToast`; the success `redirect` stays outside the try so it
+isn't swallowed (NEXT_REDIRECT).
+
+| File | Action | Fix |
+|---|---|---|
+| hotels | `createBooking` | ✅ try/catch + toast (incl. a clear "check-out after check-in" message) |
+| farms | `createFarm` | ✅ try/catch + toast |
+| farms | `createCrop` | ✅ try/catch + success/error toast |
+| farms | `updateSensors` | ✅ try/catch + success/error toast |
+| education | `createProgram` | ✅ try/catch + toast |
+| supply-chain | `createForecast` | ✅ try/catch + toast (covers the date / same-company refines) |
+
+**Already correct (no change):**
+- hotels `createHotel`, dairy `createBatch` — use the `parseFormState` pattern (inline field errors).
+- dairy `setBatchStatus`, supply `setForecastStatus` — workspace null-guard + revalidate (status flips visibly).
+- supply `autoGenerateForecasts` / `approveForecast` / `rejectForecast` / delete / restore — already try/catch + toast (incl. the cross-tenant PO bridge result).
+- education `setProgramStage` (safeParse guard), `deleteProgram` (try/catch + toast, #190).
+
+**Deferred (silent, low-risk delete/status — not in this PR):**
+- hotels `deleteHotel` / `deleteBooking` / `setBookingStatus`, farms `deleteFarm` / `deleteCrop`, dairy `deleteBatch` — delete/status actions with no toast (row visibly disappears / chip flips, so not "dead", but a toast would be nicer).

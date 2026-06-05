@@ -8,6 +8,8 @@ import { getActiveWorkspaceId } from "@/lib/tenancy/workspace";
 import { resolveOwnCompanyId } from "@/lib/auth/adminActionScope";
 import { requireRole } from "@/lib/auth/authz";
 import { logActivity } from "@/lib/auth/activityLog";
+import { flashToast } from "@/lib/utils/toast";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { COMPANY_CODE_TO_TENANT_SLUG, SECTOR_TO_TENANT_SLUG } from "@/lib/tenancy/tenancy";
 
 const farmSchema = z.object({
@@ -39,55 +41,81 @@ const cropSchema = z.object({
 
 export async function createFarm(formData: FormData) {
   await requireRole("MANAGER");
-  const data = farmSchema.parse({
-    companyId: formData.get("companyId"),
-    name: formData.get("name"),
-    nameEn: formData.get("nameEn") ?? "",
-    type: formData.get("type"),
-    location: formData.get("location"),
-    areaDunum: formData.get("areaDunum") ?? 0,
-    description: formData.get("description") ?? "",
-  });
-  const created = await prisma.farm.create({
-    data: {
-      companyId: resolveOwnCompanyId(data.companyId, getActiveWorkspaceId()),
-      name: data.name,
-      nameEn: data.nameEn || null,
-      type: data.type,
-      location: data.location,
-      areaDunum: data.areaDunum,
-      description: data.description || null,
-    },
-  });
-  await logActivity({
-    action: "CREATE",
-    entity: "FARM",
-    entityId: created.id,
-    summary: `إنشاء مزرعة ${data.name} (${data.type})`,
-    summaryEn: `Created farm ${data.name} (${data.type})`,
-    module: "AGRICULTURE",
-  });
+  const ar = getLocale() === "ar";
+  // schema.parse()/create() throw on invalid input or a DB error; guard so the
+  // form doesn't silently re-render with no feedback.
+  try {
+    const data = farmSchema.parse({
+      companyId: formData.get("companyId"),
+      name: formData.get("name"),
+      nameEn: formData.get("nameEn") ?? "",
+      type: formData.get("type"),
+      location: formData.get("location"),
+      areaDunum: formData.get("areaDunum") ?? 0,
+      description: formData.get("description") ?? "",
+    });
+    const created = await prisma.farm.create({
+      data: {
+        companyId: resolveOwnCompanyId(data.companyId, getActiveWorkspaceId()),
+        name: data.name,
+        nameEn: data.nameEn || null,
+        type: data.type,
+        location: data.location,
+        areaDunum: data.areaDunum,
+        description: data.description || null,
+      },
+    });
+    await logActivity({
+      action: "CREATE",
+      entity: "FARM",
+      entityId: created.id,
+      summary: `إنشاء مزرعة ${data.name} (${data.type})`,
+      summaryEn: `Created farm ${data.name} (${data.type})`,
+      module: "AGRICULTURE",
+    });
+  } catch {
+    flashToast({
+      type: "info", entity: "info", id: "create-farm",
+      label: ar ? "تعذّر إنشاء المزرعة — تحقّق من المدخلات" : "Couldn't create farm — check the inputs",
+    });
+    revalidatePath("/farms");
+    return;
+  }
   revalidatePath("/farms");
   redirect("/farms");
 }
 
 export async function updateSensors(farmId: string, formData: FormData) {
   await requireRole("MANAGER");
-  const data = sensorSchema.parse({
-    tempC: formData.get("tempC") ?? "",
-    humidity: formData.get("humidity") ?? "",
-    soilMoisture: formData.get("soilMoisture") ?? "",
-    alertLevel: formData.get("alertLevel") || "OK",
-  });
-  await prisma.farm.update({
-    where: { id: farmId },
-    data: {
-      tempC: data.tempC ?? null,
-      humidity: data.humidity ?? null,
-      soilMoisture: data.soilMoisture ?? null,
-      alertLevel: data.alertLevel,
-      lastReadAt: new Date(),
-    },
+  const ar = getLocale() === "ar";
+  try {
+    const data = sensorSchema.parse({
+      tempC: formData.get("tempC") ?? "",
+      humidity: formData.get("humidity") ?? "",
+      soilMoisture: formData.get("soilMoisture") ?? "",
+      alertLevel: formData.get("alertLevel") || "OK",
+    });
+    await prisma.farm.update({
+      where: { id: farmId },
+      data: {
+        tempC: data.tempC ?? null,
+        humidity: data.humidity ?? null,
+        soilMoisture: data.soilMoisture ?? null,
+        alertLevel: data.alertLevel,
+        lastReadAt: new Date(),
+      },
+    });
+  } catch {
+    flashToast({
+      type: "info", entity: "info", id: "update-sensors",
+      label: ar ? "تعذّر تحديث القراءات — تحقّق من القيم" : "Couldn't update sensors — check the values",
+    });
+    revalidatePath(`/farms/${farmId}`);
+    return;
+  }
+  flashToast({
+    type: "info", entity: "info", id: "update-sensors",
+    label: ar ? "حُدّثت قراءات المستشعرات" : "Sensor readings updated",
   });
   revalidatePath("/farms");
   revalidatePath(`/farms/${farmId}`);
@@ -114,47 +142,63 @@ export async function deleteFarm(formData: FormData) {
 
 export async function createCrop(formData: FormData) {
   await requireRole("MANAGER");
-  const data = cropSchema.parse({
-    farmId: formData.get("farmId"),
-    name: formData.get("name"),
-    variety: formData.get("variety") ?? "",
-    plantedAt: formData.get("plantedAt"),
-    expectedHarvest: formData.get("expectedHarvest"),
-    expectedYieldKg: formData.get("expectedYieldKg") ?? 0,
-    status: formData.get("status") || "GROWING",
-  });
-  // Phase F4 — derive tenantId from the parent farm's company.
-  const parentFarm = await prisma.farm.findUnique({
-    where: { id: data.farmId },
-    select: { company: { select: { code: true, sector: true } } },
-  });
-  const tenantSlug =
-    (parentFarm && COMPANY_CODE_TO_TENANT_SLUG[parentFarm.company.code]) ||
-    (parentFarm && SECTOR_TO_TENANT_SLUG[parentFarm.company.sector]) ||
-    "loran-agri";
+  const ar = getLocale() === "ar";
+  const farmId = String(formData.get("farmId") ?? "");
+  try {
+    const data = cropSchema.parse({
+      farmId: formData.get("farmId"),
+      name: formData.get("name"),
+      variety: formData.get("variety") ?? "",
+      plantedAt: formData.get("plantedAt"),
+      expectedHarvest: formData.get("expectedHarvest"),
+      expectedYieldKg: formData.get("expectedYieldKg") ?? 0,
+      status: formData.get("status") || "GROWING",
+    });
+    // Phase F4 — derive tenantId from the parent farm's company.
+    const parentFarm = await prisma.farm.findUnique({
+      where: { id: data.farmId },
+      select: { company: { select: { code: true, sector: true } } },
+    });
+    const tenantSlug =
+      (parentFarm && COMPANY_CODE_TO_TENANT_SLUG[parentFarm.company.code]) ||
+      (parentFarm && SECTOR_TO_TENANT_SLUG[parentFarm.company.sector]) ||
+      "loran-agri";
 
-  const created = await prisma.crop.create({
-    data: {
-      farmId: data.farmId,
-      tenantId: tenantSlug,
-      name: data.name,
-      variety: data.variety || null,
-      plantedAt: new Date(data.plantedAt),
-      expectedHarvest: new Date(data.expectedHarvest),
-      expectedYieldKg: data.expectedYieldKg,
-      status: data.status,
-    },
-  });
-  await logActivity({
-    action: "CREATE",
-    entity: "CROP",
-    entityId: created.id,
-    summary: `زراعة ${data.name}${data.variety ? ` (${data.variety})` : ""}`,
-    summaryEn: `Planted ${data.name}${data.variety ? ` (${data.variety})` : ""}`,
-    module: "AGRICULTURE",
+    const created = await prisma.crop.create({
+      data: {
+        farmId: data.farmId,
+        tenantId: tenantSlug,
+        name: data.name,
+        variety: data.variety || null,
+        plantedAt: new Date(data.plantedAt),
+        expectedHarvest: new Date(data.expectedHarvest),
+        expectedYieldKg: data.expectedYieldKg,
+        status: data.status,
+      },
+    });
+    await logActivity({
+      action: "CREATE",
+      entity: "CROP",
+      entityId: created.id,
+      summary: `زراعة ${data.name}${data.variety ? ` (${data.variety})` : ""}`,
+      summaryEn: `Planted ${data.name}${data.variety ? ` (${data.variety})` : ""}`,
+      module: "AGRICULTURE",
+    });
+  } catch {
+    flashToast({
+      type: "info", entity: "info", id: "create-crop",
+      label: ar ? "تعذّر إضافة المحصول — تحقّق من المدخلات" : "Couldn't add crop — check the inputs",
+    });
+    revalidatePath("/farms");
+    if (farmId) revalidatePath(`/farms/${farmId}`);
+    return;
+  }
+  flashToast({
+    type: "info", entity: "info", id: "create-crop",
+    label: ar ? "تمت إضافة المحصول" : "Crop planted",
   });
   revalidatePath("/farms");
-  revalidatePath(`/farms/${data.farmId}`);
+  if (farmId) revalidatePath(`/farms/${farmId}`);
 }
 
 export async function deleteCrop(formData: FormData) {

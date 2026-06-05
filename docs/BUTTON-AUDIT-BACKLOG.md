@@ -143,3 +143,27 @@ isn't swallowed (NEXT_REDIRECT).
 
 **Deferred (silent, low-risk delete/status — not in this PR):**
 - hotels `deleteHotel` / `deleteBooking` / `setBookingStatus`, farms `deleteFarm` / `deleteCrop`, dairy `deleteBatch` — delete/status actions with no toast (row visibly disappears / chip flips, so not "dead", but a toast would be nicer).
+
+---
+
+## Batch 4 — finance & engagement (2026-06-05, code-trace)
+
+Audited finance / tasks / projects / messages / workflows actions.
+
+**Silent-create bug class (fixed)** — raw `schema.parse()` + `create()` with no
+try/catch, now wrapped + `flashToast` (redirect stays outside the try):
+
+| File | Action | Fix |
+|---|---|---|
+| finance | `createTransaction` | ✅ try/catch + toast ("check the amount and date") |
+| tasks | `createTask` | ✅ try/catch + toast |
+| messages | `sendMessage` | ✅ try/catch + toast on failure (incl. "not a participant"); success stays silent (the message appearing is the confirmation) |
+| messages | `startDirectThread` | ✅ try/catch + toast (incl. "can't message yourself") |
+
+**Already correct (no change):**
+- projects `createProject` — `parseFormState` inline-error pattern; delete/restore toast.
+- tasks `deleteTask` / `restoreTask` — toast.
+- workflows `createWorkflowFromTemplate` / `createWorkflow` / `addEdge` — redirect to the studio / idempotent; studio ops re-render visibly.
+
+**Deferred (silent status/bulk — not in this PR):**
+- tasks `setTaskStatus` / `bulkSetTaskStatus` (status flips visibly; XP award invisible — a toast would be nicer), projects `setProjectStage`, workflows `toggleWorkflow` (Enable/Disable — status flips, no toast), finance `deleteTransaction` / bulk.

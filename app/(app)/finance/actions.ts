@@ -6,6 +6,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/db/db";
 import { requireRole } from "@/lib/auth/authz";
 import { generateNumber } from "@/lib/utils/utils";
+import { flashToast } from "@/lib/utils/toast";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { logActivity } from "@/lib/auth/activityLog";
 
 const txSchema = z.object({
@@ -21,38 +23,50 @@ const txSchema = z.object({
 export async function createTransaction(formData: FormData) {
   // Phase D: recording money movements is a privileged mutation.
   const user = await requireRole("MANAGER");
-  const data = txSchema.parse({
-    companyId: formData.get("companyId"),
-    kind: formData.get("kind"),
-    category: formData.get("category"),
-    amount: formData.get("amount"),
-    currency: formData.get("currency") || "JOD",
-    description: formData.get("description") ?? "",
-    occurredAt: formData.get("occurredAt"),
-  });
+  const ar = getLocale() === "ar";
+  // schema.parse()/create() throw on invalid input; without a guard the
+  // transaction form re-renders silently. Money entry especially must confirm.
+  try {
+    const data = txSchema.parse({
+      companyId: formData.get("companyId"),
+      kind: formData.get("kind"),
+      category: formData.get("category"),
+      amount: formData.get("amount"),
+      currency: formData.get("currency") || "JOD",
+      description: formData.get("description") ?? "",
+      occurredAt: formData.get("occurredAt"),
+    });
 
-  const tx = await prisma.transaction.create({
-    data: {
-      companyId: data.companyId,
-      reference: generateNumber("TX"),
-      kind: data.kind,
-      category: data.category,
-      amount: data.amount,
-      currency: data.currency.toUpperCase(),
-      description: data.description || null,
-      occurredAt: new Date(data.occurredAt),
-      createdById: user.id,
-    },
-  });
-  await logActivity({
-    action: "CREATE",
-    entity: "TRANSACTION",
-    entityId: tx.id,
-    summary: `${data.kind === "REVENUE" ? "إيراد" : data.kind === "EXPENSE" ? "مصروف" : "تحويل"} ${tx.reference} — ${data.amount} ${data.currency}`,
-    summaryEn: `${data.kind} ${tx.reference} — ${data.amount} ${data.currency}`,
-    module: "FINANCE",
-    meta: { kind: data.kind, amount: data.amount, currency: data.currency },
-  });
+    const tx = await prisma.transaction.create({
+      data: {
+        companyId: data.companyId,
+        reference: generateNumber("TX"),
+        kind: data.kind,
+        category: data.category,
+        amount: data.amount,
+        currency: data.currency.toUpperCase(),
+        description: data.description || null,
+        occurredAt: new Date(data.occurredAt),
+        createdById: user.id,
+      },
+    });
+    await logActivity({
+      action: "CREATE",
+      entity: "TRANSACTION",
+      entityId: tx.id,
+      summary: `${data.kind === "REVENUE" ? "إيراد" : data.kind === "EXPENSE" ? "مصروف" : "تحويل"} ${tx.reference} — ${data.amount} ${data.currency}`,
+      summaryEn: `${data.kind} ${tx.reference} — ${data.amount} ${data.currency}`,
+      module: "FINANCE",
+      meta: { kind: data.kind, amount: data.amount, currency: data.currency },
+    });
+  } catch {
+    flashToast({
+      type: "info", entity: "info", id: "create-tx",
+      label: ar ? "تعذّر تسجيل المعاملة — تحقّق من المبلغ والتاريخ" : "Couldn't record transaction — check the amount and date",
+    });
+    revalidatePath("/finance");
+    return;
+  }
   revalidatePath("/finance");
   redirect("/finance");
 }

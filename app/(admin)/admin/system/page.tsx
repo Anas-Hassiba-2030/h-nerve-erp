@@ -143,7 +143,7 @@ export default async function AdminSystemPage() {
                   <Link key={c.href} href={c.href} className="admin-tenant-card">
                     <div
                       className="admin-tenant-card-body"
-                      style={{ display: "flex", alignItems: "center", gap: 14 }}
+                      style={{ display: "flex", alignItems: "center", gap: 16 }}
                     >
                       <span
                         aria-hidden
@@ -151,24 +151,22 @@ export default async function AdminSystemPage() {
                           display: "inline-flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          width: 40,
-                          height: 40,
+                          width: 48,
+                          height: 48,
                           border: "1px solid var(--admin-rule)",
                           color: "var(--admin-cyan)",
                           flexShrink: 0,
                         }}
                       >
-                        <Icon className="h-4 w-4" strokeWidth={1.5} />
+                        <Icon className="h-6 w-6" strokeWidth={1.5} />
                       </span>
-                      <span style={{ display: "grid", gap: 3, minWidth: 0, flex: 1 }}>
+                      <span style={{ display: "grid", gap: 4, minWidth: 0, flex: 1 }}>
                         <span className="admin-tenant-name">{ar ? c.titleAr : c.titleEn}</span>
                         <span
                           style={{
-                            fontSize: 12,
+                            fontSize: 13,
                             color: "var(--admin-text-muted)",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
+                            lineHeight: 1.45,
                           }}
                         >
                           {ar ? c.descAr : c.descEn}

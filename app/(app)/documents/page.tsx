@@ -1,10 +1,11 @@
+import Link from "next/link";
 import { FileText } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { DeleteButton } from "@/components/ui/DeleteButton";
 import { prisma } from "@/lib/db/db";
 import { formatNumber, formatRelative } from "@/lib/utils/utils";
 import { getLocale } from "@/lib/i18n/i18n.server";
-import { commitDocument, deleteDocument } from "./actions";
+import { deleteDocument } from "./actions";
 import "../daylight.css";
 import "./documents.css";
 
@@ -98,17 +99,17 @@ export default async function DocumentsPage() {
                         <div className="dn">{name}</div>
                         <div className="dm">{meta}{committed ? (ar ? " · مُعتمد" : " · committed") : (ar ? " · بانتظار الاعتماد" : " · pending")}</div>
                       </div>
-                      {committed ? (
-                        <form action={commitDocument}>
-                          <input type="hidden" name="id" value={d.id} />
-                          <button type="submit" className="br-btn br-btn-ghost">{ar ? "ناقش مع الدماغ" : "Discuss with brain"}</button>
-                        </form>
-                      ) : (
-                        <form action={commitDocument}>
-                          <input type="hidden" name="id" value={d.id} />
-                          <button type="submit" className="br-btn br-btn-primary">{ar ? "اعتمد" : "Commit"}</button>
-                        </form>
-                      )}
+                      {/* Both states previously posted to commitDocument, which
+                          only redirected to the detail page (the row is saved on
+                          upload) — so "Discuss with brain"/"Commit" promised
+                          actions that never happened. Honest: a plain link that
+                          opens the document. */}
+                      <Link
+                        href={`/documents/${d.id}`}
+                        className={`br-btn ${committed ? "br-btn-ghost" : "br-btn-primary"}`}
+                      >
+                        {ar ? "فتح المستند" : "Open document"}
+                      </Link>
                       <DeleteButton
                         action={deleteDocument}
                         payload={{ id: d.id }}

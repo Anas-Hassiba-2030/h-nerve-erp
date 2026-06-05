@@ -13,7 +13,7 @@ import "./benchmarks.css";
 import { prisma } from "@/lib/db/db";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getOptIn } from "@/lib/brain/federation.live";
-import { Globe2, ShieldCheck, RotateCw, Database, Trash2, Building2, ArrowRight } from "lucide-react";
+import { Globe2, ShieldCheck, RotateCw, Database, Trash2, Building2 } from "lucide-react";
 import {
   optInFederation,
   optOutFederation,
@@ -317,10 +317,9 @@ function BenchmarkRow({ pattern, ar }: { pattern: any; ar: boolean }) {
       <span className="br-chip info">
         {pattern.peerCount} {ar ? "نظير" : "peers"}
       </span>
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--gold-soft)" }}>
-        {ar ? "تفاصيل" : "DETAILS"}
-        <ArrowRight className="h-3 w-3 rtl:rotate-180" strokeWidth={1.5} />
-      </span>
+      {/* Removed a "DETAILS →" affordance that looked clickable but had no
+          handler or drill-down route. Re-add as a real <Link> if a benchmark
+          detail page is built. */}
     </div>
   );
 }

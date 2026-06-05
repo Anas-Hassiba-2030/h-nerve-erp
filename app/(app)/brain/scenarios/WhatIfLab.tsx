@@ -420,11 +420,26 @@ export function WhatIfLab({ ar }: { ar: boolean }) {
     const onSolve = () => solve();
     const onReset = () => reset();
     const onSave = () => {
+      // Honest action: there is no scenario-persistence backend, so instead of
+      // faking a "saved" confirmation, copy the current lever values + the
+      // narrative to the clipboard so the user can actually paste/share them.
       const b = saveBtnRef.current;
       if (!b) return;
-      const t = b.textContent;
-      b.textContent = ar ? "✓ حُفظ السيناريو" : "✓ Scenario saved";
-      setTimeout(() => { b.textContent = t; }, 1600);
+      const lines = LEVERS.map(
+        (L) => `• ${ar ? L.name : L.nameEn}: ${fmtVal(L, state[L.id])}${(ar ? L.unit : L.unitEn) ? " " + (ar ? L.unit : L.unitEn) : ""}`,
+      );
+      const narr = narrRef.current?.textContent?.trim() ?? "";
+      const text = `${ar ? "سيناريو ماذا-لو · H-Nerve" : "What-if scenario · H-Nerve"}\n${lines.join("\n")}${narr ? "\n\n" + narr : ""}`;
+      const confirm = () => {
+        const t = b.textContent;
+        b.textContent = ar ? "✓ نُسخت القيم" : "✓ Values copied";
+        setTimeout(() => { b.textContent = t; }, 1600);
+      };
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(text).then(confirm).catch(confirm);
+      } else {
+        confirm();
+      }
     };
     const solveBtn = solveBtnRef.current;
     const resetBtn = resetBtnRef.current;
@@ -514,7 +529,7 @@ export function WhatIfLab({ ar }: { ar: boolean }) {
           </div>
           <div className="wi-actions">
             <button ref={resetBtnRef} className="dl-btn dl-btn-secondary dl-btn-onnight">{ar ? "إعادة الضبط" : "Reset"}</button>
-            <button ref={saveBtnRef} className="dl-btn dl-btn-primary">{ar ? "احفظ كسيناريو" : "Save scenario"}</button>
+            <button ref={saveBtnRef} className="dl-btn dl-btn-primary">{ar ? "انسخ القيم" : "Copy values"}</button>
           </div>
         </div>
       </div>

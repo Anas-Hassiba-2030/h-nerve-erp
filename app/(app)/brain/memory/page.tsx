@@ -60,10 +60,17 @@ function safeStringArray(json: string | null | undefined): string[] {
 export default async function BrainMemoryPage() {
   const ar = getLocale() === "ar";
 
-  const rows = await prisma.memory.findMany({
-    orderBy: { occurredAt: "desc" },
-    take: 60,
-  });
+  let rows: Awaited<ReturnType<typeof prisma.memory.findMany>> = [];
+  try {
+    rows = await prisma.memory.findMany({
+      orderBy: { occurredAt: "desc" },
+      take: 60,
+    });
+  } catch {
+    // DB unavailable or table missing — show empty state so the page
+    // renders rather than crashing into the error boundary.
+    rows = [];
+  }
 
   if (rows.length === 0) {
     return (

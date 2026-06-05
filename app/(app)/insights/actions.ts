@@ -266,9 +266,11 @@ export async function generateInsightPlan(formData: FormData) {
 
   // Every failure path must surface a toast — a silent throw makes the click
   // look broken even when the auth + DB layer are working correctly.
+  let planId: string | null = null;
   try {
     const { generatePlanFromInsight } = await import("@/lib/brain/planner.live");
     const plan = await generatePlanFromInsight(id, lc);
+    planId = plan.id;
 
     await logActivity({
       action: "INSIGHT",
@@ -290,16 +292,20 @@ export async function generateInsightPlan(formData: FormData) {
     const msg = (e as Error).message || "unknown";
     flashToast({
       type: "info",
-      entity: "insight",
+      entity: "info",
       id,
       label: lc === "ar"
         ? `تعذّر توليد الخطة: ${msg}`
         : `Could not generate plan: ${msg}`,
     });
+    revalidatePath("/insights");
+    return;
   }
 
   revalidatePath("/insights");
   revalidatePath("/plans");
+  // Navigate to the plans page so the user immediately sees the new plan.
+  redirect("/plans");
 }
 
 // === AI ENGINE — runs heuristics across all modules and persists fresh insights ===

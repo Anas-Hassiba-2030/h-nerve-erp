@@ -12,6 +12,14 @@
 
 import type { Locale } from "@/lib/i18n/i18n";
 import "./orrery-fabs.css";
+// Import the panel CSS DIRECTLY (not only via the globals.css @import chain).
+// The Orrery hub renders OUTSIDE the (app) layout; if the @import is ever not
+// inlined into this route's bundle, the brain veil (.cv-root) and time pill
+// (.tm-pill) render UNSTYLED — as raw flow text in the top-left corner (the bug
+// Anas hit). A direct component import guarantees these styles ship with the
+// orrery route no matter what.
+import "../../app/phase15-conversational.css";
+import "../../app/phase16-timemachine.css";
 import { FabRail } from "@/components/orrery/FabRail";
 import { Conversational } from "@/components/brain/Conversational";
 import { QuickAddFAB } from "@/components/nav/QuickAddFAB";

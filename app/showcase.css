@@ -1,0 +1,241 @@
+/* =================================================================
+   SHOWCASE — the demo reel walking through all 20 phases.
+   Heritage Modern with a single accent per wave.
+   ================================================================= */
+
+.sc-wave {
+  margin-top: 40px;
+}
+.sc-wave-head {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 18px;
+  align-items: start;
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--heri-rule);
+}
+.sc-wave-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--heri-cream);
+}
+.sc-wave-meta {
+  min-width: 0;
+}
+.sc-wave-eyebrow {
+  margin: 0 0 8px;
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--heri-ink-3);
+  font-weight: 700;
+}
+.sc-wave-title {
+  margin: 0;
+  font-size: clamp(26px, 3.4vw, 38px);
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  line-height: 1.1;
+  color: var(--heri-ink);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+[dir="rtl"] .sc-wave-title {
+  font-family: "Reem Kufi", "Tajawal", "Inter Tight", system-ui, sans-serif;
+}
+.sc-wave-title-sep {
+  color: var(--heri-rule-strong);
+  font-weight: 400;
+}
+.sc-wave-title-en {
+  font-family: "Fraunces", "GT Sectra", Georgia, serif;
+  font-style: italic;
+  color: var(--heri-copper);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.sc-wave-blurb {
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--heri-ink-2);
+  max-width: 64ch;
+}
+.sc-wave-blurb-en {
+  font-style: italic;
+  color: var(--heri-ink-3);
+  font-size: 13px;
+  font-family: "Fraunces", "GT Sectra", Georgia, serif;
+}
+
+.sc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  gap: 12px;
+}
+
+.sc-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px 14px;
+  background: var(--heri-cream);
+  border: 1px solid var(--heri-rule);
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+  min-height: 220px;
+}
+.sc-card:hover {
+  border-color: var(--heri-ink);
+  box-shadow: 0 1px 0 var(--heri-rule), 0 12px 32px -20px rgba(0,0,0,0.22);
+  transform: translateY(-2px);
+}
+.sc-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.sc-card-n {
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.sc-card-arrow {
+  width: 16px;
+  height: 16px;
+  color: var(--heri-ink-3);
+  transition: color 160ms ease, transform 160ms ease;
+}
+.sc-card:hover .sc-card-arrow {
+  color: var(--heri-copper);
+  transform: translate(2px, -2px);
+}
+[dir="rtl"] .sc-card:hover .sc-card-arrow {
+  transform: translate(-2px, -2px);
+}
+
+.sc-card-name {
+  margin: 2px 0 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.2;
+  color: var(--heri-ink);
+}
+[dir="rtl"] .sc-card-name {
+  font-family: "Reem Kufi", "Tajawal", "Inter Tight", system-ui, sans-serif;
+}
+.sc-card-name-en {
+  margin: 0;
+  font-family: "Fraunces", "GT Sectra", Georgia, serif;
+  font-style: italic;
+  font-size: 13.5px;
+  color: var(--heri-ink-3);
+  letter-spacing: 0.01em;
+}
+.sc-card-pitch {
+  margin: 6px 0 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--heri-ink-2);
+}
+
+.sc-card-wow {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 8px;
+  align-items: start;
+  margin-top: auto;
+  padding: 8px 10px;
+  background: var(--heri-cream-2);
+  border-inline-start: 2px solid var(--heri-copper);
+}
+.sc-card-wow-mark {
+  color: var(--heri-copper);
+  font-size: 14px;
+  line-height: 1;
+  padding-top: 1px;
+}
+.sc-card-wow p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--heri-ink);
+}
+
+.sc-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--heri-rule);
+}
+.sc-card-cta {
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--heri-copper);
+  font-weight: 700;
+}
+
+.sc-close {
+  margin-top: 48px;
+  padding: 28px 26px 22px;
+  background: var(--heri-cream);
+  border: 1px solid var(--heri-rule);
+  border-inline-start: 3px solid var(--heri-copper);
+  max-width: 720px;
+}
+.sc-close-eyebrow {
+  margin: 0 0 10px;
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--heri-copper);
+  font-weight: 700;
+}
+.sc-close-title {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--heri-ink);
+}
+[dir="rtl"] .sc-close-title {
+  font-family: "Reem Kufi", "Tajawal", system-ui, sans-serif;
+}
+.sc-close-title code {
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 13px;
+  background: var(--heri-cream-2);
+  border: 1px solid var(--heri-rule);
+  padding: 1px 6px;
+  color: var(--heri-ink);
+}
+.sc-close-body {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--heri-ink-2);
+}

@@ -1,0 +1,248 @@
+/* =================================================================
+   PHASE 17 — REAL-TIME COLLABORATION
+   Heritage Modern primitives — hairline cursors, 24px monogram pips,
+   side-docked comment bubbles, ochre typing underlines.
+   See docs/PHASES-INTELLIGENCE.md Phase 17.
+   ================================================================= */
+
+/* ---- Pip stack (top-end of the page) ---- */
+.rt-pip-stack {
+  position: fixed;
+  top: 14px;
+  inset-inline-end: 16px;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px 4px 4px;
+  background: var(--heri-cream, #f4ede0);
+  border: 1px solid var(--heri-rule, #d8d2c2);
+  pointer-events: none; /* the page underneath stays interactive */
+  animation: rt-stack-in 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+[dir="rtl"] .rt-pip-stack { padding: 4px 4px 4px 8px; }
+@keyframes rt-stack-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.rt-pip {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--rt-color, #5a7d4a) 14%, var(--heri-cream, #f4ede0));
+  border: 1.5px solid var(--rt-color, #5a7d4a);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  transition: transform 160ms ease;
+}
+.rt-pip:hover {
+  transform: scale(1.1);
+  z-index: 1;
+}
+.rt-pip-mono {
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--rt-color, #5a7d4a);
+  text-transform: uppercase;
+  line-height: 1;
+}
+.rt-pip-pulse {
+  position: absolute;
+  inset: -3px;
+  border-radius: 999px;
+  border: 1.5px solid var(--rt-color, #5a7d4a);
+  opacity: 0;
+  animation: rt-pulse 2.6s ease-out infinite;
+}
+@keyframes rt-pulse {
+  0%   { opacity: 0.55; transform: scale(0.85); }
+  100% { opacity: 0;    transform: scale(1.45); }
+}
+.rt-pip.is-phantom .rt-pip-pulse {
+  /* Subtle dashed ring to hint these are simulated for the demo */
+  border-style: dashed;
+}
+.rt-pip-more {
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--heri-ink-2, #4a4434);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Cursors ---- */
+.rt-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 80;
+  pointer-events: none;
+  /* Position is set via translate3d in the inline transform — the parent
+     RAF loop handles easing. We do NOT add a CSS transition here, since
+     that would compete with the RAF tween. */
+  will-change: transform;
+}
+.rt-cursor-arrow {
+  display: block;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.18));
+}
+.rt-cursor-label {
+  position: absolute;
+  top: 18px;
+  left: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px 3px 4px;
+  background: var(--rt-color, #5a7d4a);
+  color: #fff;
+  font-family: "Inter Tight", "Inter", "Noto Sans Arabic", system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.005em;
+  white-space: nowrap;
+  border-radius: 0;
+  box-shadow: 0 6px 16px -10px rgba(0,0,0,0.32);
+}
+[dir="rtl"] .rt-cursor-label {
+  left: auto;
+  right: 14px;
+}
+.rt-cursor-mono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: rgba(255,255,255,0.18);
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.rt-cursor.is-phantom .rt-cursor-arrow path {
+  /* Dashed border for phantom — same demo cue as the pip */
+  stroke-dasharray: 1.4 1.4;
+}
+
+/* ---- Typing underline ---- */
+.rt-typing {
+  position: fixed;
+  height: 1.5px;
+  z-index: 70;
+  background: currentColor; /* color set inline */
+  transform-origin: left center;
+  animation: rt-typing-draw 260ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+[dir="rtl"] .rt-typing {
+  transform-origin: right center;
+}
+@keyframes rt-typing-draw {
+  from { transform: scaleX(0); opacity: 0.4; }
+  to   { transform: scaleX(1); opacity: 1;  }
+}
+
+/* ---- Comment bubbles (side-docked) ---- */
+.rt-comment {
+  position: fixed;
+  top: calc(72px + (var(--rt-stack, 0) * 96px));
+  inset-inline-end: 16px;
+  z-index: 75;
+  width: 320px;
+  background: var(--heri-cream, #f4ede0);
+  border: 1px solid var(--heri-rule, #d8d2c2);
+  border-inline-start: 3px solid var(--rt-color, #5a7d4a);
+  padding: 10px 12px 12px;
+  box-shadow: 0 12px 36px -22px rgba(0,0,0,0.28);
+  animation: rt-comment-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  pointer-events: auto;
+}
+@keyframes rt-comment-in {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+[dir="rtl"] .rt-comment {
+  animation-name: rt-comment-in-rtl;
+}
+@keyframes rt-comment-in-rtl {
+  from { opacity: 0; transform: translateX(-24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.rt-comment-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.rt-comment-pip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--rt-color, #5a7d4a) 14%, var(--heri-cream, #f4ede0));
+  border: 1.5px solid var(--rt-color, #5a7d4a);
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--rt-color, #5a7d4a);
+  text-transform: uppercase;
+  flex: 0 0 22px;
+}
+.rt-comment-name {
+  flex: 1;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--heri-ink, #1a1a1a);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rt-comment-ago {
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--heri-ink-3, #6b6552);
+}
+.rt-comment-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--heri-ink-3, #6b6552);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+.rt-comment-close:hover {
+  color: var(--heri-ink, #1a1a1a);
+  background: var(--heri-cream-2, #ebe2cf);
+  border-color: var(--heri-rule, #d8d2c2);
+}
+.rt-comment-body {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--heri-ink-2, #4a4434);
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  .rt-pip-stack,
+  .rt-pip-pulse,
+  .rt-comment,
+  .rt-typing {
+    animation: none !important;
+  }
+}

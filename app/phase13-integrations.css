@@ -1,0 +1,282 @@
+/* =================================================================
+   PHASE 13 — INTEGRATIONS HUB
+   Heritage Modern marketplace tiles. Front face = NOT_CONNECTED with
+   Connect CTA. Back face = CONNECTED with account + meta + Manage.
+   The flip is a 3D Y-axis rotation driven by [data-status="CONNECTED"]
+   on the article — when a server action returns having flipped the
+   row to CONNECTED, the page re-renders and the tile rotates in place.
+   See docs/PHASES-INTELLIGENCE.md Phase 13.
+   ================================================================= */
+
+/* Outer card — provides perspective for the 3D flip and a subtle hover lift */
+.integration-card {
+  position: relative;
+  perspective: 1400px;
+  background: transparent;
+  border: 0;
+  /* tile minimum height — keeps the grid aligned even with shorter copy */
+  min-height: 232px;
+  display: block;
+}
+
+.integration-card-flip {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 232px;
+  transform-style: preserve-3d;
+  transition: transform 720ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+/* Connected state — flip to the back */
+.integration-card[data-status="CONNECTED"] .integration-card-flip {
+  transform: rotateY(180deg);
+}
+
+/* RTL — flip the other way so the band stays on the start edge perceptually.
+   We don't actually mirror the rotation; the band lives on the inline-start
+   anyway, but we keep transforms in logical space. */
+
+/* Faces */
+.integration-card-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 232px;
+  display: flex;
+  flex-direction: column;
+  background: var(--heri-cream);
+  border: 1px solid var(--heri-rule);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+}
+
+.integration-card-face-back {
+  transform: rotateY(180deg);
+}
+
+/* Hover — only on the visible face */
+.integration-card[data-status="CONNECTED"] .integration-card-face-back:hover,
+.integration-card:not([data-status="CONNECTED"]) .integration-card-face-front:hover {
+  border-color: var(--heri-ink);
+  box-shadow: 0 1px 0 var(--heri-rule), 0 8px 24px -16px rgba(0, 0, 0, 0.18);
+}
+
+/* Top brand band */
+.integration-card-band {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px 10px 16px;
+  color: #fff;
+  min-height: 52px;
+  overflow: hidden;
+}
+.integration-card-band::after {
+  /* paper-cream wash on the bottom edge — softens the saturated brand color */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent 65%,
+    rgba(0, 0, 0, 0.12) 100%
+  );
+  pointer-events: none;
+}
+.integration-card-band-back {
+  /* slightly darker overlay on the connected face, like a sealed envelope flap */
+  filter: brightness(0.92);
+}
+
+.integration-card-glyph {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: 22px;
+  line-height: 1;
+  font-family: "Inter Tight", "Inter", system-ui, sans-serif;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  color: #fff;
+  border-radius: 0;
+}
+
+.integration-card-cat {
+  position: relative;
+  z-index: 1;
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 500;
+}
+
+/* Body */
+.integration-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px 14px 16px;
+}
+
+.integration-card-name {
+  font-family: "Inter Tight", "Inter", system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: var(--heri-ink);
+  line-height: 1.2;
+  margin: 0;
+}
+[lang="ar"] .integration-card-name,
+[dir="rtl"] .integration-card-name {
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  font-family: "Reem Kufi", "Tajawal", "Inter", system-ui, sans-serif;
+}
+
+.integration-card-desc {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--heri-ink-2);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.integration-card-footrow {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+/* Account cluster on the back face */
+.integration-card-account {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  background: var(--heri-cream-2);
+  border-inline-start: 2px solid var(--heri-teal);
+}
+.integration-card-account-value {
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11.5px;
+  color: var(--heri-ink);
+  letter-spacing: 0.01em;
+  word-break: break-all;
+}
+
+.integration-card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: var(--heri-ink-3);
+}
+.integration-card-meta-sep {
+  color: var(--heri-rule-strong);
+}
+
+/* Connect / Manage buttons — distinct from .heri-btn so we can tune the size
+   without bleeding into other surfaces */
+.integration-connect-form {
+  display: contents;
+}
+.integration-connect-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--heri-ink);
+  color: var(--heri-cream);
+  border: 1px solid var(--heri-ink);
+  font-family: "Inter Tight", "Inter", system-ui, sans-serif;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+  text-decoration: none;
+}
+.integration-connect-btn:hover {
+  background: var(--heri-copper);
+  border-color: var(--heri-copper);
+  transform: translateY(-1px);
+}
+.integration-connect-btn:active {
+  transform: translateY(0);
+}
+.integration-connect-btn-ghost {
+  background: transparent;
+  color: var(--heri-ink);
+  border-color: var(--heri-rule-strong);
+}
+.integration-connect-btn-ghost:hover {
+  background: var(--heri-cream-2);
+  color: var(--heri-ink);
+  border-color: var(--heri-ink);
+}
+
+/* Pulse on the band when CONNECTED — quick "alive" beacon, runs once on mount.
+   Uses a CSS-driven inset highlight rather than a box-shadow so it stays inside
+   the band and never bleeds onto neighbors. */
+.integration-card[data-status="CONNECTED"] .integration-card-band-back::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 14px 50%,
+    rgba(255, 255, 255, 0.35) 0%,
+    transparent 30%
+  );
+  animation: integration-pulse 2400ms ease-out 600ms 1 both;
+  pointer-events: none;
+}
+@keyframes integration-pulse {
+  0%   { opacity: 0; }
+  35%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Status-tinted ERROR/EXPIRED side rails — a thin colored seam on the
+   inline-start of the front face for at-a-glance triage on the grid. */
+.integration-card[data-status="ERROR"] .integration-card-face-front {
+  box-shadow: inset 3px 0 0 var(--heri-terracotta);
+}
+.integration-card[data-status="EXPIRED"] .integration-card-face-front {
+  box-shadow: inset 3px 0 0 var(--heri-amber, #c89b3c);
+}
+
+/* Reduced-motion — kill the flip and pulse */
+@media (prefers-reduced-motion: reduce) {
+  .integration-card-flip,
+  .integration-card-face,
+  .integration-connect-btn {
+    transition: none !important;
+  }
+  .integration-card[data-status="CONNECTED"] .integration-card-band-back::before {
+    animation: none !important;
+  }
+}

@@ -44,6 +44,7 @@ export default async function GenesisPage({
   const topup = searchParams.topup;
   const fill = searchParams.fill;
   const confirmError = searchParams.error === "confirm";
+  const seedError = searchParams.error === "seed";
 
   // Live counts for every key the recipe catalog references.
   const [
@@ -159,6 +160,14 @@ export default async function GenesisPage({
           icon={<AlertTriangle size={20} style={{ color: "#fbbf24", flexShrink: 0, marginTop: 1 }} />}
           title={ar ? "لم يتم تأكيد الحذف" : "Wipe not confirmed"}
           body={ar ? "يجب تأكيد المربع قبل إعادة البذر المدمّرة." : "You must tick the acknowledgement before a destructive reseed."}
+        />
+      )}
+      {seedError && (
+        <Banner
+          color="#ff6b6b"
+          icon={<AlertTriangle size={20} style={{ color: "#ff6b6b", flexShrink: 0, marginTop: 1 }} />}
+          title={ar ? "فشلت إعادة البذر" : "Reseed failed"}
+          body={ar ? "حدث خطأ أثناء إعادة بناء البيانات. حاول مرة أخرى." : "An error occurred while rebuilding the dataset. Try again."}
         />
       )}
       {fill && (

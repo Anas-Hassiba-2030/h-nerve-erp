@@ -167,3 +167,28 @@ try/catch, now wrapped + `flashToast` (redirect stays outside the try):
 
 **Deferred (silent status/bulk — not in this PR):**
 - tasks `setTaskStatus` / `bulkSetTaskStatus` (status flips visibly; XP award invisible — a toast would be nicer), projects `setProjectStage`, workflows `toggleWorkflow` (Enable/Disable — status flips, no toast), finance `deleteTransaction` / bulk.
+
+---
+
+## Batch 5 — admin console (2026-06-05, code-trace, app/(admin)/*)
+
+**Key infra fact:** the `(admin)` layout does **not** mount `ToastProvider`, so
+`flashToast` does NOT render in the admin console. Admin feedback is FormState
+(inline) or query-param banners — not toasts. (Don't "fix" an admin action by
+adding flashToast; it won't show.)
+
+**Already well-instrumented (no change):**
+- users `createUser` / `resetPassword` — return `FormState` with inline field errors + success message.
+- permissions-preview `togglePermission` — upsert + revalidate; the grid cell flips visibly.
+- genesis `seedMissingGenesis` (?fill=N), `topUpDemoCorpus` (?topup=N) — query-param result banners (incl. skip/error).
+- tenants `createTenant` → redirects to the live provisioning checklist; `runProvisioningStep` returns DONE/FAILED per step; `viewAsTenant` flips theme + redirects.
+
+**Fixed:**
+- genesis `runGenesisSeed` — `seedOperator()` was unwrapped, so a failed
+  destructive reseed crashed into the admin error boundary. Now try/catch →
+  `?error=seed`, with a matching red "Reseed failed" banner on the page (mirrors
+  the additive `?fill=error` / `?topup=error` banners).
+
+**Deferred (admin-only edge cases — would need FormState/param plumbing, not flashToast):**
+- tenants `createTenant` — validation throws (`invalid slug`, `slug already in use`) hit the admin error boundary instead of an inline message.
+- users `updateUser` / `setActive` / `deleteUser` — protective guards (last-admin / self) silently `return done()` with no banner explaining why the action was a no-op.

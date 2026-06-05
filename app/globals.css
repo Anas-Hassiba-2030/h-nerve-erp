@@ -8,6 +8,34 @@
 
 @import "./animations.css";
 
+/* Phase / feature stylesheets.
+   CRITICAL: @import rules are only valid at the TOP of a stylesheet (before any
+   other rule). The same list used to sit ~960 lines down, after real CSS — an
+   invalid position the production build silently DROPS, so every page that relied
+   on a globals @import (admin, empire, workflow, theater, integrations, mobile,
+   docintel, meta, realtime, …) shipped completely unstyled. Verified with a local
+   `next build`: the stranded imports were absent from the output CSS; moved here
+   they are present. postcss-import dedupes by path. */
+@import "./hn-animations.css";
+@import "./exec-design.css";
+@import "./heritage-modern.css";
+@import "./phase9-theater.css";
+@import "./phase10-meta.css";
+@import "./phase11-admin.css";
+@import "./phase12-workflow.css";
+@import "./phase13-integrations.css";
+@import "./phase14-mobile.css";
+@import "./phase15-conversational.css";
+@import "./phase16-timemachine.css";
+@import "./phase17-realtime.css";
+@import "./phase18-docintel.css";
+@import "./phase19-empire.css";
+@import "./phase20-protocol.css";
+@import "./brain-slider.css";
+@import "./narrate-tooltip.css";
+@import "./showcase.css";
+@import "./workspace.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -959,55 +987,6 @@ html[dir="rtl"] .sidebar-drawer-panel { --drawer-from: -100%; }
   @page { margin: 12mm; size: A4 portrait; }
 }
 
-@import "./hn-animations.css";
-
-@import "./exec-design.css";
-
-@import "./heritage-modern.css";
-
-@import "./phase12-workflow.css";
-
-
-@import "./phase11-admin.css";
-
-
-@import "./phase10-meta.css";
-
-
-@import "./phase9-theater.css";
-
-
-@import "./brain-slider.css";
-
-
-@import "./narrate-tooltip.css";
-
-
-@import "./phase13-integrations.css";
-
-
-@import "./phase14-mobile.css";
-
-
-@import "./phase15-conversational.css";
-
-
-@import "./phase16-timemachine.css";
-
-
-@import "./phase17-realtime.css";
-
-
-@import "./phase18-docintel.css";
-
-
-@import "./phase19-empire.css";
-
-
-@import "./phase20-protocol.css";
-
-
-@import "./showcase.css";
-
-
-@import "./workspace.css";
+/* (Feature stylesheets were moved to the TOP of this file — see the @import
+   block above. They were here, after ~960 lines of CSS, which is an invalid
+   @import position the production build dropped.) */

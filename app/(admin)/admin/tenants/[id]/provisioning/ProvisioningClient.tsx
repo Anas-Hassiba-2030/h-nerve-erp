@@ -41,6 +41,7 @@ export function ProvisioningClient({
 }) {
   const router = useRouter();
   const [steps, setSteps] = useState<Step[]>(initial);
+  const [failedStep, setFailedStep] = useState<Step | null>(null);
 
   useEffect(() => {
     // StrictMode-safe lock: the second mount in dev sees this and bails.
@@ -48,6 +49,7 @@ export function ProvisioningClient({
     inFlight.add(tenantId);
 
     (async () => {
+      let failedKey: ProvisioningStepKey | null = null;
       for (const s of initial) {
         if (s.status === "DONE") continue;
 
@@ -66,13 +68,24 @@ export function ProvisioningClient({
           )
         );
 
-        if (result.status === "FAILED") break;
+        if (result.status === "FAILED") {
+          failedKey = s.key;
+          break;
+        }
+      }
+
+      inFlight.delete(tenantId);
+
+      if (failedKey) {
+        // Do NOT redirect on failure — that would mask a half-provisioned
+        // tenant as a success. Surface the failed step + offer a retry.
+        setFailedStep(initial.find((x) => x.key === failedKey) ?? null);
+        return;
       }
 
       // Brief pause so the user reads the final tick, then redirect.
       await new Promise((r) => setTimeout(r, 700));
       router.push(`/admin/tenants/${tenantId}`);
-      inFlight.delete(tenantId);
     })();
     // No cleanup needed — the loop is naturally bounded by step count
     // and the server actions are idempotent. The module-level lock
@@ -133,7 +146,22 @@ export function ProvisioningClient({
         ))}
       </ol>
 
-      {allDone ? (
+      {failedStep ? (
+        <div className="admin-provisioning-failed" role="alert">
+          <p>
+            {ar
+              ? `✕ فشلت خطوة التهيئة: «${failedStep.labelAr}». لم يكتمل تجهيز المستأجر.`
+              : `✕ Provisioning failed at step: “${failedStep.labelEn}”. The tenant was not fully provisioned.`}
+          </p>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => router.refresh()}
+          >
+            {ar ? "إعادة المحاولة" : "Retry"}
+          </button>
+        </div>
+      ) : allDone ? (
         <p className="admin-provisioning-done">
           {ar ? "✓ المستأجر جاهز. جارٍ التوجيه إلى لوحة التحكم…" : "✓ Tenant ready. Redirecting to console…"}
         </p>

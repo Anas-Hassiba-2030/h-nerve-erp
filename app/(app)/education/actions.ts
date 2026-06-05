@@ -54,12 +54,14 @@ export async function createProgram(formData: FormData) {
   redirect("/education");
 }
 
+const stageEnum = z.enum(["INTAKE", "ACCELERATING", "GRADUATED", "STALLED"]);
+
 export async function setProgramStage(formData: FormData) {
   await requireUser();
   const id = String(formData.get("id") ?? "");
-  const stage = String(formData.get("stage") ?? "");
-  if (!id || !stage) return;
-  await prisma.program.update({ where: { id }, data: { stage } });
+  const parsed = stageEnum.safeParse(formData.get("stage"));
+  if (!id || !parsed.success) return; // reject unknown/malformed stage values
+  await prisma.program.update({ where: { id }, data: { stage: parsed.data } });
   revalidatePath("/education");
 }
 

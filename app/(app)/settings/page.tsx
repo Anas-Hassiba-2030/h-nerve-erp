@@ -274,9 +274,13 @@ export default async function SettingsPage({
           <div className="panel" style={{ marginTop: 14 }}>
             <div className="panel-head">
               <span className="panel-title">{ar ? "تفضيلات العرض" : "Display preferences"}</span>
-              <span className="panel-aside">{ar ? "ما يظهر في كل وحدة" : "What shows in each module"}</span>
+              <span className="panel-aside">{ar ? "الحالة الحالية للواجهة" : "Current interface state"}</span>
             </div>
             <div>
+              {/* Read-only status rows. These reflect what the interface
+                  currently shows; they are NOT user-editable yet, so they are
+                  rendered as status tags rather than interactive switches (a
+                  toggle that persists nothing would be a dead control). */}
               {(ar
                 ? [
                     ["إظهار شريط المؤشّرات الحيّ", true],
@@ -298,7 +302,9 @@ export default async function SettingsPage({
                   style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0", borderBottom: "1px solid var(--line)" }}
                 >
                   <span style={{ fontSize: 13.5, color: "var(--ink)" }}>{label}</span>
-                  <span className={`br-switch ${on ? "on" : ""}`} />
+                  <span className={`ops-tag ${on ? "ok" : ""}`}>
+                    {on ? (ar ? "مُفعّل" : "On") : (ar ? "معطّل" : "Off")}
+                  </span>
                 </div>
               ))}
             </div>

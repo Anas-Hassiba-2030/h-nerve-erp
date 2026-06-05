@@ -43,9 +43,18 @@ export type AhliyyaProgram = {
 const STAGES_AR = ["فكرة", "احتضان", "نمو", "خروج"];
 const STAGES_EN = ["Idea", "Incubate", "Growth", "Exit"];
 
-// the domain stage that each pipeline index advances *to* (mirrors the
-// INTAKE→ACCELERATING→GRADUATED progression; STALLED holds at incubate)
-const INDEX_TO_STAGE = ["INTAKE", "STALLED", "ACCELERATING", "GRADUATED"];
+// the healthy linear progression. STALLED is an off-pipeline exception
+// (a "watch" state), NOT a forward step — advancing a stalled program
+// resumes it into ACCELERATING. Deriving the next stage from `p.stage`
+// (not the visual pipeline index) keeps INTAKE → ACCELERATING correct.
+const STAGE_FLOW = ["INTAKE", "ACCELERATING", "GRADUATED"] as const;
+
+function nextStage(stage: string): string | null {
+  if (stage === "STALLED") return "ACCELERATING"; // un-stall = resume growth
+  const i = STAGE_FLOW.indexOf(stage as (typeof STAGE_FLOW)[number]);
+  if (i < 0 || i >= STAGE_FLOW.length - 1) return null; // unknown or terminal
+  return STAGE_FLOW[i + 1];
+}
 
 export function AhliyyaTabs({
   ar,
@@ -98,10 +107,11 @@ function ProgramsPanel({
   const [pending, startTransition] = useTransition();
 
   function advance(p: AhliyyaProgram) {
-    if (p.stageIndex >= stages.length - 1) return;
+    const next = nextStage(p.stage);
+    if (!next) return;
     const fd = new FormData();
     fd.set("id", p.id);
-    fd.set("stage", INDEX_TO_STAGE[p.stageIndex + 1]);
+    fd.set("stage", next);
     startTransition(() => { void setProgramStage(fd); });
   }
 
@@ -112,7 +122,7 @@ function ProgramsPanel({
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {programs.map((p) => {
-          const atEnd = p.stageIndex >= stages.length - 1;
+          const atEnd = nextStage(p.stage) == null;
           return (
             <div key={p.id} className="panel" style={{ padding: "18px 20px", marginBottom: 0 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 14, flexWrap: "wrap" }}>

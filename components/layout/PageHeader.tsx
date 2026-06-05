@@ -19,7 +19,6 @@ import {
   type NotifTask,
 } from "@/components/nav/NotificationCenter";
 import { KeyboardShortcuts } from "@/components/nav/KeyboardShortcuts";
-import { SidebarHamburger } from "@/components/layout/SidebarDrawer";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getTheme } from "@/lib/theme/theme.server";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -236,7 +235,6 @@ export async function PageHeader({
 
           {/* Utility controls — always single-line, never clip */}
           <div className="flex shrink-0 items-center gap-1.5">
-            <SidebarHamburger locale={locale} />
             <CommandPalette locale={locale} />
             <KeyboardShortcuts locale={locale} />
             <NotificationCenter

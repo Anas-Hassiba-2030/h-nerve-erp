@@ -4,6 +4,12 @@
 // hairline edges, palette on the left, inspector on the right, test-run
 // strip at the bottom. Phase 12 of docs/PHASES-INTELLIGENCE.md.
 
+// Import the studio CSS DIRECTLY — globals.css's @import of phase12-workflow.css
+// is not inlined into this route's chunk in the production build, so the studio
+// shipped unstyled (.studio-palette had no panel/background and the palette text
+// fell back to the dark --ink colour → unreadable dark-on-dark). Same fix as the
+// admin shell (#211) and orrery panels (#202).
+import "../../../../phase12-workflow.css";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db/db";
 import Link from "next/link";

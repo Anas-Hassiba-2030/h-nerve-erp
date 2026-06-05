@@ -27,14 +27,43 @@ body:has(.dl-page[data-section="brain"]) .flex.min-h-screen.flex-1.flex-col.nerv
   background-attachment: fixed;
 }
 
-/* ── Brain · night-surface overrides ── */
+/* ── Brain · night-surface overrides ──
+   daylight.css paints sec-head as a near-opaque CREAM card (the work-surface
+   header). On the brain's cosmic background that reads as a washed-out white
+   smear behind the title. Repaint the card as a translucent emerald-glass
+   panel so the gold eyebrow + white headline land legibly. */
 .dl-page { background: transparent; color: var(--mist); }
+.dl-page .sec-head {
+  background: linear-gradient(160deg, rgba(20, 46, 38, .55), rgba(13, 31, 26, .48));
+  border: 1px solid rgba(194, 163, 90, .22);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px -22px rgba(0, 0, 0, .6);
+}
 .dl-page .sec-title { color: #fff; }
-.dl-page .sec-sub { color: var(--mist); opacity: .8; }
+.dl-page .sec-sub { color: var(--mist); opacity: .85; }
 .dl-page .sec-eyebrow { color: var(--gold-soft); }
 .dl-page .sec-eyebrow .tick { background: var(--gold-soft); }
-.dl-page .sec-head { border-bottom-color: rgba(194, 163, 90, .2); }
 .dl-page .sec-status { background: rgba(17, 42, 35, .6); border-color: rgba(194, 163, 90, .28); color: var(--mist); }
+
+/* daylight.css's dl-btn-secondary is dark-emerald text on a cream border —
+   invisible on the cosmic surface. Lift it to the same gold-glass register
+   the rest of the night UI uses (matches insights' br-btn-ghost). */
+.dl-page .dl-btn-secondary {
+  color: var(--mist);
+  background: rgba(194, 163, 90, .12);
+  border-color: rgba(194, 163, 90, .35);
+}
+.dl-page .dl-btn-secondary:hover {
+  color: #fff;
+  background: rgba(194, 163, 90, .22);
+  border-color: var(--gold);
+}
+.dl-page .dl-btn-primary {
+  color: #241b06;
+  background: linear-gradient(135deg, var(--gold-soft), var(--gold));
+  box-shadow: 0 6px 16px -8px rgba(194, 163, 90, .55);
+}
+.dl-page .dl-btn-primary:hover { box-shadow: 0 10px 24px -10px rgba(194, 163, 90, .7); }
 .dl-page .n-panel { background: rgba(17, 42, 35, .55); backdrop-filter: blur(12px); border: 1px solid rgba(194, 163, 90, .2); border-radius: 18px; padding: 24px 26px; margin-bottom: 22px; }
 .dl-page .n-panel-title { font-family: var(--display); font-size: 24px; font-weight: 600; color: #fff; margin-bottom: 4px; }
 .dl-page .n-panel-aside { font-size: 12.5px; color: var(--mist); opacity: .7; margin-bottom: 18px; }

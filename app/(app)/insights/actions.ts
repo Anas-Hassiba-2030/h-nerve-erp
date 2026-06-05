@@ -62,43 +62,63 @@ export async function setInsightStatus(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "");
   if (!id || !status) return;
+  const locale = getLocale();
+  const ar = locale === "ar";
   // ISO-4 ownership — the scoped client nulls an insight outside the caller's
   // workspace (shared-company guard), so a null row means foreign or gone.
   // Bail before the write so a pinned operator can't flip another company's
-  // insight by id.
+  // insight by id. Surface the bail as a toast so the user knows the click
+  // landed but the row isn't theirs to touch (silent return reads as broken).
   const before = await prisma.aIInsight.findUnique({ where: { id } });
-  if (!before) return;
-  await prisma.aIInsight.update({ where: { id }, data: { status } });
-  if (before) {
-    await logActivity({
-      action: status === "RESOLVED" ? "APPROVE" : "UPDATE",
-      entity: "INSIGHT",
-      entityId: id,
-      summary: `حالة الإشارة "${before.title}" → ${status}`,
-      summaryEn: `Insight "${before.title}" status → ${status}`,
-      meta: { from: before.status, to: status },
+  if (!before) {
+    flashToast({
+      type: "info",
+      entity: "insight",
+      id,
+      label: ar ? "هذه الإشارة ليست في مساحة عملك الحالية" : "This signal isn't in your active workspace",
     });
-    // Phase 7 — feedback signal
-    if (status === "RESOLVED") {
-      await recordFeedback({
-        kind: "INSIGHT_RESOLVED",
-        targetRef: id,
-        targetType: "insight",
-        module: before.module,
-        category: deriveInsightCategory(before),
-        userId: me.id,
-      });
-    } else if (status === "ACKNOWLEDGED") {
-      await recordFeedback({
-        kind: "INSIGHT_HELPFUL",
-        targetRef: id,
-        targetType: "insight",
-        module: before.module,
-        category: deriveInsightCategory(before),
-        userId: me.id,
-      });
-    }
+    revalidatePath("/insights");
+    return;
   }
+  await prisma.aIInsight.update({ where: { id }, data: { status } });
+  await logActivity({
+    action: status === "RESOLVED" ? "APPROVE" : "UPDATE",
+    entity: "INSIGHT",
+    entityId: id,
+    summary: `حالة الإشارة "${before.title}" → ${status}`,
+    summaryEn: `Insight "${before.title}" status → ${status}`,
+    meta: { from: before.status, to: status },
+  });
+  // Phase 7 — feedback signal
+  if (status === "RESOLVED") {
+    await recordFeedback({
+      kind: "INSIGHT_RESOLVED",
+      targetRef: id,
+      targetType: "insight",
+      module: before.module,
+      category: deriveInsightCategory(before),
+      userId: me.id,
+    });
+  } else if (status === "ACKNOWLEDGED") {
+    await recordFeedback({
+      kind: "INSIGHT_HELPFUL",
+      targetRef: id,
+      targetType: "insight",
+      module: before.module,
+      category: deriveInsightCategory(before),
+      userId: me.id,
+    });
+  }
+  // Visible confirmation — without this the row just greys out silently and
+  // users (rightly) wonder whether the click actually fired.
+  flashToast({
+    type: "info",
+    entity: "insight",
+    id,
+    label: ar
+      ? (status === "RESOLVED" ? `حُلّت: ${before.title}` : `الحالة → ${status}`)
+      : (status === "RESOLVED" ? `Resolved: ${before.title}` : `Status → ${status}`),
+  });
   revalidatePath("/insights");
 }
 

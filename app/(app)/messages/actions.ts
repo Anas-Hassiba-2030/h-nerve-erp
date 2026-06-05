@@ -6,6 +6,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/db/db";
 import { requireUser } from "@/lib/auth/session";
 import { ensureDirectThread, markThreadRead } from "@/lib/utils/messages";
+import { flashToast } from "@/lib/utils/toast";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { logActivity } from "@/lib/auth/activityLog";
 
 const sendSchema = z.object({
@@ -29,53 +31,72 @@ const sendSchema = z.object({
 
 export async function sendMessage(formData: FormData) {
   const user = await requireUser();
-  const data = sendSchema.parse({
-    threadId: formData.get("threadId"),
-    body: formData.get("body") ?? "",
-    refType: formData.get("refType") ?? undefined,
-    refId: formData.get("refId") ?? undefined,
-    imageUrl: formData.get("imageUrl") ?? undefined,
-  });
-  // After parse: require at least one of (trimmed body, imageUrl). A
-  // whitespace-only body ("   ") is not a message.
-  const trimmedBody = data.body.trim();
-  if (!trimmedBody && !data.imageUrl) {
-    throw new Error("Empty message");
+  const ar = getLocale() === "ar";
+  // parse() + the empty/participant guards all throw; without a catch a failed
+  // send just vanishes with no feedback. Toast on failure only (a successful
+  // send shouldn't nag — the new message appearing IS the confirmation).
+  let threadId = "";
+  try {
+    const data = sendSchema.parse({
+      threadId: formData.get("threadId"),
+      body: formData.get("body") ?? "",
+      refType: formData.get("refType") ?? undefined,
+      refId: formData.get("refId") ?? undefined,
+      imageUrl: formData.get("imageUrl") ?? undefined,
+    });
+    threadId = data.threadId;
+    // After parse: require at least one of (trimmed body, imageUrl). A
+    // whitespace-only body ("   ") is not a message.
+    const trimmedBody = data.body.trim();
+    if (!trimmedBody && !data.imageUrl) {
+      throw new Error("empty");
+    }
+
+    // Verify the user is a participant of this thread
+    const part = await prisma.threadParticipant.findFirst({
+      where: { threadId: data.threadId, userId: user.id },
+    });
+    if (!part) throw new Error("forbidden");
+
+    await prisma.message.create({
+      data: {
+        threadId: data.threadId,
+        authorId: user.id,
+        body: trimmedBody,
+        imageUrl: data.imageUrl ?? null,
+        refType: data.refType ?? null,
+        refId: data.refId ?? null,
+      },
+    });
+    await prisma.messageThread.update({
+      where: { id: data.threadId },
+      data: { updatedAt: new Date() },
+    });
+    await markThreadRead(data.threadId, user.id);
+
+    await logActivity({
+      action: "CREATE",
+      entity: "USER",
+      entityId: data.threadId,
+      summary: `رسالة جديدة من ${user.name}`,
+      summaryEn: `New message from ${user.name}`,
+      module: "MESSAGES",
+    });
+  } catch (e) {
+    const msg = (e as Error)?.message;
+    flashToast({
+      type: "info", entity: "info", id: "send-msg",
+      label: msg === "forbidden"
+        ? (ar ? "لست عضواً في هذه المحادثة" : "You're not a participant of this thread")
+        : (ar ? "تعذّر إرسال الرسالة" : "Couldn't send the message"),
+    });
+    revalidatePath("/messages");
+    if (threadId) revalidatePath(`/messages/${threadId}`);
+    return;
   }
 
-  // Verify the user is a participant of this thread
-  const part = await prisma.threadParticipant.findFirst({
-    where: { threadId: data.threadId, userId: user.id },
-  });
-  if (!part) throw new Error("Forbidden");
-
-  await prisma.message.create({
-    data: {
-      threadId: data.threadId,
-      authorId: user.id,
-      body: trimmedBody,
-      imageUrl: data.imageUrl ?? null,
-      refType: data.refType ?? null,
-      refId: data.refId ?? null,
-    },
-  });
-  await prisma.messageThread.update({
-    where: { id: data.threadId },
-    data: { updatedAt: new Date() },
-  });
-  await markThreadRead(data.threadId, user.id);
-
-  await logActivity({
-    action: "CREATE",
-    entity: "USER",
-    entityId: data.threadId,
-    summary: `رسالة جديدة من ${user.name}`,
-    summaryEn: `New message from ${user.name}`,
-    module: "MESSAGES",
-  });
-
   revalidatePath("/messages");
-  revalidatePath(`/messages/${data.threadId}`);
+  revalidatePath(`/messages/${threadId}`);
 }
 
 const startSchema = z.object({
@@ -85,26 +106,40 @@ const startSchema = z.object({
 
 export async function startDirectThread(formData: FormData) {
   const user = await requireUser();
-  const data = startSchema.parse({
-    toUserId: formData.get("toUserId"),
-    body: formData.get("body") ?? undefined,
-  });
-  if (data.toUserId === user.id) throw new Error("Cannot message yourself");
+  const ar = getLocale() === "ar";
+  let threadId = "";
+  try {
+    const data = startSchema.parse({
+      toUserId: formData.get("toUserId"),
+      body: formData.get("body") ?? undefined,
+    });
+    if (data.toUserId === user.id) throw new Error("self");
 
-  const threadId = await ensureDirectThread(user.id, data.toUserId);
-  if (data.body) {
-    await prisma.message.create({
-      data: {
-        threadId,
-        authorId: user.id,
-        body: data.body,
-      },
+    threadId = await ensureDirectThread(user.id, data.toUserId);
+    if (data.body) {
+      await prisma.message.create({
+        data: {
+          threadId,
+          authorId: user.id,
+          body: data.body,
+        },
+      });
+      await prisma.messageThread.update({
+        where: { id: threadId },
+        data: { updatedAt: new Date() },
+      });
+      await markThreadRead(threadId, user.id);
+    }
+  } catch (e) {
+    const msg = (e as Error)?.message;
+    flashToast({
+      type: "info", entity: "info", id: "start-thread",
+      label: msg === "self"
+        ? (ar ? "لا يمكنك مراسلة نفسك" : "You can't message yourself")
+        : (ar ? "تعذّر بدء المحادثة" : "Couldn't start the conversation"),
     });
-    await prisma.messageThread.update({
-      where: { id: threadId },
-      data: { updatedAt: new Date() },
-    });
-    await markThreadRead(threadId, user.id);
+    revalidatePath("/messages");
+    return;
   }
   revalidatePath("/messages");
   redirect(`/messages/${threadId}`);

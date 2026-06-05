@@ -9,6 +9,7 @@ import { requireRole } from "@/lib/auth/authz";
 import { rankFor, bonusFor } from "@/lib/utils/gamification";
 import { softDelete, softRestore, deletedLabel, restoredLabel } from "@/lib/db/softDelete";
 import { flashToast } from "@/lib/utils/toast";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { logActivity } from "@/lib/auth/activityLog";
 
 const taskSchema = z.object({
@@ -25,39 +26,51 @@ const taskSchema = z.object({
 
 export async function createTask(formData: FormData) {
   const user = await requireRole("MANAGER");
-  const data = taskSchema.parse({
-    title: formData.get("title"),
-    titleEn: formData.get("titleEn") ?? "",
-    description: formData.get("description") ?? "",
-    kind: formData.get("kind") || "CORE",
-    priority: formData.get("priority") || "MEDIUM",
-    module: formData.get("module") || "GENERAL",
-    points: formData.get("points") ?? 10,
-    dueAt: formData.get("dueAt") ?? "",
-    assigneeId: formData.get("assigneeId") ?? "",
-  });
-  const created = await prisma.task.create({
-    data: {
-      title: data.title,
-      titleEn: data.titleEn || null,
-      description: data.description || null,
-      kind: data.kind,
-      priority: data.priority,
+  const ar = getLocale() === "ar";
+  // schema.parse()/create() throw on invalid input; guard so the new-task form
+  // doesn't silently re-render with no feedback.
+  try {
+    const data = taskSchema.parse({
+      title: formData.get("title"),
+      titleEn: formData.get("titleEn") ?? "",
+      description: formData.get("description") ?? "",
+      kind: formData.get("kind") || "CORE",
+      priority: formData.get("priority") || "MEDIUM",
+      module: formData.get("module") || "GENERAL",
+      points: formData.get("points") ?? 10,
+      dueAt: formData.get("dueAt") ?? "",
+      assigneeId: formData.get("assigneeId") ?? "",
+    });
+    const created = await prisma.task.create({
+      data: {
+        title: data.title,
+        titleEn: data.titleEn || null,
+        description: data.description || null,
+        kind: data.kind,
+        priority: data.priority,
+        module: data.module,
+        points: data.points,
+        dueAt: data.dueAt ? new Date(data.dueAt) : null,
+        assigneeId: data.assigneeId || user.id,
+      },
+    });
+    await logActivity({
+      action: "CREATE",
+      entity: "TASK",
+      entityId: created.id,
+      summary: `مهمة جديدة: ${data.title}`,
+      summaryEn: `New task: ${data.title}`,
       module: data.module,
-      points: data.points,
-      dueAt: data.dueAt ? new Date(data.dueAt) : null,
-      assigneeId: data.assigneeId || user.id,
-    },
-  });
-  await logActivity({
-    action: "CREATE",
-    entity: "TASK",
-    entityId: created.id,
-    summary: `مهمة جديدة: ${data.title}`,
-    summaryEn: `New task: ${data.title}`,
-    module: data.module,
-    meta: { kind: data.kind, points: data.points, priority: data.priority },
-  });
+      meta: { kind: data.kind, points: data.points, priority: data.priority },
+    });
+  } catch {
+    flashToast({
+      type: "info", entity: "info", id: "create-task",
+      label: ar ? "تعذّر إنشاء المهمة — تحقّق من المدخلات" : "Couldn't create task — check the inputs",
+    });
+    revalidatePath("/tasks");
+    return;
+  }
   revalidatePath("/tasks");
   redirect("/tasks");
 }

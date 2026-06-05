@@ -18,8 +18,8 @@ export default async function AnalyticsHubPage() {
 
   const [companies, transactions, forecasts, esg] = await Promise.all([
     prisma.company.findMany({ orderBy: { name: "asc" } }),
-    prisma.transaction.findMany({ where: { occurredAt: { gte: start12mo } } }),
-    prisma.supplyForecast.findMany(),
+    prisma.transaction.findMany({ where: { occurredAt: { gte: start12mo } }, orderBy: { occurredAt: "desc" }, take: 3000 }),
+    prisma.supplyForecast.findMany({ take: 500 }),
     prisma.sustainabilityScore.findMany({ orderBy: [{ year: "asc" }, { period: "asc" }] }),
   ]);
 

@@ -27,8 +27,8 @@ export default async function EmployeesPage() {
 
   const [me, users, companies] = await Promise.all([
     getCurrentUser(),
-    prisma.user.findMany({ orderBy: { createdAt: "asc" }, include: { company: true } }),
-    prisma.company.findMany(),
+    prisma.user.findMany({ orderBy: { createdAt: "asc" }, include: { company: true }, take: 200 }),
+    prisma.company.findMany({ take: 100 }),
   ]);
   // "New member" routes to /admin/users, which is hard-gated to ADMIN — only
   // show it to admins so non-admins aren't bounced to /dashboard on click.

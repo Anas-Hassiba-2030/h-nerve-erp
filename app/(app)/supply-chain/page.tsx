@@ -67,6 +67,7 @@ export default async function SupplyChainPage() {
       generatedBy: true,
       sourcedPO: { select: { id: true, poNumber: true, supplierRef: { select: { name: true } } } },
     },
+    take: 300,
   });
 
   const drafts = forecasts.filter((f) => f.status === "DRAFT").length;

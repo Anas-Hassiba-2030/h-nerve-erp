@@ -58,6 +58,11 @@ export default async function CompaniesPage() {
       </DaylightKpiGrid>
 
       <DaylightPanel title={ar ? "الشركات" : "Companies"} aside={ar ? "اضغط لفتح ملف الشركة" : "Click to open a company profile"}>
+        {companies.length === 0 ? (
+          <p style={{ fontSize: 13, color: "var(--ink-muted)", padding: "12px 0" }}>
+            {ar ? "لا شركات مضافة بعد." : "No companies yet."}
+          </p>
+        ) : (
         <div className="prop-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
           {companies.map((c) => {
             const Icon = SECTOR_ICON[c.sector] ?? Building2;
@@ -87,6 +92,7 @@ export default async function CompaniesPage() {
             );
           })}
         </div>
+        )}
       </DaylightPanel>
     </DaylightShell>
   );

@@ -225,7 +225,9 @@ export default async function HotelsPage() {
           </tr>
         </thead>
         <tbody>
-          {hotelRows.map(({ h, rev, occ: o, state }) => (
+          {hotelRows.length === 0 ? (
+            <tr><td colSpan={7} style={{ textAlign: "center", padding: "40px 20px", color: "var(--ink-muted)", fontSize: 13 }}>{ar ? "لا فنادق مضافة بعد" : "No hotels yet"}</td></tr>
+          ) : hotelRows.map(({ h, rev, occ: o, state }) => (
             <tr key={h.id}>
               <td>
                 <Link href={`/hotels/${h.id}`} style={{ fontWeight: 700, color: "var(--ink)" }}>
@@ -274,7 +276,9 @@ export default async function HotelsPage() {
           </tr>
         </thead>
         <tbody>
-          {recentBookings.map((b) => (
+          {recentBookings.length === 0 ? (
+            <tr><td colSpan={9} style={{ textAlign: "center", padding: "40px 20px", color: "var(--ink-muted)", fontSize: 13 }}>{ar ? "لا حجوزات بعد" : "No bookings yet"}</td></tr>
+          ) : recentBookings.map((b) => (
             <tr key={b.id}>
               <td style={{ fontFamily: "monospace", fontSize: 11, color: "var(--ink-muted)" }}>{b.reference}</td>
               <td style={{ fontWeight: 700, color: "var(--ink)" }}>{b.guestName}</td>

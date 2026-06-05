@@ -40,7 +40,15 @@ export async function runGenesisSeed(formData: FormData): Promise<void> {
     redirect("/admin/genesis?error=confirm");
   }
 
-  await seedOperator();
+  // seedOperator() can throw (schema drift, a failed write mid-reseed). Without
+  // this guard the destructive reseed crashes into the admin error boundary with
+  // no idea whether the DB was left half-wiped. Catch → report via the page's
+  // banner, matching the additive seeds (?fill=error / ?topup=error).
+  try {
+    await seedOperator();
+  } catch {
+    redirect("/admin/genesis?error=seed");
+  }
   redirect("/admin/genesis?seeded=1");
 }
 

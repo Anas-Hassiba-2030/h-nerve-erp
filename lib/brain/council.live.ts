@@ -12,23 +12,34 @@
 import { prisma } from "@/lib/db/db";
 import { causalGraph } from "./graph.prisma";
 import { SPECIALIST_AGENTS, runAgent, runModerator } from "./agents";
-import type { Council, CouncilSession, AgentVoice } from "./council";
+import type { Council, CouncilSession, AgentVoice, CouncilScope, CouncilLens } from "./council";
 import { log } from "@/lib/utils/logger";
 import { llmConfig } from "./llm";
 import { retrieveDocuments, docHitsToContext, type DocContext } from "./documents.retrieve";
 import { retrieveGraphContext } from "./graphrag.live";
 import { evaluateRetrieval } from "./crag";
 
+// Bilingual labels for each lens — used to spell the focus out to the agents.
+const LENS_LABEL: Record<CouncilLens, { ar: string; en: string }> = {
+  finance:        { ar: "المالية والهوامش", en: "finances & margins" },
+  operations:     { ar: "العمليات",          en: "operations" },
+  supply:         { ar: "سلسلة التوريد",      en: "supply chain" },
+  sustainability: { ar: "الاستدامة وESG",     en: "sustainability & ESG" },
+  people:         { ar: "الموظفون والفرق",    en: "people & teams" },
+  analytics:      { ar: "التحليلات والأداء",  en: "analytics & performance" },
+};
+
 class LiveCouncil implements Council {
-  async convene(topic: string, contextRefs: string[] = [], scopeCompanyId?: string): Promise<CouncilSession> {
+  async convene(topic: string, contextRefs: string[] = [], scope?: CouncilScope): Promise<CouncilSession> {
     const t0 = Date.now();
     const locale: "ar" | "en" =
       /[؀-ۿ]/.test(topic) ? "ar" : "en";
 
-    // 1. Build the context. When the user picked a subject company up front, the
-    //    agents see ONLY that unit's data — no other business units bleed in, so
-    //    the debate is fenced to the chosen subject instead of the whole group.
-    const context = await buildAgentContext(contextRefs, topic, locale, scopeCompanyId);
+    // 1. Build the context. When the user briefed the council on specific units
+    //    and/or a lens, the agents see ONLY that slice — no other business units
+    //    bleed in, and the lens narrows which facet they reason about, so the
+    //    debate is fenced to the chosen brief instead of the whole group.
+    const context = await buildAgentContext(contextRefs, topic, locale, scope);
 
     // 2. Persist the running session up-front so the UI can poll it if streaming.
     const session = await prisma.councilSession.create({
@@ -156,11 +167,18 @@ async function buildAgentContext(
   contextRefs: string[],
   topic: string,
   locale: "ar" | "en",
-  scopeCompanyId?: string,
+  scope?: CouncilScope,
 ) {
+  const companyIds = scope?.companyIds?.filter(Boolean) ?? [];
+  const scoped = companyIds.length > 0;
+  const idSet = new Set(companyIds);
+  const lenses = scope?.lenses ?? [];
+
   // Pull the most central nodes (Companies + Hotels + Forecasts) plus any explicit refs.
   // Phase RAG-3 — also retrieve the tenant's documents most relevant to the
   // topic, so each agent can ground its argument in real contract/policy text.
+  // When the brief is fenced to specific units we retrieve fewer, stronger doc
+  // matches so an off-unit contract can't sneak into the citations.
   /* eslint-disable prefer-const */
   let [companies, hotels, dairyBatches, farms, openInsights, forecasts, txnSums, docHits] = await Promise.all([
     prisma.company.findMany(),
@@ -180,21 +198,21 @@ async function buildAgentContext(
       where: { occurredAt: { gte: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) } },
       _sum: { amount: true },
     }),
-    retrieveDocuments(topic, { k: 4, minScore: 0.06, locale }).catch(() => []),
+    retrieveDocuments(topic, { k: scoped ? 2 : 4, minScore: scoped ? 0.12 : 0.06, locale }).catch(() => []),
   ]);
 
-  // FENCE the context to the chosen subject company: strip every other unit's
-  // data so the sub-agents debate ONLY that subject (no cross-contamination).
+  // FENCE the context to the chosen subject companies: strip every other unit's
+  // data so the sub-agents debate ONLY the briefed units (no cross-contamination).
   // Group-wide insights (companyId === null) are dropped too — a fenced debate
-  // is about the chosen unit, not the whole federation.
-  if (scopeCompanyId) {
-    companies = companies.filter((c) => c.id === scopeCompanyId);
-    hotels = hotels.filter((h) => h.companyId === scopeCompanyId);
-    dairyBatches = dairyBatches.filter((b) => b.companyId === scopeCompanyId);
-    farms = farms.filter((f) => f.companyId === scopeCompanyId);
-    openInsights = openInsights.filter((i) => i.companyId === scopeCompanyId);
+  // is about the chosen units, not the whole federation.
+  if (scoped) {
+    companies = companies.filter((c) => idSet.has(c.id));
+    hotels = hotels.filter((h) => idSet.has(h.companyId));
+    dairyBatches = dairyBatches.filter((b) => idSet.has(b.companyId));
+    farms = farms.filter((f) => idSet.has(f.companyId));
+    openInsights = openInsights.filter((i) => i.companyId != null && idSet.has(i.companyId));
     forecasts = forecasts.filter(
-      (f) => f.sourceCompanyId === scopeCompanyId || f.targetCompanyId === scopeCompanyId,
+      (f) => idSet.has(f.sourceCompanyId) || idSet.has(f.targetCompanyId),
     );
   }
   /* eslint-enable prefer-const */
@@ -205,10 +223,34 @@ async function buildAgentContext(
   const documents: DocContext[] = docHitsToContext(evaluateRetrieval(docHits).keep, locale);
 
   // Phase RAG-4 — multi-hop causal context from the brain graph for this topic.
-  const graph = await retrieveGraphContext(topic, { k: 8, topSeeds: 3 }).catch(() => ({
-    nodes: [],
-    links: [],
+  let graph = await retrieveGraphContext(topic, { k: scoped ? 6 : 8, topSeeds: 3 }).catch(() => ({
+    nodes: [] as Array<{ kind: string; label: string }>,
+    links: [] as string[],
   }));
+
+  // FENCE the graph too: when units are chosen, drop graph nodes/links that name
+  // entities outside the brief — otherwise the agents cite another company's
+  // contracts/leases while debating yours (the cross-entity leak). We keep nodes
+  // whose label matches an in-scope entity, and links that mention one.
+  if (scoped) {
+    const allowed = new Set(
+      [
+        ...companies.map((c) => c.nameEn || c.name),
+        ...companies.map((c) => c.name),
+        ...hotels.map((h) => h.name),
+        ...farms.map((f) => f.name),
+      ].map((s) => s.toLowerCase()),
+    );
+    const mentionsAllowed = (s: string) => {
+      const low = s.toLowerCase();
+      for (const a of allowed) if (a && low.includes(a)) return true;
+      return false;
+    };
+    graph = {
+      nodes: graph.nodes.filter((n) => mentionsAllowed(n.label)),
+      links: graph.links.filter((l) => mentionsAllowed(l)),
+    };
+  }
 
   const sumByKind = (k: string) =>
     txnSums.find((r) => r.kind === k)?._sum.amount ?? 0;
@@ -217,9 +259,18 @@ async function buildAgentContext(
 
   const farmsAlerting = farms.filter((f) => f.alertLevel !== "OK").length;
 
-  const summary = locale === "ar"
+  let summary = locale === "ar"
     ? `مجموعة من ${companies.length} شركات. ${hotels.length} فنادق. ${farms.length} مزارع (${farmsAlerting} في تنبيه). ${dairyBatches.length} دفعة ألبان قيد المتابعة. الإيرادات (90ي): ${Math.round(totalRevenue).toLocaleString()} د.أ، المصاريف: ${Math.round(totalExpense).toLocaleString()} د.أ.`
     : `Group has ${companies.length} companies. ${hotels.length} hotels. ${farms.length} farms (${farmsAlerting} alerting). ${dairyBatches.length} dairy batches under watch. Revenue (90d): JOD ${Math.round(totalRevenue).toLocaleString()}, Expense: JOD ${Math.round(totalExpense).toLocaleString()}.`;
+
+  // The lens narrows what the council argues about. Spell it out so each agent
+  // restricts its thesis to the chosen facet(s) instead of ranging over the
+  // whole operation — this is what makes a "finances only" brief stay on finances.
+  if (lenses.length > 0) {
+    summary += locale === "ar"
+      ? ` ركّز النقاش حصراً على: ${lenses.map((l) => LENS_LABEL[l].ar).join("، ")}. تجاهل ما عدا ذلك.`
+      : ` Focus the debate ONLY on: ${lenses.map((l) => LENS_LABEL[l].en).join(", ")}. Set everything else aside.`;
+  }
 
   const metrics: Record<string, number | string> = {
     companies: companies.length,

@@ -35,7 +35,20 @@ export type CouncilSession = {
   };
 };
 
+// The scope fences the debate. `companyIds` restricts which business units the
+// sub-agents see (empty = the whole group). `lenses` narrows WHICH aspect they
+// reason about — "finance", "operations", "supply", "sustainability", "people",
+// "analytics" — so the council can debate a single facet of a single unit
+// instead of everything about everyone. Both optional and composable.
+export type CouncilLens =
+  | "finance" | "operations" | "supply" | "sustainability" | "people" | "analytics";
+
+export type CouncilScope = {
+  companyIds?: string[];
+  lenses?: CouncilLens[];
+};
+
 export interface Council {
-  convene(topic: string, contextRefs: string[], scopeCompanyId?: string): Promise<CouncilSession>;
+  convene(topic: string, contextRefs?: string[], scope?: CouncilScope): Promise<CouncilSession>;
   replay(sessionId: string): Promise<CouncilSession | null>;
 }

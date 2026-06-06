@@ -283,30 +283,40 @@
 .dl-page .dbt .dtext { font-size: 14px; line-height: 1.55; color: rgba(246, 241, 231, .88); }
 .dl-page .dbt .dtext b { color: var(--gold-soft); font-weight: 600; }
 
-/* evidence pills inside a debate tile — kept from the live data */
+/* Evidence under a debate tile. The live model emits sentence-length labels,
+   so the old uppercase 9.5px pills crushed them into an unreadable wall. Render
+   them instead as a calm, sentence-case bulleted list with real line-height —
+   each piece of evidence reads as its own line. */
 .dl-page .dbt .devid {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  margin-top: 10px;
-  padding-top: 10px;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 11px;
+  padding-top: 11px;
   border-top: 1px solid rgba(194, 163, 90, .14);
 }
 .dl-page .dbt .devid .pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 9px;
-  border-radius: 999px;
-  font-size: 9.5px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: rgba(246, 241, 231, .82);
-  background: rgba(13, 31, 26, .5);
-  border: 1px solid rgba(194, 163, 90, .22);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  letter-spacing: 0;
+  text-transform: none;
+  color: rgba(246, 241, 231, .72);
 }
-.dl-page .dbt .devid .pill .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold-soft); }
+.dl-page .dbt .devid .pill .dot {
+  width: 5px;
+  height: 5px;
+  margin-top: 7px;
+  flex: 0 0 5px;
+  border-radius: 50%;
+  background: var(--gold-soft);
+}
 
 /* moderator synthesis */
 .dl-page .co-mod { max-width: 760px; margin: 24px auto 0; opacity: 0; transform: translateY(16px); }
@@ -367,14 +377,27 @@
   margin-bottom: 4px;
 }
 
-/* the night-field buttons referenced by the reference's mod-actions / replay */
+/* Night-field buttons. The whole /brain/* surface renders on the dark cosmic
+   field, so the cream Daylight button styles (.dl-btn-secondary) come out as
+   faint, near-invisible outlines (the "Back to council" the user couldn't see).
+   Give every secondary/on-night button on a council page a high-contrast
+   treatment: a readable gold-tinted fill with ivory text. Fixed once at the
+   class level so Back, Open-in-Theater, Delete, Show-every-voice and Replay are
+   all legible without per-button patches. */
+.dl-page .dl-btn-secondary,
 .dl-page .co-wrap .dl-btn-onnight {
-  color: rgba(246, 241, 231, .92);
-  background: transparent;
-  border: 0;
-  box-shadow: inset 0 0 0 1.5px rgba(194, 163, 90, .4);
+  color: #f6f1e7;
+  background: rgba(20, 46, 38, .72);
+  border: 1px solid rgba(220, 195, 138, .55);
+  box-shadow: none;
+  font-weight: 700;
 }
-.dl-page .co-wrap .dl-btn-onnight:hover { box-shadow: inset 0 0 0 1.5px var(--gold); }
+.dl-page .dl-btn-secondary:hover,
+.dl-page .co-wrap .dl-btn-onnight:hover {
+  background: rgba(31, 77, 63, .85);
+  border-color: var(--gold);
+  color: #fff;
+}
 .dl-page .co-replay { display: inline-flex; margin: 22px auto 0; }
 .dl-page .co-replay-row { display: flex; justify-content: center; }
 

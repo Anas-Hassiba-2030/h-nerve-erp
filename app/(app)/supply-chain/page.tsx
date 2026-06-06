@@ -4,6 +4,7 @@
 // are unchanged from the previous DaylightShell version.
 
 import Link from "next/link";
+import { ShareViewButton } from "@/components/brain/ShareViewButton";
 import { Sankey, type SankeyNode, type SankeyLink } from "@/components/charts/Sankey";
 import { ForecastExplainer } from "@/components/brain/ForecastExplainer";
 import { ExportMenu } from "@/components/ui/ExportMenu";
@@ -151,6 +152,11 @@ export default async function SupplyChainPage() {
               ? `مباشر · ${formatNumber(drafts)} تنبؤات معلّقة`
               : `Live · ${formatNumber(drafts)} pending forecasts`}
           </span>
+          <ShareViewButton
+            title={ar ? "سلسلة التوريد — جسر الذكاء" : "Supply chain — AI Bridge"}
+            body={ar ? "نظرة حية على التنبؤات بين وحدات المجموعة وأوامر الشراء." : "Live cross-unit demand forecasts + purchase orders."}
+            refType="view" refId="supply-chain" ar={ar} tone="light"
+          />
           <div className="sec-actions">
             <Link href="/supply-chain/new" className="dl-btn dl-btn-secondary" style={{ textDecoration: "none" }}>
               {ar ? "تنبؤ يدوي" : "Manual forecast"}

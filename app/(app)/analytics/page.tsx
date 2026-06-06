@@ -1,4 +1,5 @@
 import { AreaLineChart } from "@/components/charts/AreaLineChart";
+import { ShareViewButton } from "@/components/brain/ShareViewButton";
 import { prisma } from "@/lib/db/db";
 import { formatMoney, formatNumber } from "@/lib/utils/utils";
 import { getLocale } from "@/lib/i18n/i18n.server";
@@ -126,7 +127,14 @@ export default async function AnalyticsHubPage() {
               : "Group performance across twelve months — revenue, distribution, growth, and benchmarks."}
           </p>
         </div>
-        <div className="sec-head-aside"><span className="sec-status"><span className="dot" />{ar ? "مباشر · مُحدّث" : "Live · updated"}</span></div>
+        <div className="sec-head-aside">
+          <span className="sec-status"><span className="dot" />{ar ? "مباشر · مُحدّث" : "Live · updated"}</span>
+          <ShareViewButton
+            title={ar ? "التحليلات" : "Analytics"}
+            body={ar ? "نظرة حية على التحليلات: الاتجاهات والمؤشرات عبر المجموعة." : "Live analytics view: trends and KPIs across the group."}
+            refType="view" refId="analytics" ar={ar} tone="light"
+          />
+        </div>
       </div>
 
       <div className="an-callouts reveal">

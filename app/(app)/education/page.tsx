@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { GraduationCap, Plus } from "lucide-react";
+import { ShareViewButton } from "@/components/brain/ShareViewButton";
 import { ExportMenu } from "@/components/ui/ExportMenu";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -169,6 +170,11 @@ export default async function EducationPage() {
         </div>
         <div className="sec-head-aside">
           <span className="sec-status"><span className="dot" />{ar ? "كوهورت ٢٠٢٦" : "Cohort 2026"}</span>
+          <ShareViewButton
+            title={ar ? "التعليم — حاضنة The Tank" : "Education — The Tank"}
+            body={ar ? "نظرة حية على البرامج: الشركات الناشئة، المراحل، والتمويل." : "Live programs view: startups, stages, and funding."}
+            refType="view" refId="education" ar={ar} tone="light"
+          />
           <div className="sec-actions">
             <Link href="/education/new" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "تسجيل مشروع" : "Register program"}</Link>
             <ExportMenu type="education" companyCode="AAU" locale={lc} />

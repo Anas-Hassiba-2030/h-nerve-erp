@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { ShareViewButton } from "@/components/brain/ShareViewButton";
 import { ExportMenu } from "@/components/ui/ExportMenu";
 import { DaylightShell } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db/db";
@@ -155,6 +156,11 @@ export default async function FarmsPage() {
         </div>
         <div className="sec-head-aside">
           <span className="sec-status"><span className="dot" />{ar ? "مباشر · إشعار ري" : "Live · irrigation alerts"}</span>
+          <ShareViewButton
+            title={ar ? "الزراعة — لوران" : "Agriculture — Loran"}
+            body={ar ? "نظرة حية على المزارع: المحاصيل، الري، وتنبيهات الاستشعار." : "Live farms view: crops, irrigation, and sensor alerts."}
+            refType="view" refId="farms" ar={ar} tone="light"
+          />
           <div className="sec-actions">
             <Link href="/farms/new" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "مزرعة جديدة" : "New farm"}</Link>
             <Link href="/farms/crops/new" className="dl-btn dl-btn-secondary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "محصول جديد" : "New crop"}</Link>

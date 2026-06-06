@@ -48,9 +48,18 @@
 .dl-page .tree > .tnode > .tcard{border-color:rgba(194,163,90,.55);box-shadow:0 0 28px -8px rgba(194,163,90,.28)}
 
 /* cards */
-.dl-page .tcard{display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:16px;cursor:pointer;
+.dl-page .tcard{position:relative;display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:16px;cursor:pointer;
   background:linear-gradient(160deg,rgba(20,46,38,.75),rgba(13,31,26,.65));border:1px solid rgba(194,163,90,.22);transition:border-color .25s,box-shadow .25s,transform .25s;white-space:nowrap;min-width:160px}
 .dl-page .tcard:hover{border-color:rgba(194,163,90,.65);box-shadow:0 0 28px rgba(220,195,138,.35);transform:translateY(-2px)}
+
+/* per-person edit pencil (ADMIN only) — top corner of the card, deep-links to
+   that user's editor in the admin console. Fades in on card hover/focus. */
+.dl-page .tedit{position:absolute;top:6px;inset-inline-end:6px;display:grid;place-items:center;
+  width:22px;height:22px;border-radius:7px;color:var(--gold-soft);
+  background:rgba(13,31,26,.55);border:1px solid rgba(194,163,90,.3);
+  opacity:0;transition:opacity .2s,background .2s,color .2s;z-index:6}
+.dl-page .tcard:hover .tedit,.dl-page .tedit:focus-visible{opacity:1}
+.dl-page .tedit:hover{background:rgba(194,163,90,.2);color:#fff}
 
 /* role-based card accent stripes */
 .dl-page .tcard[data-role="ADMIN"]{border-color:rgba(194,163,90,.6);background:linear-gradient(160deg,rgba(30,58,46,.85),rgba(13,31,26,.72))}

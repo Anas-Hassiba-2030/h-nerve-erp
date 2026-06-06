@@ -84,14 +84,27 @@ export async function deleteSession(formData: FormData): Promise<void> {
   revalidatePath("/brain/council");
 }
 
-// Save / unsave (pin) a council session so it surfaces first in the archive.
+// Save / unsave (pin) a council session so it surfaces first in the archive
+// and gets its own "Saved" section on the council page. A toast confirms where
+// it went — without it the Save button just silently flips and the user can't
+// tell anything happened (the #1 reported confusion).
 export async function togglePin(formData: FormData): Promise<void> {
   await requireUser();
+  const ar = getLocale() === "ar";
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const row = await prisma.councilSession.findUnique({ where: { id }, select: { pinned: true } });
   if (!row) return;
-  await prisma.councilSession.update({ where: { id }, data: { pinned: !row.pinned } });
+  const nowPinned = !row.pinned;
+  await prisma.councilSession.update({ where: { id }, data: { pinned: nowPinned } });
+  flashToast({
+    type: "info",
+    entity: "info",
+    id: "council-save",
+    label: nowPinned
+      ? ar ? "حُفظت — ستجدها في «المحفوظة» أعلى صفحة المجلس" : "Saved — find it under “Saved” on the Council page"
+      : ar ? "أُزيلت من المحفوظة" : "Removed from Saved",
+  });
   revalidatePath(`/brain/council/${id}`);
   revalidatePath("/brain/council");
 }

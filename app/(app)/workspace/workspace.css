@@ -31,7 +31,7 @@
 .dl-page .ws-line .v { font-family: var(--display); font-weight: 600; color: var(--emerald); font-variant-numeric: tabular-nums; }
 
 .dl-page .ws-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--emerald-soft), var(--emerald)); border: 0; border-radius: 999px; padding: 8px 14px; cursor: pointer; margin-top: 12px; text-decoration: none; }
-.dl-page .ws-btn.ghost { color: var(--emerald); background: transparent; border: 1px solid var(--line); }
+.dl-page .ws-btn.ghost { color: var(--emerald); background: rgba(31,77,63,.06); border: 1.5px solid rgba(31,77,63,.28); }
 
 .dl-page .ws-pri { display: flex; align-items: center; gap: 9px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--ink); }
 .dl-page .ws-pri .dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 8px; }

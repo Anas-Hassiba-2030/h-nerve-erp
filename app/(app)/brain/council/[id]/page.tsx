@@ -105,8 +105,36 @@ export default async function CouncilTranscriptPage({
 
       <CouncilTranscript session={session} ar={ar} />
 
-      {/* The proof base — what the council actually reasoned over */}
-      {session.sources ? <CouncilSourcesPanel sources={session.sources} ar={ar} /> : null}
+      {/* The proof base — what the council actually reasoned over. Sessions run
+          before evidence-capture shipped have no stored sources; rather than
+          silently omit the section (and re-raise "where are the proofs?"), say
+          so honestly and point at re-running. */}
+      {session.sources ? (
+        <CouncilSourcesPanel sources={session.sources} ar={ar} />
+      ) : (
+        <div className="co-wrap reveal" style={{ marginTop: 18 }}>
+          <div className="co-question" style={{ margin: "0 0 14px" }}>
+            <div className="lbl">{ar ? "الأدلة والمصادر" : "Evidence & sources"}</div>
+            <h2 style={{ fontSize: "clamp(20px,2.4vw,28px)" }}>
+              {ar ? "على ماذا استند المجلس" : "What the council reasoned on"}
+            </h2>
+          </div>
+          <p
+            style={{
+              maxWidth: "62ch",
+              margin: "0 auto",
+              textAlign: "center",
+              fontSize: 13.5,
+              lineHeight: 1.6,
+              color: "rgba(246,241,231,.62)",
+            }}
+          >
+            {ar
+              ? "عُقدت هذه الجلسة قبل تفعيل تسجيل الأدلة، لذا لم تُحفظ قاعدة الإثبات. اطرح القرار من جديد على المجلس لتسجيل الأرقام والمستندات والكيانات التي يستند إليها."
+              : "This session ran before evidence-capture was enabled, so its proof base wasn’t recorded. Pose the decision to the council again to capture the metrics, documents, and entities behind it."}
+          </p>
+        </div>
+      )}
 
       {/* Generate plan CTA — Phase 5 hook from PHASES-INTELLIGENCE.md */}
       <CouncilToPlanCta sessionId={session.id} ar={ar} />

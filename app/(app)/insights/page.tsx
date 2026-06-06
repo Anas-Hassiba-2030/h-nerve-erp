@@ -13,6 +13,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db/db";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { TrustChip } from "@/components/brain/TrustChip";
+import { ShareMenu } from "@/components/brain/ShareMenu";
 import {
   generateInsightPlan,
   setInsightStatus,
@@ -53,6 +54,14 @@ export default async function InsightsPage() {
     where: { deletedAt: null },
     orderBy: [{ status: "asc" }, { createdAt: "desc" }],
     take: 50,
+  });
+
+  // Colleagues a signal can be shared to (the <ShareMenu> "to member" picker).
+  const members = await prisma.user.findMany({
+    where: { active: true },
+    select: { id: true, name: true },
+    orderBy: { name: "asc" },
+    take: 100,
   });
 
   const openInsights = insights.filter((i) => i.status === "OPEN");
@@ -141,6 +150,17 @@ export default async function InsightsPage() {
                         </form>
                       </>
                     ) : null}
+                    {/* Universal sharing — push this signal to the Council or a colleague. */}
+                    <ShareMenu
+                      title={ar ? i.title : (i.titleEn || i.title)}
+                      body={ar ? i.body : ((i as any).bodyEn || i.body)}
+                      insightId={i.id}
+                      refType="insight"
+                      refId={i.id}
+                      members={members}
+                      ar={ar}
+                      tone="dark"
+                    />
                   </div>
                 );
               })

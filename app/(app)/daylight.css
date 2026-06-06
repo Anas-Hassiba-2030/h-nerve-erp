@@ -44,9 +44,9 @@
   border-radius: 999px; padding: 9px 16px; cursor: pointer; transition: transform .2s, box-shadow .2s, border-color .2s;
 }
 .dl-page .dl-btn-primary { color: #fff; background: linear-gradient(135deg, var(--emerald-soft), var(--emerald)); border: 0; box-shadow: 0 6px 16px -8px rgba(31,77,63,.5); }
-.dl-page .dl-btn-secondary { color: var(--emerald); background: transparent; border: 1px solid var(--line); }
+.dl-page .dl-btn-secondary { color: var(--emerald); background: rgba(31,77,63,.06); border: 1.5px solid rgba(31,77,63,.28); }
 .dl-page .dl-btn:hover { transform: translateY(-1px); }
-.dl-page .dl-btn-secondary:hover { border-color: var(--gold); }
+.dl-page .dl-btn-secondary:hover { border-color: var(--gold); background: rgba(31,77,63,.1); }
 
 /* KPI grid */
 .dl-page .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 26px; }

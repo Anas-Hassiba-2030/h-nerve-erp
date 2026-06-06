@@ -175,12 +175,12 @@ html[lang="en"] body {
     @apply btn;
     background: var(--surface-elevated);
     color: var(--brand-deep);
-    border: 1px solid var(--border);
-    box-shadow: 0 1px 0 rgb(0 0 0 / 0.02);
+    border: 1.5px solid color-mix(in srgb, var(--brand-deep) 26%, var(--border));
+    box-shadow: 0 1px 0 rgb(0 0 0 / 0.03);
   }
   .btn-secondary:hover {
     background: var(--brand-soft);
-    border-color: color-mix(in srgb, var(--brand) 32%, var(--border));
+    border-color: color-mix(in srgb, var(--brand) 50%, var(--border));
     transform: translateY(-1px);
   }
 
@@ -208,10 +208,12 @@ html[lang="en"] body {
     @apply btn;
     color: var(--text-muted);
     background: transparent;
+    border: 1.5px solid color-mix(in srgb, var(--text-muted) 30%, transparent);
   }
   .btn-ghost:hover {
     background: color-mix(in srgb, var(--brand) 7%, transparent);
     color: var(--brand-deep);
+    border-color: color-mix(in srgb, var(--brand) 35%, transparent);
   }
 
   .btn-sm { @apply px-2.5 py-1 text-[11px] rounded-md; }

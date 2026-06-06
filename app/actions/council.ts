@@ -125,7 +125,9 @@ export async function conveneFromDiscussion(formData: FormData): Promise<void> {
     // as refs, fenced to its company, with the topic text as the boundary.
     const contextRefs = d.insightId ? [d.insightId] : [];
     const topic = `${d.title} — ${d.body}`.slice(0, 1000);
-    const session = await council().convene(topic, contextRefs, scopeCompanyId);
+    const session = await council().convene(topic, contextRefs, {
+      companyIds: scopeCompanyId ? [scopeCompanyId] : [],
+    });
     sessionId = session.id;
   } catch (e) {
     flashToast({

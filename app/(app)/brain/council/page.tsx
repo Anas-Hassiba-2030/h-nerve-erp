@@ -18,10 +18,11 @@ import { prisma } from "@/lib/db/db";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { formatNumber } from "@/lib/utils/utils";
 import { llmConfig } from "@/lib/brain/llm";
-import { Users2, ChevronLeft, MessagesSquare, ArrowRight } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { convene } from "./actions";
 import { conveneFromDiscussion } from "@/app/actions/council";
 import { CouncilStage } from "./CouncilStage";
+import { CouncilBrief } from "@/components/brain/CouncilBrief";
 import { TrustChip } from "@/components/brain/TrustChip";
 import "../../daylight.css";
 import "./council-design.css";
@@ -114,191 +115,14 @@ export default async function BrainCouncilIndex() {
           <h2>{ar ? "اطرح قراراً جديداً على المجلس." : "Pose a new decision to the council."}</h2>
         </div>
 
-        <form
-          action={convene}
-          style={{ maxWidth: 760, margin: "0 auto" }}
-        >
-          {/* CHOOSE THE SUBJECT FIRST — the council debates this unit only, instead
-              of pulling every company into the discussion. */}
-          <label
-            htmlFor="scope"
-            style={{
-              display: "block",
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: ".12em",
-              textTransform: "uppercase",
-              color: "var(--gold-soft)",
-              marginBottom: 8,
-            }}
-          >
-            {ar ? "ما الذي يناقشه المجلس؟" : "What should the council debate?"}
-          </label>
-          <select
-            id="scope"
-            name="scope"
-            defaultValue="group"
-            style={{
-              width: "100%",
-              background: "rgba(13,31,26,.45)",
-              border: "1px solid rgba(194,163,90,.3)",
-              borderRadius: 14,
-              padding: "12px 14px",
-              fontFamily: "'Inter Tight','Inter','IBM Plex Sans Arabic',system-ui,sans-serif",
-              fontSize: 14,
-              color: "rgba(246,241,231,.95)",
-              marginBottom: 16,
-            }}
-          >
-            <option value="group">{ar ? "المجموعة كاملة" : "Whole group"}</option>
-            {companies.map((c) => (
-              <option key={c.id} value={c.id}>{ar ? c.name : (c.nameEn || c.name)}</option>
-            ))}
-          </select>
-          <label
-            htmlFor="topic"
-            style={{
-              display: "block",
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: ".12em",
-              textTransform: "uppercase",
-              color: "var(--gold-soft)",
-              marginBottom: 8,
-            }}
-          >
-            {ar ? "الموضوع" : "Topic"}
-          </label>
-          <textarea
-            id="topic"
-            name="topic"
-            rows={3}
-            required
-            minLength={6}
-            placeholder={
-              ar
-                ? "مثال: هل نزيد إنتاج المها لاستيعاب موسم أرينا؟"
-                : "e.g. Should we ramp Maha production for the Arena season?"
-            }
-            style={{
-              width: "100%",
-              background: "rgba(13,31,26,.45)",
-              border: "1px solid rgba(194,163,90,.3)",
-              borderRadius: 14,
-              padding: "13px 16px",
-              fontFamily:
-                "'Inter Tight','Inter','IBM Plex Sans Arabic',system-ui,sans-serif",
-              fontSize: 14.5,
-              lineHeight: 1.55,
-              color: "rgba(246,241,231,.95)",
-              resize: "vertical",
-            }}
-          />
-          <div
-            style={{
-              marginTop: 16,
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              gap: 14,
-            }}
-          >
-            <button type="submit" className="dl-btn dl-btn-primary">
-              <Users2 className="h-4 w-4" strokeWidth={1.5} />
-              {ar ? "اجتمع المجلس" : "Convene the council"}
-            </button>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 7,
-                fontSize: 10.5,
-                fontWeight: 700,
-                letterSpacing: ".1em",
-                textTransform: "uppercase",
-                color: "rgba(246,241,231,.6)",
-              }}
-            >
-              <MessagesSquare className="h-3 w-3" strokeWidth={1.5} />
-              {llmEnabled
-                ? (ar ? (<>حالة المحرك: مُتصِل بـ <bdi dir="ltr">Claude</bdi></>) : "Engine: live · Claude")
-                : (ar ? "حالة المحرك: تحليلي محلي" : "Engine: on-device reasoning")}
-            </span>
-            {openCount > 0 ? (
-              <span
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: ".06em",
-                  padding: "3px 11px",
-                  borderRadius: 999,
-                  color: "var(--gold-soft)",
-                  background: "rgba(194,163,90,.18)",
-                  border: "1px solid rgba(194,163,90,.3)",
-                }}
-              >
-                {openCount} {ar ? "جلسة قيد التشغيل" : "running"}
-              </span>
-            ) : null}
-          </div>
-        </form>
-
-        {/* Suggested topics — single-click prefills, on the night field */}
-        <div style={{ maxWidth: 760, margin: "26px auto 0" }}>
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              letterSpacing: ".12em",
-              textTransform: "uppercase",
-              color: "var(--gold-soft)",
-              marginBottom: 12,
-            }}
-          >
-            {ar ? "اقتراحات" : "Suggestions"}
-          </div>
-          <ul
-            style={{
-              display: "grid",
-              gap: 8,
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            }}
-          >
-            {topics.map((t) => (
-              <li key={t}>
-                <form action={convene}>
-                  <input type="hidden" name="topic" value={t} />
-                  <button
-                    type="submit"
-                    className="group"
-                    style={{
-                      display: "flex",
-                      width: "100%",
-                      textAlign: "start",
-                      gap: 8,
-                      alignItems: "flex-start",
-                      background: "rgba(20,46,38,.5)",
-                      border: "1px solid rgba(194,163,90,.18)",
-                      borderRadius: 12,
-                      padding: "11px 14px",
-                      fontSize: 12.5,
-                      lineHeight: 1.45,
-                      color: "rgba(246,241,231,.82)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <ArrowRight
-                      className="h-3 w-3 mt-1 shrink-0 rtl:rotate-180 transition group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
-                      style={{ color: "var(--gold-soft)" }}
-                      strokeWidth={1.5}
-                    />
-                    <span style={{ fontStyle: ar ? "normal" : "italic" }}>{t}</span>
-                  </button>
-                </form>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <CouncilBrief
+          convene={convene}
+          companies={companies}
+          ar={ar}
+          llmEnabled={llmEnabled}
+          runningCount={openCount}
+          suggestions={topics}
+        />
       </div>
 
       {/* ── KPI strip — the council's footprint at a glance ────────────── */}

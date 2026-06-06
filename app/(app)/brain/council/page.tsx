@@ -75,6 +75,13 @@ export default async function BrainCouncilIndex() {
   const avgConfidence = avgConfRaw._avg.confidence ?? 0;
   const openSharedCount = sharedDiscussions.filter((d) => d.status === "OPEN").length;
 
+  // Subject choices for the "what should the council debate?" picker. Choosing a
+  // company fences the sub-agents to that unit only (no cross-contamination).
+  const companies = await prisma.company.findMany({
+    select: { id: true, name: true, nameEn: true },
+    orderBy: { name: "asc" },
+  });
+
   const topics = ar ? SUGGESTED_TOPICS_AR : SUGGESTED_TOPICS_EN;
 
   return (
@@ -111,6 +118,43 @@ export default async function BrainCouncilIndex() {
           action={convene}
           style={{ maxWidth: 760, margin: "0 auto" }}
         >
+          {/* CHOOSE THE SUBJECT FIRST — the council debates this unit only, instead
+              of pulling every company into the discussion. */}
+          <label
+            htmlFor="scope"
+            style={{
+              display: "block",
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: ".12em",
+              textTransform: "uppercase",
+              color: "var(--gold-soft)",
+              marginBottom: 8,
+            }}
+          >
+            {ar ? "ما الذي يناقشه المجلس؟" : "What should the council debate?"}
+          </label>
+          <select
+            id="scope"
+            name="scope"
+            defaultValue="group"
+            style={{
+              width: "100%",
+              background: "rgba(13,31,26,.45)",
+              border: "1px solid rgba(194,163,90,.3)",
+              borderRadius: 14,
+              padding: "12px 14px",
+              fontFamily: "'Inter Tight','Inter','IBM Plex Sans Arabic',system-ui,sans-serif",
+              fontSize: 14,
+              color: "rgba(246,241,231,.95)",
+              marginBottom: 16,
+            }}
+          >
+            <option value="group">{ar ? "المجموعة كاملة" : "Whole group"}</option>
+            {companies.map((c) => (
+              <option key={c.id} value={c.id}>{ar ? c.name : (c.nameEn || c.name)}</option>
+            ))}
+          </select>
           <label
             htmlFor="topic"
             style={{

@@ -205,8 +205,9 @@ export default async function AdminUsersPage({
           return (
             <div
               key={u.id}
+              id={`u-${u.id}`}
               className="admin-tenant-card"
-              style={{ padding: 18, opacity: u.active ? 1 : 0.6 }}
+              style={{ padding: 18, opacity: u.active ? 1 : 0.6, scrollMarginTop: 90 }}
             >
               <div
                 style={{

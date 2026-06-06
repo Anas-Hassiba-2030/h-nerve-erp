@@ -1,4 +1,7 @@
+import Link from "next/link";
+import { Pencil } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/db";
 import { formatNumber } from "@/lib/utils/utils";
 import { OrgTabsClient } from "./OrgTabsClient";
@@ -42,6 +45,13 @@ export default async function UsersPage() {
 
   const isAr = getLocale() === "ar";
 
+  // The org chart IS the real user records (built from each user's reportsToId).
+  // Editing a user — name, title, role, and "reports to" (manager) — reshapes
+  // this tree. The editor lives in the admin console, so only an ADMIN sees the
+  // per-card edit pencil that deep-links straight to that person's form.
+  const me = await getCurrentUser();
+  const canEdit = me?.role === "ADMIN";
+
   // ── KPIs from real data ──
   const count = users.length;
   const online = users.filter((u) => u.active).length;
@@ -76,6 +86,16 @@ export default async function UsersPage() {
             {sector ? <span className="tr" style={{ opacity: 0.55, fontSize: "9.5px" }}>{sector}</span> : null}
           </span>
           <span className="tbadge">{RANK_GLYPH[u.rank] ?? "♟"}</span>
+          {canEdit ? (
+            <Link
+              href={`/admin/users#u-${u.id}`}
+              className="tedit"
+              aria-label={isAr ? `تعديل ${u.name}` : `Edit ${u.name}`}
+              title={isAr ? "تعديل البيانات (الاسم، الدور، المسؤول)" : "Edit (name, role, manager)"}
+            >
+              <Pencil className="h-3 w-3" strokeWidth={2} />
+            </Link>
+          ) : null}
         </div>
         {kids.length ? (
           <div className="tkids">{kids.map((k) => renderNode(k))}</div>

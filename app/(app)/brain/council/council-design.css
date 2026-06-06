@@ -401,6 +401,27 @@
 .dl-page .co-replay { display: inline-flex; margin: 22px auto 0; }
 .dl-page .co-replay-row { display: flex; justify-content: center; }
 
+/* Arabic display type. The shared --dl-display stack starts with Cormorant /
+   Newsreader (Latin-only, and Cormorant isn't even loaded) so Arabic display
+   headings fell through to Reem Kufi — a stylised Kufi that reads poorly for
+   long synthesis paragraphs. On RTL council surfaces, render every display
+   heading and the synthesis with the clean, modern Arabic face the rest of the
+   ERP uses, at a display weight. */
+.dl-page[dir="rtl"] .co-title-box h1,
+.dl-page[dir="rtl"] .co-question h2,
+.dl-page[dir="rtl"] .co-center .ttl,
+.dl-page[dir="rtl"] .mod-body h3,
+.dl-page[dir="rtl"] .ring-wrap .rtxt b {
+  font-family: "IBM Plex Sans Arabic", "Cairo", "Tajawal", system-ui, sans-serif;
+  font-weight: 600;
+}
+/* The recorded-dissent quote drops its Latin italic serif (no Arabic italic) in
+   favour of a legible upright Arabic face. */
+.dl-page[dir="rtl"] .mod-dissent {
+  font-family: "IBM Plex Sans Arabic", "Cairo", system-ui, sans-serif;
+  font-style: normal;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dl-page .co-question .q-glow,
   .dl-page .seat .think span { animation: none; }

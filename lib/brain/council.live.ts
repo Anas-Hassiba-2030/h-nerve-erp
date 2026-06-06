@@ -30,10 +30,19 @@ const LENS_LABEL: Record<CouncilLens, { ar: string; en: string }> = {
 };
 
 class LiveCouncil implements Council {
-  async convene(topic: string, contextRefs: string[] = [], scope?: CouncilScope): Promise<CouncilSession> {
+  async convene(
+    topic: string,
+    contextRefs: string[] = [],
+    scope?: CouncilScope,
+    forcedLocale?: "ar" | "en",
+  ): Promise<CouncilSession> {
     const t0 = Date.now();
+    // The debate language follows the UI locale when the caller passes one.
+    // Only fall back to sniffing the topic text when it is unknown — the
+    // auto-prefixed subject labels can contain the other language's characters
+    // and would otherwise flip the whole debate (English user, Arabic answer).
     const locale: "ar" | "en" =
-      /[؀-ۿ]/.test(topic) ? "ar" : "en";
+      forcedLocale ?? (/[؀-ۿ]/.test(topic) ? "ar" : "en");
 
     // 1. Build the context. When the user briefed the council on specific units
     //    and/or a lens, the agents see ONLY that slice — no other business units

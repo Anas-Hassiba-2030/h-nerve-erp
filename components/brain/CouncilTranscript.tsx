@@ -333,6 +333,26 @@ export function CouncilTranscript({
     voices,
   ]);
 
+  // Reveal the whole transcript at once — no choreography. Unlike "Replay the
+  // debate" (which re-runs the timed animation), this jumps straight to the
+  // fully-revealed end state: every voice shown, tension lines drawn, the
+  // confidence ring filled. For when the user just wants to read it all now.
+  const revealAll = useCallback(() => {
+    clearAll();
+    seatRefs.current.forEach((s) => {
+      s?.classList.remove("thinking");
+      s?.classList.add("spoke");
+    });
+    feedTilesRef.current.forEach((t) => t?.classList.add("in"));
+    drawTension();
+    if (centerTtlRef.current) {
+      centerTtlRef.current.innerHTML = ar ? "الدماغ<b>يوازن</b>" : "Brain<b>weighing</b>";
+    }
+    modRef.current?.classList.add("in");
+    setRing(confidencePct);
+    setConfidenceTarget(confidencePct);
+  }, [ar, clearAll, confidencePct, drawTension, setRing]);
+
   // Lay seats out before paint, then run the debate. Re-layout on resize.
   useLayoutEffect(() => {
     layoutSeats();
@@ -523,9 +543,9 @@ export function CouncilTranscript({
               <button
                 type="button"
                 className="dl-btn dl-btn-onnight"
-                onClick={runDebate}
+                onClick={revealAll}
               >
-                {ar ? "اعرض كل الأصوات" : "Show every voice"}
+                {ar ? "اعرض كل الأصوات دفعة واحدة" : "Show all at once"}
               </button>
             </div>
           </div>

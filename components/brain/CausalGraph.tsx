@@ -28,18 +28,32 @@ function toAr(n: number | string): string {
   return String(n).replace(/[0-9]/g, (d) => "٠١٢٣٤٥٦٧٨٩"[Number(d)]);
 }
 
-// Deterministic circular layout inside the 800×440 viewBox the reference uses.
-// The reference hard-codes coordinates; with live data we place nodes on a
-// ring so the SVG always renders sensibly regardless of count.
+// Deterministic concentric-ring layout inside the 800×440 viewBox.
+// One ring works for a handful of nodes; with hundreds of nodes a single
+// ring collapses into an unreadable bright band, so we spread them across
+// multiple concentric rings sized so each node has ~22px of arc to itself.
 function layout(nodes: CGNode[]): Record<string, { x: number; y: number; label: string }> {
   const pos: Record<string, { x: number; y: number; label: string }> = {};
   const cx = 400;
   const cy = 220;
-  const rx = 320;
-  const ry = 175;
   const n = Math.max(nodes.length, 1);
+  const outerRx = 340;
+  const outerRy = 195;
+  const minArc = 22;
+  const outerCirc = 2 * Math.PI * ((outerRx + outerRy) / 2);
+  const perRing = Math.max(8, Math.floor(outerCirc / minArc));
+  const rings = Math.max(1, Math.ceil(n / perRing));
+  const innerRx = rings > 1 ? 70 : outerRx;
+  const innerRy = rings > 1 ? 40 : outerRy;
   nodes.forEach((node, i) => {
-    const a = (i / n) * Math.PI * 2 - Math.PI / 2;
+    const ring = i % rings;
+    const idxInRing = Math.floor(i / rings);
+    const ringCount = Math.ceil((n - ring) / rings);
+    const t = rings === 1 ? 1 : ring / (rings - 1);
+    const rx = innerRx + (outerRx - innerRx) * t;
+    const ry = innerRy + (outerRy - innerRy) * t;
+    const phase = (ring * 0.37) * Math.PI;
+    const a = (idxInRing / ringCount) * Math.PI * 2 - Math.PI / 2 + phase;
     pos[node.id] = {
       x: Math.round(cx + rx * Math.cos(a)),
       y: Math.round(cy + ry * Math.sin(a)),
@@ -76,10 +90,13 @@ export function CausalGraph({ ar, nodes, edges, rebuildSlot }: Props) {
   function clearSel() {
     const svg = svgRef.current;
     if (!svg) return;
+    const ec = validEdges.length;
+    const baseOp = ec > 600 ? "0.06" : ec > 200 ? "0.1" : ec > 60 ? "0.16" : "0.22";
+    const baseW = ec > 200 ? "0.8" : "1.3";
     svg.querySelectorAll(".cg-edge").forEach((l) => {
-      l.setAttribute("opacity", "0.22");
+      l.setAttribute("opacity", baseOp);
       l.setAttribute("stroke", "#C2A35A");
-      l.setAttribute("stroke-width", "1.3");
+      l.setAttribute("stroke-width", baseW);
     });
     svg.querySelectorAll(".cg-halo").forEach((h) => h.setAttribute("opacity", "0"));
     svg
@@ -260,38 +277,53 @@ export function CausalGraph({ ar, nodes, edges, rebuildSlot }: Props) {
       <div className="cg-stage">
         <span className="cg-hint">{ar ? "انقر عقدة لتتبّع الأثر" : "Click a node to trace the effect"}</span>
         <svg id="cg" ref={svgRef} viewBox="0 0 800 440">
-          {validEdges.map((e, i) => {
-            const a = posById[e.from];
-            const b = posById[e.to];
-            return (
-              <line
-                key={`e${i}`}
-                className="cg-edge"
-                data-edge={i}
-                data-from={e.from}
-                data-to={e.to}
-                x1={a.x}
-                y1={a.y}
-                x2={b.x}
-                y2={b.y}
-                stroke="#C2A35A"
-                strokeWidth={1.3}
-                opacity={0.22}
-              />
-            );
-          })}
-          {nodes.map((n) => {
-            const p = posById[n.id];
-            return (
-              <g key={n.id} className="cg-node" data-node={n.id} transform={`translate(${p.x},${p.y})`}>
-                <circle r={26} fill="rgba(31,77,63,.85)" stroke="#C2A35A" strokeWidth={1.5} />
-                <circle className="cg-halo" r={26} fill="none" stroke="#DCC38A" strokeWidth={2} opacity={0} />
-                <text textAnchor="middle" dy={5} fill="#fff" fontFamily="Cairo,sans-serif" fontSize={13} fontWeight={700}>
-                  {n.label}
-                </text>
-              </g>
-            );
-          })}
+          {(() => {
+            const ec = validEdges.length;
+            const edgeOp = ec > 600 ? 0.06 : ec > 200 ? 0.1 : ec > 60 ? 0.16 : 0.22;
+            const edgeW = ec > 200 ? 0.8 : 1.3;
+            return validEdges.map((e, i) => {
+              const a = posById[e.from];
+              const b = posById[e.to];
+              return (
+                <line
+                  key={`e${i}`}
+                  className="cg-edge"
+                  data-edge={i}
+                  data-from={e.from}
+                  data-to={e.to}
+                  x1={a.x}
+                  y1={a.y}
+                  x2={b.x}
+                  y2={b.y}
+                  stroke="#C2A35A"
+                  strokeWidth={edgeW}
+                  opacity={edgeOp}
+                />
+              );
+            });
+          })()}
+          {(() => {
+            const count = nodes.length;
+            const nodeR = count > 200 ? 4 : count > 80 ? 7 : count > 30 ? 14 : 26;
+            const showLabel = count <= 30;
+            const labelSize = count > 80 ? 9 : count > 30 ? 10 : 13;
+            return nodes.map((n) => {
+              const p = posById[n.id];
+              return (
+                <g key={n.id} className="cg-node" data-node={n.id} transform={`translate(${p.x},${p.y})`}>
+                  <circle r={nodeR} fill="rgba(31,77,63,.85)" stroke="#C2A35A" strokeWidth={1.5} />
+                  <circle className="cg-halo" r={nodeR + 2} fill="none" stroke="#DCC38A" strokeWidth={2} opacity={0} />
+                  {showLabel ? (
+                    <text textAnchor="middle" dy={5} fill="#fff" fontFamily="Cairo,sans-serif" fontSize={labelSize} fontWeight={700}>
+                      {n.label}
+                    </text>
+                  ) : (
+                    <title>{n.label}</title>
+                  )}
+                </g>
+              );
+            });
+          })()}
         </svg>
         <div className="cg-readout" id="readout"></div>
       </div>

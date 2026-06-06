@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ExportMenu } from "@/components/ui/ExportMenu";
+import { ShareViewButton } from "@/components/brain/ShareViewButton";
 import { DeleteButton } from "@/components/ui/DeleteButton";
 import { DaylightShell } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db/db";
@@ -320,6 +321,11 @@ export default async function HotelsPage() {
           <div className="sec-actions">
             <Link className="dl-btn dl-btn-secondary" href="/finance">{ar ? "الأثر المالي" : "Financial impact"}</Link>
             <ExportMenu type="hotels" companyCode="ARENA" locale={lc} />
+            <ShareViewButton
+              title={ar ? "الضيافة — أرينا" : "Hospitality — Arena"}
+              body={ar ? "نظرة حية على الفنادق: الإشغال، الإيراد، والحجوزات الأخيرة." : "Live hotels view: occupancy, revenue, and recent bookings."}
+              refType="view" refId="hotels" ar={ar} tone="light"
+            />
           </div>
         </div>
       </div>

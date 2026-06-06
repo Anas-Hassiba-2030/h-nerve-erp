@@ -19,7 +19,11 @@
   font-family:var(--ui);
 }
 
-.dl-page .em-wrap{max-width:1200px;margin:0 auto;padding:14px 24px 80px}
+/* Team page breaks out of the shared .dl-page 1240px cap so the org-structure
+   tree fills the full screen width and no longer needs left/right scrolling.
+   Scoped to .dl-page.em-page (this page only) — the global .dl-page is untouched. */
+.dl-page.em-page{max-width:min(1800px,96vw)}
+.dl-page .em-wrap{max-width:min(1760px,94vw);margin:0 auto;padding:14px 24px 80px}
 .dl-page .em-top{display:flex;align-items:stretch;gap:16px;margin-bottom:14px;flex-wrap:wrap}
 .dl-page .em-title-box{display:flex;flex-direction:column;justify-content:center;padding-inline-end:16px;border-inline-end:1px solid rgba(194,163,90,.2);min-width:150px}
 .dl-page .em-title-box .eb{display:inline-flex;align-items:center;gap:7px;font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--gold-soft);text-transform:uppercase;margin-bottom:4px}
@@ -67,7 +71,7 @@
 .dl-page .tbadge{font-size:15px;margin-inline-start:4px;opacity:.85}
 
 /* connectors — horizontal children row */
-.dl-page .tkids{display:flex;gap:24px;margin-top:28px;position:relative;padding-top:28px;transition:opacity .3s;align-items:flex-start}
+.dl-page .tkids{display:flex;gap:18px;margin-top:28px;position:relative;padding-top:28px;transition:opacity .3s;align-items:flex-start}
 .dl-page .tnode.collapsed > .tkids{display:none}
 
 /* vertical line from parent card down to horizontal bar */

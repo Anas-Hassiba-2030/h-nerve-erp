@@ -87,7 +87,7 @@ export default async function UsersPage() {
   const roots = byParent.get(null) ?? [];
 
   return (
-    <div className="dl-page" dir={isAr ? "rtl" : "ltr"}>
+    <div className="dl-page em-page" dir={isAr ? "rtl" : "ltr"}>
       <div className="em-wrap">
         <div className="em-top">
           <div className="em-title-box">

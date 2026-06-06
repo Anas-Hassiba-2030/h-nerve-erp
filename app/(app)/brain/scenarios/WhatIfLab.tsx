@@ -6,6 +6,7 @@
 // arrival. Auto-solve animates levers to an optimal config. Reset returns.
 
 import { useEffect, useRef } from "react";
+import { shareToCouncil } from "@/app/actions/share";
 
 type Lever = {
   id: "arenaPrice" | "mahaOutput" | "newInvest" | "annualReturn" | "students";
@@ -61,6 +62,14 @@ export function WhatIfLab({ ar }: { ar: boolean }) {
   const solveBtnRef = useRef<HTMLButtonElement | null>(null);
   const resetBtnRef = useRef<HTMLButtonElement | null>(null);
   const saveBtnRef = useRef<HTMLButtonElement | null>(null);
+  // "Share to Council" — a What-If scenario is a live, shareable object. The
+  // button captures the exact lever positions + projected impacts and submits
+  // them to shareToCouncil (which lands them in the Council for the sub-agents
+  // to debate).
+  const shareBtnRef = useRef<HTMLButtonElement | null>(null);
+  const shareFormRef = useRef<HTMLFormElement | null>(null);
+  const shareTitleRef = useRef<HTMLInputElement | null>(null);
+  const shareBodyRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -441,12 +450,30 @@ export function WhatIfLab({ ar }: { ar: boolean }) {
         confirm();
       }
     };
+    const onShareCouncil = () => {
+      // Capture the exact simulation state — lever positions + projected impacts
+      // + the brain's narrative — and push it to the Council as a debatable subject.
+      const lines = LEVERS.map(
+        (L) => `• ${ar ? L.name : L.nameEn}: ${fmtVal(L, state[L.id])}${(ar ? L.unit : L.unitEn) ? " " + (ar ? L.unit : L.unitEn) : ""}`,
+      );
+      const o = compute(state);
+      const impacts = ar
+        ? `الأثر — صافي الربح ${grp(o.net, ar)} د.أ · الإيراد ${grp(o.rev, ar)} د.أ · المخاطرة ${toAr(Math.round(o.risk), ar)} · الذكاء ${toAr(Math.round(o.iq), ar)}`
+        : `Impact — net ${grp(o.net, ar)} JOD · revenue ${grp(o.rev, ar)} JOD · risk ${toAr(Math.round(o.risk), ar)} · IQ ${toAr(Math.round(o.iq), ar)}`;
+      const narr = narrRef.current?.textContent?.trim() ?? "";
+      const body = `${lines.join("\n")}\n\n${impacts}${narr ? "\n\n" + narr : ""}`;
+      if (shareTitleRef.current) shareTitleRef.current.value = ar ? "سيناريو ماذا-لو" : "What-If scenario";
+      if (shareBodyRef.current) shareBodyRef.current.value = body.slice(0, 2000);
+      shareFormRef.current?.requestSubmit();
+    };
     const solveBtn = solveBtnRef.current;
     const resetBtn = resetBtnRef.current;
     const saveBtn = saveBtnRef.current;
+    const shareBtn = shareBtnRef.current;
     solveBtn?.addEventListener("click", onSolve);
     resetBtn?.addEventListener("click", onReset);
     saveBtn?.addEventListener("click", onSave);
+    shareBtn?.addEventListener("click", onShareCouncil);
     const onResize = () => buildWires();
     window.addEventListener("resize", onResize);
 
@@ -458,6 +485,7 @@ export function WhatIfLab({ ar }: { ar: boolean }) {
       solveBtn?.removeEventListener("click", onSolve);
       resetBtn?.removeEventListener("click", onReset);
       saveBtn?.removeEventListener("click", onSave);
+      shareBtn?.removeEventListener("click", onShareCouncil);
       onInputs.forEach(({ el, h }) => el.removeEventListener("input", h));
       clearTimeout(waveT);
     };
@@ -530,7 +558,16 @@ export function WhatIfLab({ ar }: { ar: boolean }) {
           <div className="wi-actions">
             <button ref={resetBtnRef} className="dl-btn dl-btn-secondary dl-btn-onnight">{ar ? "إعادة الضبط" : "Reset"}</button>
             <button ref={saveBtnRef} className="dl-btn dl-btn-primary">{ar ? "انسخ القيم" : "Copy values"}</button>
+            <button ref={shareBtnRef} type="button" className="dl-btn dl-btn-secondary dl-btn-onnight">
+              {ar ? "↗ شارك مع المجلس" : "↗ Share to Council"}
+            </button>
           </div>
+          {/* Hidden carrier — onShareCouncil fills these from the LIVE scenario
+              (lever positions + projected impacts), then posts to the action. */}
+          <form ref={shareFormRef} action={shareToCouncil} style={{ display: "none" }}>
+            <input ref={shareTitleRef} type="hidden" name="title" defaultValue="" />
+            <input ref={shareBodyRef} type="hidden" name="body" defaultValue="" />
+          </form>
         </div>
       </div>
     </div>

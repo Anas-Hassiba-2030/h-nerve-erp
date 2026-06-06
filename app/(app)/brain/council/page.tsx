@@ -20,6 +20,7 @@ import { formatNumber } from "@/lib/utils/utils";
 import { llmConfig } from "@/lib/brain/llm";
 import { Users2, ChevronLeft, MessagesSquare, ArrowRight } from "lucide-react";
 import { convene } from "./actions";
+import { conveneFromDiscussion } from "@/app/actions/council";
 import { CouncilStage } from "./CouncilStage";
 import { TrustChip } from "@/components/brain/TrustChip";
 import "../../daylight.css";
@@ -367,14 +368,28 @@ export default async function BrainCouncilIndex() {
                 >
                   {d.body}
                 </div>
-                <Link
-                  href={`/brain/council/discussion/${d.id}`}
-                  className="dl-btn dl-btn-secondary"
-                  style={{ fontSize: 12, padding: "6px 12px" }}
-                >
-                  {ar ? "فتح النقاش" : "Open discussion"}
-                  <ChevronLeft className="h-3 w-3 rtl:rotate-180" />
-                </Link>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                  <Link
+                    href={`/brain/council/discussion/${d.id}`}
+                    className="dl-btn dl-btn-secondary"
+                    style={{ fontSize: 12, padding: "6px 12px" }}
+                  >
+                    {ar ? "فتح النقاش" : "Open discussion"}
+                    <ChevronLeft className="h-3 w-3 rtl:rotate-180" />
+                  </Link>
+                  {/* Context-isolated debate — convene the specialist sub-agents
+                      fenced on JUST this shared subject. */}
+                  <form action={conveneFromDiscussion}>
+                    <input type="hidden" name="discussionId" value={d.id} />
+                    <button
+                      type="submit"
+                      className="dl-btn dl-btn-primary"
+                      style={{ fontSize: 12, padding: "6px 12px" }}
+                    >
+                      {ar ? "✦ ناقش بالوكلاء" : "✦ Debate with sub-agents"}
+                    </button>
+                  </form>
+                </div>
               </li>
             ))}
           </ul>

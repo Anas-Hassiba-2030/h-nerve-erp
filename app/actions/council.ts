@@ -87,3 +87,49 @@ export async function replyToDiscussion(formData: FormData): Promise<void> {
   revalidatePath(`/brain/council/discussion/${discussionId}`);
   revalidatePath("/brain/council");
 }
+
+// Context-isolated sub-agent debate. Takes a SHARED subject (a CouncilDiscussion —
+// an insight, a What-If scenario, anything pushed via shareToCouncil) and convenes
+// the specialist agents FENCED on just that subject, instead of letting them roam
+// the whole database. convene() builds the agent context from the subject's refs
+// (its insight's graph neighbourhood) + the topic text, so the debate stays on-topic.
+export async function conveneFromDiscussion(formData: FormData): Promise<void> {
+  await requireUser();
+  const ar = getLocale() === "ar";
+  const discussionId = String(formData.get("discussionId") ?? "").trim();
+  if (!discussionId) return;
+
+  const d = await prisma.councilDiscussion.findUnique({
+    where: { id: discussionId },
+    select: { title: true, body: true, insightId: true },
+  });
+  if (!d) {
+    flashToast({ type: "info", entity: "info", label: ar ? "الموضوع غير موجود" : "Subject not found" });
+    return;
+  }
+
+  let sessionId: string;
+  try {
+    const { council } = await import("@/lib/brain/council.live");
+    // Fence the debate: if the subject is tied to an insight, scope to its graph
+    // neighbourhood; otherwise the topic text itself is the boundary.
+    const contextRefs = d.insightId ? [d.insightId] : [];
+    const topic = `${d.title} — ${d.body}`.slice(0, 1000);
+    const session = await council().convene(topic, contextRefs);
+    sessionId = session.id;
+  } catch (e) {
+    flashToast({
+      type: "info", entity: "info",
+      label: ar ? `تعذّر عقد النقاش: ${(e as Error).message}` : `Couldn't convene: ${(e as Error).message}`,
+    });
+    revalidatePath("/brain/council");
+    return;
+  }
+
+  flashToast({
+    type: "info", entity: "info",
+    label: ar ? "عقد المجلس جلسة وكلاء حول هذا الموضوع" : "Sub-agents convened on this subject",
+  });
+  revalidatePath("/brain/council");
+  redirect(`/brain/council/${sessionId}`);
+}

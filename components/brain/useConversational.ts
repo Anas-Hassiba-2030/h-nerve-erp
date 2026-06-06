@@ -43,9 +43,11 @@ type SpokenPos = { turnIndex: number; wordIndex: number } | null;
 
 const SESSION_KEY = "h_nerve_converse_session_v1";
 
-// Pick a warm female voice for the spoken answer. Browsers ship different
-// voice sets, so we match the locale first, then prefer the well-known
-// feminine voices by name; fall back gracefully to any locale voice, then any.
+// Pick a young, soft, feminine voice for the spoken answer. Browsers ship
+// different voice sets, so we match the locale first, then walk an ORDERED
+// preference list of the youngest / cutest-sounding female voices available
+// across Chrome / Edge / Safari / Android (and Arabic), falling back to any
+// female-named voice, then any locale voice, then anything.
 function pickWarmFemaleVoice(
   voices: SpeechSynthesisVoice[],
   ar: boolean,
@@ -54,9 +56,38 @@ function pickWarmFemaleVoice(
   const prefix = ar ? "ar" : "en";
   const inLocale = voices.filter((v) => v.lang?.toLowerCase().startsWith(prefix));
   const pool = inLocale.length ? inLocale : voices;
-  // Known feminine voice names across Chrome / Edge / Safari / Android + Arabic.
+
+  // Ordered "young + cute + soft" preference. The first voice in the pool that
+  // matches the earliest pattern wins, so the most youthful-sounding voices are
+  // chosen before generic female ones.
+  const PREFERRED: RegExp[] = ar
+    ? [
+        // Arabic young-female voices (Edge/Windows + Google + common names).
+        /salma/i, /amany/i, /hoda/i, /laila|layla/i, /hala/i, /maryam/i, /zahra/i,
+        /google.*arabic/i,
+      ]
+    : [
+        // English young, soft, feminine voices in priority order.
+        /jenny/i,          // Microsoft Jenny — young, warm, soft
+        /aria/i,           // Microsoft Aria — youthful
+        /ava/i,            // Apple Ava (premium) — young
+        /samantha/i,       // Apple Samantha — warm female
+        /serena/i,
+        /allison/i,
+        /zira/i,           // Microsoft Zira — clear female
+        /michelle|sonia/i,
+        /google us english/i,
+        /google uk english female/i,
+      ];
+
+  // Generic feminine fallback patterns.
   const FEMALE =
     /female|woman|girl|samantha|victoria|karen|tessa|fiona|moira|serena|allison|ava|susan|zira|aria|jenny|michelle|sonia|google (uk|us) english|hoda|salma|amira|laila|hala|maryam|zahra/i;
+
+  for (const pat of PREFERRED) {
+    const hit = pool.find((v) => pat.test(v.name));
+    if (hit) return hit;
+  }
   return (
     pool.find((v) => FEMALE.test(v.name)) ||
     pool.find((v) => /google/i.test(v.name)) ||
@@ -214,8 +245,11 @@ export function useConversational({ locale = "ar" }: { locale?: "ar" | "en" }) {
         ar,
       );
       if (voice) utter.voice = voice;
-      utter.rate = 0.94;
-      utter.pitch = 1.25;
+      // Young, cute, soft delivery: higher pitch reads as more youthful/feminine,
+      // and a gently relaxed rate keeps it soft rather than rushed. (Tunable —
+      // raise pitch toward 1.6 for cuter, lower toward 1.2 for more mature.)
+      utter.rate = 0.96;
+      utter.pitch = 1.45;
       utter.volume = 1.0;
 
       // Word boundaries are reported as charIndex offsets into utter.text.

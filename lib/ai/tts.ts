@@ -5,9 +5,9 @@
 // endpoint), which is a big step up from the robotic built-in browser voice.
 //
 // Pick the voice you like with ONE env var (no code change, no key):
-//   TTS_VOICE   — e.g. Joanna (default, warm US female), Kimberly, Salli,
-//                 Kendra, Amy (British), Emma (British), Nicole (Australian).
-//                 Arabic answers default to Zeina.
+//   TTS_VOICE   — Salli (default — soft, young, cute US female), Kimberly
+//                 (breathy), Joanna (warm), Kendra, Amy/Emma (British),
+//                 Nicole (Australian). Arabic answers default to Zeina.
 //
 // OPTIONAL PREMIUM — if you later want studio-grade / custom voices, set an
 // ElevenLabs key and it takes over automatically:

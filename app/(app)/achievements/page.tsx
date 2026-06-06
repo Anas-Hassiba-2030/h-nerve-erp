@@ -8,6 +8,7 @@ import { getLocale } from "@/lib/i18n/i18n.server";
 import { RANKS, rankById, progressToNext } from "@/lib/utils/gamification";
 import { formatNumber } from "@/lib/utils/utils";
 import { Confetti } from "@/components/ui/Confetti";
+import { ShareViewButton } from "@/components/brain/ShareViewButton";
 import "../daylight.css";
 
 export const dynamic = "force-dynamic";
@@ -142,6 +143,13 @@ export default async function AchievementsPage() {
           ar
             ? "نظام رتب الشطرنج: من بيدق إلى ملك. كل رتبة تفتح بونصاً أعلى."
             : "Chess-rank system: Pawn to King. Each rank unlocks a bigger bonus."
+        }
+        actions={
+          <ShareViewButton
+            title={ar ? "الإنجازات والرتب" : "Achievements & Ranks"}
+            body={ar ? "نظام رتب الشطرنج: من بيدق إلى ملك." : "Chess-rank system: Pawn to King."}
+            refType="view" refId="achievements" ar={ar} tone="light"
+          />
         }
       />
 

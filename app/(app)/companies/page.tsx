@@ -10,6 +10,7 @@ import { getLocale } from "@/lib/i18n/i18n.server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { hasRole } from "@/lib/auth/authz";
 import { getCompanyBrand } from "@/lib/utils/companyBrand";
+import { ShareViewButton } from "@/components/brain/ShareViewButton";
 import "../daylight.css";
 
 export const dynamic = "force-dynamic";
@@ -46,6 +47,7 @@ export default async function CompaniesPage() {
           <>
             {canManage ? <Link href="/companies/new" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "شركة جديدة" : "New company"}</Link> : null}
             <ExportMenu type="companies" locale={lc} />
+            <ShareViewButton title={ar ? "شركات المجموعة" : "Group Companies"} body={ar ? "نظرة شاملة على شركات مجموعة الحوراني وأداء كل قطاع." : "Overview of Hourani Group companies and each sector's performance."} refType="view" refId="companies" ar={ar} tone="light" />
           </>
         }
       />

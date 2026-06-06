@@ -10,6 +10,7 @@ import { prisma } from "@/lib/db/db";
 import { formatMoney, formatNumber } from "@/lib/utils/utils";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { deleteProject } from "./actions";
+import { ShareViewButton } from "@/components/brain/ShareViewButton";
 import "../daylight.css";
 
 export const dynamic = "force-dynamic";
@@ -44,7 +45,7 @@ export default async function ProjectsPage() {
         title={ar ? "المشاريع المستقبلية" : "Future Projects"}
         subtitle={ar ? "كل توسعة أو استثمار أو منتج جديد قيد التخطيط — منظّمة حسب الشركة." : "Every planned expansion, investment, or product — grouped by owning company."}
         status={`${formatNumber(inProgress)} ${ar ? "نشطة" : "active"}`}
-        actions={<ExportMenu type="projects" locale={lc} />}
+        actions={<><ExportMenu type="projects" locale={lc} /><ShareViewButton title={ar ? "المشاريع المستقبلية" : "Future Projects"} body={ar ? "كل توسعة أو استثمار أو منتج جديد قيد التخطيط." : "Every planned expansion, investment, or product."} refType="view" refId="projects" ar={ar} tone="light" /></>}
       />
 
       <DaylightKpiGrid>

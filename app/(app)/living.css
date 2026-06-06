@@ -367,6 +367,12 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
   background:linear-gradient(135deg,#cf9d9d,#A86A5C);
   color:#fff;
 }
+/* Pitch / Showcase — emerald→gold, distinct from the gold Quick-Add and a play
+   glyph that reads as "present this". It's an <a>, so kill the underline. */
+.hn-fab--pitch{
+  background:linear-gradient(135deg,#2E6B57,#C2A35A);
+  color:#fff; text-decoration:none; font-size:18px;
+}
 .hn-fab__glyph{ display:inline-block; transform:translateY(-1px); }
 .hn-fab__lbl{
   position:absolute; inset-inline-start:64px; white-space:nowrap;

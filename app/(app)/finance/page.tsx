@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Wallet, Plus } from "lucide-react";
 import { ExportMenu } from "@/components/ui/ExportMenu";
+import { ShareViewButton } from "@/components/brain/ShareViewButton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { TransactionTable } from "@/components/finance/TransactionTable";
 import { getLocale } from "@/lib/i18n/i18n.server";
@@ -103,6 +104,11 @@ export default async function FinancePage() {
           <div className="sec-actions">
             <Link href="/finance/new" className="dl-btn dl-btn-secondary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "عملية جديدة" : "New transaction"}</Link>
             <ExportMenu type="finance" locale={lc} />
+            <ShareViewButton
+              title={ar ? "المالية — مجموعة الحوراني" : "Finance — Hourani Group"}
+              body={ar ? "الصورة المالية الموحّدة: الإيراد، التدفق النقدي، والهامش عبر الوحدات." : "Unified financial picture: revenue, cash flow, and margin across units."}
+              refType="view" refId="finance" ar={ar} tone="light"
+            />
           </div>
         </div>
       </header>

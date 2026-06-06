@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { ExportMenu } from "@/components/ui/ExportMenu";
+import { ShareViewButton } from "@/components/brain/ShareViewButton";
 import { DaylightShell } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db/db";
 import { formatNumber, formatPercent, formatShortDate, loc, STATUS_AR, STATUS_EN } from "@/lib/utils/utils";
@@ -178,6 +179,11 @@ export default async function DairyPage() {
           <div className="sec-actions">
             <Link href="/dairy/new" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "دفعة جديدة" : "New batch"}</Link>
             <ExportMenu type="dairy" companyCode="MAHA" locale={lc} />
+            <ShareViewButton
+              title={ar ? "الألبان — المها" : "Dairy — Maha"}
+              body={ar ? "نظرة حية على الألبان: الدفعات، الجودة، ومخاطر انتهاء الصلاحية." : "Live dairy view: batches, quality, and expiry risk."}
+              refType="view" refId="dairy" ar={ar} tone="light"
+            />
           </div>
         </div>
       </header>

@@ -1,5 +1,6 @@
 import { Sparkline } from "@/components/ui/Sparkline";
 import { ExportMenu } from "@/components/ui/ExportMenu";
+import { ShareViewButton } from "@/components/brain/ShareViewButton";
 import { prisma } from "@/lib/db/db";
 import { formatNumber } from "@/lib/utils/utils";
 import { getLocale } from "@/lib/i18n/i18n.server";
@@ -50,6 +51,11 @@ export default async function MarketsPage() {
           <span className="sec-status"><span className="dot" />{ar ? "مباشر · سوق مفتوح" : "Live · market open"}</span>
           <div className="sec-actions">
             <ExportMenu type="markets" locale={ar ? "ar" : "en"} />
+            <ShareViewButton
+              title={ar ? "الأسواق" : "Markets"}
+              body={ar ? "نظرة حية على الأسواق: المؤشرات، السلع، والأسهم ذات الصلة." : "Live markets view: indices, commodities, and relevant tickers."}
+              refType="view" refId="markets" ar={ar} tone="light"
+            />
           </div>
         </div>
       </header>

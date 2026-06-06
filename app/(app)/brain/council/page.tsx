@@ -18,7 +18,7 @@ import { prisma } from "@/lib/db/db";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { formatNumber } from "@/lib/utils/utils";
 import { llmConfig } from "@/lib/brain/llm";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, BookmarkCheck } from "lucide-react";
 import { convene } from "./actions";
 import { conveneFromDiscussion } from "@/app/actions/council";
 import { CouncilStage } from "./CouncilStage";
@@ -53,7 +53,7 @@ export default async function BrainCouncilIndex() {
   // workspaceScope middleware.
   const [recentSessions, openCount, llmEnabled, sharedDiscussions, totalSessions, avgConfRaw] = await Promise.all([
     prisma.councilSession.findMany({
-      orderBy: { ranAt: "desc" },
+      orderBy: [{ pinned: "desc" }, { ranAt: "desc" }],
       take: 12,
       include: { _count: { select: { voices: true } } },
     }),
@@ -336,6 +336,15 @@ export default async function BrainCouncilIndex() {
                         fontVariantNumeric: "tabular-nums",
                       }}
                     >
+                      {s.pinned ? (
+                        <>
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--gold)", fontWeight: 700 }}>
+                            <BookmarkCheck className="h-3 w-3" strokeWidth={2} />
+                            {ar ? "محفوظة" : "Saved"}
+                          </span>
+                          <span style={{ color: "var(--line)" }}>·</span>
+                        </>
+                      ) : null}
                       <span>
                         {new Intl.DateTimeFormat(ar ? "ar-JO-u-nu-latn" : "en-US", {
                           day: "numeric",

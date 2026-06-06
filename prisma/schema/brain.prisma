@@ -120,6 +120,13 @@ model CouncilSession {
   durationMs      Int?
   // Whether any voice in the session was a real LLM call (vs stub).
   usedLiveLlm     Boolean  @default(false)
+  // Operator bookmark — pinned sessions surface first in the archive.
+  pinned          Boolean  @default(false)
+  // The evidence base the council actually reasoned over: the live metrics,
+  // the documents consulted, and the in-scope entities. Persisted so the saved
+  // transcript can show "on what exactly did they decide this" — JSON of
+  // CouncilSources (see council.ts).
+  sourcesJson     String   @default("[]")
 
   voices          CouncilVoice[]
 

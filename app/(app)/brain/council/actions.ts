@@ -83,3 +83,15 @@ export async function deleteSession(formData: FormData): Promise<void> {
   await prisma.councilSession.delete({ where: { id } });
   revalidatePath("/brain/council");
 }
+
+// Save / unsave (pin) a council session so it surfaces first in the archive.
+export async function togglePin(formData: FormData): Promise<void> {
+  await requireUser();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const row = await prisma.councilSession.findUnique({ where: { id }, select: { pinned: true } });
+  if (!row) return;
+  await prisma.councilSession.update({ where: { id }, data: { pinned: !row.pinned } });
+  revalidatePath(`/brain/council/${id}`);
+  revalidatePath("/brain/council");
+}

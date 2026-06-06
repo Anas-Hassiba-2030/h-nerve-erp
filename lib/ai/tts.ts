@@ -1,70 +1,123 @@
-// lib/ai/tts.ts — cloud text-to-speech seam (the "real voice").
+// lib/ai/tts.ts — the brain's spoken voice (the "real voice").
 //
-// When ELEVENLABS_API_KEY is set, the brain's spoken answers use a real,
-// designed female voice instead of whatever voices the user's browser happens
-// to ship. The voice is configurable:
-//   ELEVENLABS_API_KEY    — your ElevenLabs key (required to enable)
-//   ELEVENLABS_VOICE_ID   — the voice to speak with (defaults to a young, soft
-//                           female voice from the ElevenLabs shared library)
-//   ELEVENLABS_MODEL_ID   — defaults to eleven_multilingual_v2 (handles ar + en)
+// FREE BY DEFAULT — no API key required. The spoken answer is synthesized with
+// a real, natural female voice (AWS Polly, served via StreamElements' public
+// endpoint), which is a big step up from the robotic built-in browser voice.
 //
-// With NO key set, synthesizeSpeech() returns null and the client gracefully
-// falls back to the browser's built-in speechSynthesis voice. This mirrors the
-// provider seam in lib/brain/embeddings.ts: real provider when configured,
-// safe local fallback otherwise — so nothing breaks when the key is absent.
+// Pick the voice you like with ONE env var (no code change, no key):
+//   TTS_VOICE   — e.g. Joanna (default, warm US female), Kimberly, Salli,
+//                 Kendra, Amy (British), Emma (British), Nicole (Australian).
+//                 Arabic answers default to Zeina.
+//
+// OPTIONAL PREMIUM — if you later want studio-grade / custom voices, set an
+// ElevenLabs key and it takes over automatically:
+//   ELEVENLABS_API_KEY  — enables ElevenLabs
+//   ELEVENLABS_VOICE_ID — any voice from your ElevenLabs library
+//   ELEVENLABS_MODEL_ID — defaults to eleven_multilingual_v2
+//
+// synthesizeSpeech() NEVER throws and returns null only when every provider
+// fails, in which case the client falls back to the browser voice. So this is
+// always safe to call.
 
 export type TtsResult = { audio: ArrayBuffer; contentType: string } | null;
 
-// "Bella" — a young, soft, warm female voice from the ElevenLabs default
-// library. Override with ELEVENLABS_VOICE_ID to use any custom/cloned voice.
-const DEFAULT_VOICE_ID = "EXAVITQu4vr4xnSDxMaL";
-const DEFAULT_MODEL_ID = "eleven_multilingual_v2";
+// ── Free provider (StreamElements → AWS Polly), no key ──────────────────────
 
-export function ttsConfig() {
-  const key = process.env.ELEVENLABS_API_KEY?.trim();
-  return {
-    enabled: Boolean(key),
-    apiKey: key ?? null,
-    voiceId: process.env.ELEVENLABS_VOICE_ID?.trim() || DEFAULT_VOICE_ID,
-    modelId: process.env.ELEVENLABS_MODEL_ID?.trim() || DEFAULT_MODEL_ID,
-  };
+const STREAMELEMENTS_URL = "https://api.streamelements.com/kappa/v2/speech";
+const DEFAULT_FREE_VOICE_EN = "Joanna"; // warm, natural US female
+const DEFAULT_FREE_VOICE_AR = "Zeina"; // the Arabic Polly female voice
+
+/** Split long text into <=maxLen chunks at sentence/word boundaries so the
+ *  free endpoint (which caps request length) never truncates the answer. */
+function splitForTts(text: string, maxLen = 480): string[] {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (!clean) return [];
+  if (clean.length <= maxLen) return [clean];
+  const chunks: string[] = [];
+  let rest = clean;
+  while (rest.length > maxLen) {
+    // Prefer a sentence end, then a space, before the hard limit.
+    let cut = rest.lastIndexOf(". ", maxLen);
+    if (cut < maxLen * 0.5) cut = rest.lastIndexOf("، ", maxLen); // Arabic comma
+    if (cut < maxLen * 0.5) cut = rest.lastIndexOf(" ", maxLen);
+    if (cut <= 0) cut = maxLen;
+    chunks.push(rest.slice(0, cut).trim());
+    rest = rest.slice(cut).trim();
+  }
+  if (rest) chunks.push(rest);
+  return chunks;
 }
 
-/**
- * Synthesize `text` to spoken audio via ElevenLabs. Returns the audio bytes +
- * content-type, or null when no provider is configured or the call fails (the
- * caller then falls back to the browser voice). Never throws.
- */
-export async function synthesizeSpeech(
-  text: string,
-  _lang: "ar" | "en",
-): Promise<TtsResult> {
-  const cfg = ttsConfig();
-  if (!cfg.enabled || !cfg.apiKey) return null;
+function concatAudio(parts: Uint8Array[], contentType: string): TtsResult {
+  if (!parts.length) return null;
+  const total = parts.reduce((n, p) => n + p.byteLength, 0);
+  const out = new Uint8Array(total);
+  let off = 0;
+  for (const p of parts) {
+    out.set(p, off);
+    off += p.byteLength;
+  }
+  return { audio: out.buffer, contentType };
+}
 
-  // Bound length so a runaway answer can't drive cost or latency.
-  const clean = (text || "").replace(/\s+/g, " ").trim().slice(0, 2500);
-  if (!clean) return null;
+async function synthesizeFree(text: string, lang: "ar" | "en"): Promise<TtsResult> {
+  const voice =
+    process.env.TTS_VOICE?.trim() ||
+    (lang === "ar" ? DEFAULT_FREE_VOICE_AR : DEFAULT_FREE_VOICE_EN);
+  const chunks = splitForTts(text);
+  if (!chunks.length) return null;
 
-  // Don't let a hung provider hang the request — abort and fall back.
+  const parts: Uint8Array[] = [];
+  for (const chunk of chunks) {
+    const url = `${STREAMELEMENTS_URL}?voice=${encodeURIComponent(
+      voice,
+    )}&text=${encodeURIComponent(chunk)}`;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15_000);
+    try {
+      const res = await fetch(url, {
+        signal: controller.signal,
+        // A UA header avoids the occasional bot block on the public endpoint.
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; HNerve/1.0)" },
+      });
+      if (!res.ok) break; // play whatever we have so far
+      const ab = await res.arrayBuffer();
+      if (ab.byteLength) parts.push(new Uint8Array(ab));
+    } catch {
+      break;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  return concatAudio(parts, "audio/mpeg");
+}
+
+// ── Optional premium provider (ElevenLabs), only when a key is set ──────────
+
+const EL_DEFAULT_VOICE_ID = "EXAVITQu4vr4xnSDxMaL"; // "Bella" — young soft female
+const EL_DEFAULT_MODEL_ID = "eleven_multilingual_v2";
+
+async function synthesizeElevenLabs(text: string): Promise<TtsResult> {
+  const apiKey = process.env.ELEVENLABS_API_KEY?.trim();
+  if (!apiKey) return null;
+  const voiceId = process.env.ELEVENLABS_VOICE_ID?.trim() || EL_DEFAULT_VOICE_ID;
+  const modelId = process.env.ELEVENLABS_MODEL_ID?.trim() || EL_DEFAULT_MODEL_ID;
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 20_000);
   try {
     const res = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${cfg.voiceId}`,
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
       {
         method: "POST",
         headers: {
-          "xi-api-key": cfg.apiKey,
+          "xi-api-key": apiKey,
           "Content-Type": "application/json",
           Accept: "audio/mpeg",
         },
         body: JSON.stringify({
-          text: clean,
-          model_id: cfg.modelId,
-          // Soft, warm, expressive young-female delivery. Tunable:
-          //  • lower stability  → more emotional / playful
-          //  • higher style     → more expressive
+          text,
+          model_id: modelId,
           voice_settings: {
             stability: 0.4,
             similarity_boost: 0.8,
@@ -84,4 +137,26 @@ export async function synthesizeSpeech(
   } finally {
     clearTimeout(timer);
   }
+}
+
+// ── Public API ──────────────────────────────────────────────────────────────
+
+/**
+ * Synthesize `text` to spoken audio. Premium (ElevenLabs) is used when a key is
+ * set; otherwise the FREE Polly voice is used. Returns null only if everything
+ * fails (caller then uses the browser voice). Never throws.
+ */
+export async function synthesizeSpeech(
+  text: string,
+  lang: "ar" | "en",
+): Promise<TtsResult> {
+  const clean = (text || "").replace(/\s+/g, " ").trim().slice(0, 2500);
+  if (!clean) return null;
+
+  // Premium first when configured — fall back to free if it fails.
+  if (process.env.ELEVENLABS_API_KEY?.trim()) {
+    const premium = await synthesizeElevenLabs(clean);
+    if (premium) return premium;
+  }
+  return synthesizeFree(clean, lang);
 }

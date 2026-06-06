@@ -30,6 +30,7 @@ import {
   Volume2,
   VolumeX,
   Sparkle,
+  SquarePen,
 } from "lucide-react";
 import { useConversational } from "./useConversational";
 
@@ -147,6 +148,8 @@ export function Conversational({ locale = "ar" }: { locale?: "ar" | "en" }) {
     submit,
     toggleListen,
     visibleTurns,
+    clearConversation,
+    hasHistory,
   } = useConversational({ locale });
 
   if (!open) return null;
@@ -173,6 +176,17 @@ export function Conversational({ locale = "ar" }: { locale?: "ar" | "en" }) {
             <kbd className="cv-kbd">⌘ J</kbd>
             <span className="cv-head-sep">·</span>
             <kbd className="cv-kbd">ESC</kbd>
+            {hasHistory ? (
+              <button
+                type="button"
+                className="cv-head-mute"
+                onClick={clearConversation}
+                aria-label={ar ? "محادثة جديدة" : "New chat"}
+                title={ar ? "محادثة جديدة (يمسح المحفوظ)" : "New chat (clears saved history)"}
+              >
+                <SquarePen className="h-4 w-4" strokeWidth={2} />
+              </button>
+            ) : null}
             <button
               type="button"
               className="cv-head-mute"

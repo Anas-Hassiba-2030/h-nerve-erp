@@ -42,6 +42,11 @@ export type Turn = {
 type SpokenPos = { turnIndex: number; wordIndex: number } | null;
 
 const SESSION_KEY = "h_nerve_converse_session_v1";
+// The conversation itself is persisted here so it survives closing the overlay,
+// navigating away (incl. to the Orrery hub), and full page reloads. Bounded so
+// it can't grow without limit.
+const TURNS_KEY = "h_nerve_converse_turns_v1";
+const MAX_PERSISTED_TURNS = 60;
 
 // Pick a young, soft, feminine voice for the spoken answer. Browsers ship
 // different voice sets, so we match the locale first, then walk an ORDERED
@@ -142,6 +147,34 @@ export function useConversational({ locale = "ar" }: { locale?: "ar" | "en" }) {
     }
     return id;
   }, []);
+
+  // Restore the saved conversation on mount, so the chat has MEMORY — it's
+  // there when you reopen the overlay, switch pages, or reload. Runs once.
+  const restoredRef = useRef(false);
+  useEffect(() => {
+    if (restoredRef.current) return;
+    restoredRef.current = true;
+    if (typeof window === "undefined") return;
+    try {
+      const raw = window.localStorage.getItem(TURNS_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (Array.isArray(saved) && saved.length) setTurns(saved as Turn[]);
+    } catch {
+      /* corrupt/old payload — ignore, start fresh */
+    }
+  }, []);
+
+  // Persist the conversation whenever it changes (bounded to the last N turns).
+  useEffect(() => {
+    if (typeof window === "undefined" || !restoredRef.current) return;
+    try {
+      const trimmed = turns.slice(-MAX_PERSISTED_TURNS);
+      window.localStorage.setItem(TURNS_KEY, JSON.stringify(trimmed));
+    } catch {
+      /* quota / serialization issue — non-fatal */
+    }
+  }, [turns]);
 
   // ⌘J / Ctrl+J toggle. ⌘K is reserved for CommandPalette.
   useEffect(() => {
@@ -472,6 +505,24 @@ export function useConversational({ locale = "ar" }: { locale?: "ar" | "en" }) {
     }
   }, [listening, ar, submit]);
 
+  // Start a fresh conversation — clears the saved memory and stops any voice.
+  const clearConversation = useCallback(() => {
+    try {
+      window.speechSynthesis?.cancel();
+    } catch {}
+    try {
+      audioRef.current?.pause();
+    } catch {}
+    audioRef.current = null;
+    setTurns([]);
+    setRevealedTurnIndex(null);
+    setRevealedChars(0);
+    setSpokenPos(null);
+    try {
+      window.localStorage.removeItem(TURNS_KEY);
+    } catch {}
+  }, []);
+
   // Slice the latest brain turn at the reveal cursor
   const visibleTurns = turns.map((t, i) => {
     if (i === revealedTurnIndex && t.role === "brain") {
@@ -496,5 +547,7 @@ export function useConversational({ locale = "ar" }: { locale?: "ar" | "en" }) {
     submit,
     toggleListen,
     visibleTurns,
+    clearConversation,
+    hasHistory: turns.length > 0,
   };
 }

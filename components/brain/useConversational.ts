@@ -43,9 +43,11 @@ type SpokenPos = { turnIndex: number; wordIndex: number } | null;
 
 const SESSION_KEY = "h_nerve_converse_session_v1";
 
-// Pick a warm female voice for the spoken answer. Browsers ship different
-// voice sets, so we match the locale first, then prefer the well-known
-// feminine voices by name; fall back gracefully to any locale voice, then any.
+// Pick a young, soft, feminine voice for the spoken answer. Browsers ship
+// different voice sets, so we match the locale first, then walk an ORDERED
+// preference list of the youngest / cutest-sounding female voices available
+// across Chrome / Edge / Safari / Android (and Arabic), falling back to any
+// female-named voice, then any locale voice, then anything.
 function pickWarmFemaleVoice(
   voices: SpeechSynthesisVoice[],
   ar: boolean,
@@ -54,9 +56,38 @@ function pickWarmFemaleVoice(
   const prefix = ar ? "ar" : "en";
   const inLocale = voices.filter((v) => v.lang?.toLowerCase().startsWith(prefix));
   const pool = inLocale.length ? inLocale : voices;
-  // Known feminine voice names across Chrome / Edge / Safari / Android + Arabic.
+
+  // Ordered "young + cute + soft" preference. The first voice in the pool that
+  // matches the earliest pattern wins, so the most youthful-sounding voices are
+  // chosen before generic female ones.
+  const PREFERRED: RegExp[] = ar
+    ? [
+        // Arabic young-female voices (Edge/Windows + Google + common names).
+        /salma/i, /amany/i, /hoda/i, /laila|layla/i, /hala/i, /maryam/i, /zahra/i,
+        /google.*arabic/i,
+      ]
+    : [
+        // English young, soft, feminine voices in priority order.
+        /jenny/i,          // Microsoft Jenny — young, warm, soft
+        /aria/i,           // Microsoft Aria — youthful
+        /ava/i,            // Apple Ava (premium) — young
+        /samantha/i,       // Apple Samantha — warm female
+        /serena/i,
+        /allison/i,
+        /zira/i,           // Microsoft Zira — clear female
+        /michelle|sonia/i,
+        /google us english/i,
+        /google uk english female/i,
+      ];
+
+  // Generic feminine fallback patterns.
   const FEMALE =
     /female|woman|girl|samantha|victoria|karen|tessa|fiona|moira|serena|allison|ava|susan|zira|aria|jenny|michelle|sonia|google (uk|us) english|hoda|salma|amira|laila|hala|maryam|zahra/i;
+
+  for (const pat of PREFERRED) {
+    const hit = pool.find((v) => pat.test(v.name));
+    if (hit) return hit;
+  }
   return (
     pool.find((v) => FEMALE.test(v.name)) ||
     pool.find((v) => /google/i.test(v.name)) ||
@@ -83,6 +114,10 @@ export function useConversational({ locale = "ar" }: { locale?: "ar" | "en" }) {
   const recognitionRef = useRef<any>(null);
   // Available TTS voices load asynchronously; cache them + refresh on change.
   const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
+  // The currently-playing cloud-TTS audio element (when the real voice is used),
+  // so we can stop it on close / ESC / new answer. Null when idle or when the
+  // browser-voice fallback is being used.
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [spokenPos, setSpokenPos] = useState<SpokenPos>(null);
 
   // Load the browser's TTS voices (populated asynchronously) so we can pick a
@@ -120,10 +155,14 @@ export function useConversational({ locale = "ar" }: { locale?: "ar" | "en" }) {
       if (e.key === "Escape" && open) {
         e.preventDefault();
         setOpen(false);
-        // Stop any in-flight TTS
+        // Stop any in-flight TTS (browser voice + cloud audio)
         try {
           window.speechSynthesis?.cancel();
         } catch {}
+        try {
+          audioRef.current?.pause();
+        } catch {}
+        audioRef.current = null;
         try {
           recognitionRef.current?.stop?.();
         } catch {}
@@ -150,6 +189,19 @@ export function useConversational({ locale = "ar" }: { locale?: "ar" | "en" }) {
     const t = window.setTimeout(() => inputRef.current?.focus(), 320);
     return () => window.clearTimeout(t);
   }, [open]);
+
+  // Stop any playback when the overlay closes or the voice is muted — covers
+  // the ✕ close button (not just ESC) and the speaker toggle.
+  useEffect(() => {
+    if (open && voiceOut) return;
+    try {
+      window.speechSynthesis?.cancel();
+    } catch {}
+    try {
+      audioRef.current?.pause();
+    } catch {}
+    audioRef.current = null;
+  }, [open, voiceOut]);
 
   // Auto-scroll transcript to bottom on new turn
   useEffect(() => {
@@ -199,12 +251,60 @@ export function useConversational({ locale = "ar" }: { locale?: "ar" | "en" }) {
 
   // Voice synthesis with word tracker
   const speakAnswer = useCallback(
-    (turnIndex: number, text: string) => {
+    async (turnIndex: number, text: string) => {
       if (!voiceOut) return;
-      if (typeof window === "undefined" || !window.speechSynthesis) return;
+      if (typeof window === "undefined") return;
+      // Stop anything already playing (browser speech or cloud audio).
       try {
-        window.speechSynthesis.cancel();
+        window.speechSynthesis?.cancel();
       } catch {}
+      try {
+        audioRef.current?.pause();
+      } catch {}
+      audioRef.current = null;
+
+      // 1) Try the REAL cloud voice first. When a TTS provider is configured
+      //    server-side (/api/tts → lib/ai/tts.ts), it returns mp3 audio we play
+      //    directly. When it isn't, the route 501s and we fall back to the
+      //    browser's built-in voice below — so nothing breaks without a key.
+      try {
+        const res = await fetch("/api/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, lang: ar ? "ar" : "en" }),
+        });
+        if (res.ok) {
+          const buf = await res.arrayBuffer();
+          if (buf.byteLength > 0) {
+            const blob = new Blob([buf], {
+              type: res.headers.get("Content-Type") || "audio/mpeg",
+            });
+            const url = URL.createObjectURL(blob);
+            const audio = new Audio(url);
+            audioRef.current = audio;
+            const cleanup = () => {
+              try {
+                URL.revokeObjectURL(url);
+              } catch {}
+              if (audioRef.current === audio) audioRef.current = null;
+            };
+            audio.onended = () => {
+              cleanup();
+              setSpokenPos((cur) =>
+                cur && cur.turnIndex === turnIndex ? null : cur,
+              );
+            };
+            audio.onerror = cleanup;
+            await audio.play();
+            return; // real cloud voice is playing — done
+          }
+        }
+      } catch {
+        // network / playback failure — fall through to the browser voice
+      }
+
+      // 2) Browser-voice fallback (also drives the per-word highlight).
+      if (!window.speechSynthesis) return;
       const utter = new SpeechSynthesisUtterance(text);
       utter.lang = ar ? "ar-SA" : "en-US";
       // Warm female voice: a touch slower and higher-pitched for a soft,
@@ -214,8 +314,11 @@ export function useConversational({ locale = "ar" }: { locale?: "ar" | "en" }) {
         ar,
       );
       if (voice) utter.voice = voice;
-      utter.rate = 0.94;
-      utter.pitch = 1.25;
+      // Young, cute, soft delivery: higher pitch reads as more youthful/feminine,
+      // and a gently relaxed rate keeps it soft rather than rushed. (Tunable —
+      // raise pitch toward 1.6 for cuter, lower toward 1.2 for more mature.)
+      utter.rate = 0.96;
+      utter.pitch = 1.45;
       utter.volume = 1.0;
 
       // Word boundaries are reported as charIndex offsets into utter.text.

@@ -36,6 +36,6 @@ export type CouncilSession = {
 };
 
 export interface Council {
-  convene(topic: string, contextRefs: string[]): Promise<CouncilSession>;
+  convene(topic: string, contextRefs: string[], scopeCompanyId?: string): Promise<CouncilSession>;
   replay(sessionId: string): Promise<CouncilSession | null>;
 }

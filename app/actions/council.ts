@@ -108,14 +108,24 @@ export async function conveneFromDiscussion(formData: FormData): Promise<void> {
     return;
   }
 
+  // Fence the debate to the subject's company when it came from an insight.
+  let scopeCompanyId: string | undefined;
+  if (d.insightId) {
+    const ins = await prisma.aIInsight.findUnique({
+      where: { id: d.insightId },
+      select: { companyId: true },
+    });
+    scopeCompanyId = ins?.companyId ?? undefined;
+  }
+
   let sessionId: string;
   try {
     const { council } = await import("@/lib/brain/council.live");
-    // Fence the debate: if the subject is tied to an insight, scope to its graph
-    // neighbourhood; otherwise the topic text itself is the boundary.
+    // The sub-agents debate JUST this subject — its insight's graph neighbourhood
+    // as refs, fenced to its company, with the topic text as the boundary.
     const contextRefs = d.insightId ? [d.insightId] : [];
     const topic = `${d.title} — ${d.body}`.slice(0, 1000);
-    const session = await council().convene(topic, contextRefs);
+    const session = await council().convene(topic, contextRefs, scopeCompanyId);
     sessionId = session.id;
   } catch (e) {
     flashToast({

@@ -20,13 +20,15 @@ import { retrieveGraphContext } from "./graphrag.live";
 import { evaluateRetrieval } from "./crag";
 
 class LiveCouncil implements Council {
-  async convene(topic: string, contextRefs: string[] = []): Promise<CouncilSession> {
+  async convene(topic: string, contextRefs: string[] = [], scopeCompanyId?: string): Promise<CouncilSession> {
     const t0 = Date.now();
     const locale: "ar" | "en" =
       /[؀-ۿ]/.test(topic) ? "ar" : "en";
 
-    // 1. Build the context — top hub nodes + their immediate neighbors if refs given.
-    const context = await buildAgentContext(contextRefs, topic, locale);
+    // 1. Build the context. When the user picked a subject company up front, the
+    //    agents see ONLY that unit's data — no other business units bleed in, so
+    //    the debate is fenced to the chosen subject instead of the whole group.
+    const context = await buildAgentContext(contextRefs, topic, locale, scopeCompanyId);
 
     // 2. Persist the running session up-front so the UI can poll it if streaming.
     const session = await prisma.councilSession.create({
@@ -153,12 +155,14 @@ export function council(): LiveCouncil {
 async function buildAgentContext(
   contextRefs: string[],
   topic: string,
-  locale: "ar" | "en"
+  locale: "ar" | "en",
+  scopeCompanyId?: string,
 ) {
   // Pull the most central nodes (Companies + Hotels + Forecasts) plus any explicit refs.
   // Phase RAG-3 — also retrieve the tenant's documents most relevant to the
   // topic, so each agent can ground its argument in real contract/policy text.
-  const [companies, hotels, dairyBatches, farms, openInsights, forecasts, txnSums, docHits] = await Promise.all([
+  /* eslint-disable prefer-const */
+  let [companies, hotels, dairyBatches, farms, openInsights, forecasts, txnSums, docHits] = await Promise.all([
     prisma.company.findMany(),
     prisma.hotel.findMany(),
     prisma.dairyBatch.findMany({ orderBy: { expiryDate: "asc" }, take: 5 }),
@@ -178,6 +182,23 @@ async function buildAgentContext(
     }),
     retrieveDocuments(topic, { k: 4, minScore: 0.06, locale }).catch(() => []),
   ]);
+
+  // FENCE the context to the chosen subject company: strip every other unit's
+  // data so the sub-agents debate ONLY that subject (no cross-contamination).
+  // Group-wide insights (companyId === null) are dropped too — a fenced debate
+  // is about the chosen unit, not the whole federation.
+  if (scopeCompanyId) {
+    companies = companies.filter((c) => c.id === scopeCompanyId);
+    hotels = hotels.filter((h) => h.companyId === scopeCompanyId);
+    dairyBatches = dairyBatches.filter((b) => b.companyId === scopeCompanyId);
+    farms = farms.filter((f) => f.companyId === scopeCompanyId);
+    openInsights = openInsights.filter((i) => i.companyId === scopeCompanyId);
+    forecasts = forecasts.filter(
+      (f) => f.sourceCompanyId === scopeCompanyId || f.targetCompanyId === scopeCompanyId,
+    );
+  }
+  /* eslint-enable prefer-const */
+
   // Phase RAG-5 — Corrective RAG: only let the council cite documents the
   // evaluator judged relevant. A weak/irrelevant top match is dropped rather
   // than handed to every agent as evidence.

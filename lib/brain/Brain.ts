@@ -1,33 +1,31 @@
 // =====================================================================
-//  Brain.ts — the master orchestrator of the H-Nerve intelligence layer.
+//  Brain.ts — the central orchestrator of the H-Nerve intelligence layer.
 //
 //  THIS IS THE FILE TO REFERENCE WHEN ASKING TO "IMPROVE THE BRAIN".
 //  Path: lib/brain/Brain.ts
 //
 //  H-Nerve is a generic ERP intelligence platform. The Brain is its
 //  central nervous system: a causal graph of every business entity, a
-//  what-if simulator over that graph, a council of domain agents that
-//  reason about decisions, a narrator that explains everything in plain
-//  language, a planner that turns insights into ordered action plans, a
-//  long-term memory of past situations, and a self-reflective meta layer
-//  that tunes the brain's own behavior over time.
+//  what-if simulator over that graph, a council of domain agents, a
+//  narrator that explains in plain language, a planner that turns
+//  insight into ordered actions, a long-term episodic memory, and a
+//  self-reflective meta layer that scores and tunes the brain over time.
 //
-//  Each subsystem lives in its own file under lib/brain/. This file is
-//  the conductor: it composes them, exposes the public API, and is the
-//  single import path the rest of the app should reach for.
+//  ask() is the single entry point. It ROUTES each question to the right
+//  subsystem(s) and COMPOSES their REAL outputs into one editorial
+//  answer. Subsystems are loaded via dynamic import so each is pulled in
+//  only when a question needs it (this also avoids circular-import
+//  init-order problems).
 //
-//  This is a SKELETON. Implementations land in their own files as the
-//  20-phase plan in docs/PHASES-INTELLIGENCE.md is executed.
+//  Boundary: the Brain is READ-MOSTLY. ask() never writes domain data.
+//  The `plan` kind drafts a plan in memory (draftPlanFromGoal) but does
+//  NOT persist it — persistence goes through the server actions under
+//  app/(app)/plans/actions.ts. Keep it that way.
+//
+//  (B1, 2026-06: this file was previously a Proxy-stub skeleton whose
+//  `plan`/`explain` branches only narrated. It now composes the live
+//  subsystems. See docs/proposals/BRAIN-INFRA-AUDIT-2026-06.md.)
 // =====================================================================
-
-import type { CausalGraph } from "./graph";
-import type { Simulator } from "./simulator";
-import type { Council } from "./council";
-import type { Narrator } from "./narrator";
-import type { Planner } from "./planner";
-import type { MemoryLake } from "./memory";
-import type { FeedbackLoop } from "./feedback";
-import type { MetaBrain } from "./meta";
 
 // ─────────────────────────────────────────────────────────────────────
 // Public types — every subsystem speaks these
@@ -80,42 +78,54 @@ export type BrainTrace = {
 };
 
 // ─────────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────────
+
+/**
+ * Resolve a domain {entity, id} to a causal-graph node id.
+ *
+ * The graph seeder (`seedGraph.ts`) keys every node as
+ * `bn_${kind.toLowerCase()}_${refId}` via its `nid()` helper. The Brain
+ * must use the same convention to find a node, otherwise graph lookups
+ * silently miss. An id that is already a `bn_…` node id is passed through
+ * unchanged (callers that already hold a node id stay correct).
+ */
+export function graphNodeId(entity: string, id: string): string {
+  if (id.startsWith("bn_")) return id;
+  return `bn_${entity.toLowerCase()}_${id}`;
+}
+
+// ─────────────────────────────────────────────────────────────────────
 // Brain — composition root
 // ─────────────────────────────────────────────────────────────────────
 
 export class Brain {
-  constructor(
-    private readonly graph: CausalGraph,
-    private readonly simulator: Simulator,
-    private readonly council: Council,
-    private readonly narrator: Narrator,
-    private readonly planner: Planner,
-    private readonly memory: MemoryLake,
-    private readonly feedback: FeedbackLoop,
-    private readonly meta: MetaBrain,
-  ) {}
-
   /**
    * The single entry point for the rest of the app.
-   * Routes the question to the right subsystem(s), then runs the answer
-   * through the narrator so every response is editorial-quality prose.
-   *
-   * Uses dynamic imports so each subsystem is loaded only when needed,
-   * avoiding circular dependencies at module-init time.
+   * Routes the question to the right subsystem(s), composes their real
+   * outputs, then runs the result through the narrator so every response
+   * is editorial-quality prose.
    */
   async ask(ctx: BrainContext, q: BrainQuestion): Promise<BrainAnswer> {
     const t0 = Date.now();
+    const steps: BrainTrace["steps"] = [];
+    const step = (agent: string, thought: string, since: number) =>
+      steps.push({ agent, thought, ms: Date.now() - since });
 
     if (q.kind === "council") {
       const { council } = await import("./council.live");
       const { narrator } = await import("./narrator.claude");
+      let sStart = Date.now();
       const session = await council().convene(q.topic, q.subgraph ?? []);
+      step("council", `convened ${session.voices.length} voices`, sStart);
+      sStart = Date.now();
       const nar = await narrator().write({
         register: "editorial",
         locale: ctx.locale,
         topic: "council",
         facts: { recommendation: session.synthesis.recommendation, confidence: session.synthesis.confidence },
       });
+      step("narrator", "wrote editorial synthesis", sStart);
       return {
         summary: session.synthesis.recommendation.slice(0, 200),
         narrative: nar.text,
@@ -125,28 +135,55 @@ export class Brain {
           ref: v.agentId,
           weight: 1 / Math.max(session.voices.length, 1),
         })),
-        trace: {
-          inputs: [q.topic],
-          steps: session.voices.map((v) => ({ agent: v.agentId, thought: v.thesis.slice(0, 120), ms: 0 })),
-          totalMs: Date.now() - t0,
-        },
+        trace: { inputs: [q.topic], steps, totalMs: Date.now() - t0 },
       };
     }
 
     if (q.kind === "explain") {
+      const { causalGraph } = await import("./graph.prisma");
       const { narrator } = await import("./narrator.claude");
+      const nodeId = graphNodeId(q.target.entity, q.target.id);
+
+      // Pull the real causal neighborhood so the explanation is grounded
+      // in how this entity actually connects to the rest of the business.
+      // Degrade gracefully if the graph isn't populated yet.
+      let neighbors: { id: string; label: string }[] = [];
+      const gStart = Date.now();
+      try {
+        const ns = await causalGraph().neighbors(nodeId, 1);
+        neighbors = ns.slice(0, 6).map((n) => ({ id: n.id, label: n.label }));
+      } catch {
+        /* graph not seeded — fall back to a narration with no connections */
+      }
+      step("graph", `loaded ${neighbors.length} causal neighbors`, gStart);
+
+      const nStart = Date.now();
       const nar = await narrator().write({
         register: "executive",
         locale: ctx.locale,
         topic: q.target.entity,
-        facts: { entityId: q.target.id, entity: q.target.entity },
+        facts: {
+          entity: q.target.entity,
+          entityId: q.target.id,
+          connections: neighbors.map((n) => n.label),
+          connectionCount: neighbors.length,
+        },
       });
+      step("narrator", "wrote executive explanation", nStart);
+
       return {
         summary: `${q.target.entity} #${q.target.id}`,
         narrative: nar.text,
-        confidence: 0.82,
-        citations: [{ kind: "graph" as const, ref: `${q.target.entity}:${q.target.id}`, weight: 1 }],
-        trace: { inputs: [q.target.entity, q.target.id], steps: [], totalMs: Date.now() - t0 },
+        confidence: neighbors.length > 0 ? 0.85 : 0.7,
+        citations: [
+          { kind: "graph" as const, ref: nodeId, weight: 1 },
+          ...neighbors.map((n) => ({
+            kind: "graph" as const,
+            ref: n.id,
+            weight: 1 / Math.max(neighbors.length, 1),
+          })),
+        ],
+        trace: { inputs: [q.target.entity, q.target.id], steps, totalMs: Date.now() - t0 },
       };
     }
 
@@ -154,80 +191,121 @@ export class Brain {
       const { causalGraph } = await import("./graph.prisma");
       const { simulateOnSnapshot } = await import("./simulator.bfs");
       const { narrator } = await import("./narrator.claude");
+      const sStart = Date.now();
       const snapshot = await causalGraph().loadAll();
       const delta = typeof q.perturbation.to === "number" ? q.perturbation.to - 1 : -0.3;
-      const impacts = simulateOnSnapshot(snapshot, { nodeId: q.perturbation.id, delta });
+      // B1 fix: resolve the perturbed entity to its real graph node id
+      // (was passing the raw refId, which never matched a `bn_…` node).
+      const nodeId = graphNodeId(q.perturbation.entity, q.perturbation.id);
+      const impacts = simulateOnSnapshot(snapshot, { nodeId, delta });
+      step("simulator", `propagated ${impacts.length} impacts`, sStart);
+      const nStart = Date.now();
       const nar = await narrator().write({
         register: "editorial",
         locale: ctx.locale,
         topic: "simulation",
         facts: { entity: q.perturbation.entity, field: q.perturbation.field, impactCount: impacts.length },
       });
+      step("narrator", "wrote scenario narrative", nStart);
       return {
         summary: `Simulating ${q.perturbation.field} on ${q.perturbation.entity}`,
         narrative: nar.text,
         confidence: 0.75,
         citations: impacts.slice(0, 3).map((r) => ({ kind: "graph" as const, ref: r.node.id, weight: Math.abs(r.projectedDelta) })),
-        trace: {
-          inputs: [q.perturbation.entity, q.perturbation.field],
-          steps: [],
-          totalMs: Date.now() - t0,
-        },
+        trace: { inputs: [q.perturbation.entity, q.perturbation.field], steps, totalMs: Date.now() - t0 },
       };
     }
 
     if (q.kind === "recall") {
       const { memoryLake } = await import("./memory.live");
       const { narrator } = await import("./narrator.claude");
+      const mStart = Date.now();
       const memories = await memoryLake().recall({ situation: q.situation, topK: 5 });
+      step("memory", `recalled ${memories.length} analogous situations`, mStart);
+      const nStart = Date.now();
       const nar = await narrator().write({
         register: "editorial",
         locale: ctx.locale,
         topic: "memory",
         facts: { situation: q.situation.slice(0, 80), count: memories.length, topScore: memories[0]?.similarity ?? 0 },
       });
+      step("narrator", "wrote recall narrative", nStart);
       return {
         summary: `${memories.length} analogous memories found`,
         narrative: nar.text,
         confidence: memories[0]?.similarity ?? 0.5,
         citations: memories.map((m) => ({ kind: "memory" as const, ref: m.id, weight: m.similarity })),
-        trace: { inputs: [q.situation.slice(0, 60)], steps: [], totalMs: Date.now() - t0 },
+        trace: { inputs: [q.situation.slice(0, 60)], steps, totalMs: Date.now() - t0 },
       };
     }
 
     if (q.kind === "plan") {
+      const { draftPlanFromGoal } = await import("./planner.live");
       const { narrator } = await import("./narrator.claude");
+
+      // Draft a real, ordered plan from the goal — read-mostly: nothing is
+      // persisted here. The user commits it via the plans server action.
+      const pStart = Date.now();
+      let draft: Awaited<ReturnType<typeof draftPlanFromGoal>> | null = null;
+      try {
+        draft = await draftPlanFromGoal(q.goal, ctx.locale);
+      } catch {
+        /* planner unavailable — degrade to a goal-only narration */
+      }
+      step("planner", draft ? `drafted ${draft.steps.length}-step plan` : "planner unavailable", pStart);
+
+      const nStart = Date.now();
       const nar = await narrator().write({
         register: "executive",
         locale: ctx.locale,
         topic: "plan",
-        facts: { goal: q.goal },
+        facts: {
+          goal: q.goal,
+          targetMetric: draft?.targetMetric ?? null,
+          targetDelta: draft?.targetDelta ?? null,
+          stepCount: draft?.steps.length ?? 0,
+          rationale: draft?.rationale ?? null,
+        },
       });
+      step("narrator", "wrote plan narrative", nStart);
+
+      const actions: BrainAction[] = (draft?.steps ?? []).map((s, i) => ({
+        id: `step-${i + 1}`,
+        label: { ar: s.action, en: s.actionEn ?? s.action },
+        module: s.ownerRole,
+        ...(draft ? { estimatedImpact: { metric: draft.targetMetric, delta: draft.targetDelta } } : {}),
+      }));
+
       return {
-        summary: q.goal.slice(0, 120),
+        summary: (draft?.goal ?? q.goal).slice(0, 120),
         narrative: nar.text,
-        confidence: 0.78,
+        confidence: draft ? 0.8 : 0.6,
         citations: [],
-        trace: { inputs: [q.goal], steps: [], totalMs: Date.now() - t0 },
+        actions,
+        trace: { inputs: [q.goal], steps, totalMs: Date.now() - t0 },
       };
     }
 
     if (q.kind === "reflect") {
       const { computeIQ } = await import("./meta.reflector");
       const { narrator } = await import("./narrator.claude");
+      const iqStart = Date.now();
       const iq = await computeIQ();
+      step("meta", `computed IQ ${Math.round(iq.score * 100)} (${iq.trend})`, iqStart);
+      const nStart = Date.now();
       const nar = await narrator().write({
         register: "executive",
         locale: ctx.locale,
         topic: "reflection",
         facts: { iq: Math.round(iq.score * 100), trend: iq.trend, window: q.window },
       });
+      step("narrator", "wrote reflection narrative", nStart);
       return {
         summary: `Brain IQ: ${Math.round(iq.score * 100)} (${iq.trend})`,
         narrative: nar.text,
         confidence: iq.score,
         citations: [{ kind: "metric" as const, ref: "brain.iq", weight: iq.score }],
-        trace: { inputs: [q.window], steps: [], totalMs: Date.now() - t0 },
+        trace: { inputs: [q.window], steps, totalMs: Date.now() - t0 },
       };
     }
 
@@ -248,13 +326,11 @@ export class Brain {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Factory — call this from server-side code to get a Brain instance
+// Factory — call this from server-side code to get a Brain instance.
+// ask() and introspect() route via dynamic imports, so the Brain holds
+// no subsystem state and the factory takes no wiring.
 // ─────────────────────────────────────────────────────────────────────
 
 export function makeBrain(): Brain {
-  // Constructor args are no longer used — ask() and introspect() route via
-  // dynamic imports directly. We pass typed stubs here only to satisfy the
-  // constructor signature; no code path reaches them.
-  const stub: any = new Proxy({}, { get: () => () => { throw new Error("unreachable stub"); } });
-  return new Brain(stub, stub, stub, stub, stub, stub, stub, stub);
+  return new Brain();
 }

@@ -71,6 +71,32 @@ export async function generatePlanFromCouncil(sessionId: string, locale: "ar" | 
   return persistPlan(draft, { sourceCouncilSessionId: sessionId });
 }
 
+/**
+ * Draft a plan from a free-text goal WITHOUT persisting it.
+ *
+ * Used by the Brain orchestrator's `plan` question kind, which is
+ * READ-MOSTLY: it proposes a plan for the user to review but never writes
+ * to the DB. Persisting a plan goes through generatePlanFromInsight /
+ * generatePlanFromCouncil (which create a DRAFT row) behind a server
+ * action — never from inside `Brain.ask`.
+ *
+ * In STUB mode (no ANTHROPIC_API_KEY) this is fully deterministic and
+ * touches no DB or network — it routes through `stubPlan` by keyword.
+ */
+export async function draftPlanFromGoal(
+  goal: string,
+  locale: "ar" | "en"
+): Promise<PlanDraft> {
+  return draftPlan({
+    sourceTitle: goal,
+    sourceBody: "",
+    sourceKind: "insight",
+    sourceModule: "GROUP",
+    severity: "INFO",
+    locale,
+  });
+}
+
 export async function commitPlan(planId: string, userId: string) {
   return prisma.plan.update({
     where: { id: planId },

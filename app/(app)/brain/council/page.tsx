@@ -18,8 +18,8 @@ import { prisma } from "@/lib/db/db";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { formatNumber } from "@/lib/utils/utils";
 import { llmConfig } from "@/lib/brain/llm";
-import { ChevronLeft, BookmarkCheck } from "lucide-react";
-import { convene } from "./actions";
+import { ChevronLeft, Bookmark, BookmarkCheck, BookOpen } from "lucide-react";
+import { convene, togglePin } from "./actions";
 import { conveneFromDiscussion } from "@/app/actions/council";
 import { CouncilStage } from "./CouncilStage";
 import { CouncilBrief } from "@/components/brain/CouncilBrief";
@@ -44,6 +44,156 @@ const SUGGESTED_TOPICS_AR = [
   "رطوبة دفيئة لوران أقل من 35% منذ 72 ساعة. خطة طوارئ؟",
 ];
 
+type SessionRowData = {
+  id: string;
+  topic: string;
+  ranAt: Date;
+  status: string;
+  confidence: number | null;
+  usedLiveLlm: boolean;
+  pinned: boolean;
+  _count: { voices: number };
+};
+
+// One archive row. The whole card is NOT a single <Link> — the title is the
+// link, and Save / Theater are separate controls on their own action row. A
+// button/form/anchor nested inside an <a> is invalid markup and throws a
+// hydration error, so they live as siblings, not children.
+function SessionRow({ s, ar }: { s: SessionRowData; ar: boolean }) {
+  const when = new Intl.DateTimeFormat(ar ? "ar-JO-u-nu-latn" : "en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(s.ranAt);
+
+  return (
+    <li>
+      <div
+        style={{
+          background: "var(--ivory)",
+          border: "1px solid var(--line)",
+          borderRadius: 14,
+          borderInlineStart:
+            s.status === "FAILED"
+              ? "2px solid var(--brick)"
+              : s.status === "RUNNING"
+                ? "2px solid var(--gold)"
+                : "2px solid var(--sage)",
+          padding: "13px 16px",
+        }}
+      >
+        <Link
+          href={`/brain/council/${s.id}`}
+          className="group"
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 12,
+            textDecoration: "none",
+            color: "var(--ink)",
+          }}
+        >
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div
+              className="line-clamp-2"
+              style={{
+                fontFamily: "var(--dl-display)",
+                fontSize: 17,
+                fontWeight: 600,
+                color: "var(--emerald)",
+                lineHeight: 1.25,
+              }}
+            >
+              {s.topic}
+            </div>
+            <div
+              style={{
+                marginTop: 7,
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: 8,
+                fontSize: 11,
+                letterSpacing: ".04em",
+                color: "var(--ink-muted)",
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {s.pinned ? (
+                <>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--gold)", fontWeight: 700 }}>
+                    <BookmarkCheck className="h-3 w-3" strokeWidth={2} />
+                    {ar ? "محفوظة" : "Saved"}
+                  </span>
+                  <span style={{ color: "var(--line)" }}>·</span>
+                </>
+              ) : null}
+              <span>{when}</span>
+              <span style={{ color: "var(--line)" }}>·</span>
+              <span>{s._count.voices} {ar ? "صوت" : "voices"}</span>
+              {typeof s.confidence === "number" ? (
+                <>
+                  <span style={{ color: "var(--line)" }}>·</span>
+                  <TrustChip score={s.confidence} locale={ar ? "ar" : "en"} />
+                </>
+              ) : null}
+              {s.usedLiveLlm ? (
+                <>
+                  <span style={{ color: "var(--line)" }}>·</span>
+                  <span style={{ color: "var(--gold)", fontWeight: 700 }}>LIVE</span>
+                </>
+              ) : null}
+            </div>
+          </div>
+          <ChevronLeft
+            className="mt-1 h-4 w-4 shrink-0 transition rtl:rotate-180 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
+            style={{ color: "var(--gold)" }}
+            strokeWidth={1.5}
+          />
+        </Link>
+
+        {/* action row — Save (pin) + Open in Theater, siblings of the link */}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 8,
+            marginTop: 11,
+            paddingTop: 11,
+            borderTop: "1px solid var(--line)",
+          }}
+        >
+          <form action={togglePin}>
+            <input type="hidden" name="id" value={s.id} />
+            <button
+              type="submit"
+              className="dl-btn dl-btn-secondary"
+              style={{
+                fontSize: 12,
+                padding: "5px 11px",
+                ...(s.pinned ? { borderColor: "var(--gold)", color: "#fff" } : {}),
+              }}
+            >
+              {s.pinned ? <BookmarkCheck className="h-3.5 w-3.5" strokeWidth={1.5} /> : <Bookmark className="h-3.5 w-3.5" strokeWidth={1.5} />}
+              {s.pinned ? (ar ? "محفوظة" : "Saved") : (ar ? "احفظ" : "Save")}
+            </button>
+          </form>
+          <Link
+            href={`/theater/council/${s.id}`}
+            className="dl-btn dl-btn-secondary"
+            style={{ fontSize: 12, padding: "5px 11px", textDecoration: "none" }}
+          >
+            <BookOpen className="h-3.5 w-3.5" strokeWidth={1.5} />
+            {ar ? "افتح في المسرح" : "Open in Theater"}
+          </Link>
+        </div>
+      </div>
+    </li>
+  );
+}
+
 export default async function BrainCouncilIndex() {
   const locale = getLocale();
   const ar = locale === "ar";
@@ -54,7 +204,7 @@ export default async function BrainCouncilIndex() {
   const [recentSessions, openCount, llmEnabled, sharedDiscussions, totalSessions, avgConfRaw] = await Promise.all([
     prisma.councilSession.findMany({
       orderBy: [{ pinned: "desc" }, { ranAt: "desc" }],
-      take: 12,
+      take: 20,
       include: { _count: { select: { voices: true } } },
     }),
     prisma.councilSession.count({ where: { status: "RUNNING" } }),
@@ -84,6 +234,12 @@ export default async function BrainCouncilIndex() {
   });
 
   const topics = ar ? SUGGESTED_TOPICS_AR : SUGGESTED_TOPICS_EN;
+
+  // Saved (pinned) sessions get their own home so "where did my save go?" has a
+  // clear answer; the rest fall under "Past sessions" (filtered out of here so a
+  // saved session never lists twice).
+  const savedSessions = recentSessions.filter((s) => s.pinned);
+  const pastSessions = recentSessions.filter((s) => !s.pinned);
 
   return (
     <DaylightShell dir={ar ? "rtl" : "ltr"}>
@@ -264,6 +420,24 @@ export default async function BrainCouncilIndex() {
         )}
       </DaylightPanel>
 
+      {/* ── Saved ──────────────────────────────────────────────────────── */}
+      {savedSessions.length > 0 ? (
+        <DaylightPanel
+          title={ar ? "★ المحفوظة" : "★ Saved"}
+          aside={
+            ar
+              ? "الجلسات التي حفظتها — تظهر هنا أولاً. اضغط «احفظ» على أي جلسة لتضيفها."
+              : "Sessions you saved land here first. Hit Save on any session to add it."
+          }
+        >
+          <ul style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {savedSessions.map((s) => (
+              <SessionRow key={s.id} s={s} ar={ar} />
+            ))}
+          </ul>
+        </DaylightPanel>
+      ) : null}
+
       {/* ── Past sessions ──────────────────────────────────────────────── */}
       <DaylightPanel
         title={ar ? "جلسات سابقة" : "Past sessions"}
@@ -273,7 +447,7 @@ export default async function BrainCouncilIndex() {
             : "Every session is preserved in full — voices, recommendation, dissent."
         }
       >
-        {recentSessions.length === 0 ? (
+        {pastSessions.length === 0 ? (
           <div
             style={{
               padding: "26px 0",
@@ -283,101 +457,14 @@ export default async function BrainCouncilIndex() {
               fontSize: 13,
             }}
           >
-            {ar ? "لم تُعقد جلسات بعد." : "No sessions yet."}
+            {savedSessions.length > 0
+              ? ar ? "كل الجلسات محفوظة." : "Every session is saved."
+              : ar ? "لم تُعقد جلسات بعد." : "No sessions yet."}
           </div>
         ) : (
           <ul style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {recentSessions.map((s) => (
-              <li key={s.id}>
-                <Link
-                  href={`/brain/council/${s.id}`}
-                  className="group"
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 12,
-                    padding: "13px 16px",
-                    background: "var(--ivory)",
-                    border: "1px solid var(--line)",
-                    borderRadius: 14,
-                    borderInlineStart:
-                      s.status === "FAILED"
-                        ? "2px solid var(--brick)"
-                        : s.status === "RUNNING"
-                          ? "2px solid var(--gold)"
-                          : "2px solid var(--sage)",
-                    textDecoration: "none",
-                    color: "var(--ink)",
-                  }}
-                >
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div
-                      className="line-clamp-2"
-                      style={{
-                        fontFamily: "var(--dl-display)",
-                        fontSize: 17,
-                        fontWeight: 600,
-                        color: "var(--emerald)",
-                        lineHeight: 1.25,
-                      }}
-                    >
-                      {s.topic}
-                    </div>
-                    <div
-                      style={{
-                        marginTop: 7,
-                        display: "flex",
-                        flexWrap: "wrap",
-                        alignItems: "center",
-                        gap: 8,
-                        fontSize: 11,
-                        letterSpacing: ".04em",
-                        color: "var(--ink-muted)",
-                        fontVariantNumeric: "tabular-nums",
-                      }}
-                    >
-                      {s.pinned ? (
-                        <>
-                          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--gold)", fontWeight: 700 }}>
-                            <BookmarkCheck className="h-3 w-3" strokeWidth={2} />
-                            {ar ? "محفوظة" : "Saved"}
-                          </span>
-                          <span style={{ color: "var(--line)" }}>·</span>
-                        </>
-                      ) : null}
-                      <span>
-                        {new Intl.DateTimeFormat(ar ? "ar-JO-u-nu-latn" : "en-US", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }).format(s.ranAt)}
-                      </span>
-                      <span style={{ color: "var(--line)" }}>·</span>
-                      <span>{s._count.voices} {ar ? "صوت" : "voices"}</span>
-                      {typeof s.confidence === "number" ? (
-                        <>
-                          <span style={{ color: "var(--line)" }}>·</span>
-                          {/* Phase 22 — trust-coded recommendation chip */}
-                          <TrustChip score={s.confidence} locale={ar ? "ar" : "en"} />
-                        </>
-                      ) : null}
-                      {s.usedLiveLlm ? (
-                        <>
-                          <span style={{ color: "var(--line)" }}>·</span>
-                          <span style={{ color: "var(--gold)", fontWeight: 700 }}>LIVE</span>
-                        </>
-                      ) : null}
-                    </div>
-                  </div>
-                  <ChevronLeft
-                    className="mt-1 h-4 w-4 shrink-0 transition rtl:rotate-180 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
-                    style={{ color: "var(--gold)" }}
-                    strokeWidth={1.5}
-                  />
-                </Link>
-              </li>
+            {pastSessions.map((s) => (
+              <SessionRow key={s.id} s={s} ar={ar} />
             ))}
           </ul>
         )}

@@ -12,12 +12,13 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { CouncilTranscript } from "@/components/brain/CouncilTranscript";
+import { CouncilSourcesPanel } from "@/components/brain/CouncilSourcesPanel";
 import { council } from "@/lib/brain/council.live";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { prisma } from "@/lib/db/db";
 import { pickLocale } from "@/lib/utils/utils";
-import { ArrowLeft, Target, ArrowRight, BookOpen } from "lucide-react";
-import { deleteSession } from "../actions";
+import { ArrowLeft, Target, ArrowRight, BookOpen, Bookmark, BookmarkCheck } from "lucide-react";
+import { deleteSession, togglePin } from "../actions";
 import { generateFromCouncil } from "@/app/(app)/plans/actions";
 import "../../../daylight.css";
 import "../council-design.css";
@@ -63,6 +64,17 @@ export default async function CouncilTranscriptPage({
         }
         actions={
           <>
+            <form action={togglePin}>
+              <input type="hidden" name="id" value={session.id} />
+              <button
+                type="submit"
+                className="dl-btn dl-btn-secondary"
+                style={session.pinned ? { borderColor: "var(--gold)", color: "#fff" } : undefined}
+              >
+                {session.pinned ? <BookmarkCheck className="h-3.5 w-3.5" strokeWidth={1.5} /> : <Bookmark className="h-3.5 w-3.5" strokeWidth={1.5} />}
+                {session.pinned ? (ar ? "محفوظة" : "Saved") : (ar ? "احفظ" : "Save")}
+              </button>
+            </form>
             <Link
               href={`/theater/council/${session.id}`}
               className="dl-btn dl-btn-secondary"
@@ -92,6 +104,9 @@ export default async function CouncilTranscriptPage({
       </div>
 
       <CouncilTranscript session={session} ar={ar} />
+
+      {/* The proof base — what the council actually reasoned over */}
+      {session.sources ? <CouncilSourcesPanel sources={session.sources} ar={ar} /> : null}
 
       {/* Generate plan CTA — Phase 5 hook from PHASES-INTELLIGENCE.md */}
       <CouncilToPlanCta sessionId={session.id} ar={ar} />

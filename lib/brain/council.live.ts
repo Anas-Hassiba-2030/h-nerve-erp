@@ -12,7 +12,7 @@
 import { prisma } from "@/lib/db/db";
 import { causalGraph } from "./graph.prisma";
 import { SPECIALIST_AGENTS, runAgent, runModerator } from "./agents";
-import type { Council, CouncilSession, AgentVoice, CouncilScope, CouncilLens } from "./council";
+import type { Council, CouncilSession, AgentVoice, CouncilScope, CouncilLens, CouncilSources } from "./council";
 import { log } from "@/lib/utils/logger";
 import { llmConfig } from "./llm";
 import { retrieveDocuments, docHitsToContext, type DocContext } from "./documents.retrieve";
@@ -49,6 +49,16 @@ class LiveCouncil implements Council {
     //    bleed in, and the lens narrows which facet they reason about, so the
     //    debate is fenced to the chosen brief instead of the whole group.
     const context = await buildAgentContext(contextRefs, topic, locale, scope);
+
+    // The proof base: exactly what the council looked at — the live metrics, the
+    // documents it could cite, and the in-scope entities. Persisted with the
+    // session so the saved transcript can answer "on what did they decide this".
+    const sources: CouncilSources = {
+      engine: llmConfig().enabled ? "live" : "stub",
+      metrics: Object.entries(context.metrics).map(([key, value]) => ({ key, value: String(value) })),
+      documents: context.documents.map((d) => ({ title: d.title, kind: d.kind })),
+      entities: context.relevantNodes.slice(0, 14).map((n) => ({ kind: n.kind, label: n.label })),
+    };
 
     // 2. Persist the running session up-front so the UI can poll it if streaming.
     const session = await prisma.councilSession.create({
@@ -108,6 +118,7 @@ class LiveCouncil implements Council {
             confidence: moderation.confidence,
             dissentNote: moderation.dissentNote ?? null,
             durationMs: Date.now() - t0,
+            sourcesJson: JSON.stringify(sources),
           },
         }),
       ]);
@@ -122,6 +133,7 @@ class LiveCouncil implements Council {
           confidence: moderation.confidence,
           dissentNote: moderation.dissentNote,
         },
+        sources,
       };
     } catch (err) {
       log.error("brain.council: convene failed", { err: String(err) });
@@ -158,8 +170,23 @@ class LiveCouncil implements Council {
         confidence: row.confidence ?? 0,
         dissentNote: row.dissentNote ?? undefined,
       },
+      pinned: row.pinned,
+      sources: parseSources(row.sourcesJson),
     };
   }
+}
+
+// Parse the persisted sources blob, tolerating old rows that predate the column
+// (they carry the default "[]" — an array, not an object — so we return undefined).
+function parseSources(s: string | null | undefined): CouncilSources | undefined {
+  if (!s) return undefined;
+  try {
+    const v = JSON.parse(s);
+    if (v && !Array.isArray(v) && typeof v === "object") return v as CouncilSources;
+  } catch {
+    /* fall through */
+  }
+  return undefined;
 }
 
 let _instance: LiveCouncil | null = null;

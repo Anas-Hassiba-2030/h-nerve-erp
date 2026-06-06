@@ -23,6 +23,16 @@ export type AgentVoice = {
   evidence: { ref: string; weight: number; label?: string }[];
 };
 
+// The evidence base a council session reasoned over — persisted so the saved
+// transcript can show the proofs behind the recommendation: the live metrics
+// the agents saw, the documents they could cite, and the in-scope entities.
+export type CouncilSources = {
+  engine: "live" | "stub";
+  metrics: { key: string; value: string }[];
+  documents: { title: string; kind: string }[];
+  entities: { kind: string; label: string }[];
+};
+
 export type CouncilSession = {
   id: string;
   topic: string;
@@ -33,6 +43,8 @@ export type CouncilSession = {
     confidence: number;
     dissentNote?: string;
   };
+  pinned?: boolean;
+  sources?: CouncilSources;
 };
 
 // The scope fences the debate. `companyIds` restricts which business units the

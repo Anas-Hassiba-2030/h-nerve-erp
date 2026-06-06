@@ -19,6 +19,7 @@ import { TodayActivity } from "@/components/dashboard/TodayActivity";
 import { UpcomingTasksPanel } from "@/components/dashboard/UpcomingTasksPanel";
 import { IntelligenceLayerPanel } from "@/components/dashboard/IntelligenceLayerPanel";
 import { BrainStatusBadge } from "@/components/brain/BrainStatusBadge";
+import { ShareViewButton } from "@/components/brain/ShareViewButton";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/utils/utils";
@@ -109,6 +110,13 @@ export default async function DashboardPage({
             : "Full pulse of Hourani Group across every business unit."
         }
         status={<><BrainStatusBadge /></>}
+        actions={
+          <ShareViewButton
+            title={ar ? "اللوحة التنفيذية" : "Executive dashboard"}
+            body={ar ? "النبض الكامل لمجموعة الحوراني عبر كل الوحدات." : "Full pulse of Hourani Group across every business unit."}
+            refType="view" refId="dashboard" ar={ar} tone="light"
+          />
+        }
       />
 
       {/* Period selector rail */}

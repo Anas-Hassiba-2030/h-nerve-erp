@@ -2,6 +2,7 @@ import { Leaf } from "lucide-react";
 import {
   DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel,
 } from "@/components/orrery/daylight";
+import { ShareViewButton } from "@/components/brain/ShareViewButton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { prisma } from "@/lib/db/db";
 import { formatNumber } from "@/lib/utils/utils";
@@ -35,6 +36,13 @@ export default async function SustainabilityPage() {
         title={ar ? "الاستدامة وESG" : "Sustainability & ESG"}
         subtitle={ar ? "مؤشرات الأثر البيئي والحوكمة عبر شركات المجموعة." : "Environmental impact and governance metrics across the group."}
         status={`${ar ? "متوسط" : "Avg"} ESG ${avgScore}`}
+        actions={
+          <ShareViewButton
+            title={ar ? "الاستدامة وESG" : "Sustainability & ESG"}
+            body={ar ? "مؤشرات الأثر البيئي والحوكمة عبر شركات المجموعة." : "Environmental impact and governance metrics across the group."}
+            refType="view" refId="sustainability" ar={ar} tone="light"
+          />
+        }
       />
 
       <DaylightKpiGrid>

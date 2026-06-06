@@ -556,9 +556,34 @@ export function WhatIfLab({ ar }: { ar: boolean }) {
             <div className="bar"><span id="b_risk" style={{ width: "31%" }} /></div>
           </div>
           <div className="wi-actions">
-            <button ref={resetBtnRef} className="dl-btn dl-btn-secondary dl-btn-onnight">{ar ? "إعادة الضبط" : "Reset"}</button>
+            {/* High-contrast inline styles — the old dl-btn-onnight outline
+                rendered as a faint white shape that was hard to read on the dark
+                panel. Reset = clear gold outline; Share = solid gold so the
+                marquee "share this scenario" action stands out. */}
+            <button
+              ref={resetBtnRef}
+              className="dl-btn"
+              style={{
+                background: "transparent",
+                border: "1px solid rgba(220,195,138,.6)",
+                color: "#ece5d3",
+                fontWeight: 700,
+              }}
+            >
+              {ar ? "إعادة الضبط" : "Reset"}
+            </button>
             <button ref={saveBtnRef} className="dl-btn dl-btn-primary">{ar ? "انسخ القيم" : "Copy values"}</button>
-            <button ref={shareBtnRef} type="button" className="dl-btn dl-btn-secondary dl-btn-onnight">
+            <button
+              ref={shareBtnRef}
+              type="button"
+              className="dl-btn"
+              style={{
+                background: "linear-gradient(135deg,#dcc38a,#c2a35a)",
+                border: "1px solid #c2a35a",
+                color: "#0d1f1a",
+                fontWeight: 800,
+              }}
+            >
               {ar ? "↗ شارك مع المجلس" : "↗ Share to Council"}
             </button>
           </div>

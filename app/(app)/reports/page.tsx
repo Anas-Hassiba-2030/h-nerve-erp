@@ -6,6 +6,7 @@ import { FileText, Printer, ArrowRight } from "lucide-react";
 import {
   DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel,
 } from "@/components/orrery/daylight";
+import { ShareViewButton } from "@/components/brain/ShareViewButton";
 import { prisma } from "@/lib/db/db";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { formatNumber, formatMoney } from "@/lib/utils/utils";
@@ -38,6 +39,13 @@ export default async function ReportsIndexPage() {
         title={ar ? "التقارير الرسمية" : "Official Reports"}
         subtitle={ar ? `${formatNumber(companies.length)} تقرير شركة جاهز للطباعة كـ PDF.` : `${formatNumber(companies.length)} per-company reports — print-ready as PDF.`}
         status={ar ? "جاهزة للطباعة" : "Print-ready"}
+        actions={
+          <ShareViewButton
+            title={ar ? "التقارير التنفيذية" : "Executive reports"}
+            body={ar ? "تقارير الشركات الرسمية — جاهزة للطباعة كـ PDF." : "Official per-company reports — print-ready as PDF."}
+            refType="view" refId="reports" ar={ar} tone="light"
+          />
+        }
       />
 
       <DaylightKpiGrid>

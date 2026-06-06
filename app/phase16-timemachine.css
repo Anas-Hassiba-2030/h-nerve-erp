@@ -267,9 +267,18 @@
 
 /* ---- Top banner when traveling ---- */
 .tm-banner {
-  position: sticky;
+  /* MUST be fixed, not sticky: the banner is a direct child of the (app)
+     layout's `flex flex-row-reverse` wrapper, so as a sticky flex ITEM it
+     collapsed to its content width and pinned itself to the top-RIGHT corner,
+     hiding the EXIT button behind the Orbit pill (you got stuck in time
+     travel). `fixed` removes it from the flex flow so it spans the full width
+     at the very top, with EXIT clearly reachable. z-index sits above the
+     orrery chrome. */
+  position: fixed;
   top: 0;
-  z-index: 65;
+  inset-inline: 0;
+  width: 100%;
+  z-index: 130;
   background: var(--heri-ink, #1a1a1a);
   color: var(--heri-cream, #f4ede0);
   border-bottom: 2px solid var(--heri-copper, #b3733e);
@@ -350,23 +359,23 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 9px;
-  background: transparent;
-  color: var(--heri-cream, #f4ede0);
-  border: 1px solid rgba(255,255,255,0.22);
+  flex: 0 0 auto;       /* never shrink — the way OUT must always be visible */
+  margin-inline-start: auto;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--heri-copper, #b3733e);   /* solid, unmissable */
+  color: var(--heri-ink, #1a1a1a);
+  border: 1px solid var(--heri-copper, #b3733e);
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+  transition: filter 140ms ease, transform 140ms ease;
 }
-.tm-banner-clear:hover {
-  background: var(--heri-copper, #b3733e);
-  color: var(--heri-ink, #1a1a1a);
-  border-color: var(--heri-copper, #b3733e);
-}
+.tm-banner-clear:hover { filter: brightness(1.12); transform: translateY(-1px); }
+.tm-banner-clear:disabled { opacity: 0.6; cursor: progress; }
 
 /* ---- Chart-morph easing token ---- */
 :root {

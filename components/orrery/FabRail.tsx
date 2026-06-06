@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import type { Locale } from "@/lib/i18n/i18n";
 
 // Vertical FAB rail — ports Claude Design's #al-fabs (app-layer.js lines 28-32).
@@ -22,18 +21,6 @@ export function FabRail({ locale }: { locale: Locale }) {
 
   return (
     <div className="hn-fab-rail" role="toolbar" aria-label={ar ? "أدوات سريعة" : "Quick tools"}>
-      {/* Pitch / Showcase — the demo reel you point a customer at. Its only
-          link used to live in the removed Heritage sidebar, which orphaned the
-          page; restored here on the always-visible rail so it's never lost. */}
-      <Link
-        className="hn-fab hn-fab--pitch"
-        href="/showcase"
-        title={ar ? "العرض التقديمي" : "Showcase / Pitch"}
-        aria-label={ar ? "العرض التقديمي" : "Showcase / Pitch"}
-      >
-        <span aria-hidden className="hn-fab__glyph">▶</span>
-        <span className="hn-fab__lbl">{ar ? "العرض التقديمي" : "Showcase"}</span>
-      </Link>
       <button
         type="button"
         className="hn-fab hn-fab--brain"

@@ -92,6 +92,9 @@ export type SeedCtx = {
 export async function seedOperator() {
   // -- Wipe (FK-safe order)
   await prisma.protocolClause.deleteMany();
+  // Connector stack — has @@unique([scope, providerKey]); wipe so re-seeding
+  // an already-populated DB is idempotent (else `db:seed` throws P2002).
+  await prisma.integration.deleteMany();
   await prisma.userAchievement.deleteMany();
   await prisma.achievement.deleteMany();
   await prisma.task.deleteMany();
@@ -115,6 +118,10 @@ export async function seedOperator() {
   await prisma.brainFeedback.deleteMany();
   await prisma.brainPattern.deleteMany();
   await prisma.brainWeight.deleteMany();
+  // BrainInsight — the brain's generated-insight store. Seeded below so the
+  // brain console (/admin/brain) shows live counts on a fresh local seed
+  // (else activeCount/criticalCount render 0). Wiped here for idempotency.
+  await prisma.brainInsight.deleteMany();
   await prisma.user.deleteMany();
   await prisma.company.deleteMany();
 
@@ -884,6 +891,25 @@ export async function seedIntelligence(ctx: SeedCtx) {
       { module: "DAIRY", severity: "CRITICAL", confidence: 0.94, title: "دفعة لبنة قرب انتهاء الصلاحية - المها", titleEn: "Labneh batch near expiry — Maha", body: "دفعة MAHA-00007 (1,180 لتر) — تنتهي خلال 36 ساعة. اقتراح: تحويل عاجل إلى منفذ التجزئة بعرض ترويجي.", bodyEn: "Batch MAHA-00007 (1,180 L) — expires within 36 hours. Suggestion: urgent transfer to a retail outlet with a promotional offer.", status: "OPEN" },
       { module: "FINANCE", severity: "OPPORTUNITY", confidence: 0.71, title: "هامش الربح في دفيئة لوران 1 يتفوق على المعيار", titleEn: "Profit margin at Loran greenhouse 1 beats the benchmark", body: "هامش الربح 41% مقابل 28% معيار القطاع. توصية: نسخ النموذج التشغيلي إلى الحقول المكشوفة في الموسم القادم.", bodyEn: "Profit margin 41% vs the 28% sector benchmark. Recommendation: replicate the operating model in the open fields next season.", status: "OPEN" },
       { module: "EDUCATION", severity: "INFO", confidence: 0.58, title: "حاضنة The Tank: 5 شركات نشطة في الكوهورت 2026-S1", titleEn: "The Tank incubator: 5 active startups in cohort 2026-S1", body: "تمويل تراكمي: 53,000 د.أ. من بينها «أغريفاي» المرشحة للتجربة المباشرة في مزارع لوران.", bodyEn: "Cumulative funding: 53,000 JOD. Among them ‘Agrify’, a candidate for a live trial on Loran farms.", status: "OPEN" },
+    ],
+  });
+
+  // -------------------------------------------------------------------
+  // BRAIN INSIGHTS — the brain's own generated-insight store (distinct from
+  // aIInsight above). Populates the brain console at /admin/brain so the
+  // active / critical counts and the feed are non-empty on a fresh local
+  // seed. Each row uses a distinct (tenantId, type) pair to satisfy
+  // @@unique([tenantId, type, productId]) with a null productId.
+  // resolvedAt / dismissedAt stay null → counted as active.
+  // -------------------------------------------------------------------
+  await prisma.brainInsight.createMany({
+    data: [
+      { tenantId: "hourani-hotels", type: "OCCUPANCY_SIGNAL",       severity: "INFO",     title: "إشغال أرينا عمّان يتجاوز 80% للأسبوع الثالث", body: "اتجاه صعودي مستقر في الحجوزات المؤكدة. يُقترح تثبيت تسعير نهاية الأسبوع ورفع جاهزية فريق الاستقبال.", metadata: JSON.stringify({ source: "seed", confidence: 0.74 }) },
+      { tenantId: "hourani-hotels", type: "REORDER_RECOMMENDATION", severity: "WARNING",  title: "مخزون المفروشات الفندقية قارب نقطة إعادة الطلب", body: "الاستهلاك الأسبوعي تجاوز المعدل بـ 18%. يُنصح بإصدار أمر شراء خلال 3 أيام لتفادي نفاد المخزون.", metadata: JSON.stringify({ source: "seed", confidence: 0.81 }) },
+      { tenantId: "maha-dairy",     type: "EXPIRY_RISK",            severity: "CRITICAL", title: "دفعة لبنة المها قرب انتهاء الصلاحية", body: "دفعة بحجم 1,180 لتر تنتهي خلال 36 ساعة. توصية: تحويل عاجل إلى منفذ التجزئة بعرض ترويجي قبل الإتلاف.", metadata: JSON.stringify({ source: "seed", confidence: 0.93 }) },
+      { tenantId: "maha-dairy",     type: "LOW_STOCK",              severity: "WARNING",  title: "مخزون عبوات التعبئة منخفض في خط المها", body: "تكفي العبوات الحالية لأربعة أيام إنتاج فقط. يُقترح تسريع طلبية المورد الأساسي.", metadata: JSON.stringify({ source: "seed", confidence: 0.79 }) },
+      { tenantId: "loran-agri",     type: "IRRIGATION_ALERT",       severity: "WARNING",  title: "انخفاض رطوبة التربة في دفيئة لوران الذكية", body: "قراءة المستشعر 29% مقابل عتبة مثلى 35%. يُنصح بتفعيل الري الجزئي خلال 4 ساعات.", metadata: JSON.stringify({ source: "seed", confidence: 0.86 }) },
+      { tenantId: "tank-incubator", type: "STALE_PRODUCT",          severity: "INFO",     title: "شركة ناشئة في حاضنة The Tank دون تحديث منذ 21 يوماً", body: "ملف «أغريفاي» لم يُحدّث منذ ثلاثة أسابيع. يُقترح جدولة جلسة متابعة مع فريق الحاضنة.", metadata: JSON.stringify({ source: "seed", confidence: 0.6 }) },
     ],
   });
 

@@ -5,6 +5,7 @@ import { formatNumber, pickLocale } from "@/lib/utils/utils";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { commit, abandon, markStepDone, markStepBlocked } from "./actions";
 import { TrustChip } from "@/components/brain/TrustChip";
+import { ShareMenu } from "@/components/brain/ShareMenu";
 import "../daylight.css";
 import "./plans.css";
 
@@ -27,6 +28,14 @@ export default async function PlansPage() {
     orderBy: [{ status: "asc" }, { createdAt: "desc" }],
     include: { steps: { orderBy: { orderIndex: "asc" } } },
     take: 40,
+  });
+
+  // Colleagues a plan can be shared to (the <ShareMenu> "to member" picker).
+  const members = await prisma.user.findMany({
+    where: { active: true },
+    select: { id: true, name: true },
+    orderBy: { name: "asc" },
+    take: 100,
   });
 
   const active = plans.filter((p) => p.status === "ACTIVE").length;
@@ -84,6 +93,16 @@ export default async function PlansPage() {
                     <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                       {/* Phase 22 — projected-impact trust at a glance */}
                       <TrustChip score={plan.confidence} locale={ar ? "ar" : "en"} />
+                      {/* Universal sharing — push this plan to the Council or a colleague. */}
+                      <ShareMenu
+                        title={pickLocale(ar, plan.goal, plan.goalEn)}
+                        body={`${ar ? st.ar : st.en} — ${doneSteps}/${plan.steps.length} ${ar ? "خطوات منجزة" : "steps done"}`}
+                        refType="plan"
+                        refId={plan.id}
+                        members={members}
+                        ar={ar}
+                        tone="dark"
+                      />
                       {committed ? (
                         <span className={`br-chip ${st.chip}`}>{ar ? st.ar : st.en}</span>
                       ) : (

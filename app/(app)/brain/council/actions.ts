@@ -62,7 +62,7 @@ export async function convene(formData: FormData): Promise<void> {
 
   let sessionId: string | null = null;
   try {
-    const session = await council().convene(finalTopic, contextRefs, { companyIds, lenses });
+    const session = await council().convene(finalTopic, contextRefs, { companyIds, lenses }, ar ? "ar" : "en");
     sessionId = session.id;
   } catch (e) {
     flashToast({

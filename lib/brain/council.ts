@@ -49,6 +49,15 @@ export type CouncilScope = {
 };
 
 export interface Council {
-  convene(topic: string, contextRefs?: string[], scope?: CouncilScope): Promise<CouncilSession>;
+  // `locale` forces the debate language. When omitted it is inferred from the
+  // topic text, but callers with a known UI locale should always pass it so the
+  // council answers in the user's language regardless of what characters the
+  // (possibly auto-prefixed) topic contains.
+  convene(
+    topic: string,
+    contextRefs?: string[],
+    scope?: CouncilScope,
+    locale?: "ar" | "en",
+  ): Promise<CouncilSession>;
   replay(sessionId: string): Promise<CouncilSession | null>;
 }

@@ -24,7 +24,9 @@ export type TtsResult = { audio: ArrayBuffer; contentType: string } | null;
 // ── Free provider (StreamElements → AWS Polly), no key ──────────────────────
 
 const STREAMELEMENTS_URL = "https://api.streamelements.com/kappa/v2/speech";
-const DEFAULT_FREE_VOICE_EN = "Joanna"; // warm, natural US female
+// Default: the softest / youngest-sounding free female voice. Override anytime
+// with TTS_VOICE (Kimberly = breathier, Joanna = warmer/mature, Amy = British).
+const DEFAULT_FREE_VOICE_EN = "Salli"; // soft, young, cute US female
 const DEFAULT_FREE_VOICE_AR = "Zeina"; // the Arabic Polly female voice
 
 /** Split long text into <=maxLen chunks at sentence/word boundaries so the

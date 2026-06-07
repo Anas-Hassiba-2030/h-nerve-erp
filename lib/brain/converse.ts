@@ -20,6 +20,7 @@
 import { prisma } from "@/lib/db/db";
 import { callLlm } from "./llm";
 import { retrieveDocuments, type DocHit } from "./documents.retrieve";
+import { retrieveGraphContext, type GraphContext } from "./graphrag.live";
 import { evaluateRetrieval } from "./crag";
 import { sanitizeForPrompt } from "./ragGuard";
 
@@ -459,7 +460,7 @@ export async function ask(input: AskInput): Promise<AskResult> {
   // parallel. The documents are the RAG "retrieve" stage (Phase RAG-2):
   // semantic search over the tenant's contracts/invoices/reports via the
   // embedding seam. Their snippets ground the answer in real clauses.
-  const [facts, docHits] = await Promise.all([
+  const [facts, docHits, graphCtx] = await Promise.all([
     pullFacts(),
     retrieveDocuments(input.question, {
       scope: session.scope,
@@ -467,6 +468,14 @@ export async function ask(input: AskInput): Promise<AskResult> {
       minScore: 0.08,
       locale,
     }).catch(() => [] as DocHit[]),
+    // Graph RAG (Phase RAG-4): the causal subgraph most relevant to the
+    // question — related entities + signed causal links. This is what lets
+    // the conversational brain reason about second-order effects ("Arena
+    // occupancy →(+) Maha demand") instead of only the metrics in the fact
+    // pack. Degrades to an empty result on an unseeded graph or any error.
+    retrieveGraphContext(input.question, { k: 6, topSeeds: 3 }).catch(
+      () => ({ nodes: [], links: [] } as GraphContext),
+    ),
   ]);
 
   // Build the prompt — we always use the stub generator's payload as the
@@ -496,8 +505,8 @@ export async function ask(input: AskInput): Promise<AskResult> {
     {
       system:
         locale === "ar"
-          ? "أنت H-Nerve — الدماغ المحادث لمنظومة ERP. أجِب في 3 جمل بالضبط. استخدم إحالات مرجعية بصيغة [c1] [c2] للأرقام والادعاءات وللاستشهاد بالمستندات. لا تخترع أرقاماً ولا بنوداً؛ استشهد فقط بالمستندات المرفقة. اكتب بنبرة هادئة، صريحة، عملية."
-          : "You are H-Nerve, the conversational brain of an ERP. Answer in exactly 3 sentences. Use [c1] [c2] reference markers for numbers, claims, and document citations. Never invent numbers or clauses; cite only the documents provided. Tone: calm, plain, operational.",
+          ? "أنت H-Nerve — الدماغ المحادث لمنظومة ERP. أجِب في 3 جمل بالضبط. استخدم إحالات مرجعية بصيغة [c1] [c2] للأرقام والادعاءات وللاستشهاد بالمستندات. لا تخترع أرقاماً ولا بنوداً؛ استشهد فقط بالمستندات المرفقة. إن وُجدت روابط سببية (graph.links) فاستعملها لتفسير الأثر غير المباشر بين الوحدات، دون أن تُحيل إليها كمرجع. اكتب بنبرة هادئة، صريحة، عملية."
+          : "You are H-Nerve, the conversational brain of an ERP. Answer in exactly 3 sentences. Use [c1] [c2] reference markers for numbers, claims, and document citations. Never invent numbers or clauses; cite only the documents provided. When causal links are provided (graph.links), use them to explain second-order effects between business units, but do not cite them as a reference. Tone: calm, plain, operational.",
       user: input.question,
       context: {
         priorTurns: session.turns.slice(-MAX_TURNS_PER_SESSION),
@@ -509,6 +518,17 @@ export async function ask(input: AskInput): Promise<AskResult> {
           // Phase RAG-7 — sanitize uploaded text before it enters the prompt.
           snippet: sanitizeForPrompt(usedDocs[i]?.snippet?.text ?? "", 240).text,
         })),
+        // Graph RAG context — related entities + signed causal links. Only
+        // included when the graph actually returned something, so an unseeded
+        // graph adds no noise to the prompt.
+        ...(graphCtx.links.length > 0
+          ? {
+              graph: {
+                related: graphCtx.nodes.slice(0, 6).map((n) => n.label),
+                links: graphCtx.links.slice(0, 8),
+              },
+            }
+          : {}),
       },
       maxTokens: 320,
       temperature: 0.5,
@@ -538,6 +558,16 @@ export async function ask(input: AskInput): Promise<AskResult> {
       const lead = hedged ? "This may relate to" : "From the uploaded documents, this intersects";
       answerText += ` ${lead} “${top.titleEn || top.title}” ${`[${ref}]`}${snippet ? `: “${snippet}”` : ""}.`;
     }
+  }
+
+  // Stub mode doesn't reason over the graph context on its own, so surface
+  // the single strongest causal link as one short clause — this keeps Graph
+  // RAG visible end-to-end in the local/demo (no-key) state, mirroring the
+  // document append above.
+  if (llm.isStub && graphCtx.links.length > 0) {
+    const link = graphCtx.links[0];
+    answerText +=
+      locale === "ar" ? ` على خريطة الأثر: ${link}.` : ` On the causal map: ${link}.`;
   }
 
   // Reflect retrieval quality in the turn confidence: an answer leaning on

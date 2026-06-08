@@ -17,7 +17,8 @@
 // `Citation` with { id, label, value, href } so Tab-key drill-through has
 // somewhere to land.
 
-import { callLlm } from "./llm";
+import { callLlm, llmConfig } from "./llm";
+import { runToolLoop } from "./orchestrator";
 import { retrieveDocuments, type DocHit } from "./documents.retrieve";
 import { retrieveGraphContext, type GraphContext } from "./graphrag.live";
 import { evaluateRetrieval } from "./crag";
@@ -95,8 +96,8 @@ export function resetSession(sessionId: string) {
 // ---------------------------------------------------------------------------
 // The relevant fact pack (insights, plans, integrations, hotel/dairy/farm
 // pulse) is pulled from Prisma by `pullFacts` — moved to ./tools/pullFacts so
-// the same capability is exposed both here and as a brain tool. FactPack is
-// re-exported via that import for the stub generator below.
+// the same capability is exposed both here and as a brain tool. `pullFacts`
+// and the `FactPack` type are imported at the top for the stub generator below.
 // ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------
@@ -374,7 +375,83 @@ export type AskResult = {
   brainTurn: ConverseTurn;
 };
 
+// Build doc citations from any retrieveDocuments tool output in the loop.
+export function buildCitationsFromToolCalls(
+  toolCalls: Array<{ name: string; output: unknown }>,
+  startIndex: number,
+): Citation[] {
+  const cites: Citation[] = [];
+  for (const call of toolCalls) {
+    if (call.name !== "retrieveDocuments") continue;
+    const docs = (call.output as any)?.documents ?? [];
+    for (const d of docs) {
+      cites.push({
+        id: `c${startIndex + cites.length + 1}`,
+        source: "DOCUMENT",
+        label: d.title ?? "Document",
+        value: d.kind,
+        href: `/documents/${d.documentId}`,
+      });
+    }
+  }
+  return cites;
+}
+
+// LIVE path. Mutates the session ONLY on success; returns null to degrade so
+// the caller can fall back to askSingleShot without a double-pushed user turn.
+async function askWithTools(input: AskInput): Promise<AskResult | null> {
+  const t0 = Date.now();
+  const session = getOrCreate(input.sessionId, input.scope ?? "default");
+  const locale = input.locale ?? "ar";
+  const system =
+    locale === "ar"
+      ? "أنت H-Nerve، الدماغ المحادث لمنظومة ERP. استخدم الأدوات المتاحة للحصول على الحقائق قبل الإجابة. أجب في 3 جمل بنبرة هادئة عملية، واستشهد بالمستندات بصيغة [c1]."
+      : "You are H-Nerve, the conversational brain of an ERP. Use the available tools to gather facts before answering. Answer in 3 calm, operational sentences and cite documents as [c1].";
+
+  // priorTurns = existing turns only; runToolLoop appends the question itself.
+  const loop = await runToolLoop({
+    system,
+    question: input.question,
+    priorTurns: session.turns.slice(-MAX_TURNS_PER_SESSION).map((t) => ({ role: t.role, text: t.text })),
+  });
+  if (loop.stub || !loop.text) return null; // degrade — session untouched
+
+  // Success: commit the user turn and the brain turn together.
+  session.turns.push({ role: "user", text: input.question, ts: new Date().toISOString() });
+  const citations = buildCitationsFromToolCalls(loop.toolCalls, 0);
+  const brainTurn: ConverseTurn = {
+    role: "brain",
+    text: loop.text,
+    ts: new Date().toISOString(),
+    citations,
+    confidence: 0.8,
+    stub: false,
+    ms: Date.now() - t0,
+  };
+  session.turns.push(brainTurn);
+  if (session.turns.length > MAX_TURNS_PER_SESSION) session.turns = session.turns.slice(-MAX_TURNS_PER_SESSION);
+  return { session, brainTurn };
+}
+
 export async function ask(input: AskInput): Promise<AskResult> {
+  // LIVE: let the model drive the tool loop. Any degrade/failure falls through
+  // to the deterministic single-shot path so the overlay always gets an answer.
+  if (llmConfig().enabled) {
+    try {
+      const r = await askWithTools(input);
+      if (r) return r;
+    } catch {
+      /* fall through to single-shot */
+    }
+  }
+  return askSingleShot(input);
+}
+
+// STUB / fallback path. This is the original single-shot ask() body unchanged:
+// push the user turn, pull facts + retrieve docs + graph in parallel, run the
+// deterministic stub (LLM-augmented if a key is set via callLlm), push the
+// brain turn. The LIVE tool-loop path is ask() below, which falls back here.
+async function askSingleShot(input: AskInput): Promise<AskResult> {
   const t0 = Date.now();
   const session = getOrCreate(input.sessionId, input.scope ?? "default");
   const locale = input.locale ?? "ar";

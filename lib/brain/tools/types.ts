@@ -9,8 +9,14 @@ export type BrainTool<I = unknown, O = unknown> = {
   description: string;
   /** Zod schema validating the tool input. MUST be a z.object(...). */
   inputSchema: z.ZodType<I>;
-  /** Runs the capability. MUST return a JSON-serializable object. */
-  run: (input: I) => Promise<O>;
+  /**
+   * Runs the capability. MUST return a JSON-serializable object.
+   * Method syntax (not an arrow property) so TS compares the parameter
+   * bivariantly — this lets specifically-typed tools live in a
+   * `BrainTool[]` registry. Safe because `runTool` validates input against
+   * each tool's own `inputSchema` before calling `run`.
+   */
+  run(input: I): Promise<O>;
 };
 
 /** Validate raw input against a tool's schema, throwing a named error. */

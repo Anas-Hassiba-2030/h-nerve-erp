@@ -17,12 +17,12 @@
 // `Citation` with { id, label, value, href } so Tab-key drill-through has
 // somewhere to land.
 
-import { prisma } from "@/lib/db/db";
 import { callLlm } from "./llm";
 import { retrieveDocuments, type DocHit } from "./documents.retrieve";
 import { retrieveGraphContext, type GraphContext } from "./graphrag.live";
 import { evaluateRetrieval } from "./crag";
 import { sanitizeForPrompt } from "./ragGuard";
+import { pullFacts, type FactPack } from "./tools/pullFacts";
 
 export type Citation = {
   id: string;          // "c1", "c2", … (referenced from the answer text)
@@ -93,80 +93,11 @@ export function resetSession(sessionId: string) {
 }
 
 // ---------------------------------------------------------------------------
-// Pull a relevant fact pack from Prisma. The conversational brain doesn't
-// scan the entire DB — it grabs the surfaces a manager would naturally ask
-// about, then lets the LLM (or stub) synthesize.
+// The relevant fact pack (insights, plans, integrations, hotel/dairy/farm
+// pulse) is pulled from Prisma by `pullFacts` — moved to ./tools/pullFacts so
+// the same capability is exposed both here and as a brain tool. FactPack is
+// re-exported via that import for the stub generator below.
 // ---------------------------------------------------------------------------
-type FactPack = {
-  insights: Array<{ id: string; title: string; severity: string; module: string; body: string }>;
-  plans: Array<{ id: string; goal: string; status: string; targetMetric: string; targetDelta: number }>;
-  integrations: Array<{ providerKey: string; status: string; errorCount: number }>;
-  hotels: { totalRooms: number; occupiedNow: number; activeBookings: number };
-  dairy: { batchesThisWeek: number; nearExpiry: number };
-  farms: { activeCrops: number; totalFarms: number };
-};
-
-async function pullFacts(): Promise<FactPack> {
-  const [insights, plans, integrations, hotelsAgg, bookings, dairyWeek, dairyExp, crops, farms] =
-    await Promise.all([
-      prisma.aIInsight.findMany({
-        where: { deletedAt: null, status: "OPEN" },
-        orderBy: [{ severity: "asc" }, { createdAt: "desc" }],
-        take: 6,
-        select: { id: true, title: true, severity: true, module: true, body: true },
-      }),
-      prisma.plan.findMany({
-        where: { status: { in: ["DRAFT", "ACTIVE"] } },
-        orderBy: { createdAt: "desc" },
-        take: 4,
-        select: { id: true, goal: true, status: true, targetMetric: true, targetDelta: true },
-      }),
-      prisma.integration.findMany({
-        take: 6,
-        select: { providerKey: true, status: true, errorCount: true },
-      }),
-      // Total room count and active bookings — rough hotel pulse.
-      prisma.hotel.aggregate({ _sum: { totalRooms: true } }).catch(() => ({ _sum: { totalRooms: 0 } })),
-      prisma.booking
-        .count({ where: { status: { in: ["CONFIRMED", "ACTIVE", "CHECKED_IN"] } } })
-        .catch(() => 0),
-      prisma.dairyBatch
-        .count({
-          where: {
-            createdAt: {
-              gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-            },
-          },
-        })
-        .catch(() => 0),
-      prisma.dairyBatch
-        .count({
-          where: {
-            expiryDate: {
-              lte: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-              gte: new Date(),
-            },
-          },
-        })
-        .catch(() => 0),
-      prisma.crop.count({ where: { status: "GROWING" } }).catch(() => 0),
-      prisma.farm.count().catch(() => 0),
-    ]);
-
-  // Hotel occupancy is approximate — bookings don't model nightly stays
-  // here; we just show "active bookings" as a proxy for occupancy.
-  const totalRooms = hotelsAgg._sum?.totalRooms ?? 0;
-  const occupiedNow = Math.min(bookings, totalRooms);
-
-  return {
-    insights,
-    plans,
-    integrations,
-    hotels: { totalRooms, occupiedNow, activeBookings: bookings },
-    dairy: { batchesThisWeek: dairyWeek, nearExpiry: dairyExp },
-    farms: { activeCrops: crops, totalFarms: farms },
-  };
-}
 
 // ---------------------------------------------------------------------------
 // Stub generator — picks 1-3 most relevant facts and writes 3 sentences.

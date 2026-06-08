@@ -18,6 +18,9 @@ export function getActiveWorkspaceId(): string | null {
   try {
     return cookies().get(WORKSPACE_COOKIE)?.value || null;
   } catch {
-    return null;
+    // Non-request context (MCP server, seed, build). Allow an explicit
+    // workspace via env so a standalone process can run tenant-scoped.
+    // With no env set this stays null → byte-identical pass-through.
+    return process.env.H_NERVE_MCP_WORKSPACE || null;
   }
 }

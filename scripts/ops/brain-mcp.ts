@@ -15,7 +15,9 @@ async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   // stderr is safe — stdout is the MCP transport channel.
-  console.error(`[brain-mcp] up (${scope.mode === "scoped" ? `workspace=${scope.workspace}` : "UNSCOPED"})`);
+  console.error(
+    `[brain-mcp] up (${scope.mode === "scoped" ? `workspace=${scope.workspace} tenant=${scope.tenant}` : "UNSCOPED"})`,
+  );
 }
 
 main().catch((e) => {

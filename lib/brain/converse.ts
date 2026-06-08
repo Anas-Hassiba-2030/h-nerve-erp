@@ -386,7 +386,7 @@ export function buildCitationsFromToolCalls(
     const docs = (call.output as any)?.documents ?? [];
     for (const d of docs) {
       cites.push({
-        id: `c${startIndex + cites.length + 1}`,
+        id: d.citationId ?? `c${startIndex + cites.length + 1}`,
         source: "DOCUMENT",
         label: d.title ?? "Document",
         value: d.kind,
@@ -405,8 +405,8 @@ async function askWithTools(input: AskInput): Promise<AskResult | null> {
   const locale = input.locale ?? "ar";
   const system =
     locale === "ar"
-      ? "أنت H-Nerve، الدماغ المحادث لمنظومة ERP. استخدم الأدوات المتاحة للحصول على الحقائق قبل الإجابة. أجب في 3 جمل بنبرة هادئة عملية، واستشهد بالمستندات بصيغة [c1]."
-      : "You are H-Nerve, the conversational brain of an ERP. Use the available tools to gather facts before answering. Answer in 3 calm, operational sentences and cite documents as [c1].";
+      ? "أنت H-Nerve، الدماغ المحادث لمنظومة ERP. استخدم الأدوات المتاحة للحصول على الحقائق قبل الإجابة. أجب في 3 جمل بنبرة هادئة عملية. عند الاستشهاد بمستند، استخدم مُعرّف الاستشهاد المرفق به (citationId) بصيغة [c1] تماماً، ولا تخترع ترقيماً خاصاً بك."
+      : "You are H-Nerve, the conversational brain of an ERP. Use the available tools to gather facts before answering. Answer in 3 calm, operational sentences. When you cite a document, use the exact citationId provided with it (e.g. [c1]); never invent your own numbering.";
 
   // priorTurns = existing turns only; runToolLoop appends the question itself.
   const loop = await runToolLoop({

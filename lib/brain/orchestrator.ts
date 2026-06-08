@@ -26,17 +26,31 @@ export async function runToolLoop(opts: {
   const toolCalls: ToolCallRecord[] = [];
   let rounds = 0;
   let finalText = "";
+  let citationCounter = 0;
 
   for (let i = 0; i < MAX_ROUNDS; i++) {
     rounds++;
-    const resp = await callLlmWithTools({ system: opts.system, messages, tools, maxTokens: 700, temperature: 0.4 });
+    // On the final allowed round, withhold tools so the model MUST emit a
+    // terminal answer rather than request yet another tool. Without this, a cap
+    // hit mid-tool-use would leave finalText holding a stale "let me check…"
+    // preamble that converse.ts would serve as the answer.
+    const isLastRound = i === MAX_ROUNDS - 1;
+    const resp = await callLlmWithTools({
+      system: opts.system,
+      messages,
+      tools: isLastRound ? [] : tools,
+      maxTokens: 700,
+      temperature: 0.4,
+    });
     if (resp.isStub) return { text: "", toolCalls, rounds, stub: true };
 
     const textBlocks = resp.content.filter((b: any) => b.type === "text").map((b: any) => b.text).join("\n").trim();
     const toolUses = resp.content.filter((b: any) => b.type === "tool_use");
 
+    // Terminal round: the model stopped requesting tools (or had none). Its text
+    // IS the answer — never fall back to an earlier preamble (empty → degrade).
     if (resp.stopReason !== "tool_use" || toolUses.length === 0) {
-      finalText = textBlocks || finalText;
+      finalText = textBlocks;
       break;
     }
 
@@ -49,12 +63,26 @@ export async function runToolLoop(opts: {
       } catch (e) {
         output = { error: String(e) };
       }
+      // Convention: a tool output carrying a `documents[]` (retrieveDocuments)
+      // gets a stable citationId per doc, continuous across the whole loop, so
+      // the model cites the SAME ids the caller later builds chips from.
+      output = tagDocumentCitations(output, () => `c${++citationCounter}`);
       toolCalls.push({ name: tu.name, input: tu.input, output });
       results.push({ type: "tool_result", tool_use_id: tu.id, content: JSON.stringify(output) });
     }
     messages.push({ role: "user", content: results });
-    finalText = textBlocks || finalText;
   }
 
   return { text: finalText, toolCalls, rounds, stub: false };
+}
+
+/** Tag each document in a retrieveDocuments-shaped output with a stable citationId. */
+function tagDocumentCitations(output: unknown, nextId: () => string): unknown {
+  if (!output || typeof output !== "object") return output;
+  const docs = (output as { documents?: unknown }).documents;
+  if (!Array.isArray(docs)) return output;
+  return {
+    ...(output as Record<string, unknown>),
+    documents: docs.map((d: any) => ({ ...d, citationId: d?.citationId ?? nextId() })),
+  };
 }

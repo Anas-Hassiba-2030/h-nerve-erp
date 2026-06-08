@@ -17,9 +17,11 @@
     "db:reset": "node scripts/ops/guard-not-prod.js && prisma db push --force-reset && tsx prisma/seed.ts",
     "db:fresh": "node scripts/ops/guard-not-prod.js && prisma db push --force-reset && tsx prisma/seed.ts && tsx scripts/seed/seed-demo-extras.ts",
     "db:studio": "prisma studio",
+    "brain:mcp": "tsx scripts/ops/brain-mcp.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@prisma/client": "5.22.0",
     "bcryptjs": "2.4.3",
     "clsx": "2.1.1",

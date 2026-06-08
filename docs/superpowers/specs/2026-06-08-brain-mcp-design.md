@@ -158,17 +158,36 @@ external LLM that has no other context about H-Nerve.
 ## 7. Security & tenancy
 
 The MCP door is the new risk surface — an external client must never read across
-tenants.
+tenants. The mechanism is shaped by how scoping actually works in this codebase
+(verified, not assumed):
 
-- **Explicit `orgId` on every tool** (not an ambient cookie). The MCP server resolves
-  `orgId` from an authenticated identity, never from untrusted tool input alone.
-- **Authentication on the MCP server.** stdio launch carries a configured tenant/identity
-  (env-provided) for v1; remote/HTTP transport (deferred) will need real per-request auth.
+- **Scoping is cookie-driven Prisma middleware** (`lib/db/db.ts` `$use` reads
+  `getActiveWorkspaceId()` / `getActiveTenantSlug()`, which read cookies). The live
+  cores take **no `orgId`** — they rely on this ambient scope. Threading an explicit
+  `orgId` through them would modify the cores, which v1 explicitly does not do.
+- **In-app orchestrator: unchanged.** It runs inside a Next.js request, so the cookie
+  scope applies exactly as today.
+- **Stdio MCP server: env-scoped to one workspace.** Outside a request, `cookies()`
+  throws and scoping would pass through *unscoped* (all data). To get genuine
+  single-tenant isolation without touching the cores, the tenancy resolvers gain an
+  **env fallback**: when no cookie is present, `getActiveWorkspaceId()` returns
+  `process.env.H_NERVE_MCP_WORKSPACE` and `getActiveTenantSlug()` returns
+  `process.env.H_NERVE_MCP_TENANT`. The MCP process is launched scoped to one explicit
+  workspace. This change lives in `lib/tenancy/` (scoping's correct home), not the cores.
+- **Pitch-safety invariant preserved.** With neither cookie nor env set, behaviour is
+  byte-identical to today (pass-through) — so the app, seeds, and builds are unaffected;
+  only a process that sets the env var becomes scoped.
+- **Fail-closed.** The MCP entrypoint refuses to start unless `H_NERVE_MCP_WORKSPACE`
+  is set **or** `H_NERVE_MCP_ALLOW_UNSCOPED=1` is explicitly set. You cannot accidentally
+  expose all tenants.
 - **Reuse `ragGuard`** scope + prompt-injection redaction — already inside
   `retrieveDocuments`, so it applies to external callers automatically.
 - **Rate limiting.** Mirror the `/api/converse` fixed-window limiter for the orchestrator
-  path; the stdio MCP server inherits the global `BRAIN_MAX_LLM_CALLS` cap for any tool
-  that calls the model (`councilDebate`, `narrate`).
+  path; any model-calling tool (`councilDebate`, `narrate`) inherits the global
+  `BRAIN_MAX_LLM_CALLS` cap.
+- **Multi-tenant over a remote transport stays deferred.** True per-caller tenant
+  isolation (many tenants, one server) needs the HTTP/SSE transport + per-request auth,
+  which v1 does not build.
 
 No secrets, tokens, or model IDs are committed. `ANTHROPIC_API_KEY` stays in `.env`.
 
@@ -207,7 +226,7 @@ No secrets, tokens, or model IDs are committed. `ANTHROPIC_API_KEY` stays in `.e
 
 | Risk | Mitigation |
 |------|------------|
-| Cross-tenant read via the MCP door | Explicit `orgId` per tool; server resolves it from auth, never trusts raw input; `ragGuard` scope reused. |
+| Cross-tenant read via the MCP door | Env-scope the stdio server to one workspace (`H_NERVE_MCP_WORKSPACE`) via the `lib/tenancy/` resolvers; entrypoint fail-closed unless that or `H_NERVE_MCP_ALLOW_UNSCOPED=1` is set; `ragGuard` scope reused. |
 | Unbounded tool fan-out / cost | ≤4 tool-call rounds per question; global `BRAIN_MAX_LLM_CALLS` cap; per-user rate limit. |
 | `/api/converse` contract drift breaks the overlay | Orchestrator preserves the exact request/response shape; covered by a contract test. |
 | STUB demo regresses | STUB mode keeps today's deterministic single-shot path, now calling the tool layer; snapshot the answer shape in a test. |
@@ -237,6 +256,9 @@ No secrets, tokens, or model IDs are committed. `ANTHROPIC_API_KEY` stays in `.e
 - `lib/brain/llm.ts` — add the tool-calling capability behind the existing seam.
 - `lib/brain/converse.ts` — reduced to the session store + shared types + a thin
   `ask()` that delegates to the orchestrator.
+- `lib/tenancy/workspace.ts` + `lib/tenancy/tenancy.ts` — env fallback
+  (`H_NERVE_MCP_WORKSPACE` / `H_NERVE_MCP_TENANT`) so a standalone process can run
+  tenant-scoped without a request cookie. Pass-through unchanged when neither is set.
 
 **Retired:**
 - `lib/brain/Brain.ts` — superseded by the tool registry + orchestrator.

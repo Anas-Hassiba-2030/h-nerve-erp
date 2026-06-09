@@ -18,6 +18,8 @@
     "db:fresh": "node scripts/ops/guard-not-prod.js && prisma db push --force-reset && tsx prisma/seed.ts && tsx scripts/seed/seed-demo-extras.ts",
     "db:studio": "prisma studio",
     "brain:mcp": "tsx scripts/ops/brain-mcp.ts",
+    "brain:doctor": "tsx scripts/verify/brain-db-link.ts",
+    "brain:mcp:smoke": "tsx scripts/verify/brain-mcp-smoke.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

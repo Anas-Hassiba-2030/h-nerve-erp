@@ -53,4 +53,9 @@ describe("reconcileCitations", () => {
     expect(text).toBe("Answer with no markers at all.");
     expect(citations).toHaveLength(2); // not nuked to empty
   });
+
+  it("tidies the space before an Arabic question mark ؟ after stripping an orphan marker", () => {
+    const { text } = reconcileCitations("هل الإشغال مرتفع [c9]؟ نعم [c1].", [chip("c1")]);
+    expect(text).toBe("هل الإشغال مرتفع؟ نعم [c1].");
+  });
 });

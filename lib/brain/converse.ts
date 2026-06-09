@@ -420,7 +420,7 @@ export function reconcileCitations(
   const cleanedText = text
     .replace(markerRe, (m) => (chipIds.has(m.slice(1, -1)) ? m : ""))
     .replace(/ {2,}/g, " ")
-    .replace(/ +([.,،؛!?])/g, "$1")
+    .replace(/ +([.,،؛!?؟])/g, "$1")
     .trim();
   return { text: cleanedText, citations: keptCitations };
 }

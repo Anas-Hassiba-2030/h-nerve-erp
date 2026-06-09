@@ -1,6 +1,7 @@
 // lib/brain/tools/causalSubgraph.ts
 import { z } from "zod";
 import { retrieveGraphContext } from "../graphrag.live";
+import { sanitizeForPrompt } from "../ragGuard";
 import type { BrainTool } from "./types";
 
 export const causalSubgraphInput = z.object({
@@ -20,6 +21,13 @@ export const causalSubgraphTool: BrainTool<
   inputSchema: causalSubgraphInput,
   run: async (input) => {
     const ctx = await retrieveGraphContext(input.question, { k: input.k, topSeeds: input.topSeeds });
-    return { nodes: ctx.nodes, links: ctx.links };
+    // Node labels + link strings derive from free-text domain fields (guest
+    // names, insight titles), so they pass ragGuard before reaching the model —
+    // same as the converse single-shot path. The orchestrator feeds this tool
+    // output straight back to the model, so the guard must live here too.
+    return {
+      nodes: ctx.nodes.map((n) => ({ ...n, label: sanitizeForPrompt(n.label, 120).text })),
+      links: ctx.links.map((l) => sanitizeForPrompt(l, 160).text),
+    };
   },
 };

@@ -11,24 +11,44 @@
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { prisma } from "@/lib/db/db";
+import { COMPANY_CODE_TO_TENANT_SLUG } from "@/lib/tenancy/tenancy";
 
 const G = (s: string) => `\x1b[32m${s}\x1b[0m`;
 const R = (s: string) => `\x1b[31m${s}\x1b[0m`;
 const DIM = (s: string) => `\x1b[2m${s}\x1b[0m`;
 
+// Resolve the scope env for the spawned server. Default: unscoped (simplest
+// smoke). With `--scoped`, look up a real Company id + its tenant slug from the
+// seeded DB so we prove the PRODUCTION posture (scoped boot serving real data),
+// exercising the env-fallback scoping path end-to-end.
+async function resolveScopeEnv(scoped: boolean): Promise<Record<string, string>> {
+  if (!scoped) return { H_NERVE_MCP_ALLOW_UNSCOPED: "1" };
+  const company = await prisma.company.findFirst({ select: { id: true, code: true } });
+  if (!company) {
+    console.log("  (no Company rows — falling back to unscoped)");
+    return { H_NERVE_MCP_ALLOW_UNSCOPED: "1" };
+  }
+  const tenant = COMPANY_CODE_TO_TENANT_SLUG[company.code] ?? "hourani-hotels";
+  console.log(`  scope → workspace=${company.id} tenant=${tenant}`);
+  return { H_NERVE_MCP_WORKSPACE: company.id, H_NERVE_MCP_TENANT: tenant };
+}
+
 async function main() {
+  const scoped = process.argv.includes("--scoped");
+  console.log(`\n  BRAIN-MCP STDIO SMOKE (${scoped ? "SCOPED" : "unscoped"})\n` + "─".repeat(40));
+  const scopeEnv = await resolveScopeEnv(scoped);
+
   const transport = new StdioClientTransport({
     command: process.platform === "win32" ? "npx.cmd" : "npx",
     args: ["tsx", "scripts/ops/brain-mcp.ts"],
-    // Inherit the parent env (DATABASE_URL, PATH) and force unscoped so the
-    // fail-closed gate lets the server boot for the smoke.
-    env: { ...process.env, H_NERVE_MCP_ALLOW_UNSCOPED: "1" } as Record<string, string>,
+    // Inherit the parent env (DATABASE_URL, PATH); scope per --scoped.
+    env: { ...process.env, ...scopeEnv } as Record<string, string>,
     stderr: "inherit",
   });
 
   const client = new Client({ name: "brain-mcp-smoke", version: "1.0.0" }, { capabilities: {} });
 
-  console.log("\n  BRAIN-MCP STDIO SMOKE\n" + "─".repeat(40));
   await client.connect(transport);
   console.log(`  ${G("✓ connected")} to the stdio server`);
 

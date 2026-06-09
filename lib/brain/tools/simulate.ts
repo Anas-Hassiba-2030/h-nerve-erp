@@ -26,7 +26,11 @@ export const simulateTool: BrainTool<SimulateInput, { impacts: SimulateImpact[] 
     "Project the downstream impact of perturbing one causal-graph node by a relative delta. Returns ranked impacts with confidence and the causal path. Use for what-if questions.",
   inputSchema: simulateInput,
   run: async (input) => {
-    const snapshot = await causalGraph().loadAll();
+    // A DB read error degrades to no impacts, mirroring causalSubgraph
+    // (graphrag.live.ts guards the same loadAll() call). An empty/unseeded
+    // graph already returns [] from simulateOnSnapshot without throwing.
+    const snapshot = await causalGraph().loadAll().catch(() => null);
+    if (!snapshot) return { impacts: [] };
     const rows = simulateOnSnapshot(snapshot, { nodeId: input.nodeId, delta: input.delta }, input.depthCap);
     return {
       impacts: rows.map((r) => ({

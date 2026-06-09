@@ -70,10 +70,27 @@ export type ConverseSession = {
 // ---------------------------------------------------------------------------
 const SESSIONS = new Map<string, ConverseSession>();
 const MAX_TURNS_PER_SESSION = 24;
+// Cap distinct sessions so a long-lived prod process can't leak one Map entry
+// per browser session forever (mirrors the rateLimit sweep). Each unique
+// localStorage session id would otherwise persist for the process lifetime.
+const MAX_SESSIONS = 500;
 
 function getOrCreate(sessionId: string, scope = "default"): ConverseSession {
   let s = SESSIONS.get(sessionId);
   if (!s) {
+    if (SESSIONS.size >= MAX_SESSIONS) {
+      // Evict the oldest session by createdAt before inserting a new one.
+      let oldestId: string | null = null;
+      let oldestTs = Infinity;
+      for (const [id, sess] of SESSIONS) {
+        const ts = Date.parse(sess.createdAt);
+        if (ts < oldestTs) {
+          oldestTs = ts;
+          oldestId = id;
+        }
+      }
+      if (oldestId) SESSIONS.delete(oldestId);
+    }
     s = {
       id: sessionId,
       scope,

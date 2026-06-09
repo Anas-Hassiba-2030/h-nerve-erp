@@ -36,18 +36,21 @@ class ClaudeNarrator implements Narrator {
     const topic = req.topic ?? "general";
     const factsHash = hashFacts(req.facts);
 
-    // 1. Cache lookup
-    const hit = await prisma.narrative.findUnique({
-      where: {
-        scope_topic_register_locale_factsHash: {
-          scope,
-          topic,
-          register: req.register,
-          locale: req.locale,
-          factsHash,
+    // 1. Cache lookup — best-effort. A read-only / unmigrated DB must not break
+    // narration; on a read error we just skip the cache and generate fresh.
+    const hit = await prisma.narrative
+      .findUnique({
+        where: {
+          scope_topic_register_locale_factsHash: {
+            scope,
+            topic,
+            register: req.register,
+            locale: req.locale,
+            factsHash,
+          },
         },
-      },
-    });
+      })
+      .catch(() => null);
     if (hit && hit.expiresAt.getTime() > Date.now()) {
       return {
         text: hit.text,
@@ -97,47 +100,52 @@ class ClaudeNarrator implements Narrator {
       graphSupports: null, // graph hook lands in Phase 1 integration
     });
 
-    // 3. Persist cache entry (idempotent upsert)
+    // 3. Persist cache entry (idempotent upsert) — best-effort. A read-only or
+    // write-denied DB must not discard the prose we already computed above;
+    // on a write error we skip the cache and return the fresh narrative. This
+    // keeps narrate honest to the brain's read-mostly contract.
     const ttl = req.ttlMs ?? DEFAULT_TTL_MS;
     const expiresAt = new Date(Date.now() + ttl);
-    await prisma.narrative.upsert({
-      where: {
-        scope_topic_register_locale_factsHash: {
+    await prisma.narrative
+      .upsert({
+        where: {
+          scope_topic_register_locale_factsHash: {
+            scope,
+            topic,
+            register: req.register,
+            locale: req.locale,
+            factsHash,
+          },
+        },
+        create: {
           scope,
           topic,
           register: req.register,
           locale: req.locale,
           factsHash,
+          text,
+          model: res.model ?? null,
+          isStub: res.isStub,
+          ms: res.ms,
+          trustScore: confidence.score,
+          trustLabel: confidence.label,
+          claimsTotal: verification.total,
+          claimsMatched: verification.verified,
+          expiresAt,
         },
-      },
-      create: {
-        scope,
-        topic,
-        register: req.register,
-        locale: req.locale,
-        factsHash,
-        text,
-        model: res.model ?? null,
-        isStub: res.isStub,
-        ms: res.ms,
-        trustScore: confidence.score,
-        trustLabel: confidence.label,
-        claimsTotal: verification.total,
-        claimsMatched: verification.verified,
-        expiresAt,
-      },
-      update: {
-        text,
-        model: res.model ?? null,
-        isStub: res.isStub,
-        ms: res.ms,
-        trustScore: confidence.score,
-        trustLabel: confidence.label,
-        claimsTotal: verification.total,
-        claimsMatched: verification.verified,
-        expiresAt,
-      },
-    });
+        update: {
+          text,
+          model: res.model ?? null,
+          isStub: res.isStub,
+          ms: res.ms,
+          trustScore: confidence.score,
+          trustLabel: confidence.label,
+          claimsTotal: verification.total,
+          claimsMatched: verification.verified,
+          expiresAt,
+        },
+      })
+      .catch(() => undefined);
 
     return {
       text,

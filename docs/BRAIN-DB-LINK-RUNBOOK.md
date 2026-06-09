@@ -9,7 +9,7 @@ npm run brain:doctor      # read-only, no API keys, no cost — proves the link
 npm run brain:mcp:smoke   # spawns the MCP server + a real client over the wire
 ```
 
-`brain:doctor` connects, counts the tables the brain reads, runs all 4 read tools end-to-end, and prints **"Link is good"** or **"Link is broken"** with the exact fix. Run it against *any* DB before wiring anything.
+`brain:doctor` connects, counts the tables the brain reads, runs all 5 read-safe tools end-to-end (`pullFacts`, `retrieveDocuments`, `recallMemory`, `causalSubgraph`, `simulate`), and prints **"Link is good"** or **"Link is broken"** with the exact fix. (`councilDebate` + `narrate` write on each call, so they aren't probed read-only.) Run it against *any* DB before wiring anything.
 
 ---
 
@@ -148,7 +148,7 @@ bash/macOS: `H_NERVE_MCP_WORKSPACE=<companyId> H_NERVE_MCP_TENANT=<slug> npm run
 | `brain-mcp refuses to start` | scope vars not set / only one set | set BOTH scope vars (or `ALLOW_UNSCOPED=1`) **inline / in `env`**, not `.env` |
 | First `callTool` errors, boot was fine | provider/URL mismatch (lazy connect) | flip provider to match URL + `npx prisma generate` |
 | `npx prisma generate` fails EPERM (Windows) | a running process holds the engine DLL | stop dev server / Prisma Studio / MCP / stray node, delete `node_modules/.prisma/client/query_engine-windows.dll.node.tmp*`, re-run |
-| Doctor shows `DATABASE_URL: (unset)` but connects fine | cosmetic — doctor reads `process.env` before Prisma loads `.env` | ignore that line; trust "connected" + "VERDICT" |
+| `npm run build` fails: "the URL must start with postgresql://" | committed schema is `postgresql` but `.env` is `file:` (sqlite) | expected for local sqlite — run `npx next build` directly (skips `prisma db push`), or flip the provider to match before building |
 | `recallMemory` got worse after adding a key | stored 256-dim vs query ~1536-dim | re-run the memory seed to re-embed |
 | MCP works locally, breaks after `npm install` | postinstall regenerated the client for the committed (postgres) provider | re-flip to sqlite + `npx prisma generate` for local dev |
 

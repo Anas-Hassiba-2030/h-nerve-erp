@@ -16,6 +16,15 @@
 import { prisma } from "@/lib/db/db";
 import { runTool } from "@/lib/brain/tools";
 
+// Load .env so the Configuration section shows the real DATABASE_URL. Prisma
+// loads .env lazily on client init, but this script reads process.env for
+// display first — without this it would print "(unset)" even when healthy.
+try {
+  (process as NodeJS.Process & { loadEnvFile?: (p?: string) => void }).loadEnvFile?.();
+} catch {
+  /* no .env file — fine, env may be set inline */
+}
+
 const G = (s: string) => `\x1b[32m${s}\x1b[0m`;
 const R = (s: string) => `\x1b[31m${s}\x1b[0m`;
 const Y = (s: string) => `\x1b[33m${s}\x1b[0m`;
@@ -126,15 +135,29 @@ async function main() {
     { name: "recallMemory", input: { situation: "milk near expiry" }, summarize: (o) => `${o.memories?.length ?? 0} memories` },
     { name: "causalSubgraph", input: { question: "how does arena occupancy affect dairy demand" }, summarize: (o) => `${o.nodes?.length ?? 0} nodes, ${o.links?.length ?? 0} links` },
   ];
+  let firstNodeId: string | null = null;
   for (const p of probes) {
     try {
-      const out = await runTool(p.name, p.input);
+      const out: any = await runTool(p.name, p.input);
+      if (p.name === "causalSubgraph") firstNodeId = out?.nodes?.[0]?.id ?? null;
       console.log(`   ${G("✓")} ${p.name.padEnd(18)} ${DIM(p.summarize(out))}`);
     } catch (e) {
       hardFail = true;
       console.log(`   ${R("✗")} ${p.name.padEnd(18)} ${R(String((e as Error)?.message ?? e).split("\n")[0])}`);
     }
   }
+  // simulate needs a real nodeId (there is no node enumerator), so probe it
+  // with a node surfaced by causalSubgraph — closes the doctor's blind spot.
+  try {
+    const simIn = firstNodeId ? { nodeId: firstNodeId, delta: 0.1 } : { nodeId: "__none__", delta: 0.1 };
+    const sim: any = await runTool("simulate", simIn);
+    const note = firstNodeId ? `${sim.impacts?.length ?? 0} impacts from ${firstNodeId}` : "no graph node to seed (empty graph)";
+    console.log(`   ${G("✓")} ${"simulate".padEnd(18)} ${DIM(note)}`);
+  } catch (e) {
+    hardFail = true;
+    console.log(`   ${R("✗")} ${"simulate".padEnd(18)} ${R(String((e as Error)?.message ?? e).split("\n")[0])}`);
+  }
+  console.log(DIM("   (councilDebate + narrate WRITE on each call, so they are not probed read-only)"));
   console.log();
 
   // 5) Verdict ---------------------------------------------------------------

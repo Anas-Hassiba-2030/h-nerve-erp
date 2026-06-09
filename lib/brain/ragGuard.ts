@@ -9,12 +9,19 @@
 //      neutralize injection markers in retrieved text BEFORE it enters a prompt.
 //
 //   2. CORPUS POISONING — a crafted document stuffed to dominate retrieval, or
-//      one tenant's data leaking into another's answers. We cap any single
-//      source's share of the results and enforce tenant scope as defense-in-depth
-//      (the query is already scoped; this is the belt-and-braces check).
+//      one tenant's data leaking into another's answers. `limitPerSource` caps
+//      any single source's share of the results and `enforceScope` filters by an
+//      allowed scope as defense-in-depth.
 //
-// Pure + dependency-free: deterministic, no DB/network, unit-testable. Wired in
-// at the chokepoints where retrieved text becomes prompt context.
+// Pure + dependency-free: deterministic, no DB/network, unit-testable.
+//
+// WIRING STATUS: `sanitizeForPrompt` IS wired at the chokepoints where retrieved
+// text becomes prompt context (documents.retrieve docHitsToContext, the
+// retrieveDocuments tool, converse, recallMemory). `enforceScope` and
+// `limitPerSource` are intentionally NOT wired today: Document carries no tenant
+// id (enforceScope would no-op on its business-unit `scope`) and retrieval
+// already returns one hit per document (limitPerSource inert). They are kept,
+// tested, and ready for the multi-tenant cutover noted in lib/brain/mcp/scope.ts.
 
 // Injection markers seen in real indirect-injection payloads (en + ar).
 const INJECTION_PATTERNS: RegExp[] = [

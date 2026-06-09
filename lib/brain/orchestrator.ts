@@ -17,6 +17,12 @@ export async function runToolLoop(opts: {
   system: string;
   question: string;
   priorTurns: Array<{ role: "user" | "brain"; text: string }>;
+  // Server-resolved retrieval scope. When set, it is FORCED onto the
+  // retrieveDocuments tool call so the model can never widen (or omit) the
+  // document scope — keeping the loop no weaker than the single-shot path.
+  // The in-app caller passes the session scope; the stdio MCP door has no
+  // session scope (see lib/brain/mcp/scope.ts) and leaves it undefined.
+  scope?: string;
 }): Promise<ToolLoopResult> {
   const tools = toAnthropicTools();
   const messages: AnthropicMessage[] = [
@@ -44,6 +50,17 @@ export async function runToolLoop(opts: {
     });
     if (resp.isStub) return { text: "", toolCalls, rounds, stub: true };
 
+    // A max_tokens truncation cut the response mid-thought: any text is a
+    // partial preamble and any tool_use may be malformed. Never serve a
+    // truncated answer — degrade to empty so converse.ts falls back to the
+    // deterministic single-shot path. The final-round tool-withholding guard
+    // only covers MAX_ROUNDS exhaustion; the per-call token cap can fire on
+    // ANY round (including round 1), so it needs its own guard here.
+    if (resp.stopReason === "max_tokens") {
+      finalText = "";
+      break;
+    }
+
     const textBlocks = resp.content.filter((b: any) => b.type === "text").map((b: any) => b.text).join("\n").trim();
     const toolUses = resp.content.filter((b: any) => b.type === "tool_use");
 
@@ -57,18 +74,35 @@ export async function runToolLoop(opts: {
     messages.push({ role: "assistant", content: resp.content });
     const results: any[] = [];
     for (const tu of toolUses) {
+      // Tenant safety: never trust the model for the document scope. When the
+      // caller resolved a scope, force it onto the retrieveDocuments call so a
+      // model that omits (or widens) `scope` can't read outside it.
+      const toolInput =
+        opts.scope && tu.name === "retrieveDocuments"
+          ? { ...(tu.input as Record<string, unknown>), scope: opts.scope }
+          : tu.input;
       let output: unknown;
+      let isError = false;
       try {
-        output = await runTool(tu.name, tu.input);
+        output = await runTool(tu.name, toolInput);
       } catch (e) {
         output = { error: String(e) };
+        isError = true;
       }
       // Convention: a tool output carrying a `documents[]` (retrieveDocuments)
       // gets a stable citationId per doc, continuous across the whole loop, so
       // the model cites the SAME ids the caller later builds chips from.
       output = tagDocumentCitations(output, () => `c${++citationCounter}`);
-      toolCalls.push({ name: tu.name, input: tu.input, output });
-      results.push({ type: "tool_result", tool_use_id: tu.id, content: JSON.stringify(output) });
+      toolCalls.push({ name: tu.name, input: toolInput, output });
+      // Per the Anthropic tool-use protocol, a failed execution sets
+      // is_error:true so the model treats it as a failure to recover from,
+      // not as legitimate retrieved data.
+      results.push({
+        type: "tool_result",
+        tool_use_id: tu.id,
+        content: JSON.stringify(output),
+        ...(isError ? { is_error: true } : {}),
+      });
     }
     messages.push({ role: "user", content: results });
   }

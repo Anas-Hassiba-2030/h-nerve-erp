@@ -13,6 +13,15 @@ export type McpScope =
  * the other axis's models reading cross-tenant. (Plan and Integration are not
  * tenant-scoped in the schema, so they stay group-wide even when scoped —
  * matching how the in-app brain already treats them.)
+ *
+ * KNOWN LIMITATION (not covered by either axis): the `Document` and `Memory`
+ * models have NO tenant column and are in none of the scoped-model sets, so
+ * "scoped" mode does NOT isolate document retrieval or episodic recall — those
+ * read group-wide. This is safe in the current single-tenant deployment only.
+ * Before a true multi-tenant cutover, give Document/Memory a tenantId column and
+ * register them in lib/tenancy/workspaceScope.ts; the in-app loop also forces
+ * the request scope onto retrieveDocuments (see lib/brain/orchestrator.ts) as a
+ * partial guard, but the stdio MCP door has no request scope to forward.
  */
 export function resolveMcpScope(env: Record<string, string | undefined>): McpScope {
   const ws = env.H_NERVE_MCP_WORKSPACE;

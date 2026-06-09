@@ -62,6 +62,45 @@ describe("runToolLoop", () => {
     expect(r.text).toBe(""); // a stale "preamble" is never served as the answer
   });
 
+  it("degrades to empty when the model hits the token cap mid-tool-use (no stale preamble)", async () => {
+    // max_tokens can fire on ANY round — here round 1, before the final-round
+    // tool-withholding guard would ever apply. The preamble must NOT be served.
+    callLlmWithTools.mockResolvedValueOnce({
+      isStub: false,
+      stopReason: "max_tokens",
+      content: [
+        { type: "text", text: "Let me check the dairy batches…" },
+        { type: "tool_use", id: "t1", name: "pullFacts", input: {} },
+      ],
+    });
+    const r = await runToolLoop({ system: "s", question: "q", priorTurns: [] });
+    expect(r.text).toBe("");
+    expect(r.rounds).toBe(1);
+    expect(runTool).not.toHaveBeenCalled(); // truncated tool_use is never executed
+  });
+
+  it("flags a thrown tool with is_error:true in the tool_result sent back to the model", async () => {
+    callLlmWithTools
+      .mockResolvedValueOnce({ isStub: false, stopReason: "tool_use", content: [{ type: "tool_use", id: "t1", name: "pullFacts", input: {} }] })
+      .mockResolvedValueOnce({ isStub: false, stopReason: "end_turn", content: [{ type: "text", text: "Recovered." }] });
+    runTool.mockRejectedValueOnce(new Error("boom"));
+    await runToolLoop({ system: "s", question: "q", priorTurns: [] });
+    // The 2nd call carries the tool_result; it must be marked is_error:true.
+    const followupMessages = callLlmWithTools.mock.calls[1][0].messages;
+    const toolResult = followupMessages.at(-1).content[0];
+    expect(toolResult.type).toBe("tool_result");
+    expect(toolResult.is_error).toBe(true);
+  });
+
+  it("forces the caller's scope onto retrieveDocuments (model cannot widen/omit it)", async () => {
+    callLlmWithTools
+      .mockResolvedValueOnce({ isStub: false, stopReason: "tool_use", content: [{ type: "tool_use", id: "d1", name: "retrieveDocuments", input: { query: "a" } }] })
+      .mockResolvedValueOnce({ isStub: false, stopReason: "end_turn", content: [{ type: "text", text: "Done." }] });
+    runTool.mockResolvedValueOnce({ documents: [] });
+    await runToolLoop({ system: "s", question: "q", priorTurns: [], scope: "hotels-q3" });
+    expect(runTool).toHaveBeenCalledWith("retrieveDocuments", { query: "a", scope: "hotels-q3" });
+  });
+
   it("tags retrieveDocuments documents with continuous citationIds across calls", async () => {
     callLlmWithTools
       .mockResolvedValueOnce({ isStub: false, stopReason: "tool_use", content: [{ type: "tool_use", id: "d1", name: "retrieveDocuments", input: { query: "a" } }] })

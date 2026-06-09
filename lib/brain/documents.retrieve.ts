@@ -10,7 +10,14 @@
 // narrator/council can cite a real clause rather than hallucinate one.
 //
 // Read-only: this never mutates. It respects the brain's read-mostly boundary.
-// Uses the scoped `prisma` client, so it stays tenant-safe by default.
+//
+// TENANCY (important): the `Document` model is NOT tenant-keyed. It has only a
+// free-text `scope` business-unit label and is in none of the scoped-model sets
+// in lib/tenancy/workspaceScope.ts, so the scoped `prisma` middleware does NOT
+// fence it by tenant. The optional `scope` arg filters by that business-unit
+// label, NOT by tenant. In the current single-tenant deployment this is moot;
+// before any true multi-tenant cutover, Document needs a tenantId column +
+// registration in the scoped sets (see the note in lib/brain/mcp/scope.ts).
 
 import { prisma } from "@/lib/db/db";
 import { rankByRelevance, type RetrievalHit } from "./retriever";

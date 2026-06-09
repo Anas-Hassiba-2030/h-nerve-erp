@@ -33,7 +33,10 @@ export const retrieveDocumentsTool: BrainTool<
       groundingConfidence: verdict.groundingConfidence,
       documents: verdict.keep.map((h) => ({
         documentId: h.documentId,
-        title: h.title,
+        // Title is user-controllable (derived from the uploaded filename /
+        // extraction) and reaches the model + the citation chip, so it must
+        // pass ragGuard too — not just the snippet. Mirrors docHitsToContext.
+        title: sanitizeForPrompt(h.title ?? "", 120).text,
         kind: h.kind,
         score: h.score,
         snippet: sanitizeForPrompt(h.snippet?.text ?? "", 280).text,

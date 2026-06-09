@@ -397,6 +397,34 @@ export function buildCitationsFromToolCalls(
   return cites;
 }
 
+// Reconcile the model's [cN] markers against the citation chips so Tab-key
+// drill-through always lands (converse header invariant). Two failure modes
+// an LLM can produce despite the prompt rules:
+//   - orphan CHIP — a retrieved doc the answer never references → drop it.
+//   - orphan MARKER — a hallucinated [c9] with no chip → strip it from text.
+// Pure + exported for unit tests.
+export function reconcileCitations(
+  text: string,
+  citations: Citation[],
+): { text: string; citations: Citation[] } {
+  const markerRe = /\[c\d+\]/g;
+  const matched = text.match(markerRe) ?? [];
+  // Safety valve: if the answer carries NO parseable [cN] markers but we DID
+  // retrieve citations, keep them rather than nuke every chip — the model may
+  // have referenced docs in a shape the regex misses (e.g. "[c1, c2]").
+  // Previously chips always showed; don't regress that into an empty list.
+  if (matched.length === 0) return { text, citations };
+  const referenced = new Set(matched.map((m) => m.slice(1, -1)));
+  const chipIds = new Set(citations.map((c) => c.id));
+  const keptCitations = citations.filter((c) => referenced.has(c.id));
+  const cleanedText = text
+    .replace(markerRe, (m) => (chipIds.has(m.slice(1, -1)) ? m : ""))
+    .replace(/ {2,}/g, " ")
+    .replace(/ +([.,،؛!?])/g, "$1")
+    .trim();
+  return { text: cleanedText, citations: keptCitations };
+}
+
 // LIVE path. Mutates the session ONLY on success; returns null to degrade so
 // the caller can fall back to askSingleShot without a double-pushed user turn.
 async function askWithTools(input: AskInput): Promise<AskResult | null> {
@@ -413,15 +441,23 @@ async function askWithTools(input: AskInput): Promise<AskResult | null> {
     system,
     question: input.question,
     priorTurns: session.turns.slice(-MAX_TURNS_PER_SESSION).map((t) => ({ role: t.role, text: t.text })),
+    // Force the request scope onto document retrieval — the model must not
+    // pick (or omit) the document scope itself. Keeps the loop no weaker than
+    // the single-shot path, which already passes session.scope.
+    scope: session.scope,
   });
   if (loop.stub || !loop.text) return null; // degrade — session untouched
 
-  // Success: commit the user turn and the brain turn together.
+  // Success: commit the user turn and the brain turn together. Reconcile the
+  // answer's [cN] markers with the chips so no orphan chip/marker survives.
   session.turns.push({ role: "user", text: input.question, ts: new Date().toISOString() });
-  const citations = buildCitationsFromToolCalls(loop.toolCalls, 0);
+  const { text: answerText, citations } = reconcileCitations(
+    loop.text,
+    buildCitationsFromToolCalls(loop.toolCalls, 0),
+  );
   const brainTurn: ConverseTurn = {
     role: "brain",
-    text: loop.text,
+    text: answerText,
     ts: new Date().toISOString(),
     citations,
     confidence: 0.8,
@@ -521,19 +557,23 @@ async function askSingleShot(input: AskInput): Promise<AskResult> {
         facts,
         documents: docCitations.map((c, i) => ({
           ref: c.id,
-          title: c.label,
-          kind: usedDocs[i]?.kind,
           // Phase RAG-7 — sanitize uploaded text before it enters the prompt.
+          // Both the title (user-named file) AND the snippet are user-controlled,
+          // so both pass ragGuard. The display chip (c.label) stays raw.
+          title: sanitizeForPrompt(c.label, 120).text,
+          kind: usedDocs[i]?.kind,
           snippet: sanitizeForPrompt(usedDocs[i]?.snippet?.text ?? "", 240).text,
         })),
         // Graph RAG context — related entities + signed causal links. Only
         // included when the graph actually returned something, so an unseeded
-        // graph adds no noise to the prompt.
+        // graph adds no noise to the prompt. Node labels/links derive from
+        // free-text domain fields (guest names, insight titles), so they pass
+        // ragGuard too before entering the prompt.
         ...(graphCtx.links.length > 0
           ? {
               graph: {
-                related: graphCtx.nodes.slice(0, 6).map((n) => n.label),
-                links: graphCtx.links.slice(0, 8),
+                related: graphCtx.nodes.slice(0, 6).map((n) => sanitizeForPrompt(n.label, 120).text),
+                links: graphCtx.links.slice(0, 8).map((l) => sanitizeForPrompt(l, 160).text),
               },
             }
           : {}),

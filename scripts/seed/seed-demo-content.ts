@@ -453,8 +453,11 @@ async function main() {
       const ach = await prisma.achievement.findUnique({ where: { code } });
       if (!ach) continue;
       const uaId = sid("ua", adminId.slice(-4), code);
+      // Upsert on the COMPOUND unique (userId, achievementId), not the synthetic
+      // id — an earlier seed may have awarded the same achievement under its own
+      // id, and an id-keyed upsert would miss it and crash on the unique index.
       await prisma.userAchievement.upsert({
-        where: { id: uaId },
+        where: { userId_achievementId: { userId: adminId, achievementId: ach.id } },
         create: { id: uaId, userId: adminId, achievementId: ach.id, earnedAt: daysAgo(14) },
         update: {},
       });

@@ -154,4 +154,49 @@ bash/macOS: `H_NERVE_MCP_WORKSPACE=<companyId> H_NERVE_MCP_TENANT=<slug> npm run
 
 ---
 
+## Link-day rehearsal on a virgin Postgres (Docker) — the ultimate proof
+
+Run this before any real cutover. It replays the EXACT link-day path (real
+migrations + real seed chain + brain verification) against a throwaway
+Postgres, so every surprise fires here instead of on prod. Verified green
+2026-06-10 (and it caught a real migration-drift bug + a seed crash).
+
+```bash
+# 0. client must be postgres-generated (committed schema already is):
+npx prisma generate
+
+# 1. throwaway Postgres
+docker run -d --name hnerve-rehearsal -e POSTGRES_PASSWORD=rehearsal \
+  -e POSTGRES_DB=hnerve -p 55432:5432 postgres:16-alpine
+export DATABASE_URL="postgresql://postgres:rehearsal@localhost:55432/hnerve"
+
+# 2. migrations (what Railway preDeploy runs)
+npx prisma migrate deploy
+
+# 3. DRIFT CHECK — migrations must exactly reproduce the schema. Non-empty
+#    output = someone db:push-ed a schema change without a migration → generate
+#    a catch-up: append `--script` and save as a new prisma/migrations entry.
+npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema
+
+# 4. the Railway seed chain, in preDeploy order
+for s in seed-if-empty ensure-admins ensure-sectors ensure-demo-docs \
+         ensure-supply-forecasts seed-erp-demo seed-demo-content \
+         ensure-brain-seed seed-markets seed-v3-extras ensure-org-hierarchy; do
+  npx tsx scripts/seed/$s.ts || echo "SEED FAILED: $s"   # no ||true — failures must be LOUD here
+done
+
+# 5. brain verification
+npm run brain:doctor
+npx tsx scripts/verify/brain-mcp-smoke.ts --scoped
+
+# 6. teardown + restore the local sqlite client
+docker rm -f hnerve-rehearsal
+# flip provider to sqlite in prisma/schema/schema.prisma → npx prisma generate → flip back
+```
+
+Note Railway wraps each seed in `|| true`, so a crashing seed silently
+no-ops on prod — the rehearsal removes the muffler on purpose.
+
+---
+
 *See also: `scripts/verify/brain-db-link.ts` (doctor), `scripts/verify/brain-mcp-smoke.ts` (wire smoke), `lib/brain/mcp/scope.ts` (fail-closed scoping), `docs/SUBAGENTS-AND-MCP-CATALOG.md`.*

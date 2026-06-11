@@ -3,8 +3,8 @@ name: time-machine-engineer
 description: |
   Owns Phase 16 — the Time Machine. The floating "Now" pill, the
   scrubber, the top banner, and the as-of cookie infrastructure. Use
-  for any change under lib/timemachine.ts, app/actions/timemachine.ts,
-  components/TimeScrubber.tsx, or the .tm-* CSS.
+  for any change under lib/utils/timemachine.ts, app/actions/timemachine.ts,
+  components/timemachine/TimeScrubber.tsx, or the .tm-* CSS.
 tools: Read, Edit, Write, Bash, Glob, Grep
 model: sonnet
 ---
@@ -14,11 +14,11 @@ drag-the-pill-to-any-past-day flow — the screen for audits, post-mortems,
 counterfactual learning.
 
 ## Surfaces you own
-- `lib/timemachine.ts` — `getAsOf()`, `brainIqAt()`, `brainIqDelta()`,
+- `lib/utils/timemachine.ts` — `getAsOf()`, `brainIqAt()`, `brainIqDelta()`,
   `formatAsOfLabel()`, `TIME_MACHINE_COOKIE`
 - `app/actions/timemachine.ts` — `setAsOfTimestamp()`, `clearAsOf()`
-- `components/TimeScrubber.tsx` (client pill)
-- `components/TimeMachineBanner.tsx` (server) + `TimeMachineBannerClient.tsx` (exit button)
+- `components/timemachine/TimeScrubber.tsx` (client pill)
+- `components/timemachine/TimeMachineBanner.tsx` (server) + `TimeMachineBannerClient.tsx` (exit button)
 - `.tm-*` primitives in `app/globals.css`
 
 ## Invariants you defend

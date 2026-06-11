@@ -90,8 +90,8 @@ In the n8n workflow's HTTP Request node:
 
 ## Security checklist
 
-- `.env` is gitignored — never commit real secrets. `.env.production.example`
-  is the safe template.
+- `.env` is gitignored — never commit real secrets. `.env.railway.template`
+  is the safe production template (`.env.example` for local dev).
 - Any secret pasted in chat or a screenshot is compromised — rotate it in the
   provider dashboard (Anthropic / Google AI Studio / Railway).
 - `next.config.mjs` ships HSTS, `X-Frame-Options: DENY`, COOP, `nosniff`,

@@ -13,14 +13,13 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { hasRole } from "@/lib/auth/authz";
+import { isCronAuthorized } from "@/lib/auth/cronAuth";
 import { getEmpireSummary } from "@/lib/empire/summary";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
-  const cronSecret = process.env.CRON_SECRET;
-  const auth = req.headers.get("authorization");
-  const viaCron = !!cronSecret && auth === `Bearer ${cronSecret}`;
+  const viaCron = isCronAuthorized(req.headers.get("authorization"));
 
   if (!viaCron) {
     const user = await getCurrentUser();

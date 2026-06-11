@@ -24,6 +24,7 @@
 // re-wipes + re-seeds deterministically.
 import { NextRequest, NextResponse } from "next/server";
 import { scoped } from "@/lib/utils/logger";
+import { timingSafeStringEqual } from "@/lib/auth/cronAuth";
 
 const log = scoped("seed-pitch");
 
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
     );
   }
   const body = await req.json().catch(() => ({}));
-  if (body.secret !== secret) {
+  if (!timingSafeStringEqual(body.secret, secret)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

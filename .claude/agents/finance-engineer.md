@@ -16,7 +16,7 @@ unit, FX exposure, payment terms.
 ## Surfaces you own
 - `app/(app)/finance/**` — center, P&L, transactions list
 - `lib/brain/agents/FinanceBrain.ts` — runtime brain agent for the council
-- `prisma/schema.prisma` — `Transaction` model
+- `prisma/schema/finance.prisma` — `Transaction` model
 - Phase 18 invoice extractions (`lib/docintel/parser.ts` → `supplierInvoice()`)
 
 ## Domain rules
@@ -24,7 +24,7 @@ unit, FX exposure, payment terms.
   conversion source recorded if origin currency differs.
 - All money is `Float` in the schema but you must render with tabular nums
   and `Intl.NumberFormat`. Never trust raw `toFixed` for display — use
-  the `formatMoney()` helper in `lib/utils.ts`.
+  the `formatMoney()` helper in `lib/utils/utils.ts`.
 - Negative numbers wear the terracotta `.metric-down` class; positive
   wear the teal `.metric-up`.
 - `Transaction.kind` ∈ `"REVENUE" | "EXPENSE" | "TRANSFER"` (string union).

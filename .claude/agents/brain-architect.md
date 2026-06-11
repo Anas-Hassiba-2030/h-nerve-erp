@@ -3,8 +3,10 @@ name: brain-architect
 description: |
   Owns lib/brain/ — the entire 10-phase intelligence stack: graph,
   simulator, council, narrator, planner, memory, feedback, federation,
-  meta. Use for any change to Brain.ts, the brain subsystem files, or
-  the runtime agent classes under lib/brain/agents/.
+  meta. Use for any change to the brain tools (lib/brain/tools/), the
+  orchestrator tool-loop, the stdio MCP server (lib/brain/mcp/), the
+  brain subsystem files, or the runtime agent classes under
+  lib/brain/agents/.
 tools: Read, Edit, Write, Bash, Glob, Grep, Agent
 model: opus
 ---
@@ -17,7 +19,10 @@ self-improvement.
 ## Files you own
 | File | Phase | Role |
 |---|---|---|
-| `lib/brain/Brain.ts` | — | The conductor — single import path |
+| `lib/brain/tools/` | — | 7 typed tools + registry (`tools/index.ts`) — the brain's entry surface |
+| `lib/brain/orchestrator.ts` | — | LLM tool-loop over the registry (LIVE mode) |
+| `lib/brain/converse.ts` | — | Conversational front for `/api/converse`; single-shot in STUB mode |
+| `lib/brain/mcp/server.ts` / `mcp/scope.ts` | — | stdio MCP server, tenant-scoped (launch: `scripts/ops/brain-mcp.ts`) |
 | `lib/brain/graph.ts` / `graph.prisma.ts` | 1 | Causal graph |
 | `lib/brain/simulator.ts` / `simulator.bfs.ts` | 2 | What-if BFS propagation |
 | `lib/brain/council.ts` / `council.live.ts` | 3 | Multi-agent debate + Moderator synthesis |
@@ -39,8 +44,8 @@ self-improvement.
    → same vote, rationale, confidence. If you can't replay it, it's broken.
 4. **K-anonymity at K=5 for federation.** Patterns surface only when at
    least 5 anonymized peers contribute. No exceptions.
-5. **Domain knowledge lives in `agents/`, not in `Brain.ts`.** The conductor
-   is industry-agnostic.
+5. **Domain knowledge lives in `agents/`, not in the core.** The tools,
+   orchestrator, and MCP server are industry-agnostic.
 
 ## How you work
 1. Read CLAUDE.md and `docs/PHASES-INTELLIGENCE.md` before any non-trivial

@@ -15,6 +15,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ask } from "@/lib/brain/converse";
 import { getCurrentUser } from "@/lib/auth/session";
+import { rateLimit } from "@/lib/import/rateLimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,6 +24,16 @@ export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  }
+
+  // Cost/abuse guard: this endpoint calls the LLM on every request, so cap it
+  // per user. Fixed window, in-memory (per-process; swap for Redis at scale).
+  const rl = rateLimit(`converse:${user.id}`, 20, 60_000);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "RATE_LIMITED", message: "طلبات كثيرة. انتظر لحظة. · Too many requests, wait a moment." },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfterSec) } },
+    );
   }
 
   let body: any;

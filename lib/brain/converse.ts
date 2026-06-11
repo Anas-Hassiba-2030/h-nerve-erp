@@ -17,11 +17,13 @@
 // `Citation` with { id, label, value, href } so Tab-key drill-through has
 // somewhere to land.
 
-import { prisma } from "@/lib/db/db";
-import { callLlm } from "./llm";
+import { callLlm, llmConfig } from "./llm";
+import { runToolLoop } from "./orchestrator";
 import { retrieveDocuments, type DocHit } from "./documents.retrieve";
+import { retrieveGraphContext, type GraphContext } from "./graphrag.live";
 import { evaluateRetrieval } from "./crag";
 import { sanitizeForPrompt } from "./ragGuard";
+import { pullFacts, type FactPack } from "./tools/pullFacts";
 
 export type Citation = {
   id: string;          // "c1", "c2", … (referenced from the answer text)
@@ -68,10 +70,27 @@ export type ConverseSession = {
 // ---------------------------------------------------------------------------
 const SESSIONS = new Map<string, ConverseSession>();
 const MAX_TURNS_PER_SESSION = 24;
+// Cap distinct sessions so a long-lived prod process can't leak one Map entry
+// per browser session forever (mirrors the rateLimit sweep). Each unique
+// localStorage session id would otherwise persist for the process lifetime.
+const MAX_SESSIONS = 500;
 
 function getOrCreate(sessionId: string, scope = "default"): ConverseSession {
   let s = SESSIONS.get(sessionId);
   if (!s) {
+    if (SESSIONS.size >= MAX_SESSIONS) {
+      // Evict the oldest session by createdAt before inserting a new one.
+      let oldestId: string | null = null;
+      let oldestTs = Infinity;
+      for (const [id, sess] of SESSIONS) {
+        const ts = Date.parse(sess.createdAt);
+        if (ts < oldestTs) {
+          oldestTs = ts;
+          oldestId = id;
+        }
+      }
+      if (oldestId) SESSIONS.delete(oldestId);
+    }
     s = {
       id: sessionId,
       scope,
@@ -92,80 +111,11 @@ export function resetSession(sessionId: string) {
 }
 
 // ---------------------------------------------------------------------------
-// Pull a relevant fact pack from Prisma. The conversational brain doesn't
-// scan the entire DB — it grabs the surfaces a manager would naturally ask
-// about, then lets the LLM (or stub) synthesize.
+// The relevant fact pack (insights, plans, integrations, hotel/dairy/farm
+// pulse) is pulled from Prisma by `pullFacts` — moved to ./tools/pullFacts so
+// the same capability is exposed both here and as a brain tool. `pullFacts`
+// and the `FactPack` type are imported at the top for the stub generator below.
 // ---------------------------------------------------------------------------
-type FactPack = {
-  insights: Array<{ id: string; title: string; severity: string; module: string; body: string }>;
-  plans: Array<{ id: string; goal: string; status: string; targetMetric: string; targetDelta: number }>;
-  integrations: Array<{ providerKey: string; status: string; errorCount: number }>;
-  hotels: { totalRooms: number; occupiedNow: number; activeBookings: number };
-  dairy: { batchesThisWeek: number; nearExpiry: number };
-  farms: { activeCrops: number; totalFarms: number };
-};
-
-async function pullFacts(): Promise<FactPack> {
-  const [insights, plans, integrations, hotelsAgg, bookings, dairyWeek, dairyExp, crops, farms] =
-    await Promise.all([
-      prisma.aIInsight.findMany({
-        where: { deletedAt: null, status: "OPEN" },
-        orderBy: [{ severity: "asc" }, { createdAt: "desc" }],
-        take: 6,
-        select: { id: true, title: true, severity: true, module: true, body: true },
-      }),
-      prisma.plan.findMany({
-        where: { status: { in: ["DRAFT", "ACTIVE"] } },
-        orderBy: { createdAt: "desc" },
-        take: 4,
-        select: { id: true, goal: true, status: true, targetMetric: true, targetDelta: true },
-      }),
-      prisma.integration.findMany({
-        take: 6,
-        select: { providerKey: true, status: true, errorCount: true },
-      }),
-      // Total room count and active bookings — rough hotel pulse.
-      prisma.hotel.aggregate({ _sum: { totalRooms: true } }).catch(() => ({ _sum: { totalRooms: 0 } })),
-      prisma.booking
-        .count({ where: { status: { in: ["CONFIRMED", "ACTIVE", "CHECKED_IN"] } } })
-        .catch(() => 0),
-      prisma.dairyBatch
-        .count({
-          where: {
-            createdAt: {
-              gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-            },
-          },
-        })
-        .catch(() => 0),
-      prisma.dairyBatch
-        .count({
-          where: {
-            expiryDate: {
-              lte: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-              gte: new Date(),
-            },
-          },
-        })
-        .catch(() => 0),
-      prisma.crop.count({ where: { status: "GROWING" } }).catch(() => 0),
-      prisma.farm.count().catch(() => 0),
-    ]);
-
-  // Hotel occupancy is approximate — bookings don't model nightly stays
-  // here; we just show "active bookings" as a proxy for occupancy.
-  const totalRooms = hotelsAgg._sum?.totalRooms ?? 0;
-  const occupiedNow = Math.min(bookings, totalRooms);
-
-  return {
-    insights,
-    plans,
-    integrations,
-    hotels: { totalRooms, occupiedNow, activeBookings: bookings },
-    dairy: { batchesThisWeek: dairyWeek, nearExpiry: dairyExp },
-    farms: { activeCrops: crops, totalFarms: farms },
-  };
-}
 
 // ---------------------------------------------------------------------------
 // Stub generator — picks 1-3 most relevant facts and writes 3 sentences.
@@ -442,7 +392,119 @@ export type AskResult = {
   brainTurn: ConverseTurn;
 };
 
+// Build doc citations from any retrieveDocuments tool output in the loop.
+export function buildCitationsFromToolCalls(
+  toolCalls: Array<{ name: string; output: unknown }>,
+  startIndex: number,
+): Citation[] {
+  const cites: Citation[] = [];
+  for (const call of toolCalls) {
+    if (call.name !== "retrieveDocuments") continue;
+    const docs = (call.output as any)?.documents ?? [];
+    for (const d of docs) {
+      cites.push({
+        id: d.citationId ?? `c${startIndex + cites.length + 1}`,
+        source: "DOCUMENT",
+        label: d.title ?? "Document",
+        value: d.kind,
+        href: `/documents/${d.documentId}`,
+      });
+    }
+  }
+  return cites;
+}
+
+// Reconcile the model's [cN] markers against the citation chips so Tab-key
+// drill-through always lands (converse header invariant). Two failure modes
+// an LLM can produce despite the prompt rules:
+//   - orphan CHIP — a retrieved doc the answer never references → drop it.
+//   - orphan MARKER — a hallucinated [c9] with no chip → strip it from text.
+// Pure + exported for unit tests.
+export function reconcileCitations(
+  text: string,
+  citations: Citation[],
+): { text: string; citations: Citation[] } {
+  const markerRe = /\[c\d+\]/g;
+  const matched = text.match(markerRe) ?? [];
+  // Safety valve: if the answer carries NO parseable [cN] markers but we DID
+  // retrieve citations, keep them rather than nuke every chip — the model may
+  // have referenced docs in a shape the regex misses (e.g. "[c1, c2]").
+  // Previously chips always showed; don't regress that into an empty list.
+  if (matched.length === 0) return { text, citations };
+  const referenced = new Set(matched.map((m) => m.slice(1, -1)));
+  const chipIds = new Set(citations.map((c) => c.id));
+  const keptCitations = citations.filter((c) => referenced.has(c.id));
+  const cleanedText = text
+    .replace(markerRe, (m) => (chipIds.has(m.slice(1, -1)) ? m : ""))
+    .replace(/ {2,}/g, " ")
+    .replace(/ +([.,،؛!?؟])/g, "$1")
+    .trim();
+  return { text: cleanedText, citations: keptCitations };
+}
+
+// LIVE path. Mutates the session ONLY on success; returns null to degrade so
+// the caller can fall back to askSingleShot without a double-pushed user turn.
+async function askWithTools(input: AskInput): Promise<AskResult | null> {
+  const t0 = Date.now();
+  const session = getOrCreate(input.sessionId, input.scope ?? "default");
+  const locale = input.locale ?? "ar";
+  const system =
+    locale === "ar"
+      ? "أنت H-Nerve، الدماغ المحادث لمنظومة ERP. استخدم الأدوات المتاحة للحصول على الحقائق قبل الإجابة. أجب في 3 جمل بنبرة هادئة عملية. عند الاستشهاد بمستند، استخدم مُعرّف الاستشهاد المرفق به (citationId) بصيغة [c1] تماماً، ولا تخترع ترقيماً خاصاً بك."
+      : "You are H-Nerve, the conversational brain of an ERP. Use the available tools to gather facts before answering. Answer in 3 calm, operational sentences. When you cite a document, use the exact citationId provided with it (e.g. [c1]); never invent your own numbering.";
+
+  // priorTurns = existing turns only; runToolLoop appends the question itself.
+  const loop = await runToolLoop({
+    system,
+    question: input.question,
+    priorTurns: session.turns.slice(-MAX_TURNS_PER_SESSION).map((t) => ({ role: t.role, text: t.text })),
+    // Force the request scope onto document retrieval — the model must not
+    // pick (or omit) the document scope itself. Keeps the loop no weaker than
+    // the single-shot path, which already passes session.scope.
+    scope: session.scope,
+  });
+  if (loop.stub || !loop.text) return null; // degrade — session untouched
+
+  // Success: commit the user turn and the brain turn together. Reconcile the
+  // answer's [cN] markers with the chips so no orphan chip/marker survives.
+  session.turns.push({ role: "user", text: input.question, ts: new Date().toISOString() });
+  const { text: answerText, citations } = reconcileCitations(
+    loop.text,
+    buildCitationsFromToolCalls(loop.toolCalls, 0),
+  );
+  const brainTurn: ConverseTurn = {
+    role: "brain",
+    text: answerText,
+    ts: new Date().toISOString(),
+    citations,
+    confidence: 0.8,
+    stub: false,
+    ms: Date.now() - t0,
+  };
+  session.turns.push(brainTurn);
+  if (session.turns.length > MAX_TURNS_PER_SESSION) session.turns = session.turns.slice(-MAX_TURNS_PER_SESSION);
+  return { session, brainTurn };
+}
+
 export async function ask(input: AskInput): Promise<AskResult> {
+  // LIVE: let the model drive the tool loop. Any degrade/failure falls through
+  // to the deterministic single-shot path so the overlay always gets an answer.
+  if (llmConfig().enabled) {
+    try {
+      const r = await askWithTools(input);
+      if (r) return r;
+    } catch {
+      /* fall through to single-shot */
+    }
+  }
+  return askSingleShot(input);
+}
+
+// STUB / fallback path. This is the original single-shot ask() body unchanged:
+// push the user turn, pull facts + retrieve docs + graph in parallel, run the
+// deterministic stub (LLM-augmented if a key is set via callLlm), push the
+// brain turn. The LIVE tool-loop path is ask() below, which falls back here.
+async function askSingleShot(input: AskInput): Promise<AskResult> {
   const t0 = Date.now();
   const session = getOrCreate(input.sessionId, input.scope ?? "default");
   const locale = input.locale ?? "ar";
@@ -459,7 +521,7 @@ export async function ask(input: AskInput): Promise<AskResult> {
   // parallel. The documents are the RAG "retrieve" stage (Phase RAG-2):
   // semantic search over the tenant's contracts/invoices/reports via the
   // embedding seam. Their snippets ground the answer in real clauses.
-  const [facts, docHits] = await Promise.all([
+  const [facts, docHits, graphCtx] = await Promise.all([
     pullFacts(),
     retrieveDocuments(input.question, {
       scope: session.scope,
@@ -467,6 +529,14 @@ export async function ask(input: AskInput): Promise<AskResult> {
       minScore: 0.08,
       locale,
     }).catch(() => [] as DocHit[]),
+    // Graph RAG (Phase RAG-4): the causal subgraph most relevant to the
+    // question — related entities + signed causal links. This is what lets
+    // the conversational brain reason about second-order effects ("Arena
+    // occupancy →(+) Maha demand") instead of only the metrics in the fact
+    // pack. Degrades to an empty result on an unseeded graph or any error.
+    retrieveGraphContext(input.question, { k: 6, topSeeds: 3 }).catch(
+      () => ({ nodes: [], links: [] } as GraphContext),
+    ),
   ]);
 
   // Build the prompt — we always use the stub generator's payload as the
@@ -496,19 +566,34 @@ export async function ask(input: AskInput): Promise<AskResult> {
     {
       system:
         locale === "ar"
-          ? "أنت H-Nerve — الدماغ المحادث لمنظومة ERP. أجِب في 3 جمل بالضبط. استخدم إحالات مرجعية بصيغة [c1] [c2] للأرقام والادعاءات وللاستشهاد بالمستندات. لا تخترع أرقاماً ولا بنوداً؛ استشهد فقط بالمستندات المرفقة. اكتب بنبرة هادئة، صريحة، عملية."
-          : "You are H-Nerve, the conversational brain of an ERP. Answer in exactly 3 sentences. Use [c1] [c2] reference markers for numbers, claims, and document citations. Never invent numbers or clauses; cite only the documents provided. Tone: calm, plain, operational.",
+          ? "أنت H-Nerve — الدماغ المحادث لمنظومة ERP. أجِب في 3 جمل بالضبط. استخدم إحالات مرجعية بصيغة [c1] [c2] للأرقام والادعاءات وللاستشهاد بالمستندات. لا تخترع أرقاماً ولا بنوداً؛ استشهد فقط بالمستندات المرفقة. إن وُجدت روابط سببية (graph.links) فاستعملها لتفسير الأثر غير المباشر بين الوحدات، دون أن تُحيل إليها كمرجع. اكتب بنبرة هادئة، صريحة، عملية."
+          : "You are H-Nerve, the conversational brain of an ERP. Answer in exactly 3 sentences. Use [c1] [c2] reference markers for numbers, claims, and document citations. Never invent numbers or clauses; cite only the documents provided. When causal links are provided (graph.links), use them to explain second-order effects between business units, but do not cite them as a reference. Tone: calm, plain, operational.",
       user: input.question,
       context: {
         priorTurns: session.turns.slice(-MAX_TURNS_PER_SESSION),
         facts,
         documents: docCitations.map((c, i) => ({
           ref: c.id,
-          title: c.label,
-          kind: usedDocs[i]?.kind,
           // Phase RAG-7 — sanitize uploaded text before it enters the prompt.
+          // Both the title (user-named file) AND the snippet are user-controlled,
+          // so both pass ragGuard. The display chip (c.label) stays raw.
+          title: sanitizeForPrompt(c.label, 120).text,
+          kind: usedDocs[i]?.kind,
           snippet: sanitizeForPrompt(usedDocs[i]?.snippet?.text ?? "", 240).text,
         })),
+        // Graph RAG context — related entities + signed causal links. Only
+        // included when the graph actually returned something, so an unseeded
+        // graph adds no noise to the prompt. Node labels/links derive from
+        // free-text domain fields (guest names, insight titles), so they pass
+        // ragGuard too before entering the prompt.
+        ...(graphCtx.links.length > 0
+          ? {
+              graph: {
+                related: graphCtx.nodes.slice(0, 6).map((n) => sanitizeForPrompt(n.label, 120).text),
+                links: graphCtx.links.slice(0, 8).map((l) => sanitizeForPrompt(l, 160).text),
+              },
+            }
+          : {}),
       },
       maxTokens: 320,
       temperature: 0.5,
@@ -538,6 +623,16 @@ export async function ask(input: AskInput): Promise<AskResult> {
       const lead = hedged ? "This may relate to" : "From the uploaded documents, this intersects";
       answerText += ` ${lead} “${top.titleEn || top.title}” ${`[${ref}]`}${snippet ? `: “${snippet}”` : ""}.`;
     }
+  }
+
+  // Stub mode doesn't reason over the graph context on its own, so surface
+  // the single strongest causal link as one short clause — this keeps Graph
+  // RAG visible end-to-end in the local/demo (no-key) state, mirroring the
+  // document append above.
+  if (llm.isStub && graphCtx.links.length > 0) {
+    const link = graphCtx.links[0];
+    answerText +=
+      locale === "ar" ? ` على خريطة الأثر: ${link}.` : ` On the causal map: ${link}.`;
   }
 
   // Reflect retrieval quality in the turn confidence: an answer leaning on

@@ -38,7 +38,8 @@ export function getActiveTenantSlug(): string | null {
   try {
     return cookies().get(TENANT_COOKIE)?.value || null;
   } catch {
-    return null;
+    // Non-request context — explicit tenant slug via env (MCP server).
+    return process.env.H_NERVE_MCP_TENANT || null;
   }
 }
 

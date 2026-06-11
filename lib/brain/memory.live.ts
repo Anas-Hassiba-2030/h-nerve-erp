@@ -211,7 +211,10 @@ class LiveMemoryLake implements MemoryLake {
       }));
     }
 
-    const rows = await prisma.memory.findMany({ where, take: 800 });
+    // A DB read error (missing table on a partial migration, dropped
+    // connection) degrades to "no analogous memory" rather than throwing —
+    // empty recall is truthful, and matches retrieveDocuments' behavior.
+    const rows = await prisma.memory.findMany({ where, take: 800 }).catch(() => [] as any[]);
 
     const scored: Array<{ row: any; similarity: number }> = [];
     for (const r of rows) {
@@ -222,6 +225,14 @@ class LiveMemoryLake implements MemoryLake {
         let stored: number[];
         try { stored = JSON.parse(r.vectorJson); } catch { continue; }
         if (!Array.isArray(stored) || stored.length === 0) continue;
+        // Stored vectors carry the dimensionality of whatever embedder was
+        // active when the memory was written. If the active query embedder
+        // differs (e.g. a 256-dim local seed vs a later 1536-dim provider key),
+        // cosineSim would silently compare truncated, mismatched feature spaces
+        // and score noise. Skip the mismatch → it falls through to a clean miss
+        // instead of a misleading similarity. Re-embed memories after changing
+        // the embedding provider (see docs/BRAIN-DB-LINK-RUNBOOK.md).
+        if (stored.length !== queryDense.length) continue;
         sim = cosineSim(queryDense, stored);
       } else {
         // legacy v1 sparse bag-of-words path

@@ -181,3 +181,82 @@ export function extractJson<T = unknown>(text: string): T | null {
   }
   return null;
 }
+
+// ── Tool-use loop seam ─────────────────────────────────────────────────────
+
+export type AnthropicToolDef = { name: string; description: string; input_schema: object };
+export type AnthropicMessage = { role: "user" | "assistant"; content: unknown };
+
+export type ToolTurnResponse = {
+  content: any[];          // assistant content blocks (text + tool_use)
+  stopReason: string | null;
+  isStub: boolean;
+  model?: string;
+  ms: number;
+};
+
+/**
+ * One Claude Messages-API call WITH tools. Unlike callLlm(), the caller drives
+ * the loop: inspect `content` for tool_use blocks, run them, append a
+ * tool_result message, and call again. Degrades to { isStub: true } on no key /
+ * cost cap / error / timeout — the orchestrator then falls back to the stub path.
+ */
+export async function callLlmWithTools(args: {
+  system: string;
+  messages: AnthropicMessage[];
+  tools: AnthropicToolDef[];
+  maxTokens?: number;
+  temperature?: number;
+}): Promise<ToolTurnResponse> {
+  const t0 = Date.now();
+  const cfg = llmConfig();
+  if (!cfg.enabled || !cfg.apiKey) {
+    return { content: [], stopReason: "stub", isStub: true, ms: Date.now() - t0 };
+  }
+  const cap = Number(process.env.BRAIN_MAX_LLM_CALLS ?? 200);
+  if (cap > 0 && __llmCallCount >= cap) {
+    return { content: [], stopReason: "stub", isStub: true, ms: Date.now() - t0 };
+  }
+  __llmCallCount++;
+
+  const controller = new AbortController();
+  const timeoutMs = Number(process.env.BRAIN_LLM_TIMEOUT_MS) || 20_000;
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": cfg.apiKey,
+        "anthropic-version": ANTHROPIC_VERSION,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model: cfg.model,
+        max_tokens: args.maxTokens ?? 700,
+        temperature: args.temperature ?? 0.4,
+        system: args.system,
+        messages: args.messages,
+        tools: args.tools,
+      }),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      const errorText = await res.text();
+      log.error("brain.llm: tool-use API error", { status: res.status, body: errorText.slice(0, 400) });
+      return { content: [], stopReason: "stub", isStub: true, ms: Date.now() - t0 };
+    }
+    const json: any = await res.json();
+    return {
+      content: Array.isArray(json?.content) ? json.content : [],
+      stopReason: json?.stop_reason ?? null,
+      isStub: false,
+      model: cfg.model,
+      ms: Date.now() - t0,
+    };
+  } catch (err) {
+    log.error("brain.llm: tool-use call failed", { err: String(err) });
+    return { content: [], stopReason: "stub", isStub: true, ms: Date.now() - t0 };
+  } finally {
+    clearTimeout(timer);
+  }
+}

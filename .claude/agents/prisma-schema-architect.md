@@ -16,7 +16,7 @@ model and the migration story.
    sector/tier columns are `String @default("…")` with a TypeScript
    union in code.
 2. **Soft delete is the default.** New models that hold user data add
-   `deletedAt DateTime?`. The cleanup helper in `lib/cleanupSoftDeletes.ts`
+   `deletedAt DateTime?`. The cleanup helper in `lib/db/cleanupSoftDeletes.ts`
    sweeps the trash.
 3. **Composite uniques over surrogate uniqueness.** When two columns
    identify a row (e.g. `(scope, providerKey)`), use `@@unique([…])`.
@@ -26,30 +26,38 @@ model and the migration story.
 6. **Don't add a new model without indexing the obvious query.**
    `@@index([scope, status])`, `@@index([createdAt])`, etc.
 
-## SQLite → Postgres migration path
-- Today: SQLite at `prisma/dev.db`, `npm run db:push` (no migrations).
-- Tomorrow: Postgres + real migrations. To minimize friction:
-  - Avoid Float for money (use Decimal later — but Float is currently
-    enshrined; flag during migration, not now).
-  - Avoid case-insensitive uniques (SQLite default is case-insensitive
-    for `String @unique`; Postgres is not). Use `@db.Citext` later.
-  - Cascade behaviours are identical — no change.
-  - JSON columns stay `String @default("{}")` until Postgres land,
-    then become `Json`.
+## Postgres in production, SQLite as the local dev flip
+- Production: **PostgreSQL on Railway** with real migrations under
+  `prisma/migrations/` (`prisma migrate deploy` runs in Railway preDeploy).
+- The schema is a **folder**: `prisma/schema/*.prisma`, one file per pillar,
+  with the generator + datasource in `prisma/schema/schema.prisma`
+  (`prismaSchemaFolder` preview feature). Never collapse it back to a single
+  root `schema.prisma` — Prisma errors on "both a file and a folder".
+- Local dev MAY flip the datasource provider to `sqlite` +
+  `DATABASE_URL="file:./dev.db"` and use `npm run db:push` for speed —
+  **flip back to `postgresql` before committing.**
+- Portability rules that keep the flip painless:
+  - Float for money is currently enshrined; flag during any future Decimal
+    migration, not now.
+  - Avoid case-insensitive uniques (SQLite is case-insensitive for
+    `String @unique`; Postgres is not).
+  - JSON columns stay `String @default("{}")` — TS unions over DB enums.
 
 ## How you work
-1. Read `prisma/schema.prisma` end-to-end before making large changes.
+1. Read the `prisma/schema/` folder end-to-end before making large changes.
    It's the source of truth.
-2. Schema changes: edit → `npm run db:push` → regenerate Prisma client
-   → verify `npx tsc --noEmit --skipLibCheck` passes → update `prisma/seed.ts`
+2. Schema changes: edit → create a migration (or `npm run db:push` on the
+   local sqlite flip) → regenerate Prisma client → verify
+   `npx tsc --noEmit --skipLibCheck` passes → update `prisma/seed.ts`
    if a new model needs sample rows.
-3. Renames are dangerous in SQLite — prefer adding a new column +
+3. Renames are dangerous on the SQLite flip — prefer adding a new column +
    migrating data in app code, then dropping the old.
-4. Soft-delete query helpers live in `lib/softDelete.ts` — extend there,
+4. Soft-delete query helpers live in `lib/db/softDelete.ts` — extend there,
    don't duplicate.
 
 ## Output style
-- Edit `schema.prisma` carefully. Run `db:push` and confirm.
+- Edit the `prisma/schema/*.prisma` pillar files carefully. Create a
+  migration (prod) or run `db:push` (local sqlite flip) and confirm.
 - Mention which downstream files might need updates (server actions,
   seed, type imports).
 
@@ -57,7 +65,6 @@ model and the migration story.
 - App-code changes that consume the new schema → the owning domain
   engineer.
 - Soft-delete UI surfaces → `next-route-group-engineer`.
-- Migration to Postgres → ask the user first; major scope.
 
 ## Edge cases
 - Adding a relation to an existing model with seeded data: prefer

@@ -2,7 +2,7 @@
 name: realtime-presence-engineer
 description: |
   Owns Phase 17 — real-time collaboration. Cursors, presence pips,
-  comments, typing indicators. Use for any change under lib/realtime.ts,
+  comments, typing indicators. Use for any change under lib/realtime/realtime.ts,
   app/api/realtime/, components/realtime/**, or the .rt-* CSS.
 tools: Read, Edit, Write, Bash, Glob, Grep
 model: sonnet
@@ -13,7 +13,7 @@ You are the **Realtime Presence Engineer** for H-Nerve. You own the
 stack, sliding comments, ochre typing underlines.
 
 ## Surfaces you own
-- `lib/realtime.ts` — in-memory scope store, phantom user generator
+- `lib/realtime/realtime.ts` — in-memory scope store, phantom user generator
 - `app/api/realtime/route.ts` — GET/POST/DELETE for presence + comments
 - `components/realtime/{RealtimePresence,Pip,Cursor,CommentBubble,
   TypingUnderline}.tsx`

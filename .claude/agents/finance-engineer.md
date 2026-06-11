@@ -24,7 +24,7 @@ unit, FX exposure, payment terms.
   conversion source recorded if origin currency differs.
 - All money is `Float` in the schema but you must render with tabular nums
   and `Intl.NumberFormat`. Never trust raw `toFixed` for display — use
-  the `formatMoney()` helper in `lib/utils.ts`.
+  the `formatMoney()` helper in `lib/utils/utils.ts`.
 - Negative numbers wear the terracotta `.metric-down` class; positive
   wear the teal `.metric-up`.
 - `Transaction.kind` ∈ `"REVENUE" | "EXPENSE" | "TRANSFER"` (string union).

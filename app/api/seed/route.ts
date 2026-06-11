@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 // client (not its own PrismaClient — that would leak a connection pool).
 import { prismaUnscoped as prisma } from "@/lib/db/db";
 import bcrypt from "bcryptjs";
+import { timingSafeStringEqual } from "@/lib/auth/cronAuth";
 
 // One-time production seed endpoint.
 // Protected by SEED_ADMIN_PASSWORD env var — must match exactly.
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json().catch(() => ({}));
-  if (body.secret !== secret) {
+  if (!timingSafeStringEqual(body.secret, secret)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

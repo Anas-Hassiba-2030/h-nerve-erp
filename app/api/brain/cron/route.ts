@@ -20,13 +20,13 @@ import { runBrainAnalysis } from "@/lib/intelligence/engine";
 // its own insight refresh. prismaUnscoped reaches the Tenant table
 // regardless of the (non-existent) cookie context on a cron invocation.
 import { prismaUnscoped } from "@/lib/db/db";
+import { cronSecretConfigured, isCronAuthorized } from "@/lib/auth/cronAuth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  const secret = process.env.CRON_SECRET?.trim();
-  if (!secret) {
+  if (!cronSecretConfigured()) {
     // Fail closed: without a configured secret the endpoint is disabled
     // rather than left open to anonymous triggering.
     return NextResponse.json(
@@ -34,8 +34,7 @@ export async function GET(req: NextRequest) {
       { status: 503 },
     );
   }
-  const auth = req.headers.get("authorization") ?? "";
-  if (auth !== `Bearer ${secret}`) {
+  if (!isCronAuthorized(req.headers.get("authorization"))) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 

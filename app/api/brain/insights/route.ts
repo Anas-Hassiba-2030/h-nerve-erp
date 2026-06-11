@@ -19,6 +19,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prismaUnscoped } from "@/lib/db/db";
 import { getCurrentUser } from "@/lib/auth/session";
+import { isCronAuthorized } from "@/lib/auth/cronAuth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,9 +27,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   // Close the anonymous cross-tenant leak: require a session OR the cron token.
   const user = await getCurrentUser();
-  const secret = process.env.CRON_SECRET?.trim();
-  const auth = req.headers.get("authorization") ?? "";
-  const machineOk = !!secret && auth === `Bearer ${secret}`;
+  const machineOk = isCronAuthorized(req.headers.get("authorization"));
   if (!user && !machineOk) {
     return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
   }

@@ -8,7 +8,7 @@ Phase 18 is largely scaffolded and demo-working in stub mode; the gap is real ex
 - **Server actions** — `app/(app)/documents/actions.ts`: `uploadDocument` (creates `Document` PARSING → parse → writes `DocExtraction`/`DocClause`, then best-effort entity match), `commitDocument` (no-op confirm + redirect), `deleteDocument` (soft-delete, MANAGER+).
 - **UI** — global drop overlay + reveal-one-at-a-time clause modal in `components/DocumentDropZone.tsx` (mounted app-wide via `components/DeferredOverlays.tsx`, `ssr:false`); ledger list grouped by linked entity `app/(app)/documents/page.tsx`; editorial detail `app/(app)/documents/[id]/page.tsx`; styles `app/(app)/documents/documents.css`.
 - **Schema** — `prisma/schema.prisma` lines ~1408–1489: `Document`, `DocExtraction`, `DocClause` all present, incl. NS-8 denormalized match scalars.
-- **Env** — `.env.example` documents `DOCINTEL_USE_VISION` / `DOCINTEL_MAX_VISION_CALLS` (also in `.env.railway.template`, `.env.production.example`).
+- **Env** — `.env.example` documents `DOCINTEL_USE_VISION` / `DOCINTEL_MAX_VISION_CALLS` (also in `.env.railway.template`).
 
 ## Scope (what "shipping this phase" concretely means)
 The pieces from `PHASES-INTELLIGENCE.md §18` exist; "shipping" = hardening from a single-tenant stub demo to a trustworthy multi-tenant feature:

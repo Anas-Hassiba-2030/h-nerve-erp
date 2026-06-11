@@ -1059,8 +1059,8 @@ Today: **10–15 concurrent users — yes, comfortably.** The render path does n
 in-process compute and no blocking LLM calls; the Prisma client is a proper
 singleton; SSE is clean. **100–200 — not yet**, because:
 - **No DB connection pooling.** Railway Postgres is a *direct* connection; Prisma's
-  default pool (~9–17/instance) exhausts under load. The `.env.production.example`
-  "pgBouncer" claim is aspirational/false. **Fix:** enable **Prisma Accelerate**
+  default pool (~9–17/instance) exhausts under load. The old env-template
+  "pgBouncer" claim was aspirational/false (that Vercel-era template is retired). **Fix:** enable **Prisma Accelerate**
   (drop-in) or a **PgBouncer** sidecar with a `directUrl` for migrations. *This one
   change unlocks 100–200.*
 - **Dashboard is `force-dynamic` + ~22 uncached queries/load** (grabs 15–20

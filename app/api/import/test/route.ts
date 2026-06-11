@@ -15,7 +15,7 @@
 // /admin/imports can query and expand them. SQLite as-is.
 
 import { NextRequest, NextResponse } from "next/server";
-import { timingSafeEqual } from "node:crypto";
+import { timingSafeStringEqual } from "@/lib/auth/cronAuth";
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { prismaUnscoped } from "@/lib/db/db";
@@ -56,13 +56,6 @@ const PayloadSchema = z.object({
   records: z.array(z.unknown()).max(10_000),
 });
 
-function tokenMatches(provided: string, expected: string): boolean {
-  const a = Buffer.from(provided);
-  const b = Buffer.from(expected);
-  // timingSafeEqual throws on length mismatch — guard first.
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
-}
 
 // Phase 9: free-text warehouse string → warehouse code. Same algorithm
 // as the one-shot migration so an imported string lands on the same
@@ -164,7 +157,7 @@ export async function POST(req: NextRequest) {
   }
   const auth = req.headers.get("authorization") ?? "";
   const m = /^Bearer\s+(.+)$/i.exec(auth.trim());
-  if (!m || !tokenMatches(m[1], expected)) {
+  if (!m || !timingSafeStringEqual(m[1], expected)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

@@ -10,9 +10,11 @@
 // The seed routes (/api/seed, /api/admin/seed-pitch) use the generic
 // timingSafeStringEqual for their SEED_ADMIN_PASSWORD body check.
 //
-// The length pre-check short-circuits (length is not secret — an attacker can
-// derive it from the token format anyway); the content comparison is constant
-// time.
+// The length pre-check short-circuits before the constant-time content
+// comparison (crypto.timingSafeEqual requires equal lengths). That reveals
+// the secret's byte length at most — irrelevant for a high-entropy token,
+// and a negligible brute-force narrowing for a human-chosen seed password;
+// pick a long SEED_ADMIN_PASSWORD regardless.
 
 import { timingSafeEqual } from "crypto";
 

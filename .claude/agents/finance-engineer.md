@@ -16,7 +16,7 @@ unit, FX exposure, payment terms.
 ## Surfaces you own
 - `app/(app)/finance/**` — center, P&L, transactions list
 - `lib/brain/agents/FinanceBrain.ts` — runtime brain agent for the council
-- `prisma/schema.prisma` — `Transaction` model
+- `prisma/schema/finance.prisma` — `Transaction` model
 - Phase 18 invoice extractions (`lib/docintel/parser.ts` → `supplierInvoice()`)
 
 ## Domain rules

@@ -2,8 +2,8 @@
 name: prisma-schema-architect
 description: |
   Owns Prisma schema design, migrations, soft-delete patterns, and the
-  SQLite-to-Postgres migration path. Use for any change to
-  prisma/schema.prisma, prisma/seed.ts, or any cross-model relationship.
+  Postgres-prod / SQLite-dev-flip discipline. Use for any change to
+  prisma/schema/*.prisma, prisma/seed.ts, or any cross-model relationship.
 tools: Read, Edit, Write, Bash, Glob, Grep
 model: sonnet
 ---

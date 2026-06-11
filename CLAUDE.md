@@ -16,9 +16,9 @@ These files are the source of truth. Reference them by path in any conversation 
 
 1. **`docs/DESIGN-SKILL.md`** — the design language. Heritage Modern is the default. Eight aesthetic vocabularies are documented; pick ONE per surface; never mix.
 2. **`docs/PHASES-INTELLIGENCE.md`** — the master plan (Phases 1–27 across five waves: **A** Brain 1–10, **B** Platform 11–15, **C** Theater 16–19, **D** Empire 20, **E** Genesis & Hardening 21–26, plus **Phase 27** ERP modules — backlog). On top of this, a **RAG re-architecture** (RAG-1…RAG-7) is fully shipped — see the Brain section below. Health + open items: `docs/AUDIT-2026-06.md`.
-3. **`lib/brain/README.md`** + **`lib/brain/Brain.ts`** — the brain architecture. The single import path the rest of the app reaches for.
+3. **`lib/brain/README.md`** + **`lib/brain/tools/`** — the brain architecture. The brain is fronted by a tool registry (`lib/brain/tools/index.ts`), an orchestrator tool-loop (`lib/brain/orchestrator.ts`), and a stdio MCP server (`lib/brain/mcp/server.ts`, launched via `scripts/ops/brain-mcp.ts`). The old `Brain.ts` composition root is retired.
 
-When the user says **"improve the brain"**, that means `lib/brain/Brain.ts` and its subsystem files. When the user says **"apply the design skill to X"**, that means `docs/DESIGN-SKILL.md` § the appropriate vocabulary.
+When the user says **"improve the brain"**, that means `lib/brain/` — the tools, the orchestrator, and the subsystem files. When the user says **"apply the design skill to X"**, that means `docs/DESIGN-SKILL.md` § the appropriate vocabulary.
 
 ## ⏰ Standing reminder — Phase 27 (ERP modules)
 
@@ -77,11 +77,11 @@ The App Router uses **four** groups, each with its own `layout.tsx`:
 
 ### The Brain (`lib/brain/`)
 
-This is its own architectural pillar. `Brain.ts` is the conductor; subsystems live in sibling files:
+This is its own architectural pillar. There is no single conductor class anymore — the brain is **tool-fronted**: `lib/brain/tools/` defines 7 typed tools (`pullFacts`, `causalSubgraph`, `simulate`, `councilDebate`, `recallMemory`, `retrieveDocuments`, `narrate`) registered in `tools/index.ts`; `orchestrator.ts` runs the LLM tool-loop over them (LIVE mode); `converse.ts` answers single-shot in STUB mode; `mcp/server.ts` exposes the same tools over stdio MCP (tenant-scoped via `mcp/scope.ts`, launched by `scripts/ops/brain-mcp.ts`). Subsystems live in sibling files:
 
 | File | Phase | Role |
 |------|-------|------|
-| `Brain.ts` | — | Single entry point. Routes `BrainQuestion` → `BrainAnswer`. |
+| `tools/` + `orchestrator.ts` | — | Entry point. Tool registry + LLM tool-loop (replaces the retired `Brain.ts`). |
 | `graph.ts` / `graph.prisma.ts` | 1 | Causal graph; every entity is a node, edges carry weights. |
 | `simulator.ts` / `simulator.bfs.ts` | 2 | What-if propagation. |
 | `council.ts` / `council.live.ts` | 3 | Multi-agent debate; `agents/Moderator.ts` synthesizes. |

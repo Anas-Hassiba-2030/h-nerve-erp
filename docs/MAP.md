@@ -1,6 +1,6 @@
 # H-Nerve ERP — System Map
 > Single source of truth for navigation. Use this to find anything fast.
-> Updated: 2026-06-05
+> Updated: 2026-06-11 (post brain-MCP re-arch #240 + audit cleanup #242)
 
 ---
 
@@ -23,11 +23,11 @@
 | `.env.railway.template` | Railway env var template |
 | `.gitignore` | Git exclusions |
 
-**Junk at root (ignore / safe to delete):**
-- `free-claude-code-main.zip` — old zip, not part of project
+**Junk at root (ignore / safe to delete — all gitignored):**
 - `h-nerve-erp/` — stale cloned copy of the repo
 - `.vercel/` — leftover from Vercel era (Railway now)
 - `.obsidian/` — Obsidian notes app config (personal)
+- `.gstack/` / `.playwright-mcp/` — local tooling state
 - `workflows/` — n8n workflow exports (not Next.js)
 
 ---
@@ -207,8 +207,8 @@
 |--------|-------|-------------|
 | `ai/` | aiEngine.ts, anomaly.ts, digest.ts | AI insight engine, anomaly detection |
 | `alerts/` | alertEngine.ts | Alert evaluation + routing |
-| `auth/` | session.ts, auth.ts, authz.ts, permissions.ts, owner.ts, password.ts, activityLog.ts | Iron-session auth, bcrypt, roles, permissions |
-| `brain/` | Brain.ts + 40+ subsystem files | **THE BRAIN** — see section below |
+| `auth/` | session.ts, auth.ts, authz.ts, permissions.ts, owner.ts, password.ts, activityLog.ts, cronAuth.ts | Iron-session auth, bcrypt, roles, permissions, timing-safe secret compare |
+| `brain/` | tools/ + orchestrator.ts + mcp/ + 40+ subsystem files | **THE BRAIN** — see section below |
 | `brand/` | themes.ts | Theme presets + CSS-var generator |
 | `db/` | db.ts, softDelete.ts, cleanupSoftDeletes.ts | Prisma client (scoped + unscoped), soft delete |
 | `design/` | tokens.ts | Design token constants |
@@ -236,7 +236,9 @@
 ### The Brain (`lib/brain/`) — key files
 | File | Phase | Role |
 |------|-------|------|
-| `Brain.ts` | — | Entry point. Routes BrainQuestion → BrainAnswer |
+| `tools/` | — | Entry surface: 7 typed tools (pullFacts, causalSubgraph, simulate, councilDebate, recallMemory, retrieveDocuments, narrate) + registry in `tools/index.ts` |
+| `orchestrator.ts` | — | LLM tool-loop over the registry (LIVE mode); replaced the retired `Brain.ts` |
+| `mcp/server.ts` / `mcp/scope.ts` | — | stdio MCP server, fail-closed tenant scoping (`npm run brain:mcp`) |
 | `graph.ts` / `graph.prisma.ts` | 1 | Causal graph, weighted edges |
 | `simulator.ts` / `simulator.bfs.ts` | 2 | What-if propagation |
 | `council.ts` / `council.live.ts` | 3 | Multi-agent debate |
@@ -252,7 +254,7 @@
 | `crag.ts` | RAG | Corrective RAG grade filter |
 | `ragEval.ts` | RAG | Decomposed eval metrics |
 | `ragGuard.ts` | RAG | Prompt-injection redaction |
-| `converse.ts` | — | /api/converse brain chat |
+| `converse.ts` | — | /api/converse brain chat — orchestrator loop in LIVE, single-shot in STUB |
 | `agents/` | — | Industry packs: HospitalityExpert, DairyExpert, AgriExpert, FinanceBrain, RiskOfficer, Moderator |
 
 ---
@@ -310,7 +312,7 @@ prisma/
 |------|---------|
 | `docs/RE-INFRASTRUCTURE-PLAN.md` | Rebuild-the-right-way spec (docs-first) |
 | `docs/BLUEPRINT.md` | High-level architecture blueprint |
-| `docs/READINESS.md` | Pitch readiness assessment |
+| `docs/READINESS.md` | Pitch readiness assessment *(historical snapshot 2026-05-15; current state → AUDIT-2026-06.md)* |
 | `docs/prompts/LOGIN-REDESIGN.md` | Login cinematic redesign brief (Claude Design) |
 
 ### Design references
@@ -328,10 +330,10 @@ prisma/
 | Folder | Scripts |
 |--------|---------|
 | `build/` | `build-orrery.mjs` — builds public/orrery from design source |
-| `ops/` | `reset-admin-password.ts`, `run-brain-all-tenants.ts`, `create-test-managers.ts`, `make-execs-crosstenant.ts`, `capture-dashboard.ts`, `e2e-link-check.mjs` |
+| `ops/` | `brain-mcp.ts` (stdio MCP entrypoint, `npm run brain:mcp`), `reset-admin-password.ts`, `run-brain-all-tenants.ts`, `create-test-managers.ts`, `make-execs-crosstenant.ts`, `capture-dashboard.ts`, `e2e-link-check.mjs` |
 | `seed/` | `seed-if-empty.ts` (Railway preDeploy), `ensure-admins.ts` (Railway preDeploy), `ensure-demo-docs.ts` (Railway preDeploy), `ensure-supply-forecasts.ts`, `seed-brain-local.ts` (local brain stub), `seed-demo-extras.ts`, `seed-production.ts`, `seed-erp-demo.ts`, `seed-markets.ts`, etc. |
 | `test/` | Integration flow tests (NS-1, workflow studio, message persistence) |
-| `verify/` | `sanity-sweep.ts`, `count-brain.ts`, revenue parity checks |
+| `verify/` | `brain-db-link.ts` (`npm run brain:doctor`), `brain-mcp-smoke.ts` (`npm run brain:mcp:smoke`), `sanity-sweep.ts`, `count-brain.ts`, revenue parity checks |
 
 ---
 

@@ -9,7 +9,8 @@
 // Styled inline (no external CSS) so it renders correctly on both the cream
 // Heritage surfaces and the dark brain/cosmic surfaces.
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Share2, MessageSquareShare, Send, X } from "lucide-react";
 import { shareToCouncil, shareToMember } from "@/app/actions/share";
 
@@ -39,15 +40,64 @@ export function ShareMenu({
   tone?: "light" | "dark" | "auto";
 }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+
+  // Portal target only exists on the client.
+  useEffect(() => setMounted(true), []);
+
+  // Anchor the fixed-position panel to the trigger. Right-aligned (LTR) /
+  // left-aligned (RTL), flipped above the button if it would overflow the
+  // viewport bottom. Recomputed on open, scroll, and resize.
+  const reposition = useCallback(() => {
+    const t = triggerRef.current;
+    if (!t) return;
+    const r = t.getBoundingClientRect();
+    const panelW = panelRef.current?.offsetWidth ?? 240;
+    const panelH = panelRef.current?.offsetHeight ?? 0;
+    const gap = 6;
+    let top = r.bottom + gap;
+    // Flip above if the panel would spill past the viewport bottom.
+    if (panelH && top + panelH > window.innerHeight - 8) {
+      top = Math.max(8, r.top - gap - panelH);
+    }
+    const left = ar
+      ? Math.max(8, r.left)
+      : Math.min(window.innerWidth - panelW - 8, Math.max(8, r.right - panelW));
+    setPos({ top, left });
+  }, [ar]);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    reposition();
+    const onScroll = () => reposition();
+    window.addEventListener("scroll", onScroll, true);
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll, true);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [open, reposition]);
 
   useEffect(() => {
     if (!open) return;
     function onDoc(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      const inTrigger = ref.current?.contains(e.target as Node);
+      const inPanel = panelRef.current?.contains(e.target as Node);
+      if (!inTrigger && !inPanel) setOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
     }
     document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
   }, [open]);
 
   const dark = tone === "dark";
@@ -59,6 +109,7 @@ export function ShareMenu({
   return (
     <div ref={ref} style={{ position: "relative", display: "inline-block" }}>
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
         className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-mono font-extrabold uppercase tracking-[0.16em] transition"
@@ -76,14 +127,20 @@ export function ShareMenu({
         {label ?? (ar ? "مشاركة" : "Share")}
       </button>
 
-      {open ? (
+      {open && mounted
+        ? createPortal(
         <div
+          ref={panelRef}
           dir={ar ? "rtl" : "ltr"}
           style={{
-            position: "absolute",
-            top: "calc(100% + 6px)",
-            insetInlineEnd: 0,
-            zIndex: 50,
+            position: "fixed",
+            top: pos?.top ?? -9999,
+            left: pos?.left ?? -9999,
+            // Above every page surface, overlay, and stacking context. The
+            // portal escapes ancestor overflow/clipping; this just orders it
+            // over fixed chrome (topbar, FABs).
+            zIndex: 2147483000,
+            visibility: pos ? "visible" : "hidden",
             minWidth: 240,
             background: panelBg,
             border: panelBorder,
@@ -154,8 +211,10 @@ export function ShareMenu({
               {ar ? "أرسل إلى الزميل" : "Send to colleague"}
             </button>
           </form>
-        </div>
-      ) : null}
+        </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }

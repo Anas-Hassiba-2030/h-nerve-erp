@@ -1,7 +1,0 @@
-.env
-.env.*
-!.env.example
-dev.db
-prisma/dev.db
-node_modules
-.next

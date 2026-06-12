@@ -29,6 +29,10 @@ When the user says **"improve the brain"**, that means `lib/brain/` — the tool
 > (`docs/BLUEPRINT.md` is the narrower companion: the read-mostly Brain
 > intelligence-layer pattern.)
 
+> **Lost? Need to find where something lives?** `docs/MAP.md` is the
+> navigation protocol — a 30-second orientation table ("if you want a page →
+> `src/app/<route>/page.tsx`", etc.) plus the full file map. Start there.
+
 ## ⏰ Standing reminder — Phase 27 (ERP modules)
 
 Anas is studying ERP and will bring source material (the "13 ERP modules" + functionality) ~early-mid June 2026 to plan a final enrichment wave. **When he mentions ERP study / sources / modules, surface `docs/PHASES-INTELLIGENCE.md` § Phase 27** and plan it with him. Don't start it before the sources arrive.

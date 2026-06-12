@@ -1,5 +1,5 @@
 // Production-grade HTTP security headers. We deliberately omit a strict
-// Content-Security-Policy here — Next 14's inline scripts plus the project's
+// Content-Security-Policy here — Next.js's inline scripts plus the project's
 // recharts/lucide bundles need careful nonce wiring to ship CSP without
 // breakage. Add CSP in a follow-up after testing every page.
 const securityHeaders = [
@@ -26,7 +26,7 @@ const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "off" },
   // Phase 12 — CSP ENFORCED. The policy was validated in Report-Only
   // across every page; it intentionally keeps script-src/style-src
-  // 'unsafe-inline' 'unsafe-eval' because Next 14's runtime + recharts
+  // 'unsafe-inline' 'unsafe-eval' because Next.js's runtime + recharts
   // require them without nonce wiring, so enforcing this exact policy
   // changes no page behavior — it only blocks unlisted origins
   // (foreign script/connect/object/frame). Tighten by removing the

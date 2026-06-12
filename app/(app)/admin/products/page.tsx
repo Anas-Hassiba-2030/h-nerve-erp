@@ -47,6 +47,51 @@ type SP = { [k: string]: string | string[] | undefined };
 const str = (v: string | string[] | undefined) =>
   (typeof v === "string" ? v.trim() : "") || "";
 
+// Hoisted to module scope (was inline in the render body — react-hooks/
+// static-components). The two render-local closures it used (`hrefWith`, `ar`)
+// are now passed as props; behavior is identical.
+function Pills({
+  label,
+  values,
+  active,
+  paramKey,
+  hrefWith,
+  ar,
+}: {
+  label: string;
+  values: { value: string; label: string }[];
+  active: string;
+  paramKey: string;
+  hrefWith: (key: string, value: string) => string;
+  ar: boolean;
+}) {
+  return values.length === 0 ? null : (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span
+        className="text-[10px] font-bold uppercase tracking-widest"
+        style={{ color: "var(--ink-muted)" }}
+      >
+        {label}
+      </span>
+      <Link
+        href={hrefWith(paramKey, "")}
+        className={active ? "badge-slate" : "badge-emerald"}
+      >
+        {ar ? "الكل" : "All"}
+      </Link>
+      {values.map((v) => (
+        <Link
+          key={v.value}
+          href={hrefWith(paramKey, v.value)}
+          className={active === v.value ? "badge-emerald" : "badge-slate"}
+        >
+          {v.label}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 export default async function ProductsAdminPage(
   props: {
     searchParams: Promise<SP>;
@@ -136,43 +181,6 @@ export default async function ProductsAdminPage(
     return s ? `/admin/products?${s}` : "/admin/products";
   };
 
-  const Pills = ({
-    label,
-    values,
-    active,
-    paramKey,
-  }: {
-    label: string;
-    values: { value: string; label: string }[];
-    active: string;
-    paramKey: string;
-  }) =>
-    values.length === 0 ? null : (
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span
-          className="text-[10px] font-bold uppercase tracking-widest"
-          style={{ color: "var(--ink-muted)" }}
-        >
-          {label}
-        </span>
-        <Link
-          href={hrefWith(paramKey, "")}
-          className={active ? "badge-slate" : "badge-emerald"}
-        >
-          {ar ? "الكل" : "All"}
-        </Link>
-        {values.map((v) => (
-          <Link
-            key={v.value}
-            href={hrefWith(paramKey, v.value)}
-            className={active === v.value ? "badge-emerald" : "badge-slate"}
-          >
-            {v.label}
-          </Link>
-        ))}
-      </div>
-    );
-
   return (
     <DaylightShell dir={ar ? "rtl" : "ltr"}>
       <DaylightHeader
@@ -224,8 +232,8 @@ export default async function ProductsAdminPage(
             </Link>
           )}
         </form>
-        <Pills label={ar ? "المورّد" : "Supplier"} values={suppliers} active={supplier} paramKey="supplier" />
-        <Pills label={ar ? "المستودع" : "Warehouse"} values={warehouses} active={warehouse} paramKey="warehouse" />
+        <Pills label={ar ? "المورّد" : "Supplier"} values={suppliers} active={supplier} paramKey="supplier" hrefWith={hrefWith} ar={ar} />
+        <Pills label={ar ? "المستودع" : "Warehouse"} values={warehouses} active={warehouse} paramKey="warehouse" hrefWith={hrefWith} ar={ar} />
       </div>
 
       {products.length === 0 ? (

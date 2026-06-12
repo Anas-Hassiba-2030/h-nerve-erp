@@ -27,6 +27,23 @@ const str = (v: string | string[] | undefined) =>
 const DEBIT_NORMAL = new Set(["ASSET", "EXPENSE", "COGS"]);
 const TYPE_ORDER = ["ASSET", "LIABILITY", "EQUITY", "REVENUE", "COGS", "EXPENSE"];
 
+// Hoisted to module scope (was defined inline in the render body — flagged by
+// react-hooks/static-components, recreated every render). Pure: only reads props
+// + the formatMoney2 import.
+function Stat({ label, value, strong }: { label: string; value: number; strong?: boolean }) {
+  return (
+    <div className="flex items-center justify-between py-1 text-sm">
+      <span style={{ color: "var(--ink-muted)" }}>{label}</span>
+      <span
+        className="font-mono"
+        style={{ color: "var(--ink)", fontWeight: strong ? 800 : 500 }}
+      >
+        {formatMoney2(value)}
+      </span>
+    </div>
+  );
+}
+
 export default async function AccountsPage(props: { searchParams: Promise<SP> }) {
   const searchParams = await props.searchParams;
   const ar = (await getLocale()) === "ar";
@@ -84,17 +101,6 @@ export default async function AccountsPage(props: { searchParams: Promise<SP> })
   const tenantDefault = accounts[0]?.tenantId ?? "hourani-hotels";
   const byType = (t: string) => accounts.filter((a) => a.type === t);
 
-  const Stat = ({ label, value, strong }: { label: string; value: number; strong?: boolean }) => (
-    <div className="flex items-center justify-between py-1 text-sm">
-      <span style={{ color: "var(--ink-muted)" }}>{label}</span>
-      <span
-        className="font-mono"
-        style={{ color: "var(--ink)", fontWeight: strong ? 800 : 500 }}
-      >
-        {formatMoney2(value)}
-      </span>
-    </div>
-  );
 
   return (
     <DaylightShell dir={ar ? "rtl" : "ltr"}>

@@ -3,8 +3,8 @@ name: document-intel-engineer
 description: |
   Owns Phase 18 — Document Intelligence. The drop zone, the extraction
   modal, the parser (currently a stub, target Claude Vision), and the
-  Documents ledger. Use for any change under lib/docintel/, app/(app)/
-  documents/**, or components/DocumentDropZone.tsx.
+  Documents ledger. Use for any change under src/lib/docintel/, src/app/(app)/
+  documents/**, or src/components/DocumentDropZone.tsx.
 tools: Read, Edit, Write, Bash, Glob, Grep
 model: sonnet
 ---
@@ -14,10 +14,10 @@ drop-anything-anywhere flow: contract → modal → editorial summary +
 extracted facts + risk clauses + "Add to ledger".
 
 ## Surfaces you own
-- `lib/docintel/parser.ts` — currently a stub that pattern-matches
-  filenames; target Claude Vision via `lib/brain/llm.ts`
-- `components/DocumentDropZone.tsx` — global drag overlay + modal
-- `app/(app)/documents/**` — list + detail
+- `src/lib/docintel/parser.ts` — currently a stub that pattern-matches
+  filenames; target Claude Vision via `src/lib/brain/llm.ts`
+- `src/components/DocumentDropZone.tsx` — global drag overlay + modal
+- `src/app/(app)/documents/**` — list + detail
 - `prisma/schema.prisma` — `Document`, `DocExtraction`, `DocClause` models
 
 ## Parser contract (don't break this)

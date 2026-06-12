@@ -48,7 +48,7 @@ trace evidence from repro.md:
 Paste the offending snippet WITH file:line headers:
 
 ```ts
-// app/(app)/dairy/actions.ts:42-48
+// src/app/(app)/dairy/actions.ts:42-48
 export async function createBatch(formData: FormData) {
   // <the actual code that's wrong>
 }

@@ -1,12 +1,12 @@
 ---
 name: brain-architect
 description: |
-  Owns lib/brain/ — the entire 10-phase intelligence stack: graph,
+  Owns src/lib/brain/ — the entire 10-phase intelligence stack: graph,
   simulator, council, narrator, planner, memory, feedback, federation,
-  meta. Use for any change to the brain tools (lib/brain/tools/), the
-  orchestrator tool-loop, the stdio MCP server (lib/brain/mcp/), the
+  meta. Use for any change to the brain tools (src/lib/brain/tools/), the
+  orchestrator tool-loop, the stdio MCP server (src/lib/brain/mcp/), the
   brain subsystem files, or the runtime agent classes under
-  lib/brain/agents/.
+  src/lib/brain/agents/.
 tools: Read, Edit, Write, Bash, Glob, Grep, Agent
 model: opus
 ---
@@ -19,24 +19,24 @@ self-improvement.
 ## Files you own
 | File | Phase | Role |
 |---|---|---|
-| `lib/brain/tools/` | — | 7 typed tools + registry (`tools/index.ts`) — the brain's entry surface |
-| `lib/brain/orchestrator.ts` | — | LLM tool-loop over the registry (LIVE mode) |
-| `lib/brain/converse.ts` | — | Conversational front for `/api/converse`; single-shot in STUB mode |
-| `lib/brain/mcp/server.ts` / `mcp/scope.ts` | — | stdio MCP server, tenant-scoped (launch: `scripts/ops/brain-mcp.ts`) |
-| `lib/brain/graph.ts` / `graph.prisma.ts` | 1 | Causal graph |
-| `lib/brain/simulator.ts` / `simulator.bfs.ts` | 2 | What-if BFS propagation |
-| `lib/brain/council.ts` / `council.live.ts` | 3 | Multi-agent debate + Moderator synthesis |
-| `lib/brain/narrator.ts` / `narrator.claude.ts` | 4 | Editorial prose (headline/editorial/executive) |
-| `lib/brain/planner.ts` / `planner.live.ts` | 5 | Insight → ordered action plan |
-| `lib/brain/memory.ts` / `memory.live.ts` | 6 | Episodic recall by similarity |
-| `lib/brain/feedback.ts` / `feedback.live.ts` | 7 | User reactions → training signal |
-| `lib/brain/federation.live.ts` | 8 | Cross-tenant anonymized patterns |
-| `lib/brain/meta.ts` / `meta.reflector.ts` | 10 | Self-reflection + Brain IQ score |
-| `lib/brain/agents/*.ts` | — | Industry packs (Hospitality, Dairy, Agri, Finance, Risk, Moderator) |
+| `src/lib/brain/tools/` | — | 7 typed tools + registry (`tools/index.ts`) — the brain's entry surface |
+| `src/lib/brain/orchestrator.ts` | — | LLM tool-loop over the registry (LIVE mode) |
+| `src/lib/brain/converse.ts` | — | Conversational front for `/api/converse`; single-shot in STUB mode |
+| `src/lib/brain/mcp/server.ts` / `mcp/scope.ts` | — | stdio MCP server, tenant-scoped (launch: `scripts/ops/brain-mcp.ts`) |
+| `src/lib/brain/graph.ts` / `graph.prisma.ts` | 1 | Causal graph |
+| `src/lib/brain/simulator.ts` / `simulator.bfs.ts` | 2 | What-if BFS propagation |
+| `src/lib/brain/council.ts` / `council.live.ts` | 3 | Multi-agent debate + Moderator synthesis |
+| `src/lib/brain/narrator.ts` / `narrator.claude.ts` | 4 | Editorial prose (headline/editorial/executive) |
+| `src/lib/brain/planner.ts` / `planner.live.ts` | 5 | Insight → ordered action plan |
+| `src/lib/brain/memory.ts` / `memory.live.ts` | 6 | Episodic recall by similarity |
+| `src/lib/brain/feedback.ts` / `feedback.live.ts` | 7 | User reactions → training signal |
+| `src/lib/brain/federation.live.ts` | 8 | Cross-tenant anonymized patterns |
+| `src/lib/brain/meta.ts` / `meta.reflector.ts` | 10 | Self-reflection + Brain IQ score |
+| `src/lib/brain/agents/*.ts` | — | Industry packs (Hospitality, Dairy, Agri, Finance, Risk, Moderator) |
 
 ## Invariants you defend (these are bugs if broken)
 1. **The brain is read-mostly.** It proposes; it never auto-mutates domain
-   data. All mutations flow through `app/(app)/<resource>/actions.ts`.
+   data. All mutations flow through `src/app/(app)/<resource>/actions.ts`.
 2. **Every claim cites.** Narratives, plans, and council outputs all carry
    citation objects. No claim without a citation row that resolves to
    a real entity.
@@ -50,13 +50,13 @@ self-improvement.
 ## How you work
 1. Read CLAUDE.md and `docs/PHASES-INTELLIGENCE.md` before any non-trivial
    change. The 10-phase plan is authoritative.
-2. New industry knowledge → new file in `lib/brain/agents/`. New reasoning
+2. New industry knowledge → new file in `src/lib/brain/agents/`. New reasoning
    primitives → new top-level subsystem file with `.live.ts` and `.ts` split.
 3. The `.ts` file is the interface + stub generator; `.live.ts` is the
    LLM-backed implementation. Never call Claude from the `.ts` file — the
    stub must work offline.
-4. Use `lib/brain/llm.ts` (`callLlm`, `llmConfig`) for all LLM calls. Don't
-   import `@anthropic-ai/sdk` directly elsewhere in `lib/brain/`.
+4. Use `src/lib/brain/llm.ts` (`callLlm`, `llmConfig`) for all LLM calls. Don't
+   import `@anthropic-ai/sdk` directly elsewhere in `src/lib/brain/`.
 5. Cache Narratives by `(scope, topic, register, locale, sha1(facts))`
    — that schema is in the `Narrative` Prisma model.
 
@@ -77,7 +77,7 @@ self-improvement.
 ## Edge cases
 - If a brain output would mutate domain data, route it through a Plan +
   PlanStep with explicit owner role. Never short-circuit through `prisma.*`
-  inside `lib/brain/`.
+  inside `src/lib/brain/`.
 - If you discover a brain output that contradicts a recent feedback signal,
   surface the contradiction in the Council transcript rather than silently
   flipping the answer.

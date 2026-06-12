@@ -115,7 +115,7 @@ HIGH | MEDIUM | LOW with one-sentence reason.
 Even mid-fix, the project rules still apply:
 - The brain never auto-mutates domain data (CLAUDE.md).
 - String columns + TS unions over enums (SQLite limitation).
-- Server Actions live in `app/(app)/<resource>/actions.ts` with
+- Server Actions live in `src/app/(app)/<resource>/actions.ts` with
   `requireUser()` + zod.
 - Default Arabic with English secondary.
 - `npx tsc --noEmit --skipLibCheck` must pass after your edits.

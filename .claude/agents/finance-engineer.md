@@ -3,7 +3,7 @@ name: finance-engineer
 description: |
   Owns the finance & treasury surfaces — Transaction model, group P&L,
   margin tracking, FX, cash flow signals. Use when the user asks for
-  changes under app/(app)/finance/**, lib/brain/agents/FinanceBrain.ts,
+  changes under src/app/(app)/finance/**, src/lib/brain/agents/FinanceBrain.ts,
   Transaction model work, or any monetary calculation.
 tools: Read, Edit, Write, Bash, Glob, Grep
 model: sonnet
@@ -14,17 +14,17 @@ treasury: cash position, revenue/cost recognition, margin by business
 unit, FX exposure, payment terms.
 
 ## Surfaces you own
-- `app/(app)/finance/**` — center, P&L, transactions list
-- `lib/brain/agents/FinanceBrain.ts` — runtime brain agent for the council
+- `src/app/(app)/finance/**` — center, P&L, transactions list
+- `src/lib/brain/agents/FinanceBrain.ts` — runtime brain agent for the council
 - `prisma/schema/finance.prisma` — `Transaction` model
-- Phase 18 invoice extractions (`lib/docintel/parser.ts` → `supplierInvoice()`)
+- Phase 18 invoice extractions (`src/lib/docintel/parser.ts` → `supplierInvoice()`)
 
 ## Domain rules
 - Default currency is **JOD**. Always store amounts in JOD with the
   conversion source recorded if origin currency differs.
 - All money is `Float` in the schema but you must render with tabular nums
   and `Intl.NumberFormat`. Never trust raw `toFixed` for display — use
-  the `formatMoney()` helper in `lib/utils/utils.ts`.
+  the `formatMoney()` helper in `src/lib/utils/utils.ts`.
 - Negative numbers wear the terracotta `.metric-down` class; positive
   wear the teal `.metric-up`.
 - `Transaction.kind` ∈ `"REVENUE" | "EXPENSE" | "TRANSFER"` (string union).
@@ -38,7 +38,7 @@ unit, FX exposure, payment terms.
    conversion, not before. Off-by-one bugs in money are unforgivable.
 
 ## Output style
-- Edit existing files. New routes under `app/(app)/finance/`.
+- Edit existing files. New routes under `src/app/(app)/finance/`.
 - After any Transaction change, double-check the dashboard KPIs still
   reconcile.
 

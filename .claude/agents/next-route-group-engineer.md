@@ -17,12 +17,12 @@ vocabularies live.
 ## The four operator route groups + 2 standalone routes
 | Group | Auth | Chrome | Vocabulary |
 |---|---|---|---|
-| `app/(app)/**` | `getCurrentUser()` → redirect to /login if empty | Sidebar + Topbar + global overlays | Heritage Modern |
-| `app/(admin)/**` | Same — production will gate by role | Sleek Operator frosted top rail | Sleek Operator |
-| `app/(theater)/**` | Same | No chrome — fullscreen | Refined Editorial |
-| `app/(auth)/**` | Public | Auth-only chrome (logo + cards) | Heritage hero |
-| `app/m/**` | Same as (app), separate shell | Mobile shell | Calm Clinical |
-| `app/dev/**` | **Public** — protocol portal | Dev rail | Refined Editorial + Industrial |
+| `src/app/(app)/**` | `getCurrentUser()` → redirect to /login if empty | Sidebar + Topbar + global overlays | Heritage Modern |
+| `src/app/(admin)/**` | Same — production will gate by role | Sleek Operator frosted top rail | Sleek Operator |
+| `src/app/(theater)/**` | Same | No chrome — fullscreen | Refined Editorial |
+| `src/app/(auth)/**` | Public | Auth-only chrome (logo + cards) | Heritage hero |
+| `src/app/m/**` | Same as (app), separate shell | Mobile shell | Calm Clinical |
+| `src/app/dev/**` | **Public** — protocol portal | Dev rail | Refined Editorial + Industrial |
 
 ## Rules
 1. **Drop a folder under the right group** for a new authenticated page.
@@ -32,23 +32,23 @@ vocabularies live.
 3. **Server actions live in `actions.ts`** next to the route. `"use server"`,
    `requireUser()`, zod validation, `prisma`, `revalidatePath()`,
    `redirect()` if appropriate.
-4. **`app/api/` is reserved** for streaming, file exports, public
+4. **`src/app/api/` is reserved** for streaming, file exports, public
    protocol routes, and SSE. Don't use it for ordinary CRUD.
 5. **The seam is at the route boundary**, not the card boundary. If a
    surface mixes vocabularies, you've crossed the boundary wrong.
 
 ## Adding a new (app) page
-1. Create `app/(app)/<resource>/page.tsx` (Server Component).
+1. Create `src/app/(app)/<resource>/page.tsx` (Server Component).
 2. Render `<PageHeader>` (eyebrow + title + optional subtitle).
 3. Wrap content in `<PageContainer>`.
 4. KPI row + list table mirrors the Companies + Hotels canonical pattern.
-5. Create `app/(app)/<resource>/actions.ts` for mutations.
-6. Add a sidebar entry in `components/Sidebar.tsx` under the right group.
+5. Create `src/app/(app)/<resource>/actions.ts` for mutations.
+6. Add a sidebar entry in `src/components/Sidebar.tsx` under the right group.
 
 ## Adding a new admin page
-1. Create `app/(admin)/admin/<resource>/page.tsx`.
+1. Create `src/app/(admin)/admin/<resource>/page.tsx`.
 2. Use Sleek Operator components (cyan-on-near-black, frosted glass).
-3. Add a link to the admin rail in `app/(admin)/layout.tsx`.
+3. Add a link to the admin rail in `src/app/(admin)/layout.tsx`.
 
 ## Layouts
 - The `(app)` layout is async — it does auth, view-as-tenant, theme,
@@ -70,5 +70,5 @@ vocabularies live.
 ## Edge cases
 - A page that needs both (app) chrome and a custom overlay should mount
   the overlay in the page, not the layout. The layout is global.
-- `app/page.tsx` is the bare router: signed-in → `/dashboard`, else
+- `src/app/page.tsx` is the bare router: signed-in → `/dashboard`, else
   → `/login`. Don't pile content there.

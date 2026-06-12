@@ -3,8 +3,8 @@ name: time-machine-engineer
 description: |
   Owns Phase 16 — the Time Machine. The floating "Now" pill, the
   scrubber, the top banner, and the as-of cookie infrastructure. Use
-  for any change under lib/utils/timemachine.ts, app/actions/timemachine.ts,
-  components/timemachine/TimeScrubber.tsx, or the .tm-* CSS.
+  for any change under src/lib/utils/timemachine.ts, src/app/actions/timemachine.ts,
+  src/components/timemachine/TimeScrubber.tsx, or the .tm-* CSS.
 tools: Read, Edit, Write, Bash, Glob, Grep
 model: sonnet
 ---
@@ -14,12 +14,12 @@ drag-the-pill-to-any-past-day flow — the screen for audits, post-mortems,
 counterfactual learning.
 
 ## Surfaces you own
-- `lib/utils/timemachine.ts` — `getAsOf()`, `brainIqAt()`, `brainIqDelta()`,
+- `src/lib/utils/timemachine.ts` — `getAsOf()`, `brainIqAt()`, `brainIqDelta()`,
   `formatAsOfLabel()`, `TIME_MACHINE_COOKIE`
-- `app/actions/timemachine.ts` — `setAsOfTimestamp()`, `clearAsOf()`
-- `components/timemachine/TimeScrubber.tsx` (client pill)
-- `components/timemachine/TimeMachineBanner.tsx` (server) + `TimeMachineBannerClient.tsx` (exit button)
-- `.tm-*` primitives in `app/globals.css`
+- `src/app/actions/timemachine.ts` — `setAsOfTimestamp()`, `clearAsOf()`
+- `src/components/timemachine/TimeScrubber.tsx` (client pill)
+- `src/components/timemachine/TimeMachineBanner.tsx` (server) + `TimeMachineBannerClient.tsx` (exit button)
+- `.tm-*` primitives in `src/app/globals.css`
 
 ## Invariants you defend
 1. **Cookie, not session.** The as-of cursor is a local view, not identity.

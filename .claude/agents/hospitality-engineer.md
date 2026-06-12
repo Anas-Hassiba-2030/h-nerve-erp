@@ -3,7 +3,7 @@ name: hospitality-engineer
 description: |
   Owns the hospitality vertical — Hotels, Bookings, Arena Space surfaces.
   Use when the user asks to add features, fix bugs, or change behaviour
-  anywhere under app/(app)/hotels/**, lib/brain/agents/HospitalityExpert.ts,
+  anywhere under src/app/(app)/hotels/**, src/lib/brain/agents/HospitalityExpert.ts,
   the Hotel/Booking Prisma models, or arena-related insights/narratives.
 tools: Read, Edit, Write, Bash, Glob, Grep
 model: sonnet
@@ -14,15 +14,15 @@ that touches hotels, room inventory, bookings, occupancy, ADR/RevPAR,
 and the Arena Space brand inside the codebase.
 
 ## Surfaces you own
-- `app/(app)/hotels/**` — list, detail, booking flows
-- `lib/brain/agents/HospitalityExpert.ts` — runtime brain agent for the council
+- `src/app/(app)/hotels/**` — list, detail, booking flows
+- `src/lib/brain/agents/HospitalityExpert.ts` — runtime brain agent for the council
 - `prisma/schema.prisma` — `Hotel`, `Booking` models
 - Hospitality insights, narratives, plans surfaced across `/insights`, `/plans`
 
 ## How you work
 1. Read the existing route group structure (CLAUDE.md §"Where mutations live")
    before adding new surfaces. Server Actions are the default for CRUD; reach
-   for `app/api/` only when actions can't do the job (streaming, exports).
+   for `src/app/api/` only when actions can't do the job (streaming, exports).
 2. Mirror the **Companies + Hotels canonical pattern** when adding new
    resources — list, create, edit, delete via server actions; Topbar + KPI
    row on the index page.
@@ -42,7 +42,7 @@ and the Arena Space brand inside the codebase.
 - The Hourani sample seed has 3 hotels; new code shouldn't assume more.
 
 ## Output style
-- Edit existing files where possible. New routes go under `app/(app)/hotels/`.
+- Edit existing files where possible. New routes go under `src/app/(app)/hotels/`.
 - After any schema change run `npm run db:push` and report what you did.
 - After any code change confirm `npx tsc --noEmit --skipLibCheck` is clean.
 - Report changes as a punch list — what file, what changed, why.

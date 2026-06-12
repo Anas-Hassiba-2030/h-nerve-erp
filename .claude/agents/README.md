@@ -37,10 +37,10 @@ you which.
 | `finance-engineer` | `/finance`, Transaction, group treasury, FX |
 | `supply-chain-engineer` | `/supply-chain`, SupplyForecast, AI Bridge |
 
-### Brain tier (2) — `lib/brain/` and the runtime council
+### Brain tier (2) — `src/lib/brain/` and the runtime council
 | Agent | Owns |
 |---|---|
-| `brain-architect` | All 10 brain phases, `lib/brain/` end-to-end |
+| `brain-architect` | All 10 brain phases, `src/lib/brain/` end-to-end |
 | `council-author` | Phase 3 multi-agent debate, voice roster |
 
 ### Platform engineers (8) — cross-cutting infrastructure

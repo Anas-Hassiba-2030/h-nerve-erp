@@ -32,7 +32,7 @@ const MODULE_LABEL: Record<string, { ar: string; en: string }> = {
 };
 
 export default async function BrainBenchmarksPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const [optIn, peers, patterns] = await Promise.all([

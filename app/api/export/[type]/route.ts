@@ -121,7 +121,8 @@ function analyticsLines(analytics: ExportAnalytics, locale: string): string[] {
   return lines;
 }
 
-export async function GET(req: NextRequest, { params }: { params: { type: string } }) {
+export async function GET(req: NextRequest, props: { params: Promise<{ type: string }> }) {
+  const params = await props.params;
   const user = await getCurrentUser();
   if (!user) return new NextResponse("Unauthorized", { status: 401 });
 

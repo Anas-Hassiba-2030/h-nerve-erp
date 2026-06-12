@@ -11,11 +11,11 @@ import { getLocale } from "@/lib/i18n/i18n.server";
 
 export async function seedMemories(): Promise<void> {
   await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   try {
     await seedMemoryLake();
   } catch (e) {
-    flashToast({
+    await flashToast({
       type: "info",
       entity: "info",
       id: "seed-memories",

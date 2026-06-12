@@ -12,20 +12,20 @@ import {
   type MessageKey,
 } from "@/lib/i18n/i18n";
 
-export function getLocale(): Locale {
-  return localeOrDefault(cookies().get(LOCALE_COOKIE)?.value);
+export async function getLocale(): Promise<Locale> {
+  return localeOrDefault((await cookies()).get(LOCALE_COOKIE)?.value);
 }
 
-export function getMessages(locale?: Locale): Messages {
-  return getMessagesByLocale(locale ?? getLocale());
+export async function getMessages(locale?: Locale): Promise<Messages> {
+  return getMessagesByLocale(locale ?? (await getLocale()));
 }
 
-export function t(key: MessageKey, locale?: Locale): string {
-  return tBy(locale ?? getLocale(), key);
+export async function t(key: MessageKey, locale?: Locale): Promise<string> {
+  return tBy(locale ?? (await getLocale()), key);
 }
 
-export function isRtl(locale?: Locale): boolean {
-  return isRtlPure(locale ?? getLocale());
+export async function isRtl(locale?: Locale): Promise<boolean> {
+  return isRtlPure(locale ?? (await getLocale()));
 }
 
 export type { Locale, Messages, MessageKey };

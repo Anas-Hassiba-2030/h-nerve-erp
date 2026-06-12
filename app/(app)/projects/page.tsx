@@ -22,7 +22,7 @@ const STAGE_AR: Record<string, string> = {
 const PRIORITY_AR: Record<string, string> = { LOW: "منخفضة", MEDIUM: "متوسطة", HIGH: "عالية", URGENT: "عاجل" };
 
 export default async function ProjectsPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const lc = ar ? "ar" : "en";
 

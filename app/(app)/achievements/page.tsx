@@ -85,7 +85,7 @@ const initialsOf = (name: string) =>
 const PODIUM_MEDAL = ["🥇", "🥈", "🥉"] as const;
 
 export default async function AchievementsPage() {
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const session = await getCurrentUser();
   if (!session) return null;
 

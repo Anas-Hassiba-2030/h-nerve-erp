@@ -62,12 +62,13 @@ function relTime(d: Date, ar: boolean): string {
   return ar ? `قبل ${days} يوم` : `${days}d ago`;
 }
 
-export default async function ImportsAdminPage({
-  searchParams,
-}: {
-  searchParams: { q?: string; status?: string; window?: string };
-}) {
-  const ar = getLocale() === "ar";
+export default async function ImportsAdminPage(
+  props: {
+    searchParams: Promise<{ q?: string; status?: string; window?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const ar = (await getLocale()) === "ar";
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
@@ -122,7 +123,7 @@ export default async function ImportsAdminPage({
 
   // Webhook URL — built server-side from the request host so the operator
   // can copy a real address, not a placeholder.
-  const h = headers();
+  const h = await headers();
   const proto = h.get("x-forwarded-proto") ?? "https";
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
   const webhookUrl = host ? `${proto}://${host}/api/import/test` : "/api/import/test";

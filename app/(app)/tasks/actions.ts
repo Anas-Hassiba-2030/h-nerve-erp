@@ -26,7 +26,7 @@ const taskSchema = z.object({
 
 export async function createTask(formData: FormData) {
   const user = await requireRole("MANAGER");
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   // schema.parse()/create() throw on invalid input; guard so the new-task form
   // doesn't silently re-render with no feedback.
   try {

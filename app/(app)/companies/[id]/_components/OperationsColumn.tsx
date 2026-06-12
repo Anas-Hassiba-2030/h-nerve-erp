@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { getLocale } from "@/lib/i18n/i18n.server";
 import {
   Hotel,
   Milk,
@@ -30,6 +29,7 @@ export function OperationsColumn({
   company: CompanyDetail["company"];
   en: boolean;
 }) {
+  const locale = en ? "en" : "ar";
   return (
     <div className="space-y-6">
       {/* Hotels */}
@@ -54,7 +54,7 @@ export function OperationsColumn({
                     </span>
                   </div>
                   <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
-                    {h.city} • {loc(TIERS_AR, TIERS_EN, getLocale(), h.tier)} • {formatNumber(h.totalRooms)} غرفة
+                    {h.city} • {loc(TIERS_AR, TIERS_EN, locale, h.tier)} • {formatNumber(h.totalRooms)} غرفة
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -120,7 +120,7 @@ export function OperationsColumn({
                     {en ? (f.nameEn ?? f.name) : f.name}
                   </div>
                   <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
-                    {loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), f.type)} • {f.location} • {formatNumber(f.areaDunum)} {en ? "dunum" : "دونم"}
+                    {loc(FARM_TYPES_AR, FARM_TYPES_EN, locale, f.type)} • {f.location} • {formatNumber(f.areaDunum)} {en ? "dunum" : "دونم"}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -152,7 +152,7 @@ export function OperationsColumn({
                     {en ? (p.nameEn ?? p.name) : p.name}
                   </div>
                   <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
-                    {loc(VERTICALS_AR, VERTICALS_EN, getLocale(), p.vertical)} • {en ? "Founder:" : "مؤسس:"} {p.founder} • {en ? "Cohort" : "فوج"} {p.cohort}
+                    {loc(VERTICALS_AR, VERTICALS_EN, locale, p.vertical)} • {en ? "Founder:" : "مؤسس:"} {p.founder} • {en ? "Cohort" : "فوج"} {p.cohort}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

@@ -71,7 +71,7 @@ export async function createHotel(
   try {
     created = await prisma.hotel.create({
       data: {
-        companyId: resolveOwnCompanyId(data.companyId, getActiveWorkspaceId()),
+        companyId: resolveOwnCompanyId(data.companyId, await getActiveWorkspaceId()),
         name: data.name,
         nameEn: data.nameEn || null,
         city: data.city,
@@ -120,7 +120,7 @@ export async function deleteHotel(formData: FormData) {
 
 export async function createBooking(formData: FormData) {
   await requireRole("MANAGER");
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   // bookingSchema.parse() + the check-out>check-in guard both throw; without a
   // catch the booking form silently re-renders with no message. Toast on any
   // failure so the button never looks dead.
@@ -181,7 +181,7 @@ export async function createBooking(formData: FormData) {
     });
   } catch (e) {
     const dateErr = (e as Error)?.message === "checkout-before-checkin";
-    flashToast({
+    await flashToast({
       type: "info", entity: "info", id: "create-booking",
       label: dateErr
         ? (ar ? "تاريخ المغادرة يجب أن يكون بعد تاريخ الوصول" : "Check-out must be after check-in")

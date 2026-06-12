@@ -27,7 +27,7 @@ import "../../daylight.css";
 export const dynamic = "force-dynamic";
 
 export default async function WorkspaceOperationsPage() {
-  const workspaceId = getActiveWorkspaceId();
+  const workspaceId = await getActiveWorkspaceId();
   if (!workspaceId) redirect("/companies");
   const company = await prismaUnscoped.company.findUnique({
     where: { id: workspaceId },
@@ -35,7 +35,7 @@ export default async function WorkspaceOperationsPage() {
   });
   if (!company) redirect("/companies");
 
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   // W6 — only MANAGER+ may mutate; STAFF get the read-only board.
   const canMutate = !!(await getUserIfRole("MANAGER"));

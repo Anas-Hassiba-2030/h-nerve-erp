@@ -63,12 +63,13 @@ function relativeTime(date: Date, ar: boolean): string {
   return formatDate(date);
 }
 
-export default async function ActivityLogPage({
-  searchParams,
-}: {
-  searchParams: { entity?: string; action?: string; actor?: string };
-}) {
-  const locale = getLocale();
+export default async function ActivityLogPage(
+  props: {
+    searchParams: Promise<{ entity?: string; action?: string; actor?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const where: any = {};

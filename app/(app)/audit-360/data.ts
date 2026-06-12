@@ -199,7 +199,7 @@ export async function resolveEntity(
         where: { id },
         select: { productLabel: true, productLabelEn: true, status: true },
       });
-      return r ? { label: getLocale() === "ar" ? r.productLabel : (r.productLabelEn || r.productLabel), sub: r.status } : null;
+      return r ? { label: (await getLocale()) === "ar" ? r.productLabel : (r.productLabelEn || r.productLabel), sub: r.status } : null;
     }
     case "INSIGHT": {
       const r = await prisma.aIInsight.findUnique({

@@ -76,14 +76,15 @@ function renderDigestBody(body: string): string {
   return html.join("\n");
 }
 
-export default async function DigestDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function DigestDetailPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   if (!isSafeId(params.id)) notFound();
 
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const digest = await prisma.digest.findUnique({
     where: { id: params.id },
   });

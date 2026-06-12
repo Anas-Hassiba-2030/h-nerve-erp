@@ -12,7 +12,7 @@ import { getLocale } from "@/lib/i18n/i18n.server";
 // expensive (run every heuristic) and become permanent records.
 export async function generateNewDigest() {
   const user = await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   if (!hasRole(user, "MANAGER")) {
     throw new Error("FORBIDDEN");
   }

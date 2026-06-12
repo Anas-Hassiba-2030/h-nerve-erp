@@ -39,7 +39,7 @@ export async function toggleRule(formData: FormData) {
 
 export async function updateRule(formData: FormData) {
   await requireUser();
-  const locale = getLocale();
+  const locale = await getLocale();
   const id = String(formData.get("id") ?? "");
   // updateSchema.parse() throws on an out-of-range threshold/cooldown; without
   // a guard the rule-settings form re-renders silently. Toast on either path.

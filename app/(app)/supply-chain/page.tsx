@@ -55,7 +55,7 @@ function ConfidenceRing({ pct }: { pct: number }) {
 }
 
 export default async function SupplyChainPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const lc: "ar" | "en" = ar ? "ar" : "en";
 

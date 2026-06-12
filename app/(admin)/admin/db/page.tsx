@@ -27,9 +27,9 @@ async function countOf(prop: string): Promise<number | null> {
 }
 
 export default async function AdminDbPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
-  const m = getMessages(locale);
+  const m = await getMessages(locale);
   const models = listModels();
 
   const counts = await Promise.all(models.map((m) => countOf(m.prop)));

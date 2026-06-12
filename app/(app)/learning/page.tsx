@@ -14,8 +14,8 @@ import "../daylight.css";
 
 export const dynamic = "force-dynamic";
 
-export default function LearningPage() {
-  const ar = getLocale() === "ar";
+export default async function LearningPage() {
+  const ar = (await getLocale()) === "ar";
   return (
     <DaylightShell dir={ar ? "rtl" : "ltr"}>
       <DaylightHeader

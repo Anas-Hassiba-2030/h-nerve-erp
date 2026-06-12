@@ -38,13 +38,13 @@ function revalidate(stockMoved = false) {
   }
 }
 
-function toast(label: string) {
-  flashToast({ type: "info", entity: "info", label });
+async function toast(label: string) {
+  await flashToast({ type: "info", entity: "info", label });
 }
 
 export async function createSalesOrder(formData: FormData): Promise<void> {
   const user = await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   // Phase 11 authz — never trust a submitted tenantId; resolve against the
   // session. Pinned user → forced to own tenantSlug; cross-tenant ADMIN may pass through.
   const scope = resolveAdminTenantId(user, String(formData.get("tenantId") ?? ""));
@@ -90,29 +90,29 @@ export async function createSalesOrder(formData: FormData): Promise<void> {
       note: note || null,
     });
     revalidate();
-    toast(ar ? `تم إنشاء أمر البيع ${so.soNumber}` : `Created SO ${so.soNumber}`);
+    await toast(ar ? `تم إنشاء أمر البيع ${so.soNumber}` : `Created SO ${so.soNumber}`);
   } catch (e) {
-    toast(`⚠ ${e instanceof Error ? e.message : "create failed"}`);
+    await toast(`⚠ ${e instanceof Error ? e.message : "create failed"}`);
   }
 }
 
 export async function confirmSalesOrder(formData: FormData): Promise<void> {
   await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const soId = String(formData.get("soId") ?? "").trim();
   if (!soId) return;
   try {
     await confirmSO(soId);
     revalidate();
-    toast(ar ? "تم تأكيد أمر البيع" : "SO confirmed");
+    await toast(ar ? "تم تأكيد أمر البيع" : "SO confirmed");
   } catch (e) {
-    toast(`⚠ ${e instanceof Error ? e.message : "confirm failed"}`);
+    await toast(`⚠ ${e instanceof Error ? e.message : "confirm failed"}`);
   }
 }
 
 export async function fulfillSalesOrder(formData: FormData): Promise<void> {
   await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const soId = String(formData.get("soId") ?? "").trim();
   if (!soId) return;
   const fulfillments: Fulfillment[] = [];
@@ -128,22 +128,22 @@ export async function fulfillSalesOrder(formData: FormData): Promise<void> {
   try {
     await fulfillSO(soId, fulfillments);
     revalidate(true);
-    toast(ar ? "تم تنفيذ أمر البيع" : "SO fulfillment recorded");
+    await toast(ar ? "تم تنفيذ أمر البيع" : "SO fulfillment recorded");
   } catch (e) {
-    toast(`⚠ ${e instanceof Error ? e.message : "fulfill failed"}`);
+    await toast(`⚠ ${e instanceof Error ? e.message : "fulfill failed"}`);
   }
 }
 
 export async function cancelSalesOrder(formData: FormData): Promise<void> {
   await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const soId = String(formData.get("soId") ?? "").trim();
   if (!soId) return;
   try {
     await cancelSO(soId);
     revalidate();
-    toast(ar ? "تم إلغاء أمر البيع" : "SO cancelled");
+    await toast(ar ? "تم إلغاء أمر البيع" : "SO cancelled");
   } catch (e) {
-    toast(`⚠ ${e instanceof Error ? e.message : "cancel failed"}`);
+    await toast(`⚠ ${e instanceof Error ? e.message : "cancel failed"}`);
   }
 }

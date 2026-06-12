@@ -14,7 +14,7 @@ import { ArrowUpRight, Crown, Globe2 } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export default async function EmpirePage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const tiles = await getEmpireTiles();
 

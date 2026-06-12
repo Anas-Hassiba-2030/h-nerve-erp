@@ -16,7 +16,7 @@ const REGION_TAG_AR: Record<string, string> = { MENA: "إقليمي", US: "دو�
 const REGION_TAG_EN: Record<string, string> = { MENA: "Regional", US: "International", EU: "International", ASIA: "Regional" };
 
 export default async function MarketsPage() {
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const [stocks, companies] = await Promise.all([
     prisma.marketStock.findMany({ orderBy: [{ region: "asc" }, { changePct: "desc" }], include: { company: true }, take: 200 }),
     prisma.company.findMany({ orderBy: { code: "asc" }, select: { id: true, code: true, name: true, nameEn: true, sector: true, employees: true }, take: 100 }),

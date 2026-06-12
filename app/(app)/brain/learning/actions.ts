@@ -11,11 +11,11 @@ import { flashToast } from "@/lib/utils/toast";
 
 export async function learnNow(): Promise<void> {
   await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   try {
     await learnPatterns({ scope: "default", windowDays: 60, minEvidence: 3 });
   } catch (e) {
-    flashToast({ type: "info", entity: "info", id: "learn", label: ar ? `تعذّر التعلّم: ${(e as Error).message}` : `Learn failed: ${(e as Error).message}` });
+    await flashToast({ type: "info", entity: "info", id: "learn", label: ar ? `تعذّر التعلّم: ${(e as Error).message}` : `Learn failed: ${(e as Error).message}` });
     revalidatePath("/brain/learning");
     return;
   }
@@ -24,12 +24,12 @@ export async function learnNow(): Promise<void> {
 
 export async function seedFeedback(): Promise<void> {
   await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   try {
     await seedFeedbackLib();
     await learnPatterns({ scope: "default", windowDays: 60, minEvidence: 3 });
   } catch (e) {
-    flashToast({ type: "info", entity: "info", id: "seed-fb", label: ar ? `تعذّر البذر: ${(e as Error).message}` : `Seed failed: ${(e as Error).message}` });
+    await flashToast({ type: "info", entity: "info", id: "seed-fb", label: ar ? `تعذّر البذر: ${(e as Error).message}` : `Seed failed: ${(e as Error).message}` });
     revalidatePath("/brain/learning");
     return;
   }

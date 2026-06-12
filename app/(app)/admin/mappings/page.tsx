@@ -40,7 +40,7 @@ const pretty = (s: string | null) => {
 };
 
 export default async function MappingsAdminPage() {
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   // Standard (app) gate (mirrors /admin/imports & /admin/products).
   const user = await getCurrentUser();
   if (!user) redirect("/login");

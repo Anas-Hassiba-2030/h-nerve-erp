@@ -69,8 +69,9 @@ function linkFor(type: string, meta: Record<string, unknown>): string {
   return "/admin/products";
 }
 
-export default async function BrainPage({ searchParams }: { searchParams: SP }) {
-  const ar = getLocale() === "ar";
+export default async function BrainPage(props: { searchParams: Promise<SP> }) {
+  const searchParams = await props.searchParams;
+  const ar = (await getLocale()) === "ar";
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 

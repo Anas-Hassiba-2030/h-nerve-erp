@@ -48,12 +48,13 @@ function relTime(d: Date, ar: boolean): string {
   return ar ? `قبل ${dd} يوم` : `${dd}d ago`;
 }
 
-export default async function PurchaseOrdersPage({
-  searchParams,
-}: {
-  searchParams: SP;
-}) {
-  const ar = getLocale() === "ar";
+export default async function PurchaseOrdersPage(
+  props: {
+    searchParams: Promise<SP>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const ar = (await getLocale()) === "ar";
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 

@@ -9,14 +9,14 @@ export const metadata: Metadata = {
     "نظام H-Nerve ERP — العقل المركزي الرقمي لمجموعة الحوراني. ضيافة، ألبان، زراعة ذكية، تعليم، ذكاء تنبؤي لسلسلة التوريد، أسواق عالمية، واستدامة.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const locale = getLocale();
-  const dir = isRtl(locale) ? "rtl" : "ltr";
-  const theme = getTheme();
+  const locale = await getLocale();
+  const dir = (await isRtl(locale)) ? "rtl" : "ltr";
+  const theme = await getTheme();
   const styleString = themeCssVars(theme);
 
   return (

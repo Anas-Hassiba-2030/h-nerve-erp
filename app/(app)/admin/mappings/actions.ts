@@ -25,13 +25,13 @@ async function gate() {
   return user;
 }
 
-function ok(ar: boolean, label: string) {
-  flashToast({ type: "info", entity: "info", label });
+async function ok(ar: boolean, label: string) {
+  await flashToast({ type: "info", entity: "info", label });
   revalidatePath("/admin/mappings");
 }
 
-function fail(ar: boolean, label: string) {
-  flashToast({ type: "info", entity: "info", label: `⚠ ${label}` });
+async function fail(ar: boolean, label: string) {
+  await flashToast({ type: "info", entity: "info", label: `⚠ ${label}` });
   revalidatePath("/admin/mappings");
 }
 
@@ -51,7 +51,7 @@ function normalizeJsonObject(raw: string): string | null {
 
 export async function createMapping(formData: FormData): Promise<void> {
   const user = await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   // Phase 11 authz — pinned user can only create a mapping in their own tenant.
   const scope = resolveAdminTenantId(user, String(formData.get("tenantId") ?? ""));
   if (!scope) return fail(ar, ar ? "المستأجر مطلوب" : "tenantId is required");
@@ -91,12 +91,12 @@ export async function createMapping(formData: FormData): Promise<void> {
         : `a mapping for (${tenantId}, ${sourceSystem}) already exists`,
     );
   }
-  ok(ar, ar ? "تم إنشاء الخريطة" : "Mapping created");
+  await ok(ar, ar ? "تم إنشاء الخريطة" : "Mapping created");
 }
 
 export async function updateMapping(formData: FormData): Promise<void> {
   await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const description =
@@ -119,12 +119,12 @@ export async function updateMapping(formData: FormData): Promise<void> {
     where: { id },
     data: { description, fieldMapJson, defaultsJson },
   });
-  ok(ar, ar ? "تم تحديث الخريطة" : "Mapping updated");
+  await ok(ar, ar ? "تم تحديث الخريطة" : "Mapping updated");
 }
 
 export async function toggleMappingActive(formData: FormData): Promise<void> {
   await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const current = await prisma.tenantImportMapping.findUnique({
@@ -136,7 +136,7 @@ export async function toggleMappingActive(formData: FormData): Promise<void> {
     where: { id },
     data: { active: !current.active },
   });
-  ok(
+  await ok(
     ar,
     !current.active
       ? ar ? "تم تفعيل الخريطة" : "Mapping activated"
@@ -146,9 +146,9 @@ export async function toggleMappingActive(formData: FormData): Promise<void> {
 
 export async function deleteMapping(formData: FormData): Promise<void> {
   await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   await prisma.tenantImportMapping.delete({ where: { id } });
-  ok(ar, ar ? "تم حذف الخريطة" : "Mapping deleted");
+  await ok(ar, ar ? "تم حذف الخريطة" : "Mapping deleted");
 }

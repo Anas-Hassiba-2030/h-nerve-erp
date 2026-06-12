@@ -31,10 +31,11 @@ function formatTime(d: Date, ar: boolean) {
   }).format(d);
 }
 
-export default async function ThreadPage({ params }: { params: { id: string } }) {
+export default async function ThreadPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await getCurrentUser();
   if (!session) return null;
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   // Verify access
@@ -87,7 +88,6 @@ export default async function ThreadPage({ params }: { params: { id: string } })
             : ""
         }
       />
-
       {/* Thread header card */}
       <section
         className="flex items-center gap-4 p-4 panel reveal"
@@ -129,7 +129,6 @@ export default async function ThreadPage({ params }: { params: { id: string } })
           </>
         ) : null}
       </section>
-
       {/* Messages canvas — BUG-B: full-height chat column. The card
           fills the viewport (header on top, list scrolls in the middle,
           composer pinned at the bottom) so there's no dead whitespace
@@ -226,7 +225,7 @@ export default async function ThreadPage({ params }: { params: { id: string } })
                             the message has a data URI attached. */}
                         {m.imageUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img
+                          (<img
                             src={m.imageUrl}
                             alt=""
                             style={{
@@ -236,7 +235,7 @@ export default async function ThreadPage({ params }: { params: { id: string } })
                               borderRadius: 10,
                               marginBottom: m.body ? 6 : 0,
                             }}
-                          />
+                          />)
                         ) : null}
                         {m.body ? (
                           <div

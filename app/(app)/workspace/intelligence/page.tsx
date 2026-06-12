@@ -52,7 +52,7 @@ const SEV_RANK: Record<string, number> = {
 };
 
 export default async function WorkspaceIntelligencePage() {
-  const workspaceId = getActiveWorkspaceId();
+  const workspaceId = await getActiveWorkspaceId();
   if (!workspaceId) redirect("/companies");
   const company = await prismaUnscoped.company.findUnique({
     where: { id: workspaceId },
@@ -60,7 +60,7 @@ export default async function WorkspaceIntelligencePage() {
   });
   if (!company) redirect("/companies");
 
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const modules = SECTOR_MODULES[company.sector] ?? [];
   const metrics = SECTOR_METRICS[company.sector] ?? [];

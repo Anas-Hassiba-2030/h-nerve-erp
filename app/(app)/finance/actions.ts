@@ -23,7 +23,7 @@ const txSchema = z.object({
 export async function createTransaction(formData: FormData) {
   // Phase D: recording money movements is a privileged mutation.
   const user = await requireRole("MANAGER");
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   // schema.parse()/create() throw on invalid input; without a guard the
   // transaction form re-renders silently. Money entry especially must confirm.
   try {

@@ -12,12 +12,13 @@ import { formatMoney, formatNumber, formatPercent, formatDate } from "@/lib/util
 import { getCompanyBrand } from "@/lib/utils/companyBrand";
 import "../../daylight.css";
 
-export default async function CompanyReportPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const locale = getLocale();
+export default async function CompanyReportPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const company = await prisma.company.findUnique({

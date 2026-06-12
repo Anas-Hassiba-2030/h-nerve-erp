@@ -3,8 +3,8 @@
 import { cookies } from "next/headers";
 import { THEME_COOKIE, themeById, type ThemeDef } from "@/lib/theme/theme";
 
-export function getTheme(): ThemeDef {
-  const id = cookies().get(THEME_COOKIE)?.value;
+export async function getTheme(): Promise<ThemeDef> {
+  const id = (await cookies()).get(THEME_COOKIE)?.value;
   return themeById(id);
 }
 

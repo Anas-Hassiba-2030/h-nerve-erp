@@ -28,12 +28,13 @@ const STATUS_LABEL: Record<string, { ar: string; en: string }> = {
   AUTO_APPLIED: { ar: "تطبيق تلقائي", en: "Auto-applied" },
 };
 
-export default async function SelfTuningReportDetail({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const locale = getLocale();
+export default async function SelfTuningReportDetail(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
+  const locale = await getLocale();
   const ar = locale === "ar";
   const r = await prisma.selfTuningReport.findUnique({ where: { id: params.id } });
   if (!r) notFound();

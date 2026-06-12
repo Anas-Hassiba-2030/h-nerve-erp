@@ -11,11 +11,12 @@ import { UserKpis } from "./_components/UserKpis";
 import { UserActivityColumn } from "./_components/UserActivityColumn";
 import { UserSidebar } from "./_components/UserSidebar";
 
-export default async function UserDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function UserDetailPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const data = await getUserDetail(params.id);
   if (!data) notFound();
 
@@ -41,14 +42,15 @@ export default async function UserDetailPage({
     brand,
   } = data;
 
-  const en = getLocale() === "en";
+  const locale = await getLocale();
+  const en = locale === "en";
 
   return (
     <DaylightShell dir={en ? "ltr" : "rtl"}>
       <DaylightHeader
         eyebrow={en ? "Employee Profile" : "ملف الموظف"}
         title={user.name}
-        subtitle={user.title ?? loc(ROLES_AR, ROLES_EN, getLocale(), user.role)}
+        subtitle={user.title ?? loc(ROLES_AR, ROLES_EN, locale, user.role)}
         actions={
           <Link href="/users" className="dl-btn dl-btn-secondary">
             <ArrowLeft className="h-4 w-4" />

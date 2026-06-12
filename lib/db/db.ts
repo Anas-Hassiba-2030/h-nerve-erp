@@ -39,8 +39,13 @@ function baseClient(): PrismaClient {
 
 function makeScopedClient(): PrismaClient {
   const client = baseClient();
-  client.$use((params, next) =>
-    applyWorkspaceScope(params, next, getActiveWorkspaceId(), getActiveTenantSlug()),
+  client.$use(async (params, next) =>
+    applyWorkspaceScope(
+      params,
+      next,
+      await getActiveWorkspaceId(),
+      await getActiveTenantSlug(),
+    ),
   );
   return client;
 }

@@ -40,7 +40,7 @@ export default async function WorkspaceLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const workspaceId = getActiveWorkspaceId();
+  const workspaceId = await getActiveWorkspaceId();
   if (!workspaceId) redirect("/companies");
 
   const company = await prismaUnscoped.company.findUnique({
@@ -67,7 +67,7 @@ export default async function WorkspaceLayout({
     take: 200,
   });
 
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   // W6 surfaced — make the role model visible, not "buttons missing".
   const canMutate = !!(await getUserIfRole("MANAGER"));

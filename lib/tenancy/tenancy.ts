@@ -15,11 +15,11 @@ import type { ThemeKey } from "@/lib/brand/themes";
 const VIEW_AS_COOKIE = "h_nerve_view_as_tenant";
 const TENANT_THEME_COOKIE = "h_nerve_tenant_theme";
 
-export function getViewAsTenant(): string | null {
-  return cookies().get(VIEW_AS_COOKIE)?.value ?? null;
+export async function getViewAsTenant(): Promise<string | null> {
+  return (await cookies()).get(VIEW_AS_COOKIE)?.value ?? null;
 }
-export function getTenantThemeCookie(): ThemeKey | null {
-  const v = cookies().get(TENANT_THEME_COOKIE)?.value as ThemeKey | undefined;
+export async function getTenantThemeCookie(): Promise<ThemeKey | null> {
+  const v = (await cookies()).get(TENANT_THEME_COOKIE)?.value as ThemeKey | undefined;
   if (!v) return null;
   return v;
 }
@@ -34,9 +34,9 @@ export const tenancyCookies = {
 // in app/actions/workspace.ts. Read by lib/db.ts $use middleware to
 // scope tenant-keyed models.
 export const TENANT_COOKIE = "h_nerve_tenant";
-export function getActiveTenantSlug(): string | null {
+export async function getActiveTenantSlug(): Promise<string | null> {
   try {
-    return cookies().get(TENANT_COOKIE)?.value || null;
+    return (await cookies()).get(TENANT_COOKIE)?.value || null;
   } catch {
     // Non-request context — explicit tenant slug via env (MCP server).
     return process.env.H_NERVE_MCP_TENANT || null;

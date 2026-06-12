@@ -19,7 +19,7 @@ export async function TimeMachineBanner({
 }: {
   locale?: "ar" | "en";
 }) {
-  const state = getAsOf();
+  const state = await getAsOf();
   if (!state.isTraveling || !state.asOf) return null;
 
   const ar = locale === "ar";

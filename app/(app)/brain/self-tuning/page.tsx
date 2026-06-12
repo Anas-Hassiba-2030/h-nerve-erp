@@ -23,7 +23,7 @@ const STATUS_LABEL: Record<string, { ar: string; en: string }> = {
 };
 
 export default async function SelfTuningIndex() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const reports = await prisma.selfTuningReport.findMany({

@@ -48,9 +48,9 @@ async function n(p: Promise<number>): Promise<number | null> {
 }
 
 export default async function AdminSystemPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
-  const m = getMessages(locale);
+  const m = await getMessages(locale);
 
   const [tenants, brainPatterns, iqRows, memories] = await Promise.all([
     prisma.tenant.count().catch(() => 0),

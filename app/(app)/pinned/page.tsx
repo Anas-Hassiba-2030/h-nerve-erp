@@ -35,7 +35,7 @@ const ENTITY_META: Record<string, { ar: string; en: string }> = {
 };
 
 export default async function PinnedPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const user = await getCurrentUser();
   const pins = user ? await listPins(user.id) : [];

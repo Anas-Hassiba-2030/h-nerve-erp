@@ -42,7 +42,7 @@ function dueLabel(d: Date | null | undefined, ar: boolean): string {
 }
 
 export default async function TasksPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const session = await getCurrentUser();
 

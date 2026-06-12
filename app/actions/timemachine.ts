@@ -19,12 +19,12 @@ export async function setAsOfTimestamp(ts: number): Promise<void> {
   const min = new Date("2025-09-01T00:00:00.000Z").getTime();
   const max = Date.now();
   const safe = Math.max(min, Math.min(max, ts));
-  cookies().set(TIME_MACHINE_COOKIE, String(safe), COOKIE_OPTS);
+  (await cookies()).set(TIME_MACHINE_COOKIE, String(safe), COOKIE_OPTS);
   // Refresh the layout so banners + queries pick up the new value.
   revalidatePath("/", "layout");
 }
 
 export async function clearAsOf(): Promise<void> {
-  cookies().delete(TIME_MACHINE_COOKIE);
+  (await cookies()).delete(TIME_MACHINE_COOKIE);
   revalidatePath("/", "layout");
 }

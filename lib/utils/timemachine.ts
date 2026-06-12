@@ -33,8 +33,8 @@ export type AsOfState = {
  * Caller is responsible for using `asOf ?? new Date()` when they want
  * the current cursor regardless of travel mode.
  */
-export function getAsOf(): AsOfState {
-  const raw = cookies().get(TIME_MACHINE_COOKIE)?.value;
+export async function getAsOf(): Promise<AsOfState> {
+  const raw = (await cookies()).get(TIME_MACHINE_COOKIE)?.value;
   if (!raw) return { asOf: null, isTraveling: false, daysBack: 0 };
   const ts = Number(raw);
   if (!Number.isFinite(ts) || ts <= 0)

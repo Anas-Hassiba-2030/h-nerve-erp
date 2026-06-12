@@ -5,11 +5,12 @@ import { prisma } from "@/lib/db/db";
 import { createCrop } from "../../actions";
 import "../../../daylight.css";
 
-export default async function NewCropPage({
-  searchParams,
-}: {
-  searchParams: { farmId?: string };
-}) {
+export default async function NewCropPage(
+  props: {
+    searchParams: Promise<{ farmId?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const farms = await prisma.farm.findMany({
     orderBy: { name: "asc" },
     include: { company: true },

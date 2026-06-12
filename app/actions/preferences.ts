@@ -10,7 +10,7 @@ const ONE_YEAR = 60 * 60 * 24 * 365;
 
 export async function setLocale(formData: FormData) {
   const v = String(formData.get("locale") ?? "ar") as Locale;
-  cookies().set(LOCALE_COOKIE, v === "en" ? "en" : "ar", {
+  (await cookies()).set(LOCALE_COOKIE, v === "en" ? "en" : "ar", {
     httpOnly: false,
     sameSite: "lax",
     path: "/",
@@ -22,7 +22,7 @@ export async function setLocale(formData: FormData) {
 export async function setTheme(formData: FormData) {
   const v = String(formData.get("theme") ?? "harmony") as ThemeId;
   const valid = THEMES[v] ? v : "harmony";
-  cookies().set(THEME_COOKIE, valid, {
+  (await cookies()).set(THEME_COOKIE, valid, {
     httpOnly: false,
     sameSite: "lax",
     path: "/",
@@ -34,7 +34,7 @@ export async function setTheme(formData: FormData) {
 export async function setSidebarCollapsed(formData: FormData) {
   const v = String(formData.get("collapsed") ?? "");
   const next = v === "1" || v === "true" || v === "collapsed" ? "collapsed" : "expanded";
-  cookies().set(SIDEBAR_COOKIE, next, {
+  (await cookies()).set(SIDEBAR_COOKIE, next, {
     httpOnly: false,
     sameSite: "lax",
     path: "/",

@@ -14,7 +14,7 @@ import { getCompanyBrand } from "@/lib/utils/companyBrand";
 import "../daylight.css";
 
 export default async function ReportsIndexPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const [companies, transactions, esg] = await Promise.all([

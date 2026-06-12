@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 
 export default async function MobileApprovalsPage() {
   await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const Arrow = ar ? ArrowLeft : ArrowRight;
 
   const [failedRuns, brokenIntegrations, draftPlans] = await Promise.all([

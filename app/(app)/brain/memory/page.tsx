@@ -58,7 +58,7 @@ function safeStringArray(json: string | null | undefined): string[] {
 }
 
 export default async function BrainMemoryPage() {
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
 
   let rows: Awaited<ReturnType<typeof prisma.memory.findMany>> = [];
   try {

@@ -318,8 +318,8 @@ const WAVES: Wave[] = [
   },
 ];
 
-export default function ShowcasePage() {
-  const ar = getLocale() === "ar";
+export default async function ShowcasePage() {
+  const ar = (await getLocale()) === "ar";
   const totalPhases = WAVES.reduce((s, w) => s + w.phases.length, 0);
   return (
     <DaylightShell dir={ar ? "rtl" : "ltr"}>

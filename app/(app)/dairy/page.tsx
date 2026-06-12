@@ -34,7 +34,7 @@ function qualityPct(grade: string, fat: number): number {
 }
 
 export default async function DairyPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const lc = ar ? "ar" : "en";
 

@@ -21,7 +21,7 @@ import { ProtocolDoc } from "@/components/protocol/ProtocolDoc";
 export const dynamic = "force-dynamic";
 
 export default async function ProtocolPage() {
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const user = await getCurrentUser();
   const admin = isAdmin(user);
   const { clauses, fallback } = await getProtocolClauses();

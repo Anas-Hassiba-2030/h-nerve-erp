@@ -53,7 +53,7 @@ function relativeTime(date: Date, ar: boolean): string {
 
 export default async function MobileActivityPage() {
   await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const rows = await prisma.activityLog.findMany({
     orderBy: { createdAt: "desc" },
     take: 40,

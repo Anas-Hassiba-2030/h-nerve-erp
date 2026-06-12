@@ -5,7 +5,8 @@ import { updateCompany } from "../../actions";
 import { prisma } from "@/lib/db/db";
 import "../../../daylight.css";
 
-export default async function EditCompanyPage({ params }: { params: { id: string } }) {
+export default async function EditCompanyPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const company = await prisma.company.findUnique({ where: { id: params.id } });
   if (!company) notFound();
 

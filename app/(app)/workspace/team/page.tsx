@@ -20,7 +20,7 @@ const ROLE_TONE: Record<string, "critical" | "warn" | "success" | "info" | "neut
 };
 
 export default async function WorkspaceTeamPage() {
-  const workspaceId = getActiveWorkspaceId();
+  const workspaceId = await getActiveWorkspaceId();
   if (!workspaceId) redirect("/companies");
   const company = await prismaUnscoped.company.findUnique({
     where: { id: workspaceId },
@@ -28,7 +28,7 @@ export default async function WorkspaceTeamPage() {
   });
   if (!company) redirect("/companies");
 
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const team = await prismaUnscoped.user.findMany({

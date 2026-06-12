@@ -28,7 +28,7 @@ const KIND_PI: Record<string, { cls: string; icon: string }> = {
 };
 
 export default async function WorkflowsPage() {
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
 
   const workflows = await prisma.workflow.findMany({
     orderBy: { updatedAt: "desc" },

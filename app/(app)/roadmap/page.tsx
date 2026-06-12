@@ -35,8 +35,8 @@ const COLUMN_META: Record<
 
 const STATUS_ORDER: RoadmapStatus[] = ["now", "next", "later"];
 
-export default function RoadmapPage() {
-  const ar = getLocale() === "ar";
+export default async function RoadmapPage() {
+  const ar = (await getLocale()) === "ar";
 
   return (
     <DaylightShell dir={ar ? "rtl" : "ltr"}>

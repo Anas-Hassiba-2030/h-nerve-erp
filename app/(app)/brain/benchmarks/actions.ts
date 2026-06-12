@@ -14,7 +14,7 @@ import { getLocale } from "@/lib/i18n/i18n.server";
 
 export async function optInFederation(): Promise<void> {
   const me = await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   try {
     await enableFederation("default", me.id);
     await aggregate({ scope: "default" });
@@ -39,7 +39,7 @@ export async function optOutFederation(): Promise<void> {
 
 export async function refreshFederation(): Promise<void> {
   await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   try {
     await aggregate({ scope: "default" });
   } catch (e) {
@@ -57,7 +57,7 @@ export async function refreshFederation(): Promise<void> {
 
 export async function seedFederationPeers(): Promise<void> {
   await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   try {
     await seedFederation();
     await aggregate({ scope: "default" });

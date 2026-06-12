@@ -12,7 +12,7 @@ import "../daylight.css";
 export const dynamic = "force-dynamic";
 
 export default async function SustainabilityPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const scores = await prisma.sustainabilityScore.findMany({

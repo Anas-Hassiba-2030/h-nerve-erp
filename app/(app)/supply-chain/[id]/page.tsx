@@ -48,11 +48,12 @@ const CATEGORY_EN: Record<string, string> = {
   GENERAL: "General",
 };
 
-export default async function ForecastDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function ForecastDetailPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const f = await prisma.supplyForecast.findUnique({
     where: { id: params.id },
     include: {
@@ -99,7 +100,7 @@ export default async function ForecastDetailPage({
 
   const pinned = await isPinned("FORECAST", f.id);
 
-  const en = getLocale() === "en";
+  const en = (await getLocale()) === "en";
   const sourceName = en ? (f.source.nameEn ?? f.source.name) : f.source.name;
   const targetName = en ? (f.target.nameEn ?? f.target.name) : f.target.name;
   const categoryLabel = en

@@ -58,11 +58,12 @@ const MODULE_AR: Record<string, string> = {
   EDUCATION: "التعليم",
 };
 
-export default async function InsightDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function InsightDetailPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const insight = await prisma.aIInsight.findUnique({
     where: { id: params.id },
     include: {

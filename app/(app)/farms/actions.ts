@@ -41,7 +41,7 @@ const cropSchema = z.object({
 
 export async function createFarm(formData: FormData) {
   await requireRole("MANAGER");
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   // schema.parse()/create() throw on invalid input or a DB error; guard so the
   // form doesn't silently re-render with no feedback.
   try {
@@ -56,7 +56,7 @@ export async function createFarm(formData: FormData) {
     });
     const created = await prisma.farm.create({
       data: {
-        companyId: resolveOwnCompanyId(data.companyId, getActiveWorkspaceId()),
+        companyId: resolveOwnCompanyId(data.companyId, await getActiveWorkspaceId()),
         name: data.name,
         nameEn: data.nameEn || null,
         type: data.type,
@@ -87,7 +87,7 @@ export async function createFarm(formData: FormData) {
 
 export async function updateSensors(farmId: string, formData: FormData) {
   await requireRole("MANAGER");
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   try {
     const data = sensorSchema.parse({
       tempC: formData.get("tempC") ?? "",
@@ -142,7 +142,7 @@ export async function deleteFarm(formData: FormData) {
 
 export async function createCrop(formData: FormData) {
   await requireRole("MANAGER");
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const farmId = String(formData.get("farmId") ?? "");
   try {
     const data = cropSchema.parse({

@@ -48,11 +48,12 @@ const KIND_ICON = {
   TRANSFER: ArrowLeftRight,
 } as const;
 
-export default async function FinanceDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function FinanceDetailPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const tx = await prisma.transaction.findUnique({
     where: { id: params.id },
     include: {
@@ -112,7 +113,7 @@ export default async function FinanceDetailPage({
 
   const pinned = await isPinned("TRANSACTION", tx.id);
 
-  const en = getLocale() === "en";
+  const en = (await getLocale()) === "en";
   const companyName = en ? (tx.company.nameEn ?? tx.company.name) : tx.company.name;
   const kindLabel = en
     ? (KIND_EN[tx.kind] ?? tx.kind)

@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 type Bucket = { label: "high" | "medium" | "low"; count: number };
 
 export default async function BrainTrustPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   // Pull a representative window of recent narratives. The narrator

@@ -40,7 +40,7 @@ export async function createInsight(formData: FormData) {
       title: data.title,
       body: data.body,
       authorId: user.id,
-      companyId: getActiveWorkspaceId(),
+      companyId: await getActiveWorkspaceId(),
       status: "OPEN",
     },
   });
@@ -62,7 +62,7 @@ export async function setInsightStatus(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "");
   if (!id || !status) return;
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   // ISO-4 ownership — the scoped client nulls an insight outside the caller's
   // workspace (shared-company guard), so a null row means foreign or gone.
@@ -71,7 +71,7 @@ export async function setInsightStatus(formData: FormData) {
   // landed but the row isn't theirs to touch (silent return reads as broken).
   const before = await prisma.aIInsight.findUnique({ where: { id } });
   if (!before) {
-    flashToast({
+    await flashToast({
       type: "info",
       entity: "insight",
       id,
@@ -111,7 +111,7 @@ export async function setInsightStatus(formData: FormData) {
   }
   // Visible confirmation — without this the row just greys out silently and
   // users (rightly) wonder whether the click actually fired.
-  flashToast({
+  await flashToast({
     type: "info",
     entity: "insight",
     id,
@@ -160,7 +160,7 @@ export async function deleteInsight(formData: FormData) {
       userId: me.id,
     });
   }
-  flashToast({
+  await flashToast({
     type: "deleted",
     entity: "insight",
     id,
@@ -171,10 +171,10 @@ export async function deleteInsight(formData: FormData) {
 
 export async function bulkResolveInsights(ids: string[]) {
   const me = await requireRole("MANAGER");
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   if (!ids.length) {
-    flashToast({
+    await flashToast({
       type: "info",
       entity: "insight",
       id: "bulk-resolve",
@@ -195,7 +195,7 @@ export async function bulkResolveInsights(ids: string[]) {
     summaryEn: `Bulk resolved ${ids.length} insights`,
     meta: { ids, count: ids.length },
   });
-  flashToast({
+  await flashToast({
     type: "info",
     entity: "insight",
     id: "bulk-resolve",
@@ -209,7 +209,7 @@ export async function bulkResolveInsights(ids: string[]) {
 
 export async function bulkDeleteInsights(ids: string[]) {
   const me = await requireRole("MANAGER");
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   if (!ids.length) return;
   for (const id of ids) {
@@ -223,7 +223,7 @@ export async function bulkDeleteInsights(ids: string[]) {
     summaryEn: `Bulk deleted ${ids.length} insights`,
     meta: { ids, count: ids.length },
   });
-  flashToast({
+  await flashToast({
     type: "info",
     entity: "insight",
     id: "bulk-delete",
@@ -248,7 +248,7 @@ export async function restoreInsight(formData: FormData) {
     summary: `استعادة إشارة "${after.title}"`,
     summaryEn: `Restored insight "${after.title}"`,
   });
-  flashToast({
+  await flashToast({
     type: "restored",
     entity: "insight",
     id,
@@ -260,7 +260,7 @@ export async function restoreInsight(formData: FormData) {
 export async function generateInsightPlan(formData: FormData) {
   const user = await requireUser();
   const id = String(formData.get("id") ?? "");
-  const locale = getLocale();
+  const locale = await getLocale();
   const lc: "ar" | "en" = locale === "ar" ? "ar" : "en";
   if (!id) return;
 
@@ -280,7 +280,7 @@ export async function generateInsightPlan(formData: FormData) {
       summaryEn: `Plan generated from insight: ${(plan as any).goalEn ?? plan.goal}`,
     });
 
-    flashToast({
+    await flashToast({
       type: "info",
       entity: "info",
       id: plan.id,
@@ -290,7 +290,7 @@ export async function generateInsightPlan(formData: FormData) {
     });
   } catch (e) {
     const msg = (e as Error).message || "unknown";
-    flashToast({
+    await flashToast({
       type: "info",
       entity: "info",
       id,
@@ -311,7 +311,7 @@ export async function generateInsightPlan(formData: FormData) {
 // === AI ENGINE — runs heuristics across all modules and persists fresh insights ===
 export async function runAiEngine() {
   const user = await requireUser();
-  const locale = getLocale();
+  const locale = await getLocale();
   const lc: "ar" | "en" = locale === "ar" ? "ar" : "en";
 
   // The engine runs ~10 parallel heuristics; if any one throws (schema drift,
@@ -328,7 +328,7 @@ export async function runAiEngine() {
       summaryEn: `AI engine: ${created} new insights (${skipped} skipped)`,
     });
 
-    flashToast({
+    await flashToast({
       type: "info",
       entity: "insight",
       id: "ai-engine",
@@ -338,7 +338,7 @@ export async function runAiEngine() {
     });
   } catch (e) {
     const msg = (e as Error).message || "unknown";
-    flashToast({
+    await flashToast({
       type: "info",
       entity: "insight",
       id: "ai-engine",

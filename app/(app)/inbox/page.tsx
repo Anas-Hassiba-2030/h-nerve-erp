@@ -26,7 +26,7 @@ const KIND_CHIP_EN: Record<InboxItem["kind"], string> = {
 };
 
 export default async function InboxPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const lc = ar ? "ar" : "en";
   const user = await getCurrentUser();

@@ -17,11 +17,12 @@ import { OperationsColumn } from "./_components/OperationsColumn";
 import { SignalsColumn } from "./_components/SignalsColumn";
 import "../../daylight.css";
 
-export default async function CompanyDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function CompanyDetailPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const data = await getCompanyDetail(params.id);
 
   if (!data) notFound();
@@ -40,7 +41,7 @@ export default async function CompanyDetailPage({
     latestEsg,
   } = data;
 
-  const en = getLocale() === "en";
+  const en = (await getLocale()) === "en";
 
   return (
     <DaylightShell dir={en ? "ltr" : "rtl"}>

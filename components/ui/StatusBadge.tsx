@@ -30,8 +30,8 @@ const STATUS_TONE: Record<string, Tone> = {
   ARCHIVED: "neutral", CLOSED: "neutral",
 };
 
-export function StatusBadge({ status, locale }: { status: string; locale?: "ar" | "en" }) {
-  const lc = locale ?? getLocale();
+export async function StatusBadge({ status, locale }: { status: string; locale?: "ar" | "en" }) {
+  const lc = locale ?? (await getLocale());
   const tone: Tone = STATUS_TONE[status] ?? "neutral";
   const color: Record<Tone, string> = {
     success:  "var(--heri-teal)",

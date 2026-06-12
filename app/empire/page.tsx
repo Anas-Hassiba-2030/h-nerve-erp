@@ -26,7 +26,7 @@ import { BrainActivity } from "@/components/empire/BrainActivity";
 export const dynamic = "force-dynamic";
 
 export default async function EmpirePage() {
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const data = await getEmpireSummary();
 
   const businessCount = data.sectors.reduce((s, x) => s + x.companyCount, 0);

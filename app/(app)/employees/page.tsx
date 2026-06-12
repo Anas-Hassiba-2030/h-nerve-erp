@@ -21,7 +21,7 @@ const ROLE_META: Record<string, { ar: string; en: string; icon: any }> = {
 };
 
 export default async function EmployeesPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const lc = ar ? "ar" : "en";
 

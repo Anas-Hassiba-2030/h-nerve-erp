@@ -24,8 +24,9 @@ type SP = { [k: string]: string | string[] | undefined };
 const str = (v: string | string[] | undefined) =>
   (typeof v === "string" ? v.trim() : "") || "";
 
-export default async function SuppliersPage({ searchParams }: { searchParams: SP }) {
-  const ar = getLocale() === "ar";
+export default async function SuppliersPage(props: { searchParams: Promise<SP> }) {
+  const searchParams = await props.searchParams;
+  const ar = (await getLocale()) === "ar";
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 

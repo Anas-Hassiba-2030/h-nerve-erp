@@ -14,9 +14,9 @@ export const WORKSPACE_COOKIE = "h_nerve_workspace";
  * contexts (prisma/seed.ts, build-time) `cookies()` throws — we treat
  * that as "no workspace" so seeds and builds are never scoped.
  */
-export function getActiveWorkspaceId(): string | null {
+export async function getActiveWorkspaceId(): Promise<string | null> {
   try {
-    return cookies().get(WORKSPACE_COOKIE)?.value || null;
+    return (await cookies()).get(WORKSPACE_COOKIE)?.value || null;
   } catch {
     // Non-request context (MCP server, seed, build). Allow an explicit
     // workspace via env so a standalone process can run tenant-scoped.

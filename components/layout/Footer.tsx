@@ -9,8 +9,8 @@ import { getLocale } from "@/lib/i18n/i18n.server";
 //   3. Status      — system pill + secure indicator
 //
 // No heavy gradients, no bloat — just Bloomberg-grade quiet confidence.
-export function Footer() {
-  const locale = getLocale();
+export async function Footer() {
+  const locale = await getLocale();
   const ar = locale === "ar";
   const year = new Date().getFullYear();
 

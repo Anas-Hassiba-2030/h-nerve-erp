@@ -18,10 +18,11 @@ type SP = { [k: string]: string | string[] | undefined };
 const s = (v: string | string[] | undefined) =>
   (typeof v === "string" ? v.trim() : "");
 
-export default async function AuditPage({ searchParams }: { searchParams: SP }) {
-  const locale = getLocale();
+export default async function AuditPage(props: { searchParams: Promise<SP> }) {
+  const searchParams = await props.searchParams;
+  const locale = await getLocale();
   const ar = locale === "ar";
-  const m = getMessages(locale);
+  const m = await getMessages(locale);
 
   const fAction = s(searchParams.action);
   const fEntity = s(searchParams.entity);

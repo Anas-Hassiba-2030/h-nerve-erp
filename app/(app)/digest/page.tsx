@@ -11,7 +11,7 @@ import "./digest.css";
 export const dynamic = "force-dynamic";
 
 export default async function DigestListPage() {
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const session = await getCurrentUser();
   const canGenerate = hasRole(session, "MANAGER");
 

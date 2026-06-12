@@ -11,8 +11,9 @@ import { formatMoney, formatNumber, SECTORS_AR, SECTORS_EN, loc } from "@/lib/ut
 import "../daylight.css";
 import "./compare.css";
 
-export default async function ComparePage({ searchParams }: { searchParams: { a?: string; b?: string } }) {
-  const ar = getLocale() === "ar";
+export default async function ComparePage(props: { searchParams: Promise<{ a?: string; b?: string }> }) {
+  const searchParams = await props.searchParams;
+  const ar = (await getLocale()) === "ar";
   const lc: "ar" | "en" = ar ? "ar" : "en";
 
   const [companies, transactions, esg, allFarms, allHotels, allDairy, allPrograms, allForecasts] = await Promise.all([

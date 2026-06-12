@@ -25,12 +25,12 @@ async function gate() {
   return user;
 }
 
-function ok(label: string) {
-  flashToast({ type: "info", entity: "info", label });
+async function ok(label: string) {
+  await flashToast({ type: "info", entity: "info", label });
   revalidatePath("/admin/suppliers");
 }
-function fail(label: string) {
-  flashToast({ type: "info", entity: "info", label: `⚠ ${label}` });
+async function fail(label: string) {
+  await flashToast({ type: "info", entity: "info", label: `⚠ ${label}` });
   revalidatePath("/admin/suppliers");
 }
 
@@ -49,7 +49,7 @@ function fields(formData: FormData) {
 
 export async function createSupplier(formData: FormData): Promise<void> {
   const user = await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   // Phase 11 authz — pinned user can only create a supplier in their own tenant.
   const scope = resolveAdminTenantId(user, String(formData.get("tenantId") ?? ""));
   if (!scope) return fail(ar ? "المستأجر مطلوب" : "tenantId is required");
@@ -67,12 +67,12 @@ export async function createSupplier(formData: FormData): Promise<void> {
         : `a supplier named "${f.name}" already exists for this tenant`,
     );
   }
-  ok(ar ? "تم إنشاء المورّد" : "Supplier created");
+  await ok(ar ? "تم إنشاء المورّد" : "Supplier created");
 }
 
 export async function updateSupplier(formData: FormData): Promise<void> {
   await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return;
   const f = fields(formData);
@@ -84,12 +84,12 @@ export async function updateSupplier(formData: FormData): Promise<void> {
       ar ? "تعذّر التحديث (اسم مكرّر؟)" : "update failed (duplicate name?)",
     );
   }
-  ok(ar ? "تم تحديث المورّد" : "Supplier updated");
+  await ok(ar ? "تم تحديث المورّد" : "Supplier updated");
 }
 
 export async function deleteSupplier(formData: FormData): Promise<void> {
   await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return;
   // Block soft-delete while non-cancelled POs still reference it — the
@@ -108,5 +108,5 @@ export async function deleteSupplier(formData: FormData): Promise<void> {
     where: { id },
     data: { deletedAt: new Date() },
   });
-  ok(ar ? "تم حذف المورّد" : "Supplier deleted");
+  await ok(ar ? "تم حذف المورّد" : "Supplier deleted");
 }

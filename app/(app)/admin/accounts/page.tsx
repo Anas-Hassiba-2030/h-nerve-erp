@@ -27,8 +27,9 @@ const str = (v: string | string[] | undefined) =>
 const DEBIT_NORMAL = new Set(["ASSET", "EXPENSE", "COGS"]);
 const TYPE_ORDER = ["ASSET", "LIABILITY", "EQUITY", "REVENUE", "COGS", "EXPENSE"];
 
-export default async function AccountsPage({ searchParams }: { searchParams: SP }) {
-  const ar = getLocale() === "ar";
+export default async function AccountsPage(props: { searchParams: Promise<SP> }) {
+  const searchParams = await props.searchParams;
+  const ar = (await getLocale()) === "ar";
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 

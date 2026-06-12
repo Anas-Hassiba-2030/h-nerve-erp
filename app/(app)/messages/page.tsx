@@ -49,7 +49,7 @@ function formatTime(d: Date, ar: boolean) {
 }
 
 export default async function MessagesPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const session = await getCurrentUser();
 

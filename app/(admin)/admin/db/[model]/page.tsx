@@ -31,16 +31,17 @@ const db = prismaUnscoped as unknown as Record<
   }
 >;
 
-export default async function AdminDbModelPage({
-  params,
-  searchParams,
-}: {
-  params: { model: string };
-  searchParams: SP;
-}) {
-  const locale = getLocale();
+export default async function AdminDbModelPage(
+  props: {
+    params: Promise<{ model: string }>;
+    searchParams: Promise<SP>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
+  const locale = await getLocale();
   const ar = locale === "ar";
-  const m = getMessages(locale);
+  const m = await getMessages(locale);
   const meta = getModel(params.model);
   if (!meta) notFound();
 

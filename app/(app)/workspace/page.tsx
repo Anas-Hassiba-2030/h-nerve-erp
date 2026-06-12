@@ -38,8 +38,8 @@ const SECTOR_MODULES: Record<string, string[]> = {
 };
 
 export default async function WorkspaceCommandPage() {
-  const workspaceId = getActiveWorkspaceId();
-  const locale = getLocale();
+  const workspaceId = await getActiveWorkspaceId();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   // Phase 26.4 — empty state instead of silently redirecting to /companies.

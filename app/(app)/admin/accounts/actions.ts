@@ -19,16 +19,16 @@ export async function createLedgerAccount(formData: FormData): Promise<void> {
   if (!user || !["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) {
     throw new Error("forbidden");
   }
-  const ar = getLocale() === "ar";
-  const fail = (label: string) => {
-    flashToast({ type: "info", entity: "info", label: `⚠ ${label}` });
+  const ar = (await getLocale()) === "ar";
+  const fail = async (label: string) => {
+    await flashToast({ type: "info", entity: "info", label: `⚠ ${label}` });
     revalidatePath("/admin/accounts");
   };
 
   // Phase 11 authz — never trust a submitted tenantId; resolve against the
   // session. Pinned user → forced to own tenantSlug; cross-tenant ADMIN may pass through.
   const scope = resolveAdminTenantId(user, String(formData.get("tenantId") ?? ""));
-  if (!scope) return fail(ar ? "المستأجر مطلوب" : "tenantId is required");
+  if (!scope) return await fail(ar ? "المستأجر مطلوب" : "tenantId is required");
   const tenantId = scope.tenantId.slice(0, 64);
   const code = String(formData.get("code") ?? "").trim().slice(0, 20);
   const name = String(formData.get("name") ?? "").trim().slice(0, 120);
@@ -37,23 +37,23 @@ export async function createLedgerAccount(formData: FormData): Promise<void> {
     String(formData.get("description") ?? "").trim().slice(0, 200) || null;
 
   if (!code || !name) {
-    return fail(ar ? "الرمز والاسم مطلوبة" : "code and name are required");
+    return await fail(ar ? "الرمز والاسم مطلوبة" : "code and name are required");
   }
   if (!TYPES.includes(type)) {
-    return fail(ar ? `النوع يجب أن يكون أحد: ${TYPES.join(", ")}` : `type must be one of: ${TYPES.join(", ")}`);
+    return await fail(ar ? `النوع يجب أن يكون أحد: ${TYPES.join(", ")}` : `type must be one of: ${TYPES.join(", ")}`);
   }
   try {
     await prisma.ledgerAccount.create({
       data: { tenantId, code, name, type, description },
     });
   } catch {
-    return fail(
+    return await fail(
       ar
         ? `يوجد حساب بالرمز ${code} لهذا المستأجر`
         : `an account with code ${code} already exists for this tenant`,
     );
   }
-  flashToast({
+  await flashToast({
     type: "info",
     entity: "info",
     label: ar ? `تم إنشاء الحساب ${code}` : `Account ${code} created`,

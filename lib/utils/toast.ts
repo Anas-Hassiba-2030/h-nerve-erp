@@ -16,12 +16,12 @@ export {
 // Server-side: attach a one-shot flash to the response so the next render of
 // (app)/layout.tsx hands it to <ToastProvider>. httpOnly is intentionally false
 // — the client clears the cookie after consuming it.
-export function flashToast(payload: Omit<ToastFlash, "expiresAt">): void {
+export async function flashToast(payload: Omit<ToastFlash, "expiresAt">): Promise<void> {
   const value: ToastFlash = {
     ...payload,
     expiresAt: Date.now() + TOAST_DURATION_MS,
   };
-  cookies().set(FLASH_COOKIE, JSON.stringify(value), {
+  (await cookies()).set(FLASH_COOKIE, JSON.stringify(value), {
     httpOnly: false,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -30,8 +30,8 @@ export function flashToast(payload: Omit<ToastFlash, "expiresAt">): void {
   });
 }
 
-export function readFlash(): ToastFlash | null {
-  const raw = cookies().get(FLASH_COOKIE)?.value;
+export async function readFlash(): Promise<ToastFlash | null> {
+  const raw = (await cookies()).get(FLASH_COOKIE)?.value;
   if (!raw) return null;
   try {
     return JSON.parse(raw) as ToastFlash;

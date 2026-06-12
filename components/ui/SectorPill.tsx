@@ -17,8 +17,8 @@ const TONE: Record<string, string> = {
   TRADE:       "var(--heri-rose)",       // rose
 };
 
-export function SectorPill({ sector, locale }: { sector: string; locale?: "ar" | "en" }) {
-  const lc = locale ?? getLocale();
+export async function SectorPill({ sector, locale }: { sector: string; locale?: "ar" | "en" }) {
+  const lc = locale ?? (await getLocale());
   const color = TONE[sector] ?? TONE.INVESTMENT;
   return (
     <span className="heri-pill" style={{ color }}>

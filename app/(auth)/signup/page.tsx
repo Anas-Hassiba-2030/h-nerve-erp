@@ -7,15 +7,16 @@ import { Logo } from "@/components/layout/Logo";
 import { MIN_PASSWORD_LEN } from "@/lib/auth/password";
 import { signupAction } from "./actions";
 
-export default async function SignupPage({
-  searchParams,
-}: {
-  searchParams: { error?: string };
-}) {
+export default async function SignupPage(
+  props: {
+    searchParams: Promise<{ error?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const user = await getCurrentUser();
   if (user) redirect("/dashboard");
-  const locale = getLocale();
-  const m = getMessages(locale);
+  const locale = await getLocale();
+  const m = await getMessages(locale);
 
   return (
     <div className="space-y-6">

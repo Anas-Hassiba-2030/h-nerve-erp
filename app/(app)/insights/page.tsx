@@ -47,7 +47,7 @@ function num(n: number, ar: boolean): string {
 }
 
 export default async function InsightsPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const insights = await prisma.aIInsight.findMany({

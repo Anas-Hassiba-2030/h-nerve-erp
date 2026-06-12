@@ -195,7 +195,7 @@ function SessionRow({ s, ar }: { s: SessionRowData; ar: boolean }) {
 }
 
 export default async function BrainCouncilIndex() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   // Phase V3-P5 — operator-shared CouncilDiscussion threads render

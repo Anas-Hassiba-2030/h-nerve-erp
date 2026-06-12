@@ -45,7 +45,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // override check lives. Only fires when H_NERVE_PERMS_ENFORCED=true so
   // the dev/staging path stays unchanged.
   if (permsEnforced() && session.role !== "ADMIN") {
-    const pathname = headers().get("x-pathname") ?? "";
+    const pathname = (await headers()).get("x-pathname") ?? "";
     const allowed = await effectiveCanAccess(
       session.role,
       pathname,
@@ -58,18 +58,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     if (!allowed) redirect("/dashboard");
   }
 
-  const locale = getLocale();
-  const initialFlash = readFlash();
+  const locale = await getLocale();
+  const initialFlash = await readFlash();
 
   // Phase 16 — Time Machine cursor (cookie-driven). Banner surfaces only
   // when traveling; pill is always visible.
-  const asOfState = getAsOf();
+  const asOfState = await getAsOf();
 
   // Phase 11 — when a superadmin is "viewing as" a tenant, swap the
   // Heritage palette for the tenant's theme via inline style overrides
   // and surface a banner that lets them exit the preview.
-  const viewAsSlug = getViewAsTenant();
-  const viewAsTheme = getTenantThemeCookie();
+  const viewAsSlug = await getViewAsTenant();
+  const viewAsTheme = await getTenantThemeCookie();
   const viewAsTenantData = viewAsSlug
     ? await prisma.tenant.findUnique({ where: { slug: viewAsSlug } })
     : null;

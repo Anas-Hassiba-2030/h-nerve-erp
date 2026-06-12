@@ -30,14 +30,15 @@ const SECTIONS: { ar: string; en: string; routes: string[] }[] = [
   { ar: "عائلة الإدارة", en: "Admin family", routes: ["/admin/imports", "/admin/products", "/admin/warehouses", "/admin/journal", "/admin/accounts", "/admin/brain"] },
 ];
 
-export default async function PermissionsPreview({
-  searchParams,
-}: {
-  searchParams: { as?: string };
-}) {
-  const locale = getLocale();
+export default async function PermissionsPreview(
+  props: {
+    searchParams: Promise<{ as?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const locale = await getLocale();
   const ar = locale === "ar";
-  const m = getMessages(locale);
+  const m = await getMessages(locale);
   const asRole = (
     GATED_ROLES.includes(searchParams.as as PermRole)
       ? searchParams.as

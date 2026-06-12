@@ -31,7 +31,7 @@ const sendSchema = z.object({
 
 export async function sendMessage(formData: FormData) {
   const user = await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   // parse() + the empty/participant guards all throw; without a catch a failed
   // send just vanishes with no feedback. Toast on failure only (a successful
   // send shouldn't nag — the new message appearing IS the confirmation).
@@ -84,7 +84,7 @@ export async function sendMessage(formData: FormData) {
     });
   } catch (e) {
     const msg = (e as Error)?.message;
-    flashToast({
+    await flashToast({
       type: "info", entity: "info", id: "send-msg",
       label: msg === "forbidden"
         ? (ar ? "لست عضواً في هذه المحادثة" : "You're not a participant of this thread")
@@ -106,7 +106,7 @@ const startSchema = z.object({
 
 export async function startDirectThread(formData: FormData) {
   const user = await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   let threadId = "";
   try {
     const data = startSchema.parse({
@@ -132,7 +132,7 @@ export async function startDirectThread(formData: FormData) {
     }
   } catch (e) {
     const msg = (e as Error)?.message;
-    flashToast({
+    await flashToast({
       type: "info", entity: "info", id: "start-thread",
       label: msg === "self"
         ? (ar ? "لا يمكنك مراسلة نفسك" : "You can't message yourself")

@@ -48,12 +48,13 @@ function highlight(text: string, q: string): React.ReactNode {
   );
 }
 
-export default async function SearchPage({
-  searchParams,
-}: {
-  searchParams: { q?: string; group?: string };
-}) {
-  const locale = getLocale();
+export default async function SearchPage(
+  props: {
+    searchParams: Promise<{ q?: string; group?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const locale = await getLocale();
   const ar = locale === "ar";
   const q = (searchParams.q ?? "").trim();
   const groupFilter = searchParams.group;

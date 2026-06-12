@@ -15,7 +15,7 @@ import "./finance.css";
 export const dynamic = "force-dynamic";
 
 export default async function FinancePage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const lc: "ar" | "en" = ar ? "ar" : "en";
   const session = await getCurrentUser();

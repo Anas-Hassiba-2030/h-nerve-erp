@@ -16,8 +16,8 @@ import { getLocale } from "@/lib/i18n/i18n.server";
 import { DesignSystemShowcase } from "./DesignSystemShowcase";
 import "../daylight.css";
 
-export default function DesignSystemPage() {
-  const locale = getLocale();
+export default async function DesignSystemPage() {
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   return (

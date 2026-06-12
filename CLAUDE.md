@@ -59,6 +59,18 @@ pure-unit — `lib/**/*.test.ts`, no DB/network/Next runtime. Run
 
 ## Architecture
 
+### `src/` layout (2026-06-12)
+
+All source lives under **`src/`**: `src/app/`, `src/components/`, `src/lib/`,
+`src/middleware.ts`. Everywhere this document (or any doc) says `app/...`,
+`components/...`, or `lib/...`, read it as `src/app/...`, `src/components/...`,
+`src/lib/...`. The `@/*` import alias maps to `./src/*` (so `@/lib/db/db`
+still works unchanged), with one carve-out: `@/prisma/*` maps to the root
+`prisma/` folder (seeds are imported by genesis/seed routes). `prisma/`,
+`scripts/`, `docs/`, `public/` stay at the repo root, as do all
+framework-mandated config files (`package.json`, `next.config.mjs`,
+`tsconfig.json`, `.env*`, `railway.toml`, …) — those cannot move.
+
 ### Route groups
 
 The App Router uses **four** groups, each with its own `layout.tsx`:

@@ -20,6 +20,15 @@ These files are the source of truth. Reference them by path in any conversation 
 
 When the user says **"improve the brain"**, that means `lib/brain/` — the tools, the orchestrator, and the subsystem files. When the user says **"apply the design skill to X"**, that means `docs/DESIGN-SKILL.md` § the appropriate vocabulary.
 
+> **REQUIRED READING — `docs/SYSTEM-BLUEPRINT.md`.** When the user asks to
+> design, blueprint, architect, or build a **new system** for a company (or any
+> new project from scratch), you MUST read `docs/SYSTEM-BLUEPRINT.md` first and
+> base the plan and implementation on its principles, stack, structure, security
+> baseline, and bootstrap checklist. It is the distilled, battle-tested playbook
+> behind this codebase — apply it so the new build starts on ideal foundations.
+> (`docs/BLUEPRINT.md` is the narrower companion: the read-mostly Brain
+> intelligence-layer pattern.)
+
 ## ⏰ Standing reminder — Phase 27 (ERP modules)
 
 Anas is studying ERP and will bring source material (the "13 ERP modules" + functionality) ~early-mid June 2026 to plan a final enrichment wave. **When he mentions ERP study / sources / modules, surface `docs/PHASES-INTELLIGENCE.md` § Phase 27** and plan it with him. Don't start it before the sources arrive.

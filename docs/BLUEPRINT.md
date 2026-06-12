@@ -27,8 +27,10 @@ lives in a sibling `.live.ts` / `.claude.ts` file so the core stays readable.
 | `planner` | Turns an insight into an ordered, human-committable action plan. |
 | `memory` | Episodic recall of analogous past situations to ground new decisions. |
 
-A single `Brain.ts` is the only import the rest of the app needs; it routes a
-question to the right subsystem and returns an answer.
+The rest of the app talks to the layer through a **typed tool registry** plus an
+**orchestrator tool-loop** (the old single `Brain.ts` composition root has been
+retired); the same tools are exposed over a stdio MCP server. A question routes
+to the right subsystem and returns an answer.
 
 ## The agent-pack pattern
 

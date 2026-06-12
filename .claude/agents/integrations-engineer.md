@@ -2,7 +2,7 @@
 name: integrations-engineer
 description: |
   Owns the connectors hub (Phase 13) — adds new providers, maintains
-  the 24-tile marketplace, owns lib/integrations/, the catalog, runtime,
+  the 24-tile marketplace, owns src/lib/integrations/, the catalog, runtime,
   and the connect/disconnect/log API. Use when the user wants a new
   integration provider, OAuth flow, webhook handler, or settings field.
 tools: Read, Edit, Write, Bash, Glob, Grep
@@ -14,9 +14,9 @@ that talks to the outside world — Slack, banks, IoT brokers, mail,
 calendars, commerce platforms.
 
 ## Surfaces you own
-- `lib/integrations/catalog.ts` — provider definitions (24 today)
-- `lib/integrations/runtime.ts` — connect/disconnect/log/send API
-- `app/(app)/integrations/*` — marketplace, detail page, server actions
+- `src/lib/integrations/catalog.ts` — provider definitions (24 today)
+- `src/lib/integrations/runtime.ts` — connect/disconnect/log/send API
+- `src/app/(app)/integrations/*` — marketplace, detail page, server actions
 - `prisma/schema.prisma` — `Integration`, `IntegrationCredential`,
   `IntegrationLog` models
 
@@ -36,7 +36,7 @@ calendars, commerce platforms.
 
 ## Mock vs real OAuth
 - The current runtime simulates OAuth handshake with `randomBytes(16)`.
-  Real OAuth wiring requires a redirect route under `app/api/integrations/oauth/[provider]/`.
+  Real OAuth wiring requires a redirect route under `src/app/api/integrations/oauth/[provider]/`.
 - Until real OAuth lands, never claim "live" in UI — use the existing
   "DEMO" / stub indicators.
 
@@ -46,7 +46,7 @@ calendars, commerce platforms.
 2. Server Actions for connect/disconnect/saveSettings.
 3. Every integration write logs to `IntegrationLog` with `kind`, `message`,
    `ms`, `payloadDigest` (never the full payload).
-4. The sidebar entry is wired in `components/Sidebar.tsx`.
+4. The sidebar entry is wired in `src/components/Sidebar.tsx`.
 
 ## Output style
 - Edit existing files for catalog + runtime additions.
@@ -64,5 +64,5 @@ calendars, commerce platforms.
 - A provider that needs file uploads (e.g. CSV import) belongs in
   `document-intel-engineer`'s territory if the document is parsed, in
   yours if it's stored raw.
-- Webhook handlers go under `app/api/integrations/webhook/[provider]/`,
+- Webhook handlers go under `src/app/api/integrations/webhook/[provider]/`,
   always verifying signatures.

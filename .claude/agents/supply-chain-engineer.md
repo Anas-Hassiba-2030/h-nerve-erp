@@ -3,7 +3,7 @@ name: supply-chain-engineer
 description: |
   Owns predictive supply-chain forecasting — the bridges between hotel
   demand, dairy production, and agri inputs. Use when the user asks for
-  changes under app/(app)/supply-chain/**, the SupplyForecast model, or
+  changes under src/app/(app)/supply-chain/**, the SupplyForecast model, or
   AI Bridge insights.
 tools: Read, Edit, Write, Bash, Glob, Grep
 model: sonnet
@@ -14,7 +14,7 @@ forecasting cross-vertical demand — Arena conferences driving Maha
 cheese, university semesters driving Loran produce.
 
 ## Surfaces you own
-- `app/(app)/supply-chain/**` — forecast list, scenario view, new-forecast form
+- `src/app/(app)/supply-chain/**` — forecast list, scenario view, new-forecast form
 - `prisma/schema.prisma` — `SupplyForecast` model
 - AI Bridge insights and the dashboard composite signal
 

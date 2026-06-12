@@ -2,7 +2,7 @@
 name: council-author
 description: |
   Adds, tunes, or debugs council voices — the multi-agent debate that
-  runs in lib/brain/council.live.ts. Use when the user wants a new
+  runs in src/lib/brain/council.live.ts. Use when the user wants a new
   council role, wants to rebalance voting weights, or wants the Moderator
   to synthesize differently.
 tools: Read, Edit, Write, Bash, Glob, Grep
@@ -14,10 +14,10 @@ multi-agent debate that drives Phase 3 — the 5-voice argument that the
 Moderator synthesizes into a single decision with citations.
 
 ## Files you own
-- `lib/brain/council.ts` — interface + stub
-- `lib/brain/council.live.ts` — LLM-backed live debate
-- `lib/brain/agents/Moderator.ts` — synthesizer
-- `lib/brain/agents/<Voice>.ts` — individual voices
+- `src/lib/brain/council.ts` — interface + stub
+- `src/lib/brain/council.live.ts` — LLM-backed live debate
+- `src/lib/brain/agents/Moderator.ts` — synthesizer
+- `src/lib/brain/agents/<Voice>.ts` — individual voices
 
 ## Voices currently registered
 - `HospitalityExpert` — Arena/hotel domain
@@ -27,13 +27,13 @@ Moderator synthesizes into a single decision with citations.
 - `RiskOfficer` — skeptic, surfaces downside
 
 ## Adding a new voice
-1. Create `lib/brain/agents/<Voice>.ts` exporting a class that satisfies
+1. Create `src/lib/brain/agents/<Voice>.ts` exporting a class that satisfies
    the `CouncilVoice` interface — `id`, `name`, `nameAr`, `register()`,
    `vote(topic, context): Promise<CouncilVoiceVote>`.
 2. The vote returns `{ stance: "advocate" | "skeptic" | "abstain",
    rationale: string, rationaleAr?: string, confidence: 0..1,
    citations: Citation[] }`.
-3. Register the voice in `lib/brain/council.live.ts` (the voice roster).
+3. Register the voice in `src/lib/brain/council.live.ts` (the voice roster).
 4. The Moderator weighs votes — never let one voice unilaterally decide.
 5. Voices are stateless and deterministic given the same subgraph.
 

@@ -4,7 +4,7 @@ description: |
   Writes new workflow templates for the Phase 12 visual studio — triggers,
   conditions, actions. Use when the user describes a new automation
   ("send Slack when expiry < 3 days") or wants to extend the template
-  library at lib/workflows/templates.ts.
+  library at src/lib/workflows/templates.ts.
 tools: Read, Edit, Write, Bash, Glob, Grep
 model: sonnet
 ---
@@ -14,11 +14,11 @@ templates to the Phase 12 visual studio — triggers, conditions, actions
 that compose into runnable automations.
 
 ## Files you own
-- `lib/workflows/templates.ts` — 15 templates today (5 triggers, 4
+- `src/lib/workflows/templates.ts` — 15 templates today (5 triggers, 4
   conditions, 6 actions)
-- `lib/workflows/runtime.ts` — BFS executor with per-node trace
-- `lib/workflows/seed.ts` — example seeded workflows
-- `app/(app)/workflows/**` — list, studio, actions
+- `src/lib/workflows/runtime.ts` — BFS executor with per-node trace
+- `src/lib/workflows/seed.ts` — example seeded workflows
+- `src/app/(app)/workflows/**` — list, studio, actions
 
 ## Template shape
 ```ts
@@ -48,12 +48,12 @@ that compose into runnable automations.
    Modern for the list. **Don't mix vocabularies** within the same surface.
 2. New triggers usually wrap an existing event source (insight created,
    integration log of kind "send", workflow run completed).
-3. New actions usually call into `lib/integrations/runtime.ts` for outward
+3. New actions usually call into `src/lib/integrations/runtime.ts` for outward
    sends or into the existing domain server actions for internal updates.
 
 ## Output style
 - Edit `templates.ts` — append to the existing array; never reorder.
-- Add a paired seed in `lib/workflows/seed.ts` if the template makes
+- Add a paired seed in `src/lib/workflows/seed.ts` if the template makes
   sense to ship as an example.
 - `npx tsc` to verify.
 

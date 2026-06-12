@@ -13,10 +13,10 @@
 | `next.config.mjs` | Next.js config (headers, redirects) |
 | `tailwind.config.ts` | Tailwind tokens |
 | `postcss.config.mjs` | PostCSS (postcss-import enabled) |
-| `middleware.ts` | Edge auth guard + locale/theme cookie routing |
+| `src/proxy.ts` | Route-level RBAC proxy (Next 16 middleware convention) + rate limiting |
 | `railway.toml` | Railway deploy config (preDeploy seed commands) |
 | `tsconfig.json` | TypeScript paths (`@/*` → repo root) |
-| `vitest.config.ts` | Test runner config (node env, lib/**/*.test.ts) |
+| `vitest.config.ts` | Test runner config (node env, src/lib/**/*.test.ts) |
 | `.eslintrc.json` | Lint rules |
 | `.env` | **LOCAL secrets** — never commit |
 | `.env.example` | Env var reference (safe to commit) |
@@ -37,19 +37,19 @@
 ### Entry point
 | Path | What it does |
 |------|-------------|
-| `app/page.tsx` | Root redirect: signed-in → `/orrery`, else → `/login` |
-| `app/orrery/page.tsx` | Orrery hub (the animated home screen iframe) |
+| `src/app/page.tsx` | Root redirect: signed-in → `/orrery`, else → `/login` |
+| `src/app/orrery/page.tsx` | Orrery hub (the animated home screen iframe) |
 
 ### Route groups
 
-#### `app/(auth)/` — Public pages (no sidebar)
+#### `src/app/(auth)/` — Public pages (no sidebar)
 | Route | File |
 |-------|------|
 | `/login` | `login/page.tsx` + `LoginCosmos.tsx` |
 | `/logout` | `logout/route.ts` (destroys session, 303 → /login) |
 | `/signup` | `signup/page.tsx` |
 
-#### `app/(app)/` — All authenticated operator pages
+#### `src/app/(app)/` — All authenticated operator pages
 **Layout:** `layout.tsx` → auth guard + LivingAtmosphere + ConstellationRail + FabRail + Companion
 
 **Sectors:**
@@ -138,7 +138,7 @@
 | `/admin/transfers` | `admin/transfers/` |
 | `/admin/warehouses` | `admin/warehouses/` |
 
-#### `app/(admin)/` — Superadmin only (role === "ADMIN")
+#### `src/app/(admin)/` — Superadmin only (role === "ADMIN")
 | Route | File |
 |-------|------|
 | `/admin/system` | Mission Control command deck |
@@ -150,17 +150,17 @@
 | `/admin/permissions-preview` | Role permissions editor |
 | `/admin/db/[model]` | Raw DB browser |
 
-#### `app/(theater)/` — Fullscreen Decision Theater (no sidebar, ESC to exit)
+#### `src/app/(theater)/` — Fullscreen Decision Theater (no sidebar, ESC to exit)
 | Route | Folder |
 |-------|--------|
 | `/theater` | `theater/` |
 
-#### `app/m/` — Mobile-first ops view
+#### `src/app/m/` — Mobile-first ops view
 | Route | Folder |
 |-------|--------|
 | `/m` | `m/` |
 
-#### `app/api/` — API routes (NOT for CRUD — only streaming/export/special)
+#### `src/app/api/` — API routes (NOT for CRUD — only streaming/export/special)
 | Endpoint | Purpose |
 |----------|---------|
 | `/api/converse` | SSE: "Talk to Brain" overlay |
@@ -233,7 +233,7 @@
 | `workflows/` | templates.ts + engine | Workflow automation templates |
 | `workspace/` | workspace data helpers | Unit-level workspace queries |
 
-### The Brain (`lib/brain/`) — key files
+### The Brain (`src/lib/brain/`) — key files
 | File | Phase | Role |
 |------|-------|------|
 | `tools/` | — | Entry surface: 7 typed tools (pullFacts, causalSubgraph, simulate, councilDebate, recallMemory, retrieveDocuments, narrate) + registry in `tools/index.ts` |
@@ -291,7 +291,7 @@ prisma/
 | `CLAUDE.md` *(root)* | **#1 — Claude Code rules, architecture, conventions** |
 | `docs/DESIGN-SKILL.md` | **#2 — Design language (Heritage Modern + 7 others)** |
 | `docs/PHASES-INTELLIGENCE.md` | **#3 — Master roadmap (Phases 1–28+)** |
-| `lib/brain/README.md` | Brain architecture deep-dive |
+| `src/lib/brain/README.md` | Brain architecture deep-dive |
 
 ### Engineering health
 | File | Purpose |
@@ -359,7 +359,7 @@ npm run db:seed      # seed Hourani demo data
 npm run db:reset     # nuke + recreate + reseed
 npm run db:studio    # Prisma Studio GUI
 npm run lint         # eslint
-npm test             # vitest (lib/**/*.test.ts only)
+npm test             # vitest (src/lib/**/*.test.ts only)
 ```
 
 ---

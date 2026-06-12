@@ -16,7 +16,7 @@ model and the migration story.
    sector/tier columns are `String @default("…")` with a TypeScript
    union in code.
 2. **Soft delete is the default.** New models that hold user data add
-   `deletedAt DateTime?`. The cleanup helper in `lib/db/cleanupSoftDeletes.ts`
+   `deletedAt DateTime?`. The cleanup helper in `src/lib/db/cleanupSoftDeletes.ts`
    sweeps the trash.
 3. **Composite uniques over surrogate uniqueness.** When two columns
    identify a row (e.g. `(scope, providerKey)`), use `@@unique([…])`.
@@ -52,7 +52,7 @@ model and the migration story.
    if a new model needs sample rows.
 3. Renames are dangerous on the SQLite flip — prefer adding a new column +
    migrating data in app code, then dropping the old.
-4. Soft-delete query helpers live in `lib/db/softDelete.ts` — extend there,
+4. Soft-delete query helpers live in `src/lib/db/softDelete.ts` — extend there,
    don't duplicate.
 
 ## Output style

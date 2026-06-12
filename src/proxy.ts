@@ -22,7 +22,7 @@ function sessionPassword() {
   return e && e.length >= 32 ? e : DEV_FALLBACK;
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
   // Phase F-UX — forward the current pathname to server components via

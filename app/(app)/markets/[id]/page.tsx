@@ -122,11 +122,12 @@ function Sparkline({
   );
 }
 
-export default async function MarketDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function MarketDetailPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const stock = await prisma.marketStock.findUnique({
     where: { id: params.id },
     include: {
@@ -158,7 +159,7 @@ export default async function MarketDetailPage({
     ? getCompanyBrand(stock.company.code)
     : null;
 
-  const en = getLocale() === "en";
+  const en = (await getLocale()) === "en";
   const regionLabel =
     (en ? REGION_EN[stock.region] : REGION_AR[stock.region]) ?? stock.region;
   const exchangeLabel =

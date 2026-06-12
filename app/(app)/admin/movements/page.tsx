@@ -59,12 +59,13 @@ function rangeStart(range: Range): Date | null {
   return null;
 }
 
-export default async function MovementsAdminPage({
-  searchParams,
-}: {
-  searchParams: SP;
-}) {
-  const ar = getLocale() === "ar";
+export default async function MovementsAdminPage(
+  props: {
+    searchParams: Promise<SP>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const ar = (await getLocale()) === "ar";
   // Standard (app) gate (mirrors /admin/imports & /admin/products).
   const user = await getCurrentUser();
   if (!user) redirect("/login");

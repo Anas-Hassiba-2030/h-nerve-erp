@@ -63,12 +63,13 @@ const FILTERS: Array<{ id: Filter; ar: string; en: string }> = [
   { id: "fix", ar: "الإصلاحات", en: "Fixes" },
 ];
 
-export default function ChangelogPage({
-  searchParams,
-}: {
-  searchParams: { filter?: string };
-}) {
-  const ar = getLocale() === "ar";
+export default async function ChangelogPage(
+  props: {
+    searchParams: Promise<{ filter?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const ar = (await getLocale()) === "ar";
   const raw = searchParams.filter;
   const filter: Filter =
     raw === "feature" || raw === "polish" || raw === "fix" ? raw : "all";

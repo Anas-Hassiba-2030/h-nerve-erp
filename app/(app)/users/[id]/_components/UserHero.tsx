@@ -5,7 +5,7 @@ import { formatNumber, formatRelative, ROLES_AR, ROLES_EN, loc } from "@/lib/uti
 import { RANKS } from "@/lib/utils/gamification";
 import type { UserDetail } from "../data";
 
-export function UserHero({
+export async function UserHero({
   user,
   brand,
   currentRank,
@@ -22,6 +22,7 @@ export function UserHero({
   xp: number;
   en: boolean;
 }) {
+  const locale = await getLocale();
   return (
     <section
       className="relative overflow-hidden rounded-2xl p-6 anim-fade-up"
@@ -74,7 +75,7 @@ export function UserHero({
                 border: "1px solid rgba(255,255,255,.3)",
               }}
             >
-              {loc(ROLES_AR, ROLES_EN, getLocale(), user.role)}
+              {loc(ROLES_AR, ROLES_EN, locale, user.role)}
             </span>
             {user.company ? (
               <Link

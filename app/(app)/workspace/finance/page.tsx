@@ -13,7 +13,7 @@ import "../../daylight.css";
 export const dynamic = "force-dynamic";
 
 export default async function WorkspaceFinancePage() {
-  const workspaceId = getActiveWorkspaceId();
+  const workspaceId = await getActiveWorkspaceId();
   if (!workspaceId) redirect("/companies");
   const company = await prismaUnscoped.company.findUnique({
     where: { id: workspaceId },
@@ -21,12 +21,12 @@ export default async function WorkspaceFinancePage() {
   });
   if (!company) redirect("/companies");
 
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   // Time-Machine aware — when the user has scrubbed back, the whole
   // P&L + ledger reconstructs the company's books as of that date.
-  const { asOf, isTraveling } = getAsOf();
+  const { asOf, isTraveling } = await getAsOf();
   const txns = await prisma.transaction.findMany({
     where: asOf ? { occurredAt: { lte: asOf } } : undefined,
     orderBy: { occurredAt: "desc" },

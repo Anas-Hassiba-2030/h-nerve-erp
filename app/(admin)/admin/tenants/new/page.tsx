@@ -9,9 +9,9 @@ import { createTenant } from "../actions";
 import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
 
 export default async function NewTenantPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
-  const m = getMessages(locale);
+  const m = await getMessages(locale);
 
   return (
     <div className="admin-page admin-page-narrow">

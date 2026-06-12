@@ -1,4 +1,3 @@
-import { getLocale } from "@/lib/i18n/i18n.server";
 import {
   Users2,
   Calendar,
@@ -54,7 +53,7 @@ export function CompanyBrandCover({
               <StatusBadge status={company.status} />
             </div>
             <h2 className="mt-1 text-2xl font-bold md:text-3xl" style={{ letterSpacing: "-0.01em" }}>
-              {getLocale() === "en" ? company.nameEn : company.name}
+              {en ? company.nameEn : company.name}
             </h2>
             <p className="text-sm opacity-90" dir="ltr">
               {brand.mottoEn}

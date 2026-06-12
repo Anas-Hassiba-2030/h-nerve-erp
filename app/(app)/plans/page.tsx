@@ -21,7 +21,7 @@ const STATUS: Record<string, { chip: string; ar: string; en: string }> = {
 };
 
 export default async function PlansPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const plans = await prisma.plan.findMany({

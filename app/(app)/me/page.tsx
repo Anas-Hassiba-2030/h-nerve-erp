@@ -32,7 +32,7 @@ export default async function MyProfilePage() {
   const me = await prisma.user.findUnique({ where: { id: session.id } });
   if (!me) redirect("/logout");
 
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const roleLabel = ar ? ROLES_AR[me.role] ?? me.role : me.role;

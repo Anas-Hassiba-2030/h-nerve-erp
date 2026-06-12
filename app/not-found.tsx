@@ -15,8 +15,8 @@ import { getLocale } from "@/lib/i18n/i18n.server";
 // Branded 404 — full-page hero with the H-Nerve mark + breadcrumb-style
 // suggestions toward common destinations. Renders outside the (app) group's
 // auth wall, so unauthenticated users hitting bad URLs land here too.
-export default function NotFound() {
-  const locale = getLocale();
+export default async function NotFound() {
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const suggestions = [

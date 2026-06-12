@@ -12,7 +12,7 @@ import "./analytics.css";
 export const dynamic = "force-dynamic";
 
 export default async function AnalyticsHubPage() {
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const now = new Date();
   const monthMs = 30 * 24 * 60 * 60 * 1000;
   const start12mo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);

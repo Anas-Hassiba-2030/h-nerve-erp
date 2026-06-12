@@ -113,11 +113,12 @@ function ScoreGauge({
   );
 }
 
-export default async function SustainabilityDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function SustainabilityDetailPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const score = await prisma.sustainabilityScore.findUnique({
     where: { id: params.id },
     include: {
@@ -153,7 +154,7 @@ export default async function SustainabilityDetailPage({
   });
 
   const brand = getCompanyBrand(score.company.code);
-  const en = getLocale() === "en";
+  const en = (await getLocale()) === "en";
   const companyName = en ? (score.company.nameEn ?? score.company.name) : score.company.name;
 
   function delta(curr: number, prev?: number) {

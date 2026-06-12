@@ -328,7 +328,7 @@ export async function getHoldingOpsData(_ar: boolean) {
   });
   // Time-Machine aware — the 30d portfolio window ends at the cursor,
   // so the roll-up shows the group as it stood on that past day.
-  const { asOf } = getAsOf();
+  const { asOf } = await getAsOf();
   const DAY = 86_400_000;
   const until = asOf ?? new Date();
   const since = new Date(until.getTime() - 30 * DAY);

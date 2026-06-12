@@ -18,7 +18,7 @@ export const dynamic = "force-dynamic";
 const SECTOR_ICON: Record<string, typeof Hotel> = { HOSPITALITY: Hotel, DAIRY: Milk, AGRICULTURE: Sprout, EDUCATION: GraduationCap };
 
 export default async function CompaniesPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const lc = ar ? "ar" : "en";
   const session = await getCurrentUser();

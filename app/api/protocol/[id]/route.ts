@@ -18,7 +18,8 @@ export const dynamic = "force-dynamic";
 
 const MAX_BODY = 4000;
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
   if (!isAdmin(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
@@ -41,7 +42,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 
   const id = params.id;
-  const tenantId = getActiveTenantSlug() ?? "default";
+  const tenantId = (await getActiveTenantSlug()) ?? "default";
 
   try {
     // Seed-only placeholder → upsert by (tenantId, key) so the edit persists.

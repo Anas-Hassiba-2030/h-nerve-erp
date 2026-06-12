@@ -39,7 +39,7 @@ const forecastSchema = z.object({
 
 export async function createForecast(formData: FormData) {
   const user = await requireRole("MANAGER");
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   // forecastSchema.parse() throws on invalid input or a failed .refine
   // (periodEnd<periodStart, same source/target). Without this guard the throw
   // re-renders the form silently. Wrap so the button always gives feedback.
@@ -63,7 +63,7 @@ export async function createForecast(formData: FormData) {
     // own company is party to (source OR target); a cross-company ADMIN
     // (no active workspace) may bridge any two. The scoped middleware also
     // blocks a foreign create — this just returns a graceful message first.
-    const ws = getActiveWorkspaceId();
+    const ws = await getActiveWorkspaceId();
     if (ws && data.sourceCompanyId !== ws && data.targetCompanyId !== ws) {
       flashToast({
         type: "info",
@@ -196,7 +196,7 @@ export async function restoreForecast(formData: FormData) {
 // =================================================================
 export async function autoGenerateForecasts(): Promise<void> {
   const user = await requireUser();
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const now = new Date();
   const horizon = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
@@ -329,8 +329,8 @@ export async function autoGenerateForecasts(): Promise<void> {
     entity: "info",
     label:
       generated > 0
-        ? t("toast.err.forecastsGenerated", locale).replace("{n}", formatNumber(generated))
-        : t("toast.err.noOccupancySignal", locale),
+        ? (await t("toast.err.forecastsGenerated", locale)).replace("{n}", formatNumber(generated))
+        : await t("toast.err.noOccupancySignal", locale),
   });
 
   revalidatePath("/supply-chain");
@@ -376,7 +376,7 @@ export async function approveForecast(formData: FormData): Promise<void> {
   const poNumberCreated = result.po?.poNumber ?? null;
   const supplierNameCreated = result.po?.supplierName ?? null;
 
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   // Phase NS-FIX/NS-1 — toast + audit use ar/en switch via getLocale.
   // When a PO was drafted, append its number + supplier to both summaries.
   const poTailAr = poNumberCreated
@@ -418,7 +418,7 @@ export async function rejectForecast(formData: FormData): Promise<void> {
     where: { id },
     data: { status: "DISMISSED" },
   });
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   flashToast({
     type: "info",
     entity: "info",

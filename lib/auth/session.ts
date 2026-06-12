@@ -64,7 +64,7 @@ function buildSessionOptions(): SessionOptions {
 }
 
 export async function getSession() {
-  return getIronSession<SessionData>(cookies(), buildSessionOptions());
+  return getIronSession<SessionData>(await cookies(), buildSessionOptions());
 }
 
 export async function getCurrentUser(): Promise<SessionUser | null> {

@@ -17,14 +17,15 @@ const STATUS_COLOR: Record<string, string> = {
   ARCHIVED:     "var(--admin-mute)",
 };
 
-export default async function TenantDetail({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const locale = getLocale();
+export default async function TenantDetail(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
+  const locale = await getLocale();
   const ar = locale === "ar";
-  const m = getMessages(locale);
+  const m = await getMessages(locale);
 
   const tenant = await prisma.tenant.findUnique({
     where: { id: params.id },

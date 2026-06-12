@@ -178,15 +178,15 @@ export async function viewAsTenant(formData: FormData): Promise<void> {
   if (!t) return;
   const theme = (t.theme?.preset as ThemeKey) ?? "heritage";
 
-  cookies().set(tenancyCookies.VIEW_AS, t.slug, { path: "/", maxAge: 60 * 60 * 8 });
-  cookies().set(tenancyCookies.THEME, theme, { path: "/", maxAge: 60 * 60 * 8 });
+  (await cookies()).set(tenancyCookies.VIEW_AS, t.slug, { path: "/", maxAge: 60 * 60 * 8 });
+  (await cookies()).set(tenancyCookies.THEME, theme, { path: "/", maxAge: 60 * 60 * 8 });
   redirect("/dashboard");
 }
 
 export async function clearViewAs(): Promise<void> {
   await requireUser();
-  cookies().delete(tenancyCookies.VIEW_AS);
-  cookies().delete(tenancyCookies.THEME);
+  (await cookies()).delete(tenancyCookies.VIEW_AS);
+  (await cookies()).delete(tenancyCookies.THEME);
   revalidatePath("/dashboard");
   revalidatePath("/admin/tenants");
 }

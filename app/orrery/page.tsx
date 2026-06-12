@@ -27,7 +27,7 @@ export default async function OrreryPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const locale = getLocale();
+  const locale = await getLocale();
 
   // Real Brain IQ (most recent snapshot). Defensive — never let a data hiccup
   // blank the hub; the engine animates its own value if this is omitted.

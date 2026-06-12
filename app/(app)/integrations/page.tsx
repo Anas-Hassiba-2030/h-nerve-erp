@@ -38,7 +38,7 @@ function relLabel(d: Date | null, ar: boolean): string {
 }
 
 export default async function IntegrationsHubPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const integrations = await prisma.integration.findMany({

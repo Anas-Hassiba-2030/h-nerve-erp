@@ -33,7 +33,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   // Logged-in non-admins are sent back to the operator dashboard.
   if (dbUser.role !== "ADMIN") redirect("/dashboard");
 
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
 
   return (
     <div className="admin-shell" data-shell="admin">

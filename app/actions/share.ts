@@ -20,12 +20,12 @@ import { getLocale } from "@/lib/i18n/i18n.server";
 /** Share ANY object to the Council as a discussion subject. */
 export async function shareToCouncil(formData: FormData): Promise<void> {
   const me = await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const title = String(formData.get("title") ?? "").trim().slice(0, 300);
   const body = String(formData.get("body") ?? "").trim().slice(0, 2000);
   const insightId = String(formData.get("insightId") ?? "").trim() || null;
   if (!title || !body) {
-    flashToast({ type: "info", entity: "info", label: ar ? "لا يوجد محتوى للمشاركة" : "Nothing to share" });
+    await flashToast({ type: "info", entity: "info", label: ar ? "لا يوجد محتوى للمشاركة" : "Nothing to share" });
     return;
   }
   try {
@@ -42,14 +42,14 @@ export async function shareToCouncil(formData: FormData): Promise<void> {
       },
     });
   } catch (e) {
-    flashToast({
+    await flashToast({
       type: "info", entity: "info",
       label: ar ? `تعذّرت المشاركة: ${(e as Error).message}` : `Share failed: ${(e as Error).message}`,
     });
     revalidatePath("/brain/council");
     return;
   }
-  flashToast({ type: "info", entity: "info", label: ar ? "تمت المشاركة مع المجلس" : "Shared to the Council" });
+  await flashToast({ type: "info", entity: "info", label: ar ? "تمت المشاركة مع المجلس" : "Shared to the Council" });
   revalidatePath("/brain/council");
   redirect("/brain/council");
 }
@@ -57,7 +57,7 @@ export async function shareToCouncil(formData: FormData): Promise<void> {
 /** Share ANY object straight into a colleague's direct-message feed. */
 export async function shareToMember(formData: FormData): Promise<void> {
   const me = await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const toUserId = String(formData.get("toUserId") ?? "").trim();
   const title = String(formData.get("title") ?? "").trim().slice(0, 300);
   const body = String(formData.get("body") ?? "").trim().slice(0, 2000);
@@ -65,15 +65,15 @@ export async function shareToMember(formData: FormData): Promise<void> {
   const refId = String(formData.get("refId") ?? "").trim() || null;
 
   if (!toUserId) {
-    flashToast({ type: "info", entity: "info", label: ar ? "اختر زميلاً أولاً" : "Pick a colleague first" });
+    await flashToast({ type: "info", entity: "info", label: ar ? "اختر زميلاً أولاً" : "Pick a colleague first" });
     return;
   }
   if (toUserId === me.id) {
-    flashToast({ type: "info", entity: "info", label: ar ? "لا يمكنك المشاركة مع نفسك" : "Can't share to yourself" });
+    await flashToast({ type: "info", entity: "info", label: ar ? "لا يمكنك المشاركة مع نفسك" : "Can't share to yourself" });
     return;
   }
   if (!title) {
-    flashToast({ type: "info", entity: "info", label: ar ? "لا يوجد محتوى للمشاركة" : "Nothing to share" });
+    await flashToast({ type: "info", entity: "info", label: ar ? "لا يوجد محتوى للمشاركة" : "Nothing to share" });
     return;
   }
 
@@ -83,7 +83,7 @@ export async function shareToMember(formData: FormData): Promise<void> {
     // never trust the posted id).
     const target = await prisma.user.findUnique({ where: { id: toUserId }, select: { id: true, name: true } });
     if (!target) {
-      flashToast({ type: "info", entity: "info", label: ar ? "الزميل غير موجود" : "Colleague not found" });
+      await flashToast({ type: "info", entity: "info", label: ar ? "الزميل غير موجود" : "Colleague not found" });
       return;
     }
     threadId = await ensureDirectThread(me.id, toUserId);
@@ -94,14 +94,14 @@ export async function shareToMember(formData: FormData): Promise<void> {
     await prisma.messageThread.update({ where: { id: threadId }, data: { updatedAt: new Date() } });
     await markThreadRead(threadId, me.id);
   } catch (e) {
-    flashToast({
+    await flashToast({
       type: "info", entity: "info",
       label: ar ? `تعذّرت المشاركة: ${(e as Error).message}` : `Share failed: ${(e as Error).message}`,
     });
     revalidatePath("/messages");
     return;
   }
-  flashToast({ type: "info", entity: "info", label: ar ? "تمت المشاركة في محادثة الزميل" : "Shared to their inbox" });
+  await flashToast({ type: "info", entity: "info", label: ar ? "تمت المشاركة في محادثة الزميل" : "Shared to their inbox" });
   revalidatePath("/messages");
   redirect(`/messages/${threadId}`);
 }

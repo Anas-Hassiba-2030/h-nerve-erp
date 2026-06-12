@@ -29,14 +29,14 @@ function refresh() {
   revalidatePath("/admin/brain");
   revalidatePath("/dashboard");
 }
-function warn(label: string) {
-  flashToast({ type: "info", entity: "info", label: `⚠ ${label}` });
+async function warn(label: string) {
+  await flashToast({ type: "info", entity: "info", label: `⚠ ${label}` });
   refresh();
 }
 
 export async function runAnalysis(formData: FormData): Promise<void> {
   const user = await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   // ISOLATION-FIX — never trust the submitted tenantId. runBrainAnalysis
   // reads+writes that tenant's data via the UNSCOPED client, so a pinned
   // operator who passed a foreign tenantId would otherwise read and write
@@ -60,7 +60,7 @@ export async function runAnalysis(formData: FormData): Promise<void> {
         : `Analysis failed: ${e instanceof Error ? e.message : ""}`,
     );
   }
-  flashToast({
+  await flashToast({
     type: "info",
     entity: "info",
     label: ar
@@ -72,7 +72,7 @@ export async function runAnalysis(formData: FormData): Promise<void> {
 
 export async function dismissInsight(formData: FormData): Promise<void> {
   await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return;
   // ISOLATION-FIX — the engine dismisses via the UNSCOPED client (by id,
@@ -83,7 +83,7 @@ export async function dismissInsight(formData: FormData): Promise<void> {
   const owned = await prisma.brainInsight.findUnique({ where: { id }, select: { id: true } });
   if (!owned) return warn(ar ? "الرؤية غير موجودة" : "Insight not found");
   await engineDismiss(id);
-  flashToast({
+  await flashToast({
     type: "info",
     entity: "info",
     label: ar ? "تم تجاهل الرؤية" : "Insight dismissed",
@@ -93,7 +93,7 @@ export async function dismissInsight(formData: FormData): Promise<void> {
 
 export async function resolveInsight(formData: FormData): Promise<void> {
   await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return;
   // ISOLATION-FIX — same ownership gate as dismissInsight: the engine
@@ -102,7 +102,7 @@ export async function resolveInsight(formData: FormData): Promise<void> {
   const owned = await prisma.brainInsight.findUnique({ where: { id }, select: { id: true } });
   if (!owned) return warn(ar ? "الرؤية غير موجودة" : "Insight not found");
   await engineResolve(id);
-  flashToast({
+  await flashToast({
     type: "info",
     entity: "info",
     label: ar ? "تم حلّ الرؤية" : "Insight resolved",

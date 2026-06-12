@@ -21,7 +21,7 @@ export async function loginAction(
 ): Promise<LoginState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
-  const ar = (cookies().get("h_nerve_locale")?.value ?? "ar") !== "en";
+  const ar = ((await cookies()).get("h_nerve_locale")?.value ?? "ar") !== "en";
 
   if (!email || !password) {
     return {
@@ -96,7 +96,7 @@ export async function loginAction(
   const pinWorkspace = (user.role as string) !== "ADMIN";
 
   if (pinWorkspace && user.companyId) {
-    cookies().set(WORKSPACE_COOKIE, user.companyId, {
+    (await cookies()).set(WORKSPACE_COOKIE, user.companyId, {
       httpOnly: true,
       sameSite: "lax",
       path: "/",
@@ -106,7 +106,7 @@ export async function loginAction(
   // all opaque-tenantId models (Product, Supplier, ...). Null slug
   // means cross-tenant; no cookie written.
   if (pinWorkspace && tenantSlug) {
-    cookies().set(TENANT_COOKIE, tenantSlug, {
+    (await cookies()).set(TENANT_COOKIE, tenantSlug, {
       httpOnly: true,
       sameSite: "lax",
       path: "/",

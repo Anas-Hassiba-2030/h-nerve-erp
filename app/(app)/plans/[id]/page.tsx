@@ -44,12 +44,13 @@ const STATUS_LABEL: Record<string, { ar: string; en: string }> = {
   ROLLED_BACK: { ar: "تراجع", en: "Rolled back" },
 };
 
-export default async function PlanDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const locale = getLocale();
+export default async function PlanDetailPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const plan = await prisma.plan.findUnique({

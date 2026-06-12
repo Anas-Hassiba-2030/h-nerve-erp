@@ -32,14 +32,15 @@ async function safeCount(fn: () => Promise<number>): Promise<number> {
   }
 }
 
-export default async function GenesisPage({
-  searchParams,
-}: {
-  searchParams: { seeded?: string; topup?: string; error?: string; fill?: string };
-}) {
-  const locale = getLocale();
+export default async function GenesisPage(
+  props: {
+    searchParams: Promise<{ seeded?: string; topup?: string; error?: string; fill?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const locale = await getLocale();
   const ar = locale === "ar";
-  const m = getMessages(locale);
+  const m = await getMessages(locale);
   const justSeeded = searchParams.seeded === "1";
   const topup = searchParams.topup;
   const fill = searchParams.fill;

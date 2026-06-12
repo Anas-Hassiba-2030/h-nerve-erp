@@ -11,7 +11,7 @@ import { getLocale } from "@/lib/i18n/i18n.server";
 
 export async function reflectNow(): Promise<void> {
   await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   let reportId: string | null = null;
   try {
     const result = await reflect({ scope: "default", windowDays: 7 });
@@ -35,7 +35,7 @@ export async function reflectNow(): Promise<void> {
 
 export async function approveReport(formData: FormData): Promise<void> {
   const me = await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const note = String(formData.get("note") ?? "").slice(0, 320) || undefined;
@@ -60,7 +60,7 @@ export async function approveReport(formData: FormData): Promise<void> {
 
 export async function rejectReport(formData: FormData): Promise<void> {
   const me = await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const note = String(formData.get("note") ?? "").slice(0, 320) || undefined;
@@ -85,7 +85,7 @@ export async function rejectReport(formData: FormData): Promise<void> {
 
 export async function seedHistory(): Promise<void> {
   await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   try {
     await seedMetaHistory();
     await computeIQ("default");

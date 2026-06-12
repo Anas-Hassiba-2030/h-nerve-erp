@@ -13,7 +13,7 @@ import "./whatif.css";
 export const dynamic = "force-dynamic";
 
 export default async function BrainScenariosPage() {
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   return (
     <DaylightShell dir={ar ? "rtl" : "ltr"}>
       <WhatIfLab ar={ar} />

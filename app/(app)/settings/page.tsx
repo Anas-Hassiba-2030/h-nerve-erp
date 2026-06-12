@@ -32,16 +32,17 @@ function toArabicDigits(n: number | string): string {
   return String(n).replace(/[0-9]/g, (d) => "٠١٢٣٤٥٦٧٨٩"[Number(d)]);
 }
 
-export default async function SettingsPage({
-  searchParams,
-}: {
-  searchParams: { tab?: string };
-}) {
+export default async function SettingsPage(
+  props: {
+    searchParams: Promise<{ tab?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const session = await getCurrentUser();
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const tab = searchParams.tab === "settings" ? "settings" : "status";
-  const currentTheme = getTheme();
+  const currentTheme = await getTheme();
 
   const me = session
     ? await prisma.user.findUnique({ where: { id: session.id } })

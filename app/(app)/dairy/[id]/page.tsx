@@ -22,11 +22,12 @@ import {
 } from "@/lib/utils/utils";
 import "../../daylight.css";
 
-export default async function DairyDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function DairyDetailPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const batch = await prisma.dairyBatch.findUnique({
     where: { id: params.id },
     include: { company: true },
@@ -60,7 +61,7 @@ export default async function DairyDetailPage({
 
   const pinned = await isPinned("DAIRY", batch.id);
 
-  const en = getLocale() === "en";
+  const en = (await getLocale()) === "en";
 
   return (
     <DaylightShell dir={en ? "ltr" : "rtl"}>

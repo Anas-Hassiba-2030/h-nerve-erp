@@ -34,11 +34,12 @@ function countryName(code: string, en: boolean): string {
   );
 }
 
-export default async function HotelDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function HotelDetailPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const now = new Date();
   const last30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const next14 = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
@@ -97,7 +98,8 @@ export default async function HotelDetailPage({
 
   const pinned = await isPinned("HOTEL", hotel.id);
 
-  const en = getLocale() === "en";
+  const locale = await getLocale();
+  const en = locale === "en";
 
   return (
     <DaylightShell dir={en ? "ltr" : "rtl"}>
@@ -144,7 +146,7 @@ export default async function HotelDetailPage({
             </div>
             <div className="min-w-0">
               <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)", marginBottom: 6 }}>
-                {loc(TIERS_AR, TIERS_EN, getLocale(), hotel.tier)} · {"★".repeat(hotel.starRating)}
+                {loc(TIERS_AR, TIERS_EN, locale, hotel.tier)} · {"★".repeat(hotel.starRating)}
               </div>
               <h2
                 className="text-2xl font-semibold md:text-3xl"
@@ -265,7 +267,7 @@ export default async function HotelDetailPage({
                         <StatusBadge status={b.status} />
                       </div>
                       <div className="text-[11px] font-mono" style={{ color: "var(--ink-muted)" }}>
-                        {b.reference} • {loc(ROOM_TYPES_AR, ROOM_TYPES_EN, getLocale(), b.roomType)} •{" "}
+                        {b.reference} • {loc(ROOM_TYPES_AR, ROOM_TYPES_EN, locale, b.roomType)} •{" "}
                         {b.rooms} {en ? "rooms" : "غرفة"} • {b.guests} {en ? "guests" : "ضيف"}
                       </div>
                     </div>
@@ -358,7 +360,7 @@ export default async function HotelDetailPage({
           {/* Quick facts */}
           <DaylightPanel title={en ? "Property card" : "بطاقة العقار"}>
             <dl className="space-y-2 text-xs">
-              <Fact label={en ? "Tier" : "الفئة"} value={loc(TIERS_AR, TIERS_EN, getLocale(), hotel.tier)} />
+              <Fact label={en ? "Tier" : "الفئة"} value={loc(TIERS_AR, TIERS_EN, locale, hotel.tier)} />
               <Fact
                 label={en ? "Rating" : "التقييم"}
                 value={`${"★".repeat(hotel.starRating)} (${hotel.starRating}/5)`}

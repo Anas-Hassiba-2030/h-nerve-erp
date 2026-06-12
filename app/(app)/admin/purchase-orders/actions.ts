@@ -46,13 +46,13 @@ function revalidate(stockMoved = false) {
 // flashToast is server-flash via cookie; import lazily to keep this file
 // focused (same helper /admin/mappings + /admin/products use).
 import { flashToast } from "@/lib/utils/toast";
-function toast(label: string) {
-  flashToast({ type: "info", entity: "info", label });
+async function toast(label: string) {
+  await flashToast({ type: "info", entity: "info", label });
 }
 
 export async function createPurchaseOrder(formData: FormData): Promise<void> {
   const user = await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   // Phase 11 authz — never trust a submitted tenantId; resolve against the
   // session. Pinned user → forced to own tenantSlug; cross-tenant ADMIN may pass through.
   const scope = resolveAdminTenantId(user, String(formData.get("tenantId") ?? ""));
@@ -99,29 +99,29 @@ export async function createPurchaseOrder(formData: FormData): Promise<void> {
       note: note || null,
     });
     revalidate();
-    toast(ar ? `تم إنشاء أمر الشراء ${po.poNumber}` : `Created PO ${po.poNumber}`);
+    await toast(ar ? `تم إنشاء أمر الشراء ${po.poNumber}` : `Created PO ${po.poNumber}`);
   } catch (e) {
-    toast(`⚠ ${e instanceof Error ? e.message : "create failed"}`);
+    await toast(`⚠ ${e instanceof Error ? e.message : "create failed"}`);
   }
 }
 
 export async function markPurchaseOrderSent(formData: FormData): Promise<void> {
   await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const poId = String(formData.get("poId") ?? "").trim();
   if (!poId) return;
   try {
     await markPOSent(poId);
     revalidate();
-    toast(ar ? "تم إرسال أمر الشراء" : "PO marked as Sent");
+    await toast(ar ? "تم إرسال أمر الشراء" : "PO marked as Sent");
   } catch (e) {
-    toast(`⚠ ${e instanceof Error ? e.message : "transition failed"}`);
+    await toast(`⚠ ${e instanceof Error ? e.message : "transition failed"}`);
   }
 }
 
 export async function receivePurchaseOrder(formData: FormData): Promise<void> {
   await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const poId = String(formData.get("poId") ?? "").trim();
   if (!poId) return;
   const receipts: Receipt[] = [];
@@ -137,22 +137,22 @@ export async function receivePurchaseOrder(formData: FormData): Promise<void> {
   try {
     await receivePO(poId, receipts);
     revalidate(true);
-    toast(ar ? "تم استلام أمر الشراء" : "PO receipt recorded");
+    await toast(ar ? "تم استلام أمر الشراء" : "PO receipt recorded");
   } catch (e) {
-    toast(`⚠ ${e instanceof Error ? e.message : "receive failed"}`);
+    await toast(`⚠ ${e instanceof Error ? e.message : "receive failed"}`);
   }
 }
 
 export async function cancelPurchaseOrder(formData: FormData): Promise<void> {
   await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const poId = String(formData.get("poId") ?? "").trim();
   if (!poId) return;
   try {
     await cancelPO(poId);
     revalidate();
-    toast(ar ? "تم إلغاء أمر الشراء" : "PO cancelled");
+    await toast(ar ? "تم إلغاء أمر الشراء" : "PO cancelled");
   } catch (e) {
-    toast(`⚠ ${e instanceof Error ? e.message : "cancel failed"}`);
+    await toast(`⚠ ${e instanceof Error ? e.message : "cancel failed"}`);
   }
 }

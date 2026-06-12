@@ -25,12 +25,13 @@ import "../council-design.css";
 
 export const dynamic = "force-dynamic";
 
-export default async function CouncilTranscriptPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const locale = getLocale();
+export default async function CouncilTranscriptPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const session = await council().replay(params.id);

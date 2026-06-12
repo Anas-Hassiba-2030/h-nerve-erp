@@ -36,11 +36,12 @@ const VERTICAL_TONE: Record<string, string> = {
   OTHER: "badge-slate",
 };
 
-export default async function EducationDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function EducationDetailPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const program = await prisma.program.findUnique({
     where: { id: params.id },
     include: { company: true },
@@ -61,7 +62,8 @@ export default async function EducationDetailPage({
 
   const pinned = await isPinned("PROGRAM", program.id);
 
-  const en = getLocale() === "en";
+  const locale = await getLocale();
+  const en = locale === "en";
 
   return (
     <DaylightShell dir={en ? "ltr" : "rtl"}>
@@ -100,7 +102,7 @@ export default async function EducationDetailPage({
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <span className={VERTICAL_TONE[program.vertical] ?? "badge-slate"}>
-                  {loc(VERTICALS_AR, VERTICALS_EN, getLocale(), program.vertical)}
+                  {loc(VERTICALS_AR, VERTICALS_EN, locale, program.vertical)}
                 </span>
                 <StatusBadge status={program.stage} />
                 <Link
@@ -171,7 +173,7 @@ export default async function EducationDetailPage({
           <DaylightKpi
             label={en ? "Completion Rate" : "نسبة الإنجاز"}
             value={stalled ? "0%" : `${Math.round(Math.max(0, stageIdx + 1) / STAGE_FLOW.length * 100)}%`}
-            hint={loc(STATUS_AR, STATUS_EN, getLocale(), program.stage)}
+            hint={loc(STATUS_AR, STATUS_EN, locale, program.stage)}
           />
         </DaylightKpiGrid>
 
@@ -219,7 +221,7 @@ export default async function EducationDetailPage({
                       className="mt-2 text-center text-[11px] font-semibold"
                       style={{ color: reached ? "var(--ink)" : "var(--ink-muted)" }}
                     >
-                      {loc(STATUS_AR, STATUS_EN, getLocale(), stage)}
+                      {loc(STATUS_AR, STATUS_EN, locale, stage)}
                     </div>
                     {i < STAGE_FLOW.length - 1 ? (
                       <div
@@ -280,7 +282,7 @@ export default async function EducationDetailPage({
                             {en ? (r.nameEn ?? r.name) : r.name}
                           </span>
                           <span className={VERTICAL_TONE[r.vertical] ?? "badge-slate"}>
-                            {loc(VERTICALS_AR, VERTICALS_EN, getLocale(), r.vertical)}
+                            {loc(VERTICALS_AR, VERTICALS_EN, locale, r.vertical)}
                           </span>
                         </div>
                         <div className="mt-0.5 font-mono" style={{ fontSize: 10.5, color: "var(--ink-muted)" }}>
@@ -304,8 +306,8 @@ export default async function EducationDetailPage({
             <DaylightPanel title={en ? "Startup Profile" : "بطاقة المشروع"}>
               <dl className="space-y-2 text-xs">
                 <Fact label={en ? "Founder" : "المؤسس"} value={program.founder} />
-                <Fact label={en ? "Vertical" : "القطاع"} value={loc(VERTICALS_AR, VERTICALS_EN, getLocale(), program.vertical)} />
-                <Fact label={en ? "Stage" : "المرحلة"} value={loc(STATUS_AR, STATUS_EN, getLocale(), program.stage)} />
+                <Fact label={en ? "Vertical" : "القطاع"} value={loc(VERTICALS_AR, VERTICALS_EN, locale, program.vertical)} />
+                <Fact label={en ? "Stage" : "المرحلة"} value={loc(STATUS_AR, STATUS_EN, locale, program.stage)} />
                 <Fact label={en ? "Cohort" : "الفوج"} value={program.cohort} />
                 <Fact label={en ? "Team Size" : "حجم الفريق"} value={`${formatNumber(program.teamSize)} ${en ? "members" : "فرد"}`} />
                 <Fact label={en ? "Funding" : "التمويل"} value={formatMoney(program.fundingJod)} />

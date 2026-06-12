@@ -28,7 +28,7 @@ function occState(occ: number): { tag: "ok" | "info" | "warn"; ar: string; en: s
 }
 
 export default async function HotelsPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const lc = ar ? "ar" : "en";
 

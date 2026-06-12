@@ -28,7 +28,7 @@ export async function createTransferAction(
   formData: FormData,
 ): Promise<void> {
   await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
 
   const fromProductId = String(formData.get("fromProductId") ?? "").trim();
   const toWarehouseId = String(formData.get("toWarehouseId") ?? "").trim();

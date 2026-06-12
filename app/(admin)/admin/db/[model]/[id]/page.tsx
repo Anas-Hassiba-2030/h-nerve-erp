@@ -23,14 +23,15 @@ const db = prismaUnscoped as unknown as Record<
   { findFirst: (args?: unknown) => Promise<Record<string, unknown> | null> }
 >;
 
-export default async function AdminDbRecordPage({
-  params,
-}: {
-  params: { model: string; id: string };
-}) {
-  const locale = getLocale();
+export default async function AdminDbRecordPage(
+  props: {
+    params: Promise<{ model: string; id: string }>;
+  }
+) {
+  const params = await props.params;
+  const locale = await getLocale();
   const ar = locale === "ar";
-  const m = getMessages(locale);
+  const m = await getMessages(locale);
   const meta = getModel(params.model);
   if (!meta || !meta.idField) notFound();
 

@@ -23,7 +23,7 @@ function toAr(n: number | string): string {
 }
 
 export default async function BrainGraphPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const { nodes, edges } = await causalGraph().loadAll();

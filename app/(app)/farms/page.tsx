@@ -25,7 +25,7 @@ const CROP_STATUS_EN: Record<string, string> = {
 const ALERT_TAG: Record<string, "ok" | "warn" | "crit"> = { OK: "ok", WARN: "warn", CRITICAL: "crit" };
 
 export default async function FarmsPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const lc = ar ? "ar" : "en";
 

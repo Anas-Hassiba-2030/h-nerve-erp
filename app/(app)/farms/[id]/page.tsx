@@ -29,7 +29,8 @@ import {
 import { updateSensors, deleteCrop } from "../actions";
 import "../../daylight.css";
 
-export default async function FarmDetailPage({ params }: { params: { id: string } }) {
+export default async function FarmDetailPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const farm = await prisma.farm.findUnique({
     where: { id: params.id },
     include: { company: true, crops: { orderBy: { expectedHarvest: "asc" } } },
@@ -44,12 +45,13 @@ export default async function FarmDetailPage({ params }: { params: { id: string 
   const growingCount = farm.crops.filter((c) => c.status === "GROWING").length;
   const expectedYieldKg = farm.crops.reduce((a, c) => a + (c.expectedYieldKg ?? 0), 0);
   const actualYieldKg = farm.crops.reduce((a, c) => a + (c.actualYieldKg ?? 0), 0);
-  const en = getLocale() === "en";
+  const locale = await getLocale();
+  const en = locale === "en";
 
   return (
     <DaylightShell dir={en ? "ltr" : "rtl"}>
       <DaylightHeader
-        eyebrow={`${en ? farm.company.nameEn : farm.company.name} • ${loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), farm.type)}`}
+        eyebrow={`${en ? farm.company.nameEn : farm.company.name} • ${loc(FARM_TYPES_AR, FARM_TYPES_EN, locale, farm.type)}`}
         title={en ? (farm.nameEn ?? farm.name) : farm.name}
         subtitle={`${farm.location} • ${formatNumber(farm.areaDunum)} ${en ? "dunum" : "دونم"}`}
         actions={
@@ -84,7 +86,7 @@ export default async function FarmDetailPage({ params }: { params: { id: string 
             </div>
             <div className="min-w-0">
               <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)", marginBottom: 6 }} className="flex items-center gap-2">
-                <span>{loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), farm.type)}</span>
+                <span>{loc(FARM_TYPES_AR, FARM_TYPES_EN, locale, farm.type)}</span>
                 <span style={{ color: "var(--line)" }}>·</span>
                 <StatusBadge status={farm.alertLevel} />
               </div>
@@ -236,7 +238,7 @@ export default async function FarmDetailPage({ params }: { params: { id: string 
             </p>
           )}
           <dl className="mt-4 space-y-2 text-xs">
-            <Fact label="النوع" value={loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), farm.type)} />
+            <Fact label="النوع" value={loc(FARM_TYPES_AR, FARM_TYPES_EN, locale, farm.type)} />
             <Fact label={en ? "Location" : "الموقع"} value={farm.location} />
             <Fact label={en ? "Area" : "المساحة"} value={`${formatNumber(farm.areaDunum)} ${en ? "dunum" : "دونم"}`} />
             <Fact

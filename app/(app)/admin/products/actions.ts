@@ -34,15 +34,15 @@ async function gate(): Promise<SessionUser> {
   return user;
 }
 
-function toast(label: string) {
-  flashToast({ type: "info", entity: "info", label });
+async function toast(label: string) {
+  await flashToast({ type: "info", entity: "info", label });
   revalidatePath("/admin/products");
   revalidatePath("/admin/movements");
 }
 
 export async function adjustStock(formData: FormData): Promise<void> {
   const user = await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
 
   const productId = String(formData.get("productId") ?? "").trim();
   const rawDelta = String(formData.get("delta") ?? "").trim();
@@ -109,7 +109,7 @@ export async function adjustStock(formData: FormData): Promise<void> {
   }
 
   const signed = delta > 0 ? `+${delta}` : String(delta);
-  toast(
+  await toast(
     ar
       ? `تمت تسوية ${product.sku} بمقدار ${signed} وحدة`
       : `Adjusted ${product.sku} by ${signed} units`,
@@ -121,7 +121,7 @@ export async function adjustStock(formData: FormData): Promise<void> {
 // low-stock analyzer reads this threshold.
 export async function setReorderPoint(formData: FormData): Promise<void> {
   await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
 
   const productId = String(formData.get("productId") ?? "").trim();
   if (!productId) return;
@@ -154,7 +154,7 @@ export async function setReorderPoint(formData: FormData): Promise<void> {
     data: { reorderPoint: value },
   });
   revalidatePath("/admin/brain");
-  toast(
+  await toast(
     ar
       ? `تم ضبط نقطة إعادة الطلب لـ ${product.sku}${value == null ? " (افتراضي)" : `: ${value}`}`
       : `Reorder point set for ${product.sku}${value == null ? " (default)" : `: ${value}`}`,

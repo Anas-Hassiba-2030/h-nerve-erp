@@ -10,8 +10,9 @@ import { formatMoney, formatNumber, formatPercent, formatShortDate } from "@/lib
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getCompanyBrand } from "@/lib/utils/companyBrand";
 
-export default async function AnalyticsCompanyPage({ params }: { params: { id: string } }) {
-  const ar = getLocale() === "ar";
+export default async function AnalyticsCompanyPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const ar = (await getLocale()) === "ar";
   const company = await prisma.company.findUnique({
     where: { id: params.id },
     include: {

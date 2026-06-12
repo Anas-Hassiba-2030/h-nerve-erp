@@ -35,11 +35,12 @@ import "../../../daylight.css";
 const COUNTRY_NAMES: Record<string, string> = { JO: "الأردن", BG: "بلغاريا" };
 const COUNTRY_NAMES_EN: Record<string, string> = { JO: "Jordan", BG: "Bulgaria" };
 
-export default async function BookingDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function BookingDetailPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const booking = await prisma.booking.findUnique({
     where: { id: params.id },
     include: {
@@ -60,7 +61,8 @@ export default async function BookingDetailPage({
     include: { hotel: { select: { name: true, nameEn: true } } },
   });
 
-  const en = getLocale() === "en";
+  const locale = await getLocale();
+  const en = locale === "en";
   const now = new Date();
   const nights = Math.max(
     1,
@@ -185,7 +187,7 @@ export default async function BookingDetailPage({
                   }}
                 >
                   <BedDouble className="h-3 w-3" />
-                  {loc(ROOM_TYPES_AR, ROOM_TYPES_EN, getLocale(), booking.roomType)} •{" "}
+                  {loc(ROOM_TYPES_AR, ROOM_TYPES_EN, locale, booking.roomType)} •{" "}
                   {formatNumber(booking.rooms)} {en ? "rooms" : "غرفة"}
                 </span>
                 <span
@@ -356,7 +358,7 @@ export default async function BookingDetailPage({
                 <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
                   {booking.hotel.city} •{" "}
                   {(en ? COUNTRY_NAMES_EN : COUNTRY_NAMES)[booking.hotel.country] ?? booking.hotel.country}{" "}
-                  • {loc(TIERS_AR, TIERS_EN, getLocale(), booking.hotel.tier)} •{" "}
+                  • {loc(TIERS_AR, TIERS_EN, locale, booking.hotel.tier)} •{" "}
                   {"★".repeat(booking.hotel.starRating)}
                 </div>
               </Link>
@@ -367,7 +369,7 @@ export default async function BookingDetailPage({
               <dl className="space-y-2 text-xs">
                 <Fact label={en ? "Reference" : "المرجع"} value={booking.reference} mono />
                 <Fact label={en ? "Guest" : "الضيف"} value={booking.guestName} />
-                <Fact label={en ? "Room type" : "نوع الغرفة"} value={loc(ROOM_TYPES_AR, ROOM_TYPES_EN, getLocale(), booking.roomType)} />
+                <Fact label={en ? "Room type" : "نوع الغرفة"} value={loc(ROOM_TYPES_AR, ROOM_TYPES_EN, locale, booking.roomType)} />
                 <Fact label={en ? "Rooms" : "الغرف"} value={formatNumber(booking.rooms)} />
                 <Fact label={en ? "Guests" : "الضيوف"} value={formatNumber(booking.guests)} />
                 <Fact label={en ? "Nights" : "الليالي"} value={formatNumber(nights)} />

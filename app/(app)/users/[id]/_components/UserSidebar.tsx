@@ -20,7 +20,7 @@ const TIER_TONE: Record<string, string> = {
   PLATINUM: "gold",
 };
 
-export function UserSidebar({
+export async function UserSidebar({
   user,
   achievements,
   earnedAchievements,
@@ -41,6 +41,7 @@ export function UserSidebar({
   totalCount: number;
   en: boolean;
 }) {
+  const locale = await getLocale();
   return (
     <aside style={{ display: "flex", flexDirection: "column", gap: 24 }}>
       {/* Achievements */}
@@ -175,7 +176,7 @@ export function UserSidebar({
       {/* Quick facts */}
       <DaylightPanel title={en ? "Employment Card" : "البطاقة الوظيفية"}>
         <dl style={{ fontSize: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-          <Fact label={en ? "Role" : "الدور"} value={loc(ROLES_AR, ROLES_EN, getLocale(), user.role)} />
+          <Fact label={en ? "Role" : "الدور"} value={loc(ROLES_AR, ROLES_EN, locale, user.role)} />
           {user.title ? (
             <Fact label={en ? "Job Title" : "المسمى الوظيفي"} value={user.title} />
           ) : null}

@@ -25,7 +25,7 @@ const REGISTER_LABEL: Record<string, { ar: string; en: string }> = {
 };
 
 export default async function NarratePage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const narratives = await prisma.narrative.findMany({

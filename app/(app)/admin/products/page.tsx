@@ -47,12 +47,13 @@ type SP = { [k: string]: string | string[] | undefined };
 const str = (v: string | string[] | undefined) =>
   (typeof v === "string" ? v.trim() : "") || "";
 
-export default async function ProductsAdminPage({
-  searchParams,
-}: {
-  searchParams: SP;
-}) {
-  const ar = getLocale() === "ar";
+export default async function ProductsAdminPage(
+  props: {
+    searchParams: Promise<SP>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const ar = (await getLocale()) === "ar";
   // Standard (app) gate (mirrors /admin/imports): no session → /login,
   // then role-gate this cross-tenant operational surface.
   const user = await getCurrentUser();

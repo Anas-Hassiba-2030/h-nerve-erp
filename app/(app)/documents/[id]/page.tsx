@@ -34,8 +34,9 @@ function clauseIcon(kind: string) {
   }
 }
 
-export default async function DocumentDetail({ params }: { params: { id: string } }) {
-  const locale = getLocale();
+export default async function DocumentDetail(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const doc = await prisma.document.findUnique({

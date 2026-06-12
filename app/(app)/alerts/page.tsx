@@ -20,7 +20,7 @@ const SEV: Record<string, { chip: string; ar: string; en: string }> = {
 };
 
 export default async function AlertsPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const rules = await prisma.alertRule.findMany({

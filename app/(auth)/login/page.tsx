@@ -16,18 +16,19 @@ function safeDest(to: string | undefined): string {
   return to;
 }
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: { error?: string; email?: string; to?: string };
-}) {
+export default async function LoginPage(
+  props: {
+    searchParams: Promise<{ error?: string; email?: string; to?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const dest = safeDest(searchParams.to);
   const user = await getCurrentUser();
   if (user) redirect(dest);
 
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
-  const theme = getTheme();
+  const theme = await getTheme();
   // The theme toggle is a self-contained dawn/night sky swap (see LoginCosmos);
   // it does not mutate the app-wide theme. We seed the initial sky from a calm
   // default so the very first frame is on-brand deep-emerald night.

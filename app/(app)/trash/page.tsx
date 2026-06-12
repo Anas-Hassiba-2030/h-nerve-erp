@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 const GRACE_MS = 24 * 60 * 60 * 1000;
 
 export default async function TrashPage() {
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const user = await requireUser();
   const isManager = hasRole(user, "MANAGER");
 

@@ -23,7 +23,7 @@ export default async function MobileTodayPage() {
   });
   const userName = dbUser?.name?.split(" ")[0] ?? "صديقي";
 
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const now = new Date();
   const payload = await buildTodayPayload({ userName, hour: now.getHours() });

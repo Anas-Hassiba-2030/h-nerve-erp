@@ -54,7 +54,7 @@ export async function createProject(
   try {
     await prisma.futureProject.create({
       data: {
-        companyId: resolveOwnCompanyId(data.companyId, getActiveWorkspaceId()),
+        companyId: resolveOwnCompanyId(data.companyId, await getActiveWorkspaceId()),
         title: data.title,
         description: data.description || null,
         stage: data.stage,

@@ -30,10 +30,8 @@ function csvCell(value: string): string {
   return /[",\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
 }
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { model: string } },
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ model: string }> }) {
+  const params = await props.params;
   const user = await getCurrentUser();
   if (!user || user.role !== "ADMIN") {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });

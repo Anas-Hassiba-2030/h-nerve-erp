@@ -38,11 +38,12 @@ const CROP_STATUS_EN: Record<string, string> = {
   FAILED: "Failed",
 };
 
-export default async function CropDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function CropDetailPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const crop = await prisma.crop.findUnique({
     where: { id: params.id },
     include: {
@@ -98,7 +99,8 @@ export default async function CropDetailPage({
       ? (crop.actualYieldKg / crop.expectedYieldKg) * 100
       : null;
 
-  const en = getLocale() === "en";
+  const locale = await getLocale();
+  const en = locale === "en";
   const farmName = en ? (crop.farm.nameEn ?? crop.farm.name) : crop.farm.name;
 
   const lifecycleColor =
@@ -145,7 +147,7 @@ export default async function CropDetailPage({
               <p className="text-sm" style={{ color: "var(--ink-muted)" }}>{en ? "Variety: " : "صنف: "}<span className="font-bold">{crop.variety}</span></p>
             ) : null}
             <div className="mt-2 flex flex-wrap gap-3 text-[12px]" style={{ color: "var(--ink-muted)" }}>
-              <span>{loc(FARM_TYPES_AR, FARM_TYPES_EN, getLocale(), crop.farm.type)}</span>
+              <span>{loc(FARM_TYPES_AR, FARM_TYPES_EN, locale, crop.farm.type)}</span>
               <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{en ? "Planted " : "زُرع "}{formatRelative(crop.plantedAt)}</span>
               {!harvested && crop.status !== "FAILED" ? (
                 <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{Math.max(0, daysRemaining)} {en ? "days to harvest" : "يوم للحصاد"}</span>
@@ -173,7 +175,7 @@ export default async function CropDetailPage({
         />
         <DaylightKpi
           label={en ? "Status" : "الحالة"}
-          value={loc(CROP_STATUS_AR, CROP_STATUS_EN, getLocale(), crop.status)}
+          value={loc(CROP_STATUS_AR, CROP_STATUS_EN, locale, crop.status)}
         />
       </DaylightKpiGrid>
 
@@ -293,7 +295,7 @@ export default async function CropDetailPage({
             <dl className="space-y-2 text-xs">
               <Fact label={en ? "Crop" : "المحصول"} value={crop.name} />
               {crop.variety ? (<Fact label={en ? "Variety" : "الصنف"} value={crop.variety} />) : null}
-              <Fact label={en ? "Status" : "الحالة"} value={loc(CROP_STATUS_AR, CROP_STATUS_EN, getLocale(), crop.status)} />
+              <Fact label={en ? "Status" : "الحالة"} value={loc(CROP_STATUS_AR, CROP_STATUS_EN, locale, crop.status)} />
               <Fact label={en ? "Planted" : "زُرع"} value={formatShortDate(crop.plantedAt)} />
               <Fact label={en ? "Expected harvest" : "حصاد متوقع"} value={formatShortDate(crop.expectedHarvest)} />
               <Fact label={en ? "Expected yield" : "غلة متوقعة"} value={`${formatNumber(crop.expectedYieldKg)} ${en ? "kg" : "كغم"}`} />

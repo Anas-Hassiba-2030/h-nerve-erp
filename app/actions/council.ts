@@ -34,8 +34,8 @@ export async function shareInsightToCouncil(formData: FormData): Promise<void> {
     },
   });
 
-  const ar = getLocale() === "ar";
-  flashToast({
+  const ar = (await getLocale()) === "ar";
+  await flashToast({
     type: "info",
     entity: "info",
     label: ar ? "تمت المشاركة مع المجلس" : "Shared with the Council",
@@ -78,8 +78,8 @@ export async function replyToDiscussion(formData: FormData): Promise<void> {
     data: { updatedAt: new Date() },
   });
 
-  const ar = getLocale() === "ar";
-  flashToast({
+  const ar = (await getLocale()) === "ar";
+  await flashToast({
     type: "info",
     entity: "info",
     label: ar ? "تم نشر الرد في المجلس" : "Reply posted to council",
@@ -95,7 +95,7 @@ export async function replyToDiscussion(formData: FormData): Promise<void> {
 // (its insight's graph neighbourhood) + the topic text, so the debate stays on-topic.
 export async function conveneFromDiscussion(formData: FormData): Promise<void> {
   await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const discussionId = String(formData.get("discussionId") ?? "").trim();
   if (!discussionId) return;
 
@@ -104,7 +104,7 @@ export async function conveneFromDiscussion(formData: FormData): Promise<void> {
     select: { title: true, body: true, insightId: true },
   });
   if (!d) {
-    flashToast({ type: "info", entity: "info", label: ar ? "الموضوع غير موجود" : "Subject not found" });
+    await flashToast({ type: "info", entity: "info", label: ar ? "الموضوع غير موجود" : "Subject not found" });
     return;
   }
 
@@ -133,7 +133,7 @@ export async function conveneFromDiscussion(formData: FormData): Promise<void> {
     );
     sessionId = session.id;
   } catch (e) {
-    flashToast({
+    await flashToast({
       type: "info", entity: "info",
       label: ar ? `تعذّر عقد النقاش: ${(e as Error).message}` : `Couldn't convene: ${(e as Error).message}`,
     });
@@ -141,7 +141,7 @@ export async function conveneFromDiscussion(formData: FormData): Promise<void> {
     return;
   }
 
-  flashToast({
+  await flashToast({
     type: "info", entity: "info",
     label: ar ? "عقد المجلس جلسة وكلاء حول هذا الموضوع" : "Sub-agents convened on this subject",
   });

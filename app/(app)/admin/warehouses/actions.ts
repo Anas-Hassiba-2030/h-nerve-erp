@@ -48,7 +48,7 @@ function editFields(formData: FormData) {
 
 export async function createWarehouse(formData: FormData): Promise<void> {
   const user = await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   // Phase 11 authz — never trust a submitted tenantId; resolve against the
   // session. Pinned user → forced to own tenantSlug; cross-tenant ADMIN may pass through.
   const scope = resolveAdminTenantId(user, String(formData.get("tenantId") ?? ""));
@@ -90,7 +90,7 @@ export async function createWarehouse(formData: FormData): Promise<void> {
 
 export async function updateWarehouse(formData: FormData): Promise<void> {
   await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return;
   const { name, address, type, active } = editFields(formData);
@@ -111,7 +111,7 @@ export async function updateWarehouse(formData: FormData): Promise<void> {
 
 export async function deleteWarehouse(formData: FormData): Promise<void> {
   await gate();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return;
   // Block soft-delete while the warehouse still holds products — the

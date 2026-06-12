@@ -15,16 +15,16 @@ afterEach(() => {
 });
 
 describe("tenancy env fallback (non-request context)", () => {
-  it("returns null when no env is set (pitch-safe pass-through)", () => {
+  it("returns null when no env is set (pitch-safe pass-through)", async () => {
     delete process.env.H_NERVE_MCP_WORKSPACE;
     delete process.env.H_NERVE_MCP_TENANT;
-    expect(getActiveWorkspaceId()).toBeNull();
-    expect(getActiveTenantSlug()).toBeNull();
+    expect(await getActiveWorkspaceId()).toBeNull();
+    expect(await getActiveTenantSlug()).toBeNull();
   });
-  it("returns the env workspace/tenant when set", () => {
+  it("returns the env workspace/tenant when set", async () => {
     process.env.H_NERVE_MCP_WORKSPACE = "company_123";
     process.env.H_NERVE_MCP_TENANT = "maha-dairy";
-    expect(getActiveWorkspaceId()).toBe("company_123");
-    expect(getActiveTenantSlug()).toBe("maha-dairy");
+    expect(await getActiveWorkspaceId()).toBe("company_123");
+    expect(await getActiveTenantSlug()).toBe("maha-dairy");
   });
 });

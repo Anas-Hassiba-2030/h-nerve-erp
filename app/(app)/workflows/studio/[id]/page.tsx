@@ -23,7 +23,8 @@ import { getLocale } from "@/lib/i18n/i18n.server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { hasRole } from "@/lib/auth/authz";
 
-export default async function StudioPage({ params }: { params: { id: string } }) {
+export default async function StudioPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const wf = await prisma.workflow.findUnique({
     where: { id: params.id },
     include: {
@@ -34,7 +35,7 @@ export default async function StudioPage({ params }: { params: { id: string } })
   });
   if (!wf) notFound();
 
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const session = await getCurrentUser();
   // deleteNode / deleteEdge / deleteWorkflow are MANAGER-gated; only show

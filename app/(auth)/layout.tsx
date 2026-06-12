@@ -3,9 +3,9 @@ import { ThemeSwitch } from "@/components/nav/ThemeSwitch";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getTheme } from "@/lib/theme/theme.server";
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
-  const locale = getLocale();
-  const theme = getTheme();
+export default async function AuthLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
+  const theme = await getTheme();
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10"
           style={{ background: "var(--surface)" }}>

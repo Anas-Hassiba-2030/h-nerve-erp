@@ -21,14 +21,15 @@ function initialsFor(name: string): string {
   return parts.map((p) => p[0] ?? "").join("").toUpperCase();
 }
 
-export default async function DiscussionPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function DiscussionPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
   const me = await getCurrentUser();
   if (!me) redirect("/login");
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const d = await prisma.councilDiscussion.findUnique({

@@ -20,7 +20,7 @@ import { ReflectButton } from "./ReflectButton";
 import { ConfirmResetForm } from "./ConfirmResetForm";
 
 export default async function BrainIQPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const [iq, history, drafts, applied, latestDraft] = await Promise.all([

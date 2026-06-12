@@ -51,7 +51,7 @@ const MODULES: Module[] = [
 ];
 
 export default async function HelpPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
 
   const faq = [

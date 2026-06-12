@@ -35,14 +35,15 @@ type SP = {
   page?: string;
 };
 
-export default async function AdminUsersPage({
-  searchParams,
-}: {
-  searchParams: SP;
-}) {
-  const locale = getLocale();
+export default async function AdminUsersPage(
+  props: {
+    searchParams: Promise<SP>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const locale = await getLocale();
   const ar = locale === "ar";
-  const m = getMessages(locale);
+  const m = await getMessages(locale);
   const me = await getCurrentUser();
 
   // Read filters off the URL.

@@ -43,7 +43,7 @@ export default async function UsersPage() {
     take: 500,
   })) as unknown as Member[];
 
-  const isAr = getLocale() === "ar";
+  const isAr = (await getLocale()) === "ar";
 
   // The org chart IS the real user records (built from each user's reportsToId).
   // Editing a user — name, title, role, and "reports to" (manager) — reshapes

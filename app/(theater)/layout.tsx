@@ -16,7 +16,7 @@ export default async function TheaterLayout({ children }: { children: React.Reac
   const dbUser = await prisma.user.findUnique({ where: { id: session.id } });
   if (!dbUser) redirect("/logout");
 
-  const initialFlash = readFlash();
+  const initialFlash = await readFlash();
   return (
     <div
       className="theater-shell min-h-screen"

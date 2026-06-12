@@ -23,7 +23,7 @@ export async function clearTestImports(): Promise<void> {
   if (!["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) {
     throw new Error("forbidden");
   }
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
 
   const where = {
     OR: [
@@ -48,7 +48,7 @@ export async function clearTestImports(): Promise<void> {
     prisma.importLog.deleteMany({ where: { id: { in: ids } } }),
   ]);
 
-  flashToast({
+  await flashToast({
     type: "info",
     entity: "info",
     label: ar
@@ -63,7 +63,7 @@ export async function sendTestBatch(): Promise<void> {
   if (!["ADMIN", "EXECUTIVE", "MANAGER"].includes(user.role)) {
     throw new Error("forbidden");
   }
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
 
   // Mirror the real endpoint shape (one ImportLog + N ImportRows). The
   // source carries "test" so clearTestImports() can sweep it later.
@@ -102,7 +102,7 @@ export async function sendTestBatch(): Promise<void> {
     },
   });
 
-  flashToast({
+  await flashToast({
     type: "info",
     entity: "info",
     label: ar ? "تم إنشاء دفعة تجريبية (٤ سجلات)" : "Demo batch created (4 rows)",

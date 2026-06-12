@@ -46,7 +46,7 @@ const STAGE_TAG: Record<string, "ok" | "warn" | "crit"> = {
 };
 
 export default async function EducationPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const lc: "ar" | "en" = ar ? "ar" : "en";
 

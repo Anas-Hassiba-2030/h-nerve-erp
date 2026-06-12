@@ -65,7 +65,7 @@ export async function createBatch(
   try {
     batch = await prisma.dairyBatch.create({
       data: {
-        companyId: resolveOwnCompanyId(data.companyId, getActiveWorkspaceId()),
+        companyId: resolveOwnCompanyId(data.companyId, await getActiveWorkspaceId()),
         batchNumber: generateNumber("MAHA"),
         product: data.product,
         productAr: data.productAr,

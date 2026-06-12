@@ -25,7 +25,7 @@ export async function enterWorkspace(formData: FormData) {
     select: { id: true, code: true },
   });
   if (!company) redirect("/companies");
-  cookies().set(WORKSPACE_COOKIE, company.id, {
+  (await cookies()).set(WORKSPACE_COOKIE, company.id, {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
@@ -35,21 +35,21 @@ export async function enterWorkspace(formData: FormData) {
   // tenantId models cross-tenant.
   const slug = COMPANY_CODE_TO_TENANT_SLUG[company.code] ?? null;
   if (slug) {
-    cookies().set(TENANT_COOKIE, slug, {
+    (await cookies()).set(TENANT_COOKIE, slug, {
       httpOnly: true,
       sameSite: "lax",
       path: "/",
     });
   } else {
-    cookies().delete(TENANT_COOKIE);
+    (await cookies()).delete(TENANT_COOKIE);
   }
   redirect("/workspace"); // Phase G1: land on the Company Command Center
 }
 
 export async function exitWorkspace() {
   await requireUser();
-  cookies().delete(WORKSPACE_COOKIE);
-  cookies().delete(TENANT_COOKIE);
+  (await cookies()).delete(WORKSPACE_COOKIE);
+  (await cookies()).delete(TENANT_COOKIE);
   redirect("/companies");
 }
 
@@ -82,20 +82,20 @@ export async function enterWorkspaceByPath(formData: FormData): Promise<void> {
   });
   if (!company) redirect(path);
 
-  cookies().set(WORKSPACE_COOKIE, company.id, {
+  (await cookies()).set(WORKSPACE_COOKIE, company.id, {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
   });
   const slug = COMPANY_CODE_TO_TENANT_SLUG[company.code] ?? null;
   if (slug) {
-    cookies().set(TENANT_COOKIE, slug, {
+    (await cookies()).set(TENANT_COOKIE, slug, {
       httpOnly: true,
       sameSite: "lax",
       path: "/",
     });
   } else {
-    cookies().delete(TENANT_COOKIE);
+    (await cookies()).delete(TENANT_COOKIE);
   }
   redirect(path);
 }

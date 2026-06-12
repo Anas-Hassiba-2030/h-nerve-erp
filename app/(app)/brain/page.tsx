@@ -28,7 +28,7 @@ function advPos(position: string, ar: boolean): string {
 }
 
 export default async function BrainPage() {
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const cfg = llmConfig();
 
   const [

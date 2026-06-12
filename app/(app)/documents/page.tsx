@@ -25,7 +25,7 @@ function ext(name: string): string {
 }
 
 export default async function DocumentsPage() {
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   const lc = ar ? "ar" : "en";
 

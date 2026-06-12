@@ -18,8 +18,8 @@ import { TENANT_COOKIE } from "@/lib/tenancy/tenancy";
 async function destroyAndRedirect(req: NextRequest | Request): Promise<Response> {
   const session = await getSession();
   session.destroy();
-  cookies().delete(WORKSPACE_COOKIE);
-  cookies().delete(TENANT_COOKIE);
+  (await cookies()).delete(WORKSPACE_COOKIE);
+  (await cookies()).delete(TENANT_COOKIE);
   const url = new URL("/login", req.url);
   return NextResponse.redirect(url, 303);
 }

@@ -20,10 +20,10 @@ import { flashToast } from "@/lib/utils/toast";
 export async function generateFromCouncil(formData: FormData): Promise<void> {
   await requireUser();
   const sessionId = String(formData.get("sessionId") ?? "");
-  const locale = getLocale() as "ar" | "en";
+  const locale = (await getLocale()) as "ar" | "en";
   const ar = locale === "ar";
   if (!sessionId) {
-    flashToast({ type: "info", entity: "info", id: "gen", label: ar ? "معرف الجلسة مفقود" : "Session id missing" });
+    await flashToast({ type: "info", entity: "info", id: "gen", label: ar ? "معرف الجلسة مفقود" : "Session id missing" });
     revalidatePath("/plans");
     return;
   }
@@ -32,7 +32,7 @@ export async function generateFromCouncil(formData: FormData): Promise<void> {
     const plan = await generatePlanFromCouncil(sessionId, locale);
     planId = plan.id;
   } catch (e) {
-    flashToast({
+    await flashToast({
       type: "info", entity: "info", id: "gen",
       label: ar ? `تعذّر توليد الخطة: ${(e as Error).message}` : `Could not generate plan: ${(e as Error).message}`,
     });
@@ -47,10 +47,10 @@ export async function generateFromCouncil(formData: FormData): Promise<void> {
 export async function generateFromInsight(formData: FormData): Promise<void> {
   await requireUser();
   const insightId = String(formData.get("insightId") ?? "");
-  const locale = getLocale() as "ar" | "en";
+  const locale = (await getLocale()) as "ar" | "en";
   const ar = locale === "ar";
   if (!insightId) {
-    flashToast({ type: "info", entity: "info", id: "gen", label: ar ? "معرف الإشارة مفقود" : "Insight id missing" });
+    await flashToast({ type: "info", entity: "info", id: "gen", label: ar ? "معرف الإشارة مفقود" : "Insight id missing" });
     revalidatePath("/plans");
     return;
   }
@@ -59,7 +59,7 @@ export async function generateFromInsight(formData: FormData): Promise<void> {
     const plan = await generatePlanFromInsight(insightId, locale);
     planId = plan.id;
   } catch (e) {
-    flashToast({
+    await flashToast({
       type: "info", entity: "info", id: "gen",
       label: ar ? `تعذّر توليد الخطة: ${(e as Error).message}` : `Could not generate plan: ${(e as Error).message}`,
     });
@@ -74,7 +74,7 @@ export async function generateFromInsight(formData: FormData): Promise<void> {
 
 export async function commit(formData: FormData): Promise<void> {
   const me = await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const id = String(formData.get("id") ?? "");
   if (!id) throw new Error("id required");
 
@@ -94,7 +94,7 @@ export async function commit(formData: FormData): Promise<void> {
       });
     }
   } catch (e) {
-    flashToast({
+    await flashToast({
       type: "info", entity: "info", id: "commit",
       label: ar ? `تعذّر اعتماد الخطة: ${(e as Error).message}` : `Could not commit plan: ${(e as Error).message}`,
     });
@@ -107,7 +107,7 @@ export async function commit(formData: FormData): Promise<void> {
   // but without a toast the click reads as "nothing happened" — the user can't
   // tell where the plan went. Name it + its new state so the result is obvious.
   const goal = plan ? (ar ? plan.goal : ((plan as any).goalEn || plan.goal)) : "";
-  flashToast({
+  await flashToast({
     type: "info", entity: "info", id: "commit",
     label: ar ? `اعتُمدت الخطة وأصبحت قيد التنفيذ: ${goal}` : `Plan committed — now active: ${goal}`,
   });
@@ -117,7 +117,7 @@ export async function commit(formData: FormData): Promise<void> {
 
 export async function abandon(formData: FormData): Promise<void> {
   const me = await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const id = String(formData.get("id") ?? "");
   if (!id) throw new Error("id required");
   const plan = await prisma.plan.findUnique({ where: { id } });
@@ -134,7 +134,7 @@ export async function abandon(formData: FormData): Promise<void> {
       });
     }
   } catch (e) {
-    flashToast({
+    await flashToast({
       type: "info", entity: "info", id: "abandon",
       label: ar ? `تعذّر إلغاء الخطة: ${(e as Error).message}` : `Could not abandon plan: ${(e as Error).message}`,
     });
@@ -144,7 +144,7 @@ export async function abandon(formData: FormData): Promise<void> {
   }
 
   const goal = plan ? (ar ? plan.goal : ((plan as any).goalEn || plan.goal)) : "";
-  flashToast({
+  await flashToast({
     type: "info", entity: "info", id: "abandon",
     label: ar ? `أُلغيت الخطة: ${goal}` : `Plan abandoned: ${goal}`,
   });
@@ -154,7 +154,7 @@ export async function abandon(formData: FormData): Promise<void> {
 
 export async function markStepDone(formData: FormData): Promise<void> {
   const me = await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const stepId = String(formData.get("stepId") ?? "");
   const planId = String(formData.get("planId") ?? "");
   if (!stepId) throw new Error("stepId required");
@@ -188,7 +188,7 @@ export async function markStepDone(formData: FormData): Promise<void> {
       }
     }
   } catch (e) {
-    flashToast({
+    await flashToast({
       type: "info", entity: "info", id: "step-done",
       label: ar ? `تعذّر إكمال الخطوة: ${(e as Error).message}` : `Could not complete step: ${(e as Error).message}`,
     });
@@ -197,7 +197,7 @@ export async function markStepDone(formData: FormData): Promise<void> {
     return;
   }
 
-  flashToast({
+  await flashToast({
     type: "info", entity: "info", id: "step-done",
     label: planCompleted
       ? (ar ? "اكتملت الخطة بالكامل ✓" : "Plan fully completed ✓")
@@ -209,7 +209,7 @@ export async function markStepDone(formData: FormData): Promise<void> {
 
 export async function markStepBlocked(formData: FormData): Promise<void> {
   const me = await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const stepId = String(formData.get("stepId") ?? "");
   const planId = String(formData.get("planId") ?? "");
   const note = String(formData.get("note") ?? "").slice(0, 320) || null;
@@ -231,7 +231,7 @@ export async function markStepBlocked(formData: FormData): Promise<void> {
       });
     }
   } catch (e) {
-    flashToast({
+    await flashToast({
       type: "info", entity: "info", id: "step-blocked",
       label: ar ? `تعذّر تعليق الخطوة: ${(e as Error).message}` : `Could not block step: ${(e as Error).message}`,
     });
@@ -239,7 +239,7 @@ export async function markStepBlocked(formData: FormData): Promise<void> {
     return;
   }
 
-  flashToast({
+  await flashToast({
     type: "info", entity: "info", id: "step-blocked",
     label: ar ? "عُلّقت الخطوة" : "Step marked blocked",
   });

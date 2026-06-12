@@ -23,7 +23,7 @@ const LENS_LABEL: Record<string, { ar: string; en: string }> = {
 
 export async function convene(formData: FormData): Promise<void> {
   await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const topic = String(formData.get("topic") ?? "").trim();
   if (!topic || topic.length < 6) {
     flashToast({
@@ -90,7 +90,7 @@ export async function deleteSession(formData: FormData): Promise<void> {
 // tell anything happened (the #1 reported confusion).
 export async function togglePin(formData: FormData): Promise<void> {
   await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const id = String(formData.get("id") ?? "");
   if (!id) return;
   const row = await prisma.councilSession.findUnique({ where: { id }, select: { pinned: true } });

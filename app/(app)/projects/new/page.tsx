@@ -6,7 +6,7 @@ import { ProjectForm } from "../ProjectForm";
 import "../../daylight.css";
 
 export default async function NewProjectPage() {
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const companies = await prisma.company.findMany({
     orderBy: { name: "asc" },
     select: { id: true, name: true },

@@ -23,8 +23,9 @@ const STATUS_TONE: Record<string, string> = {
   DONE: "badge-emerald", BLOCKED: "badge-red",
 };
 
-export default async function EmployeeProfilePage({ params }: { params: { id: string } }) {
-  const ar = getLocale() === "ar";
+export default async function EmployeeProfilePage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const ar = (await getLocale()) === "ar";
   const lc = ar ? "ar" : "en";
 
   const user = await prisma.user.findUnique({

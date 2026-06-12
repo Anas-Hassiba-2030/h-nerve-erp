@@ -19,7 +19,7 @@ import "../daylight.css";
 export const dynamic = "force-dynamic";
 
 export default async function MemoryPage() {
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   // forgetMemory requires MANAGER+; only show the "forget" control to those
   // roles so a STAFF user isn't handed a button that silently rejects.
   const user = await getCurrentUser();

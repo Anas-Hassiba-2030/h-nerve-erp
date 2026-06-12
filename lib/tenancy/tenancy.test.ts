@@ -74,16 +74,16 @@ describe("provisioning checklist tables stay in lock-step", () => {
 });
 
 describe("cookie readers (next/headers mocked)", () => {
-  it("getViewAsTenant returns the value, or null when absent", () => {
+  it("getViewAsTenant returns the value, or null when absent", async () => {
     mockCookie({ [tenancyCookies.VIEW_AS]: "arena" });
-    expect(getViewAsTenant()).toBe("arena");
+    expect(await getViewAsTenant()).toBe("arena");
     mockCookie({});
-    expect(getViewAsTenant()).toBeNull();
+    expect(await getViewAsTenant()).toBeNull();
   });
-  it("getTenantThemeCookie returns the theme key, or null when absent", () => {
+  it("getTenantThemeCookie returns the theme key, or null when absent", async () => {
     mockCookie({ [tenancyCookies.THEME]: "midnight" });
-    expect(getTenantThemeCookie()).toBe("midnight");
+    expect(await getTenantThemeCookie()).toBe("midnight");
     mockCookie({});
-    expect(getTenantThemeCookie()).toBeNull();
+    expect(await getTenantThemeCookie()).toBeNull();
   });
 });

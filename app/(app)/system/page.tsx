@@ -30,12 +30,13 @@ function num(n: number, ar: boolean): string {
   return ar ? toArabicDigits(n) : String(n);
 }
 
-export default async function SystemPage({
-  searchParams,
-}: {
-  searchParams: { tab?: string };
-}) {
-  const locale = getLocale();
+export default async function SystemPage(
+  props: {
+    searchParams: Promise<{ tab?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const locale = await getLocale();
   const ar = locale === "ar";
   const tab = searchParams.tab === "settings" ? "settings" : "status";
 

@@ -14,7 +14,7 @@ import { getLocale } from "@/lib/i18n/i18n.server";
  */
 export async function rebuildBrainGraph(): Promise<void> {
   await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   try {
     await seedBrainGraph();
   } catch (e) {

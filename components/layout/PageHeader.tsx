@@ -43,8 +43,8 @@ export async function PageHeader({
   // Optional inline metric chips shown next to title for at-a-glance KPIs.
   metrics?: Array<{ label: string; value: string; tone?: "emerald" | "amber" | "blue" | "violet" }>;
 }) {
-  const locale = getLocale();
-  const theme = getTheme();
+  const locale = await getLocale();
+  const theme = await getTheme();
   const ar = locale === "ar";
 
   const session = await getCurrentUser();

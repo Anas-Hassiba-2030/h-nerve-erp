@@ -32,14 +32,15 @@ import "../daylight.css";
 // H_NERVE_PERMS_ENFORCED flips and the layout-level redirect kicks in.
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams: { period?: string };
-}) {
+export default async function DashboardPage(
+  props: {
+    searchParams: Promise<{ period?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const session = await getCurrentUser();
-  const locale = getLocale();
-  const m = getMessages(locale);
+  const locale = await getLocale();
+  const m = await getMessages(locale);
   const ar = locale === "ar";
   const lc: "ar" | "en" = ar ? "ar" : "en";
 

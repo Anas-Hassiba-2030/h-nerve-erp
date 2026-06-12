@@ -24,12 +24,13 @@ import { AuditPickerView } from "./_components/AuditPickerView";
 import "../daylight.css";
 import "../audit.css";
 
-export default async function Audit360Page({
-  searchParams,
-}: {
-  searchParams: { entity?: string; id?: string };
-}) {
-  const ar = getLocale() === "ar";
+export default async function Audit360Page(
+  props: {
+    searchParams: Promise<{ entity?: string; id?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const ar = (await getLocale()) === "ar";
 
   const rawEntity = (searchParams.entity ?? "").toUpperCase();
   const rawId = searchParams.id ?? "";

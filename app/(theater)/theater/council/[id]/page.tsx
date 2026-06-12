@@ -25,12 +25,13 @@ const ACCENT_PER_AGENT: Record<string, string> = {
   "risk-officer":       "#a87a32",
 };
 
-export default async function TheaterCouncilPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const locale = getLocale();
+export default async function TheaterCouncilPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  const params = await props.params;
+  const locale = await getLocale();
   const ar = locale === "ar";
   const script = await composeFromCouncil(params.id, ar ? "ar" : "en");
   if (!script) notFound();
@@ -70,7 +71,6 @@ export default async function TheaterCouncilPage({
           ))}
         </ul>
       </Act>
-
       {/* ── ACT II — HISTORY ──────────────────────────────────────── */}
       <Act
         index={1}
@@ -129,7 +129,6 @@ export default async function TheaterCouncilPage({
           </div>
         )}
       </Act>
-
       {/* ── ACT III — SIMULATION ──────────────────────────────────── */}
       <Act
         index={2}
@@ -190,7 +189,6 @@ export default async function TheaterCouncilPage({
             : `Effect propagates to ${(script.acts[2] as any).totalAffected} connected entities.`}
         </p>
       </Act>
-
       {/* ── ACT IV — COUNCIL ──────────────────────────────────────── */}
       <Act
         index={3}
@@ -221,7 +219,6 @@ export default async function TheaterCouncilPage({
           })}
         </div>
       </Act>
-
       {/* ── ACT V — RECOMMENDATION ────────────────────────────────── */}
       <Act
         index={4}

@@ -22,7 +22,7 @@ const ROLE_AR: Record<string, string> = {
 
 export default async function MobileMePage() {
   const session = await requireUser();
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   const Arrow = ar ? ArrowLeft : ArrowRight;
 
   const user = await prisma.user.findUnique({

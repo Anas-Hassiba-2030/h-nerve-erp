@@ -26,7 +26,7 @@ const programSchema = z.object({
 
 export async function createProgram(formData: FormData) {
   await requireRole("MANAGER");
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   // schema.parse() throws on invalid input; without this guard the button just
   // re-renders the form with no message (silent "does nothing"). Toast on any
   // validation/DB failure so the click always produces visible feedback.
@@ -45,7 +45,7 @@ export async function createProgram(formData: FormData) {
     });
     await prisma.program.create({
       data: {
-        companyId: resolveOwnCompanyId(data.companyId, getActiveWorkspaceId()),
+        companyId: resolveOwnCompanyId(data.companyId, await getActiveWorkspaceId()),
         name: data.name,
         nameEn: data.nameEn || null,
         founder: data.founder,
@@ -84,7 +84,7 @@ export async function deleteProgram(formData: FormData) {
   await requireRole("MANAGER");
   const id = String(formData.get("id") ?? "");
   if (!id) return;
-  const ar = getLocale() === "ar";
+  const ar = (await getLocale()) === "ar";
   try {
     await prisma.program.delete({ where: { id } });
     flashToast({

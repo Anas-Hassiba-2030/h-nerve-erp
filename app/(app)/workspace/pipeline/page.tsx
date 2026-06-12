@@ -23,7 +23,7 @@ const STAGE_LABEL: Record<string, { ar: string; en: string }> = {
 };
 
 export default async function WorkspacePipelinePage() {
-  const workspaceId = getActiveWorkspaceId();
+  const workspaceId = await getActiveWorkspaceId();
   if (!workspaceId) redirect("/companies");
   const company = await prismaUnscoped.company.findUnique({
     where: { id: workspaceId },
@@ -31,7 +31,7 @@ export default async function WorkspacePipelinePage() {
   });
   if (!company) redirect("/companies");
 
-  const locale = getLocale();
+  const locale = await getLocale();
   const ar = locale === "ar";
   // W6 — STAFF see the pipeline read-only; only MANAGER+ may edit.
   const canMutate = !!(await getUserIfRole("MANAGER"));

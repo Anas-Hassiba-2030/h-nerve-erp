@@ -30,35 +30,35 @@ function setCookie(value: string | undefined) {
 const LIVE = { asOf: null, isTraveling: false, daysBack: 0 };
 
 describe("getAsOf — defaults to LIVE on anything unusable", () => {
-  it("no cookie → live", () => {
+  it("no cookie → live", async () => {
     setCookie(undefined);
-    expect(getAsOf()).toEqual(LIVE);
+    expect(await getAsOf()).toEqual(LIVE);
   });
-  it("non-numeric cookie → live (never NaN date)", () => {
+  it("non-numeric cookie → live (never NaN date)", async () => {
     setCookie("not-a-timestamp");
-    expect(getAsOf()).toEqual(LIVE);
+    expect(await getAsOf()).toEqual(LIVE);
   });
-  it("zero / negative timestamp → live", () => {
+  it("zero / negative timestamp → live", async () => {
     setCookie("0");
-    expect(getAsOf()).toEqual(LIVE);
+    expect(await getAsOf()).toEqual(LIVE);
     setCookie("-9999");
-    expect(getAsOf()).toEqual(LIVE);
+    expect(await getAsOf()).toEqual(LIVE);
   });
-  it("a FUTURE timestamp is refused (nothing to reconstruct ahead of now)", () => {
+  it("a FUTURE timestamp is refused (nothing to reconstruct ahead of now)", async () => {
     setCookie(String(Date.now() + 5 * DAY));
-    expect(getAsOf()).toEqual(LIVE);
+    expect(await getAsOf()).toEqual(LIVE);
   });
-  it("a stale cookie < 12h old is treated as live (no per-render pollution)", () => {
+  it("a stale cookie < 12h old is treated as live (no per-render pollution)", async () => {
     setCookie(String(Date.now() - 3 * HOUR));
-    expect(getAsOf()).toEqual(LIVE);
+    expect(await getAsOf()).toEqual(LIVE);
   });
 });
 
 describe("getAsOf — genuine travel", () => {
-  it("a clearly-past timestamp travels, with rounded daysBack", () => {
+  it("a clearly-past timestamp travels, with rounded daysBack", async () => {
     const ts = Date.now() - 10 * DAY;
     setCookie(String(ts));
-    const s = getAsOf();
+    const s = await getAsOf();
     expect(s.isTraveling).toBe(true);
     expect(s.daysBack).toBe(10);
     expect(s.asOf).toBeInstanceOf(Date);

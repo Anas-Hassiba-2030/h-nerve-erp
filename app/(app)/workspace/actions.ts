@@ -281,8 +281,8 @@ export async function acceptSignal(formData: FormData): Promise<void> {
   // "Where did it go" — accepting a signal removes it from THIS feed but creates
   // a DRAFT plan on a different page (/plans). Point the user there by name so
   // the new plan is findable instead of seeming to vanish.
-  const ar = getLocale() === "ar";
-  flashToast({
+  const ar = (await getLocale()) === "ar";
+  await flashToast({
     type: "info", entity: "info", id: plan.id,
     label: ar
       ? `أُنشئت خطة مسوّدة في «الخطط»: ${plan.goal}`

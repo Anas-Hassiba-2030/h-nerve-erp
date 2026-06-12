@@ -1,6 +1,36 @@
-# H-Nerve ERP — System Map
-> Single source of truth for navigation. Use this to find anything fast.
-> Updated: 2026-06-11 (post brain-MCP re-arch #240 + audit cleanup #242)
+# H-Nerve ERP — System Map & Navigation Protocol
+> **Lost? Start here.** This is the single source of truth for *where everything
+> lives*. Find anything fast, then jump to the detailed section below.
+> Updated: 2026-06-12 (post Next 16 + React 19 upgrade #245, `src/` consolidation #248, proxy rename #249, deploy fixes #251/#253)
+
+---
+
+## 🧭 30-SECOND ORIENTATION — where is everything?
+
+Everything that isn't a mandated config file lives in a **folder**. The whole
+tree is just **8 places**:
+
+| If you want… | Go to | Notes |
+|--------------|-------|-------|
+| **A page / screen** | `src/app/<route>/page.tsx` | Route groups: `(app)` operator UI · `(admin)` superadmin · `(auth)` login · `(theater)` fullscreen · `m/` mobile |
+| **To save/change data** | `src/app/<route>/actions.ts` | Server Actions = the default write path (not `api/`) |
+| **A special endpoint** (stream, export, webhook) | `src/app/api/<thing>/route.ts` | Only when a server action can't do it |
+| **Shared logic / a service** | `src/lib/<pillar>/` | One folder per pillar — `auth`, `brain`, `db`, `finance`, `i18n`, `tenancy`, … (full list below) |
+| **A UI component** | `src/components/<group>/` | Grouped by domain — `layout`, `ui`, `forms`, `charts`, `brain`, … |
+| **The AI brain** | `src/lib/brain/` | Tools + orchestrator + MCP. Deep-dive: `src/lib/brain/README.md` |
+| **Database schema / seeds** | `prisma/` | Schema folder + migrations + seed scripts |
+| **Ops / seed / verify scripts** | `scripts/{ops,seed,verify,build,test}/` | Never a flat dump |
+| **Docs** | `docs/` | This map · `SYSTEM-BLUEPRINT.md` (build-a-system) · `OPERATING-PROTOCOL.md` (how to run) · `DESIGN-SKILL.md` (design) |
+| **Auth/RBAC gate** | `src/proxy.ts` | Runs on every request (Next 16 renamed "middleware" → "proxy") |
+| **Config** (don't move) | repo root | `package.json`, `next.config.mjs`, `tsconfig.json`, `.env*`, `railway.toml` — framework-mandated, immovable |
+
+**Import rule:** `@/...` always means `src/...` (e.g. `@/lib/db/db` →
+`src/lib/db/db.ts`). The one exception: `@/prisma/...` → the root `prisma/` folder.
+
+**The golden path for a new feature:** add `src/app/<thing>/page.tsx` (auth +
+chrome inherited) → add `src/app/<thing>/actions.ts` for writes → put shared
+logic in `src/lib/<pillar>/`. Mirror Companies/Hotels — the canonical CRUD
+pattern.
 
 ---
 
@@ -15,9 +45,10 @@
 | `postcss.config.mjs` | PostCSS (postcss-import enabled) |
 | `src/proxy.ts` | Route-level RBAC proxy (Next 16 middleware convention) + rate limiting |
 | `railway.toml` | Railway deploy config (preDeploy seed commands) |
-| `tsconfig.json` | TypeScript paths (`@/*` → repo root) |
+| `tsconfig.json` | TypeScript paths (`@/*` → `./src/*`; `@/prisma/*` → root `prisma/`) |
 | `vitest.config.ts` | Test runner config (node env, src/lib/**/*.test.ts) |
-| `.eslintrc.json` | Lint rules |
+| `eslint.config.mjs` | Lint rules (ESLint 9 flat config; `next lint` removed in Next 16) |
+| `package.json` | Deps + scripts + **`engines.node` (>=20.9, required for the Railway build)** |
 | `.env` | **LOCAL secrets** — never commit |
 | `.env.example` | Env var reference (safe to commit) |
 | `.env.railway.template` | Railway env var template |

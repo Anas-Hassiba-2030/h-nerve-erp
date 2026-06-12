@@ -207,11 +207,11 @@ async function main() {
   const brainGraph = await prisma.brainNode.count();
   if (brainGraph === 0) {
     console.log("\n→ Seeding brain (graph + memory + feedback + meta + federation)…");
-    const { seedBrainGraph } = await import("../lib/brain/seedGraph");
-    const { seedMemoryLake } = await import("../lib/brain/seedMemories");
-    const { seedFeedback } = await import("../lib/brain/seedFeedback");
-    const { seedMetaHistory } = await import("../lib/brain/seedMetaHistory");
-    const { seedFederation } = await import("../lib/brain/seedFederation");
+    const { seedBrainGraph } = await import("../src/lib/brain/seedGraph");
+    const { seedMemoryLake } = await import("../src/lib/brain/seedMemories");
+    const { seedFeedback } = await import("../src/lib/brain/seedFeedback");
+    const { seedMetaHistory } = await import("../src/lib/brain/seedMetaHistory");
+    const { seedFederation } = await import("../src/lib/brain/seedFederation");
     const g = await seedBrainGraph();
     const m = await seedMemoryLake();
     const fb = await seedFeedback();

@@ -24,8 +24,11 @@
     ],
     "baseUrl": ".",
     "paths": {
+      "@/prisma/*": [
+        "./prisma/*"
+      ],
       "@/*": [
-        "./*"
+        "./src/*"
       ]
     }
   },
@@ -37,7 +40,6 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules",
-    "h-nerve-erp"
+    "node_modules"
   ]
 }

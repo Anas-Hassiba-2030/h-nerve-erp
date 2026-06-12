@@ -22,8 +22,8 @@
 //   $env:H_NERVE_MCP_ALLOW_UNSCOPED='1'; npm run brain:mcp
 
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { buildBrainMcpServer } from "../../lib/brain/mcp/server";
-import { resolveMcpScope } from "../../lib/brain/mcp/scope";
+import { buildBrainMcpServer } from "../../src/lib/brain/mcp/server";
+import { resolveMcpScope } from "../../src/lib/brain/mcp/scope";
 
 async function main() {
   const scope = resolveMcpScope(process.env); // throws fail-closed if neither env set

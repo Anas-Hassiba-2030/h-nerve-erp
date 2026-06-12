@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { DEFAULT_PROTOCOL_CLAUSES } from "../lib/protocol/clauses";
+import { DEFAULT_PROTOCOL_CLAUSES } from "../src/lib/protocol/clauses";
 import { seedDemoDocuments } from "./seedDemoDocuments";
 
 const prisma = new PrismaClient();

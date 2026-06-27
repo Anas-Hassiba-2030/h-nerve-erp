@@ -1245,23 +1245,23 @@ const GROUPS = [
   // so the group's businesses live with the board that governs them — one anchor
   // instead of two near-duplicates. Sector kids appended below.
   { id:"overview", name:"لوحة المجموعة", en:"Group Board", amb:"finance", kids:[
-     ["لوحة المجموعة","ui_kits/dashboard/index.html"],["العرض"],["البحث"],["المثبّت"],["الشركات"],["التحليلات المتقدمة"],["المقارنة"],["مكتبة المكوّنات"],
-     ["أرينا","sections/arena.html"],["المها","sections/maha.html"],["لوران","sections/loran.html"],["الحاضنة","sections/ahliyya.html"],["سلسلة التوريد","sections/supply.html"],["مسارات العمل"] ]},
+     ["لوحة المجموعة","ui_kits/dashboard/index.html"],["الشركات"],
+     ["أرينا","sections/arena.html"],["المها","sections/maha.html"],["لوران","sections/loran.html"],["الحاضنة","sections/ahliyya.html"],["سلسلة التوريد","sections/supply.html"] ]},
   { id:"intel", name:"العقل", en:"The Brain", amb:"cosmic", kids:[
      ["مركز الدماغ","sections/brain.html"],["الرؤى","sections/insights.html"],["التنبيهات","sections/alerts.html"],["الخطط","sections/plans.html"],["المستندات","sections/documents.html"],["الرسم السببي","sections/causal.html"],["ماذا لو","sections/whatif.html"],["المجلس","sections/council.html"],["بحيرة الذاكرة","sections/memory.html"],["التعلّم","sections/learning.html"],["المعايير","sections/benchmarks.html"],["ذكاء الدماغ","sections/brainiq.html"],["الراوي","sections/narrate.html"] ]},
   { id:"finance", name:"المالية", en:"Finance", amb:"finance", kids:[
      ["المركز المالي","sections/finance.html"],["التحليلات","sections/analytics.html"],["مقارنة","sections/compare.html"],["الأسواق","sections/markets.html"],["التقارير","sections/reports.html"],["الاستدامة"],["المشاريع المستقبلية"] ]},
   { id:"team", name:"الفريق", en:"Team", amb:"university", kids:[
-     ["الرسائل","sections/messages.html"],["المهام","sections/tasks.html"],["صندوق الوارد","sections/inbox.html"],["الموجز","sections/digest.html"],["الإنجازات","sections/tasks.html"],["الموظفون","sections/employees.html"],["الفريق","sections/employees.html"] ]},
+     ["الرسائل","sections/messages.html"],["المهام","sections/tasks.html"],["صندوق الوارد","sections/inbox.html"],["الموجز","sections/digest.html"],["الإنجازات","sections/achievements.html"],["الموظفون","sections/employees.html"] ]},
   { id:"system", name:"النظام", en:"System", amb:"holding", kids:[
      ["المستأجرون","sections/admin.html"],["الإمبراطورية","sections/holding.html"],["الإدارة ERP","sections/admin.html"],["مساحة العمل","sections/workspace.html"],["الأتمتة","sections/workflows.html"],["التكاملات","sections/integrations.html"],["التدقيق الشامل","sections/audit.html"],["سجل النشاط","sections/audit.html"],["صحة النظام","sections/system.html"],["البحث","sections/search.html"],["المثبّت","sections/pinned.html"],["المحذوفات","sections/trash.html"],["المساعدة","sections/info.html"],["خارطة الطريق","sections/info.html"],["الإعدادات","sections/system.html"] ]},
 ];
 // English child labels (parallel to kids order) — for the AR/EN toggle
 const KIDS_EN = {
-  overview:["Group Board","Presentation","Search","Pinned","Companies","Advanced Analytics","Compare","Component Library","Arena","Maha","Loran","Incubator","Supply Chain","Workflows"],
+  overview:["Group Board","Companies","Arena","Maha","Loran","Incubator","Supply Chain"],
   intel:["Brain Hub","Insights","Alerts","Plans","Documents","Causal Graph","What-if","Council","Memory Lake","Learning","Benchmarks","Brain IQ","Narrate"],
   finance:["Financial Hub","Analytics","Compare","Markets","Reports","Sustainability","Future Projects"],
-  team:["Messages","Tasks","Inbox","Digest","Achievements","Staff","Team"],
+  team:["Messages","Tasks","Inbox","Digest","Achievements","Staff"],
   system:["Tenants","Empire","Admin ERP","Workspace","Workflows","Integrations","Audit 360","Activity","System Health","Search","Pinned","Trash","Help","Roadmap","Settings"],
 };
 const ANCHORS = GROUPS.map(g=>({

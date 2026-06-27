@@ -34,8 +34,6 @@ export const ORRERY_GROUPS: OrreryGroup[] = [
     children: [
       { label: "لوحة الإدارة", labelEn: "Dashboard", route: "/dashboard" },
       { label: "الشركات", labelEn: "Companies", route: "/companies" },
-      { label: "البحث", labelEn: "Search", route: "/search" },
-      { label: "المثبّت", labelEn: "Pinned", route: "/pinned" },
       { label: "أرينا", labelEn: "Arena", route: "/hotels" },
       { label: "المها", labelEn: "Maha", route: "/dairy" },
       { label: "لوران", labelEn: "Loran", route: "/farms" },
@@ -105,6 +103,8 @@ export const ORRERY_GROUPS: OrreryGroup[] = [
       { label: "التكاملات", labelEn: "Integrations", route: "/integrations" },
       { label: "التدقيق", labelEn: "Audit", route: "/audit-360" },
       { label: "سجل النشاط", labelEn: "Activity", route: "/activity" },
+      { label: "البحث", labelEn: "Search", route: "/search" },
+      { label: "المثبّت", labelEn: "Pinned", route: "/pinned" },
       { label: "المحذوفات", labelEn: "Trash", route: "/trash" },
       { label: "الإعدادات", labelEn: "Settings", route: "/settings" },
       { label: "المساعدة", labelEn: "Help", route: "/help" },

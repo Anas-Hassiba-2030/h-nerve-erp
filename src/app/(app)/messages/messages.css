@@ -55,7 +55,7 @@
 .dl-page .ms-kpis{display:flex;gap:12px;flex:1}
 .dl-page .ms-kpi{flex:1;min-width:110px;background:linear-gradient(160deg,rgba(20,46,38,.5),rgba(13,31,26,.46));border:1px solid rgba(194,163,90,.2);border-radius:14px;padding:11px 16px;display:flex;flex-direction:column;justify-content:center}
 .dl-page .ms-kpi .v{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:26px;font-weight:600;color:#fff;line-height:1}
-.dl-page .ms-kpi .k{font-size:11px;color:var(--mist);opacity:.7;margin-top:4px}
+.dl-page .ms-kpi .k{font-size:11px;color:var(--mist);opacity:.85;margin-top:4px}
 
 /* chat layout */
 .dl-page .ms-chat{flex:1;min-height:0;display:grid;grid-template-columns:320px 1fr;gap:14px}
@@ -76,9 +76,9 @@
 .dl-page .thr .meta{flex:1;min-width:0}
 .dl-page .thr .row1{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 .dl-page .thr .nm{font-size:13.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dl-page .thr .tm{font-size:10px;color:var(--mist);opacity:.5;white-space:nowrap}
+.dl-page .thr .tm{font-size:10.5px;color:var(--mist);opacity:.72;white-space:nowrap}
 .dl-page .thr .ro{font-size:10.5px;color:var(--gold-soft);opacity:.8;margin-bottom:2px}
-.dl-page .thr .prev{font-size:12px;color:var(--mist);opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dl-page .thr .prev{font-size:12.5px;color:var(--mist);opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dl-page .thr .unread{flex:0 0 auto;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--gold);color:#241b06;font-size:11px;font-weight:800;display:grid;place-items:center;animation:ms-unreadpulse 2.4s ease-in-out infinite}
 @keyframes ms-unreadpulse{0%,100%{box-shadow:0 0 0 0 rgba(220,195,138,.5)}50%{box-shadow:0 0 0 5px rgba(220,195,138,0)}}
 
@@ -100,7 +100,7 @@
 .dl-page .msg.mine .bub{background:linear-gradient(135deg,var(--emerald-soft),var(--emerald));border-bottom-left-radius:5px}
 .dl-page .msg.theirs .bub{background:rgba(20,46,38,.85);border:1px solid rgba(194,163,90,.18);border-bottom-right-radius:5px}
 .dl-page .msg .bub img{display:block;max-width:240px;width:100%;border-radius:11px;margin-top:4px}
-.dl-page .msg .meta{font-size:10px;color:var(--mist);opacity:.5;padding:0 6px}
+.dl-page .msg .meta{font-size:10.5px;color:var(--mist);opacity:.72;padding:0 6px}
 .dl-page .msg.mine .meta{text-align:start}.dl-page .msg.theirs .meta{text-align:end}
 .dl-page .typing{align-self:flex-end;display:flex;align-items:center;gap:6px;padding:10px 15px;border-radius:16px;background:rgba(20,46,38,.85);border:1px solid rgba(194,163,90,.18);opacity:0;transition:opacity .3s}
 .dl-page .typing.show{opacity:1}

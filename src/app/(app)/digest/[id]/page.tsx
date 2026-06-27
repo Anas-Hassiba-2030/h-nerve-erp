@@ -119,12 +119,21 @@ export default async function DigestDetailPage(
         }
       />
 
+      {/* What this is — plain-language explainer */}
+      <div className="panel reveal" style={{ padding: "14px 18px" }}>
+        <p style={{ fontSize: 13.5, lineHeight: 1.7, color: "var(--ink)", margin: 0 }}>
+          {ar
+            ? "ما هذا؟ الموجز الأسبوعي تقريرٌ يُعدّه الدماغ تلقائياً كل أسبوع — يجمع أهمّ إشارات المجموعة (الإيرادات والهوامش والحجوزات والمخاطر) في ملخّص تنفيذيّ واحد سهل القراءة، مع روابط للتفاصيل."
+            : "What is this? The weekly digest is a report the brain prepares automatically each week — it gathers the group's most important signals (revenue, margins, bookings, risks) into one easy-to-read executive summary, with links to the details."}
+        </p>
+      </div>
+
       {/* Hero strip */}
       <div
         className="panel reveal relative overflow-hidden text-white"
         style={{
           background:
-            "linear-gradient(135deg, var(--emerald) 0%, var(--gold) 60%, var(--gold-soft) 110%)",
+            "linear-gradient(135deg, var(--emerald) 0%, var(--emerald-soft) 52%, var(--gold) 100%)",
           minHeight: 160,
         }}
       >
@@ -141,7 +150,7 @@ export default async function DigestDetailPage(
             {ar ? "الموجز التنفيذي" : "Executive digest"}
           </div>
           <div
-            className="mt-3 flex flex-wrap items-center gap-3 font-mono text-xs font-bold opacity-90"
+            className="mt-3 flex flex-wrap items-center gap-3 font-mono text-xs font-bold"
           >
             <span className="inline-flex items-center gap-1">
               <Calendar className="h-3.5 w-3.5" />
@@ -159,8 +168,8 @@ export default async function DigestDetailPage(
             </span>
           </div>
           <p
-            className="mt-4 max-w-2xl text-base leading-relaxed md:text-[17px]"
-            style={{ textShadow: "0 2px 12px rgba(0,0,0,0.2)" }}
+            className="mt-4 max-w-2xl text-[15px] font-semibold leading-relaxed md:text-[17px]"
+            style={{ textShadow: "0 1px 10px rgba(0,0,0,0.5)" }}
           >
             {digest.summary}
           </p>
@@ -184,7 +193,7 @@ export default async function DigestDetailPage(
             .digest-prose .digest-list { padding-inline-start: 18px; margin-bottom: 12px; list-style: disc outside; }
             .digest-prose .digest-list li { font-size: 13.5px; line-height: 1.7; margin-bottom: 4px; color: var(--ink); }
             .digest-prose strong { color: var(--ink); font-weight: 800; }
-            .digest-prose em { color: var(--ink-muted); font-style: italic; }
+            .digest-prose em { color: var(--ink); opacity: 0.82; font-style: italic; }
           `,
         }}
       />

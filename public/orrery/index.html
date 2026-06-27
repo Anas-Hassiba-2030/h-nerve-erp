@@ -1261,7 +1261,7 @@ window.addEventListener("message", function(e){
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const TAU = Math.PI*2;
 
-/* ── data: 6 anchor GROUPS, each blooms its child sections ── */
+/* ── data: 5 anchor GROUPS, each blooms its child sections ── */
 const GROUPS = [
   // MERGED (#256): the old standalone "Sectors" anchor folded into "Group Board"
   // so the group's businesses live with the board that governs them — one anchor
@@ -1324,7 +1324,7 @@ ANCHORS.forEach((a, i)=>{
   el.dataset.side = "right";
   el.innerHTML = `<span class="star"></span><span class="pill">${a.name}</span>`;
   stage.appendChild(el);
-  const b = { el, type:"anchor", data:a, angle0:(-90 + i*60)*Math.PI/180, dir:1,
+  const b = { el, type:"anchor", data:a, angle0:(-90 + i*(360/ANCHORS.length))*Math.PI/180, dir:1,
               omega: TAU/90, r:innerR, curR:innerR, rTarget:innerR, s:0, op:0, hovered:false, children:[] };
   bodies.push(b);
   a._body = b;

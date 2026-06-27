@@ -180,7 +180,9 @@ export async function viewAsTenant(formData: FormData): Promise<void> {
 
   (await cookies()).set(tenancyCookies.VIEW_AS, t.slug, { path: "/", maxAge: 60 * 60 * 8 });
   (await cookies()).set(tenancyCookies.THEME, theme, { path: "/", maxAge: 60 * 60 * 8 });
-  redirect("/dashboard");
+  // Land on the tenant's Orbit hub — the top of their workspace — not a deep
+  // operator page. The ViewAsBanner stays pinned so the admin can exit.
+  redirect("/orrery");
 }
 
 export async function clearViewAs(): Promise<void> {
@@ -189,6 +191,8 @@ export async function clearViewAs(): Promise<void> {
   (await cookies()).delete(tenancyCookies.THEME);
   revalidatePath("/dashboard");
   revalidatePath("/admin/tenants");
+  // Exiting preview returns the admin to the console, not the operator UI.
+  redirect("/admin/tenants");
 }
 
 export async function deleteTenant(formData: FormData): Promise<void> {

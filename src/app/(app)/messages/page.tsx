@@ -48,7 +48,12 @@ function formatTime(d: Date, ar: boolean) {
   }).format(d);
 }
 
-export default async function MessagesPage() {
+export default async function MessagesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ t?: string }>;
+}) {
+  const selectedId = (await searchParams)?.t;
   const locale = await getLocale();
   const ar = locale === "ar";
   const session = await getCurrentUser();
@@ -108,8 +113,12 @@ export default async function MessagesPage() {
     where: { deletedAt: null, createdAt: { gt: since24h } },
   });
 
-  // ── conversation preview: the most-recent thread with messages ──
-  const activeThread = threads.find((t) => t.messages.length > 0) ?? threads[0] ?? null;
+  // ── open conversation: the thread picked in the list (?t=), else newest ──
+  const activeThread =
+    (selectedId ? threads.find((t) => t.id === selectedId) : null) ??
+    threads.find((t) => t.messages.length > 0) ??
+    threads[0] ??
+    null;
   const activeMessages = activeThread
     ? await prisma.message.findMany({
         where: { threadId: activeThread.id, deletedAt: null },
@@ -210,7 +219,8 @@ export default async function MessagesPage() {
                   return (
                     <Link
                       key={thread.id}
-                      href={`/messages/${thread.id}`}
+                      href={`/messages?t=${thread.id}`}
+                      scroll={false}
                       className={`thr${thread.id === activeThread?.id ? " active" : ""}`}
                     >
                       <div className="av">

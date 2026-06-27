@@ -1239,11 +1239,13 @@ body.qr-mode .qr-banner{opacity:.8}
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const TAU = Math.PI*2;
 
-/* ── data: 6 anchor GROUPS, each blooms its child sections ── */
+/* ── data: 5 anchor GROUPS, each blooms its child sections ── */
 const GROUPS = [
+  // MERGED (#256): the old standalone "Sectors" anchor folded into "Group Board"
+  // so the group's businesses live with the board that governs them — one anchor
+  // instead of two near-duplicates. Sector kids appended below.
   { id:"overview", name:"لوحة المجموعة", en:"Group Board", amb:"finance", kids:[
-     ["لوحة المجموعة","ui_kits/dashboard/index.html"],["العرض"],["البحث"],["المثبّت"],["الشركات"],["التحليلات المتقدمة"],["المقارنة"],["مكتبة المكوّنات"] ]},
-  { id:"sectors", name:"القطاعات", en:"Sectors", amb:"agriculture", kids:[
+     ["لوحة المجموعة","ui_kits/dashboard/index.html"],["العرض"],["البحث"],["المثبّت"],["الشركات"],["التحليلات المتقدمة"],["المقارنة"],["مكتبة المكوّنات"],
      ["أرينا","sections/arena.html"],["المها","sections/maha.html"],["لوران","sections/loran.html"],["الحاضنة","sections/ahliyya.html"],["سلسلة التوريد","sections/supply.html"],["مسارات العمل"] ]},
   { id:"intel", name:"العقل", en:"The Brain", amb:"cosmic", kids:[
      ["مركز الدماغ","sections/brain.html"],["الرؤى","sections/insights.html"],["التنبيهات","sections/alerts.html"],["الخطط","sections/plans.html"],["المستندات","sections/documents.html"],["الرسم السببي","sections/causal.html"],["ماذا لو","sections/whatif.html"],["المجلس","sections/council.html"],["بحيرة الذاكرة","sections/memory.html"],["التعلّم","sections/learning.html"],["المعايير","sections/benchmarks.html"],["ذكاء الدماغ","sections/brainiq.html"],["الراوي","sections/narrate.html"] ]},
@@ -1256,8 +1258,7 @@ const GROUPS = [
 ];
 // English child labels (parallel to kids order) — for the AR/EN toggle
 const KIDS_EN = {
-  overview:["Group Board","Presentation","Search","Pinned","Companies","Advanced Analytics","Compare","Component Library"],
-  sectors:["Arena","Maha","Loran","Incubator","Supply Chain","Workflows"],
+  overview:["Group Board","Presentation","Search","Pinned","Companies","Advanced Analytics","Compare","Component Library","Arena","Maha","Loran","Incubator","Supply Chain","Workflows"],
   intel:["Brain Hub","Insights","Alerts","Plans","Documents","Causal Graph","What-if","Council","Memory Lake","Learning","Benchmarks","Brain IQ","Narrate"],
   finance:["Financial Hub","Analytics","Compare","Markets","Reports","Sustainability","Future Projects"],
   team:["Messages","Tasks","Inbox","Digest","Achievements","Staff","Team"],
@@ -1300,7 +1301,7 @@ ANCHORS.forEach((a, i)=>{
   el.dataset.side = "right";
   el.innerHTML = `<span class="star"></span><span class="pill">${a.name}</span>`;
   stage.appendChild(el);
-  const b = { el, type:"anchor", data:a, angle0:(-90 + i*60)*Math.PI/180, dir:1,
+  const b = { el, type:"anchor", data:a, angle0:(-90 + i*(360/ANCHORS.length))*Math.PI/180, dir:1,
               omega: TAU/90, r:innerR, curR:innerR, rTarget:innerR, s:0, op:0, hovered:false, children:[] };
   bodies.push(b);
   a._body = b;

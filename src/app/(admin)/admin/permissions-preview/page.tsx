@@ -131,9 +131,9 @@ export default async function PermissionsPreview(
                             : ar ? "افتراضي — اضغط للتبديل" : "Default — click to toggle"
                         }
                         style={{
-                          color: ok ? "var(--admin-cyan)" : "#e06c75",
+                          color: ok ? "var(--admin-cyan)" : "#9a3a28",
                           background: "transparent",
-                          border: `1px solid ${ok ? "var(--admin-cyan)" : "#e06c75"}`,
+                          border: `1px solid ${ok ? "var(--admin-cyan)" : "#9a3a28"}`,
                           padding: "2px 10px",
                           cursor: "pointer",
                           fontFamily: "JetBrains Mono, ui-monospace, monospace",

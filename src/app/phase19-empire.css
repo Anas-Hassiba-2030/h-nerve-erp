@@ -11,10 +11,10 @@
 .emp-root {
   --emp-ink: #0f1112;
   --emp-ink-2: #2a2c30;
-  --emp-ink-3: #5b6068;
+  --emp-ink-3: #534b3f;        /* warm muted — foot/meta labels actually readable */
   --emp-paper: #f3edde;        /* warm cream page (deepened off flat white) */
   --emp-paper-2: #eadfca;
-  --emp-rule: #ddd2bb;         /* warm hairline */
+  --emp-rule: #ccbd97;         /* warm edge — defined, not a faint hairline */
   --emp-rule-strong: #98908a;
   --emp-card: #fffdf8;         /* warm-white card surface that lifts off the wash */
   --emp-accent: #1f4d3f;       /* emerald — unified with the Heritage admin accent */
@@ -208,6 +208,19 @@
   background: var(--emp-accent);
   color: #fff;
 }
+/* DEMO tiles tagged in gold — colour-codes "sample" vs the emerald "YOU". */
+.emp-tile[data-synthetic="true"] .emp-tile-tag {
+  background: #efe2c4;
+  color: #6e5a23;
+}
+
+/* Bolder, clearer Empire numerals + labels. */
+.emp-stat-value,
+.emp-foot-stat-value,
+.emp-tile-iq-num { font-weight: 600; }
+.emp-stat-label,
+.emp-foot-stat-label,
+.emp-tile-title { font-weight: 700; }
 
 /* ---- IQ display ---- */
 .emp-tile-iq {
@@ -260,13 +273,13 @@
 .emp-tile-spark-line {
   fill: none;
   stroke: var(--emp-ink);
-  stroke-width: 1;
-  stroke-linecap: square;
-  stroke-linejoin: miter;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .emp-tile-spark-area {
-  fill: var(--emp-ink);
-  opacity: 0.06;
+  fill: var(--emp-accent);
+  opacity: 0.1;
 }
 .emp-tile-spark-dot {
   fill: var(--emp-ink);

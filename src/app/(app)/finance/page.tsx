@@ -103,7 +103,7 @@ export default async function FinancePage() {
           <span className="sec-status"><span className="dot" />{ar ? "مباشر · مُدقّق" : "Live · audited"}</span>
           <div className="sec-actions">
             <Link href="/finance/new" className="dl-btn dl-btn-secondary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "عملية جديدة" : "New transaction"}</Link>
-            <ExportMenu type="finance" locale={lc} />
+            <ExportMenu type="finance" locale={lc} variant="heritage" />
             <ShareViewButton
               title={ar ? "المالية — مجموعة الحوراني" : "Finance — Hourani Group"}
               body={ar ? "الصورة المالية الموحّدة: الإيراد، التدفق النقدي، والهامش عبر الوحدات." : "Unified financial picture: revenue, cash flow, and margin across units."}

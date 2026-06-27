@@ -164,7 +164,7 @@ export default async function FarmsPage() {
           <div className="sec-actions">
             <Link href="/farms/new" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "مزرعة جديدة" : "New farm"}</Link>
             <Link href="/farms/crops/new" className="dl-btn dl-btn-secondary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "محصول جديد" : "New crop"}</Link>
-            <ExportMenu type="farms" companyCode="LORAN" locale={lc} />
+            <ExportMenu type="farms" companyCode="LORAN" locale={lc} variant="heritage" />
           </div>
         </div>
       </div>

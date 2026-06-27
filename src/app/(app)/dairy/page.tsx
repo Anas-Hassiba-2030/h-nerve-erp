@@ -132,7 +132,7 @@ export default async function DairyPage() {
           <span className="panel-aside">{`${formatNumber(productLines.length)} ${ar ? "خطوط · حسب الإنتاج" : "lines · by output"}`}</span>
         </div>
         {productLines.length === 0 ? (
-          <div style={{ padding: "46px 20px", textAlign: "center", color: "var(--ink-muted)" }}>—</div>
+          <div style={{ padding: "46px 20px", textAlign: "center", color: "var(--ink-muted)" }}>{ar ? "لا توجد خطوط منتجات بعد" : "No product lines yet"}</div>
         ) : (
           <table>
             <thead>
@@ -178,7 +178,7 @@ export default async function DairyPage() {
           <span className="sec-status"><span className="dot" />{ar ? "مباشر · محدّث الآن" : "Live · updated now"}</span>
           <div className="sec-actions">
             <Link href="/dairy/new" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "دفعة جديدة" : "New batch"}</Link>
-            <ExportMenu type="dairy" companyCode="MAHA" locale={lc} />
+            <ExportMenu type="dairy" companyCode="MAHA" locale={lc} variant="heritage" />
             <ShareViewButton
               title={ar ? "الألبان — المها" : "Dairy — Maha"}
               body={ar ? "نظرة حية على الألبان: الدفعات، الجودة، ومخاطر انتهاء الصلاحية." : "Live dairy view: batches, quality, and expiry risk."}

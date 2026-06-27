@@ -192,7 +192,7 @@ export default async function MessagesPage({
                   <div className="ic">💬</div>
                   <div className="t">{ar ? "لا توجد محادثات" : "No conversations"}</div>
                   <div className="s">
-                    {ar ? "ابدأ محادثة جديدة من صفحة الفريق." : "Start one from the team page."}
+                    {ar ? "ابدأ محادثة جديدة من زر «محادثة جديدة» بالأعلى." : "Start one with the New conversation button above."}
                   </div>
                 </div>
               ) : (
@@ -302,8 +302,8 @@ export default async function MessagesPage({
                 <div className="t">{ar ? "اختر محادثة" : "Pick a conversation"}</div>
                 <div className="s">
                   {ar
-                    ? "ابدأ محادثة جديدة من صفحة الفريق لتظهر هنا."
-                    : "Start one from the team page to see it here."}
+                    ? "ابدأ محادثة جديدة من زر «محادثة جديدة» بالأعلى."
+                    : "Start one with the New conversation button above."}
                 </div>
               </div>
             )}

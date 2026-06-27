@@ -120,8 +120,8 @@ export default async function GenesisPage(
           <h1 className="admin-h1">{ar ? "بداية مساحة العمل" : "Workspace Genesis"}</h1>
           <p className="admin-sub">
             {ar
-              ? "عاين شكل بيانات مجموعة الحوراني التجريبية قبل إنشائها — قطاعاً بقطاع — ثم ابذُرها بأمان من داخل المنتج."
-              : "Preview the shape of the Hourani demo dataset before it's created — sector by sector — then seed it safely from inside the product."}
+              ? "نقطة البداية لمساحة العمل: من هنا تُنشئ أو تُعيد ضبط البيانات الأولية — شركات المجموعة وموظفوها وحساباتها ووثائق الدماغ — دفعةً واحدة وبأمان. عايِن شكلها قطاعاً بقطاع قبل البذر، واستخدمها عند إطلاق مستأجر جديد أو تجهيز عرض تجريبي."
+              : "A workspace's starting point: create or reset its initial data here — the group's companies, employees, accounts and brain documents — in one safe step. Preview the shape sector by sector before seeding; use it when launching a new tenant or preparing a demo."}
           </p>
         </div>
       </div>

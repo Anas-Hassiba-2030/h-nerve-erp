@@ -110,7 +110,7 @@ export default async function TenantDetail(
             <input type="hidden" name="tenantId" value={tenant.id} />
             <button type="submit" className="admin-cta-primary">
               <Eye className="h-4 w-4" strokeWidth={1.5} />
-              {ar ? `عرض لوحة التحكم بوصفك ${tenant.name}` : `View dashboard as ${tenant.name}`}
+              {ar ? `معاينة مساحة عمل ${tenant.name}` : `Preview ${tenant.name}'s workspace`}
             </button>
           </form>
         ) : (

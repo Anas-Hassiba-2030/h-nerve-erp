@@ -21,7 +21,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/db";
-import { Building2, Settings, ArrowLeft, Crown, UsersRound, ShieldCheck, ScrollText, Sprout, Database } from "lucide-react";
+import { Building2, Settings, ArrowLeft, Crown, UsersRound, ShieldCheck, ScrollText, Sprout, Database, Orbit } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -40,11 +40,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       {/* Frosted top rail */}
       <header className="admin-rail">
         <div className="admin-rail-inner">
-          <div className="admin-rail-brand">
+          <Link
+            href="/orrery"
+            className="admin-rail-brand"
+            style={{ textDecoration: "none" }}
+            title={ar ? "العودة إلى المدار" : "Back to the Orbit hub"}
+          >
             <span className="admin-rail-mark">⌗</span>
             <span className="admin-rail-name">{ar ? "H-Nerve · إدارة" : "H-Nerve · Admin"}</span>
             <span className="admin-rail-tag">SUPERADMIN</span>
-          </div>
+          </Link>
           <nav className="admin-rail-nav">
             <Link href="/admin/empire" className="admin-rail-link">
               <Crown className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -79,14 +84,24 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               {ar ? "غرفة العمليات" : "Mission Control"}
             </Link>
           </nav>
-          <Link
-            href="/dashboard"
-            className="admin-rail-exit"
-            title={ar ? "العودة إلى واجهة المشغّل" : "Exit to operator UI"}
-          >
-            <ArrowLeft className="h-3 w-3" strokeWidth={1.5} />
-            <span>{ar ? "المشغّل" : "OPERATOR"}</span>
-          </Link>
+          <div className="admin-rail-exits">
+            <Link
+              href="/orrery"
+              className="admin-rail-exit admin-rail-orbit"
+              title={ar ? "المدار — مركز المجموعة" : "Orbit — the group hub"}
+            >
+              <Orbit className="h-3 w-3" strokeWidth={1.5} />
+              <span>{ar ? "المدار" : "ORBIT"}</span>
+            </Link>
+            <Link
+              href="/dashboard"
+              className="admin-rail-exit"
+              title={ar ? "واجهة المشغّل" : "Operator UI"}
+            >
+              <ArrowLeft className="h-3 w-3" strokeWidth={1.5} />
+              <span>{ar ? "المشغّل" : "OPERATOR"}</span>
+            </Link>
+          </div>
         </div>
       </header>
 

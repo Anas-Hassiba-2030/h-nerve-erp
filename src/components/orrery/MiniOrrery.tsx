@@ -2,121 +2,9 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { ORRERY_GROUPS, type OrreryGroup } from "@/lib/orrery/groups";
 
 type Locale = "ar" | "en";
-
-interface Child {
-  label: string;
-  labelEn: string;
-  route: string;
-}
-
-interface Group {
-  id: string;
-  nameAr: string;
-  nameEn: string;
-  children: Child[];
-}
-
-// Kept in sync (manually) with the main Orrery hub (public/orrery/index.html)
-// and with ConstellationRail.tsx. The mini orrery here MUST contain every
-// destination the main hub exposes so the two surfaces stay coherent.
-const GROUPS: Group[] = [
-  {
-    id: "sectors",
-    nameAr: "القطاعات",
-    nameEn: "Sectors",
-    children: [
-      { label: "أرينا",          labelEn: "Arena",    route: "/hotels" },
-      { label: "المها",          labelEn: "Maha",     route: "/dairy" },
-      { label: "لوران",          labelEn: "Farms",    route: "/farms" },
-      { label: "الأهلية",        labelEn: "Education",route: "/education" },
-      { label: "الحوراني",       labelEn: "Holding",  route: "/companies" },
-      { label: "سلسلة التوريد",  labelEn: "Supply",   route: "/supply-chain" },
-    ],
-  },
-  {
-    id: "intel",
-    nameAr: "العقل",
-    nameEn: "Brain",
-    children: [
-      { label: "الدماغ",        labelEn: "Brain",     route: "/brain" },
-      { label: "الرؤى",         labelEn: "Insights",  route: "/insights" },
-      { label: "التنبيهات",     labelEn: "Alerts",    route: "/alerts" },
-      { label: "الخطط",         labelEn: "Plans",     route: "/plans" },
-      { label: "الوثائق",       labelEn: "Documents", route: "/documents" },
-      { label: "الرسم السببي",  labelEn: "Graph",     route: "/brain/graph" },
-      { label: "ماذا لو",       labelEn: "What-If",   route: "/brain/scenarios" },
-      { label: "المجلس",        labelEn: "Council",   route: "/brain/council" },
-      { label: "الذاكرة",       labelEn: "Memory",    route: "/brain/memory" },
-      { label: "التعلّم",       labelEn: "Learning",  route: "/brain/learning" },
-      { label: "المخرجات",      labelEn: "Narrate",   route: "/brain/narrate" },
-      { label: "الثقة",         labelEn: "Trust",     route: "/brain/trust" },
-      { label: "ذكاء الدماغ",   labelEn: "IQ",        route: "/brain/iq" },
-    ],
-  },
-  {
-    id: "finance",
-    nameAr: "المالية",
-    nameEn: "Finance",
-    children: [
-      { label: "المركز المالي",  labelEn: "Finance",       route: "/finance" },
-      { label: "التحليلات",     labelEn: "Analytics",     route: "/analytics" },
-      { label: "مقارنة",        labelEn: "Compare",       route: "/compare" },
-      { label: "الأسواق",       labelEn: "Markets",       route: "/markets" },
-      { label: "التقارير",      labelEn: "Reports",       route: "/reports" },
-      { label: "الاستدامة",     labelEn: "Sustainability", route: "/sustainability" },
-      { label: "المشاريع",      labelEn: "Projects",      route: "/projects" },
-    ],
-  },
-  {
-    id: "team",
-    nameAr: "الفريق",
-    nameEn: "Team",
-    children: [
-      { label: "المراسلات",    labelEn: "Messages",     route: "/messages" },
-      { label: "المهام",       labelEn: "Tasks",        route: "/tasks" },
-      { label: "صندوق الوارد", labelEn: "Inbox",        route: "/inbox" },
-      { label: "الموجز",       labelEn: "Digest",       route: "/digest" },
-      { label: "الموظفون",     labelEn: "Employees",    route: "/employees" },
-      { label: "الإنجازات",    labelEn: "Achievements", route: "/achievements" },
-      { label: "المستخدمون",   labelEn: "Users",        route: "/users" },
-    ],
-  },
-  {
-    id: "board",
-    nameAr: "لوحة المجموعة",
-    nameEn: "Group Board",
-    children: [
-      { label: "لوحة الإدارة",   labelEn: "Dashboard", route: "/dashboard" },
-      { label: "البحث",         labelEn: "Search",    route: "/search" },
-      { label: "المثبّت",        labelEn: "Pinned",    route: "/pinned" },
-      { label: "الشركات",       labelEn: "Companies", route: "/companies" },
-      { label: "التحليلات",     labelEn: "Analytics", route: "/analytics" },
-      { label: "مقارنة",        labelEn: "Compare",   route: "/compare" },
-    ],
-  },
-  {
-    id: "system",
-    nameAr: "النظام",
-    nameEn: "System",
-    children: [
-      // Mission Control — the admin command deck (the renamed "System Hub").
-      { label: "غرفة العمليات", labelEn: "Mission Control", route: "/admin/system" },
-      { label: "الإمبراطورية",  labelEn: "Empire",       route: "/admin/empire" },
-      { label: "المستأجرون",    labelEn: "Tenants",      route: "/admin/tenants" },
-      { label: "مساحة العمل",  labelEn: "Workspace",    route: "/workspace" },
-      { label: "الأتمتة",      labelEn: "Workflows",    route: "/workflows" },
-      { label: "التكاملات",    labelEn: "Integrations", route: "/integrations" },
-      { label: "التدقيق",      labelEn: "Audit",        route: "/audit-360" },
-      { label: "سجل النشاط",   labelEn: "Activity",     route: "/activity" },
-      { label: "المحذوفات",    labelEn: "Trash",        route: "/trash" },
-      { label: "الإعدادات",    labelEn: "Settings",     route: "/settings" },
-      { label: "المساعدة",     labelEn: "Help",         route: "/help" },
-      { label: "خارطة الطريق", labelEn: "Roadmap",      route: "/roadmap" },
-    ],
-  },
-];
 
 interface PopupCoords {
   left: number;
@@ -128,24 +16,17 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
   const btnRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const [coords, setCoords] = useState<PopupCoords>({ left: 0, top: 0 });
-  const [activeGroup, setActiveGroup] = useState<Group | null>(null);
+  const [activeGroup, setActiveGroup] = useState<OrreryGroup | null>(null);
 
   const coreLabelAr = activeGroup ? activeGroup.nameAr : "المدار";
   const coreLabelEn = activeGroup ? activeGroup.nameEn : "Orbit";
   const coreLabel = locale === "ar" ? coreLabelAr : coreLabelEn;
 
-  // Position the popup centered on a point near the button. The popup is
-  // centered via CSS transform(-50%,-50%), so coords hold the CENTER point.
+  // The popup is a focused radial-menu modal: it opens centered in the
+  // viewport (with a dimmed scrim behind it) rather than clamped beside the
+  // trigger, which used to drop the ring on top of page content.
   const openPopup = useCallback(() => {
-    if (!btnRef.current) return;
-    const r = btnRef.current.getBoundingClientRect();
-    const bx = r.left + r.width / 2;
-    const by = r.top + r.height / 2;
-    // Keep the popup center far enough from edges that the largest ring
-    // (intel = 12 nodes) stays on-screen. Half the max popup is ~300px.
-    const cx = Math.min(Math.max(bx, 320), window.innerWidth - 320);
-    const cy = Math.min(Math.max(by, 320), window.innerHeight - 320);
-    setCoords({ left: cx, top: cy });
+    setCoords({ left: window.innerWidth / 2, top: window.innerHeight / 2 });
     setActiveGroup(null);
     setOpen(true);
   }, []);
@@ -175,7 +56,7 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
     }
   };
 
-  const handleGroupClick = (group: Group) => {
+  const handleGroupClick = (group: OrreryGroup) => {
     setActiveGroup(group);
   };
 
@@ -192,15 +73,15 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
           label: locale === "ar" ? c.label : c.labelEn,
           onPick: () => handleChildClick(c.route),
         }))
-      : GROUPS.map((g) => ({
+      : ORRERY_GROUPS.map((g) => ({
           key: g.id,
           label: locale === "ar" ? g.nameAr : g.nameEn,
           onPick: () => handleGroupClick(g),
         }));
 
-  // Phase 26.3 — radius and popup size scale with node count so labels get
-  // breathing room instead of crowding. A 12-node intel ring now spreads
-  // wide enough that no two pills collide.
+  // Radius and popup size scale with node count so labels get breathing room
+  // instead of crowding. The 13-node intel ring spreads wide enough that no
+  // two pills collide.
   const count = nodes.length;
   const radius = Math.round((activeGroup ? 122 : 104) + Math.max(0, count - 7) * 12);
   const popupSize = (radius + 96) * 2; // leave room for pill width + star
@@ -221,7 +102,7 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
         <span className="mo-core" aria-hidden="true" />
       </button>
 
-      {/* Scrim — transparent, closes popup on outside click */}
+      {/* Scrim — dims page content so the radial menu reads as a focused modal */}
       {open && (
         <div
           className="mo-scrim"
@@ -230,7 +111,7 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
         />
       )}
 
-      {/* Popup — position:fixed, positioned via JS coords */}
+      {/* Popup — position:fixed, centered in the viewport via JS coords */}
       {open && (
         <div
           className="mo-pop"

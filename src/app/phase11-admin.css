@@ -117,6 +117,9 @@
   border: 1px solid var(--admin-rule-strong);
 }
 .admin-rail-exit:hover { color: var(--admin-cyan); border-color: var(--admin-cyan-dim); }
+.admin-rail-exits { display: inline-flex; gap: 8px; justify-self: end; align-items: center; }
+.admin-rail-orbit { color: var(--admin-cyan); border-color: var(--admin-cyan-dim); }
+.admin-rail-orbit:hover { background: var(--admin-bg-2); }
 
 .admin-main {
   position: relative;

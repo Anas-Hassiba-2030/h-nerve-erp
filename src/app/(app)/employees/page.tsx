@@ -80,24 +80,27 @@ export default async function EmployeesPage() {
             title={ar ? company.name : company.nameEn}
             aside={`${formatNumber(companyUsers.length)} ${ar ? "عضو" : "members"}`}
           >
-            <div className="prop-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+            <div className="prop-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(248px, 1fr))" }}>
               {companyUsers.map((u) => {
                 const meta = ROLE_META[u.role] ?? ROLE_META.STAFF;
                 const RoleIcon = meta.icon;
                 return (
                   <div key={u.id} className="prop-card" style={{ padding: 16 }}>
                     <div className="flex items-start gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold text-white" style={{ background: brand.gradient }}>
+                      <div className="flex h-11 w-11 flex-none items-center justify-center rounded-full text-base font-bold text-white" style={{ background: brand.gradient }}>
                         {u.name.charAt(0)}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h3 className="truncate" style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>{u.name}</h3>
-                        <div className="truncate" style={{ fontSize: 11, color: "var(--ink-muted)" }}>{u.title ?? meta[lc]}</div>
+                        <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--ink)", lineHeight: 1.3 }}>{u.name}</h3>
+                        <div style={{ fontSize: 12.5, color: "#574f43", lineHeight: 1.4, marginTop: 2 }}>{u.title ?? meta[lc]}</div>
                       </div>
                     </div>
-                    <div className="mt-3 flex items-center justify-between">
+                    <div className="mt-3 flex items-center justify-between gap-2">
                       <span className="tag gold"><RoleIcon className="h-3 w-3" />{meta[lc]}</span>
-                      <a href={`mailto:${u.email}`} style={{ fontSize: 11, color: "var(--gold-soft, #8a6a1f)" }} title={u.email}><Mail className="inline h-3.5 w-3.5" style={{ color: "var(--emerald)" }} /></a>
+                      <a href={`mailto:${u.email}`} className="inline-flex min-w-0 items-center gap-1.5" style={{ fontSize: 11.5, fontWeight: 600, color: "var(--emerald)" }} title={u.email}>
+                        <Mail className="h-3.5 w-3.5 flex-none" />
+                        <span className="truncate">{u.email}</span>
+                      </a>
                     </div>
                   </div>
                 );

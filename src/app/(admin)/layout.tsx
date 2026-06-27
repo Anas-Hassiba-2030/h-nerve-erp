@@ -21,7 +21,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/db";
-import { Building2, Settings, ArrowLeft, Crown, UsersRound, ShieldCheck, ScrollText, Sprout, Database, Orbit } from "lucide-react";
+import { Building2, Settings, LayoutDashboard, Crown, UsersRound, ShieldCheck, ScrollText, Sprout, Database, Orbit } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -85,21 +85,22 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </Link>
           </nav>
           <div className="admin-rail-exits">
+            <span className="admin-rail-exits-label">{ar ? "مغادرة الإدارة" : "Leave admin"}</span>
             <Link
               href="/orrery"
               className="admin-rail-exit admin-rail-orbit"
-              title={ar ? "المدار — مركز المجموعة" : "Orbit — the group hub"}
+              title={ar ? "الصفحة الرئيسية — مركز المدار (كل أقسام النظام)" : "Home — the Orbit hub (all sections)"}
             >
-              <Orbit className="h-3 w-3" strokeWidth={1.5} />
-              <span>{ar ? "المدار" : "ORBIT"}</span>
+              <Orbit className="h-3.5 w-3.5" strokeWidth={1.5} />
+              <span>{ar ? "المدار" : "Orbit"}</span>
             </Link>
             <Link
               href="/dashboard"
               className="admin-rail-exit"
-              title={ar ? "واجهة المشغّل" : "Operator UI"}
+              title={ar ? "فتح لوحة تحكم المشغّل — واجهة الاستخدام اليومي" : "Open the operator dashboard — the day-to-day app"}
             >
-              <ArrowLeft className="h-3 w-3" strokeWidth={1.5} />
-              <span>{ar ? "المشغّل" : "OPERATOR"}</span>
+              <LayoutDashboard className="h-3.5 w-3.5" strokeWidth={1.5} />
+              <span>{ar ? "لوحة المشغّل" : "Operator"}</span>
             </Link>
           </div>
         </div>

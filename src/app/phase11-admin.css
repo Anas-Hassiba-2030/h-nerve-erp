@@ -106,20 +106,31 @@
 .admin-rail-exit {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
+  gap: 7px;
+  padding: 6px 12px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.04em;
   color: var(--admin-text-muted);
   text-decoration: none;
   border: 1px solid var(--admin-rule-strong);
+  border-radius: 6px;
 }
 .admin-rail-exit:hover { color: var(--admin-cyan); border-color: var(--admin-cyan-dim); }
 .admin-rail-exits { display: inline-flex; gap: 8px; justify-self: end; align-items: center; }
-.admin-rail-orbit { color: var(--admin-cyan); border-color: var(--admin-cyan-dim); }
-.admin-rail-orbit:hover { background: var(--admin-bg-2); }
+/* tiny context label so the two buttons clearly read as "ways out of admin" */
+.admin-rail-exits-label {
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--admin-text-faint);
+  margin-inline-end: 2px;
+  white-space: nowrap;
+}
+/* ORBIT = the primary "go home" button — filled cyan so it reads as THE main exit */
+.admin-rail-orbit { color: #07232a; background: var(--admin-cyan); border-color: var(--admin-cyan); font-weight: 600; }
+.admin-rail-orbit:hover { color: #07232a; background: #74e0ea; border-color: #74e0ea; }
 
 .admin-main {
   position: relative;

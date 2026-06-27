@@ -32,7 +32,7 @@ export function DangerReseed({ ar, total }: { ar: boolean; total: number }) {
           type="checkbox"
           checked={ack}
           onChange={(e) => setAck(e.target.checked)}
-          style={{ marginTop: 2, accentColor: "#ff6b6b" }}
+          style={{ marginTop: 2, accentColor: "#b3553f" }}
         />
         <span>
           {ar

@@ -129,16 +129,16 @@ export default async function GenesisPage(
       {/* ── Status banners ─────────────────────────────────────────────── */}
       {justSeeded && (
         <Banner
-          color="#4ade80"
-          icon={<CheckCircle2 size={20} style={{ color: "#4ade80", flexShrink: 0, marginTop: 1 }} />}
+          color="#2e6b57"
+          icon={<CheckCircle2 size={20} style={{ color: "#2e6b57", flexShrink: 0, marginTop: 1 }} />}
           title={ar ? "تمت عملية البذر بنجاح" : "Seeded successfully"}
           body={ar ? "بيانات مجموعة الحوراني جاهزة. ادخل بـ admin@hourani.jo / admin123" : "Hourani demo data is ready. Sign in with admin@hourani.jo / admin123"}
         />
       )}
       {topup && (
         <Banner
-          color={topup === "error" ? "#ff6b6b" : "#4ade80"}
-          icon={<FileText size={20} style={{ color: topup === "error" ? "#ff6b6b" : "#4ade80", flexShrink: 0, marginTop: 1 }} />}
+          color={topup === "error" ? "#b3553f" : "#2e6b57"}
+          icon={<FileText size={20} style={{ color: topup === "error" ? "#b3553f" : "#2e6b57", flexShrink: 0, marginTop: 1 }} />}
           title={
             topup === "skip"
               ? ar ? "لا حاجة للتحديث" : "Nothing to top up"
@@ -157,24 +157,24 @@ export default async function GenesisPage(
       )}
       {confirmError && (
         <Banner
-          color="#fbbf24"
-          icon={<AlertTriangle size={20} style={{ color: "#fbbf24", flexShrink: 0, marginTop: 1 }} />}
+          color="#c2a35a"
+          icon={<AlertTriangle size={20} style={{ color: "#c2a35a", flexShrink: 0, marginTop: 1 }} />}
           title={ar ? "لم يتم تأكيد الحذف" : "Wipe not confirmed"}
           body={ar ? "يجب تأكيد المربع قبل إعادة البذر المدمّرة." : "You must tick the acknowledgement before a destructive reseed."}
         />
       )}
       {seedError && (
         <Banner
-          color="#ff6b6b"
-          icon={<AlertTriangle size={20} style={{ color: "#ff6b6b", flexShrink: 0, marginTop: 1 }} />}
+          color="#b3553f"
+          icon={<AlertTriangle size={20} style={{ color: "#b3553f", flexShrink: 0, marginTop: 1 }} />}
           title={ar ? "فشلت إعادة البذر" : "Reseed failed"}
           body={ar ? "حدث خطأ أثناء إعادة بناء البيانات. حاول مرة أخرى." : "An error occurred while rebuilding the dataset. Try again."}
         />
       )}
       {fill && (
         <Banner
-          color={fill === "error" ? "#ff6b6b" : "#4ade80"}
-          icon={<Sprout size={20} style={{ color: fill === "error" ? "#ff6b6b" : "#4ade80", flexShrink: 0, marginTop: 1 }} />}
+          color={fill === "error" ? "#b3553f" : "#2e6b57"}
+          icon={<Sprout size={20} style={{ color: fill === "error" ? "#b3553f" : "#2e6b57", flexShrink: 0, marginTop: 1 }} />}
           title={
             fill === "skip"
               ? ar ? "لا توجد قطاعات ناقصة" : "No missing sectors"
@@ -263,7 +263,7 @@ export default async function GenesisPage(
               ? `الإجمالي: ${totalEntities.toLocaleString("en-US")} سجل. إعادة البذر ستمحو جميع البيانات الحالية وتستبدلها ببيانات الحوراني التجريبية — هذا الإجراء لا يمكن التراجع عنه.`
               : `Total: ${totalEntities.toLocaleString("en-US")} records. Re-seeding will wipe all current data and replace it with the Hourani demo dataset — this action cannot be undone.`}
           </p>
-          <p style={{ fontSize: 12, color: "#ff6b6b", marginBottom: 20, fontFamily: "'JetBrains Mono', ui-monospace, monospace", letterSpacing: "0.04em" }}>
+          <p style={{ fontSize: 12, color: "#b3553f", marginBottom: 20, fontFamily: "'JetBrains Mono', ui-monospace, monospace", letterSpacing: "0.04em" }}>
             ⚠ {ar ? "تحذير: سيتم حذف جميع البيانات الحالية" : "WARNING: ALL CURRENT DATA WILL BE DELETED"}
           </p>
           <DangerReseed ar={ar} total={totalEntities} />
@@ -316,7 +316,7 @@ function Banner({
         gap: 14,
         alignItems: "flex-start",
         padding: "16px 20px",
-        background: "rgba(255,255,255,0.03)",
+        background: "rgba(42,42,38,0.03)",
         border: `1px solid ${color}55`,
         borderRadius: 8,
       }}

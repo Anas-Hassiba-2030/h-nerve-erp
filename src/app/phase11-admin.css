@@ -1,22 +1,27 @@
 /* =================================================================
-   PHASE 11 — TENANCY ADMIN (Sleek Operator vocabulary)
-   Off-black + cyan accent + frosted glass. Different product feel from
-   the Heritage operator UI. See docs/PHASES-INTELLIGENCE.md Phase 11.
+   PHASE 11 — TENANCY ADMIN (Heritage Modern vocabulary)
+   Re-skinned from "Sleek Operator" (cyan-on-near-black) to the warm
+   Heritage Modern palette — cream page, ink text, emerald accent, gold
+   highlights — so the admin console reads as one visual language with
+   the rest of the operator app. The var NAMES are kept (--admin-cyan,
+   etc.) so every rule that references them re-skins automatically; the
+   "cyan" var now carries emerald. See docs/PHASES-INTELLIGENCE.md
+   Phase 11 + docs/DESIGN-SKILL.md §1.D (Heritage Modern).
    ================================================================= */
 .admin-shell {
-  --admin-bg: #0a0d12;
-  --admin-bg-2: #11161e;
-  --admin-bg-3: #1a212c;
-  --admin-text: #e6ecf2;
-  --admin-text-muted: #93a3b5;
-  --admin-text-faint: #5a6877;
-  --admin-rule: #1f2630;
-  --admin-rule-strong: #2c3543;
-  --admin-cyan: #5bd5e0;
-  --admin-cyan-dim: #2a8d97;
-  --admin-amber: #f5b647;
-  --admin-rose: #e85a72;
-  --admin-mute: #7a8b9b;
+  --admin-bg: #faf7f0;           /* cream page */
+  --admin-bg-2: #fdfbf6;         /* card / panel (slightly lighter cream) */
+  --admin-bg-3: #f1ebdd;         /* raised / hover cream */
+  --admin-text: #2a2a26;         /* ink */
+  --admin-text-muted: #6b6459;   /* ink-muted */
+  --admin-text-faint: #9a9085;   /* faint */
+  --admin-rule: rgba(42, 42, 38, 0.1);
+  --admin-rule-strong: rgba(42, 42, 38, 0.2);
+  --admin-cyan: #1f4d3f;         /* emerald — the accent (replaces cyan everywhere) */
+  --admin-cyan-dim: #2e6b57;     /* emerald-soft */
+  --admin-amber: #c2a35a;        /* gold */
+  --admin-rose: #b3553f;         /* warm terracotta danger */
+  --admin-mute: #8a8175;
 
   min-height: 100vh;
   background: var(--admin-bg);
@@ -31,8 +36,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(at 12% 6%, rgba(91, 213, 224, 0.08), transparent 40%),
-    radial-gradient(at 88% 88%, rgba(91, 213, 224, 0.05), transparent 40%);
+    radial-gradient(at 12% 6%, rgba(194, 163, 90, 0.1), transparent 40%),
+    radial-gradient(at 88% 88%, rgba(31, 77, 63, 0.07), transparent 40%);
   z-index: 0;
 }
 
@@ -128,9 +133,9 @@
   margin-inline-end: 2px;
   white-space: nowrap;
 }
-/* ORBIT = the primary "go home" button — filled cyan so it reads as THE main exit */
-.admin-rail-orbit { color: #07232a; background: var(--admin-cyan); border-color: var(--admin-cyan); font-weight: 600; }
-.admin-rail-orbit:hover { color: #07232a; background: #74e0ea; border-color: #74e0ea; }
+/* ORBIT = the primary "go home" button — filled emerald so it reads as THE main exit */
+.admin-rail-orbit { color: #faf7f0; background: var(--admin-cyan); border-color: var(--admin-cyan); font-weight: 600; }
+.admin-rail-orbit:hover { color: #faf7f0; background: var(--admin-cyan-dim); border-color: var(--admin-cyan-dim); }
 
 .admin-main {
   position: relative;
@@ -210,7 +215,7 @@
   cursor: pointer;
   transition: transform 180ms cubic-bezier(0.25,1,0.5,1), background 180ms cubic-bezier(0.25,1,0.5,1);
 }
-.admin-cta-primary:hover { transform: translateY(-1px); background: #6fe1ec; }
+.admin-cta-primary:hover { transform: translateY(-1px); background: var(--admin-cyan-dim); }
 .admin-cta-primary:active { transform: translateY(0); }
 
 .admin-btn-ghost {
@@ -229,9 +234,9 @@
 }
 .admin-btn-ghost:hover { color: var(--admin-text); border-color: var(--admin-cyan-dim); }
 
-/* Destructive action (hard-delete). Amber-on-charcoal at rest reads as
-   the right "stop and read" colour against the cyan operator palette;
-   the hover fills red so the click intent is unmistakable. */
+/* Destructive action (hard-delete). Warm terracotta at rest reads as the
+   right "stop and read" colour against the cream Heritage palette; the
+   hover fills terracotta so the click intent is unmistakable. */
 .admin-btn-danger {
   display: inline-flex;
   align-items: center;
@@ -240,16 +245,16 @@
   font-size: 12px;
   font-weight: 600;
   background: transparent;
-  color: #ff6b6b;
-  border: 1px solid #b34141;
+  color: var(--admin-rose);
+  border: 1px solid var(--admin-rose);
   text-decoration: none;
   cursor: pointer;
   transition: color 180ms, border-color 180ms, background 180ms;
 }
 .admin-btn-danger:hover {
-  background: #ff6b6b;
+  background: var(--admin-rose);
   color: var(--admin-bg);
-  border-color: #ff6b6b;
+  border-color: var(--admin-rose);
 }
 .admin-btn-danger:active { transform: translateY(1px); }
 
@@ -738,7 +743,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255,255,255,0.08);
+  background: rgba(42, 42, 38, 0.06);
   backdrop-filter: blur(2px);
 }
 .admin-hero-name {

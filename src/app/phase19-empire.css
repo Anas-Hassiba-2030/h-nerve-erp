@@ -16,8 +16,8 @@
   --emp-paper-2: #ece9df;
   --emp-rule: #d8d3c4;
   --emp-rule-strong: #98908a;
-  --emp-accent: #6b1d23;       /* oxblood — the only accent */
-  --emp-accent-soft: #f0d9d4;
+  --emp-accent: #1f4d3f;       /* emerald — unified with the Heritage admin accent */
+  --emp-accent-soft: #e8f0ea;  /* soft emerald tint */
   --emp-up: #285c47;           /* deep forest */
   --emp-down: #8a3531;         /* dust brick */
   background: var(--emp-paper);
@@ -309,10 +309,13 @@
 }
 
 /* ---- Hover layer ---- */
+/* Deep-emerald flip (was near-black ink) — keeps the cream-on-dark
+   inversion as a deliberate flourish while staying on the Heritage
+   palette, so no raw near-black surface is left in the admin console. */
 .emp-tile-hover {
   position: absolute;
   inset: 0;
-  background: var(--emp-ink);
+  background: #1f4d3f;
   color: var(--emp-paper);
   padding: 18px 20px;
   display: flex;

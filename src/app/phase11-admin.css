@@ -45,9 +45,10 @@
   position: sticky;
   top: 0;
   z-index: 60;
-  background: color-mix(in srgb, var(--admin-bg) 80%, transparent);
+  background: color-mix(in srgb, var(--admin-bg-2) 94%, transparent);
   backdrop-filter: blur(14px) saturate(120%);
-  border-bottom: 1px solid var(--admin-rule);
+  border-bottom: 1px solid var(--admin-rule-strong);
+  box-shadow: 0 6px 22px -18px rgba(42, 42, 38, 0.4);
 }
 .admin-rail-inner {
   display: grid;
@@ -96,8 +97,8 @@
   gap: 8px;
   padding: 7px 14px;
   font-size: 12px;
-  font-weight: 500;
-  color: var(--admin-text-muted);
+  font-weight: 600;
+  color: var(--admin-text);
   text-decoration: none;
   letter-spacing: -0.005em;
   border: 1px solid transparent;
@@ -116,9 +117,9 @@
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
   font-size: 11px;
   letter-spacing: 0.04em;
-  color: var(--admin-text-muted);
+  color: var(--admin-text);
   text-decoration: none;
-  border: 1px solid var(--admin-rule-strong);
+  border: 1px solid var(--admin-cyan-dim);
   border-radius: 6px;
 }
 .admin-rail-exit:hover { color: var(--admin-cyan); border-color: var(--admin-cyan-dim); }
@@ -126,10 +127,11 @@
 /* tiny context label so the two buttons clearly read as "ways out of admin" */
 .admin-rail-exits-label {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 9px;
-  letter-spacing: 0.16em;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--admin-text-faint);
+  color: var(--admin-text-muted);
+  font-weight: 600;
   margin-inline-end: 2px;
   white-space: nowrap;
 }

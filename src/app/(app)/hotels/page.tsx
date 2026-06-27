@@ -320,7 +320,7 @@ export default async function HotelsPage() {
           <span className="sec-status"><span className="dot" />{ar ? "مباشر · محدّث الآن" : "Live · updated now"}</span>
           <div className="sec-actions">
             <Link className="dl-btn dl-btn-secondary" href="/finance">{ar ? "الأثر المالي" : "Financial impact"}</Link>
-            <ExportMenu type="hotels" companyCode="ARENA" locale={lc} />
+            <ExportMenu type="hotels" companyCode="ARENA" locale={lc} variant="heritage" />
             <ShareViewButton
               title={ar ? "الضيافة — أرينا" : "Hospitality — Arena"}
               body={ar ? "نظرة حية على الفنادق: الإشغال، الإيراد، والحجوزات الأخيرة." : "Live hotels view: occupancy, revenue, and recent bookings."}

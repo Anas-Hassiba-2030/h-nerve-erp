@@ -161,7 +161,7 @@ export default async function SupplyChainPage() {
             <Link href="/supply-chain/new" className="dl-btn dl-btn-secondary" style={{ textDecoration: "none" }}>
               {ar ? "تنبؤ يدوي" : "Manual forecast"}
             </Link>
-            <ExportMenu type="supply-chain" locale={lc} />
+            <ExportMenu type="supply-chain" locale={lc} variant="heritage" />
             <form action={autoGenerateForecasts}>
               <button type="submit" className="dl-btn dl-btn-secondary">
                 {ar ? "توليد تلقائي" : "Auto-generate"}

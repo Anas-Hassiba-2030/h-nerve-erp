@@ -73,14 +73,14 @@ export default async function SettingsPage(
   // platform health rows (reference .ws-line list)
   const health: Array<[string, string]> = ar
     ? [
-        ["قاعدة البيانات", "SQLite + Prisma 5"],
+        ["قاعدة البيانات", "PostgreSQL + Prisma 5"],
         ["الجلسات", "مشفّرة"],
         ["الواجهة", "Heritage Modern"],
         ["السجل", `${formatNumber(activityCount)} سجل`],
         ["المهام المفتوحة", `${formatNumber(taskOpenCount)}`],
       ]
     : [
-        ["Database", "SQLite + Prisma 5"],
+        ["Database", "PostgreSQL + Prisma 5"],
         ["Sessions", "Encrypted"],
         ["Interface", "Heritage Modern"],
         ["Activity log", `${formatNumber(activityCount)} entries`],

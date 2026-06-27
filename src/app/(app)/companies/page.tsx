@@ -46,7 +46,7 @@ export default async function CompaniesPage() {
         actions={
           <>
             {canManage ? <Link href="/companies/new" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "شركة جديدة" : "New company"}</Link> : null}
-            <ExportMenu type="companies" locale={lc} />
+            <ExportMenu type="companies" locale={lc} variant="heritage" />
             <ShareViewButton title={ar ? "شركات المجموعة" : "Group Companies"} body={ar ? "نظرة شاملة على شركات مجموعة الحوراني وأداء كل قطاع." : "Overview of Hourani Group companies and each sector's performance."} refType="view" refId="companies" ar={ar} tone="light" />
           </>
         }

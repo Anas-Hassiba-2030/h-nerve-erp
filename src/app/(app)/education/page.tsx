@@ -177,7 +177,7 @@ export default async function EducationPage() {
           />
           <div className="sec-actions">
             <Link href="/education/new" className="dl-btn dl-btn-primary"><Plus className="h-4 w-4" strokeWidth={1.5} />{ar ? "تسجيل مشروع" : "Register program"}</Link>
-            <ExportMenu type="education" companyCode="AAU" locale={lc} />
+            <ExportMenu type="education" companyCode="AAU" locale={lc} variant="heritage" />
           </div>
         </div>
       </header>

@@ -50,7 +50,7 @@ export default async function MarketsPage() {
         <div className="sec-head-aside">
           <span className="sec-status"><span className="dot" />{ar ? "مباشر · سوق مفتوح" : "Live · market open"}</span>
           <div className="sec-actions">
-            <ExportMenu type="markets" locale={ar ? "ar" : "en"} />
+            <ExportMenu type="markets" locale={ar ? "ar" : "en"} variant="heritage" />
             <ShareViewButton
               title={ar ? "الأسواق" : "Markets"}
               body={ar ? "نظرة حية على الأسواق: المؤشرات، السلع، والأسهم ذات الصلة." : "Live markets view: indices, commodities, and relevant tickers."}

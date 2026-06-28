@@ -6,8 +6,8 @@ import Link from "next/link";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { LiveTicker } from "@/components/ui/LiveTicker";
 import { PeriodSelector } from "@/components/ui/PeriodSelector";
-import { isValidPeriod, type Period } from "@/lib/finance/period";
-import { CompanyStrip } from "@/components/dashboard/CompanyStrip";
+import { isValidPeriod, periodLabel, type Period } from "@/lib/finance/period";
+import { SectorStrip } from "@/components/dashboard/SectorStrip";
 import { ActivityStream } from "@/components/dashboard/ActivityStream";
 import { AlertCenter } from "@/components/dashboard/AlertCenter";
 import { FinancialPulse } from "@/components/dashboard/FinancialPulse";
@@ -44,7 +44,6 @@ export default async function DashboardPage(
   const period: Period = isValidPeriod(searchParams.period);
 
   const {
-    range,
     brainIQ,
     me,
     companies,
@@ -66,7 +65,7 @@ export default async function DashboardPage(
     expenseTrend,
     monthLabels,
     latestEsg,
-    stripItems,
+    sectorGroups,
     activity,
     alerts,
     tickerItems,
@@ -92,10 +91,21 @@ export default async function DashboardPage(
         : `Welcome back, ${firstToken}.`)
     : undefined;
 
+  // Human period label so the hero reconciles with "Last 12 months" below.
+  const periodHuman = periodLabel(period, ar);
+  // Margin is only meaningful when BOTH revenue and expenses exist in the
+  // period — otherwise we'd print a misleading "100% margin" off zero expenses.
+  const marginHint =
+    revenueInRange > 0 && expenseInRange > 0
+      ? (ar
+          ? `هامش ${formatPercent(netInRange / revenueInRange, 1)}`
+          : `${formatPercent(netInRange / revenueInRange, 1)} margin`)
+      : "—";
+
   return (
     <DaylightShell dir={ar ? "rtl" : "ltr"}>
       <DaylightHeader
-        eyebrow={m["dashboard.eyebrow"]}
+        eyebrow={ar ? "مجموعة الحوراني · كل الوحدات" : "Hourani Group · all units"}
         title={ar ? "اللوحة التنفيذية" : "Executive dashboard"}
         subtitle={
           ar
@@ -134,14 +144,14 @@ export default async function DashboardPage(
 
       {/* === BAND 2: hero numbers — the figures that matter, up top === */}
       <DaylightKpiGrid>
-        <DaylightKpi label={ar ? `إيراد ${range.label}` : `Revenue ${range.label}`} value={formatMoney(revenueInRange)} hint={ar ? `سابقاً ${formatMoney(revPrev)}` : `Prev ${formatMoney(revPrev)}`} delta={revDelta >= 0 ? { dir: "up", text: formatPercent(Math.abs(revDelta), 1) } : { dir: "down", text: formatPercent(Math.abs(revDelta), 1) }} />
-        <DaylightKpi label={ar ? "مصاريف" : "Expenses"} value={formatMoney(expenseInRange)} hint={ar ? `سابقاً ${formatMoney(expPrev)}` : `Prev ${formatMoney(expPrev)}`} />
-        <DaylightKpi label={ar ? "صافي" : "Net"} value={formatMoney(netInRange)} hint={ar ? `هامش ${formatPercent(revenueInRange > 0 ? netInRange / revenueInRange : 0, 1)}` : `${formatPercent(revenueInRange > 0 ? netInRange / revenueInRange : 0, 1)} margin`} />
+        <DaylightKpi label={ar ? `الإيراد · ${periodHuman}` : `Revenue · ${periodHuman}`} value={formatMoney(revenueInRange)} hint={ar ? `سابقاً ${formatMoney(revPrev)}` : `Prev ${formatMoney(revPrev)}`} delta={revDelta >= 0 ? { dir: "up", text: formatPercent(Math.abs(revDelta), 1) } : { dir: "down", text: formatPercent(Math.abs(revDelta), 1) }} />
+        <DaylightKpi label={ar ? "المصاريف" : "Expenses"} value={formatMoney(expenseInRange)} hint={ar ? `سابقاً ${formatMoney(expPrev)}` : `Prev ${formatMoney(expPrev)}`} />
+        <DaylightKpi label={ar ? "صافي" : "Net"} value={formatMoney(netInRange)} hint={marginHint} />
         <DaylightKpi label={ar ? "إشغال أرينا" : "Arena occupancy"} value={formatPercent(occupancyPct, 0)} hint={ar ? `${formatNumber(activeBookings)}/${formatNumber(totalRooms)} غرفة` : `${formatNumber(activeBookings)}/${formatNumber(totalRooms)} rooms`} />
       </DaylightKpiGrid>
 
-      {/* === BAND 3: the units at a glance === */}
-      <CompanyStrip items={stripItems} locale={lc} />
+      {/* === BAND 3: the businesses at a glance — 5 sector cards, drill to units === */}
+      <SectorStrip groups={sectorGroups} locale={lc} />
 
       {/* === BAND 4: financial pulse + what needs attention === */}
       <section className="grid gap-5 lg:grid-cols-12">

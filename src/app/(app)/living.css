@@ -229,6 +229,37 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 }
 @keyframes mo-orbit-in{ from{ opacity:0; transform:translateY(-8px) scale(.96) } to{ opacity:1; transform:translateY(0) scale(1) } }
 
+/* Ambient orbit background — drifting emerald/gold nebula + twinkling
+   starfield, behind the nodes (z-0). Pure atmosphere; never touches the
+   node bloom. Clipped by .mo-orbit's overflow:hidden. */
+.mo-orbit-aura{ position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+.mo-orbit-aura::before, .mo-orbit-aura::after{ content:""; position:absolute; border-radius:50%; filter:blur(26px); }
+.mo-orbit-aura::before{
+  width:64%; height:64%; left:8%; top:6%;
+  background:radial-gradient(circle, rgba(46,107,87,.55), transparent 70%);
+  animation:mo-aura-a 15s ease-in-out infinite alternate;
+}
+.mo-orbit-aura::after{
+  width:46%; height:46%; right:6%; bottom:6%;
+  background:radial-gradient(circle, rgba(194,163,90,.30), transparent 70%);
+  animation:mo-aura-b 19s ease-in-out infinite alternate;
+}
+@keyframes mo-aura-a{ from{ transform:translate(0,0) scale(1) } to{ transform:translate(14%,9%) scale(1.18) } }
+@keyframes mo-aura-b{ from{ transform:translate(0,0) scale(1) } to{ transform:translate(-11%,-7%) scale(1.22) } }
+.mo-orbit-stars{
+  position:absolute; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    radial-gradient(1.5px 1.5px at 18% 28%, rgba(220,195,138,.95), transparent),
+    radial-gradient(1.5px 1.5px at 72% 18%, rgba(238,243,238,.75), transparent),
+    radial-gradient(1px 1px at 42% 66%, rgba(220,195,138,.70), transparent),
+    radial-gradient(1px 1px at 86% 58%, rgba(238,243,238,.60), transparent),
+    radial-gradient(1.5px 1.5px at 56% 84%, rgba(194,163,90,.85), transparent),
+    radial-gradient(1px 1px at 12% 78%, rgba(238,243,238,.50), transparent),
+    radial-gradient(1px 1px at 32% 14%, rgba(238,243,238,.55), transparent);
+  animation:mo-twinkle 5.5s ease-in-out infinite alternate;
+}
+@keyframes mo-twinkle{ from{ opacity:.45 } to{ opacity:1 } }
+
 /* Faint decorative orbit rings — flourish only; nodes are positioned
    independently so the labels never rotate or blur. */
 .mo-orbit-ring{
@@ -292,6 +323,7 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 @media (prefers-reduced-motion:reduce){
   .mo-btn .mo-ring{ animation:none; }
   .mo-orbit, .mo-orbit-ring, .mo-orbit-node{ animation:none; }
+  .mo-orbit-aura::before, .mo-orbit-aura::after, .mo-orbit-stars{ animation:none; }
 }
 
 /* ════════════════════════════════════════════════════════════════

@@ -36,19 +36,23 @@ export function SeedDemoButton({ ar }: { ar: boolean }) {
         type="button"
         onClick={run}
         disabled={pending}
-        className="admin-btn"
         style={{
           display: "inline-flex",
           alignItems: "center",
           gap: 8,
-          fontSize: 13,
-          padding: "8px 14px",
-          background: "var(--admin-cyan, #06b6d4)",
-          color: "#000",
-          border: "1px solid var(--admin-cyan, #06b6d4)",
+          fontFamily: '"Inter Tight", "Inter", system-ui, sans-serif',
+          fontSize: 14,
+          fontWeight: 600,
+          letterSpacing: "-0.005em",
+          padding: "9px 16px",
+          borderRadius: 8,
+          // Heritage admin: emerald outline on warm white — readable on cream,
+          // clearly a button, without shouting (it's an ops action, not a hero).
+          background: "var(--admin-bg-2)",
+          color: "var(--admin-cyan)",
+          border: "1.5px solid var(--admin-cyan)",
           cursor: pending ? "not-allowed" : "pointer",
           opacity: pending ? 0.6 : 1,
-          fontWeight: 500,
         }}
       >
         {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
@@ -61,10 +65,12 @@ export function SeedDemoButton({ ar }: { ar: boolean }) {
         <div
           className="mt-3 inline-flex items-start gap-2"
           style={{
-            fontSize: 12,
-            padding: "8px 12px",
-            border: `1px solid ${result.ok ? "var(--admin-cyan, #06b6d4)" : "#ef4444"}`,
-            color: result.ok ? "var(--admin-fg, #fff)" : "#ef4444",
+            fontSize: 13,
+            padding: "10px 13px",
+            borderRadius: 8,
+            background: "var(--admin-bg-2)",
+            border: `1px solid ${result.ok ? "var(--admin-cyan)" : "var(--admin-rose)"}`,
+            color: result.ok ? "var(--admin-text)" : "var(--admin-rose)",
             maxWidth: 640,
           }}
         >

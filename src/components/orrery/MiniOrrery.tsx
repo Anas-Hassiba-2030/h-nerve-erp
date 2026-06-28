@@ -123,6 +123,12 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
           aria-label={locale === "ar" ? "قائمة التنقل" : "Navigation menu"}
           style={{ width: SIZE, height: SIZE }}
         >
+          {/* Ambient background — drifting nebula + starfield. Behind the
+              nodes (z-0), pointer-events none, motion-reduced safe. Pure
+              atmosphere; never touches the node bloom. */}
+          <span className="mo-orbit-aura" aria-hidden="true" />
+          <span className="mo-orbit-stars" aria-hidden="true" />
+
           <span
             className="mo-orbit-ring"
             aria-hidden="true"

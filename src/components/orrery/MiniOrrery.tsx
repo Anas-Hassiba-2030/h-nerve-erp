@@ -6,14 +6,26 @@ import { ORRERY_GROUPS, type OrreryGroup } from "@/lib/orrery/groups";
 
 type Locale = "ar" | "en";
 
+// The mini-orbit is a small version of the main /orrery bloom: the five
+// groups orbit a central core, a click "blooms" a group's children around
+// the core, the core steps back. The layout is computed radially in code and
+// positioned with absolute left/top — it is NEVER a vertical list, so it
+// always reads as an orbit even with animation disabled.
+const PANEL = 360; // px — the square cosmic field
+const CENTER = PANEL / 2;
+const R_GROUP = 112; // orbit radius for the 5 groups
+const R_CHILD = 116; // orbit radius for a group's children
+
+function radial(i: number, n: number, r: number): { left: number; top: number } {
+  const angle = ((-90 + (i * 360) / n) * Math.PI) / 180; // start at 12 o'clock
+  return { left: CENTER + r * Math.cos(angle), top: CENTER + r * Math.sin(angle) };
+}
+
 export function MiniOrrery({ locale }: { locale: Locale }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [activeGroup, setActiveGroup] = useState<OrreryGroup | null>(null);
 
-  // The menu is a compact dropdown anchored under the trigger (top-right
-  // control cluster) — a plain vertical list, not a centered radial popup.
-  // It never covers the central page content; only a small top-right area.
   const openMenu = useCallback(() => {
     setActiveGroup(null);
     setOpen(true);
@@ -24,7 +36,7 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
     setActiveGroup(null);
   }, []);
 
-  // ESC to close
+  // ESC closes
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
@@ -34,23 +46,39 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
     return () => document.removeEventListener("keydown", handler);
   }, [open, closeMenu]);
 
-  const handleGroupClick = (group: OrreryGroup) => {
-    setActiveGroup(group);
+  // The core: steps back to the groups view, or closes when already there.
+  const onCore = () => {
+    if (activeGroup) setActiveGroup(null);
+    else closeMenu();
   };
 
-  const handleChildClick = (route: string) => {
+  const onChild = (route: string) => {
     closeMenu();
     router.push(route);
   };
 
-  // Drill-in / back chevrons must respect reading direction. In Arabic (RTL,
-  // the default) the "forward" arrow points left and "back" points right.
-  const drillChevron = locale === "ar" ? "‹" : "›";
+  const nodes = activeGroup
+    ? activeGroup.children.map((c, i) => ({
+        key: c.route,
+        label: locale === "ar" ? c.label : c.labelEn,
+        pos: radial(i, activeGroup.children.length, R_CHILD),
+        onClick: () => onChild(c.route),
+        child: true,
+      }))
+    : ORRERY_GROUPS.map((g, i) => ({
+        key: g.id,
+        label: locale === "ar" ? g.nameAr : g.nameEn,
+        pos: radial(i, ORRERY_GROUPS.length, R_GROUP),
+        onClick: () => setActiveGroup(g),
+        child: false,
+      }));
+
+  // In Arabic (RTL) the "back" chevron points the other way.
   const backChevron = locale === "ar" ? "›" : "‹";
 
   return (
     <>
-      {/* The trigger button — lives inside dl-topctl (already position:fixed) */}
+      {/* Trigger — the same green orbit button on every section */}
       <button
         className="mo-btn"
         aria-label={locale === "ar" ? "المدار المصغّر" : "Mini Orrery"}
@@ -62,72 +90,62 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
         <span className="mo-core" aria-hidden="true" />
       </button>
 
-      {/* Transparent click-catcher — closes on outside click, no dimming. */}
-      {open && (
-        <div className="mo-scrim" aria-hidden="true" onClick={closeMenu} />
-      )}
+      {/* Transparent click-catcher — closes on outside click. */}
+      {open && <div className="mo-scrim" aria-hidden="true" onClick={closeMenu} />}
 
-      {/* Compact dropdown — anchored top-right, directly under the trigger. */}
+      {/* The mini bloom — a small radial field anchored top-right. */}
       {open && (
         <div
-          className="mo-panel"
+          className="mo-orbit"
           role="menu"
           aria-label={locale === "ar" ? "قائمة التنقل" : "Navigation menu"}
+          style={{ width: PANEL, height: PANEL }}
         >
-          {activeGroup ? (
-            <>
-              {/* Back row → return to the groups list */}
-              <button
-                className="mo-row mo-back"
-                onClick={() => setActiveGroup(null)}
-              >
-                <span className="mo-chev" aria-hidden="true">
-                  {backChevron}
-                </span>
-                <span className="mo-row-lbl">
-                  {locale === "ar" ? activeGroup.nameAr : activeGroup.nameEn}
-                </span>
-              </button>
+          <span className="mo-orbit-ring" aria-hidden="true" />
+          <span className="mo-orbit-ring mo-orbit-ring-2" aria-hidden="true" />
 
-              {/* Children of the active group */}
-              {activeGroup.children.map((child) => (
-                <button
-                  key={child.route}
-                  className="mo-row"
-                  role="menuitem"
-                  onClick={() => handleChildClick(child.route)}
-                >
-                  <span className="mo-dot" aria-hidden="true" />
-                  <span className="mo-row-lbl">
-                    {locale === "ar" ? child.label : child.labelEn}
-                  </span>
-                </button>
-              ))}
-            </>
-          ) : (
-            <>
-              {/* Header */}
-              <div className="mo-head">{locale === "ar" ? "المدار" : "Orbit"}</div>
+          <span className="mo-orbit-head">
+            {activeGroup
+              ? locale === "ar"
+                ? activeGroup.nameAr
+                : activeGroup.nameEn
+              : locale === "ar"
+                ? "المدار"
+                : "Orbit"}
+          </span>
 
-              {/* The five top-level groups */}
-              {ORRERY_GROUPS.map((group) => (
-                <button
-                  key={group.id}
-                  className="mo-row"
-                  role="menuitem"
-                  onClick={() => handleGroupClick(group)}
-                >
-                  <span className="mo-dot" aria-hidden="true" />
-                  <span className="mo-row-lbl">
-                    {locale === "ar" ? group.nameAr : group.nameEn}
-                  </span>
-                  <span className="mo-chev" aria-hidden="true">
-                    {drillChevron}
-                  </span>
-                </button>
-              ))}
-            </>
-          )}
+          <button
+            className="mo-orbit-core"
+            onClick={onCore}
+            aria-label={
+              activeGroup
+                ? locale === "ar"
+                  ? "رجوع"
+                  : "Back"
+                : locale === "ar"
+                  ? "إغلاق"
+                  : "Close"
+            }
+          >
+            {activeGroup ? backChevron : "⌗"}
+          </button>
+
+          {nodes.map((nd, i) => (
+            <button
+              key={nd.key}
+              className={"mo-orbit-node" + (nd.child ? " is-child" : "")}
+              role="menuitem"
+              onClick={nd.onClick}
+              style={{
+                left: `${nd.pos.left}px`,
+                top: `${nd.pos.top}px`,
+                animationDelay: `${i * 35}ms`,
+              }}
+            >
+              <span className="mo-orbit-dot" aria-hidden="true" />
+              <span className="mo-orbit-lbl">{nd.label}</span>
+            </button>
+          ))}
         </div>
       )}
     </>

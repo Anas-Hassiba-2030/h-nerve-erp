@@ -213,66 +213,85 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
    page content, so there's nothing to darken. */
 .mo-scrim{ position:fixed; inset:0; z-index:204; background:transparent; }
 
-/* Compact dropdown — anchored top-right, directly under the trigger that
-   lives in .dl-topctl (fixed top:14px). Replaces the old radial popup so it
-   never covers the central page content. */
-.mo-panel{
-  position:fixed; top:58px; inset-inline-end:20px; z-index:205;
-  width:300px; max-height:min(70vh,560px); overflow-y:auto;
-  padding:8px; border-radius:16px;
-  background:rgba(13,31,26,.96);
-  border:1px solid rgba(194,163,90,.3);
-  box-shadow:0 18px 48px rgba(8,18,14,.55);
-  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
-  font-family:var(--ui,"Cairo",sans-serif);
-  animation:mo-panel-in .16s ease both;
+/* Mini-orbit bloom — a small version of the main /orrery radial menu,
+   anchored top-right under the trigger. The five groups orbit a core; a
+   click blooms a group's children around it. Positioned radially in
+   MiniOrrery.tsx (absolute left/top), so it is NEVER a vertical list — it
+   always reads as an orbit, even with motion disabled. */
+.mo-orbit{
+  position:fixed; top:56px; inset-inline-end:18px; z-index:205;
+  border-radius:18px; overflow:hidden;
+  background:radial-gradient(circle at 50% 42%,#15362c,#0b1c16 68%,#08130f);
+  border:1px solid rgba(194,163,90,.32);
+  box-shadow:0 22px 60px rgba(6,14,11,.6);
+  max-width:calc(100vw - 28px);
+  animation:mo-orbit-in .18s ease both;
 }
-@keyframes mo-panel-in{ from{ opacity:0; transform:translateY(-6px) } to{ opacity:1; transform:translateY(0) } }
+@keyframes mo-orbit-in{ from{ opacity:0; transform:translateY(-8px) scale(.96) } to{ opacity:1; transform:translateY(0) scale(1) } }
 
-/* Header row (groups view) */
-.mo-head{
-  padding:8px 14px 10px; text-align:start;
-  font-size:12px; font-weight:800; letter-spacing:.04em;
-  color:#C2A35A; text-transform:uppercase;
+/* Faint decorative orbit rings — flourish only; nodes are positioned
+   independently so the labels never rotate or blur. */
+.mo-orbit-ring{
+  position:absolute; left:50%; top:50%; width:236px; height:236px;
+  transform:translate(-50%,-50%); border-radius:50%;
+  border:1px dashed rgba(194,163,90,.24);
+  animation:mo-spin 30s linear infinite;
+}
+.mo-orbit-ring-2{
+  width:150px; height:150px; border-style:solid;
+  border-color:rgba(194,163,90,.14);
+  animation-duration:46s; animation-direction:reverse;
 }
 
-/* A row — group, child, or back. */
-.mo-row{
-  width:100%; display:flex; align-items:center; gap:10px;
-  padding:10px 14px; border:0; border-radius:10px;
-  background:transparent; cursor:pointer; text-align:start;
-  font-family:inherit; font-size:14px; color:#e6f0ea;
-  transition:background .14s, color .14s;
+.mo-orbit-head{
+  position:absolute; top:13px; left:0; right:0; text-align:center;
+  font-family:"JetBrains Mono","IBM Plex Mono",ui-monospace,monospace;
+  font-size:10px; letter-spacing:.3em; text-transform:uppercase;
+  color:#C2A35A; font-weight:700; pointer-events:none;
 }
-.mo-row:hover{ background:rgba(194,163,90,.12); color:#fff; }
 
-/* Back row — sits above the children list, slightly distinguished. */
-.mo-back{
-  margin-bottom:4px; color:#C2A35A; font-weight:700;
-  border-bottom:1px solid rgba(194,163,90,.18); border-radius:10px 10px 0 0;
+/* The central core — doubles as the back / close control. */
+.mo-orbit-core{
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:48px; height:48px; border-radius:50%; cursor:pointer; z-index:6;
+  border:1px solid rgba(220,195,138,.5);
+  background:radial-gradient(circle at 42% 36%,#1f4d3f,#0d2a22 62%,#07140f);
+  color:#DCC38A; font-size:20px; font-weight:700;
+  display:grid; place-items:center;
+  box-shadow:0 0 22px rgba(31,77,63,.7), inset 0 0 10px rgba(0,0,0,.5);
+  transition:border-color .16s, box-shadow .16s;
 }
-.mo-back:hover{ color:#DCC38A; }
+.mo-orbit-core:hover{
+  border-color:rgba(220,195,138,.9);
+  box-shadow:0 0 26px rgba(194,163,90,.5), inset 0 0 10px rgba(0,0,0,.5);
+}
 
-/* The leading dot on each list row. */
-.mo-dot{
-  flex:0 0 8px; width:8px; height:8px; border-radius:50%;
+/* A group / child node — a gold dot above a readable dark pill. */
+.mo-orbit-node{
+  position:absolute; transform:translate(-50%,-50%);
+  display:flex; flex-direction:column; align-items:center; gap:5px;
+  background:none; border:0; padding:0; cursor:pointer; z-index:5;
+  animation:mo-node-pop .26s ease both;
+}
+@keyframes mo-node-pop{ from{ opacity:0; transform:translate(-50%,-50%) scale(.55) } to{ opacity:1; transform:translate(-50%,-50%) scale(1) } }
+.mo-orbit-dot{
+  width:11px; height:11px; border-radius:50%;
   background:radial-gradient(circle,#DCC38A,#C2A35A 60%,#2E6B57);
-  box-shadow:0 0 6px rgba(220,195,138,.5);
+  box-shadow:0 0 8px rgba(220,195,138,.6);
 }
-
-/* Row label takes the remaining width so the chevron parks at the edge. */
-.mo-row-lbl{ flex:1 1 auto; min-width:0; }
-
-/* Drill-in / back chevron. */
-.mo-chev{
-  flex:0 0 auto; font-size:16px; line-height:1;
-  color:rgba(194,163,90,.7);
+.mo-orbit-node.is-child .mo-orbit-dot{ width:8px; height:8px; }
+.mo-orbit-lbl{
+  font-size:11.5px; font-weight:600; color:#eef3ee;
+  background:rgba(8,18,14,.9); border:1px solid rgba(194,163,90,.3);
+  padding:3px 9px; border-radius:999px; white-space:nowrap;
+  transition:background .14s, color .14s, border-color .14s;
 }
-.mo-row:hover .mo-chev{ color:#DCC38A; }
+.mo-orbit-node:hover .mo-orbit-lbl{ background:#C2A35A; color:#0b1a15; border-color:#C2A35A; }
+.mo-orbit-node:focus-visible .mo-orbit-lbl{ outline:2px solid #DCC38A; outline-offset:2px; }
 
 @media (prefers-reduced-motion:reduce){
   .mo-btn .mo-ring{ animation:none; }
-  .mo-panel{ animation:none; }
+  .mo-orbit, .mo-orbit-ring, .mo-orbit-node{ animation:none; }
 }
 
 /* ════════════════════════════════════════════════════════════════

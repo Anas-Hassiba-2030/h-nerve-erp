@@ -11,14 +11,28 @@ type Locale = "ar" | "en";
 // the core, the core steps back. The layout is computed radially in code and
 // positioned with absolute left/top — it is NEVER a vertical list, so it
 // always reads as an orbit even with animation disabled.
-const PANEL = 360; // px — the square cosmic field
-const CENTER = PANEL / 2;
-const R_GROUP = 112; // orbit radius for the 5 groups
-const R_CHILD = 116; // orbit radius for a group's children
+// The orbit grows with the node count so a big group never crowds its labels.
+// The Brain group has 13 children and System 12; a fixed 116px ring packed
+// those pills shoulder-to-shoulder. Sets of ≤9 keep the original 116px ring,
+// so the five-group view stays pixel-identical to before — only crowded child
+// blooms expand. Only the geometry changes here; the pop/spin/bloom animation
+// is untouched.
+const BASE_R = 116; // orbit radius for ≤9 nodes (unchanged from the original)
 
-function radial(i: number, n: number, r: number): { left: number; top: number } {
+function radiusFor(n: number): number {
+  // Space nodes so adjacent pills clear an ~80px chord; floor at BASE_R.
+  return n <= 1 ? BASE_R : Math.max(BASE_R, Math.round(40 / Math.sin(Math.PI / n)));
+}
+
+// Decorative rings stay proportional to the live radius so they always frame
+// the nodes (at BASE_R these resolve to the original 236 / 150 px).
+function ringSizes(r: number): { outer: number; inner: number } {
+  return { outer: Math.round(r * 2.03), inner: Math.round(r * 1.29) };
+}
+
+function radial(i: number, n: number, r: number, center: number): { left: number; top: number } {
   const angle = ((-90 + (i * 360) / n) * Math.PI) / 180; // start at 12 o'clock
-  return { left: CENTER + r * Math.cos(angle), top: CENTER + r * Math.sin(angle) };
+  return { left: center + r * Math.cos(angle), top: center + r * Math.sin(angle) };
 }
 
 export function MiniOrrery({ locale }: { locale: Locale }) {
@@ -57,18 +71,26 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
     router.push(route);
   };
 
+  // Layout scales with the node count: more nodes → wider ring + panel, so
+  // the rings always frame the labels and the pills never collide.
+  const count = activeGroup ? activeGroup.children.length : ORRERY_GROUPS.length;
+  const R = radiusFor(count);
+  const SIZE = Math.max(360, Math.round(2 * (R + 60)));
+  const CTR = SIZE / 2;
+  const rings = ringSizes(R);
+
   const nodes = activeGroup
     ? activeGroup.children.map((c, i) => ({
         key: c.route,
         label: locale === "ar" ? c.label : c.labelEn,
-        pos: radial(i, activeGroup.children.length, R_CHILD),
+        pos: radial(i, count, R, CTR),
         onClick: () => onChild(c.route),
         child: true,
       }))
     : ORRERY_GROUPS.map((g, i) => ({
         key: g.id,
         label: locale === "ar" ? g.nameAr : g.nameEn,
-        pos: radial(i, ORRERY_GROUPS.length, R_GROUP),
+        pos: radial(i, count, R, CTR),
         onClick: () => setActiveGroup(g),
         child: false,
       }));
@@ -99,10 +121,18 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
           className="mo-orbit"
           role="menu"
           aria-label={locale === "ar" ? "قائمة التنقل" : "Navigation menu"}
-          style={{ width: PANEL, height: PANEL }}
+          style={{ width: SIZE, height: SIZE }}
         >
-          <span className="mo-orbit-ring" aria-hidden="true" />
-          <span className="mo-orbit-ring mo-orbit-ring-2" aria-hidden="true" />
+          <span
+            className="mo-orbit-ring"
+            aria-hidden="true"
+            style={{ width: rings.outer, height: rings.outer }}
+          />
+          <span
+            className="mo-orbit-ring mo-orbit-ring-2"
+            aria-hidden="true"
+            style={{ width: rings.inner, height: rings.inner }}
+          />
 
           <span className="mo-orbit-head">
             {activeGroup

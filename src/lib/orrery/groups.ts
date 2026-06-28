@@ -10,6 +10,13 @@
 // Loran, …) live under the board that governs them. Before this file the two
 // React components hand-duplicated the list and had drifted back to 6 groups —
 // that is the divergence this module removes.
+//
+// 2026-06-28 light trim: Workspace moved into Group Board (it is company-level)
+// and Roadmap dropped from the menu. This file is the source of truth for the
+// React mini-orbit, which now appears in EVERY section. The public/orrery hub
+// bloom's own group arrays were intentionally NOT edited in the same change —
+// that file is the animated signature surface and its kid arrays are
+// index-aligned AR/EN, so sync it there only as a deliberate, isolated step.
 
 export interface OrreryChild {
   label: string;
@@ -34,6 +41,7 @@ export const ORRERY_GROUPS: OrreryGroup[] = [
     children: [
       { label: "لوحة الإدارة", labelEn: "Dashboard", route: "/dashboard" },
       { label: "الشركات", labelEn: "Companies", route: "/companies" },
+      { label: "مساحة العمل", labelEn: "Workspace", route: "/workspace" },
       { label: "أرينا", labelEn: "Arena", route: "/hotels" },
       { label: "المها", labelEn: "Maha", route: "/dairy" },
       { label: "لوران", labelEn: "Loran", route: "/farms" },
@@ -98,7 +106,6 @@ export const ORRERY_GROUPS: OrreryGroup[] = [
       { label: "غرفة العمليات", labelEn: "Mission Control", route: "/admin/system" },
       { label: "الإمبراطورية", labelEn: "Empire", route: "/admin/empire" },
       { label: "المستأجرون", labelEn: "Tenants", route: "/admin/tenants" },
-      { label: "مساحة العمل", labelEn: "Workspace", route: "/workspace" },
       { label: "الأتمتة", labelEn: "Workflows", route: "/workflows" },
       { label: "التكاملات", labelEn: "Integrations", route: "/integrations" },
       { label: "التدقيق", labelEn: "Audit", route: "/audit-360" },
@@ -108,7 +115,6 @@ export const ORRERY_GROUPS: OrreryGroup[] = [
       { label: "المحذوفات", labelEn: "Trash", route: "/trash" },
       { label: "الإعدادات", labelEn: "Settings", route: "/settings" },
       { label: "المساعدة", labelEn: "Help", route: "/help" },
-      { label: "خارطة الطريق", labelEn: "Roadmap", route: "/roadmap" },
     ],
   },
 ];

@@ -21,8 +21,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/db";
-import { Building2, Settings, LayoutDashboard, Crown, UsersRound, ShieldCheck, ScrollText, Sprout, Database, Orbit } from "lucide-react";
+import { Building2, Settings, Crown, UsersRound, ShieldCheck, ScrollText, Sprout, Database } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
+import { MiniOrrery } from "@/components/orrery/MiniOrrery";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getCurrentUser();
@@ -43,12 +44,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Link
             href="/orrery"
             className="admin-rail-brand"
-            style={{ textDecoration: "none" }}
             title={ar ? "العودة إلى المدار" : "Back to the Orbit hub"}
           >
-            <span className="admin-rail-mark">⌗</span>
-            <span className="admin-rail-name">{ar ? "H-Nerve · إدارة" : "H-Nerve · Admin"}</span>
-            <span className="admin-rail-tag">SUPERADMIN</span>
+            <span className="admin-mono-tile" aria-hidden>⌗</span>
+            <span className="admin-mono-text">
+              <span className="admin-mono-name">H-Nerve</span>
+              <span className="admin-mono-sub">{ar ? "وحدة الإدارة" : "Admin console"}</span>
+            </span>
           </Link>
           <nav className="admin-rail-nav">
             <Link href="/admin/empire" className="admin-rail-link">
@@ -84,24 +86,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               {ar ? "غرفة العمليات" : "Mission Control"}
             </Link>
           </nav>
+          {/* The same Orbit control every operator section carries — the
+              single, consistent way back into the app. Replaces the old
+              LEAVE ADMIN label + Orbit/Operator text links. */}
           <div className="admin-rail-exits">
-            <span className="admin-rail-exits-label">{ar ? "مغادرة الإدارة" : "Leave admin"}</span>
-            <Link
-              href="/orrery"
-              className="admin-rail-exit admin-rail-orbit"
-              title={ar ? "الصفحة الرئيسية — مركز المدار (كل أقسام النظام)" : "Home — the Orbit hub (all sections)"}
-            >
-              <Orbit className="h-3.5 w-3.5" strokeWidth={1.5} />
-              <span>{ar ? "المدار" : "Orbit"}</span>
-            </Link>
-            <Link
-              href="/dashboard"
-              className="admin-rail-exit"
-              title={ar ? "فتح لوحة تحكم المشغّل — واجهة الاستخدام اليومي" : "Open the operator dashboard — the day-to-day app"}
-            >
-              <LayoutDashboard className="h-3.5 w-3.5" strokeWidth={1.5} />
-              <span>{ar ? "لوحة المشغّل" : "Operator"}</span>
-            </Link>
+            <MiniOrrery locale={ar ? "ar" : "en"} />
           </div>
         </div>
       </header>

@@ -7,6 +7,7 @@
 import { type TickerItem } from "@/components/ui/LiveTicker";
 import { periodToRange, type Period } from "@/lib/finance/period";
 import { type CompanyStripItem } from "@/components/dashboard/CompanyStrip";
+import { type SectorGroup } from "@/components/dashboard/SectorStrip";
 import { type ActivityItem } from "@/components/dashboard/ActivityStream";
 import { type AlertItem } from "@/components/dashboard/AlertCenter";
 import { type CalendarEvent } from "@/components/dashboard/UpcomingCalendar";
@@ -213,7 +214,7 @@ export async function getDashboardData({
   };
   const companyRevenue = (companyId: string) =>
     transactions
-      .filter((t) => t.companyId === companyId && t.kind === "REVENUE" && t.occurredAt >= range.start)
+      .filter((t) => t.companyId === companyId && t.kind === "REVENUE" && t.occurredAt >= range.start && t.occurredAt <= range.end)
       .reduce((a, t) => a + t.amount, 0);
 
   const stripItems: CompanyStripItem[] = companies.map((c) => {
@@ -234,7 +235,7 @@ export async function getDashboardData({
       return { label: ar ? "إيراد" : "Revenue", value: formatMoney(companyRevenue(c.id)) };
     })();
     // Health
-    let health: "OK" | "WARN" | "CRITICAL" = "OK";
+    let health: "OK" | "WARN" | "CRITICAL" | "NONE" = "OK";
     if (c.sector === "AGRICULTURE") {
       const f = farms.filter((x) => x.companyId === c.id);
       const crit = f.some((x) => x.alertLevel === "CRITICAL");
@@ -243,6 +244,10 @@ export async function getDashboardData({
     } else if (c.sector === "DAIRY" && expiringDairy.some((b) => b.companyId === c.id)) {
       health = "WARN";
     }
+    // Guard: a unit with no revenue in the period reads neutral, never green
+    // "Healthy" (that's what made JOD 0 cards look fake). Don't mask a real
+    // WARN/CRITICAL signal.
+    if (health === "OK" && companyRevenue(c.id) <= 0) health = "NONE";
     return {
       id: c.id,
       code: c.code,
@@ -255,6 +260,58 @@ export async function getDashboardData({
       health,
     };
   });
+
+  // === Sector roll-up — 5 cards that drill to their member units ===
+  const SECTOR_META: Record<string, { ar: string; en: string; code: string; order: number }> = {
+    HOSPITALITY: { ar: "الضيافة", en: "Hospitality", code: "ARENA", order: 0 },
+    DAIRY:       { ar: "الألبان", en: "Dairy",       code: "MAHA",  order: 1 },
+    AGRICULTURE: { ar: "الزراعة", en: "Agriculture", code: "LORAN", order: 2 },
+    EDUCATION:   { ar: "التعليم", en: "Education",   code: "AAU",   order: 3 },
+    INVESTMENT:  { ar: "الاستثمار", en: "Investment", code: "HH",   order: 4 },
+    TRADE:       { ar: "التجارة", en: "Trade",       code: "HH",    order: 5 },
+  };
+  const sectorOps = (sector: string, unitCount: number): { label: string; value: string } => {
+    if (sector === "HOSPITALITY") return { label: ar ? "إشغال" : "Occupancy", value: formatPercent(occupancyPct, 0) };
+    if (sector === "DAIRY") return { label: ar ? "إنتاج 30ي" : "30d output", value: `${formatNumber(dairyVolumeL)} L` };
+    if (sector === "AGRICULTURE") return { label: ar ? "مزارع" : "Farms", value: formatNumber(farms.length) };
+    if (sector === "EDUCATION") return { label: ar ? "برامج" : "Programs", value: formatNumber(programs.length) };
+    return { label: ar ? "وحدات" : "Units", value: formatNumber(unitCount) };
+  };
+  const bySector = new Map<string, CompanyStripItem[]>();
+  for (const it of stripItems) {
+    const arr = bySector.get(it.sector) ?? [];
+    arr.push(it);
+    bySector.set(it.sector, arr);
+  }
+  const sectorGroups: SectorGroup[] = [...bySector.entries()]
+    .map(([sector, units]) => {
+      const meta = SECTOR_META[sector] ?? { ar: sector, en: sector, code: "", order: 99 };
+      const revenue = units.reduce((a, u) => a + u.revenue, 0);
+      const len = units.reduce((mx, u) => Math.max(mx, u.revenueTrend.length), 0);
+      const revenueTrend = Array.from({ length: len }, (_, i) =>
+        units.reduce((a, u) => a + (u.revenueTrend[i] ?? 0), 0)
+      );
+      const health: "OK" | "WARN" | "CRITICAL" | "NONE" =
+        revenue <= 0
+          ? "NONE"
+          : units.some((u) => u.health === "CRITICAL")
+            ? "CRITICAL"
+            : units.some((u) => u.health === "WARN")
+              ? "WARN"
+              : "OK";
+      return {
+        id: sector,
+        name: meta.ar,
+        nameEn: meta.en,
+        code: meta.code,
+        revenue,
+        revenueTrend,
+        ops: sectorOps(sector, units.length),
+        health,
+        units,
+      };
+    })
+    .sort((a, b) => (SECTOR_META[a.id]?.order ?? 99) - (SECTOR_META[b.id]?.order ?? 99));
 
   // === Activity stream items ===
   const activity: ActivityItem[] = [
@@ -316,9 +373,10 @@ export async function getDashboardData({
   ].slice(0, 6);
 
   // === Live ticker ===
+  // Carries only signals NOT already shown as hero KPIs (occupancy + revenue
+  // live up top) — so the ticker complements the dashboard instead of echoing
+  // it.
   const tickerItems: TickerItem[] = [
-    { id: "tk-occ", icon: "up", label: ar ? "إشغال أرينا" : "Arena occupancy", value: formatPercent(occupancyPct, 0), highlight: true },
-    { id: "tk-rev", icon: "pulse", label: ar ? `إيراد ${range.label}` : `Revenue ${range.label}`, value: formatMoney(revenueInRange) },
     { id: "tk-fc", icon: "bridge", label: ar ? "تنبؤات نشطة" : "Live forecasts", value: formatNumber(forecasts.length) },
     { id: "tk-mkt", icon: groupMove >= 0 ? "up" : "down", label: ar ? "أسهم المجموعة" : "Equities", value: `${groupMove >= 0 ? "+" : ""}${groupMove.toFixed(2)}%` },
     { id: "tk-esg", icon: "sparkle", label: ar ? "ESG" : "ESG", value: latestEsg.toFixed(1) },
@@ -395,6 +453,7 @@ export async function getDashboardData({
     groupMove,
     totalProjectsBudget,
     stripItems,
+    sectorGroups,
     activity,
     alerts,
     tickerItems,

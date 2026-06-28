@@ -23,7 +23,7 @@ export type CompanyStripItem = {
   revenueTrend: number[];
   revenue: number;
   ops: { label: string; value: string }; // primary operational metric
-  health: "OK" | "WARN" | "CRITICAL";
+  health: "OK" | "WARN" | "CRITICAL" | "NONE";
 };
 
 // Per-company accent — single chromatic touch, drawn from Heritage palette.
@@ -39,12 +39,13 @@ const RAIL_DEFAULT = "var(--heri-rule-strong)";
 const HEALTH_TONE: Record<string, "success" | "warn" | "critical"> = {
   OK: "success", WARN: "warn", CRITICAL: "critical",
 };
-const HEALTH_AR: Record<string, string> = { OK: "صحي", WARN: "تنبيه", CRITICAL: "حرج" };
-const HEALTH_EN: Record<string, string> = { OK: "Healthy", WARN: "Watch", CRITICAL: "Critical" };
+const HEALTH_AR: Record<string, string> = { OK: "صحي", WARN: "تنبيه", CRITICAL: "حرج", NONE: "لا نشاط" };
+const HEALTH_EN: Record<string, string> = { OK: "Healthy", WARN: "Watch", CRITICAL: "Critical", NONE: "No activity" };
 const HEALTH_HEX: Record<string, string> = {
   OK: "#1f4e4a",       // heri-teal
   WARN: "#a87a32",     // heri-ochre-2
   CRITICAL: "#b85c38", // heri-terracotta
+  NONE: "#8a8175",     // heri-mute — neutral, never reads as "all good"
 };
 
 export function CompanyStrip({

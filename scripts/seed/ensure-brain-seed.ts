@@ -27,30 +27,48 @@ import { seedBrainGraph } from "@/lib/brain/seedGraph";
 import { seedFederation } from "@/lib/brain/seedFederation";
 import { seedFeedback } from "@/lib/brain/seedFeedback";
 import { seedMemoryLake } from "@/lib/brain/seedMemories";
+import { learnPatterns } from "@/lib/brain/feedback.live";
 
 async function main() {
   const prisma = new PrismaClient();
   try {
     const nodes = await prisma.brainNode.count();
-    if (nodes > 0) {
-      console.log(`[ensure-brain-seed] ${nodes} graph node(s) already present — skipping.`);
-      return;
+    if (nodes === 0) {
+      console.log("[ensure-brain-seed] empty causal graph detected — seeding brain subsystems…");
+
+      const g = await seedBrainGraph();
+      console.log(`[ensure-brain-seed]   graph: nodes=${g.nodesUpserted} edges=${g.edgesUpserted}`);
+
+      const f = await seedFederation();
+      console.log(`[ensure-brain-seed]   federation: written=${f.written}`);
+
+      const fb = await seedFeedback();
+      console.log(`[ensure-brain-seed]   feedback: written=${fb.written}`);
+
+      const m = await seedMemoryLake();
+      console.log(`[ensure-brain-seed]   memory: written=${m.written}`);
+
+      console.log("[ensure-brain-seed] ✓ brain subsystems seeded.");
+    } else {
+      console.log(`[ensure-brain-seed] ${nodes} graph node(s) already present — skipping graph seed.`);
     }
-    console.log("[ensure-brain-seed] empty causal graph detected — seeding brain subsystems…");
 
-    const g = await seedBrainGraph();
-    console.log(`[ensure-brain-seed]   graph: nodes=${g.nodesUpserted} edges=${g.edgesUpserted}`);
-
-    const f = await seedFederation();
-    console.log(`[ensure-brain-seed]   federation: written=${f.written}`);
-
-    const fb = await seedFeedback();
-    console.log(`[ensure-brain-seed]   feedback: written=${fb.written}`);
-
-    const m = await seedMemoryLake();
-    console.log(`[ensure-brain-seed]   memory: written=${m.written}`);
-
-    console.log("[ensure-brain-seed] ✓ brain subsystems seeded.");
+    // LEARNED PATTERNS — decoupled guard. An already-graphed prod can still
+    // have 0 patterns (the "LEARNED PATTERNS 0" stat on the admin deck), since
+    // pattern learning was never run there. Only act when patterns are empty;
+    // only seed feedback if it too is empty (never clobber accumulated signal).
+    // Pure computation from feedback events — no LLM calls.
+    const patternCount = await prisma.brainPattern.count();
+    if (patternCount === 0) {
+      if ((await prisma.brainFeedback.count()) === 0) {
+        const fb = await seedFeedback();
+        console.log(`[ensure-brain-seed]   feedback (for patterns): written=${fb.written}`);
+      }
+      await learnPatterns({ scope: "default", windowDays: 60, minEvidence: 3 });
+      console.log(`[ensure-brain-seed]   patterns learned=${await prisma.brainPattern.count()}`);
+    } else {
+      console.log(`[ensure-brain-seed] ${patternCount} learned pattern(s) already present — skipping.`);
+    }
   } catch (e) {
     console.error("[ensure-brain-seed] non-fatal error:", e);
   } finally {

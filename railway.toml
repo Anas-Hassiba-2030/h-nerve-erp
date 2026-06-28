@@ -23,7 +23,10 @@ buildCommand = "npm install && prisma generate && next build"
 #     it never clears accumulated brain signal; skips runBrainAnalysis = no AI spend)
 #   • seed-markets       → /markets   (marketStock.upsert — idempotent)
 #   • seed-v3-extras     → /projects + council (futureProject/councilDiscussion.upsert)
-preDeployCommand = "prisma migrate deploy && (npx tsx scripts/seed/seed-if-empty.ts || true) && (npx tsx scripts/seed/ensure-admins.ts || true) && (npx tsx scripts/seed/ensure-sectors.ts || true) && (npx tsx scripts/seed/ensure-demo-docs.ts || true) && (npx tsx scripts/seed/ensure-supply-forecasts.ts || true) && (npx tsx scripts/seed/seed-erp-demo.ts || true) && (npx tsx scripts/seed/seed-demo-content.ts || true) && (npx tsx scripts/seed/ensure-brain-seed.ts || true) && (npx tsx scripts/seed/seed-markets.ts || true) && (npx tsx scripts/seed/seed-v3-extras.ts || true) && (npx tsx scripts/seed/ensure-org-hierarchy.ts || true)"
+#   • seed-finance-demo  → credible Executive-dashboard finance (DEMO-FIN-* tx,
+#     idempotent upsert) so the 30-day hero + sector cards are never JOD 0 /
+#     100% margin. Runs LAST so every company (incl. operating units) exists.
+preDeployCommand = "prisma migrate deploy && (npx tsx scripts/seed/seed-if-empty.ts || true) && (npx tsx scripts/seed/ensure-admins.ts || true) && (npx tsx scripts/seed/ensure-sectors.ts || true) && (npx tsx scripts/seed/ensure-demo-docs.ts || true) && (npx tsx scripts/seed/ensure-supply-forecasts.ts || true) && (npx tsx scripts/seed/seed-erp-demo.ts || true) && (npx tsx scripts/seed/seed-demo-content.ts || true) && (npx tsx scripts/seed/ensure-brain-seed.ts || true) && (npx tsx scripts/seed/seed-markets.ts || true) && (npx tsx scripts/seed/seed-v3-extras.ts || true) && (npx tsx scripts/seed/ensure-org-hierarchy.ts || true) && (npx tsx scripts/seed/seed-finance-demo.ts || true)"
 startCommand = "next start -p ${PORT:-3000}"
 
 # Liveness probe — Railway restarts the container if this returns non-2xx.

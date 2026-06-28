@@ -1229,3 +1229,44 @@
     animation: none;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   READABILITY PASS (2026-06-28)
+   The admin label family was tiny monospace (7.5–10.5px) with extreme
+   tracking (0.16–0.30em) set in ALL CAPS — it read as decoration, not
+   as text. Owner feedback: "stupid font I can't read." Move the whole
+   label family onto the sans face at a readable size with restrained
+   tracking; uppercase is KEPT (legible now), so the labels still read
+   as labels. Numeric / code / slug / ID / timestamp classes
+   deliberately stay monospace — that is correct for data. Appended
+   last so it wins the cascade without !important.
+   ════════════════════════════════════════════════════════════════ */
+.admin-eyebrow,
+.admin-back,
+.admin-stat-label,
+.admin-meta-label,
+.admin-rail-tag,
+.admin-rail-exits-label,
+.admin-fieldset-legend,
+.admin-tenant-row-label,
+.admin-tenant-status,
+.admin-tenant-view,
+.admin-progress-label,
+.admin-check-meta,
+.admin-provisioning-done,
+.admin-hero-status,
+.admin-trail-meta,
+.admin-pack-state {
+  font-family: "Inter Tight", "Inter", system-ui, sans-serif;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+/* The page eyebrow + the stat labels lead each screen — a touch larger. */
+.admin-eyebrow { font-size: 12px; letter-spacing: 0.07em; }
+/* Wordmark sub-line ("ADMIN CONSOLE") was 7.5px — unreadable at a glance. */
+.admin-mono-sub {
+  font-family: "Inter Tight", "Inter", system-ui, sans-serif;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+}

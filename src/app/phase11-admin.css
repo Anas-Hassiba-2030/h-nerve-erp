@@ -9,14 +9,14 @@
    Phase 11 + docs/DESIGN-SKILL.md §1.D (Heritage Modern).
    ================================================================= */
 .admin-shell {
-  --admin-bg: #faf7f0;           /* cream page */
-  --admin-bg-2: #fdfbf6;         /* card / panel (slightly lighter cream) */
-  --admin-bg-3: #f1ebdd;         /* raised / hover cream */
-  --admin-text: #2a2a26;         /* ink */
-  --admin-text-muted: #6b6459;   /* ink-muted */
-  --admin-text-faint: #9a9085;   /* faint */
-  --admin-rule: rgba(42, 42, 38, 0.1);
-  --admin-rule-strong: rgba(42, 42, 38, 0.2);
+  --admin-bg: #f3edde;           /* warm cream page (deepened off flat white) */
+  --admin-bg-2: #fffdf8;         /* card / panel — warm white that lifts off the page */
+  --admin-bg-3: #efe7d3;         /* raised / hover cream */
+  --admin-text: #201e19;         /* ink — deepened for stronger contrast */
+  --admin-text-muted: #564e42;   /* ink-muted — readable on cream, not washed */
+  --admin-text-faint: #7c7264;   /* faint */
+  --admin-rule: rgba(42, 42, 38, 0.14);
+  --admin-rule-strong: rgba(42, 42, 38, 0.28);
   --admin-cyan: #1f4d3f;         /* emerald — the accent (replaces cyan everywhere) */
   --admin-cyan-dim: #2e6b57;     /* emerald-soft */
   --admin-amber: #c2a35a;        /* gold */
@@ -36,10 +36,52 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(at 12% 6%, rgba(194, 163, 90, 0.1), transparent 40%),
-    radial-gradient(at 88% 88%, rgba(31, 77, 63, 0.07), transparent 40%);
+    radial-gradient(1200px 520px at 50% -8%, rgba(255, 255, 255, 0.6), transparent 62%),
+    radial-gradient(at 10% 4%, rgba(194, 163, 90, 0.16), transparent 42%),
+    radial-gradient(at 90% 96%, rgba(31, 77, 63, 0.12), transparent 45%);
   z-index: 0;
 }
+
+/* Soft lift — warm-white cards float off the cream wash instead of
+   blending into it. Subtle: a 1px contact shadow + a long, faint drop. */
+.admin-stat-tile,
+.admin-tenant-card,
+.admin-section,
+.admin-fieldset,
+.admin-hero,
+.admin-provisioning,
+.admin-action-rail,
+.admin-empty {
+  box-shadow: 0 1px 2px rgba(42, 42, 38, 0.04), 0 14px 30px -24px rgba(42, 42, 38, 0.55);
+}
+
+/* ---- Definition + legibility pass ----
+   Cream needs real edges and bolder copy or everything reads washed-out.
+   Cards carry a visible border (not a 14% hairline); headings + labels
+   gain weight; the brand wordmark is locked to a single line. */
+.admin-stat-tile,
+.admin-tenant-card,
+.admin-section,
+.admin-fieldset,
+.admin-hero,
+.admin-provisioning,
+.admin-action-rail,
+.admin-empty,
+.admin-table-wrap,
+.admin-record {
+  border-color: var(--admin-rule-strong);
+}
+.admin-h1 { font-weight: 700; }
+.admin-h2 { font-weight: 700; }
+.admin-eyebrow { font-weight: 700; }
+.admin-stat-value { font-weight: 700; }
+.admin-tenant-name { font-weight: 700; }
+.admin-stat-label,
+.admin-meta-label,
+.admin-tenant-row-label,
+.admin-label { font-weight: 700; }
+.admin-rail-brand { white-space: nowrap; flex-wrap: nowrap; }
+.admin-rail-name { white-space: nowrap; }
 
 .admin-rail {
   position: sticky;
@@ -61,8 +103,9 @@
 }
 .admin-rail-brand {
   display: inline-flex;
-  align-items: baseline;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
 }
 .admin-rail-mark {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
@@ -944,5 +987,195 @@
   .admin-progress-bar {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* ---- Admin wordmark — monogram lockup (emerald tile + gold mark) ---- */
+.admin-mono-tile {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: var(--admin-cyan);
+  color: var(--admin-amber);
+  display: grid;
+  place-items: center;
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 16px;
+  line-height: 1;
+}
+.admin-mono-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.06;
+}
+.admin-mono-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--admin-text);
+}
+.admin-mono-sub {
+  font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #9a7d3f;
+  margin-top: 2px;
+}
+
+/* ---- Mini-Orbit control — mirrored from (app)/living.css .mo-* so the admin
+   rail reuses the SAME MiniOrrery button + dropdown the operator sections use.
+   Admin loads its own CSS bundle (not living.css), so the rules live here too.
+   Keep in sync with living.css if the operator orbit styling changes. ---- */
+.mo-btn {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex: 0 0 38px;
+  padding: 0;
+  background: radial-gradient(circle at 38% 35%, #2e6b57, #1f4d3f 60%, #0d1f1a);
+  border: 1px solid rgba(194, 163, 90, 0.4);
+  box-shadow: 0 2px 8px rgba(13, 31, 26, 0.22);
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.mo-btn:hover {
+  border-color: rgba(194, 163, 90, 0.8);
+  box-shadow: 0 0 14px rgba(31, 77, 63, 0.5);
+}
+.mo-btn .mo-ring {
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 1px solid rgba(220, 195, 138, 0.5);
+  animation: mo-spin 8s linear infinite;
+}
+.mo-btn .mo-ring::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #c2a35a;
+  transform: translateX(-50%);
+}
+.mo-btn .mo-core {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #c2a35a;
+  box-shadow: 0 0 8px rgba(194, 163, 90, 0.7);
+}
+@keyframes mo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.mo-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 204;
+  background: transparent;
+}
+.mo-panel {
+  position: fixed;
+  top: 58px;
+  inset-inline-end: 20px;
+  z-index: 205;
+  width: 300px;
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+  padding: 8px;
+  border-radius: 16px;
+  background: rgba(13, 31, 26, 0.96);
+  border: 1px solid rgba(194, 163, 90, 0.3);
+  box-shadow: 0 18px 48px rgba(8, 18, 14, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: mo-panel-in 0.16s ease both;
+}
+@keyframes mo-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.mo-head {
+  padding: 8px 14px 10px;
+  text-align: start;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #c2a35a;
+  text-transform: uppercase;
+}
+.mo-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  text-align: start;
+  font-family: inherit;
+  font-size: 14px;
+  color: #e6f0ea;
+  transition: background 0.14s, color 0.14s;
+}
+.mo-row:hover {
+  background: rgba(194, 163, 90, 0.12);
+  color: #fff;
+}
+.mo-back {
+  margin-bottom: 4px;
+  color: #c2a35a;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(194, 163, 90, 0.18);
+  border-radius: 10px 10px 0 0;
+}
+.mo-back:hover {
+  color: #dcc38a;
+}
+.mo-dot {
+  flex: 0 0 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #dcc38a, #c2a35a 60%, #2e6b57);
+  box-shadow: 0 0 6px rgba(220, 195, 138, 0.5);
+}
+.mo-row-lbl {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.mo-chev {
+  flex: 0 0 auto;
+  font-size: 16px;
+  line-height: 1;
+  color: rgba(194, 163, 90, 0.7);
+}
+.mo-row:hover .mo-chev {
+  color: #dcc38a;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mo-btn .mo-ring {
+    animation: none;
+  }
+  .mo-panel {
+    animation: none;
   }
 }

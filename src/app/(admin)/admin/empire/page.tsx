@@ -213,7 +213,7 @@ function Sparkline({ points }: { points: SparkPoint[] }) {
           key={i}
           cx={xs(i)}
           cy={ys(p.iq)}
-          r={i === last ? 1.8 : 0.9}
+          r={i === last ? 2.6 : 1}
           className={i === last ? "emp-tile-spark-dot is-last" : "emp-tile-spark-dot"}
         />
       ))}

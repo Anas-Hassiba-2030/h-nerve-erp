@@ -8,8 +8,8 @@
 //
 // See docs/DESIGN-SKILL.md §1.D and §5.1.
 
-import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+import { enterWorkspace } from "@/app/actions/workspace";
 import { Sparkline } from "@/components/ui/Sparkline";
 import { CompanyLogo } from "@/components/brand/CompanyLogo";
 import { formatMoney } from "@/lib/utils/utils";
@@ -77,19 +77,22 @@ export function CompanyStrip({
         const healthHex = HEALTH_HEX[c.health];
 
         return (
-          <Link
-            key={c.id}
-            href={`/companies/${c.id}`}
-            className="heri-focusable group relative block transition"
-            style={{
-              background: "var(--heri-cream)",
-              border: "1px solid var(--heri-rule)",
-              padding: "16px 16px 14px",
-              textDecoration: "none",
-              color: "var(--heri-ink)",
-              overflow: "hidden",
-            }}
-          >
+          <form key={c.id} action={enterWorkspace} className="block">
+            <input type="hidden" name="companyId" value={c.id} />
+            <button
+              type="submit"
+              className="heri-focusable group relative block w-full transition"
+              style={{
+                background: "var(--heri-cream)",
+                border: "1px solid var(--heri-rule)",
+                padding: "16px 16px 14px",
+                textAlign: "start",
+                font: "inherit",
+                color: "var(--heri-ink)",
+                cursor: "pointer",
+                overflow: "hidden",
+              }}
+            >
             {/* Inline-start rail — single chromatic accent */}
             <span
               aria-hidden
@@ -211,10 +214,11 @@ export function CompanyStrip({
               className="ms-2 mt-3 flex items-center justify-between heri-eyebrow opacity-0 transition group-hover:opacity-100"
               style={{ color: accent, fontSize: 10 }}
             >
-              <span>{ar ? "افتح الملف" : "Open profile"}</span>
+              <span>{ar ? "ادخل مساحة العمل" : "Open workspace"}</span>
               <ChevronLeft className="h-3 w-3 rtl:rotate-180" />
             </div>
-          </Link>
+            </button>
+          </form>
         );
       })}
     </div>

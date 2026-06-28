@@ -11,16 +11,25 @@
 .emp-root {
   --emp-ink: #0f1112;
   --emp-ink-2: #2a2c30;
-  --emp-ink-3: #5b6068;
-  --emp-paper: #f6f4ee;
-  --emp-paper-2: #ece9df;
-  --emp-rule: #d8d3c4;
+  --emp-ink-3: #534b3f;        /* warm muted — foot/meta labels actually readable */
+  --emp-paper: #f3edde;        /* warm cream page (deepened off flat white) */
+  --emp-paper-2: #eadfca;
+  --emp-rule: #ccbd97;         /* warm edge — defined, not a faint hairline */
   --emp-rule-strong: #98908a;
+  --emp-card: #fffdf8;         /* warm-white card surface that lifts off the wash */
   --emp-accent: #1f4d3f;       /* emerald — unified with the Heritage admin accent */
   --emp-accent-soft: #e8f0ea;  /* soft emerald tint */
+  --emp-gold: #c2a35a;         /* gold — spark accent */
   --emp-up: #285c47;           /* deep forest */
   --emp-down: #8a3531;         /* dust brick */
-  background: var(--emp-paper);
+  /* Lit-from-top cream with gold + emerald corner washes — the same depth
+     treatment the rest of the admin console gets via .admin-shell::before,
+     so the Empire page stops reading as flat dead-white. */
+  background:
+    radial-gradient(1200px 520px at 50% -8%, rgba(255, 255, 255, 0.6), transparent 62%),
+    radial-gradient(at 8% 3%, rgba(194, 163, 90, 0.16), transparent 42%),
+    radial-gradient(at 92% 97%, rgba(31, 77, 63, 0.12), transparent 46%),
+    var(--emp-paper);
   color: var(--emp-ink);
   min-height: 100vh;
   padding: 36px 32px 80px;
@@ -74,9 +83,10 @@
   grid-template-columns: repeat(4, minmax(0, 200px));
   gap: 0;
   border: 1px solid var(--emp-rule);
-  background: #fff;
+  background: var(--emp-card);
   width: max-content;
   max-width: 100%;
+  box-shadow: 0 1px 2px rgba(42, 42, 38, 0.04), 0 14px 30px -24px rgba(42, 42, 38, 0.5);
 }
 .emp-stat {
   padding: 12px 18px;
@@ -112,9 +122,9 @@
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(290px, 100%), 1fr));
-  gap: 1px;
-  background: var(--emp-rule);
-  border: 1px solid var(--emp-rule);
+  gap: 14px;
+  background: transparent;
+  border: 0;
 }
 
 /* ---- Tile ---- */
@@ -124,14 +134,16 @@
   flex-direction: column;
   gap: 12px;
   padding: 18px 20px 14px;
-  background: #fff;
+  background: var(--emp-card);
+  border: 1px solid var(--emp-rule);
+  box-shadow: 0 1px 2px rgba(42, 42, 38, 0.04), 0 14px 30px -24px rgba(42, 42, 38, 0.5);
   text-decoration: none;
   color: inherit;
   /* The whole grid breathes — 1% scale, 4s pulse, staggered per tile.
      The user barely notices. */
   animation: emp-breath 4000ms ease-in-out infinite alternate;
   animation-delay: var(--emp-breath-delay, 0ms);
-  transition: background 200ms ease, transform 200ms ease;
+  transition: background 200ms ease, transform 200ms ease, box-shadow 200ms ease;
 }
 @keyframes emp-breath {
   0%   { transform: scale(1); }
@@ -196,6 +208,19 @@
   background: var(--emp-accent);
   color: #fff;
 }
+/* DEMO tiles tagged in gold — colour-codes "sample" vs the emerald "YOU". */
+.emp-tile[data-synthetic="true"] .emp-tile-tag {
+  background: #efe2c4;
+  color: #6e5a23;
+}
+
+/* Bolder, clearer Empire numerals + labels. */
+.emp-stat-value,
+.emp-foot-stat-value,
+.emp-tile-iq-num { font-weight: 600; }
+.emp-stat-label,
+.emp-foot-stat-label,
+.emp-tile-title { font-weight: 700; }
 
 /* ---- IQ display ---- */
 .emp-tile-iq {
@@ -248,19 +273,19 @@
 .emp-tile-spark-line {
   fill: none;
   stroke: var(--emp-ink);
-  stroke-width: 1;
-  stroke-linecap: square;
-  stroke-linejoin: miter;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .emp-tile-spark-area {
-  fill: var(--emp-ink);
-  opacity: 0.06;
+  fill: var(--emp-accent);
+  opacity: 0.1;
 }
 .emp-tile-spark-dot {
   fill: var(--emp-ink);
 }
 .emp-tile-spark-dot.is-last {
-  fill: var(--emp-accent);
+  fill: var(--emp-gold);
 }
 .emp-tile-spark-empty {
   background: var(--emp-paper-2);
@@ -379,6 +404,7 @@
   border: 1px solid var(--emp-rule);
   border-inline-start: 3px solid var(--emp-accent);
   padding: 18px 22px;
+  box-shadow: 0 1px 2px rgba(42, 42, 38, 0.04), 0 14px 30px -24px rgba(42, 42, 38, 0.5);
 }
 .emp-strip-eyebrow {
   display: block;
@@ -444,12 +470,13 @@
 }
 
 .emp-sector {
-  background: var(--emp-paper);
+  background: var(--emp-card);
   border: 1px solid var(--emp-rule);
   padding: 16px 16px 12px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  box-shadow: 0 1px 2px rgba(42, 42, 38, 0.04), 0 14px 30px -24px rgba(42, 42, 38, 0.5);
   transition: border-color 200ms var(--ease-out-quart, ease-out);
 }
 .emp-sector:hover { border-color: var(--emp-rule-strong); }
@@ -511,9 +538,10 @@
 }
 
 .emp-panel {
-  background: var(--emp-paper);
+  background: var(--emp-card);
   border: 1px solid var(--emp-rule);
   padding: 14px 16px 16px;
+  box-shadow: 0 1px 2px rgba(42, 42, 38, 0.04), 0 14px 30px -24px rgba(42, 42, 38, 0.5);
 }
 .emp-panel-head {
   display: flex;

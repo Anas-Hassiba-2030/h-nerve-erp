@@ -1107,6 +1107,37 @@
     transform: translateY(0) scale(1);
   }
 }
+
+/* Ambient orbit background — drifting nebula + starfield (kept in sync with
+   living.css). Behind the nodes (z-0), pure atmosphere. */
+.mo-orbit-aura { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.mo-orbit-aura::before, .mo-orbit-aura::after { content: ""; position: absolute; border-radius: 50%; filter: blur(26px); }
+.mo-orbit-aura::before {
+  width: 64%; height: 64%; left: 8%; top: 6%;
+  background: radial-gradient(circle, rgba(46,107,87,.55), transparent 70%);
+  animation: mo-aura-a 15s ease-in-out infinite alternate;
+}
+.mo-orbit-aura::after {
+  width: 46%; height: 46%; right: 6%; bottom: 6%;
+  background: radial-gradient(circle, rgba(194,163,90,.30), transparent 70%);
+  animation: mo-aura-b 19s ease-in-out infinite alternate;
+}
+@keyframes mo-aura-a { from { transform: translate(0,0) scale(1); } to { transform: translate(14%,9%) scale(1.18); } }
+@keyframes mo-aura-b { from { transform: translate(0,0) scale(1); } to { transform: translate(-11%,-7%) scale(1.22); } }
+.mo-orbit-stars {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    radial-gradient(1.5px 1.5px at 18% 28%, rgba(220,195,138,.95), transparent),
+    radial-gradient(1.5px 1.5px at 72% 18%, rgba(238,243,238,.75), transparent),
+    radial-gradient(1px 1px at 42% 66%, rgba(220,195,138,.70), transparent),
+    radial-gradient(1px 1px at 86% 58%, rgba(238,243,238,.60), transparent),
+    radial-gradient(1.5px 1.5px at 56% 84%, rgba(194,163,90,.85), transparent),
+    radial-gradient(1px 1px at 12% 78%, rgba(238,243,238,.50), transparent),
+    radial-gradient(1px 1px at 32% 14%, rgba(238,243,238,.55), transparent);
+  animation: mo-twinkle 5.5s ease-in-out infinite alternate;
+}
+@keyframes mo-twinkle { from { opacity: .45; } to { opacity: 1; } }
+
 .mo-orbit-ring {
   position: absolute;
   left: 50%;
@@ -1228,6 +1259,11 @@
   .mo-orbit-node {
     animation: none;
   }
+  .mo-orbit-aura::before,
+  .mo-orbit-aura::after,
+  .mo-orbit-stars {
+    animation: none;
+  }
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -1270,3 +1306,11 @@
   font-size: 9.5px;
   letter-spacing: 0.12em;
 }
+
+/* PITCH LEGIBILITY (2026-06-28) — section headers + KPI labels must read at a
+   glance and across a room (projector). Bump the section titles, the KPI tile
+   labels/values, and the module-card titles. */
+.admin-h2 { font-size: clamp(20px, 2.1vw, 26px); }
+.admin-stat-label { font-size: 13px; font-weight: 700; letter-spacing: 0.05em; }
+.admin-stat-value { font-size: 34px; }
+.admin-tenant-name { font-size: 18px; }

@@ -3,9 +3,6 @@
 // only on click. Period selector at top toggles all metrics dynamically.
 
 import Link from "next/link";
-import {
-  Hotel, Milk, Sprout, GraduationCap, TrendingUp, Trophy, Building2, Brain,
-} from "lucide-react";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { LiveTicker } from "@/components/ui/LiveTicker";
 import { PeriodSelector } from "@/components/ui/PeriodSelector";
@@ -51,8 +48,6 @@ export default async function DashboardPage(
     brainIQ,
     me,
     companies,
-    farms,
-    programs,
     forecasts,
     myTasksDue,
     myPins,
@@ -61,7 +56,6 @@ export default async function DashboardPage(
     totalRooms,
     activeBookings,
     occupancyPct,
-    dairyVolumeL,
     revenueInRange,
     expenseInRange,
     netInRange,
@@ -72,8 +66,6 @@ export default async function DashboardPage(
     expenseTrend,
     monthLabels,
     latestEsg,
-    groupMove,
-    totalProjectsBudget,
     stripItems,
     activity,
     alerts,
@@ -140,9 +132,7 @@ export default async function DashboardPage(
       {/* Live ticker */}
       <LiveTicker items={tickerItems} />
 
-      {/* === ROW 1: Per-company strip (the whole group at a glance) === */}
-      <CompanyStrip items={stripItems} locale={lc} />
-
+      {/* === BAND 2: hero numbers — the figures that matter, up top === */}
       <DaylightKpiGrid>
         <DaylightKpi label={ar ? `إيراد ${range.label}` : `Revenue ${range.label}`} value={formatMoney(revenueInRange)} hint={ar ? `سابقاً ${formatMoney(revPrev)}` : `Prev ${formatMoney(revPrev)}`} delta={revDelta >= 0 ? { dir: "up", text: formatPercent(Math.abs(revDelta), 1) } : { dir: "down", text: formatPercent(Math.abs(revDelta), 1) }} />
         <DaylightKpi label={ar ? "مصاريف" : "Expenses"} value={formatMoney(expenseInRange)} hint={ar ? `سابقاً ${formatMoney(expPrev)}` : `Prev ${formatMoney(expPrev)}`} />
@@ -150,9 +140,12 @@ export default async function DashboardPage(
         <DaylightKpi label={ar ? "إشغال أرينا" : "Arena occupancy"} value={formatPercent(occupancyPct, 0)} hint={ar ? `${formatNumber(activeBookings)}/${formatNumber(totalRooms)} غرفة` : `${formatNumber(activeBookings)}/${formatNumber(totalRooms)} rooms`} />
       </DaylightKpiGrid>
 
-      {/* === ROW 2: Financial pulse | Activity | Alerts === */}
+      {/* === BAND 3: the units at a glance === */}
+      <CompanyStrip items={stripItems} locale={lc} />
+
+      {/* === BAND 4: financial pulse + what needs attention === */}
       <section className="grid gap-5 lg:grid-cols-12">
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-8">
           <DaylightPanel
             title={ar ? "النبض المالي" : "Financial pulse"}
             aside={ar ? "آخر 12 شهر — شهرياً" : "Last 12 months — monthly"}
@@ -168,19 +161,10 @@ export default async function DashboardPage(
 
         <div className="lg:col-span-4">
           <DaylightPanel
-            title={ar ? "تيار النشاط" : "Activity stream"}
-            aside={ar ? "إشارات · توقعات · حجوزات" : "Insights · forecasts · bookings"}
-          >
-            <ActivityStream items={activity} locale={lc} />
-          </DaylightPanel>
-        </div>
-
-        <div className="lg:col-span-3">
-          <DaylightPanel
-            title={ar ? "تنبيهات الآن" : "Now"}
+            title={ar ? "يتطلب انتباهاً" : "Needs attention"}
             aside={
               alerts.length > 0
-                ? (ar ? `${alerts.length} عنصر يتطلب انتباه` : `${alerts.length} item${alerts.length === 1 ? "" : "s"} need attention`)
+                ? (ar ? `${alerts.length} عنصر` : `${alerts.length} item${alerts.length === 1 ? "" : "s"}`)
                 : (ar ? "كل شيء على ما يرام" : "All clear")
             }
           >
@@ -189,7 +173,7 @@ export default async function DashboardPage(
         </div>
       </section>
 
-      {/* === ROW 3: Tasks | Forecasts | Calendar === */}
+      {/* === BAND 5: secondary — consolidated below the brief === */}
       <section className="grid gap-5 lg:grid-cols-12">
         <div className="lg:col-span-4">
           <UpcomingTasksPanel ar={ar} me={me} myTasksDue={myTasksDue} myRank={myRank} />
@@ -200,6 +184,17 @@ export default async function DashboardPage(
         </div>
 
         <div className="lg:col-span-4">
+          <DaylightPanel
+            title={ar ? "تيار النشاط" : "Activity stream"}
+            aside={ar ? "إشارات · توقعات · حجوزات" : "Insights · forecasts · bookings"}
+          >
+            <ActivityStream items={activity} locale={lc} />
+          </DaylightPanel>
+        </div>
+      </section>
+
+      <section className="grid gap-5 lg:grid-cols-12">
+        <div className="lg:col-span-12">
           <DaylightPanel
             title={ar ? "التقويم القادم" : "Upcoming calendar"}
             aside={ar ? "حجوزات · صلاحيات · حصاد · مهام (4 أسابيع)" : "Bookings · expiry · harvest · tasks (4 weeks)"}
@@ -283,54 +278,9 @@ export default async function DashboardPage(
         </div>
       </section>
 
-      {/* === ROW 4: Module navigation === */}
-      <DaylightPanel
-        title={ar ? "الوصول السريع" : "Quick navigation"}
-        aside={ar ? "تنقل بين وحدات المجموعة" : "Jump between business units"}
-      >
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-8">
-          <Link href="/hotels" className="dl-btn dl-btn-secondary" style={{ borderRadius: 12, justifyContent: "center", flexDirection: "column", gap: 4, paddingTop: 12, paddingBottom: 12, textAlign: "center" }}>
-            <Hotel className="h-5 w-5 mx-auto" />
-            <span>{ar ? "أرينا" : "Arena"}</span>
-            <span style={{ fontSize: 10, color: "var(--ink-muted)" }}>{formatNumber(totalRooms)} {ar ? "غرفة" : "rooms"}</span>
-          </Link>
-          <Link href="/dairy" className="dl-btn dl-btn-secondary" style={{ borderRadius: 12, justifyContent: "center", flexDirection: "column", gap: 4, paddingTop: 12, paddingBottom: 12, textAlign: "center" }}>
-            <Milk className="h-5 w-5 mx-auto" />
-            <span>{ar ? "المها" : "Maha"}</span>
-            <span style={{ fontSize: 10, color: "var(--ink-muted)" }}>{formatNumber(dairyVolumeL)} L</span>
-          </Link>
-          <Link href="/farms" className="dl-btn dl-btn-secondary" style={{ borderRadius: 12, justifyContent: "center", flexDirection: "column", gap: 4, paddingTop: 12, paddingBottom: 12, textAlign: "center" }}>
-            <Sprout className="h-5 w-5 mx-auto" />
-            <span>{ar ? "لوران" : "Loran"}</span>
-            <span style={{ fontSize: 10, color: "var(--ink-muted)" }}>{formatNumber(farms.length)} {ar ? "مزرعة" : "farms"}</span>
-          </Link>
-          <Link href="/education" className="dl-btn dl-btn-secondary" style={{ borderRadius: 12, justifyContent: "center", flexDirection: "column", gap: 4, paddingTop: 12, paddingBottom: 12, textAlign: "center" }}>
-            <GraduationCap className="h-5 w-5 mx-auto" />
-            <span>The Tank</span>
-            <span style={{ fontSize: 10, color: "var(--ink-muted)" }}>{formatNumber(programs.length)} {ar ? "مشروع" : "programs"}</span>
-          </Link>
-          <Link href="/markets" className="dl-btn dl-btn-secondary" style={{ borderRadius: 12, justifyContent: "center", flexDirection: "column", gap: 4, paddingTop: 12, paddingBottom: 12, textAlign: "center" }}>
-            <TrendingUp className="h-5 w-5 mx-auto" />
-            <span>{ar ? "الأسواق" : "Markets"}</span>
-            <span style={{ fontSize: 10, color: "var(--ink-muted)" }}>{groupMove >= 0 ? "+" : ""}{groupMove.toFixed(2)}%</span>
-          </Link>
-          <Link href="/sustainability" className="dl-btn dl-btn-secondary" style={{ borderRadius: 12, justifyContent: "center", flexDirection: "column", gap: 4, paddingTop: 12, paddingBottom: 12, textAlign: "center" }}>
-            <Building2 className="h-5 w-5 mx-auto" />
-            <span>ESG</span>
-            <span style={{ fontSize: 10, color: "var(--ink-muted)" }}>{latestEsg.toFixed(1)}/100</span>
-          </Link>
-          <Link href="/projects" className="dl-btn dl-btn-secondary" style={{ borderRadius: 12, justifyContent: "center", flexDirection: "column", gap: 4, paddingTop: 12, paddingBottom: 12, textAlign: "center" }}>
-            <Building2 className="h-5 w-5 mx-auto" />
-            <span>{ar ? "أنابيب" : "Pipeline"}</span>
-            <span style={{ fontSize: 10, color: "var(--ink-muted)" }}>{formatMoney(totalProjectsBudget)}</span>
-          </Link>
-          <Link href="/achievements" className="dl-btn dl-btn-secondary" style={{ borderRadius: 12, justifyContent: "center", flexDirection: "column", gap: 4, paddingTop: 12, paddingBottom: 12, textAlign: "center" }}>
-            <Trophy className="h-5 w-5 mx-auto" />
-            <span>{ar ? "الإنجازات" : "Achievements"}</span>
-            <span style={{ fontSize: 10, color: "var(--ink-muted)" }}>{myRank.symbol} {ar ? myRank.ar : myRank.en}</span>
-          </Link>
-        </div>
-      </DaylightPanel>
+      {/* Quick-navigation grid removed — the mini-orbit (top-right of every
+          section) now handles unit hopping, so the dashboard no longer
+          repeats it as eight buttons. */}
     </DaylightShell>
   );
 }

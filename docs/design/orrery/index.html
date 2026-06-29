@@ -1288,6 +1288,9 @@ function measure(){
   const m = Math.min(r.width, r.height);
   innerR = Math.max(200, Math.min(m*0.36, 340));
   outerR = Math.max(300, Math.min(m*0.52, 480));
+  // Publish the live bloomed-children ring so the SEPARATE insight-card IIFE can
+  // keep its stars + cards OUTSIDE the orbit instead of guessing a constant.
+  window.__orbitOuterR = outerR;
 }
 measure();
 
@@ -2266,7 +2269,17 @@ addEventListener("resize", ()=>{ measure(); initStars(); sizeTrails();
   function modeBtnRemove(){ return true; }
 
   var liveStars=[]; // {el, ins, x, y}
-  function safeR(){ return Math.min(innerWidth,innerHeight)*0.30 + 110; } // orbit safe-zone radius (outer ring ~.30 + star pills + margin)
+  // Keep-out radius for stars + cards: the LIVE bloomed-children ring (outerR,
+  // published by the main orrery in measure()) + padding for the child pill
+  // labels and the card gap. The old constant (0.30·min+110) was SMALLER than
+  // outerR, so cards landed on bloomed children (the Mission Control / Roadmap
+  // overlap). Recomputes outerR's formula if the orbit hasn't measured yet.
+  function safeR(){
+    var outer = (typeof window.__orbitOuterR === "number" && window.__orbitOuterR > 0)
+      ? window.__orbitOuterR
+      : Math.max(300, Math.min(Math.min(innerWidth, innerHeight - 56) * 0.52, 480));
+    return outer + 96;
+  }
   function inOuterMargin(x,y){
     var cx=innerWidth/2, cy=56+(innerHeight-56)/2;
     return Math.hypot(x-cx,y-cy) >= safeR() && x>40 && x<innerWidth-40 && y>96 && y<innerHeight-40;
@@ -2330,7 +2343,9 @@ addEventListener("resize", ()=>{ measure(); initStars(); sizeTrails();
     var c=document.createElement("div"); c.className="ins-card";
     c.innerHTML='<div class="ictop">'+(SECTOR_AR[rec.ins.sec]||"إشارة")+'</div><div class="ictext">'+rec.ins.t+'</div><a class="icmore">اعرض ←</a>';
     document.body.appendChild(c); rec.card=c;
-    placeCard(rec);
+    // If this (small) viewport has no room OUTSIDE the orbit, don't pop a card
+    // over the nodes — keep the ambient star only.
+    if(!placeCard(rec)){ c.remove(); rec.card=null; return; }
     c.addEventListener("mouseenter",function(){ clearTimeout(rec._leave); });
     c.addEventListener("mouseleave",function(){ hideCard(rec); });
     c.addEventListener("click",function(){ flyToSection(S(rec.ins.sec+".html"), SECTOR_AR[rec.ins.sec]||rec.ins.sec); });
@@ -2340,29 +2355,34 @@ addEventListener("resize", ()=>{ measure(); initStars(); sizeTrails();
     if(!rec.card) return; var c=rec.card; rec.card=null;
     c.classList.remove("show"); setTimeout(function(){ c.remove(); }, 320);
   }
-  // clamp card: 24px from edges AND 24px outside the orbit safe zone; open inward/upward near corners
+  // Clamp the card OUTSIDE the orbit's bloomed-children ring. Returns true if it
+  // cleared the ring (show it), false if this viewport has no room (caller drops
+  // it). Two candidates: (1) radially outward from the star — the nicer look;
+  // (2) the screen corner of the star's quadrant — maximum clearance when the
+  // ring is large relative to the viewport (laptops). Pick the first that clears
+  // OUT (= outerR), preferring the radial look.
   function placeCard(rec){
     var c=rec.card; var M=24, gap=16;
     var cw=c.offsetWidth, ch=c.offsetHeight, vw=innerWidth, vh=innerHeight;
-    var cx=vw/2, cy=56+(vh-56)/2, R=safeR();
+    var cx=vw/2, cy=56+(vh-56)/2, R=safeR(), OUT=R-96;
     var sx=rec.x, sy=rec.y;
-    // horizontal: open toward whichever side is the outer side (away from center)
-    var openLeft = sx > cx; var left = openLeft ? sx-gap-cw : sx+gap, ox = openLeft?"100%":"0%";
-    left=Math.max(M,Math.min(left,vw-cw-M));
-    var top=Math.max(M+50,Math.min(sy-ch/2,vh-ch-M));
-    // push the card out of the safe circle: if its nearest point is inside R, shove it outward
     function nearestDist(L,T){ var nx=Math.max(L,Math.min(cx,L+cw)), ny=Math.max(T,Math.min(cy,T+ch)); return Math.hypot(nx-cx,ny-cy); }
-    if(nearestDist(left,top) < R+ (0)){
-      // try opening the other horizontal way
-      left = openLeft ? sx+gap : sx-gap-cw; left=Math.max(M,Math.min(left,vw-cw-M)); ox=openLeft?"0%":"100%";
-      if(nearestDist(left,top) < R){
-        // fall back to vertical: open up or down into the margin
-        top = sy < cy ? Math.max(M+50, sy-gap-ch) : Math.min(vh-ch-M, sy+gap);
-        left = Math.max(M,Math.min(sx-cw/2, vw-cw-M)); ox="50%";
-      }
-    }
-    var oy=Math.max(0,Math.min(100,((sy-top)/ch)*100))+"%";
+    function clampOn(L,T){ return [Math.max(M,Math.min(L,vw-cw-M)), Math.max(M+50,Math.min(T,vh-ch-M))]; }
+    var openLeft = sx > cx;
+    // candidate 1 — radial outward from the star, vertically centred on it
+    var L1 = openLeft ? sx-gap-cw : sx+gap, T1 = sy-ch/2;
+    var ang = Math.atan2(sy-cy, sx-cx);
+    for(var i=0;i<28 && nearestDist(L1,T1) < R;i++){ L1+=Math.cos(ang)*14; T1+=Math.sin(ang)*14; }
+    var p1 = clampOn(L1,T1);
+    // candidate 2 — the screen corner of the star's quadrant
+    var p2 = [ sx>cx ? vw-cw-M : M, sy>cy ? vh-ch-M : M+50 ];
+    var d1 = nearestDist(p1[0],p1[1]), d2 = nearestDist(p2[0],p2[1]);
+    var best = d1>=OUT ? p1 : d2>=OUT ? p2 : (d1>=d2 ? p1 : p2);
+    var left=best[0], top=best[1];
+    var ox = openLeft ? "100%" : "0%";
+    var oy = Math.max(0,Math.min(100,((sy-top)/ch)*100))+"%";
     c.style.left=left+"px"; c.style.top=top+"px"; c.style.setProperty("--ic-ox",ox); c.style.setProperty("--ic-oy",oy);
+    return nearestDist(left,top) >= OUT - 0.5;
   }
 
   function startInsights(){

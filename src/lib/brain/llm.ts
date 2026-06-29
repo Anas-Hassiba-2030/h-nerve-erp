@@ -20,6 +20,9 @@ export type LlmRequest = {
   context?: Record<string, unknown>;
   maxTokens?: number;
   temperature?: number;
+  // Per-call model override (else llmConfig().model). Council voices + moderator
+  // pass councilModel() for speed; inert in stub mode (no API call is made).
+  model?: string;
   // When the model returns JSON, the orchestrator can pass schema-shaped instructions.
   expectJson?: boolean;
 };
@@ -41,6 +44,14 @@ export function llmConfig() {
     apiKey: key ?? null,
     model: process.env.ANTHROPIC_MODEL?.trim() || DEFAULT_MODEL,
   };
+}
+
+// Council voices + moderator each emit a short (2-4 sentence) structured opinion
+// — a fast model is plenty and ~3-5x quicker than Sonnet, which is the dominant
+// latency when the brain runs LIVE (no effect in stub mode). Override with
+// BRAIN_COUNCIL_MODEL (e.g. set it to the Sonnet id to restore prior behaviour).
+export function councilModel(): string {
+  return process.env.BRAIN_COUNCIL_MODEL?.trim() || "claude-haiku-4-5-20251001";
 }
 
 // Phase D — runaway cost guard. A single process makes at most
@@ -97,7 +108,7 @@ export async function callLlm(req: LlmRequest, stub: StubGenerator): Promise<Llm
 
   try {
     const body = {
-      model: cfg.model,
+      model: req.model || cfg.model,
       max_tokens: req.maxTokens ?? 700,
       temperature: req.temperature ?? 0.7,
       system: req.system,

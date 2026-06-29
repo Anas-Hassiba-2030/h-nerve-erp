@@ -6,7 +6,7 @@
 //
 // Phase 3 of docs/PHASES-INTELLIGENCE.md.
 
-import { callLlm, extractJson, type LlmRequest } from "../llm";
+import { callLlm, councilModel, extractJson, type LlmRequest } from "../llm";
 import type { AgentVoice } from "../council";
 import type { DocContext } from "../documents.retrieve";
 
@@ -108,6 +108,7 @@ export async function runAgent(def: AgentDef, input: AgentInput): Promise<AgentV
     expectJson: true,
     maxTokens: 600,
     temperature: 0.7,
+    model: councilModel(),
   };
 
   const stubAsText = (r: LlmRequest) => {

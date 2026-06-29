@@ -92,20 +92,19 @@ export async function composeFromCouncil(
   const session = await councilStore().replay(sessionId);
   if (!session) return null;
 
-  // ── Act I — SITUATION ────────────────────────────────────────────
-  const situation = await composeSituation(session, locale);
-
-  // ── Act II — HISTORY ─────────────────────────────────────────────
-  const history = await composeHistory(session, locale);
-
-  // ── Act III — SIMULATION ─────────────────────────────────────────
-  const simulation = await composeSimulation(session);
+  // Acts I-III and V each derive independently from `session` and are read-only
+  // (DB / causal-graph / narrator). Composed serially they stacked — a narrator
+  // LLM call + a full graph loadAll + BFS + two more DB reads — and blocked the
+  // theater's first byte. Compose them concurrently; Act IV is pure in-memory.
+  const [situation, history, simulation, recommendation] = await Promise.all([
+    composeSituation(session, locale), // Act I — SITUATION (narrator LLM)
+    composeHistory(session, locale), //   Act II — HISTORY
+    composeSimulation(session), //        Act III — SIMULATION (graph + BFS)
+    composeRecommendation(session), //    Act V — RECOMMENDATION
+  ]);
 
   // ── Act IV — COUNCIL ─────────────────────────────────────────────
   const councilAct: CouncilAct = { kind: "council", voices: session.voices };
-
-  // ── Act V — RECOMMENDATION ───────────────────────────────────────
-  const recommendation = await composeRecommendation(session);
 
   return {
     sessionId: session.id,

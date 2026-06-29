@@ -58,8 +58,16 @@ export async function callLlm(req: LlmRequest, stub: StubGenerator): Promise<Llm
   const cfg = llmConfig();
 
   if (!cfg.enabled || !cfg.apiKey) {
-    // Tiny artificial latency so the UI's staggered reveal still feels alive.
-    await new Promise((r) => setTimeout(r, 600 + Math.random() * 700));
+    // Optional artificial latency for the staggered-reveal feel. Default 0.
+    // In STUB mode (the demo default — no ANTHROPIC_API_KEY) EVERY brain call
+    // hit this, so a single council (5 voices + moderator) paid ~1.2-2.6s of
+    // pure fake delay and the convene/theater UI felt frozen. The client
+    // already drives its own reveal animation, so the server pause is
+    // redundant — set BRAIN_STUB_DELAY_MS>0 only to restore a deliberate beat.
+    const stubDelayMs = Number(process.env.BRAIN_STUB_DELAY_MS) || 0;
+    if (stubDelayMs > 0) {
+      await new Promise((r) => setTimeout(r, stubDelayMs));
+    }
     return {
       text: stub(req),
       isStub: true,

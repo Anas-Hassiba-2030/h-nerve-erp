@@ -355,13 +355,13 @@
    pure-white) so a long recommendation reads comfortably. */
 .dl-page .mod-body h3 {
   font-family: var(--dl-display);
-  font-size: 21px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 500;
   color: rgba(246, 241, 231, .96);
-  line-height: 1.62;
-  letter-spacing: .004em;
-  word-spacing: .03em;
-  margin-bottom: 6px;
+  line-height: 1.85;
+  letter-spacing: .005em;
+  word-spacing: .04em;
+  margin-bottom: 8px;
 }
 .dl-page .mod-body p { font-size: 13.5px; line-height: 1.55; color: rgba(246, 241, 231, .85); }
 .dl-page .mod-actions { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; align-items: center; }

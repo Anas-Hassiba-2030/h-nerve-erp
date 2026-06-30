@@ -19,6 +19,7 @@ const messages = {
 
     "nav.dashboard": "اللوحة التنفيذية",
     "nav.companies": "شركات المجموعة",
+    "nav.crm": "إدارة العلاقات بالعملاء",
     "nav.hotels": "الفنادق والضيافة",
     "nav.dairy": "المها للألبان",
     "nav.farms": "لوران الزراعية",
@@ -192,6 +193,7 @@ const messages = {
 
     "nav.dashboard": "Executive Dashboard",
     "nav.companies": "Group Companies",
+    "nav.crm": "Customer Relations",
     "nav.hotels": "Hotels & Hospitality",
     "nav.dairy": "Maha Dairy",
     "nav.farms": "Loran Agriculture",

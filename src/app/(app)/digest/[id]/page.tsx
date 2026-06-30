@@ -119,9 +119,19 @@ export default async function DigestDetailPage(
         }
       />
 
-      {/* What this is — plain-language explainer */}
-      <div className="panel reveal" style={{ padding: "14px 18px" }}>
-        <p style={{ fontSize: 13.5, lineHeight: 1.7, color: "var(--ink)", margin: 0 }}>
+      {/* What this is — plain-language explainer. The digest surface renders on
+          the dark cosmic field (the ambient orbit backdrop shows through the
+          panels), so this card is an explicit night card with light text — the
+          cream daylight default would be invisible here. */}
+      <div
+        className="panel reveal"
+        style={{
+          padding: "16px 20px",
+          background: "linear-gradient(160deg, rgba(20,46,38,.55), rgba(13,31,26,.5))",
+          border: "1px solid rgba(194,163,90,.2)",
+        }}
+      >
+        <p style={{ fontSize: 14, lineHeight: 1.85, color: "rgba(246,241,231,.86)", margin: 0 }}>
           {ar
             ? "ما هذا؟ الموجز الأسبوعي تقريرٌ يُعدّه الدماغ تلقائياً كل أسبوع — يجمع أهمّ إشارات المجموعة (الإيرادات والهوامش والحجوزات والمخاطر) في ملخّص تنفيذيّ واحد سهل القراءة، مع روابط للتفاصيل."
             : "What is this? The weekly digest is a report the brain prepares automatically each week — it gathers the group's most important signals (revenue, margins, bookings, risks) into one easy-to-read executive summary, with links to the details."}
@@ -187,13 +197,19 @@ export default async function DigestDetailPage(
       <style
         dangerouslySetInnerHTML={{
           __html: `
-            .digest-prose .digest-h2 { font-size: 18px; font-weight: 800; margin-top: 8px; margin-bottom: 8px; color: var(--emerald); letter-spacing: -0.01em; }
-            .digest-prose .digest-h3 { font-size: 14px; font-weight: 800; margin-top: 18px; margin-bottom: 6px; color: var(--ink); letter-spacing: -0.005em; }
-            .digest-prose .digest-p { font-size: 14px; line-height: 1.7; margin-bottom: 12px; color: var(--ink); }
-            .digest-prose .digest-list { padding-inline-start: 18px; margin-bottom: 12px; list-style: disc outside; }
-            .digest-prose .digest-list li { font-size: 13.5px; line-height: 1.7; margin-bottom: 4px; color: var(--ink); }
-            .digest-prose strong { color: var(--ink); font-weight: 800; }
-            .digest-prose em { color: var(--ink); opacity: 0.82; font-style: italic; }
+            /* Digest body renders on the dark cosmic surface — make its card an
+               explicit night card and all prose light so it reads comfortably
+               (the cream daylight default left dark ink invisible on dark). */
+            .dl-page .panel:has(.digest-prose) { background: linear-gradient(160deg, rgba(20,46,38,.55), rgba(13,31,26,.5)); border-color: rgba(194,163,90,.2); }
+            .dl-page .panel:has(.digest-prose) .panel-title { color: var(--gold-soft); }
+            .digest-prose .digest-h2 { font-size: 19px; font-weight: 700; margin-top: 14px; margin-bottom: 10px; color: var(--gold-soft); letter-spacing: -0.01em; }
+            .digest-prose .digest-h3 { font-size: 14.5px; font-weight: 700; margin-top: 22px; margin-bottom: 8px; color: #f6f1e7; letter-spacing: -0.005em; }
+            .digest-prose .digest-p { font-size: 14.5px; line-height: 1.9; margin-bottom: 14px; color: rgba(246,241,231,.87); }
+            .digest-prose .digest-list { padding-inline-start: 20px; margin-bottom: 14px; list-style: disc outside; }
+            .digest-prose .digest-list li { font-size: 14px; line-height: 1.9; margin-bottom: 8px; color: rgba(246,241,231,.87); }
+            .digest-prose .digest-list li::marker { color: var(--gold-soft); }
+            .digest-prose strong { color: #fff; font-weight: 700; }
+            .digest-prose em { color: var(--gold-soft); font-style: italic; }
           `,
         }}
       />

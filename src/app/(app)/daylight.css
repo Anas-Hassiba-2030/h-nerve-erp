@@ -8,7 +8,12 @@
   --ink: #2a2a26; --ink-muted: #6b6459;
   --cream: #fefcf7; --ivory: #f6f1e7; --line: #e4dccb;
   --sage: #7e9b86; --brick: #a86a5c;
-  --dl-display: "Cormorant Garamond", "Newsreader", "Reem Kufi", Georgia, serif;
+  /* Latin display = Fraunces (an editorial high-contrast serif that IS loaded
+     in the head font link). Cormorant/Newsreader were never loaded, so Latin
+     headings were falling through to Reem Kufi — an Arabic Kufi face whose
+     Latin glyphs render cramped and unprofessional. Fraunces fixes every
+     daylight headline; Arabic still resolves per-glyph to Reem Kufi below. */
+  --dl-display: "Fraunces", "Cormorant Garamond", "Newsreader", "Reem Kufi", Georgia, serif;
   color: var(--ink);
   padding: 4px 0 60px;
 }

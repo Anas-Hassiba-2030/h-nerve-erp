@@ -13,7 +13,7 @@
 // Phase 5 of docs/PHASES-INTELLIGENCE.md.
 
 import { prisma } from "@/lib/db/db";
-import { callLlm, extractJson, llmConfig, type LlmRequest } from "./llm";
+import { callLlm, extractJson, llmConfig, plannerModel, type LlmRequest } from "./llm";
 
 // ─────────────────────────────────────────────────────────────────────
 // Types
@@ -184,6 +184,10 @@ async function draftPlan(args: {
     maxTokens: 1100,
     temperature: 0.55,
     expectJson: true,
+    // Fast model — "Generate plan" was the slowest LIVE button (Sonnet, 10s+).
+    // Haiku produces this compact JSON plan in ~2-4s; flaky JSON safely falls
+    // back to the stub plan. Override via BRAIN_PLANNER_MODEL.
+    model: plannerModel(),
   };
 
   const stub = (_r: LlmRequest) => JSON.stringify(stubPlan(args));

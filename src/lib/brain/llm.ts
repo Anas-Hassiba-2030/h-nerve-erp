@@ -54,6 +54,17 @@ export function councilModel(): string {
   return process.env.BRAIN_COUNCIL_MODEL?.trim() || "claude-haiku-4-5-20251001";
 }
 
+// The Planner emits one compact, schema-shaped JSON plan (goal + 3-6 steps).
+// On Sonnet this was the single slowest LIVE button in the app — "Generate
+// plan" routinely took 10s+. The structured output is well within a fast
+// model's reach, so default the planner to Haiku too (~3-5x quicker). If the
+// model returns flaky JSON, extractJson() fails and the caller falls back to a
+// credible stub plan — instant either way. Override with BRAIN_PLANNER_MODEL
+// (e.g. the Sonnet id) to restore the prior, slower behaviour.
+export function plannerModel(): string {
+  return process.env.BRAIN_PLANNER_MODEL?.trim() || "claude-haiku-4-5-20251001";
+}
+
 // Phase D — runaway cost guard. A single process makes at most
 // BRAIN_MAX_LLM_CALLS real Anthropic calls (default 200); after that it
 // silently serves the stub so a loop or bug can't drain the API budget.

@@ -102,10 +102,10 @@ export const ORRERY_GROUPS: OrreryGroup[] = [
     nameAr: "النظام",
     nameEn: "System",
     children: [
-      // Mission Control — the admin command deck.
+      // Mission Control — the admin command deck. It already fans out to every
+      // admin sub-console (Empire/Tenants included), so those two no longer get
+      // their own top-level pills here — one clear entry point, less clutter.
       { label: "غرفة العمليات", labelEn: "Mission Control", route: "/admin/system" },
-      { label: "الإمبراطورية", labelEn: "Empire", route: "/admin/empire" },
-      { label: "المستأجرون", labelEn: "Tenants", route: "/admin/tenants" },
       { label: "الأتمتة", labelEn: "Workflows", route: "/workflows" },
       { label: "التكاملات", labelEn: "Integrations", route: "/integrations" },
       { label: "التدقيق", labelEn: "Audit", route: "/audit-360" },

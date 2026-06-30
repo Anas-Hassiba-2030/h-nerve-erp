@@ -90,9 +90,13 @@ async function main() {
   // Pitch-grade decision threads — each is a real strategic dilemma with a
   // quantified trade-off, written so the specialist sub-agents have something
   // meaty to debate. The owner/admin (no tenant cookie) sees the whole set.
-  // `key` → the stable row id (so duplicate-tenant threads don't collide on
-  // upsert). The first thread of each original slug keeps key === slug so it
-  // overwrites the pre-existing prod row instead of leaving a stale orphan.
+  // `key` → the stable row id (so threads don't collide on upsert; the keys
+  // that match the original slugs overwrite the pre-existing prod rows instead
+  // of leaving stale orphans). `slug` → the opaque tenantId the council page
+  // scopes by. They're ALL pinned to the demo-visible tenant ("maha-dairy")
+  // so the panel is rich whether the demo session is tenant-scoped to that
+  // slug OR runs as ADMIN (null slug = pass-through, sees everything). The
+  // titles span sectors on purpose — this is the GROUP council feed.
   const discussions: Array<{ key: string; slug: string; title: string; body: string }> = [
     {
       key: "maha-dairy",
@@ -108,31 +112,31 @@ async function main() {
     },
     {
       key: "hourani-hotels",
-      slug: "hourani-hotels",
+      slug: "maha-dairy",
       title: "Arena Sofia occupancy forecast down 15% next month — pre-empt or ride it out?",
       body: "The demand model projects a 15% occupancy dip driven by a soft corporate-travel month. We can launch a 3-night long-stay promo now (protects revenue, dilutes ADR ~6%) or hold rate and absorb the dip. Council: defend RevPAR vs. defend headline rate.",
     },
     {
       key: "hourani-hotels-gulf",
-      slug: "hourani-hotels",
+      slug: "maha-dairy",
       title: "Gulf group wants an exclusive annual rate — 600 room-nights, margin-dilutive",
       body: "A Gulf travel group offers a guaranteed 600 room-nights a year, but only at 18% below our shoulder-season floor. It fills the weakest weeks and smooths cash flow — yet anchors a discount that's hard to unwind. Council: lock predictable volume or protect the rate card?",
     },
     {
       key: "loran-agri",
-      slug: "loran-agri",
+      slug: "maha-dairy",
       title: "EU organic certification — worth the 24-month wait for a 9% premium?",
       body: "Certification costs are modest but the conversion window is two full seasons, during which we sell as conventional. The payoff is a 9% export price premium and access to EU buyers. Council: commit the land now or stay MENA-focused and redeploy the capital faster?",
     },
     {
       key: "loran-sensor",
-      slug: "loran-agri",
+      slug: "maha-dairy",
       title: "Greenhouse sensor array is drifting — replace (JOD 40k) or recalibrate?",
       body: "Soil-moisture readings have drifted 6 points over 72 hours, silently over-irrigating two blocks and degrading both yield and water-use ESG metrics. Replace the full array (JOD 40k, clean signal) or recalibrate and monitor weekly (cheap, but the drift may recur at harvest). Council: capex certainty vs. operational patching.",
     },
     {
       key: "tank-incubator",
-      slug: "tank-incubator",
+      slug: "maha-dairy",
       title: "AI cohort 2027 — open enrollment to all MENA founders or keep it Jordan-only?",
       body: "Opening to the wider MENA pool lifts applicant quality and the program's regional brand, but stretches mentor capacity and complicates our local-impact mandate with the university. Council: scale the network or deepen the home base?",
     },

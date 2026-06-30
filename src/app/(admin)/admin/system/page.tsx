@@ -12,7 +12,7 @@ import Link from "next/link";
 import {
   Upload, Package, ArrowLeftRight, Warehouse, Repeat, Shuffle,
   ShoppingCart, Receipt, Truck, Users, BookOpen, Landmark, Brain,
-  UsersRound, ShieldCheck, ScrollText, Database,
+  UsersRound, ShieldCheck, ScrollText, Database, Crown, Building2,
 } from "lucide-react";
 import { prisma, prismaUnscoped } from "@/lib/db/db";
 import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
@@ -21,7 +21,7 @@ import { SeedDemoButton } from "@/components/genesis/SeedDemoButton";
 
 export const dynamic = "force-dynamic";
 
-type GroupId = "data" | "inventory" | "trade" | "books" | "intel" | "access";
+type GroupId = "platform" | "data" | "inventory" | "trade" | "books" | "intel" | "access";
 
 type Card = {
   href: string;
@@ -35,6 +35,7 @@ type Card = {
 };
 
 const GROUPS: { id: GroupId; ar: string; en: string }[] = [
+  { id: "platform",  ar: "المنصّة",             en: "Platform" },
   { id: "data",      ar: "البيانات والاستيراد", en: "Data & Ingest" },
   { id: "inventory", ar: "المخزون",            en: "Inventory" },
   { id: "trade",     ar: "الطلبات والأطراف",   en: "Orders & Parties" },
@@ -87,6 +88,8 @@ export default async function AdminSystemPage() {
   const dbModelCount = listModels().length;
 
   const cards: Card[] = [
+    { href: "/admin/empire",          titleAr: "الإمبراطورية",      titleEn: "Empire",             descAr: "لوحة المجموعة متعددة المستأجرين",       descEn: "Multi-tenant group boardroom",             icon: Crown,        count: tenants, group: "platform" },
+    { href: "/admin/tenants",         titleAr: "المستأجرون",        titleEn: "Tenants",            descAr: "إدارة المستأجرين والعلامات",            descEn: "Manage tenants and brands",                icon: Building2,    count: tenants, group: "platform" },
     { href: "/admin/db",              titleAr: "متصفّح البيانات",   titleEn: "Data Browser",       descAr: "كل جداول قاعدة البيانات — للقراءة",     descEn: "Every database table — read-only",         icon: Database,     count: dbModelCount, group: "data" },
     { href: "/admin/imports",         titleAr: "سجل الاستيراد",    titleEn: "Import Log",         descAr: "دفعات الاستيراد ومعاينتها",            descEn: "Import batches and previews",              icon: Upload,       count: cImports, group: "data" },
     { href: "/admin/mappings",        titleAr: "التخطيطات",         titleEn: "Mappings",           descAr: "ترجمة حقول أنظمة المصدر",              descEn: "Source-system field translations",         icon: Shuffle,      count: cMappings, group: "data" },

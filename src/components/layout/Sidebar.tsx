@@ -169,6 +169,7 @@ export function Sidebar({
       label: ar ? "النمو والاستثمار" : "Growth & Capital",
       items: [
         { href: "/finance", label: messages["nav.finance"], icon: Wallet },
+        { href: "/crm", label: messages["nav.crm"], icon: Users },
         { href: "/markets", label: messages["nav.markets"], icon: TrendingUp },
         { href: "/sustainability", label: messages["nav.sustainability"], icon: Leaf },
         { href: "/projects", label: messages["nav.projects"], icon: FlaskConical },

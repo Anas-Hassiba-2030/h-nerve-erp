@@ -81,6 +81,7 @@ export const ORRERY_GROUPS: OrreryGroup[] = [
       { label: "التقارير", labelEn: "Reports", route: "/reports" },
       { label: "الاستدامة", labelEn: "Sustainability", route: "/sustainability" },
       { label: "المشاريع", labelEn: "Projects", route: "/projects" },
+      { label: "العلاقات", labelEn: "CRM", route: "/crm" },
     ],
   },
   {

@@ -63,6 +63,12 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
   // bearer-token import API / brain cron run with no slug → pass-through,
   // unchanged. Null-tenant rows are simply filtered out for pinned users.
   "ImportLog",
+  // Phase 27 — CRM. Lead / Opportunity / CrmActivity carry the opaque
+  // tenantId slug like Customer/Supplier. Each tenant sees only its own
+  // pipeline; ADMIN (no tenant cookie) sees all.
+  "Lead",
+  "Opportunity",
+  "CrmActivity",
 ]);
 
 // Phase ISO-2 — models owned by TWO Company FKs at once (a bridge row).

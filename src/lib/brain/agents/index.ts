@@ -11,8 +11,13 @@ import { DairyExpert } from "./DairyExpert";
 import { AgriExpert } from "./AgriExpert";
 import { FinanceBrain } from "./FinanceBrain";
 import { RiskOfficer } from "./RiskOfficer";
+import { SalesPipelineExpert } from "./SalesPipelineExpert";
 
 export { HospitalityExpert, DairyExpert, AgriExpert, FinanceBrain, RiskOfficer };
+// Phase 27 — CRM voice. Available to convene on sales/pipeline topics and
+// surfaced on /crm. Intentionally NOT added to SPECIALIST_AGENTS below (the
+// council roster is asserted to be exactly 5 in agents.test.ts).
+export { SalesPipelineExpert };
 export { runAgent } from "./base";
 export { runModerator } from "./Moderator";
 export type { AgentDef, AgentInput } from "./base";

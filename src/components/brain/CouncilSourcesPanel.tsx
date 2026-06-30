@@ -40,18 +40,18 @@ export function CouncilSourcesPanel({ sources, ar }: { sources: CouncilSources; 
     background: "linear-gradient(160deg, rgba(20,46,38,.6), rgba(13,31,26,.55))",
     border: "1px solid rgba(194,163,90,.2)",
     borderRadius: 16,
-    padding: "16px 18px",
+    padding: "20px 22px",
   };
   const head: React.CSSProperties = {
     display: "flex",
     alignItems: "center",
-    gap: 7,
-    fontSize: 10.5,
+    gap: 8,
+    fontSize: 11,
     fontWeight: 700,
-    letterSpacing: ".1em",
+    letterSpacing: ".11em",
     textTransform: "uppercase",
     color: "var(--gold-soft)",
-    marginBottom: 12,
+    marginBottom: 15,
   };
 
   return (
@@ -79,13 +79,13 @@ export function CouncilSourcesPanel({ sources, ar }: { sources: CouncilSources; 
               <Database className="h-3 w-3" strokeWidth={1.5} />
               {ar ? "الأرقام الحيّة" : "Live metrics"}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {sources.metrics.map((m) => {
                 const lbl = METRIC_LABEL[m.key];
                 return (
-                  <div key={m.key} style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 13 }}>
-                    <span style={{ color: "rgba(246,241,231,.7)" }}>{lbl ? (ar ? lbl.ar : lbl.en) : m.key}</span>
-                    <span style={{ fontWeight: 700, color: "#f6f1e7", fontVariantNumeric: "tabular-nums" }}>
+                  <div key={m.key} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 18, fontSize: 13.5, lineHeight: 1.5 }}>
+                    <span style={{ color: "rgba(246,241,231,.72)" }}>{lbl ? (ar ? lbl.ar : lbl.en) : m.key}</span>
+                    <span style={{ fontWeight: 700, color: "#f6f1e7", fontVariantNumeric: "tabular-nums", letterSpacing: ".01em" }}>
                       {fmtMetric(m.key, m.value, ar)}
                     </span>
                   </div>
@@ -102,11 +102,11 @@ export function CouncilSourcesPanel({ sources, ar }: { sources: CouncilSources; 
               <FileText className="h-3 w-3" strokeWidth={1.5} />
               {ar ? "المستندات المرجعية" : "Documents consulted"}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {sources.documents.map((d, i) => (
-                <div key={i} style={{ fontSize: 13, lineHeight: 1.4 }}>
+                <div key={i} style={{ fontSize: 13.5, lineHeight: 1.6 }}>
                   <span style={{ color: "#f6f1e7", fontWeight: 600 }}>{d.title}</span>
-                  <span style={{ color: "var(--gold-soft)", fontSize: 10.5, marginInlineStart: 7, textTransform: "uppercase", letterSpacing: ".06em" }}>
+                  <span style={{ color: "var(--gold-soft)", fontSize: 10.5, marginInlineStart: 8, textTransform: "uppercase", letterSpacing: ".06em" }}>
                     {d.kind}
                   </span>
                 </div>
@@ -122,14 +122,15 @@ export function CouncilSourcesPanel({ sources, ar }: { sources: CouncilSources; 
               <Network className="h-3 w-3" strokeWidth={1.5} />
               {ar ? "الكيانات ضمن النطاق" : "Entities in scope"}
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {sources.entities.map((e, i) => (
                 <span
                   key={i}
                   title={e.kind}
                   style={{
-                    fontSize: 12,
-                    padding: "4px 10px",
+                    fontSize: 12.5,
+                    lineHeight: 1.3,
+                    padding: "6px 12px",
                     borderRadius: 999,
                     color: "rgba(246,241,231,.84)",
                     background: "rgba(13,31,26,.5)",

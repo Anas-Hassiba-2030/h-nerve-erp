@@ -20,6 +20,9 @@ export type LlmRequest = {
   context?: Record<string, unknown>;
   maxTokens?: number;
   temperature?: number;
+  // Per-call model override (else llmConfig().model). Council voices + moderator
+  // pass councilModel() for speed; inert in stub mode (no API call is made).
+  model?: string;
   // When the model returns JSON, the orchestrator can pass schema-shaped instructions.
   expectJson?: boolean;
 };
@@ -43,6 +46,25 @@ export function llmConfig() {
   };
 }
 
+// Council voices + moderator each emit a short (2-4 sentence) structured opinion
+// — a fast model is plenty and ~3-5x quicker than Sonnet, which is the dominant
+// latency when the brain runs LIVE (no effect in stub mode). Override with
+// BRAIN_COUNCIL_MODEL (e.g. set it to the Sonnet id to restore prior behaviour).
+export function councilModel(): string {
+  return process.env.BRAIN_COUNCIL_MODEL?.trim() || "claude-haiku-4-5-20251001";
+}
+
+// The Planner emits one compact, schema-shaped JSON plan (goal + 3-6 steps).
+// On Sonnet this was the single slowest LIVE button in the app — "Generate
+// plan" routinely took 10s+. The structured output is well within a fast
+// model's reach, so default the planner to Haiku too (~3-5x quicker). If the
+// model returns flaky JSON, extractJson() fails and the caller falls back to a
+// credible stub plan — instant either way. Override with BRAIN_PLANNER_MODEL
+// (e.g. the Sonnet id) to restore the prior, slower behaviour.
+export function plannerModel(): string {
+  return process.env.BRAIN_PLANNER_MODEL?.trim() || "claude-haiku-4-5-20251001";
+}
+
 // Phase D — runaway cost guard. A single process makes at most
 // BRAIN_MAX_LLM_CALLS real Anthropic calls (default 200); after that it
 // silently serves the stub so a loop or bug can't drain the API budget.
@@ -58,8 +80,16 @@ export async function callLlm(req: LlmRequest, stub: StubGenerator): Promise<Llm
   const cfg = llmConfig();
 
   if (!cfg.enabled || !cfg.apiKey) {
-    // Tiny artificial latency so the UI's staggered reveal still feels alive.
-    await new Promise((r) => setTimeout(r, 600 + Math.random() * 700));
+    // Optional artificial latency for the staggered-reveal feel. Default 0.
+    // In STUB mode (the demo default — no ANTHROPIC_API_KEY) EVERY brain call
+    // hit this, so a single council (5 voices + moderator) paid ~1.2-2.6s of
+    // pure fake delay and the convene/theater UI felt frozen. The client
+    // already drives its own reveal animation, so the server pause is
+    // redundant — set BRAIN_STUB_DELAY_MS>0 only to restore a deliberate beat.
+    const stubDelayMs = Number(process.env.BRAIN_STUB_DELAY_MS) || 0;
+    if (stubDelayMs > 0) {
+      await new Promise((r) => setTimeout(r, stubDelayMs));
+    }
     return {
       text: stub(req),
       isStub: true,
@@ -89,7 +119,7 @@ export async function callLlm(req: LlmRequest, stub: StubGenerator): Promise<Llm
 
   try {
     const body = {
-      model: cfg.model,
+      model: req.model || cfg.model,
       max_tokens: req.maxTokens ?? 700,
       temperature: req.temperature ?? 0.7,
       system: req.system,

@@ -87,16 +87,70 @@ async function main() {
 
   // One example CouncilDiscussion per tenant so /brain/council isn't
   // empty on first visit.
-  const discussions: Array<{ slug: string; title: string; body: string }> = [
-    { slug: "hourani-hotels", title: "How should we respond to Aqaba's drop in repeat-guest rate?", body: "Repeat-guest rate fell 8% QoQ. Council: triage marketing spend vs. service-quality investments." },
-    { slug: "maha-dairy",     title: "Lactose-free range — pilot scope decision",                  body: "Need to choose between a 3-SKU pilot or a 7-SKU full launch. Council weighs cost vs. shelf presence." },
-    { slug: "loran-agri",     title: "EU organic cert: worth the 24-month wait?",                  body: "Investment is small, but the export window is long. Discuss whether to pursue or focus MENA-only." },
-    { slug: "tank-incubator", title: "AI cohort 2027 — applicant pool gating",                     body: "Should we open enrollment to any MENA-region founder, or restrict to Jordan-based teams?" },
+  // Pitch-grade decision threads — each is a real strategic dilemma with a
+  // quantified trade-off, written so the specialist sub-agents have something
+  // meaty to debate. The owner/admin (no tenant cookie) sees the whole set.
+  // `key` → the stable row id (so threads don't collide on upsert; the keys
+  // that match the original slugs overwrite the pre-existing prod rows instead
+  // of leaving stale orphans). `slug` → the opaque tenantId the council page
+  // scopes by. They're ALL pinned to the demo-visible tenant ("maha-dairy")
+  // so the panel is rich whether the demo session is tenant-scoped to that
+  // slug OR runs as ADMIN (null slug = pass-through, sees everything). The
+  // titles span sectors on purpose — this is the GROUP council feed.
+  const discussions: Array<{ key: string; slug: string; title: string; body: string }> = [
+    {
+      key: "maha-dairy",
+      slug: "maha-dairy",
+      title: "Lactose-free range — 3-SKU pilot or 7-SKU full launch?",
+      body: "Lactose-free is up 22% in MENA retail, but a 7-SKU launch needs JOD 180k of new packaging tooling and a second cold line. A 3-SKU pilot de-risks demand at a fraction of the cost — but cedes shelf presence to a competitor who is already moving. Council: weigh capital exposure against first-mover shelf share.",
+    },
+    {
+      key: "maha-coldchain",
+      slug: "maha-dairy",
+      title: "Cold-chain breach at the Amman DC — 3,200L exposed for 90 min",
+      body: "A loading-bay compressor failed; 3,200L of fresh milk sat at 9°C for ~90 minutes. Dump it all (≈JOD 4,100 write-off, zero risk), lab test-and-release (48h delay, retail contract pressure), or divert to processed cheese where the thermal exposure is moot? Council: balance brand-safety against recoverable value.",
+    },
+    {
+      key: "hourani-hotels",
+      slug: "maha-dairy",
+      title: "Arena Sofia occupancy forecast down 15% next month — pre-empt or ride it out?",
+      body: "The demand model projects a 15% occupancy dip driven by a soft corporate-travel month. We can launch a 3-night long-stay promo now (protects revenue, dilutes ADR ~6%) or hold rate and absorb the dip. Council: defend RevPAR vs. defend headline rate.",
+    },
+    {
+      key: "hourani-hotels-gulf",
+      slug: "maha-dairy",
+      title: "Gulf group wants an exclusive annual rate — 600 room-nights, margin-dilutive",
+      body: "A Gulf travel group offers a guaranteed 600 room-nights a year, but only at 18% below our shoulder-season floor. It fills the weakest weeks and smooths cash flow — yet anchors a discount that's hard to unwind. Council: lock predictable volume or protect the rate card?",
+    },
+    {
+      key: "loran-agri",
+      slug: "maha-dairy",
+      title: "EU organic certification — worth the 24-month wait for a 9% premium?",
+      body: "Certification costs are modest but the conversion window is two full seasons, during which we sell as conventional. The payoff is a 9% export price premium and access to EU buyers. Council: commit the land now or stay MENA-focused and redeploy the capital faster?",
+    },
+    {
+      key: "loran-sensor",
+      slug: "maha-dairy",
+      title: "Greenhouse sensor array is drifting — replace (JOD 40k) or recalibrate?",
+      body: "Soil-moisture readings have drifted 6 points over 72 hours, silently over-irrigating two blocks and degrading both yield and water-use ESG metrics. Replace the full array (JOD 40k, clean signal) or recalibrate and monitor weekly (cheap, but the drift may recur at harvest). Council: capex certainty vs. operational patching.",
+    },
+    {
+      key: "tank-incubator",
+      slug: "maha-dairy",
+      title: "AI cohort 2027 — open enrollment to all MENA founders or keep it Jordan-only?",
+      body: "Opening to the wider MENA pool lifts applicant quality and the program's regional brand, but stretches mentor capacity and complicates our local-impact mandate with the university. Council: scale the network or deepen the home base?",
+    },
+    {
+      key: "maha-surplus",
+      slug: "maha-dairy",
+      title: "Reinvest the Q2 surplus into an Aqaba line or retire the Arena renovation loan early?",
+      body: "Q2 closed with a JOD 471k surplus. Option A: seed a second dairy line near Aqaba to shorten lead time to the southern hotels. Option B: pay down the Arena renovation loan early and cut interest drag. Council: growth optionality vs. balance-sheet strength.",
+    },
   ];
   let writtenDisc = 0;
   for (let i = 0; i < discussions.length; i++) {
     const d = discussions[i];
-    const id = did("disc", d.slug);
+    const id = did("disc", d.key);
     await prisma.councilDiscussion.upsert({
       where: { id },
       create: { id, tenantId: d.slug, title: d.title, body: d.body, status: "OPEN" },

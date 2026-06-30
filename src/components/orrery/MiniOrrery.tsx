@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { ORRERY_GROUPS, type OrreryGroup } from "@/lib/orrery/groups";
+import { useRouter, usePathname } from "next/navigation";
+import { ORRERY_GROUPS, detectOrreryGroup, type OrreryGroup } from "@/lib/orrery/groups";
 
 type Locale = "ar" | "en";
 
@@ -37,13 +37,18 @@ function radial(i: number, n: number, r: number, center: number): { left: number
 
 export function MiniOrrery({ locale }: { locale: Locale }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [activeGroup, setActiveGroup] = useState<OrreryGroup | null>(null);
 
   const openMenu = useCallback(() => {
-    setActiveGroup(null);
+    // Reopening from inside a section drops you back INTO that section's branch
+    // (e.g. any /admin/* or other System page → the System branch), not the
+    // 5-group root — so the mini-orbit is a real "retreat to my branch", not a
+    // reset. detectOrreryGroup returns null off-branch, preserving root behaviour.
+    setActiveGroup(detectOrreryGroup(pathname));
     setOpen(true);
-  }, []);
+  }, [pathname]);
 
   const closeMenu = useCallback(() => {
     setOpen(false);

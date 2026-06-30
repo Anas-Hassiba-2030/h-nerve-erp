@@ -23,6 +23,7 @@ import { convene, togglePin } from "./actions";
 import { conveneFromDiscussion } from "@/app/actions/council";
 import { CouncilStage } from "./CouncilStage";
 import { CouncilBrief } from "@/components/brain/CouncilBrief";
+import { ConveneSubmit } from "@/components/brain/ConveneSubmit";
 import { TrustChip } from "@/components/brain/TrustChip";
 import "../../daylight.css";
 import "./council-design.css";
@@ -405,13 +406,12 @@ export default async function BrainCouncilIndex() {
                       fenced on JUST this shared subject. */}
                   <form action={conveneFromDiscussion}>
                     <input type="hidden" name="discussionId" value={d.id} />
-                    <button
-                      type="submit"
+                    <ConveneSubmit
                       className="dl-btn dl-btn-primary"
                       style={{ fontSize: 12, padding: "6px 12px" }}
-                    >
-                      {ar ? "✦ ناقش بالوكلاء" : "✦ Debate with sub-agents"}
-                    </button>
+                      label={ar ? "✦ ناقش بالوكلاء" : "✦ Debate with sub-agents"}
+                      pendingLabel={ar ? "…يجمع الوكلاء" : "Convening agents…"}
+                    />
                   </form>
                 </div>
               </li>

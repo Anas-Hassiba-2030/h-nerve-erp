@@ -2,7 +2,7 @@
 // with confidence and dissent. Runs AFTER the specialists, with their full
 // transcript as input.
 
-import { callLlm, extractJson } from "../llm";
+import { callLlm, councilModel, extractJson } from "../llm";
 import type { AgentVoice } from "../council";
 
 export type ModeratorOutput = {
@@ -107,6 +107,7 @@ export async function runModerator({
       maxTokens: 500,
       temperature: 0.5,
       expectJson: true,
+      model: councilModel(),
     },
     stub
   );

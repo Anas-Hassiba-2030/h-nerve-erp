@@ -22,7 +22,7 @@ import { getLocale } from "@/lib/i18n/i18n.server";
 import { getTheme } from "@/lib/theme/theme.server";
 import { THEME_LIST } from "@/lib/theme/theme";
 import { setTheme, setLocale } from "@/app/actions/preferences";
-import { ar as arAr, ROLES_AR, formatNumber } from "@/lib/utils/utils";
+import { ar as arAr, ROLES_AR, formatNumber, formatDate } from "@/lib/utils/utils";
 import { rankById } from "@/lib/utils/gamification";
 import { prisma } from "@/lib/db/db";
 import "../daylight.css";
@@ -41,7 +41,12 @@ export default async function SettingsPage(
   const session = await getCurrentUser();
   const locale = await getLocale();
   const ar = locale === "ar";
-  const tab = searchParams.tab === "settings" ? "settings" : "status";
+  const tab =
+    searchParams.tab === "settings"
+      ? "settings"
+      : searchParams.tab === "activity"
+      ? "activity"
+      : "status";
   const currentTheme = await getTheme();
 
   const me = session
@@ -61,6 +66,15 @@ export default async function SettingsPage(
       ? prisma.userAchievement.count({ where: { userId: session.id } })
       : Promise.resolve(0),
   ]);
+
+  // Activity is embedded in-context as a Settings tab — the System-branch
+  // "Activity" section surfaced here instead of yanking the user to a separate
+  // page. The feed query is gated on the active tab so Status / Settings loads
+  // never pay for it.
+  const recentActivity =
+    tab === "activity"
+      ? await prisma.activityLog.findMany({ orderBy: { createdAt: "desc" }, take: 12 })
+      : [];
 
   // status: live personal counters (reference KPI grid)
   const kpis: Array<[string, string]> = [
@@ -118,6 +132,9 @@ export default async function SettingsPage(
           <Link href="/settings?tab=settings" className={`ops-tab ${tab === "settings" ? "on" : ""}`}>
             {ar ? "الإعدادات" : "Settings"}
           </Link>
+          <Link href="/settings?tab=activity" className={`ops-tab ${tab === "activity" ? "on" : ""}`}>
+            {ar ? "النشاط" : "Activity"}
+          </Link>
         </div>
 
         <div className={`ops-panel ${tab === "status" ? "on" : ""}`}>
@@ -151,6 +168,37 @@ export default async function SettingsPage(
                 <span className="ops-tag ok">{value}</span>
               </div>
             ))}
+          </div>
+        </div>
+
+        <div className={`ops-panel ${tab === "activity" ? "on" : ""}`}>
+          <div className="panel">
+            <div className="panel-head">
+              <span className="panel-title">{ar ? "آخر النشاط" : "Recent activity"}</span>
+              <Link href="/activity" className="panel-aside" style={{ textDecoration: "none" }}>
+                {ar ? "السجل الكامل ←" : "Full log →"}
+              </Link>
+            </div>
+            {recentActivity.length === 0 ? (
+              <div className="ws-line" style={{ padding: "14px 0", color: "var(--ink-muted)" }}>
+                {ar ? "لا يوجد نشاط مسجَّل بعد." : "No activity recorded yet."}
+              </div>
+            ) : (
+              recentActivity.map((log) => (
+                <div
+                  key={log.id}
+                  className="ws-line"
+                  style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "11px 0", borderBottom: "1px solid var(--line)" }}
+                >
+                  <span>
+                    {(ar ? log.summary : log.summaryEn ?? log.summary) || `${log.action} · ${log.entity}`}
+                  </span>
+                  <span className="ops-tag" style={{ whiteSpace: "nowrap" }}>
+                    {formatDate(log.createdAt)}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
         </div>
 

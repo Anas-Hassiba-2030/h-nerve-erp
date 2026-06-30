@@ -11,7 +11,10 @@
 
 .dl-page {
   --mist: #cde0d6;
-  --display: "Cormorant Garamond", "Newsreader", "Reem Kufi", Georgia, serif;
+  /* Fraunces leads — the only loaded editorial serif. Cormorant/Newsreader
+     were never in the font link, so Latin headings fell to cramped Reem Kufi.
+     Arabic still resolves per-glyph to Reem Kufi further down the stack. */
+  --display: "Fraunces", "Cormorant Garamond", "Newsreader", "Reem Kufi", Georgia, serif;
 }
 
 /* ── Night / cosmic field ──

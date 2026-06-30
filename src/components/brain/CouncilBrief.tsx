@@ -17,6 +17,7 @@
 
 import { useMemo, useState } from "react";
 import { Users2, MessagesSquare, Building2, Sparkles, X } from "lucide-react";
+import { ConveneSubmit } from "./ConveneSubmit";
 
 type Company = { id: string; name: string; nameEn: string | null };
 
@@ -220,9 +221,11 @@ export function CouncilBrief({
 
       {/* convene */}
       <div style={{ marginTop: 18, display: "flex", flexWrap: "wrap", alignItems: "center", gap: 14 }}>
-        <button
-          type="submit"
+        <ConveneSubmit
           disabled={!canSubmit}
+          icon={Users2}
+          label={ar ? "اعقد المجلس" : "Convene the council"}
+          pendingLabel={ar ? "يعقد المجلس…" : "Convening…"}
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -231,17 +234,14 @@ export function CouncilBrief({
             borderRadius: 999,
             fontSize: 14,
             fontWeight: 700,
-            cursor: canSubmit ? "pointer" : "not-allowed",
-            opacity: canSubmit ? 1 : 0.5,
+            cursor: "pointer",
+            opacity: 1,
             color: "#0d1f1a",
             background: `linear-gradient(135deg,${GOLD},${GOLD_DEEP})`,
             border: `1px solid ${GOLD_DEEP}`,
             fontFamily: "'Inter Tight','Inter','IBM Plex Sans Arabic',system-ui,sans-serif",
           }}
-        >
-          <Users2 className="h-4 w-4" strokeWidth={1.5} />
-          {ar ? "اعقد المجلس" : "Convene the council"}
-        </button>
+        />
         <span
           style={{
             display: "inline-flex",

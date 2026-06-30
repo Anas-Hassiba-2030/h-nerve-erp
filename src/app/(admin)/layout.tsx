@@ -21,7 +21,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/db";
-import { Building2, Settings, Crown, UsersRound, ShieldCheck, ScrollText, Sprout, Database } from "lucide-react";
+import { Settings, UsersRound, ShieldCheck, ScrollText, Sprout, Database } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { MiniOrrery } from "@/components/orrery/MiniOrrery";
 
@@ -53,14 +53,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </span>
           </Link>
           <nav className="admin-rail-nav">
-            <Link href="/admin/empire" className="admin-rail-link">
-              <Crown className="h-3.5 w-3.5" strokeWidth={1.5} />
-              {ar ? "الإمبراطورية" : "Empire"}
-            </Link>
-            <Link href="/admin/tenants" className="admin-rail-link">
-              <Building2 className="h-3.5 w-3.5" strokeWidth={1.5} />
-              {ar ? "المستأجرون" : "Tenants"}
-            </Link>
+            {/* Empire + Tenants intentionally removed from the rail — Mission
+                Control is the single entry point that fans out to them. */}
             <Link href="/admin/users" className="admin-rail-link">
               <UsersRound className="h-3.5 w-3.5" strokeWidth={1.5} />
               {ar ? "المستخدمون" : "Users"}

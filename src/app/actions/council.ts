@@ -8,7 +8,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db/db";
+import { prisma, prismaUnscoped } from "@/lib/db/db";
 import { requireUser } from "@/lib/auth/session";
 import { flashToast } from "@/lib/utils/toast";
 import { getLocale } from "@/lib/i18n/i18n.server";
@@ -99,7 +99,16 @@ export async function conveneFromDiscussion(formData: FormData): Promise<void> {
   const discussionId = String(formData.get("discussionId") ?? "").trim();
   if (!discussionId) return;
 
-  const d = await prisma.councilDiscussion.findUnique({
+  // CROSS-TENANT INTENT: read the discussion via the UNSCOPED client. The
+  // tenant-scoped findUnique returns null whenever the request's active tenant
+  // slug differs from the row's tenantId (workspaceScope.ts) — and that slug
+  // can resolve differently between the page render that LISTED this thread and
+  // this server-action POST, producing a spurious "Subject not found" on a
+  // thread the user is plainly looking at. The user is authenticated
+  // (requireUser above) and supplied an id from their own rendered list, so an
+  // unscoped existence read is safe; we never expose data beyond convening a
+  // debate on a subject they already see.
+  const d = await prismaUnscoped.councilDiscussion.findUnique({
     where: { id: discussionId },
     select: { title: true, body: true, insightId: true },
   });
@@ -111,7 +120,9 @@ export async function conveneFromDiscussion(formData: FormData): Promise<void> {
   // Fence the debate to the subject's company when it came from an insight.
   let scopeCompanyId: string | undefined;
   if (d.insightId) {
-    const ins = await prisma.aIInsight.findUnique({
+    // CROSS-TENANT INTENT: same rationale — resolve the source insight's
+    // company unscoped so fencing works regardless of the active slug.
+    const ins = await prismaUnscoped.aIInsight.findUnique({
       where: { id: d.insightId },
       select: { companyId: true },
     });

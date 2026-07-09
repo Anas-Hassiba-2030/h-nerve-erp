@@ -4,7 +4,7 @@
 
 H-Nerve is a generic ERP intelligence platform. This document is the master plan for everything that comes after the Heritage Modern UI pivot. Each phase is substantively new capability — not polish. Each phase has a wow moment, a defined aesthetic vocabulary from `docs/DESIGN-SKILL.md`, and a signature animation.
 
-**The brain file:** `lib/brain/Brain.ts` (subsystems under `lib/brain/`)
+**The brain entry point:** `lib/brain/tools/` + `lib/brain/orchestrator.ts` — the tool registry + LLM tool-loop (the old `Brain.ts` was retired in PR #240; subsystems under `lib/brain/`)
 **The design spec:** `docs/DESIGN-SKILL.md`
 **The architecture:** `lib/brain/README.md`
 
@@ -724,13 +724,13 @@ Five minutes per beat. They will sign.
 |---|---|
 | The 20-phase plan | `docs/PHASES-INTELLIGENCE.md` (this file) |
 | The design language | `docs/DESIGN-SKILL.md` |
-| The brain entry point | `lib/brain/Brain.ts` |
+| The brain entry point | `lib/brain/tools/` + `lib/brain/orchestrator.ts` (`Brain.ts` retired, PR #240) |
 | Brain architecture | `lib/brain/README.md` |
 | Project conventions | `CLAUDE.md` |
 | The seeded demo data | `prisma/seed.ts` |
 | The Genesis onboarding wave | `docs/PHASES-INTELLIGENCE.md` § Phase 21 |
 
-When asking a future Claude to work on this, name the file. "Improve `lib/brain/Brain.ts`." "Implement Phase 3 from `docs/PHASES-INTELLIGENCE.md`." "Apply `docs/DESIGN-SKILL.md` Heritage Modern to `/finance`." Specificity is the whole game.
+When asking a future Claude to work on this, name the file. "Improve `lib/brain/orchestrator.ts`." "Implement Phase 3 from `docs/PHASES-INTELLIGENCE.md`." "Apply `docs/DESIGN-SKILL.md` Heritage Modern to `/finance`." Specificity is the whole game.
 
 ---
 

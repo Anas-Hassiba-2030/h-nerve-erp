@@ -1,5 +1,13 @@
 # H-Nerve — Brain & Infrastructure Assessment
 
+> ⚠️ **DATED POINT-IN-TIME ASSESSMENT (2026-06-07).** Several findings below
+> have since been fixed: the stub `Brain.ts` was **retired** (PR #240,
+> merged 2026-06-11) in favor of the wired tool-loop
+> (`src/lib/brain/tools/` + `orchestrator.ts` + stdio MCP server); the cron
+> workflow was committed; the docintel parser gained a real Claude Vision path;
+> and `/api/converse` gained per-user rate limiting + an LLM call cap. For the
+> current state see **`docs/STATUS.md`**.
+
 > **Author:** Principal Systems Architect review (backend / frontend / UI-UX / AI systems).
 > **Date:** 2026-06-07. **Method:** every claim below is grounded in the actual code
 > (`lib/brain/*`, `app/api/*`, `prisma/schema/*`, `middleware.ts`) and the existing

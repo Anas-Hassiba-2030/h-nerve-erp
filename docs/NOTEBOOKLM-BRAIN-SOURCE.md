@@ -1,5 +1,16 @@
 # H-Nerve "Brain" — Single Source for NotebookLM (code + claims + audit)
 
+> ⚠️ **HISTORICAL SNAPSHOT — for NotebookLM only.** This file freezes the
+> brain's code as it stood in early June 2026. The sections describing
+> `lib/brain/Brain.ts` (A1, and the "no loop / no tool-calling" notes) are
+> **historical**: `Brain.ts` was retired in **PR #240 (merged 2026-06-11)**.
+> The brain today is tool-fronted — `src/lib/brain/tools/` (7 typed tools) +
+> `src/lib/brain/orchestrator.ts` (LLM tool-loop, LIVE mode) + a stdio MCP
+> server (`src/lib/brain/mcp/server.ts`); `converse.ts` routes LIVE questions
+> through the tool-loop and answers single-shot only in STUB mode, and
+> `/api/converse` now has per-user rate limiting + an LLM call cap. Current
+> architecture: `src/lib/brain/README.md`.
+
 **For Anas:** upload THIS one file to NotebookLM as a source. It contains (A) the
 real source code of the brain's core, (B) the builder's plain-language claims, and
 (C) the questions to ask NotebookLM. You do not need to upload any `.ts` files —
@@ -16,7 +27,7 @@ their real contents are pasted inside Section A below.
 
 # SECTION A — Ground truth (the actual code)
 
-## A1. `lib/brain/Brain.ts` — the claimed "conductor"
+## A1. `lib/brain/Brain.ts` — the claimed "conductor" (HISTORICAL — file retired in PR #240, 2026-06-11)
 > Audit focus: Does `makeBrain()` return a real object or a stub? Does `ask()`
 > compose all subsystems, or route each question-type to just one or two?
 
@@ -168,6 +179,9 @@ export async function ask(input: AskInput): Promise<AskResult> {
 **Ground-truth notes:** one retrieve → one grade → one generate. **No second
 hop, no tool-calling, no self-correction loop.** It never writes a memory/episode
 back. It never calls `Brain.ts`. State lives in an in-memory `Map`.
+_(Historical: since PR #240, LIVE mode routes `ask()` → `askWithTools` →
+`runToolLoop` in `orchestrator.ts`; the single-shot path above is now the
+STUB-mode fallback only.)_
 
 ## A3. `app/api/converse/route.ts` — the HTTP door to the brain
 > Audit focus: Is there input validation (zod)? Is there ANY rate limit or cost
@@ -236,8 +250,10 @@ export async function POST(req: NextRequest) {
    stricter judge that weights reasoning + learning more heavily would land much
    lower (closer to ~15–25%). **Decide your own number from Section A.**
 5. **Known drift the builder admitted:** `docs/READINESS.md` and
-   `docs/PITCH-WALKTHROUGH.md` still say *"Brain.ask not yet wired / throws"*, which
-   the current `Brain.ts` (A1) contradicts — proof that docs drift from code.
+   `docs/PITCH-WALKTHROUGH.md` used to say *"Brain.ask not yet wired / throws"* —
+   proof that docs drift from code. _(Both docs were truth-synced in 2026-07,
+   and `Brain.ts` itself was retired in PR #240; A1 above documents the retired
+   file as a historical snapshot.)_
 
 ---
 

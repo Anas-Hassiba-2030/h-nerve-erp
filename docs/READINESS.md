@@ -5,8 +5,14 @@
 > live (ANTHROPIC + Gemini keys set); the admin console is hard-gated to ADMIN
 > (#4 resolved); the DB is **PostgreSQL with migrations** on Railway (#5);
 > there are **580+ automated tests + CI** (#6/#7); `vercel.json` was removed
-> (Railway). The brain also gained a full RAG layer (#97–#123). The kept items
-> below — Document-Intelligence parser, deeper integration wiring — remain valid.
+> (Railway). The brain also gained a full RAG layer (#97–#123). Since then:
+> the stub `Brain.ts` was **retired** (PR #240, merged 2026-06-11) in favor of a
+> wired tool-loop — `src/lib/brain/tools/` (7 typed tools) +
+> `src/lib/brain/orchestrator.ts` + a stdio MCP server; the Document-Intelligence
+> parser gained a **real Claude Vision path** (`src/lib/docintel/parser.ts`,
+> stub fallback + `DOCINTEL_MAX_VISION_CALLS` cap); and `/api/converse` now has
+> auth + per-user rate limiting (20 req/60s) + a process-wide `BRAIN_MAX_LLM_CALLS`
+> cap. Deeper third-party integration wiring remains the main open item.
 
 _Assessed 2026-05-15 against the actual codebase (not the roadmap)._
 
@@ -33,19 +39,24 @@ text. Treat this as a high-fidelity prototype, not an operational ERP.
 
 ## What is theater (the gap to close)
 
-1. **The Brain orchestrator is dead code (but bypassed).** `Brain.ask()`
-   throws `"Brain.ask not yet wired"`; `makeBrain()` returns a stub Proxy
-   (`lib/brain/Brain.ts:104,122`). The *composed* Brain is not connected —
-   **however**, the pages don't use it: e.g. the council page calls the
-   `convene` server action → agents → `callLlm` directly. So the demo works
-   without the orchestrator. The risk is narrative ("our Brain is wired"
-   isn't literally true), not functional. Either wire it or retire it.
+1. ~~**The Brain orchestrator is dead code (but bypassed).**~~ **RESOLVED
+   (PR #240, 2026-06-11).** The stub `lib/brain/Brain.ts` — where `Brain.ask()`
+   threw `"not yet wired"` and `makeBrain()` returned a Proxy stub — was
+   retired. The brain is now tool-fronted and genuinely wired:
+   `src/lib/brain/tools/` (7 typed tools: pullFacts, causalSubgraph, simulate,
+   councilDebate, recallMemory, retrieveDocuments, narrate) +
+   `src/lib/brain/orchestrator.ts` (LLM tool-loop, LIVE mode) +
+   `src/lib/brain/converse.ts` (single-shot in STUB mode) + a stdio MCP server
+   (`src/lib/brain/mcp/server.ts`). STUB mode is the zero-key default; setting
+   `ANTHROPIC_API_KEY` runs the LIVE tool-loop.
 2. **AI is running in stub mode right now.** `.env` has **no
    `ANTHROPIC_API_KEY`**. With no key, every council debate, narration and
    insight is deterministic canned text with fake latency
    (`lib/brain/llm.ts:51-59`). The "intelligence" you'd demo today is scripted.
 3. **Document Intelligence parser is not implemented** — even live mode is a
-   TODO (`lib/docintel/parser.ts:6-9`).
+   TODO (`lib/docintel/parser.ts:6-9`). _(Since resolved —
+   `src/lib/docintel/parser.ts` now ships a real Claude Vision path
+   (`parseWithVision`) with stub fallback + `DOCINTEL_MAX_VISION_CALLS` cap.)_
 4. **Admin console has no access control.** Any logged-in user reaches the
    superadmin console (`app/(admin)/layout.tsx:22`). Real security hole.
 5. **SQLite, single file, no migrations, no backups.** `prisma/dev.db`,
@@ -72,20 +83,25 @@ text. Treat this as a high-fidelity prototype, not an operational ERP.
 - Gate `app/(admin)/layout.tsx` to `role === "ADMIN"`.
 
 **Tier 1 — before a supervised pilot with real users (weeks)**
-- Wire `Brain.ts` / `makeBrain()` to the real `.live.ts` subsystems, or be
-  explicit that pages call subsystems directly and retire the dead orchestrator.
+- ~~Wire `Brain.ts` / `makeBrain()` to the real `.live.ts` subsystems, or be
+  explicit that pages call subsystems directly and retire the dead orchestrator.~~
+  ✅ Done — PR #240 retired `Brain.ts` and shipped the wired tool-loop
+  (`src/lib/brain/tools/` + `orchestrator.ts` + MCP server).
 - Migrate SQLite → Postgres (Neon/Supabase/RDS): switch `datasource`, adopt
   `prisma migrate` (not `db push`), set up automated backups.
 - Deployment: a Dockerfile or Vercel project, environment-separated
   (`dev`/`staging`/`prod`), secrets in a vault not `.env`.
-- A real document parser (Claude Vision) or remove the feature from the pitch.
+- ~~A real document parser (Claude Vision) or remove the feature from the pitch.~~
+  ✅ Done — `parseWithVision` shipped in `src/lib/docintel/parser.ts` (stub fallback + call cap).
 - Smoke + regression tests on the auth flow and the 5 core CRUD modules.
 - Error monitoring (Sentry) + structured logging.
 
 **Tier 2 — before calling it production (months)**
 - Real integrations (actual OAuth/webhooks) for the connectors you'll claim.
 - Role-based authorization across *all* mutations, not just admin.
-- Audit log, data export/GDPR-style controls, rate limiting on AI endpoints.
+- Audit log, data export/GDPR-style controls, rate limiting on AI endpoints
+  _(rate limiting since shipped on `/api/converse`: per-user 20 req/60s via
+  `src/lib/import/rateLimit.ts` + process-wide `BRAIN_MAX_LLM_CALLS` cap)_.
 - Load/concurrency testing; cost controls on the Anthropic spend.
 - Pen-test / security review before real financial data enters the system.
 

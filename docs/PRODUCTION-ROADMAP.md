@@ -1,5 +1,10 @@
 # H-Nerve — Path to a Fully Working ERP
 
+> **⚠️ HISTORICAL ROADMAP (superseded 2026-07-09).** This document is kept as
+> the record of the May-2026 path to production. For forward planning use
+> **`docs/BUILD-PLAN.md`** — the single ordered plan that carries this file's
+> still-open items forward. Current health lives in `docs/STATUS.md`.
+
 _Companion to `docs/READINESS.md`. Phase plan from today's prototype to a
 real, multi-company ERP. Written 2026-05-15._
 
@@ -99,7 +104,9 @@ branding (awaiting Anas) · 🟡 #5 broader Arabic/English text.
   (`lib/docintel/parser.ts:6`).
 - Real third-party integrations (actual OAuth/webhooks) for the connectors
   you actually need — today they're catalog UI.
-- Wire or formally retire the dead `Brain.ts` orchestrator.
+- ✅ DONE — `Brain.ts` was retired in PR #240 (2026-06-11). The brain is now
+  fronted by `lib/brain/tools/` + the `orchestrator.ts` tool-loop + the stdio
+  MCP server (`lib/brain/mcp/`), with the planner wired in.
 - _Outcome:_ the advertised features are all genuinely backed.
 
 ### Phase G — Production hardening (parallel with pilot)
@@ -215,7 +222,7 @@ Feedback: "I'm lost — rebuild-the-brain, errors, how to run it."
 | C | Per-company workspace isolation (data scoping) | ✅ done, merged, 10 tests |
 | D | RBAC on all 28 destructive actions | ✅ core done (create/update + AI rate-limit = future) |
 | E | Regression net (39 tests) + CI gate | 🟡 net+CI live; CRUD-module tests = future |
-| F | Replace stubs (real doc parser, real integrations, wire/retire Brain.ts) | ⏳ not started (post-pitch) |
+| F | Replace stubs (real doc parser, real integrations; Brain.ts ✅ retired PR #240 2026-06-11 — brain is now tools/ + orchestrator + MCP server) | 🟡 partial — doc parser + integrations still open (see `docs/BUILD-PLAN.md`) |
 | G1 | Real per-company ERP Command Center | ✅ done, browser-verified |
 | G2 | Performance | ✅ done |
 | G3 | This audit | ✅ done |

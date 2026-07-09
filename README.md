@@ -39,6 +39,8 @@ Green gate before every merge: `npx tsc --noEmit` + `npm test` + `npm run lint` 
 
 ## Documentation map
 
+Living state: **[`docs/STATUS.md`](docs/STATUS.md)** (where we are right now) · **[`docs/BUILD-PLAN.md`](docs/BUILD-PLAN.md)** (the forward plan) · **[`docs/INDEX.md`](docs/INDEX.md)** (full docs table of contents).
+
 Start here, in order:
 
 1. **[`CLAUDE.md`](CLAUDE.md)** — conventions, commands, hard-won lessons. Canonical.

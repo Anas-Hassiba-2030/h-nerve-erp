@@ -34,6 +34,8 @@ export default [
       // (The old `next lint` only scanned app/components/lib, never public/.)
       "public/**",
       "docs/**",
+      // Claude session worktrees are throwaway checkouts, not app source.
+      ".claude/worktrees/**",
     ],
   },
 ];

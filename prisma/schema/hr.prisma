@@ -1,0 +1,88 @@
+// HR / HCM — Phase 27 (P2). Employee directory + org chart + leave + appraisal.
+// Payroll is DEFERRED (Jordan-locale heavy). Tenant-scoped like CRM; plain
+// string refs to auth.User / companies.Company (decoupled). Distinct from the
+// /employees route, which is a read-only directory of User *login accounts* —
+// this is the HR record system (the employee lifecycle). Register all four
+// models in TENANT_SCOPED_MODELS (lib/tenancy/workspaceScope.ts).
+
+model Employee {
+  id         String    @id @default(cuid())
+  tenantId   String
+  userId     String? // -> User.id if they log in (plain ref)
+  companyId  String? // -> Company.id (which group company) — plain ref
+  fullName   String
+  email      String?
+  phone      String?
+  positionId String?
+  managerId  String? // self -> Employee.id
+  hireDate   DateTime?
+  // ACTIVE | ON_LEAVE | TERMINATED
+  status     String    @default("ACTIVE")
+
+  positionRef Position?      @relation(fields: [positionId], references: [id], onDelete: SetNull)
+  manager     Employee?      @relation("EmployeeManager", fields: [managerId], references: [id], onDelete: SetNull)
+  reports     Employee[]     @relation("EmployeeManager")
+  leaves      LeaveRequest[]
+  appraisals  Appraisal[]
+
+  deletedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([tenantId, status])
+  @@index([tenantId, companyId])
+  @@index([tenantId, managerId])
+}
+
+model Position {
+  id         String     @id @default(cuid())
+  tenantId   String
+  title      String
+  department String? // FINANCE | OPS | SALES | HR | IT | OTHER
+  employees  Employee[]
+  deletedAt  DateTime?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@unique([tenantId, title])
+  @@index([tenantId, department])
+}
+
+model LeaveRequest {
+  id         String   @id @default(cuid())
+  tenantId   String
+  employeeId String
+  // ANNUAL | SICK | UNPAID | OTHER
+  type       String   @default("ANNUAL")
+  startDate  DateTime
+  endDate    DateTime
+  // PENDING | APPROVED | REJECTED
+  status     String   @default("PENDING")
+  reason     String?
+
+  employeeRef Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([tenantId, status])
+  @@index([tenantId, employeeId])
+}
+
+model Appraisal {
+  id         String   @id @default(cuid())
+  tenantId   String
+  employeeId String
+  period     String // "2026-Q2"
+  score      Int? // 1-5
+  // DRAFT | SUBMITTED | FINALIZED
+  status     String   @default("DRAFT")
+  summary    String?
+
+  employeeRef Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([tenantId, employeeId])
+}

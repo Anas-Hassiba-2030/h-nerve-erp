@@ -69,6 +69,12 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
   "Lead",
   "Opportunity",
   "CrmActivity",
+  // Phase 27 — HR/HCM. Employee/Position/LeaveRequest/Appraisal keyed by the
+  // opaque tenantId slug. Each tenant sees only its own people records.
+  "Employee",
+  "Position",
+  "LeaveRequest",
+  "Appraisal",
 ]);
 
 // Phase ISO-2 — models owned by TWO Company FKs at once (a bridge row).

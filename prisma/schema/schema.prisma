@@ -4,10 +4,15 @@ generator client {
 }
 
 datasource db {
-  // PRODUCTION: Railway injects DATABASE_URL automatically. No DIRECT_URL needed.
-  // Neon users: append `?pgbouncer=true&connection_limit=1` to DATABASE_URL and
-  // run migrations against the non-pooled connection separately.
+  // PRODUCTION: Railway injects DATABASE_URL automatically.
+  // POOLING (the 100-user unlock — see docs/DEPLOYMENT.md § Connection pooling):
+  // once the PgBouncer sidecar exists, point DATABASE_URL at the pooler with
+  // `?pgbouncer=true&connection_limit=10`, set DIRECT_DATABASE_URL to the raw
+  // Postgres URL, and uncomment directUrl below so migrations bypass the pooler.
+  // It stays commented until then — Prisma fails on a referenced-but-unset env
+  // var at migrate time, which would break the Railway preDeploy.
   // LOCAL DEV: provider="sqlite", DATABASE_URL="file:./dev.db".
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // directUrl = env("DIRECT_DATABASE_URL")
 }

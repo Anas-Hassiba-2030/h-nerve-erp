@@ -7,7 +7,7 @@
 //     and what the operator should do when a claim is unverified.
 //
 // Read-only. No mutations. The brain is read-mostly by contract.
-// See docs/PHASES-INTELLIGENCE.md § Phase 22.
+// See docs/governance/PHASES-INTELLIGENCE.md § Phase 22.
 
 import "../../daylight.css";
 import "./trust.css";

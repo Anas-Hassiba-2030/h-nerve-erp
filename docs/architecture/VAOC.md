@@ -175,7 +175,7 @@ These exist because the failure modes below have all actually happened.
   **data** only — never the bloom, never the motion. `public/orrery/` is
   generated: edit `docs/design/orrery/`, then `node scripts/build/build-orrery.mjs`.
 - **The admin console is Heritage** (cream/emerald/gold), by explicit owner
-  override of `docs/DESIGN-SKILL.md` §1.F. Do not "restore" the cyan Sleek
+  override of `docs/governance/DESIGN-SKILL.md` §1.F. Do not "restore" the cyan Sleek
   Operator skin.
 - **One design vocabulary per surface.** Operator = Heritage Modern. Theater has
   its own editorial register. Never mix.

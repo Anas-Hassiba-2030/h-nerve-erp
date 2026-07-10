@@ -33,11 +33,11 @@ The design system covers four product surfaces, each with its own UI kit (`ui_ki
 
 This system was reverse‑engineered from materials the design team was given. You may not have access to all of them, but they are recorded here so you can go deeper:
 
-- **Production codebase** — `BMV2026/` (a Next.js App Router + Prisma monorepo). The single richest source: `app/globals.css` (~9.7k lines of design tokens + component CSS), `docs/DESIGN-SKILL.md` (the canonical design playbook), `docs/BLUEPRINT.md` (the Brain architecture), `lib/brand/themes.ts` (9 tenant theme presets), and `components/` (Logo, Sidebar, PageHeader, HeritageHero, mobile, empire, brand/CompanyLogo, …).
+- **Production codebase** — `BMV2026/` (a Next.js App Router + Prisma monorepo). The single richest source: `app/globals.css` (~9.7k lines of design tokens + component CSS), `docs/governance/DESIGN-SKILL.md` (the canonical design playbook), `docs/governance/BLUEPRINT.md` (the Brain architecture), `lib/brand/themes.ts` (9 tenant theme presets), and `components/` (Logo, Sidebar, PageHeader, HeritageHero, mobile, empire, brand/CompanyLogo, …).
 - **GitHub repo** — [`Anas-Hassiba-2030/h-nerve-erp`](https://github.com/Anas-Hassiba-2030/h-nerve-erp) *(private)*. The same product on GitHub. **Explore this repository further** to build higher‑fidelity designs — the components, theme presets and the `lib/brain/` reasoning layer are all there.
 - **Pitch screenshots** — `BMV2026/docs/pitch-screenshots/` (22 PNGs of the live product). A handful are mirrored under `_ref/` here for grounding.
 
-> The product's own design playbook (`docs/DESIGN-SKILL.md`) is the spiritual parent of this README; where they conflict, **the live tokens in `app/globals.css` win** (e.g. the playbook describes an early all‑earth palette; the shipped product pairs an **emerald** chrome with the Heritage earth content layer — documented faithfully below).
+> The product's own design playbook (`docs/governance/DESIGN-SKILL.md`) is the spiritual parent of this README; where they conflict, **the live tokens in `app/globals.css` win** (e.g. the playbook describes an early all‑earth palette; the shipped product pairs an **emerald** chrome with the Heritage earth content layer — documented faithfully below).
 
 ---
 

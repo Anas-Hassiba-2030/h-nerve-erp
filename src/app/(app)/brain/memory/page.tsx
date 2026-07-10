@@ -8,7 +8,7 @@
 // recall animation lives in components/brain/MemoryLake.tsx (a faithful
 // port of memory.js). No DaylightShell — exact reference markup.
 //
-// Phase 6 of docs/PHASES-INTELLIGENCE.md.
+// Phase 6 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import "../../daylight.css";
 import "./memory.css";

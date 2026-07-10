@@ -12,7 +12,7 @@
 // Because the drafted PO belongs on the BUYER's tenant — which is NOT
 // necessarily the approver's active tenant — every write goes through
 // prismaUnscoped with an explicit tenantId. This is a legitimate
-// cross-tenant write per docs/ISOLATION.md (the brain/bridge proposes;
+// cross-tenant write per docs/architecture/ISOLATION.md (the brain/bridge proposes;
 // it does not leak reads to the wrong operator).
 //
 // ATOMICITY (review fix): the DRAFT→APPROVED flip, the PO insert, and the

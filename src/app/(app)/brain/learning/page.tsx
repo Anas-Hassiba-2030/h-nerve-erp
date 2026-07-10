@@ -5,7 +5,7 @@
 // ribbon + KPI strip + dark panel). Real data + server actions are preserved;
 // the look is the reference. Styles live in ./learning.css, scoped to .dl-page.
 //
-// Phase 7 of docs/PHASES-INTELLIGENCE.md.
+// Phase 7 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import "../../daylight.css";
 import "./learning.css";

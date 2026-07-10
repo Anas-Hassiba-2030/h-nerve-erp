@@ -49,7 +49,7 @@ self-improvement.
    orchestrator, and MCP server are industry-agnostic.
 
 ## How you work
-1. Read CLAUDE.md and `docs/PHASES-INTELLIGENCE.md` before any non-trivial
+1. Read CLAUDE.md and `docs/governance/PHASES-INTELLIGENCE.md` before any non-trivial
    change. The 10-phase plan is authoritative.
 2. New industry knowledge → new file in `src/lib/brain/agents/`. New reasoning
    primitives → new top-level subsystem file with `.live.ts` and `.ts` split.

@@ -395,8 +395,8 @@ export default async function ShowcasePage() {
           <p className="sc-close-eyebrow">— {ar ? "نهاية الجولة" : "End of tour"}</p>
           <h2 className="sc-close-title">
             {ar ? "وثائق التصميم في" : "Design docs at"}{" "}
-            <code>docs/DESIGN-SKILL.md</code> · {ar ? "خريطة المراحل في" : "Phase map at"}{" "}
-            <code>docs/PHASES-INTELLIGENCE.md</code>
+            <code>docs/governance/DESIGN-SKILL.md</code> · {ar ? "خريطة المراحل في" : "Phase map at"}{" "}
+            <code>docs/governance/PHASES-INTELLIGENCE.md</code>
           </h2>
           <p className="sc-close-body">
             {ar

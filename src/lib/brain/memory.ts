@@ -18,7 +18,7 @@
 // Memory is also the source for the "Time Machine" (Phase 11) — the
 // brain reconstructs the worldview as it was on any past date.
 //
-// See docs/PHASES-INTELLIGENCE.md — Phase 6.
+// See docs/governance/PHASES-INTELLIGENCE.md — Phase 6.
 
 export type Memory = {
   id: string;

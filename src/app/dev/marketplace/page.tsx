@@ -5,7 +5,7 @@
 // (most-installed agents closest in). Hover any planet to see its tagline
 // and stats. Below the orbit, the same 24 in a sortable list.
 //
-// Phase 20 of docs/PHASES-INTELLIGENCE.md.
+// Phase 20 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { MARKETPLACE_AGENTS } from "@/lib/protocol/spec";
 import { ArrowUpRight, Star, Download } from "lucide-react";

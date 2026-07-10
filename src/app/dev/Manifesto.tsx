@@ -4,7 +4,7 @@
 // ~85 chars in 6.8 seconds). After the line completes, a single ochre
 // dot punctuates and the reveal stops — no further animation.
 //
-// Phase 20 of docs/PHASES-INTELLIGENCE.md.
+// Phase 20 of docs/governance/PHASES-INTELLIGENCE.md.
 
 "use client";
 

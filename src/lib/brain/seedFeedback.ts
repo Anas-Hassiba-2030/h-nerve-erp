@@ -6,7 +6,7 @@
 // 6-8 distinct, defensible patterns covering both "learn from acceptance"
 // and "learn from rejection" signals.
 //
-// Phase 7 of docs/PHASES-INTELLIGENCE.md.
+// Phase 7 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { prisma } from "@/lib/db/db";
 

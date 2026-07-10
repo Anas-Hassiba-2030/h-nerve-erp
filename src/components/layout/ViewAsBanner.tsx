@@ -1,7 +1,7 @@
 // ViewAsBanner — fixed top banner shown to a superadmin who's "viewing
 // as" a tenant. Lets them exit back to their own org's view.
 //
-// Phase 11 of docs/PHASES-INTELLIGENCE.md.
+// Phase 11 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { Eye } from "lucide-react";
 import { clearViewAs } from "@/app/(admin)/admin/tenants/actions";

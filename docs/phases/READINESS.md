@@ -4,7 +4,7 @@ owner: Anas Hasiba
 last-updated: 2026-06-11
 
 > ⚠️ **HISTORICAL SNAPSHOT (2026-05-15).** Several gaps below are now **closed** —
-> for the current state see **`docs/AUDIT-2026-06.md`**. Specifically: the AI is
+> for the current state see **`docs/status/AUDIT-2026-06.md`**. Specifically: the AI is
 > live (ANTHROPIC + Gemini keys set); the admin console is hard-gated to ADMIN
 > (#4 resolved); the DB is **PostgreSQL with migrations** on Railway (#5);
 > there are **580+ automated tests + CI** (#6/#7); `vercel.json` was removed

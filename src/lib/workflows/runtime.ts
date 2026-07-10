@@ -9,7 +9,7 @@
 // domain data — they return what they WOULD do. Real run mode (Phase 13
 // integrations) will wire the action handlers to live destinations.
 //
-// Phase 12 of docs/PHASES-INTELLIGENCE.md.
+// Phase 12 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { prisma } from "@/lib/db/db";
 import { TEMPLATES, type Template } from "./templates";

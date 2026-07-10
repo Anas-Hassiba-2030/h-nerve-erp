@@ -1,6 +1,6 @@
 // HeritageHero — executive headline panel in the "Heritage Modern" register.
 //
-// One vocabulary, executed with precision (see docs/DESIGN-SKILL.md §1.D).
+// One vocabulary, executed with precision (see docs/governance/DESIGN-SKILL.md §1.D).
 //
 // Surface: cream plinth (#f5efe6) — never pure white.
 // Accent: a single gradient hairline rail across the top

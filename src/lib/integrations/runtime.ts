@@ -6,7 +6,7 @@
 // surface API is the same — when production lands, we swap the mock
 // connect for the real OAuth handshake without touching callers.
 //
-// Phase 13 of docs/PHASES-INTELLIGENCE.md.
+// Phase 13 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { prisma } from "@/lib/db/db";
 import { randomBytes } from "node:crypto";

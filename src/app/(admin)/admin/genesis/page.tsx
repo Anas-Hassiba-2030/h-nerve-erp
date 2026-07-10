@@ -9,7 +9,7 @@
 //   • Re-seed from scratch — destructive, gated behind an explicit ack.
 //
 // Aesthetic: Sleek Operator (DESIGN-SKILL §1.F) — cyan on near-black.
-// See docs/PHASES-INTELLIGENCE.md § Phase 21.
+// See docs/governance/PHASES-INTELLIGENCE.md § Phase 21.
 
 import { Sprout, CheckCircle2, FileText, AlertTriangle } from "lucide-react";
 import { prismaUnscoped } from "@/lib/db/db";

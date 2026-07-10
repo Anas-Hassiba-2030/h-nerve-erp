@@ -2,7 +2,7 @@
 // proposed weight changes. Off-black background, mono everything, single
 // ochre accent. Each row: target → field — old strikethrough → new (typed).
 //
-// Phase 10 of docs/PHASES-INTELLIGENCE.md.
+// Phase 10 of docs/governance/PHASES-INTELLIGENCE.md.
 
 export type DiffEntry = {
   target: string;

@@ -1,4 +1,4 @@
-// HeritagePill — current-color dot pattern (§5.2 in docs/DESIGN-SKILL.md).
+// HeritagePill — current-color dot pattern (§5.2 in docs/governance/DESIGN-SKILL.md).
 // Use these instead of the rainbow `badge-*` classes when inside heritage
 // modules.
 

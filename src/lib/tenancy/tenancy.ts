@@ -7,7 +7,7 @@
 // For the demo we expose a "view-as-tenant" cookie so a superadmin can
 // preview any tenant's theme without signing into their subdomain.
 //
-// Phase 11 of docs/PHASES-INTELLIGENCE.md.
+// Phase 11 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { cookies } from "next/headers";
 import type { ThemeKey } from "@/lib/brand/themes";

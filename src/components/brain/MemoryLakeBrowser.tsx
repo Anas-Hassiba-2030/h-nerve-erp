@@ -10,7 +10,7 @@
 // which is the inline server-rendered "I remember when…" card beneath an
 // alert.)
 //
-// Phase 6 of docs/PHASES-INTELLIGENCE.md.
+// Phase 6 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { Database, Trash2 } from "lucide-react";

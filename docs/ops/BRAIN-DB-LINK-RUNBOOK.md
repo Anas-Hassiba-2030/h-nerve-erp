@@ -199,4 +199,4 @@ no-ops on prod — the rehearsal removes the muffler on purpose.
 
 ---
 
-*See also: `scripts/verify/brain-db-link.ts` (doctor), `scripts/verify/brain-mcp-smoke.ts` (wire smoke), `lib/brain/mcp/scope.ts` (fail-closed scoping), `docs/SUBAGENTS-AND-MCP-CATALOG.md`.*
+*See also: `scripts/verify/brain-db-link.ts` (doctor), `scripts/verify/brain-mcp-smoke.ts` (wire smoke), `lib/brain/mcp/scope.ts` (fail-closed scoping), `docs/architecture/SUBAGENTS-AND-MCP-CATALOG.md`.*

@@ -34,24 +34,24 @@ Green gate before every merge: `npx tsc --noEmit` + `npm test` + `npm run lint` 
 | `prisma/schema/` | Prisma schema, one file per pillar (`prismaSchemaFolder`) |
 | `scripts/` | `build/ ops/ seed/ test/ verify/` |
 | `docs/` | All documentation — see the map below |
-| `.claude/agents/` | The agent company — 7 departments + orchestrator (see [`docs/VAOC.md`](docs/VAOC.md)) |
+| `.claude/agents/` | The agent company — 7 departments + orchestrator (see [`docs/architecture/VAOC.md`](docs/architecture/VAOC.md)) |
 | `public/orrery/` | Generated orbit hub — never hand-edit; built by `scripts/build/build-orrery.mjs` |
 
 ## Documentation map
 
-Living state: **[`docs/STATUS.md`](docs/STATUS.md)** (where we are right now) · **[`docs/BUILD-PLAN.md`](docs/BUILD-PLAN.md)** (the forward plan) · **[`docs/INDEX.md`](docs/INDEX.md)** (full docs table of contents) · **[`docs/VAOC.md`](docs/VAOC.md)** (the agent company that builds this).
+Living state: **[`docs/status/STATUS.md`](docs/status/STATUS.md)** (where we are right now) · **[`docs/status/BUILD-PLAN.md`](docs/status/BUILD-PLAN.md)** (the forward plan) · **[`docs/INDEX.md`](docs/INDEX.md)** (full docs table of contents) · **[`docs/architecture/VAOC.md`](docs/architecture/VAOC.md)** (the agent company that builds this).
 
 Start here, in order:
 
 1. **[`CLAUDE.md`](CLAUDE.md)** — conventions, commands, hard-won lessons. Canonical.
 2. **[`docs/MAP.md`](docs/MAP.md)** — navigation protocol: "if you want X, it lives at Y."
-3. **[`docs/DESIGN-SKILL.md`](docs/DESIGN-SKILL.md)** — the design language (Heritage Modern default; one vocabulary per surface).
-4. **[`docs/PHASES-INTELLIGENCE.md`](docs/PHASES-INTELLIGENCE.md)** — the master phase plan (Waves A–E + Phase 27 ERP modules).
+3. **[`docs/governance/DESIGN-SKILL.md`](docs/governance/DESIGN-SKILL.md)** — the design language (Heritage Modern default; one vocabulary per surface).
+4. **[`docs/governance/PHASES-INTELLIGENCE.md`](docs/governance/PHASES-INTELLIGENCE.md)** — the master phase plan (Waves A–E + Phase 27 ERP modules).
 5. **[`src/lib/brain/README.md`](src/lib/brain/README.md)** — Brain architecture: tool registry + orchestrator loop + stdio MCP server.
-6. **[`docs/SYSTEM-BLUEPRINT.md`](docs/SYSTEM-BLUEPRINT.md)** — the distilled playbook for standing up a new system on these foundations.
-7. **[`docs/RE-INFRASTRUCTURE-PLAN.md`](docs/RE-INFRASTRUCTURE-PLAN.md)** — the docs-first rebuild philosophy + RAG re-architecture (shipped).
+6. **[`docs/governance/SYSTEM-BLUEPRINT.md`](docs/governance/SYSTEM-BLUEPRINT.md)** — the distilled playbook for standing up a new system on these foundations.
+7. **[`docs/governance/RE-INFRASTRUCTURE-PLAN.md`](docs/governance/RE-INFRASTRUCTURE-PLAN.md)** — the docs-first rebuild philosophy + RAG re-architecture (shipped).
 
-Deployment and operations: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) · [`docs/RUNBOOK.md`](docs/RUNBOOK.md) · [`docs/ISOLATION.md`](docs/ISOLATION.md) (multi-tenancy rules).
+Deployment and operations: [`docs/ops/DEPLOYMENT.md`](docs/ops/DEPLOYMENT.md) · [`docs/ops/RUNBOOK.md`](docs/ops/RUNBOOK.md) · [`docs/architecture/ISOLATION.md`](docs/architecture/ISOLATION.md) (multi-tenancy rules).
 
 ## Production
 

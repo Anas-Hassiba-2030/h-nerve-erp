@@ -7,7 +7,7 @@
 //   Act IV   COUNCIL         — voice transcript, distilled to pull-quotes
 //   Act V    RECOMMENDATION  — moderator synthesis + plan (if generated)
 //
-// Phase 9 of docs/PHASES-INTELLIGENCE.md.
+// Phase 9 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { prisma } from "@/lib/db/db";
 import { council as councilStore } from "@/lib/brain/council.live";

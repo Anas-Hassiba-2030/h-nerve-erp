@@ -17,7 +17,7 @@ import { guardLlmAction, llmGuardLabel } from "@/lib/brain/actionGuard";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { matchDocumentEntities, type Match } from "@/lib/docintel/match";
 
-// Phase 18 of docs/PHASES-INTELLIGENCE.md.
+// Phase 18 of docs/governance/PHASES-INTELLIGENCE.md.
 // Server actions for the Document Intelligence flow.
 //
 // uploadDocument — accepts a File via FormData. Creates the Document

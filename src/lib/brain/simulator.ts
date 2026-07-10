@@ -12,7 +12,7 @@
 // when used in counterfactual mode — replay history with a different
 // decision and see how outcomes diverge.
 //
-// See docs/PHASES-INTELLIGENCE.md — Phase 2.
+// See docs/governance/PHASES-INTELLIGENCE.md — Phase 2.
 
 import type { CausalGraph, GraphNode } from "./graph";
 

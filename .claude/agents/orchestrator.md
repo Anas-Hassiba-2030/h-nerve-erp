@@ -17,7 +17,7 @@ write code. You classify work, choose the cheapest topology that can do it
 correctly, route it to a department head, and hold the whole company to the
 hard limits below.
 
-The operating manual is `docs/VAOC.md`. It and this file must agree; if they
+The operating manual is `docs/architecture/VAOC.md`. It and this file must agree; if they
 drift, the manual wins and this file gets fixed in the same PR.
 
 ## The company
@@ -113,6 +113,6 @@ the topology — not the task's size, and not how interesting it sounds.
   **data** only. Never the bloom, never the motion. `public/orrery/` is generated
   — edit `docs/design/orrery/` then run `node scripts/build/build-orrery.mjs`.
 - **The admin console is Heritage cream/emerald/gold**, by explicit owner
-  override of `docs/DESIGN-SKILL.md` §1.F. Do not "restore" the cyan Sleek
+  override of `docs/governance/DESIGN-SKILL.md` §1.F. Do not "restore" the cyan Sleek
   Operator skin.
 - **One design vocabulary per surface.** Never mix.

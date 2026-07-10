@@ -9,7 +9,7 @@
 //   5. Rollback condition card (if specified)
 //   6. Footer rail: Commit / Abandon / Delete buttons + source link
 //
-// Phase 5 of docs/PHASES-INTELLIGENCE.md.
+// Phase 5 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { notFound } from "next/navigation";
 import Link from "next/link";

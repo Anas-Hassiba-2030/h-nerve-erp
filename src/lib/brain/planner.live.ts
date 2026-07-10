@@ -10,7 +10,7 @@
 // DRAFT state. The user reviews and commits — at which point status flips
 // to ACTIVE and the system starts watching the target metric.
 //
-// Phase 5 of docs/PHASES-INTELLIGENCE.md.
+// Phase 5 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { prisma } from "@/lib/db/db";
 import { callLlm, extractJson, llmConfig, plannerModel, type LlmRequest } from "./llm";

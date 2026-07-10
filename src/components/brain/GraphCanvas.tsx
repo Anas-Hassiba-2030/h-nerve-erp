@@ -10,14 +10,14 @@
 //   - Layout converges in ~200 frames for 50 nodes; we run the loop
 //     continuously so dragged nodes settle naturally.
 //
-// Aesthetic: Industrial Precision (docs/DESIGN-SKILL.md §1.B).
+// Aesthetic: Industrial Precision (docs/governance/DESIGN-SKILL.md §1.B).
 //   Off-black background, Heritage ochre highlights, hairline labels.
 //
 // Signature animation: when the user clicks a node, BFS downstream
 // along causal edges; affected nodes pulse in cascade with delays
 // proportional to depth.
 //
-// Phase 1 of docs/PHASES-INTELLIGENCE.md.
+// Phase 1 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { useGraphCanvas } from "./useGraphCanvas";
 

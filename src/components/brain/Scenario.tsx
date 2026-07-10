@@ -21,7 +21,7 @@
 // auto-solve that animates the lever, reset) is translated into React
 // state/effects below.
 //
-// Phase 2 of docs/PHASES-INTELLIGENCE.md.
+// Phase 2 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import type { GraphNode, GraphEdge } from "@/lib/brain/graph";
 import { useScenario } from "./useScenario";

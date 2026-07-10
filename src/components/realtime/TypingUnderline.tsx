@@ -4,7 +4,7 @@
 // has data-rt-anchor matching the peer's typing.near. The line draws
 // in over 220ms and erases when the peer stops typing.
 //
-// Phase 17 of docs/PHASES-INTELLIGENCE.md.
+// Phase 17 of docs/governance/PHASES-INTELLIGENCE.md.
 
 "use client";
 

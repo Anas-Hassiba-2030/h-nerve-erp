@@ -4,7 +4,7 @@
 // Body content lives inside a 760px column with editorial typography.
 // On enter-view, the title underlines from 0 → 100% width over 480ms.
 //
-// Phase 9 of docs/PHASES-INTELLIGENCE.md.
+// Phase 9 of docs/governance/PHASES-INTELLIGENCE.md.
 
 export function Act({
   index,

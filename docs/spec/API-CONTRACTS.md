@@ -6,7 +6,7 @@
 > duplicate per-field input schemas (those live in the files' `zod` schemas and
 > would drift). Owner: platform. Last-updated: 2026-06-02.
 >
-> Part of the spec set in `docs/RE-INFRASTRUCTURE-PLAN.md` §3. Pairs with
+> Part of the spec set in `docs/governance/RE-INFRASTRUCTURE-PLAN.md` §3. Pairs with
 > `docs/spec/DATA-MODEL.md`.
 
 ---

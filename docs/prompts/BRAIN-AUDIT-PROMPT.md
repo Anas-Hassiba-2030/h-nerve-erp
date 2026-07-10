@@ -53,11 +53,11 @@ trust that assessment. Verify it from the source code and reach your own number.
   `retriever.ts`, `documents.retrieve.ts`, `ragEval.ts`.
 - The other "brain" subsystems — confirm REAL vs STUB: `memory.live.ts`,
   `planner.live.ts`, `council.live.ts`, `narrator.claude.ts`, `meta.reflector.ts`.
-- `app/api/brain/cron/route.ts` and `docs/AUDIT-2026-06.md` — **Check:** is the
+- `app/api/brain/cron/route.ts` and `docs/status/AUDIT-2026-06.md` — **Check:** is the
   weekly self-tuning / "it learns" loop actually running in production, or is the
   cron not firing?
 - `prisma/schema/brain.prisma` — what data the brain actually persists.
-- `docs/RE-INFRASTRUCTURE-PLAN.md` and `docs/brain/BRAIN-INFRA-ASSESSMENT-2026-06.md` —
+- `docs/governance/RE-INFRASTRUCTURE-PLAN.md` and `docs/brain/BRAIN-INFRA-ASSESSMENT-2026-06.md` —
   the claims. **Challenge them**, don't repeat them.
 
 ### Questions you must answer

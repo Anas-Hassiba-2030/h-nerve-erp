@@ -6,7 +6,7 @@
 // data + server actions are preserved; the look is the reference. Styles live
 // in ./benchmarks.css, scoped to .dl-page.
 //
-// Phase 8 of docs/PHASES-INTELLIGENCE.md.
+// Phase 8 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import "../../daylight.css";
 import "./benchmarks.css";

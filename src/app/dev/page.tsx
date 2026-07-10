@@ -6,7 +6,7 @@
 // then three primitives — Agent, Pack, Theme — each with the canonical
 // minimum source side-by-side.
 //
-// Phase 20 of docs/PHASES-INTELLIGENCE.md.
+// Phase 20 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import Link from "next/link";
 import {

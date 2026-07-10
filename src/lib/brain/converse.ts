@@ -3,7 +3,7 @@
 // The conversational layer's brain. Multi-turn context manager that turns
 // a user question into a 3-sentence answer with inline citations.
 //
-// Phase 15 of docs/PHASES-INTELLIGENCE.md.
+// Phase 15 of docs/governance/PHASES-INTELLIGENCE.md.
 //
 // Two modes:
 // - LIVE — ANTHROPIC_API_KEY is set. Calls Claude with system prompt + the

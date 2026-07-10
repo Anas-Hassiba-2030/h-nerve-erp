@@ -4,7 +4,7 @@
 // labels separate from tabular-numeral values, divided by hairline rules.
 // Single ochre dot at the start to signal "live."
 //
-// See docs/DESIGN-SKILL.md §1.D and §5 (interface patterns).
+// See docs/governance/DESIGN-SKILL.md §1.D and §5 (interface patterns).
 
 import { Sparkles, ArrowLeftRight, TrendingUp, TrendingDown, Activity } from "lucide-react";
 

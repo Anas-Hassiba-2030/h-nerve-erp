@@ -13,7 +13,7 @@
 // ("high" / "medium" / "low") suitable for badge UI.
 //
 // Pure function — deterministic, no I/O, fully unit-testable.
-// See docs/PHASES-INTELLIGENCE.md § Phase 22.
+// See docs/governance/PHASES-INTELLIGENCE.md § Phase 22.
 
 import type { VerificationReport } from "./verifier";
 

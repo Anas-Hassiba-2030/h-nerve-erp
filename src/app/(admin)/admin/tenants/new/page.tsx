@@ -1,6 +1,6 @@
 // /admin/tenants/new — three-field form to spawn a new tenant.
 //
-// Phase 11 of docs/PHASES-INTELLIGENCE.md. Sleek Operator aesthetic.
+// Phase 11 of docs/governance/PHASES-INTELLIGENCE.md. Sleek Operator aesthetic.
 
 import Link from "next/link";
 import { ArrowLeft, Plus } from "lucide-react";

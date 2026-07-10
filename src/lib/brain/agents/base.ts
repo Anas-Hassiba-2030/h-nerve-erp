@@ -4,7 +4,7 @@
 // asked to emit JSON with a strict shape; if it fails or is in stub mode,
 // the agent's deterministic fallback runs.
 //
-// Phase 3 of docs/PHASES-INTELLIGENCE.md.
+// Phase 3 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { callLlm, councilModel, extractJson, type LlmRequest } from "../llm";
 import type { AgentVoice } from "../council";

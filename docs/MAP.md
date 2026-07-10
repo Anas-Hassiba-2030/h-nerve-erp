@@ -322,29 +322,29 @@ prisma/
 | File | Purpose |
 |------|---------|
 | `CLAUDE.md` *(root)* | **#1 — Claude Code rules, architecture, conventions** |
-| `docs/DESIGN-SKILL.md` | **#2 — Design language (Heritage Modern + 7 others)** |
-| `docs/PHASES-INTELLIGENCE.md` | **#3 — Master roadmap (Phases 1–28+)** |
+| `docs/governance/DESIGN-SKILL.md` | **#2 — Design language (Heritage Modern + 7 others)** |
+| `docs/governance/PHASES-INTELLIGENCE.md` | **#3 — Master roadmap (Phases 1–28+)** |
 | `src/lib/brain/README.md` | Brain architecture deep-dive |
 
 ### Engineering health
 | File | Purpose |
 |------|---------|
-| `docs/AUDIT-2026-06.md` | Current health + prioritized open items |
+| `docs/status/AUDIT-2026-06.md` | Current health + prioritized open items |
 | `docs/MAP.md` | **This file** |
 
 ### Operations
 | File | Purpose |
 |------|---------|
-| `docs/DEPLOYMENT.md` | Railway deploy guide, env vars, cron setup |
-| `docs/ISOLATION.md` | Tenant isolation checklist |
+| `docs/ops/DEPLOYMENT.md` | Railway deploy guide, env vars, cron setup |
+| `docs/architecture/ISOLATION.md` | Tenant isolation checklist |
 | `docs/ops/PERFORMANCE.md` | Performance notes |
 | `docs/ops/GITHUB-WORKFLOW.md` | Branch/PR/CI conventions |
 
 ### Planning
 | File | Purpose |
 |------|---------|
-| `docs/RE-INFRASTRUCTURE-PLAN.md` | Rebuild-the-right-way spec (docs-first) |
-| `docs/BLUEPRINT.md` | High-level architecture blueprint |
+| `docs/governance/RE-INFRASTRUCTURE-PLAN.md` | Rebuild-the-right-way spec (docs-first) |
+| `docs/governance/BLUEPRINT.md` | High-level architecture blueprint |
 | `docs/phases/READINESS.md` | Pitch readiness assessment *(historical snapshot 2026-05-15; current state → AUDIT-2026-06.md)* |
 | `docs/prompts/LOGIN-REDESIGN.md` | Login cinematic redesign brief (Claude Design) |
 

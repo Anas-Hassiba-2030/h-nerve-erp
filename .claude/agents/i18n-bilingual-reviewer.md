@@ -17,7 +17,7 @@ is **Arabic** with RTL; English is secondary.
 - `src/lib/i18n/i18n.ts` + `src/lib/i18n/i18n.server.ts` — the message dictionaries
 - Any new UI text added to src/components/pages
 - RTL-aware CSS in `src/app/globals.css`
-- Font pairing rules from `docs/DESIGN-SKILL.md` §2.5
+- Font pairing rules from `docs/governance/DESIGN-SKILL.md` §2.5
 
 ## Bilingual rules
 1. **Arabic is the default.** Every label that ships to a user gets an

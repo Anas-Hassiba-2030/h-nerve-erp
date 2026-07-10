@@ -4,7 +4,7 @@
 > means — so a developer knows the bar without asking. Grounded in the actual
 > setup (`vitest.config.ts`, the `lib/**/*.test.ts` suite, 580+ passing tests (run `npm test` for the live count)).
 > Owner: platform. Last-updated: 2026-06-02.
-> Part of the spec set in `docs/RE-INFRASTRUCTURE-PLAN.md` §3.
+> Part of the spec set in `docs/governance/RE-INFRASTRUCTURE-PLAN.md` §3.
 
 ---
 

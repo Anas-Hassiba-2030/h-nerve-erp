@@ -1,6 +1,6 @@
 // SectorPill — Heritage Modern variant. Uses the current-color dot pattern
 // from `.heri-pill` so each sector gets a single chromatic accent drawn from
-// the Heritage palette (no pastel rainbow). See docs/DESIGN-SKILL.md §5.2.
+// the Heritage palette (no pastel rainbow). See docs/governance/DESIGN-SKILL.md §5.2.
 //
 // BILINGUAL: flips AR/EN via loc(); locale from the optional `locale` prop or
 // the h_nerve_locale cookie (server component). Previously rendered Arabic only.

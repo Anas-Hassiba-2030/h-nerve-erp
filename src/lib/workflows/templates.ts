@@ -4,7 +4,7 @@
 // Triggers fire on a domain event; conditions filter; actions execute.
 // New verticals add to this catalog without touching the runtime.
 //
-// Phase 12 of docs/PHASES-INTELLIGENCE.md.
+// Phase 12 of docs/governance/PHASES-INTELLIGENCE.md.
 
 export type ParamSpec =
   | { name: string; label: string; type: "number"; default: number; min?: number; max?: number; suffix?: string }

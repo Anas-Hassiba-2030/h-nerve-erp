@@ -7,7 +7,7 @@
 //   3. Bounded confidence — peer count caps the published confidence so
 //      we don't claim certainty from a small sample.
 //
-// Phase 8 of docs/PHASES-INTELLIGENCE.md.
+// Phase 8 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { prisma } from "@/lib/db/db";
 import { callLlm, extractJson, type LlmRequest } from "./llm";

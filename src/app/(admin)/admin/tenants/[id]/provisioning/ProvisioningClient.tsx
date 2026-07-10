@@ -5,7 +5,7 @@
 // pulse + duration mono badge per step. After step 5, redirects to the
 // tenant detail page.
 //
-// Phase 11 of docs/PHASES-INTELLIGENCE.md.
+// Phase 11 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";

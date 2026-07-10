@@ -1,8 +1,8 @@
 # lib/brain/ — the H-Nerve intelligence layer
 
 > **The file to reference when asking to "improve the brain":** `lib/brain/Brain.ts`
-> **The phase plan:** `docs/PHASES-INTELLIGENCE.md`
-> **The design language:** `docs/DESIGN-SKILL.md`
+> **The phase plan:** `docs/governance/PHASES-INTELLIGENCE.md`
+> **The design language:** `docs/governance/DESIGN-SKILL.md`
 
 ---
 
@@ -85,9 +85,9 @@ The brain has its own UI surfaces (Decision Theater, Brain Inspector, Self-tunin
 - Body register: IBM Plex Sans Arabic / Inter Tight at 14-16px, 1.55-1.65 leading
 - Maximum measure: 65ch on narrative blocks
 - Mono: JetBrains Mono for confidence scores, traces, IQ values
-- Animations: see `docs/DESIGN-SKILL.md` §4 — every reveal eases with `--ease-out-expo`
+- Animations: see `docs/governance/DESIGN-SKILL.md` §4 — every reveal eases with `--ease-out-expo`
 
-See `docs/DESIGN-SKILL.md` for the full design language.
+See `docs/governance/DESIGN-SKILL.md` for the full design language.
 
 ---
 
@@ -115,7 +115,7 @@ This boundary keeps the Brain auditable, replayable, and safely sandboxed for se
 ## Reading order for new contributors
 
 1. This README.
-2. `docs/PHASES-INTELLIGENCE.md` — the 20-phase plan.
-3. `docs/DESIGN-SKILL.md` — the design language.
+2. `docs/governance/PHASES-INTELLIGENCE.md` — the 20-phase plan.
+3. `docs/governance/DESIGN-SKILL.md` — the design language.
 4. `Brain.ts` — the contract.
 5. The subsystem you're working on.

@@ -6,7 +6,7 @@
 > immutable numbered records. **ADRs are append-only:** to change a decision,
 > add a new ADR that supersedes the old one — don't edit history.
 > Owner: platform. Last-updated: 2026-06-02.
-> Part of the spec set in `docs/RE-INFRASTRUCTURE-PLAN.md` §3.
+> Part of the spec set in `docs/governance/RE-INFRASTRUCTURE-PLAN.md` §3.
 
 Format per record: **Context → Decision → Consequences**. Status is `Accepted`
 unless noted.
@@ -67,7 +67,7 @@ opaque `tenantId`). `prismaUnscoped` is the explicit escape hatch and every call
 site carries `// CROSS-TENANT INTENT:`.
 **Consequences.** Isolation is unit-tested with no DB. The null-cookie
 pass-through invariant guarantees single-tenant behavior is unchanged. New
-tenant-keyed models **must** be added to the right set. See `docs/ISOLATION.md`
+tenant-keyed models **must** be added to the right set. See `docs/architecture/ISOLATION.md`
 and `docs/spec/DATA-MODEL.md` §2.
 
 ## ADR-006 — Arabic-default, RTL, bilingual via a hardcoded dictionary
@@ -83,7 +83,7 @@ translations. RTL must be tested on every surface.
 
 ## ADR-007 — One design vocabulary per surface
 **Status:** Accepted.
-**Context.** `docs/DESIGN-SKILL.md` documents eight aesthetic vocabularies; mixing
+**Context.** `docs/governance/DESIGN-SKILL.md` documents eight aesthetic vocabularies; mixing
 them on one surface looks incoherent.
 **Decision.** Operator UI = **Heritage Modern**; Admin console = **Sleek
 Operator**; Theater = its own editorial register. **Never mix** on one surface.

@@ -17,7 +17,7 @@
 //   │ tags · outcome chip · similarity %    │
 //   └───────────────────────────────────────┘
 //
-// Phase 6 of docs/PHASES-INTELLIGENCE.md.
+// Phase 6 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { Quote } from "lucide-react";
 import { HeritagePill } from "@/components/heritage";

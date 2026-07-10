@@ -29,7 +29,7 @@
 // itself — every other subsystem is data-in / answer-out. This one
 // reaches into prompts, weights, and edge confidences and changes them.
 //
-// See docs/PHASES-INTELLIGENCE.md — Phase 10 (the final phase).
+// See docs/governance/PHASES-INTELLIGENCE.md — Phase 10 (the final phase).
 
 export type SelfTuningReport = {
   id: string;

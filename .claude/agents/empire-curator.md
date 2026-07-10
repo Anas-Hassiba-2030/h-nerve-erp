@@ -20,7 +20,7 @@ boardrooms — 8 brains, one screen.
 - `.emp-*` primitives in `src/app/globals.css`
 
 ## Aesthetic
-**Quiet Authority** per `docs/DESIGN-SKILL.md` §1.C:
+**Quiet Authority** per `docs/governance/DESIGN-SKILL.md` §1.C:
 - Deep ink + warm gray + a single deep saturated accent (oxblood `#6b1d23`)
 - Geometric grids, no gradients, no shadows, restrained spacing
 - Tabular numerals everywhere

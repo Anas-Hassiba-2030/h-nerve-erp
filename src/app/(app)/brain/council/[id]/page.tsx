@@ -6,7 +6,7 @@
 // if present. The transcript itself is rendered by <CouncilTranscript/>, which
 // runs the choreographed debate + confidence tick-up.
 //
-// Phase 3 of docs/PHASES-INTELLIGENCE.md.
+// Phase 3 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { notFound } from "next/navigation";
 import Link from "next/link";

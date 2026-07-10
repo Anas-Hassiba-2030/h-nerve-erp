@@ -1,6 +1,6 @@
 # Phase 8 — Federation
 
-Spec: `docs/PHASES-INTELLIGENCE.md` §"Phase 8 — The Cross-Org Federation" (lines 208–228). Multi-tenant federated learning: anonymized patterns flow between opted-in orgs, raising every brain's intelligence floor. Aesthetic = Quiet Authority, single copper accent, signature 700ms ochre scan-line on benchmark load.
+Spec: `docs/governance/PHASES-INTELLIGENCE.md` §"Phase 8 — The Cross-Org Federation" (lines 208–228). Multi-tenant federated learning: anonymized patterns flow between opted-in orgs, raising every brain's intelligence floor. Aesthetic = Quiet Authority, single copper accent, signature 700ms ochre scan-line on benchmark load.
 
 ## Current state (what already exists in the repo, with file paths)
 Most of Phase 8 already ships:
@@ -35,7 +35,7 @@ Modified:
 ## Risks (technical + product, ranked)
 1. **Privacy claims vs reality (highest).** The UI promises "mathematically perturbed so no pattern can be traced back" and an enforced budget, but noise isn't applied and budget isn't enforced. In a pitch this is a credibility/legal risk — fix before any real cross-tenant data flows.
 2. **No real multi-tenant data path.** `FederationPeer` is seeded synthetically; there's no inbound/outbound peer protocol. Shipping "federation" with only `seedFederation.ts` is a demo, not a live network — set expectations or build the wire.
-3. **Cross-tenant isolation drift.** `aggregate()` reads peers via the scoped `prisma` and `enforceScope(undefined)` is the intentional cross-tenant escape hatch; any change must keep a `// CROSS-TENANT INTENT:` comment per `docs/ISOLATION.md` or it silently leaks.
+3. **Cross-tenant isolation drift.** `aggregate()` reads peers via the scoped `prisma` and `enforceScope(undefined)` is the intentional cross-tenant escape hatch; any change must keep a `// CROSS-TENANT INTENT:` comment per `docs/architecture/ISOLATION.md` or it silently leaks.
 4. **DP correctness (medium).** Naive Laplace on a small sample can flip signs/mislead; needs sensitivity bounds + tests, not a one-liner.
 5. **LLM cost/stub drift (low).** `draftFederationStatement` calls `callLlm`; cron-driven aggregation could spend API credit — keep stub-mode default and cache by `clusterKey`.
 

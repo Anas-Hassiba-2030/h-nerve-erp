@@ -8,7 +8,7 @@
 // Server component — reads as-of state directly. The banner is hidden
 // when as-of is null.
 //
-// Phase 16 of docs/PHASES-INTELLIGENCE.md.
+// Phase 16 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { brainIqDelta, formatAsOfLabel, getAsOf } from "@/lib/utils/timemachine";
 import { ClockArrowDown } from "lucide-react";

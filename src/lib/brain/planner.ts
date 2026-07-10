@@ -15,7 +15,7 @@
 // or accept one written by hand. Plans are first-class entities in the
 // schema (see Phase 5).
 //
-// See docs/PHASES-INTELLIGENCE.md — Phase 5.
+// See docs/governance/PHASES-INTELLIGENCE.md — Phase 5.
 
 export type PlanStep = {
   order: number;

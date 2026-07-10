@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 // control buttons drive the existing server actions. The look is the
 // design; the data is real.
 //
-// Phase 12 of docs/PHASES-INTELLIGENCE.md.
+// Phase 12 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import Link from "next/link";
 import { prisma } from "@/lib/db/db";

@@ -2,7 +2,7 @@
 //
 // The Living Protocol — H-Nerve as an open intelligence layer.
 //
-// Phase 20 of docs/PHASES-INTELLIGENCE.md. The final phase.
+// Phase 20 of docs/governance/PHASES-INTELLIGENCE.md. The final phase.
 //
 // This file defines the public surface that lets anyone build:
 //   1. Agents — small, single-purpose deciders that return votes/proposals

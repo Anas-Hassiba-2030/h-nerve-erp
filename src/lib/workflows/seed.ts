@@ -1,5 +1,5 @@
 // seed.ts — produce 2 example workflows so the index isn't empty.
-// Phase 12 of docs/PHASES-INTELLIGENCE.md.
+// Phase 12 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { prisma } from "@/lib/db/db";
 import { defaultParams, getTemplate } from "./templates";

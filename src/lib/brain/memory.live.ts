@@ -10,7 +10,7 @@
 // pgvector column is a later scale optimization; in-process cosine is fine
 // for the corpus sizes we have, and stays SQLite-compatible for dev.)
 //
-// Phase 6 of docs/PHASES-INTELLIGENCE.md.
+// Phase 6 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { prisma } from "@/lib/db/db";
 import type { Memory, MemoryLake, RecallQuery } from "./memory";
@@ -231,7 +231,7 @@ class LiveMemoryLake implements MemoryLake {
         // cosineSim would silently compare truncated, mismatched feature spaces
         // and score noise. Skip the mismatch → it falls through to a clean miss
         // instead of a misleading similarity. Re-embed memories after changing
-        // the embedding provider (see docs/BRAIN-DB-LINK-RUNBOOK.md).
+        // the embedding provider (see docs/ops/BRAIN-DB-LINK-RUNBOOK.md).
         if (stored.length !== queryDense.length) continue;
         sim = cosineSim(queryDense, stored);
       } else {

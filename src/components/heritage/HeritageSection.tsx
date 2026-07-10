@@ -3,7 +3,7 @@
 // soft "card with rounded ring + emoji icon" pattern that was producing
 // visual mush below the hero.
 //
-// See docs/DESIGN-SKILL.md §5.5 (three-tier hierarchy) and §1.D (vocabulary).
+// See docs/governance/DESIGN-SKILL.md §5.5 (three-tier hierarchy) and §1.D (vocabulary).
 
 import React from "react";
 import Link from "next/link";

@@ -1,6 +1,6 @@
 // /theater/council/[id] — The Decision Theater for a council session.
 //
-// Phase 9 of docs/PHASES-INTELLIGENCE.md. The composition phase: pulls
+// Phase 9 of docs/governance/PHASES-INTELLIGENCE.md. The composition phase: pulls
 // situation (Phase 4 narrator) + history (Phase 6 memory) + simulation
 // (Phase 2 simulator) + council voices (Phase 3) + plan (Phase 5) into
 // a fullscreen 5-act magazine spread.

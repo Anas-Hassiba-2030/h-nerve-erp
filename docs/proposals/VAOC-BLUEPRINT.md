@@ -42,11 +42,11 @@ foundation for a *generalized* protocol (VAOC), not a one-off.
 - `agents/*.ts` `AgentDef` interface — the plug-in contract for a "worker agent."
   Generalizing this from "industry expert" to "engineering role" (architect,
   reviewer, tester, deployer) is a naming change, not a redesign.
-- `docs/SYSTEM-BLUEPRINT.md` — already *is* a generalized "how to bootstrap any
+- `docs/governance/SYSTEM-BLUEPRINT.md` — already *is* a generalized "how to bootstrap any
   system" playbook (stack choices, layered architecture, security baseline,
   bootstrap checklist). This is the non-agent half of VAOC: the standards a
   VAOC-built system should be held to.
-- `docs/BLUEPRINT.md` — the distilled agent-pattern doc, written explicitly to
+- `docs/governance/BLUEPRINT.md` — the distilled agent-pattern doc, written explicitly to
   be lifted into someone else's app. Already written for portability.
 - The read-mostly boundary rule — directly reusable as VAOC's core safety
   invariant: agents propose, a human (or a gated action) commits.
@@ -123,7 +123,7 @@ bar as a research finding, not trusted on tone alone.
    read/reason tasks; add a hierarchical/handoff mode for build tasks
    (matches the "Hierarchical" + "Supervisor (as tools)" patterns from the
    LangGraph diagram you shared).
-4. **Treat `docs/SYSTEM-BLUEPRINT.md` as VAOC's constitution.** Any system
+4. **Treat `docs/governance/SYSTEM-BLUEPRINT.md` as VAOC's constitution.** Any system
    VAOC stands up should be checked against it (stack, layering, security
    baseline) — this is the reusable "what good looks like" the agents build
    toward.

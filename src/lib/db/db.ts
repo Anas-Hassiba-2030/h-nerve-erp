@@ -37,7 +37,7 @@ function baseClient(): PrismaClient {
   // Direct connection; pool size = Prisma default (num_cpus × 2 + 1) unless
   // DATABASE_URL carries ?connection_limit=. At ~15+ concurrent users the
   // direct Postgres budget exhausts — the fix is the PgBouncer sidecar, an
-  // env-only switch documented in docs/DEPLOYMENT.md § Connection pooling.
+  // env-only switch documented in docs/ops/DEPLOYMENT.md § Connection pooling.
   return new PrismaClient({ log: logLevels() });
 }
 

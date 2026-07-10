@@ -29,7 +29,7 @@ and the Arena Space brand inside the codebase.
    row on the index page.
 3. Every UI text defaults to **Arabic**. English appears as a secondary label
    only when the data is genuinely English (codes, emails, ISO).
-4. Use Heritage Modern (`docs/DESIGN-SKILL.md` §1.D) — cream, ochre, copper,
+4. Use Heritage Modern (`docs/governance/DESIGN-SKILL.md` §1.D) — cream, ochre, copper,
    terracotta, ink. **One vocabulary per surface.** Never mix with Industrial
    Precision or Brutalist Confidence on the same page.
 5. Numbers always tabular (`font-variant-numeric: tabular-nums`).

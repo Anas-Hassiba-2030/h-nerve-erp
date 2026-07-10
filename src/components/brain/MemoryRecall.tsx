@@ -1,6 +1,6 @@
 // MemoryRecall — server component that renders matched memories as a
 // horizontal carousel beneath an alert/insight. Shows the "I remember
-// when..." cards from Phase 6 of docs/PHASES-INTELLIGENCE.md.
+// when..." cards from Phase 6 of docs/governance/PHASES-INTELLIGENCE.md.
 //
 // This is a server component. It runs the recall query at render time so
 // the page is fully populated on first paint — no client fetch needed.

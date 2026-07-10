@@ -11,7 +11,7 @@
 // feedback loop (Phase 7) will adjust their weights over time, and the
 // Meta brain (Phase 10) will eventually rewrite them.
 //
-// Phase 1 of docs/PHASES-INTELLIGENCE.md.
+// Phase 1 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { prisma } from "@/lib/db/db";
 

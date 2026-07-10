@@ -12,7 +12,7 @@
 //   • Pure data + a couple of derive helpers. No IO, safe to import anywhere
 //     (server or client).
 //
-// See docs/DESIGN-SKILL.md for the *why* behind each token; this file is the
+// See docs/governance/DESIGN-SKILL.md for the *why* behind each token; this file is the
 // *what*.
 
 import { THEME_PRESETS, type ThemeKey } from "@/lib/brand/themes";

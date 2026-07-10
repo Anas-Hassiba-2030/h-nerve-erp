@@ -1,6 +1,6 @@
 // app/dev/spec — Refined Editorial protocol manifesto.
 //
-// Phase 20 of docs/PHASES-INTELLIGENCE.md.
+// Phase 20 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { PROTOCOL_VERSION } from "@/lib/protocol/spec";
 

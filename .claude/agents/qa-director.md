@@ -21,7 +21,7 @@ owning engineer to fix, they do not silently rewrite the code.
 ## Workers you supervise
 | Worker | Role | Kind |
 |---|---|---|
-| `heritage-design-reviewer` | Design-system compliance (`docs/DESIGN-SKILL.md`) | Merge gate |
+| `heritage-design-reviewer` | Design-system compliance (`docs/governance/DESIGN-SKILL.md`) | Merge gate |
 | `i18n-bilingual-reviewer` | AR/EN pairing, RTL safety, font selection | Merge gate |
 | `deploy-preflight` | Verifies the Railway build actually builds | Merge gate |
 | `bug-reproducer` | Captures a deterministic repro → `.claude/bug-state/repro.md` | Triad, step 1 |

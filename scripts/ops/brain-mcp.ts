@@ -1,7 +1,7 @@
 // scripts/ops/brain-mcp.ts
 //
 // Stdio MCP server exposing the H-Nerve brain tools to external clients
-// (Claude Desktop, demos). Full setup: docs/BRAIN-DB-LINK-RUNBOOK.md.
+// (Claude Desktop, demos). Full setup: docs/ops/BRAIN-DB-LINK-RUNBOOK.md.
 //
 // THREE things must be right or it won't link:
 //  1. CWD = repo root. The brain tool tree imports via the `@/*` tsconfig

@@ -2,7 +2,7 @@
 //
 // Industrial Precision (DESIGN-SKILL §1.B). Off-black canvas, luminous
 // hairline edges, palette on the left, inspector on the right, test-run
-// strip at the bottom. Phase 12 of docs/PHASES-INTELLIGENCE.md.
+// strip at the bottom. Phase 12 of docs/governance/PHASES-INTELLIGENCE.md.
 
 // Import the studio CSS DIRECTLY — globals.css's @import of phase12-workflow.css
 // is not inlined into this route's chunk in the production build, so the studio

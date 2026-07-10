@@ -1,7 +1,7 @@
 // Palette — left panel of the studio. Click a template to drop it onto
 // the canvas (auto-placed in its column). No drag, no fuss.
 //
-// Phase 12 of docs/PHASES-INTELLIGENCE.md.
+// Phase 12 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { addNode } from "@/app/(app)/workflows/actions";
 import type { Template } from "@/lib/workflows/templates";

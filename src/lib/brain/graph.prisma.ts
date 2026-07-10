@@ -4,7 +4,7 @@
 // All graph traversal happens in-memory after loading the relevant slice;
 // for the demo dataset (~50 nodes, ~120 edges) this is comfortably fast.
 //
-// Phase 1 of docs/PHASES-INTELLIGENCE.md.
+// Phase 1 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { prisma } from "@/lib/db/db";
 import type { CausalGraph, GraphNode, GraphEdge, NodeKind, CausalEdgeKind } from "./graph";

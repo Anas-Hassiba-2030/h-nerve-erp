@@ -3,7 +3,7 @@
 // hover. The single chromatic touch is the rail color along the start
 // edge, matched to the linked module's role.
 //
-// See docs/DESIGN-SKILL.md §5.1 + §1.D.
+// See docs/governance/DESIGN-SKILL.md §5.1 + §1.D.
 
 import React from "react";
 import Link from "next/link";

@@ -1,6 +1,6 @@
 # Phase 12 — Workflow Studio
 
-Visual trigger → condition → action automation across modules (docs/PHASES-INTELLIGENCE.md §Phase 12). This proposal scopes what remains; a surprising amount already ships.
+Visual trigger → condition → action automation across modules (docs/governance/PHASES-INTELLIGENCE.md §Phase 12). This proposal scopes what remains; a surprising amount already ships.
 
 ## Current state (what already exists in the repo, with file paths)
 
@@ -18,7 +18,7 @@ The "build and test a flow" half is largely done; the "run it for real" half is 
 2. All `evalAction` branches return `[dry]`/placeholder strings (runtime.ts:354-393) — no action mutates anything, even in `"real"` mode. The comment defers real handlers to "Phase 13 integrations."
 3. `updateNodeConfig` action exists but **no canvas UI calls it** — params can only be set via gallery clone or DB; the inspector panel on `page.tsx` is read-only stats.
 4. Conditions `severity_at_least`/`tenant_pack` use hardcoded payloads (runtime.ts:332-344) — no trigger-event payload threads through the graph.
-5. `Workflow*` models are **not** in `TENANT_SCOPED_MODELS` (`lib/workspaceScope.ts`); every query uses the `scope` string column without enforcement — cross-tenant leak risk (docs/ISOLATION.md).
+5. `Workflow*` models are **not** in `TENANT_SCOPED_MODELS` (`lib/workspaceScope.ts`); every query uses the `scope` string column without enforcement — cross-tenant leak risk (docs/architecture/ISOLATION.md).
 
 ## Scope (what "shipping this phase" concretely means)
 
@@ -26,7 +26,7 @@ The "build and test a flow" half is largely done; the "run it for real" half is 
 2. **Scheduled execution** — a cron path that finds `enabled` workflows with `time.*` triggers and runs them in `"real"` mode, stamping `triggeredBy="schedule:<cron>"`. Reuse the existing `.github/workflows/brain-cron.yml` pattern or an `/api/workflows/run` route.
 3. **Trigger-payload threading** — triggers emit a payload (count, severity, entity) carried into conditions/actions so `severity_at_least` and action messages are real, not constant.
 4. **Real action handlers** — minimally `create_insight`, `generate_plan`, `record_memory` (in-system, no external integration) writing through existing brain/insight paths, honoring the read-mostly boundary (actions are the sanctioned write seam). Slack/email stay `[dry]` until Phase 13.
-5. **Tenant isolation** — add `Workflow`/`WorkflowNode`/`WorkflowEdge`/`WorkflowRun` to scoping per docs/ISOLATION.md, or document the deliberate `scope`-column approach with a `// CROSS-TENANT INTENT:` audit.
+5. **Tenant isolation** — add `Workflow`/`WorkflowNode`/`WorkflowEdge`/`WorkflowRun` to scoping per docs/architecture/ISOLATION.md, or document the deliberate `scope`-column approach with a `// CROSS-TENANT INTENT:` audit.
 
 ## Files to touch (bullet list of concrete new + modified paths)
 

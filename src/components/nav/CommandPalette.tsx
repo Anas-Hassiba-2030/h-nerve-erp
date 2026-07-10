@@ -27,7 +27,7 @@ type Item = {
 
 const ENTRIES_AR: Item[] = [
   // Pseudo-href — handled specially in go() to open the Conversational overlay
-  // instead of routing. Phase 15 of docs/PHASES-INTELLIGENCE.md.
+  // instead of routing. Phase 15 of docs/governance/PHASES-INTELLIGENCE.md.
   { href: "__ask_brain__",   label: "تحدّث مع الدماغ",        hint: "⌘J",          icon: MessageCircle,    group: "المساحة", keys: ["brain","ask","talk","تحدث","سؤال","دماغ"] },
   { href: "/dashboard",      label: "اللوحة التنفيذية",     hint: "نظرة عامة",    icon: LayoutDashboard, group: "المساحة", keys: ["dashboard","لوحة","executive"] },
   { href: "/companies",      label: "شركات المجموعة",       hint: "السجل القابض", icon: Building2,        group: "المساحة", keys: ["companies","شركات","group"] },

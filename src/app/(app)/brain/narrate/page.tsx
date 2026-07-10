@@ -6,7 +6,7 @@
 // individual dashboard pages via hover tooltip; this page shows the audit log.
 //
 // Aesthetic: brain night register (reuses trust.css).
-// See docs/PHASES-INTELLIGENCE.md § Phase 4.
+// See docs/governance/PHASES-INTELLIGENCE.md § Phase 4.
 
 import "../../daylight.css";
 import "../trust/trust.css";

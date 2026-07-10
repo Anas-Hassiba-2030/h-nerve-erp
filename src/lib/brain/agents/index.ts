@@ -3,7 +3,7 @@
 // Each specialist is an AgentDef. The Moderator is separate (it runs after,
 // with the specialists' transcript as input). See base.ts for the contract.
 //
-// Phase 3 of docs/PHASES-INTELLIGENCE.md.
+// Phase 3 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import type { AgentDef } from "./base";
 import { HospitalityExpert } from "./HospitalityExpert";

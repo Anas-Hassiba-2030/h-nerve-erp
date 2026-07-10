@@ -1,7 +1,7 @@
 // Pullquote — magazine-style oversized quote with attribution.
 // Used inside Act IV (Council) to surface the most striking line per voice.
 //
-// Phase 9 of docs/PHASES-INTELLIGENCE.md.
+// Phase 9 of docs/governance/PHASES-INTELLIGENCE.md.
 
 export function Pullquote({
   quote,

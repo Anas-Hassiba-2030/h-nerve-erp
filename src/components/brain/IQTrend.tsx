@@ -4,7 +4,7 @@
 // emphasized with a 4px ochre dot. Hairline reference grid every 20 IQ
 // points. Subtle area fill under the line.
 //
-// Phase 10 of docs/PHASES-INTELLIGENCE.md.
+// Phase 10 of docs/governance/PHASES-INTELLIGENCE.md.
 
 export function IQTrend({
   history,

@@ -8,7 +8,7 @@
 //
 // Auth-gated like the rest of the brain surface: session OR CRON_SECRET.
 //
-// Phase 7 of docs/PHASES-INTELLIGENCE.md.
+// Phase 7 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/db";

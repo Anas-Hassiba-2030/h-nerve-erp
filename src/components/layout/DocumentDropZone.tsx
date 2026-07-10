@@ -2,7 +2,7 @@
 //
 // Global drop overlay + extraction modal.
 //
-// Phase 18 of docs/PHASES-INTELLIGENCE.md.
+// Phase 18 of docs/governance/PHASES-INTELLIGENCE.md.
 //
 // Drop any file anywhere on the app. The window darkens, a still
 // "Reading the document" frame appears (intentionally no spinner).

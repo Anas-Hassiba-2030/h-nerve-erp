@@ -6,7 +6,7 @@
 //
 // Auth-gated: ADMIN role required.
 //
-// Phase 11 of docs/PHASES-INTELLIGENCE.md.
+// Phase 11 of docs/governance/PHASES-INTELLIGENCE.md.
 
 // IMPORTANT — import the admin CSS DIRECTLY here, not via globals.css's
 // @import. In the production build Next does NOT inline globals.css @imports

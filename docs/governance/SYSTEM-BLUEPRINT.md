@@ -7,9 +7,9 @@
 > design, architect, or bootstrap a new system, **read this first and build
 > against it.**
 >
-> Companion docs: `docs/BLUEPRINT.md` (the Brain intelligence-layer pattern),
-> `docs/MAP.md` (this repo's file map), `docs/ISOLATION.md` (multi-tenancy
-> checklist), `docs/DEPLOYMENT.md` (deploy specifics).
+> Companion docs: `docs/governance/BLUEPRINT.md` (the Brain intelligence-layer pattern),
+> `docs/MAP.md` (this repo's file map), `docs/architecture/ISOLATION.md` (multi-tenancy
+> checklist), `docs/ops/DEPLOYMENT.md` (deploy specifics).
 
 ---
 
@@ -47,7 +47,7 @@
 | Styling | **Tailwind + a small set of brand classes** | Reuse named classes (`.btn`, `.card`, `.kpi`) over utility soup; theme via CSS-variable overrides at the route-group root. |
 | Deploy | **Railway** (container, Postgres attached) | `preDeploy` runs migrations + idempotent seeds; healthcheck + restart policy. |
 | Tests | **Vitest** (pure unit) | Fast node-env suite over the logic layer; no DB/network/runtime. |
-| Intelligence | **MCP tool registry + orchestrator loop** | Typed tools fronted by an LLM tool-loop; same tools exposed over stdio MCP. See `docs/BLUEPRINT.md`. |
+| Intelligence | **MCP tool registry + orchestrator loop** | Typed tools fronted by an LLM tool-loop; same tools exposed over stdio MCP. See `docs/governance/BLUEPRINT.md`. |
 
 **Pin your runtime.** Set `engines.node` in `package.json` to the framework's
 minimum (e.g. `">=20.9.0"` for Next 16). Nixpacks/most builders read it. The
@@ -162,7 +162,7 @@ domain folders, not flat dumps. A new file lives inside the pillar it serves.
   key to go LIVE. Never spend paid credits without explicit go-ahead.
 - **Subagents = one owner per pillar.** Keep `.claude/agents/*` briefs accurate
   to the current layout (stale paths steer future work into dead ends). A
-  registry doc (`docs/SUBAGENTS-AND-MCP-CATALOG.md`) lists every agent + MCP:
+  registry doc (`docs/architecture/SUBAGENTS-AND-MCP-CATALOG.md`) lists every agent + MCP:
   name, purpose, trigger, location.
 
 ---

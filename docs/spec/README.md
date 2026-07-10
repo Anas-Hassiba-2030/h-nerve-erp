@@ -2,7 +2,7 @@
 
 The build-from-scratch specification stack: the documents an engineer needs to
 build (or rebuild) H-Nerve **without coming back to ask**. Generated for the
-re-infrastructure effort — see `docs/RE-INFRASTRUCTURE-PLAN.md` for the strategy
+re-infrastructure effort — see `docs/governance/RE-INFRASTRUCTURE-PLAN.md` for the strategy
 and the full 13-document gap analysis this folder draws from.
 
 Each doc is **derived from the codebase** (accurate, not aspirational) and points
@@ -21,11 +21,11 @@ to source files for detail so it won't drift.
 | **PRD** (per capability) | Product | User stories, **acceptance criteria**, non-goals, success metrics | ⏳ needs product intent (do with Anas) |
 
 ## Already-strong docs elsewhere (not duplicated here)
-- Roadmap → `docs/PHASES-INTELLIGENCE.md`
-- Design language → `docs/DESIGN-SKILL.md`
-- Brain architecture → `docs/BLUEPRINT.md`, `lib/brain/README.md`
-- Tenancy checklist → `docs/ISOLATION.md`
-- Ops/deploy → `docs/RUNBOOK.md`, `docs/DEPLOYMENT.md`, `docs/phases/READINESS.md`
+- Roadmap → `docs/governance/PHASES-INTELLIGENCE.md`
+- Design language → `docs/governance/DESIGN-SKILL.md`
+- Brain architecture → `docs/governance/BLUEPRINT.md`, `lib/brain/README.md`
+- Tenancy checklist → `docs/architecture/ISOLATION.md`
+- Ops/deploy → `docs/ops/RUNBOOK.md`, `docs/ops/DEPLOYMENT.md`, `docs/phases/READINESS.md`
 - Git workflow → `docs/ops/GITHUB-WORKFLOW.md`
 - Conventions → `CLAUDE.md`
 
@@ -34,4 +34,4 @@ Read `DATA-MODEL` + `API-CONTRACTS` + `GLOSSARY` to understand the system;
 `ADRS` for why it's shaped this way; `TEST-STRATEGY` + `THREAT-MODEL` for the
 quality and security bars. Then, per feature, write the **PRD** (the one doc that
 needs human product intent) and build against the whole set — generating
-per-module execution prompts as `docs/RE-INFRASTRUCTURE-PLAN.md` §1 describes.
+per-module execution prompts as `docs/governance/RE-INFRASTRUCTURE-PLAN.md` §1 describes.

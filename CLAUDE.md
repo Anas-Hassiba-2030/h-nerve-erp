@@ -8,25 +8,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The differentiator is the **Brain** — a causal-graph + multi-agent + memory + planner intelligence layer that sits beneath every screen. The brain reasons about the business, debates decisions, plans actions, learns from outcomes, and tunes itself weekly.
 
-UI is bilingual (ar/en) with RTL. Default theme is **Heritage Modern** (`docs/DESIGN-SKILL.md` §1.D).
+UI is bilingual (ar/en) with RTL. Default theme is **Heritage Modern** (`docs/governance/DESIGN-SKILL.md` §1.D).
 
 ## The three documents that govern this codebase
 
 These files are the source of truth. Reference them by path in any conversation about this project:
 
-1. **`docs/DESIGN-SKILL.md`** — the design language. Heritage Modern is the default. Eight aesthetic vocabularies are documented; pick ONE per surface; never mix.
-2. **`docs/PHASES-INTELLIGENCE.md`** — the master plan (Phases 1–27 across five waves: **A** Brain 1–10, **B** Platform 11–15, **C** Theater 16–19, **D** Empire 20, **E** Genesis & Hardening 21–26, plus **Phase 27** ERP modules — backlog). On top of this, a **RAG re-architecture** (RAG-1…RAG-7) is fully shipped — see the Brain section below. Health + open items: `docs/AUDIT-2026-06.md`.
+1. **`docs/governance/DESIGN-SKILL.md`** — the design language. Heritage Modern is the default. Eight aesthetic vocabularies are documented; pick ONE per surface; never mix.
+2. **`docs/governance/PHASES-INTELLIGENCE.md`** — the master plan (Phases 1–27 across five waves: **A** Brain 1–10, **B** Platform 11–15, **C** Theater 16–19, **D** Empire 20, **E** Genesis & Hardening 21–26, plus **Phase 27** ERP modules — backlog). On top of this, a **RAG re-architecture** (RAG-1…RAG-7) is fully shipped — see the Brain section below. Health + open items: `docs/status/AUDIT-2026-06.md`.
 3. **`lib/brain/README.md`** + **`lib/brain/tools/`** — the brain architecture. The brain is fronted by a tool registry (`lib/brain/tools/index.ts`), an orchestrator tool-loop (`lib/brain/orchestrator.ts`), and a stdio MCP server (`lib/brain/mcp/server.ts`, launched via `scripts/ops/brain-mcp.ts`). The old `Brain.ts` composition root is retired.
 
-When the user says **"improve the brain"**, that means `lib/brain/` — the tools, the orchestrator, and the subsystem files. When the user says **"apply the design skill to X"**, that means `docs/DESIGN-SKILL.md` § the appropriate vocabulary.
+When the user says **"improve the brain"**, that means `lib/brain/` — the tools, the orchestrator, and the subsystem files. When the user says **"apply the design skill to X"**, that means `docs/governance/DESIGN-SKILL.md` § the appropriate vocabulary.
 
-> **REQUIRED READING — `docs/SYSTEM-BLUEPRINT.md`.** When the user asks to
+> **REQUIRED READING — `docs/governance/SYSTEM-BLUEPRINT.md`.** When the user asks to
 > design, blueprint, architect, or build a **new system** for a company (or any
-> new project from scratch), you MUST read `docs/SYSTEM-BLUEPRINT.md` first and
+> new project from scratch), you MUST read `docs/governance/SYSTEM-BLUEPRINT.md` first and
 > base the plan and implementation on its principles, stack, structure, security
 > baseline, and bootstrap checklist. It is the distilled, battle-tested playbook
 > behind this codebase — apply it so the new build starts on ideal foundations.
-> (`docs/BLUEPRINT.md` is the narrower companion: the read-mostly Brain
+> (`docs/governance/BLUEPRINT.md` is the narrower companion: the read-mostly Brain
 > intelligence-layer pattern.)
 
 > **Lost? Need to find where something lives?** `docs/MAP.md` is the
@@ -35,23 +35,23 @@ When the user says **"improve the brain"**, that means `lib/brain/` — the tool
 
 ## ⏰ Standing reminder — Phase 27 (ERP modules)
 
-Anas is studying ERP and will bring source material (the "13 ERP modules" + functionality) ~early-mid June 2026 to plan a final enrichment wave. **When he mentions ERP study / sources / modules, surface `docs/PHASES-INTELLIGENCE.md` § Phase 27** and plan it with him. Don't start it before the sources arrive.
+Anas is studying ERP and will bring source material (the "13 ERP modules" + functionality) ~early-mid June 2026 to plan a final enrichment wave. **When he mentions ERP study / sources / modules, surface `docs/governance/PHASES-INTELLIGENCE.md` § Phase 27** and plan it with him. Don't start it before the sources arrive.
 
 ## Design backlog (Anas's animation priorities)
 
 - **Login redesign** — a heavily-animated, cinematic "living nervous system" login. The full design brief Anas feeds to Claude Design lives in **`docs/prompts/LOGIN-REDESIGN.md`**. The login page (`app/(auth)/login/`) is being redesigned **in Claude Design** — coordinate, don't blindly overwrite it.
-- **Phase 28 — The Companion ("the soul")** — a roaming ambient animated light-being that adds personality. See `docs/PHASES-INTELLIGENCE.md` § Phase 28. Lower priority than the login.
+- **Phase 28 — The Companion ("the soul")** — a roaming ambient animated light-being that adds personality. See `docs/governance/PHASES-INTELLIGENCE.md` § Phase 28. Lower priority than the login.
 
 ## Health & open items
 
 Current engineering health + the prioritized open-item backlog live in
-**`docs/AUDIT-2026-06.md`** (lint/types/tests/build all green; in-progress
+**`docs/status/AUDIT-2026-06.md`** (lint/types/tests/build all green; in-progress
 phases 21/22/24/26; infra recommendations). Read it for "where do we stand /
 what's left."
 
 ## Re-infrastructure ("rebuild the right way") — read this first
 
-When the user talks about **re-infrastructuring / rebuilding the system the right way**, the RAG/book analysis, the document set engineers need, or generating execution prompts for a rebuild → **`docs/RE-INFRASTRUCTURE-PLAN.md` is the source of truth.** It captures everything agreed: the docs-first / fresh-session rebuild philosophy (don't rebuild from zero — derive specs from the working code, then refactor module-by-module), the prioritized RAG re-architecture roadmap, and the 13-document spec stack with its gap analysis. The re-infra session plan: generate `docs/spec/` (Data Model/ERD + API contract catalog first), then build against it.
+When the user talks about **re-infrastructuring / rebuilding the system the right way**, the RAG/book analysis, the document set engineers need, or generating execution prompts for a rebuild → **`docs/governance/RE-INFRASTRUCTURE-PLAN.md` is the source of truth.** It captures everything agreed: the docs-first / fresh-session rebuild philosophy (don't rebuild from zero — derive specs from the working code, then refactor module-by-module), the prioritized RAG re-architecture roadmap, and the 13-document spec stack with its gap analysis. The re-infra session plan: generate `docs/spec/` (Data Model/ERD + API contract catalog first), then build against it.
 
 ## Commands
 
@@ -91,7 +91,7 @@ The App Router uses **four** groups, each with its own `layout.tsx`:
 
 - `app/(auth)/` — public (login, signup, `/logout` route handler). Auth-only chrome.
 - `app/(app)/` — every authenticated operator page. The layout calls `getCurrentUser()`, redirects to `/login` on empty session, then renders Sidebar + Topbar + global overlays (ToastProvider, OnboardingTour, QuickAddFAB, Conversational, TimeScrubber/TimeMachineBanner, ViewAsBanner, RealtimePresence, DocumentDropZone). **Adding a new authenticated page = drop a folder under `app/(app)/<thing>/page.tsx`** — auth and chrome are inherited.
-- `app/(admin)/` — superadmin console (Phase 11). **Sleek Operator** vocabulary (`docs/DESIGN-SKILL.md` §1.F), cyan-on-near-black, no operator chrome. Houses `/admin/tenants`, `/admin/empire`, `/admin/system`. **Hard-gated to `role === "ADMIN"`** (`app/(admin)/layout.tsx` redirects non-admins to `/dashboard`).
+- `app/(admin)/` — superadmin console (Phase 11). **Sleek Operator** vocabulary (`docs/governance/DESIGN-SKILL.md` §1.F), cyan-on-near-black, no operator chrome. Houses `/admin/tenants`, `/admin/empire`, `/admin/system`. **Hard-gated to `role === "ADMIN"`** (`app/(admin)/layout.tsx` redirects non-admins to `/dashboard`).
 - `app/(theater)/` — fullscreen Decision Theater (Phase 9). No sidebar, no footer — the user steps **out** of the dashboard into a magazine spread. ESC returns them.
 - `app/m/` — mobile-first surface (Phase 14, see `lib/mobile/today.ts`).
 - `app/page.tsx` — bare router: signed-in → `/orrery` (the Orrery hub), otherwise → `/login`.
@@ -119,7 +119,7 @@ This is its own architectural pillar. There is no single conductor class anymore
 | `meta.ts` / `meta.reflector.ts` | 10 | Self-reflection; owns the Brain IQ score. `BrainIQ.ragQuality` carries RAG telemetry. |
 | `agents/*.ts` | — | Industry packs: HospitalityExpert, DairyExpert, AgriExpert, FinanceBrain, RiskOfficer, Moderator. **Domain knowledge lives here, not in the core.** |
 
-#### The RAG layer (shipped — `docs/RE-INFRASTRUCTURE-PLAN.md` §2)
+#### The RAG layer (shipped — `docs/governance/RE-INFRASTRUCTURE-PLAN.md` §2)
 
 Retrieval-Augmented Generation makes the brain answer from the tenant's **own** data. All pure cores are unit-tested; the `.live` files touch the DB.
 
@@ -175,7 +175,7 @@ Tailwind with H-Nerve brand classes in `app/globals.css` (`.btn`, `.btn-primary`
 - **String columns + TS unions over DB enums** for any role/status/sector/tier — keeps the schema portable to the sqlite dev provider and migrations simple.
 - **Don't introduce new auth providers, ORMs, or state libraries without asking** — the stack is intentionally minimal.
 - **Don't bypass the brain's read-mostly boundary.** If a brain subsystem needs to change domain data, it calls a server action; it doesn't write directly.
-- **All Prisma queries must go through `prisma` (the scoped client) unless they're explicitly cross-tenant.** `prismaUnscoped` is reserved for the Empire dashboard, the workspace switcher, the system-dump API, the brain engine running from cron, and the operator layout's banner lookups. Every `prismaUnscoped` call site must carry a `// CROSS-TENANT INTENT:` comment. New tenant-keyed models go in `TENANT_SCOPED_MODELS` (`lib/tenancy/workspaceScope.ts`); see `docs/ISOLATION.md` for the full checklist.
+- **All Prisma queries must go through `prisma` (the scoped client) unless they're explicitly cross-tenant.** `prismaUnscoped` is reserved for the Empire dashboard, the workspace switcher, the system-dump API, the brain engine running from cron, and the operator layout's banner lookups. Every `prismaUnscoped` call site must carry a `// CROSS-TENANT INTENT:` comment. New tenant-keyed models go in `TENANT_SCOPED_MODELS` (`lib/tenancy/workspaceScope.ts`); see `docs/architecture/ISOLATION.md` for the full checklist.
 - **Pick ONE design vocabulary per surface.** Operator UI = Heritage Modern. Admin = Sleek Operator. Theater = its own editorial register. Never mix.
 - **Every server action that calls AI / parallel DB queries MUST wrap those calls in try/catch + `flashToast`.** A thrown action revalidates the page to the same state with zero user feedback — from the user's perspective the button just "doesn't work." The pattern: `try { result = await expensiveOp(); } catch (e) { flashToast({ type: "info", entity: "info", id: "op", label: ... }); revalidatePath(...); return; }`. Apply this to: all LLM calls, all `Promise.all` fan-outs, and any external-service call inside an action.
 - **`flashToast` entity must be `SoftEntity | "info"`.** `SoftEntity = "task" | "project" | "insight" | "forecast"`. Values like `"plan"`, `"council"`, `"program"`, `"deleted"`, `"batch"` do NOT exist in the union and will cause TypeScript errors. Use `entity: "info"` for every non-soft-delete toast.

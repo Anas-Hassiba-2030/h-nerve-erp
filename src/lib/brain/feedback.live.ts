@@ -6,7 +6,7 @@
 //              human-readable BrainPatterns. Patterns are toggleable
 //              and reweight future brain output.
 //
-// Phase 7 of docs/PHASES-INTELLIGENCE.md.
+// Phase 7 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { prisma } from "@/lib/db/db";
 import { callLlm, extractJson, type LlmRequest } from "./llm";

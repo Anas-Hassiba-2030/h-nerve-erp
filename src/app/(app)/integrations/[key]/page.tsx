@@ -1,7 +1,7 @@
 // /integrations/[key] — single integration detail.
 //
 // Heritage Modern. Connect / disconnect, scope list, settings form,
-// recent log. Phase 13 of docs/PHASES-INTELLIGENCE.md.
+// recent log. Phase 13 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { notFound } from "next/navigation";
 import Link from "next/link";

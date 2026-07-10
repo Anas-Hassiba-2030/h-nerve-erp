@@ -25,6 +25,9 @@ export type LlmRequest = {
   model?: string;
   // When the model returns JSON, the orchestrator can pass schema-shaped instructions.
   expectJson?: boolean;
+  // Serve the stub even when a key is configured. Set by callers whose cost
+  // guard tripped (e.g. the per-tenant daily budget) — degrade, don't error.
+  forceStub?: boolean;
 };
 
 export type LlmResponse = {
@@ -79,7 +82,7 @@ export async function callLlm(req: LlmRequest, stub: StubGenerator): Promise<Llm
   const t0 = Date.now();
   const cfg = llmConfig();
 
-  if (!cfg.enabled || !cfg.apiKey) {
+  if (!cfg.enabled || !cfg.apiKey || req.forceStub) {
     // Optional artificial latency for the staggered-reveal feel. Default 0.
     // In STUB mode (the demo default — no ANTHROPIC_API_KEY) EVERY brain call
     // hit this, so a single council (5 voices + moderator) paid ~1.2-2.6s of

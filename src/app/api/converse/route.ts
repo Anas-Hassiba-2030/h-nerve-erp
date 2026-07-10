@@ -11,14 +11,32 @@
 // the brain. We don't stream tokens at the network layer — the UI does its
 // own line-by-line reveal animation. The brain returns the full answer
 // in one POST.
+//
+// Three cost guards stack here, cheapest first:
+//   1. rateLimit — per-user fixed window (bursts).
+//   2. per-tenant daily LLM budget — one workspace can't spend every other
+//      tenant's share; on breach the brain answers in STUB mode, no error.
+//   3. BRAIN_MAX_LLM_CALLS (inside lib/brain/llm.ts) — per-process lifetime cap.
 
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { ask } from "@/lib/brain/converse";
 import { getCurrentUser } from "@/lib/auth/session";
 import { rateLimit } from "@/lib/import/rateLimit";
+import { checkTenantLlmBudget, consumeTenantLlmBudget } from "@/lib/brain/llmBudget";
+import { getActiveTenantSlug } from "@/lib/tenancy/tenancy";
+import { llmConfig } from "@/lib/brain/llm";
+import { log } from "@/lib/utils/logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const ConverseBody = z.object({
+  sessionId: z.string().trim().min(1).max(120),
+  question: z.string().trim().min(1).max(800),
+  scope: z.string().trim().min(1).max(60).default("default"),
+  locale: z.enum(["ar", "en"]).default("ar"),
+});
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
@@ -36,34 +54,44 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let body: any;
+  let raw: unknown;
   try {
-    body = await req.json();
+    raw = await req.json();
   } catch {
     return NextResponse.json({ error: "INVALID_JSON" }, { status: 400 });
   }
 
-  const sessionId = String(body?.sessionId ?? "").trim();
-  const question = String(body?.question ?? "").trim();
-  const scope = String(body?.scope ?? "default").trim() || "default";
-  const locale: "ar" | "en" =
-    body?.locale === "en" ? "en" : "ar";
-
-  if (!sessionId || !question) {
+  const parsed = ConverseBody.safeParse(raw);
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: "sessionId and question are required" },
+      { error: "INVALID_BODY", issues: parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`) },
       { status: 400 },
     );
   }
-  if (question.length > 800) {
-    return NextResponse.json(
-      { error: "question too long (max 800 chars)" },
-      { status: 413 },
-    );
+  const { sessionId, question, scope, locale } = parsed.data;
+
+  // Per-tenant daily budget. Breach ≠ error: the brain still answers, from the
+  // deterministic single-shot stub — no Anthropic call is made for this tenant
+  // until the UTC day rolls over. Only LIVE-bound requests consume budget.
+  const tenant = (await getActiveTenantSlug()) ?? "default";
+  let forceStub = false;
+  if (llmConfig().enabled) {
+    const budget = checkTenantLlmBudget(tenant);
+    if (budget.allowed) {
+      consumeTenantLlmBudget(tenant);
+    } else {
+      forceStub = true;
+      log.warn("converse: tenant LLM budget reached — serving stub", {
+        tenant,
+        used: budget.used,
+        cap: budget.cap,
+        hint: "Raise BRAIN_TENANT_DAILY_LLM_CALLS to allow more real calls",
+      });
+    }
   }
 
   try {
-    const result = await ask({ sessionId, question, scope, locale });
+    const result = await ask({ sessionId, question, scope, locale, forceStub });
     return NextResponse.json({
       brainTurn: result.brainTurn,
       sessionTurns: result.session.turns,

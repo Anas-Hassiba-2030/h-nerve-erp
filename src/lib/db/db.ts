@@ -1,4 +1,7 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaNeon } from "@prisma/adapter-neon";
+import { Pool, neonConfig } from "@neondatabase/serverless";
+import ws from "ws";
 import { getActiveWorkspaceId } from "@/lib/tenancy/workspace";
 import { getActiveTenantSlug } from "@/lib/tenancy/tenancy";
 import { applyWorkspaceScope } from "@/lib/tenancy/workspaceScope";
@@ -33,7 +36,21 @@ function logLevels(): ("query" | "info" | "warn" | "error")[] {
   return base;
 }
 
+// Phase 4 §2 (Cloudflare audit) — Neon serverless driver adapter, env-gated.
+// NEON_DATABASE_URL set → Prisma runs over Neon's WebSocket driver against the
+// pooled (-pooler) URL. Unset → the plain direct-TCP client below, so Railway
+// keeps its current path from the same codebase.
+function neonAdapterClient(connectionString: string): PrismaClient {
+  // Node < 22 has no global WebSocket; the Neon driver needs one for Pool.
+  // On Workers/Node 22+ the native WebSocket global is used instead of ws.
+  if (typeof WebSocket === "undefined") neonConfig.webSocketConstructor = ws;
+  const adapter = new PrismaNeon(new Pool({ connectionString }));
+  return new PrismaClient({ adapter, log: logLevels() });
+}
+
 function baseClient(): PrismaClient {
+  const neonUrl = process.env.NEON_DATABASE_URL;
+  if (neonUrl) return neonAdapterClient(neonUrl);
   // Direct connection; pool size = Prisma default (num_cpus × 2 + 1) unless
   // DATABASE_URL carries ?connection_limit=. At ~15+ concurrent users the
   // direct Postgres budget exhausts — the fix is the PgBouncer sidecar, an

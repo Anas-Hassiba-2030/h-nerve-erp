@@ -197,6 +197,17 @@ docker rm -f hnerve-rehearsal
 Note Railway wraps each seed in `|| true`, so a crashing seed silently
 no-ops on prod — the rehearsal removes the muffler on purpose.
 
+### Neon rehearsal (Phase 4 §2)
+
+Same steps 0–5 as above, against a real Neon branch instead of Docker:
+set `DATABASE_URL=$NEON_DIRECT_URL` (the non-`-pooler` host) for
+`migrate deploy` (step 2), the drift check (step 3), and the loud seed
+chain (step 4), then run `npm run brain:doctor` + the MCP smoke (step 5).
+Finally smoke the **app path**: unset the direct URL and set
+`NEON_DATABASE_URL` (the pooled `-pooler` URL) so `lib/db/db.ts` picks the
+Neon serverless driver adapter, and hit a data-bearing page. No teardown —
+delete the Neon branch instead.
+
 ---
 
 *See also: `scripts/verify/brain-db-link.ts` (doctor), `scripts/verify/brain-mcp-smoke.ts` (wire smoke), `lib/brain/mcp/scope.ts` (fail-closed scoping), `docs/SUBAGENTS-AND-MCP-CATALOG.md`.*

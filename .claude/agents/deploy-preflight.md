@@ -1,5 +1,6 @@
 ---
 name: deploy-preflight
+department: quality-design-l10n
 description: >
   Run before merging any PR that could break the Railway build — framework or
   major-dependency upgrades, next.config / tsconfig / build-script changes, the

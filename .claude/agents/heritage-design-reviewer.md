@@ -1,5 +1,6 @@
 ---
 name: heritage-design-reviewer
+department: quality-design-l10n
 description: |
   Reviews code for design-system compliance. Enforces docs/DESIGN-SKILL.md
   rules — one vocabulary per surface, palette tokens from Heritage,

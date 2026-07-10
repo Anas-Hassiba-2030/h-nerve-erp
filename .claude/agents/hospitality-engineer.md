@@ -1,5 +1,6 @@
 ---
 name: hospitality-engineer
+department: domain-ops
 description: |
   Owns the hospitality vertical — Hotels, Bookings, Arena Space surfaces.
   Use when the user asks to add features, fix bugs, or change behaviour

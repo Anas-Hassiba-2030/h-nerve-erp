@@ -1,5 +1,6 @@
 ---
 name: prisma-schema-architect
+department: architecture-data
 description: |
   Owns Prisma schema design, migrations, soft-delete patterns, and the
   Postgres-prod / SQLite-dev-flip discipline. Use for any change to

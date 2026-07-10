@@ -1,5 +1,6 @@
 ---
 name: finance-engineer
+department: finance-analytics
 description: |
   Owns the finance & treasury surfaces — Transaction model, group P&L,
   margin tracking, FX, cash flow signals. Use when the user asks for

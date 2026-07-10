@@ -1,5 +1,6 @@
 ---
 name: empire-curator
+department: platform-integrations
 description: |
   Owns Phase 19 — the multi-tenant Empire dashboard at /admin/empire.
   The 8-tile boardroom with brain-IQ sparklines. Use for any change to

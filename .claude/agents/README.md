@@ -1,118 +1,166 @@
-# H-Nerve agent suite
+# H-Nerve agent company (VAOC)
 
-23 Claude Code sub-agents that live in this folder. 20 of them own a
-slice of the H-Nerve codebase. The other 3 form the **bug-fix triad** —
-a stateful 3-stage pipeline that fixes bugs without losing context
-between stages.
+The Virtual Agent Orchestration Company. A chain of command, not a flat
+pool of specialists. One **Orchestrator** (the Managing Director) routes
+every incoming task to one of **7 department heads**; each head supervises
+the workers who own the code.
 
-Drop into any agent with the `Agent` tool and let it work — or just
-describe the task and Claude will route it to the right specialist by
-reading the `description` frontmatter.
+- **Orchestrator** — `orchestrator.md`. Classifies the task, picks a
+  topology, routes to a department. For a task that plainly belongs to one
+  department, call that head directly — don't add a hop.
+- **7 department heads** — 6 are thin supervisor briefs
+  (`ops-director`, `finance-director`, `platform-director`,
+  `chief-architect`, `qa-director`, `program-director`); the Brain
+  department is headed by `brain-architect`, which is both head **and** a
+  worker (it owns `src/lib/brain/` end-to-end and supervises
+  `council-author`).
+- **24 workers** — each owns a slice of the codebase. A worker's
+  `department:` frontmatter field is the routing key.
 
-## How to use
+Drop into any agent with the `Agent` tool, or just describe the task and
+let the Orchestrator route by reading the `description` + `department`
+frontmatter.
+
+## Org chart
 
 ```
-Use the dairy-engineer agent to add a new "near-expiry promo router" action.
+                        orchestrator  (Managing Director)
+                              │
+   ┌──────────┬──────────┬────┴─────┬────────────┬───────────┬──────────┐
+ ops-      finance-   brain-     platform-    chief-       qa-       program-
+ director  director   architect  director     architect   director  director
+(Domain   (Finance   (Brain)     (Platform &  (Arch &     (Quality) (Program
+ Ops)      & Anlytx)              Integr.)     Data)                  Office)
 ```
 
-Or simply:
+## Departments
 
-```
-Add a near-expiry promo router for Maha.
-```
+### Domain Ops — head `ops-director`
+Topology: **Supervisor-as-tools, parallel.** Verticals are independent —
+the head fans work out to the owning engineer(s) and merges results.
 
-Claude reads every agent's `description` and routes by topical match.
-If two agents could plausibly do the work, Claude picks one and tells
-you which.
-
-## The 23 agents
-
-### Domain engineers (6) — one per vertical
-| Agent | Owns |
+| Worker | Owns |
 |---|---|
 | `hospitality-engineer` | `/hotels`, Arena Space, Booking model |
 | `dairy-engineer` | `/dairy`, Maha, DairyBatch, QC, expiry routing |
 | `agri-engineer` | `/farms`, Loran, Crop, irrigation signals |
 | `education-engineer` | `/education`, The Tank, Program, cohorts |
-| `finance-engineer` | `/finance`, Transaction, group treasury, FX |
 | `supply-chain-engineer` | `/supply-chain`, SupplyForecast, AI Bridge |
 
-### Brain tier (2) — `src/lib/brain/` and the runtime council
-| Agent | Owns |
+### Finance & Analytics — head `finance-director`
+Topology: **Sequential pipeline.** Money math is order-sensitive
+(validate → compute → reconcile) — steps run in series, not parallel.
+
+| Worker | Owns |
+|---|---|
+| `finance-engineer` | `/finance`, Transaction, group treasury, FX, margins |
+
+### Brain — head `brain-architect`
+Topology: **Network + Supervisor with Moderator synthesis** — mirrors the
+real `src/lib/brain/council.live.ts`: voices debate as a network, the
+Moderator synthesizes one verdict. `brain-architect` is head and worker.
+
+| Worker | Owns |
 |---|---|
 | `brain-architect` | All 10 brain phases, `src/lib/brain/` end-to-end |
-| `council-author` | Phase 3 multi-agent debate, voice roster |
+| `council-author` | Phase 3 multi-agent debate, voice roster, vote weights |
 
-### Platform engineers (8) — cross-cutting infrastructure
-| Agent | Owns |
+### Platform & Integrations — head `platform-director`
+Topology: **Supervisor.** One head routes to the owner of each
+cross-cutting platform layer.
+
+| Worker | Owns |
 |---|---|
 | `integrations-engineer` | Phase 13 hub, 24 connectors, catalog + runtime |
 | `workflow-template-author` | Phase 12 templates, studio actions |
 | `document-intel-engineer` | Phase 18 drop zone, parser, modal |
-| `mobile-ops-engineer` | Phase 14 `/m`, Calm Clinical |
 | `realtime-presence-engineer` | Phase 17 cursors, pips, comments |
-| `protocol-spec-keeper` | Phase 20 `/dev` portal, OpenAPI, marketplace |
+| `mobile-ops-engineer` | Phase 14 `/m`, Calm Clinical |
 | `time-machine-engineer` | Phase 16 `getAsOf()`, pill, banner |
+| `protocol-spec-keeper` | Phase 20 `/dev` portal, OpenAPI, marketplace |
 | `empire-curator` | Phase 19 `/admin/empire`, Quiet Authority |
 
-### Cross-cutting reviewers (4) — guard rails
-| Agent | Owns |
+### Architecture & Data — head `chief-architect`
+Topology: **Supervisor / reviewers-as-gates.** These two set foundations
+every other department builds on; they gate schema and route-boundary
+changes rather than authoring feature code.
+
+| Worker | Owns |
 |---|---|
-| `heritage-design-reviewer` | `docs/DESIGN-SKILL.md` enforcement, one-vocab-per-surface |
-| `i18n-bilingual-reviewer` | ar/en pairing, RTL safety, font selection |
-| `prisma-schema-architect` | Schema design, migrations, soft-delete |
+| `prisma-schema-architect` | Schema design, migrations, soft-delete, PG/SQLite flip |
 | `next-route-group-engineer` | Route groups, layouts, server-action conventions |
 
-### Bug-fix triad (3) — stateful, artifact-handoff pipeline
+### Quality, Design & L10n — head `qa-director`
+Topology: **Sequential triad + reviewers as merge gates.** The bug-fix
+triad runs in strict order via filesystem handoff (see below); the
+reviewers gate merges — they recommend/correct, they don't own features.
+
+| Worker | Role |
+|---|---|
+| `heritage-design-reviewer` | `docs/DESIGN-SKILL.md` enforcement — **read-only** gate |
+| `i18n-bilingual-reviewer` | ar/en pairing, RTL safety, fonts — fix-capable reviewer |
+| `deploy-preflight` | Railway build safety gate before infra-touching merges |
+| `bug-reproducer` | Triad stage 1 — repro |
+| `root-cause-analyzer` | Triad stage 2 — diagnose |
+| `fix-implementer` | Triad stage 3 — ship + verify |
+
+### Program Office — head `program-director`
+Topology: **Sequential pipeline.** Owns delivery orchestration —
+plan → open PR → gate → merge. No dedicated line workers yet; it drives
+the other departments' output through the PR pipeline.
+
+## The bug-fix triad (stateful, artifact handoff)
+
+Three of the Quality workers form a 3-stage pipeline that hands off through
+**filesystem artifacts in `.claude/bug-state/`**, not orchestrator
+summaries:
+
 | Agent | Stage | Reads | Writes |
 |---|---|---|---|
 | `bug-reproducer` | 1 — repro | `bug.md` | `.claude/bug-state/repro.md` |
 | `root-cause-analyzer` | 2 — diagnose | `repro.md` | `.claude/bug-state/diagnosis.md` |
 | `fix-implementer` | 3 — ship + verify | `repro.md` + `diagnosis.md` | `.claude/bug-state/fix.md` |
 
-**Why a triad instead of one agent?** A single agent doing all three
-stages has 25+ tool calls in one window — context fills up, the model
-forgets the original symptom by the time it's editing code. Splitting
-into three lets each stage have a focused window.
+**Why a triad, not one agent?** One agent doing all three stages runs 25+
+tool calls in a single window — context fills, the model forgets the
+original symptom by the time it edits code. Splitting gives each stage a
+focused window.
 
-**Why not a naive sequential pipeline?** Three failure modes:
-1. *Telephone game.* Subagents return summaries; logs get paraphrased.
-2. *Compounding errors.* If stage 1 misses an edge case, stages 2 + 3
-   work on the wrong premise.
-3. *One-way authority.* The fixer can't push back on a flawed diagnosis
-   because it never saw the original logs.
+**Why artifacts, not summaries?** A naive sequential pipeline fails three
+ways: *telephone game* (logs get paraphrased), *compounding errors* (a
+missed edge case in stage 1 poisons 2 + 3), *one-way authority* (the fixer
+can't push back on a flawed diagnosis it never saw). Artifact handoff
+solves all three — each agent reads the previous artifact **in full**, has
+explicit **bounce-back authority** (if `repro.md` doesn't demonstrate the
+bug, stage 2 stops and says so), and the artifacts persist on disk —
+replayable, auditable. Keep them in git for an audit trail, or
+`.gitignore` them if each fix is transient.
 
-**The triad solves all three** by handing off through **filesystem
-artifacts**, not orchestrator summaries:
-- Each agent reads the previous artifact in full — no information loss.
-- Each agent has explicit **bounce-back authority** — if `repro.md`
-  doesn't actually demonstrate the bug, `root-cause-analyzer` writes a
-  diagnosis that says "cannot diagnose without reproduction" and stops.
-- Artifacts persist on disk — replayable, auditable, learnable.
+## Model assignment
 
-**Running the triad:**
-```
-You report bug → Claude invokes bug-reproducer
-  → writes repro.md
-Claude invokes root-cause-analyzer
-  → reads repro.md, writes diagnosis.md
-Claude invokes fix-implementer
-  → reads BOTH, writes fix.md, ships the fix, verifies
-```
+| Tier | Model | Why |
+|---|---|---|
+| `orchestrator`, `brain-architect` | opus | Cross-department routing / cross-subsystem reasoning + hard debugging |
+| Everyone else | sonnet | Workhorse for tool use + code edits |
 
-Or all in one prompt:
-```
-"There's a bug where /dairy/new throws when the batch number contains
-slashes. Fix it."
-→ Claude orchestrates the triad end-to-end
-```
+## Permissions
 
-The artifacts live in `.claude/bug-state/` — keep them in git for an
-audit trail, or `.gitignore` them if you treat each fix as transient.
+- Domain, Finance, Platform, and Architecture workers have full
+  Read + Edit + Write + Bash + Glob + Grep.
+- `heritage-design-reviewer` is the only **strictly read-only** agent
+  (Read + Glob + Grep) — it recommends, it never touches a file.
+- `i18n-bilingual-reviewer` is a **fix-capable reviewer**: Read + Edit +
+  Glob + Grep. It corrects in place but has no Write or Bash — it edits
+  existing files, never creates or runs.
+- `root-cause-analyzer` is read-only **on the codebase** (no `Edit`) but
+  holds a single scoped `Write` for one purpose: emitting
+  `diagnosis.md`. Without that grant the triad handoff can't complete —
+  it's a write-one-artifact agent, not a read-only one.
+- Heads (`*-director`, `chief-architect`, `orchestrator`) carry `Agent`
+  so they can delegate to their workers.
 
-## Design principles
+## Every agent's system prompt follows the 7-part blueprint
 
-Each agent's system prompt follows the `agent-patterns` skill blueprint:
 1. **Identity** — who they are and what they own
 2. **Surfaces** — exact file paths under their jurisdiction
 3. **Invariants** — bugs if violated (CLAUDE.md + design docs)
@@ -121,45 +169,37 @@ Each agent's system prompt follows the `agent-patterns` skill blueprint:
 6. **When they delegate** — who to hand off to
 7. **Edge cases** — the gotchas
 
-All agents:
-- Default to **Arabic-first** with English secondary for technical labels
-- Use the Heritage palette unless the surface is intentionally another vocabulary
-- Never auto-mutate domain data — the brain proposes, humans commit
-- Write strings (not enums) for role/status/sector/tier
-- Use tabular numerals on every number
-- Honor `prefers-reduced-motion` on every animation
+All agents default to **Arabic-first** (English secondary for technical
+labels), use the Heritage palette unless the surface is intentionally
+another vocabulary, never auto-mutate domain data (the brain proposes,
+humans commit), write strings not enums for role/status/sector/tier, use
+tabular numerals on every number, and honor `prefers-reduced-motion`.
 
-## Model assignment
-| Tier | Model | Why |
-|---|---|---|
-| `brain-architect` | opus | Cross-subsystem reasoning, hard debugging |
-| Everyone else | sonnet | Workhorse for tool use + code edits |
+## Harmony rules
 
-## Permissions
-Domain engineers and platform engineers have full Read + Edit + Write +
-Bash + Glob + Grep.
+- **One owner per pillar.** Every file has exactly one department that owns
+  it. No two agents edit the same surface.
+- **Reviewers gate, they don't author.** Design / i18n / preflight review
+  and correct at the boundary; they don't write feature code.
+- **Short loops with human gates.** Keep chains shallow; a human approves
+  at each meaningful step.
+- **Agents propose via PRs; humans merge.** No agent pushes to `main` —
+  work lands as a branch + PR, a human merges after CI goes green.
 
-`heritage-design-reviewer` is the only **strictly read-only** agent
-(Read + Glob + Grep) — it recommends, it never touches a file.
+## When to add / not add an agent
 
-`i18n-bilingual-reviewer` is a **fix-capable reviewer**: Read + Edit +
-Glob + Grep. It applies bilingual / RTL corrections in place but has no
-Write or Bash — it edits existing files, it never creates or runs.
+Add a new agent file when a new vertical opens (a healthcare pack), a new
+platform layer emerges (observability), or a cross-cutting concern needs
+its own guard rail (a11y) — and give it a `department:` so the Orchestrator
+can route to it.
 
-`root-cause-analyzer` is read-only **on the codebase** (no `Edit`) but
-holds a single scoped `Write` for one purpose: emitting
-`.claude/bug-state/diagnosis.md`. Without that grant the triad's
-artifact handoff (stage 2 → stage 3) cannot complete — it is not a
-read-only agent, it is a write-one-artifact agent.
+Don't add an agent for a one-off task (do it inline), a subset of an
+existing agent's surface (extend the owner), or a skill / external tool
+(those live in `~/.claude/`).
 
-## When to add a new agent
+## Further reading
 
-Add a new agent file when:
-- A new vertical opens up (e.g. a healthcare pack)
-- A new platform layer emerges (e.g. observability)
-- A cross-cutting concern needs its own guard rail (e.g. a11y)
-
-Don't add an agent for:
-- A one-off task (just do it inline)
-- A subset of an existing agent's surface (extend the existing one)
-- A skill or external tool (those live in `~/.claude/`)
+- **`docs/VAOC.md`** — the full operating manual for this company (written
+  in this same PR).
+- **`docs/SUBAGENTS-AND-MCP-CATALOG.md`** — the catalog of every subagent
+  and MCP surface.

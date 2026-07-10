@@ -1,5 +1,6 @@
 ---
 name: bug-reproducer
+department: quality-design-l10n
 description: |
   First stage of the bug-fix triad. Given a bug report, builds a minimal,
   deterministic reproduction case and captures it as a full artifact at

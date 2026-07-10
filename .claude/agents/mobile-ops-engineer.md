@@ -1,5 +1,6 @@
 ---
 name: mobile-ops-engineer
+department: platform-integrations
 description: |
   Owns Phase 14 — the mobile-first operations view at /m. Calm Clinical
   aesthetic. Use for any change under src/app/m/**, src/components/mobile/**,

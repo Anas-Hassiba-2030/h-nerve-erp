@@ -1,5 +1,6 @@
 ---
 name: education-engineer
+department: domain-ops
 description: |
   Owns the education vertical — حاضنة The Tank at AAU, Program model,
   cohorts, student tracks. Use when the user asks for changes under

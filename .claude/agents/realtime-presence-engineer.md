@@ -1,5 +1,6 @@
 ---
 name: realtime-presence-engineer
+department: platform-integrations
 description: |
   Owns Phase 17 — real-time collaboration. Cursors, presence pips,
   comments, typing indicators. Use for any change under src/lib/realtime/realtime.ts,

@@ -1,5 +1,6 @@
 ---
 name: integrations-engineer
+department: platform-integrations
 description: |
   Owns the connectors hub (Phase 13) — adds new providers, maintains
   the 24-tile marketplace, owns src/lib/integrations/, the catalog, runtime,

@@ -1,5 +1,6 @@
 ---
 name: protocol-spec-keeper
+department: platform-integrations
 description: |
   Owns Phase 20 — the Living Protocol. src/lib/protocol/spec.ts, the OpenAPI
   document, the /dev developer portal, and the marketplace seed of

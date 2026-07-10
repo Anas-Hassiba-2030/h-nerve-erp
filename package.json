@@ -5,6 +5,9 @@
   "engines": {
     "node": ">=20.9.0"
   },
+  "overrides": {
+    "vite": "^8.1.4"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "node scripts/ops/guard-not-prod.js && prisma generate && prisma db push --accept-data-loss && next build",

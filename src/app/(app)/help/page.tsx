@@ -29,6 +29,13 @@ type Module = {
   desc_en: string;
 };
 
+// Developer-facing surfaces (B3 homing) — linked from here, no nav pills.
+const DEV_LINKS: Module[] = [
+  { href: "/changelog", ar: "سجل التغييرات", en: "Changelog", desc_ar: "ما الجديد في كل إصدار من النظام.", desc_en: "What changed in every release." },
+  { href: "/design-system", ar: "نظام التصميم", en: "Design system", desc_ar: "ألوان وخطوط ومكونات Heritage Modern.", desc_en: "Heritage Modern colors, type, and components." },
+  { href: "/showcase", ar: "المعرض", en: "Showcase", desc_ar: "عرض حي لمكونات الواجهة وأنماطها.", desc_en: "Live gallery of UI components and patterns." },
+];
+
 const MODULES: Module[] = [
   { href: "/dashboard", ar: "اللوحة التنفيذية", en: "Executive dashboard", desc_ar: "نظرة شاملة على نبض المجموعة في شاشة واحدة.", desc_en: "Whole-group pulse in one screen." },
   { href: "/search", ar: "البحث الشامل", en: "Global search", desc_ar: "بحث عميق عبر 14 جدول بيانات.", desc_en: "Deep search across 14 data tables." },
@@ -230,6 +237,33 @@ export default async function HelpPage() {
                 {ar ? f.a_ar : f.a_en}
               </div>
             </details>
+          ))}
+        </div>
+
+        {/* For developers — B3 homing: changelog / design-system / showcase */}
+        <div className="panel">
+          <div className="panel-head">
+            <span className="panel-title">
+              {ar ? "للمطورين" : "For developers"}
+            </span>
+          </div>
+          {DEV_LINKS.map((m) => (
+            <a
+              key={m.href}
+              href={m.href}
+              className="br-row"
+              style={{ background: "var(--cream)", borderColor: "var(--line)" }}
+            >
+              <div className="rt">
+                <div className="tt" style={{ color: "var(--ink)" }}>
+                  {ar ? m.ar : m.en}
+                </div>
+                <div className="ts">{ar ? m.desc_ar : m.desc_en}</div>
+              </div>
+              <span className="ops-tag info">
+                {ar ? "افتح" : "Open"}
+              </span>
+            </a>
           ))}
         </div>
 

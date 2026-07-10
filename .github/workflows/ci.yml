@@ -29,6 +29,8 @@ jobs:
       - run: npm ci
       - name: Typecheck
         run: npx tsc --noEmit
+      - name: Lint (baseline is 0 errors — warnings don't fail)
+        run: npm run lint
       - name: Unit tests
         run: npx vitest run
       - name: Build (catches deploy-target build breaks CI would otherwise miss)
@@ -38,3 +40,17 @@ jobs:
           # live DB. Dynamic (cookie-driven) pages aren't rendered at build time.
           DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci
           NEXT_TELEMETRY_DISABLED: "1"
+
+  # A pasted key must never land on a branch undetected (RUNBOOK §1 makes
+  # rotation manual — this makes detection automatic). Full history is scanned
+  # (fetch-depth: 0) so a secret buried in an earlier commit of the PR fails
+  # the gate too, not just the tip.
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

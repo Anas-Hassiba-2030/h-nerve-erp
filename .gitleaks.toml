@@ -1,0 +1,25 @@
+# Gitleaks config — CI secret-scanning gate (.github/workflows/ci.yml).
+#
+# Full history was swept clean before enabling (2026-07-10, 524 commits:
+# no real keys or DSNs). Everything allowlisted below is a PLACEHOLDER by
+# design — never add a path here to silence a real finding; rotate the
+# secret instead (docs/RUNBOOK.md §1).
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Placeholder/template values, not secrets"
+paths = [
+  # Env templates ship placeholder shapes on purpose (sk-ant-..., USER:PASS@).
+  '''\.env\.example''',
+  '''\.env\.railway\.template''',
+  # Docs show connection-string/key FORMATS (Neon pooled/direct, bearer shape).
+  '''docs/.*\.md''',
+  # Vitest fixtures may fabricate token-shaped strings.
+  '''src/.*\.test\.ts''',
+]
+regexes = [
+  # The documented throwaway CI build DSN.
+  '''postgresql://ci:ci@127\.0\.0\.1:5432/ci''',
+]

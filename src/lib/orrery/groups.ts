@@ -106,15 +106,17 @@ export const ORRERY_GROUPS: OrreryGroup[] = [
       // admin sub-console (Empire/Tenants included), so those two no longer get
       // their own top-level pills here — one clear entry point, less clutter.
       { label: "غرفة العمليات", labelEn: "Mission Control", route: "/admin/system" },
+      // The Core — the ERP back-office hub: one pill fronting the 13 operator
+      // consoles under /admin/* (accounts, journal, products, warehouses, …).
+      { label: "النواة", labelEn: "The Core", route: "/admin" },
       { label: "الأتمتة", labelEn: "Workflows", route: "/workflows" },
       { label: "التكاملات", labelEn: "Integrations", route: "/integrations" },
       { label: "التدقيق", labelEn: "Audit", route: "/audit-360" },
       { label: "سجل النشاط", labelEn: "Activity", route: "/activity" },
-      { label: "البحث", labelEn: "Search", route: "/search" },
-      { label: "المثبّت", labelEn: "Pinned", route: "/pinned" },
-      { label: "المحذوفات", labelEn: "Trash", route: "/trash" },
-      { label: "الإعدادات", labelEn: "Settings", route: "/settings" },
-      { label: "المساعدة", labelEn: "Help", route: "/help" },
+      // IA split (PR #288, approved): Search / Pinned / Trash / Settings / Help
+      // moved OUT of the section grid into the header UserMenu
+      // (components/nav/UserMenu.tsx) — they are personal utilities, not
+      // "system" surfaces. System is now 6 honest pills.
     ],
   },
 ];

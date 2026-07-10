@@ -19,6 +19,7 @@ import {
   type NotifTask,
 } from "@/components/nav/NotificationCenter";
 import { KeyboardShortcuts } from "@/components/nav/KeyboardShortcuts";
+import { UserMenu } from "@/components/nav/UserMenu";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getTheme } from "@/lib/theme/theme.server";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -250,6 +251,7 @@ export async function PageHeader({
             />
             <LocaleSwitch current={locale} />
             <ThemeSwitch current={theme.id} locale={locale} />
+            <UserMenu locale={locale} userName={session?.name ?? null} />
           </div>
         </div>
       </div>

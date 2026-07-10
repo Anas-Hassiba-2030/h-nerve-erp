@@ -385,6 +385,10 @@ export type AskInput = {
   question: string;
   scope?: string;
   locale?: "ar" | "en";
+  // Skip the LIVE tool-loop and answer from the deterministic single-shot
+  // path. Set by callers whose cost guard tripped (e.g. the per-tenant daily
+  // LLM budget in /api/converse) — the user still gets an answer, canned.
+  forceStub?: boolean;
 };
 
 export type AskResult = {
@@ -489,7 +493,7 @@ async function askWithTools(input: AskInput): Promise<AskResult | null> {
 export async function ask(input: AskInput): Promise<AskResult> {
   // LIVE: let the model drive the tool loop. Any degrade/failure falls through
   // to the deterministic single-shot path so the overlay always gets an answer.
-  if (llmConfig().enabled) {
+  if (!input.forceStub && llmConfig().enabled) {
     try {
       const r = await askWithTools(input);
       if (r) return r;
@@ -564,6 +568,7 @@ async function askSingleShot(input: AskInput): Promise<AskResult> {
 
   const llm = await callLlm(
     {
+      forceStub: input.forceStub,
       system:
         locale === "ar"
           ? "أنت H-Nerve — الدماغ المحادث لمنظومة ERP. أجِب في 3 جمل بالضبط. استخدم إحالات مرجعية بصيغة [c1] [c2] للأرقام والادعاءات وللاستشهاد بالمستندات. لا تخترع أرقاماً ولا بنوداً؛ استشهد فقط بالمستندات المرفقة. إن وُجدت روابط سببية (graph.links) فاستعملها لتفسير الأثر غير المباشر بين الوحدات، دون أن تُحيل إليها كمرجع. اكتب بنبرة هادئة، صريحة، عملية."

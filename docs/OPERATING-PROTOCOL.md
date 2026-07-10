@@ -33,11 +33,11 @@ mostly this + the remote database (see §6).
 | Doc | What it's for |
 |---|---|
 | `docs/OPERATING-PROTOCOL.md` | **This file** — how to run & use the system |
-| `docs/READINESS.md` | Honest "is it production-ready" assessment |
-| `docs/PRODUCTION-ROADMAP.md` | The phase plan + status (single source of truth) |
-| `docs/PITCH-WALKTHROUGH.md` | Screen-by-screen pitch review + screenshots |
+| `docs/phases/READINESS.md` | Honest "is it production-ready" assessment |
+| `docs/phases/PRODUCTION-ROADMAP.md` | The phase plan + status (single source of truth) |
+| `docs/phases/PITCH-WALKTHROUGH.md` | Screen-by-screen pitch review + screenshots |
 | `docs/AUDIT-2026-06.md` | Latest health snapshot (lint/types/tests/build green) |
-| `docs/PERFORMANCE.md` | Why it felt laggy + the fix order |
+| `docs/ops/PERFORMANCE.md` | Why it felt laggy + the fix order |
 
 Everything is committed to git on the `main` branch. When you reopen the
 session, your work is all there — nothing is lost.
@@ -92,7 +92,7 @@ the current data.
 | First click after starting does nothing | Dev mode is still compiling | Wait ~5s, reload once. Not a bug. Production build (§1A) avoids it. |
 | AI text looks generic/canned | No API key loaded | Confirm `ANTHROPIC_API_KEY` is in `.env`, restart the server. |
 | Garbled Arabic + English word | Old bug | Fixed. If seen, you're on an old build — rebuild (§1A). |
-| Everything feels slow | Dev mode + remote DB | See `docs/PERFORMANCE.md`. Short answer: production build + (for local demo) optionally switch to local SQLite. |
+| Everything feels slow | Dev mode + remote DB | See `docs/ops/PERFORMANCE.md`. Short answer: production build + (for local demo) optionally switch to local SQLite. |
 | "Company shows JOD 0 / -100%" | Old seed | Fixed + reseeded. If seen: `npm run db:reset` (wipes demo data, reseeds — safe, it's all generated). |
 | Login won't proceed | Server mid-compile or DB unreachable | Reload; check the server terminal for errors; ensure internet (Neon DB is online). |
 
@@ -137,6 +137,6 @@ task. You don't have to diagnose it yourself.
 
 - All progress is committed to git (`git log` shows the history).
 - Reopen the project in a new session; everything is on `main`.
-- The phase plan & status is always in `docs/PRODUCTION-ROADMAP.md`.
+- The phase plan & status is always in `docs/phases/PRODUCTION-ROADMAP.md`.
 - Memory of decisions persists across sessions (you don't need to
   re-explain the project each time).

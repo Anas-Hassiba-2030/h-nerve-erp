@@ -675,7 +675,7 @@ Still to land: wire the verifier directly into `narrator.claude.ts` post-process
 
 ## Phase 25 — GitHub Workflow Documentation (Team Onboarding) ✅ (shipped)
 
-**Status (2026-06):** `docs/GITHUB-WORKFLOW.md` is live. Bilingual (Arabic-first, English alongside), nine sections covering mental model, the four moving parts (commit / branch / PR / conflict), the workflow diagram, Railway hook-in, reading a diff, FAQs, naming conventions, repo at-a-glance, and a glossary.
+**Status (2026-06):** `docs/ops/GITHUB-WORKFLOW.md` is live. Bilingual (Arabic-first, English alongside), nine sections covering mental model, the four moving parts (commit / branch / PR / conflict), the workflow diagram, Railway hook-in, reading a diff, FAQs, naming conventions, repo at-a-glance, and a glossary.
 
 **Pitch.** Every change to H-Nerve goes through GitHub. Phase 25 produces a permanent, bilingual guide (Arabic + English) that any new team member or executive can read to understand the full development workflow — commits, branches, pull requests, conflicts, merging, and Railway deployments.
 
@@ -685,7 +685,7 @@ Still to land: wire the verifier directly into `narrator.claude.ts` post-process
 
 **The fix in every case:** save the new changes as a patch → reset to `main` → re-apply the patch → force-push → the conflict disappears. This is what the assistant does automatically.
 
-**Contents of the guide (`docs/GITHUB-WORKFLOW.md`).**
+**Contents of the guide (`docs/ops/GITHUB-WORKFLOW.md`).**
 1. The mental model — main branch, feature branches, PRs as proposals
 2. What a commit is (a named snapshot of changes)
 3. What a branch is (a safe workspace that doesn't affect main)
@@ -696,7 +696,7 @@ Still to land: wire the verifier directly into `narrator.claude.ts` post-process
 8. The H-Nerve naming convention for branches and PRs
 
 **Files.**
-- `docs/GITHUB-WORKFLOW.md` — bilingual guide, diagrams
+- `docs/ops/GITHUB-WORKFLOW.md` — bilingual guide, diagrams
 
 **Effort.** 1 day (writing + diagrams).
 **Depends on.** Nothing.

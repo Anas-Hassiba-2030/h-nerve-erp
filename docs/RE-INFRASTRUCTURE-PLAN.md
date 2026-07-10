@@ -138,7 +138,7 @@ owner + last-updated date, linking rather than duplicating.
     attack surface (corpus poisoning for federation), compliance. Partly
     `ISOLATION.md`.
 12. **Runbook / Deployment / Ops** — ✅ have them (`RUNBOOK.md`, `DEPLOYMENT.md`,
-    `READINESS.md`).
+    `phases/READINESS.md`).
 13. **Developer Onboarding (day-1 setup)** — partly `CLAUDE.md` + `.env.example`.
 
 ### Gap summary — what to generate in the re-infra session
@@ -172,8 +172,8 @@ git workflow, tenancy rules.
 | Phase roadmap | `docs/PHASES-INTELLIGENCE.md` |
 | Brain architecture | `docs/BLUEPRINT.md`, `lib/brain/README.md`, `lib/brain/Brain.ts` |
 | Multi-tenancy rules | `docs/ISOLATION.md` |
-| Git workflow (bilingual) | `docs/GITHUB-WORKFLOW.md` |
-| Ops / deploy | `docs/RUNBOOK.md`, `docs/DEPLOYMENT.md`, `docs/READINESS.md` |
+| Git workflow (bilingual) | `docs/ops/GITHUB-WORKFLOW.md` |
+| Ops / deploy | `docs/RUNBOOK.md`, `docs/DEPLOYMENT.md`, `docs/phases/READINESS.md` |
 | Operating protocol (plain language) | `docs/OPERATING-PROTOCOL.md` |
 | Polish/bug backlog | `docs/PHASES-INTELLIGENCE.md` § Phase 26 |
 

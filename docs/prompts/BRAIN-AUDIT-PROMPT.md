@@ -23,7 +23,7 @@ truth, in plain language, backed by evidence from the actual code.
 **The claim you must test:** H-Nerve has a "Brain" — described as a causal-graph +
 multi-agent council + memory + planner + RAG (Retrieval-Augmented Generation) +
 self-tuning intelligence layer that sits under an ERP. Another AI assessed it as
-roughly "60% of a brain" in `docs/BRAIN-INFRA-ASSESSMENT-2026-06.md`. **Do not
+roughly "60% of a brain" in `docs/brain/BRAIN-INFRA-ASSESSMENT-2026-06.md`. **Do not
 trust that assessment. Verify it from the source code and reach your own number.**
 
 ### Your rules (non-negotiable)
@@ -57,7 +57,7 @@ trust that assessment. Verify it from the source code and reach your own number.
   weekly self-tuning / "it learns" loop actually running in production, or is the
   cron not firing?
 - `prisma/schema/brain.prisma` — what data the brain actually persists.
-- `docs/RE-INFRASTRUCTURE-PLAN.md` and `docs/BRAIN-INFRA-ASSESSMENT-2026-06.md` —
+- `docs/RE-INFRASTRUCTURE-PLAN.md` and `docs/brain/BRAIN-INFRA-ASSESSMENT-2026-06.md` —
   the claims. **Challenge them**, don't repeat them.
 
 ### Questions you must answer
@@ -99,5 +99,5 @@ trust that assessment. Verify it from the source code and reach your own number.
 Tell the user to paste these files (in this order), then run the same audit on the
 pasted text: `lib/brain/Brain.ts`, `lib/brain/converse.ts`,
 `app/api/converse/route.ts`, `lib/brain/crag.ts`, `lib/brain/graphrag.live.ts`,
-`docs/BRAIN-INFRA-ASSESSMENT-2026-06.md`. If a needed file is missing, ask for it
+`docs/brain/BRAIN-INFRA-ASSESSMENT-2026-06.md`. If a needed file is missing, ask for it
 by name — do not fill the gap with assumptions.

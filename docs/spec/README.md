@@ -25,8 +25,8 @@ to source files for detail so it won't drift.
 - Design language → `docs/DESIGN-SKILL.md`
 - Brain architecture → `docs/BLUEPRINT.md`, `lib/brain/README.md`
 - Tenancy checklist → `docs/ISOLATION.md`
-- Ops/deploy → `docs/RUNBOOK.md`, `docs/DEPLOYMENT.md`, `docs/READINESS.md`
-- Git workflow → `docs/GITHUB-WORKFLOW.md`
+- Ops/deploy → `docs/RUNBOOK.md`, `docs/DEPLOYMENT.md`, `docs/phases/READINESS.md`
+- Git workflow → `docs/ops/GITHUB-WORKFLOW.md`
 - Conventions → `CLAUDE.md`
 
 ## How to use this set

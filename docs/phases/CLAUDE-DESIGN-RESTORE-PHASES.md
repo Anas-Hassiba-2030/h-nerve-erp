@@ -1,5 +1,8 @@
 # Claude Design Restore — Phases
 
+owner: Anas Hasiba
+last-updated: 2026-07-10
+
 The single mandate (the owner's words): **"I don't want to see the old interface.
 I want to see the things we created in Claude Design. Use Claude Design as our god,
 our main."**

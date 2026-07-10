@@ -1,5 +1,8 @@
 # H-Nerve ERP — Pitch Rehearsal Walkthrough
 
+owner: Anas Hasiba
+last-updated: 2026-07-10
+
 > **Status update 2026-05-21** — all 3 BLOCKERs from the original
 > 2026-05-15 walkthrough are closed in the current build. See
 > the "Status of original findings" section after the TL;DR table.

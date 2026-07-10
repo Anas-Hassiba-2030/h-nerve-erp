@@ -1,5 +1,8 @@
 # Workspace ERP — Roadmap
 
+owner: Anas Hasiba
+last-updated: 2026-05-16
+
 The per-company ERP track. Sister document to `PHASES-INTELLIGENCE.md`
 (which covers the 20 intelligence phases). This file tracks the
 company-workspace build, the polish backlog, and the long horizon.

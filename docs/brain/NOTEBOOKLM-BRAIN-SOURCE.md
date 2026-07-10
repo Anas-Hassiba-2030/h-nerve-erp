@@ -1,5 +1,8 @@
 # H-Nerve "Brain" — Single Source for NotebookLM (code + claims + audit)
 
+owner: Anas Hasiba
+last-updated: 2026-06-11
+
 > ⚠️ **HISTORICAL SNAPSHOT — for NotebookLM only.** This file freezes the
 > brain's code as it stood in early June 2026. The sections describing
 > `lib/brain/Brain.ts` (A1, and the "no loop / no tool-calling" notes) are
@@ -249,8 +252,8 @@ export async function POST(req: NextRequest) {
 4. **The builder's headline number was "~60% of a brain."** The builder also said a
    stricter judge that weights reasoning + learning more heavily would land much
    lower (closer to ~15–25%). **Decide your own number from Section A.**
-5. **Known drift the builder admitted:** `docs/READINESS.md` and
-   `docs/PITCH-WALKTHROUGH.md` used to say *"Brain.ask not yet wired / throws"* —
+5. **Known drift the builder admitted:** `docs/phases/READINESS.md` and
+   `docs/phases/PITCH-WALKTHROUGH.md` used to say *"Brain.ask not yet wired / throws"* —
    proof that docs drift from code. _(Both docs were truth-synced in 2026-07,
    and `Brain.ts` itself was retired in PR #240; A1 above documents the retired
    file as a historical snapshot.)_

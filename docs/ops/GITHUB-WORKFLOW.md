@@ -1,5 +1,8 @@
 # H-Nerve — GitHub Workflow Guide / دليل سير العمل على GitHub
 
+owner: Anas Hasiba
+last-updated: 2026-07-10
+
 > Phase 25 of `docs/PHASES-INTELLIGENCE.md`.
 >
 > **A bilingual (Arabic + English) reference any team member or executive can read

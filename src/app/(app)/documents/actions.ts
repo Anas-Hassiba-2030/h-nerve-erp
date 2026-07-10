@@ -13,6 +13,8 @@ import {
   visionEnabled,
   isVisionEligible,
 } from "@/lib/docintel/parser";
+import { guardLlmAction, llmGuardLabel } from "@/lib/brain/actionGuard";
+import { getLocale } from "@/lib/i18n/i18n.server";
 import { matchDocumentEntities, type Match } from "@/lib/docintel/match";
 
 // Phase 18 of docs/PHASES-INTELLIGENCE.md.
@@ -59,6 +61,19 @@ export async function uploadDocument(formData: FormData): Promise<UploadResult> 
   const file = formData.get("file") as File | null;
   if (!file || !file.name) throw new Error("file required");
   if (file.size > 25 * 1024 * 1024) throw new Error("file too large (>25MB)");
+
+  // Parse is expensive (up to a Claude Vision call). Throttle per user always;
+  // charge the tenant's daily LLM budget only when Vision will actually run —
+  // the stub path is free and must stay free. Thrown message surfaces in the
+  // drop-zone UI the same way the size/type errors above do.
+  const willUseVision = visionEnabled() && isVisionEligible(file.type);
+  const guard = await guardLlmAction("doc-upload", user.id, {
+    max: 10,
+    consumesBudget: willUseVision,
+  });
+  if (!guard.allowed) {
+    throw new Error(llmGuardLabel(guard, (await getLocale()) === "ar"));
+  }
 
   // 1. Create the row immediately so the UI can drill in if it wants.
   const doc = await prisma.document.create({

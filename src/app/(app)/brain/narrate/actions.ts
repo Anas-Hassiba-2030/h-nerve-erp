@@ -8,6 +8,7 @@
 import { requireUser } from "@/lib/auth/session";
 import { narrator } from "@/lib/brain/narrator.claude";
 import type { NarrativeRegister } from "@/lib/brain/narrator";
+import { guardLlmAction } from "@/lib/brain/actionGuard";
 
 export type NarrateInput = {
   topic: string;
@@ -27,7 +28,21 @@ export type NarrateResult = {
 };
 
 export async function narrate(input: NarrateInput): Promise<NarrateResult> {
-  await requireUser();
+  const user = await requireUser();
+
+  // This is a hover tooltip, not a button — on guard breach return the same
+  // calm standby text as the failure path below (a toast would be wrong here).
+  // Generous window: repeated hovers usually hit the narrator's cache anyway.
+  const guard = await guardLlmAction("narrate", user.id, { max: 20 });
+  if (!guard.allowed) {
+    return {
+      text: input.locale === "ar" ? "تعذّر توليد السرد — المحرك في وضع الاستعداد." : "Narrative unavailable — engine in standby.",
+      cacheHit: false,
+      isStub: true,
+      ms: 0,
+      wordCount: 0,
+    };
+  }
 
   // Sanity-check the topic length so this can't be abused as an open-ended LLM endpoint.
   const topic = (input.topic ?? "general").slice(0, 64);

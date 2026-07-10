@@ -4,6 +4,14 @@
 > 2026-05-15 walkthrough are closed in the current build. See
 > the "Status of original findings" section after the TL;DR table.
 >
+> **Status update 2026-07** — the `lib/brain/Brain.ts` stub described under
+> Blocker 3 was **retired in PR #240 (merged 2026-06-11)**. The brain is now a
+> wired tool-loop: `src/lib/brain/tools/` (7 typed tools) +
+> `src/lib/brain/orchestrator.ts` (LIVE mode) + a stdio MCP server; STUB mode
+> remains the zero-key default. The docintel parser is no longer a stub — it
+> has a real Claude Vision path (`src/lib/docintel/parser.ts`). See
+> `src/lib/brain/README.md`.
+>
 > Full-app dry run as an investor/leadership demo would see it.
 > **Run date:** 2026-05-15 · **Build:** Next.js 14.2.18, branch `main`, commit `f229049`
 > **Method:** gstack headless Chromium, logged in as `admin@hourani.jo`, every major screen visited at 1280px (mobile `/m` captured at 390×844 phone viewport).
@@ -108,7 +116,7 @@ Individually each is "just seed data," but together they paint the flagship hosp
 - `/brain/council` shows **"حالة المعركة: مُفعّل بـ CLAUDE"** ("powered by CLAUDE").
 - `ANTHROPIC_API_KEY` is **declared in `.env` but empty** — verified unset in the running dev server (`set: false, len: 0`).
 - `lib/brain/narrator.claude.ts:6`: *"Stub mode (no ANTHROPIC_API_KEY) returns a topic-aware editorial template."* `lib/brain/llm.ts:35` reads the key and falls back to templates when absent.
-- `lib/brain/Brain.ts` itself: `makeBrain()` returns all-stub proxies and `Brain.ask()` throws `"not yet wired"`. The brain *pages* work because they call the `*.live.ts` subsystems directly (council.live, simulator.bfs, memory.live) — those produce **real deterministic output**, not LLM output.
+- `lib/brain/Brain.ts` itself: `makeBrain()` returns all-stub proxies and `Brain.ask()` throws `"not yet wired"`. The brain *pages* work because they call the `*.live.ts` subsystems directly (council.live, simulator.bfs, memory.live) — those produce **real deterministic output**, not LLM output. _(2026-07: no longer true — `Brain.ts` was retired in PR #240; the brain is now tool-fronted via `src/lib/brain/tools/` + the `orchestrator.ts` tool-loop + a stdio MCP server. STUB mode is still the zero-key default.)_
 
 So the brain is genuinely functional as a deterministic engine, but the **"powered by CLAUDE" label is not true in this build**. If a technical evaluator asks "is this live AI?", the honest answer is "deterministic engine now, Claude-ready when the key is set." Either set a key for the demo, or change the label to something honest ("Council engine: ready") so the claim survives scrutiny. Matches the known readiness posture (prototype, AI stub-mode by default).
 
@@ -125,7 +133,7 @@ So the brain is genuinely functional as a deterministic engine, but the **"power
 
 ### ⚪ EMPTY BY DESIGN
 
-- **`/documents`** (21) — all counters `0`, clean empty state ("لا مستندات بعد. أفلِت أوّل ملف…"). The parser is a known stub (target: Claude Vision). For the pitch, either pre-seed one sample document or demo a live drag-and-drop so the module isn't all zeros.
+- **`/documents`** (21) — all counters `0`, clean empty state ("لا مستندات بعد. أفلِت أوّل ملف…"). The parser is a known stub (target: Claude Vision). _(2026-07: shipped — `parseWithVision` in `src/lib/docintel/parser.ts`, with stub fallback.)_ For the pitch, either pre-seed one sample document or demo a live drag-and-drop so the module isn't all zeros.
 
 ### ✅ CLEARED
 

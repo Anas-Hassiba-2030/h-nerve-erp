@@ -3,10 +3,9 @@
 // Document Intelligence parser. Phase 18 of docs/PHASES-INTELLIGENCE.md.
 //
 // Behavior:
-// - LIVE mode (with ANTHROPIC_API_KEY): would call Claude Vision on the
-//   uploaded file bytes. Not implemented yet — left as a clearly-marked
-//   TODO with the same return shape so we can swap in later without
-//   touching callers.
+// - LIVE mode (with ANTHROPIC_API_KEY): calls Claude Vision on the
+//   uploaded file bytes (parseWithVision below), capped per process by
+//   DOCINTEL_MAX_VISION_CALLS; any failure falls through to the stub.
 // - STUB mode: matches the filename and (rough) size against known
 //   patterns and returns a canned-but-plausible extraction. The stub is
 //   deliberately rich — the demo of dropping a "supplier_contract.pdf"

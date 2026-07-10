@@ -13,6 +13,7 @@ import { logActivity } from "@/lib/auth/activityLog";
 import { runEngine, persistInsights } from "@/lib/ai/aiEngine";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { recordFeedback } from "@/lib/brain/feedback.live";
+import { guardLlmAction, llmGuardLabel } from "@/lib/brain/actionGuard";
 
 const insightSchema = z.object({
   module: z.enum(["HOTELS", "DAIRY", "FARMS", "SUPPLY", "FINANCE", "EDUCATION"]),
@@ -264,6 +265,16 @@ export async function generateInsightPlan(formData: FormData) {
   const lc: "ar" | "en" = locale === "ar" ? "ar" : "en";
   if (!id) return;
 
+  // Plan generation is one LLM call — same guard stack as /api/converse.
+  // Shares the "plan-generate" bucket with plans/actions.ts on purpose: it's
+  // the same planner behind a different button.
+  const guard = await guardLlmAction("plan-generate", user.id, { max: 6 });
+  if (!guard.allowed) {
+    await flashToast({ type: "info", entity: "info", id, label: llmGuardLabel(guard, lc === "ar") });
+    revalidatePath("/insights");
+    return;
+  }
+
   // Every failure path must surface a toast — a silent throw makes the click
   // look broken even when the auth + DB layer are working correctly.
   let planId: string | null = null;
@@ -313,6 +324,15 @@ export async function runAiEngine() {
   const user = await requireUser();
   const locale = await getLocale();
   const lc: "ar" | "en" = locale === "ar" ? "ar" : "en";
+
+  // The engine is ~10 parallel DB heuristics — heavy on the pool but LLM-free,
+  // so throttle without charging the tenant's AI budget.
+  const guard = await guardLlmAction("ai-engine", user.id, { max: 2, consumesBudget: false });
+  if (!guard.allowed) {
+    await flashToast({ type: "info", entity: "insight", id: "ai-engine", label: llmGuardLabel(guard, lc === "ar") });
+    revalidatePath("/insights");
+    return;
+  }
 
   // The engine runs ~10 parallel heuristics; if any one throws (schema drift,
   // missing table, scoping mismatch) Promise.all rejects and the whole action

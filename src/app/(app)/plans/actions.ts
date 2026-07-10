@@ -16,12 +16,20 @@ import { recordFeedback } from "@/lib/brain/feedback.live";
 import { prisma } from "@/lib/db/db";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { flashToast } from "@/lib/utils/toast";
+import { guardLlmAction, llmGuardLabel } from "@/lib/brain/actionGuard";
 
 export async function generateFromCouncil(formData: FormData): Promise<void> {
-  await requireUser();
+  const user = await requireUser();
   const sessionId = String(formData.get("sessionId") ?? "");
   const locale = (await getLocale()) as "ar" | "en";
   const ar = locale === "ar";
+  // Plan generation is one LLM call — same guard stack as /api/converse.
+  const guard = await guardLlmAction("plan-generate", user.id, { max: 6 });
+  if (!guard.allowed) {
+    await flashToast({ type: "info", entity: "info", id: "gen", label: llmGuardLabel(guard, ar) });
+    revalidatePath("/plans");
+    return;
+  }
   if (!sessionId) {
     await flashToast({ type: "info", entity: "info", id: "gen", label: ar ? "معرف الجلسة مفقود" : "Session id missing" });
     revalidatePath("/plans");
@@ -45,10 +53,16 @@ export async function generateFromCouncil(formData: FormData): Promise<void> {
 }
 
 export async function generateFromInsight(formData: FormData): Promise<void> {
-  await requireUser();
+  const user = await requireUser();
   const insightId = String(formData.get("insightId") ?? "");
   const locale = (await getLocale()) as "ar" | "en";
   const ar = locale === "ar";
+  const guard = await guardLlmAction("plan-generate", user.id, { max: 6 });
+  if (!guard.allowed) {
+    await flashToast({ type: "info", entity: "info", id: "gen", label: llmGuardLabel(guard, ar) });
+    revalidatePath("/plans");
+    return;
+  }
   if (!insightId) {
     await flashToast({ type: "info", entity: "info", id: "gen", label: ar ? "معرف الإشارة مفقود" : "Insight id missing" });
     revalidatePath("/plans");

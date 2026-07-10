@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/session";
 import { requireRole } from "@/lib/auth/authz";
 import { council } from "@/lib/brain/council.live";
+import { guardLlmAction, llmGuardLabel } from "@/lib/brain/actionGuard";
 import type { CouncilLens } from "@/lib/brain/council";
 import { prisma } from "@/lib/db/db";
 import { flashToast } from "@/lib/utils/toast";
@@ -22,8 +23,16 @@ const LENS_LABEL: Record<string, { ar: string; en: string }> = {
 };
 
 export async function convene(formData: FormData): Promise<void> {
-  await requireUser();
+  const user = await requireUser();
   const ar = (await getLocale()) === "ar";
+  // A convene fans out 6 LLM calls (5 voices + moderator) — the most expensive
+  // button in the app. Same guard stack as /api/converse.
+  const guard = await guardLlmAction("convene", user.id, { max: 4 });
+  if (!guard.allowed) {
+    flashToast({ type: "info", entity: "info", id: "convene", label: llmGuardLabel(guard, ar) });
+    revalidatePath("/brain/council");
+    return;
+  }
   const topic = String(formData.get("topic") ?? "").trim();
   if (!topic || topic.length < 6) {
     flashToast({

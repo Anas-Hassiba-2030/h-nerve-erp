@@ -59,7 +59,9 @@ pattern.
 - `.vercel/` — leftover from Vercel era (Railway now)
 - `.obsidian/` — Obsidian notes app config (personal)
 - `.gstack/` / `.playwright-mcp/` — local tooling state
-- `workflows/` — n8n workflow exports (not Next.js)
+
+(n8n workflow exports live in `docs/integrations/n8n/` — moved from the
+old root `workflows/` dir in the 2026-07 root-hygiene pass.)
 
 ---
 

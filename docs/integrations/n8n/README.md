@@ -1,4 +1,4 @@
-# workflows/n8n
+# docs/integrations/n8n
 
 Committed n8n workflow exports live here. See
 `docs/INTEGRATIONS-N8N.md` for the contract and the redaction rule

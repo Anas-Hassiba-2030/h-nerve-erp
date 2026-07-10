@@ -8,7 +8,7 @@ the contract and giving the export a home.
 
 ## Where the workflow JSON lives
 
-Exported workflow JSON belongs in `workflows/n8n/`. Export from n8n
+Exported workflow JSON belongs in `docs/integrations/n8n/`. Export from n8n
 (`⋯ → Download`) and commit the file there. **Strip credentials before
 committing** — n8n exports include credential *references* but never
 commit a file that contains a resolved API key, DB URL, or webhook
@@ -37,13 +37,13 @@ Rules:
 ## Restoring / standing up the workflows
 
 1. Spin up n8n (self-host or cloud).
-2. Import each JSON file from `workflows/n8n/`.
+2. Import each JSON file from `docs/integrations/n8n/`.
 3. Recreate credentials in n8n (they are intentionally absent from the
    committed JSON).
 4. Point the outbound webhook credential at the H-Nerve connector URL.
 5. Activate the workflow; send one test event and confirm the connector
    log records it.
 
-> If `workflows/n8n/` contains only this note, the live workflow has
+> If `docs/integrations/n8n/` contains only this note, the live workflow has
 > not yet been exported. Export and commit it (redacted) to make the
 > automation reproducible — that is the open action this doc tracks.

@@ -23,9 +23,9 @@ last-updated: 2026-07-09
 | Batch 1 — legibility | ✅ **Merged.** PR #281 (root hygiene: front-door README, strays relocated, stale worktree delinted) + PR #283 (this doc spine + Brain truth-sync + SYSTEM-MAP refresh). |
 | Batch 2 — VAOC | ✅ **Merged.** PR #284: the agent company — `orchestrator` + 6 department heads, 24 workers tagged by `department:`, operating manual at `docs/VAOC.md`. |
 | Batch 3 — docs consolidation | ✅ **Merged.** PR #285: 12 zero-code-reference docs → `docs/{ops,brain,phases}/`, inbound links fixed. **The IA split (System group + orphan routes) is held for owner sign-off** — it needs a new user-menu surface and touches the orbit. |
-| Batch 4 — hardening (this PR) | Converse: zod request schema + per-tenant daily LLM budget (degrades to stub). Next: DB pooling prep + dashboard cache. |
+| Batch 4 — hardening | Converse ✅ **merged** (PR #286: zod schema + per-tenant daily LLM budget, degrades to stub). Pooling prep + dashboard wave-collapse: **this PR**. |
 | Phase 27 module wave | CRM shipped as **draft PR #280** (Lead/Opportunity + `/crm` Kanban + SalesPipelineExpert). HR parked as WIP on `feat/phase27-hr` (`prisma/schema/hr.prisma` + `workspaceScope` registration). |
-| Master-brief campaign | Batch 1 ✅ → Batch 2 ✅ → Batch 3 docs ✅ / IA ⏸ owner sign-off → Batch 4 in flight (converse ✅ this PR; pooling + dashboard next). |
+| Master-brief campaign | Batch 1 ✅ → Batch 2 ✅ → Batch 3 docs ✅ / IA ⏸ owner sign-off → Batch 4 (converse ✅ #286; pooling+dashboard = this PR, PgBouncer provisioning = owner). |
 
 ## 3. Open items / backlog
 
@@ -34,7 +34,7 @@ Folded forward from `docs/AUDIT-2026-06.md`, updated with facts verified 2026-07
 ### Infrastructure & hardening
 - **Brain weekly cron** — the workflow **exists** (`.github/workflows/brain-cron.yml`, Mon 06:00 UTC), but the repo secrets `APP_URL` + `CRON_SECRET` need owner verification before it can be considered live. On-demand "Run analysis" works regardless.
 - **`/api/converse` hardening** — ✅ done (Batch 4): auth + per-user rate limit (20/60s) + zod request schema + **per-tenant daily LLM budget** (`BRAIN_TENANT_DAILY_LLM_CALLS`, default 300/day; breach degrades to stub, no error) + process-wide `BRAIN_MAX_LLM_CALLS` cap.
-- **DB connection pooling** — Prisma is a **direct** connection, no pooling; the dashboard is `force-dynamic` with ~22 queries/load. 10–15 concurrent users safe today; 100–200 needs PgBouncer/Accelerate + dashboard caching → **Batch 4**. Keep `numReplicas = 1` until the in-memory realtime store moves to Redis. One stray pool in `app/api/seed/route.ts`.
+- **DB connection pooling** — repo side ✅ prepped (Batch 4): the dashboard's ~22 reads collapsed from five sequential await-waves into ONE `Promise.all`; `docs/DEPLOYMENT.md § Connection pooling` documents the PgBouncer sidecar (env-only switch + one `directUrl` uncomment); `schema.prisma` carries the ready-to-uncomment line. **Remaining: owner provisions PgBouncer on Railway.** Keep `numReplicas = 1` until the in-memory realtime store moves to Redis. (The old "stray pool in seed route" claim was stale — it already uses the shared client.) Response-level dashboard caching deliberately skipped: the payload is user-specific (`me`, `myTasksDue`, `myPins`), so a per-user cache would fragment and barely hit.
 - **Strengthen CI** — `ci.yml` runs typecheck + tests; still missing a lint step and a `next build` step (needs a Postgres service container). Workflow edits need a token with `workflow` scope — owner one-liner.
 - **Phase 24 (Railway maximization)** — custom domain, backups, monitoring — still open.
 

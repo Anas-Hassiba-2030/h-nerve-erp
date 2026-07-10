@@ -82,6 +82,34 @@ via `/admin/brain` → "Run analysis".
 - `GET /api/health` → `{ "status": "ok", "db": "connected" }` (503 = DB unreachable).
 - `/login` loads → sign in → `/dashboard` loads.
 
+## Connection pooling (PgBouncer) — the 100-user unlock
+
+Today the app opens a **direct** Prisma connection (`src/lib/db/db.ts`, plain
+`new PrismaClient()`). Prisma's default pool is `num_cpus × 2 + 1` per
+process; past ~15 concurrent users the direct Postgres connection budget
+exhausts. The fix is a PgBouncer sidecar — an owner action on Railway, then a
+two-variable switch here. No code change beyond one schema line.
+
+1. **Provision** the PgBouncer template on Railway (Railway → New → Template →
+   search "PgBouncer"), pointed at the Postgres plugin. Use
+   `POOL_MODE=transaction` and `max_client_conn=200`.
+2. **Set variables** on the app service:
+   - `DATABASE_URL` → the **PgBouncer** URL, with
+     `?pgbouncer=true&connection_limit=10` appended (Prisma disables
+     prepared statements under transaction pooling with `pgbouncer=true`;
+     `connection_limit` keeps each app instance modest).
+   - `DIRECT_DATABASE_URL` → the original direct Postgres URL (migrations
+     bypass the pooler).
+3. **Uncomment** the `directUrl` line in `prisma/schema/schema.prisma`
+   (`directUrl = env("DIRECT_DATABASE_URL")`) in the same PR — commented out
+   until the variables exist, because Prisma fails on a referenced-but-unset
+   env var at migrate time.
+4. **Verify**: `GET /api/health`, then `npm run brain:doctor` against prod per
+   `docs/BRAIN-DB-LINK-RUNBOOK.md`.
+
+Keep `numReplicas = 1` until the in-memory realtime store moves to Redis —
+pooling fixes connections, not the SSE presence fan-out.
+
 ## n8n (Phase 10 ingestion)
 
 In the n8n workflow's HTTP Request node:

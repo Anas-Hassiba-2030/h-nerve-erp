@@ -36,20 +36,28 @@ export async function getDashboardData({
   const next3Days = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
 
   const next28Days = new Date(now.getTime() + 28 * 24 * 60 * 60 * 1000);
-  // Phase F7 — scoped read. BrainInsight now has tenantId (Phase F3
-  // TENANT_SCOPED_MODELS), so this count is automatically restricted
-  // to the active tenant's insights. ADMIN with no tenant cookie sees
-  // the global count (the original behaviour).
-  const activeInsightCount = await prisma.brainInsight.count({
-    where: { resolvedAt: null, dismissedAt: null },
-  });
-  const brainIQ = await computeIQ("default").catch(() => null);
+  const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  // ONE parallel wave. These ~22 reads used to run as five sequential
+  // await-waves (insight count → IQ → main batch → activity batch → pins);
+  // they are mutually independent, so a single Promise.all cuts dashboard
+  // latency to the slowest query instead of the sum of the waves — and holds
+  // a pooled connection for the shortest possible time.
   const [
+    activeInsightCount, brainIQ,
     me, companies, totalRoomsAgg, activeRoomsAgg, bookingsAgg,
     dairyVolumeAgg, expiringDairy, farms, programs, forecasts, recentInsights,
     transactions, marketStocks, esg, futureProjects, myTasksDue,
     upcomingBookings, expiringDairyAll, harvestingCrops,
+    recentActivityLogs, totalActivityToday, myPins,
   ] = await Promise.all([
+    // Phase F7 — scoped read. BrainInsight now has tenantId (Phase F3
+    // TENANT_SCOPED_MODELS), so this count is automatically restricted
+    // to the active tenant's insights. ADMIN with no tenant cookie sees
+    // the global count (the original behaviour).
+    prisma.brainInsight.count({
+      where: { resolvedAt: null, dismissedAt: null },
+    }),
+    computeIQ("default").catch(() => null),
     session ? prisma.user.findUnique({ where: { id: session.id } }) : null,
     prisma.company.findMany({ orderBy: { createdAt: "asc" }, take: 50 }),
     prisma.hotel.aggregate({ _sum: { totalRooms: true } }),
@@ -110,19 +118,16 @@ export async function getDashboardData({
       orderBy: { expectedHarvest: "asc" },
       take: 100,
     }),
-  ]);
-
-  // Today's activity log (last 24h)
-  const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-  const [recentActivityLogs, totalActivityToday] = await Promise.all([
+    // Today's activity log (last 24h)
     prisma.activityLog.findMany({
       where: { createdAt: { gte: last24h } },
       orderBy: { createdAt: "desc" },
       take: 20,
     }),
     prisma.activityLog.count({ where: { createdAt: { gte: last24h } } }),
+    session ? listPins(session.id) : [],
   ]);
-  const myPins = session ? await listPins(session.id) : [];
+
   const todayActivityItems: ActivityLogLite[] = recentActivityLogs.map((l) => ({
     id: l.id,
     action: l.action,

@@ -1,18 +1,18 @@
 # H-Nerve — STATUS (living document)
 
 owner: Anas Hasiba
-last-updated: 2026-07-09
+last-updated: 2026-07-10
 
 > **This is the current truth.** It supersedes status claims scattered across
 > older docs (`docs/AUDIT-2026-06.md` is now a historical snapshot). Update
 > this file when facts change; don't fork new status docs.
 
-## 1. Health gate — verified 2026-07-09 ✅
+## 1. Health gate — verified 2026-07-10 ✅
 
 | Gate | Result |
 |------|--------|
 | `tsc --noEmit` | ✅ clean |
-| `npm test` (Vitest) | ✅ **772/772** passing |
+| `npm test` (Vitest) | ✅ **778/778** passing |
 | `npm run lint` | ✅ 0 errors, 74 warnings (known react-compiler advisory baseline; refactor deferred) |
 | Production | ✅ deploys from `main` on Railway |
 
@@ -23,9 +23,10 @@ last-updated: 2026-07-09
 | Batch 1 — legibility | ✅ **Merged.** PR #281 (root hygiene: front-door README, strays relocated, stale worktree delinted) + PR #283 (this doc spine + Brain truth-sync + SYSTEM-MAP refresh). |
 | Batch 2 — VAOC | ✅ **Merged.** PR #284: the agent company — `orchestrator` + 6 department heads, 24 workers tagged by `department:`, operating manual at `docs/VAOC.md`. |
 | Batch 3 — docs consolidation | ✅ **Merged.** PR #285: 12 zero-code-reference docs → `docs/{ops,brain,phases}/`, inbound links fixed. **The IA split (System group + orphan routes) is held for owner sign-off** — it needs a new user-menu surface and touches the orbit. |
-| Batch 4 — hardening | Converse ✅ **merged** (PR #286: zod schema + per-tenant daily LLM budget, degrades to stub). Pooling prep + dashboard wave-collapse: **this PR**. |
+| Batch 4 — hardening | ✅ **Merged.** PR #286 (converse: zod schema + per-tenant daily LLM budget, degrades to stub) + PR #287 (dashboard five waves → one `Promise.all`; PgBouncer runbook + ready-to-uncomment `directUrl`). Remaining: owner provisions PgBouncer. |
+| IA split | ⏸ Proposal at `docs/proposals/IA-SPLIT-PROPOSAL.md` (PR #288) — B1 user menu / B2 The Core hub / B3 orphan homing. Awaiting owner B1/B2/B3 sign-off. |
 | Phase 27 module wave | CRM shipped as **draft PR #280** (Lead/Opportunity + `/crm` Kanban + SalesPipelineExpert). HR parked as WIP on `feat/phase27-hr` (`prisma/schema/hr.prisma` + `workspaceScope` registration). |
-| Master-brief campaign | Batch 1 ✅ → Batch 2 ✅ → Batch 3 docs ✅ / IA ⏸ owner sign-off → Batch 4 (converse ✅ #286; pooling+dashboard = this PR, PgBouncer provisioning = owner). |
+| Master-brief campaign | **Batches 1–4 ✅ all merged** (#281, #283, #284, #285, #286, #287). Open: IA sign-off (#288) + the owner-action ledger (§5). |
 
 ## 3. Open items / backlog
 

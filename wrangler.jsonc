@@ -1,0 +1,36 @@
+{
+  // Cloudflare Workers deploy config (Phase 4 §3 — docs/proposals/CLOUDFLARE-AUDIT.md).
+  // Deploy model: Workers + static assets via @opennextjs/cloudflare (NOT Pages).
+  // Build:   npm run cf:build     (opennextjs-cloudflare build)
+  // Preview: npm run cf:preview   (local workerd)
+  // Deploy:  npm run cf:deploy    (needs CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID)
+  //
+  // Secrets (ANTHROPIC_API_KEY, SESSION_PASSWORD, NEON_DATABASE_URL, CRON_SECRET, …)
+  // are NOT set here — use `wrangler secret put <NAME>` / the dashboard. Setting
+  // them fresh doubles as the rotation owed per docs/RUNBOOK.md §1.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "h-nerve-erp",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-06-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      // Self-reference service binding — the service name must match "name"
+      // above (see https://opennext.js.org/cloudflare/caching).
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "h-nerve-erp"
+    }
+  ],
+  "vars": {
+    // Non-secret runtime vars. NEXT_PUBLIC_APP_URL is overridden per
+    // environment in the dashboard once the final hostname exists.
+    "NEXT_TELEMETRY_DISABLED": "1"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

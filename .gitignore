@@ -66,3 +66,7 @@ graphify-out/
 
 # Claude Code session lock — machine state, churns every session
 .claude/scheduled_tasks.lock
+
+# OpenNext / Cloudflare build output (Phase 4)
+.open-next/
+.wrangler/

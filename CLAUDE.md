@@ -75,8 +75,9 @@ pure-unit — `lib/**/*.test.ts`, no DB/network/Next runtime. Run
 ### `src/` layout (2026-06-12)
 
 All source lives under **`src/`**: `src/app/`, `src/components/`, `src/lib/`,
-`src/proxy.ts` (Next 16's renamed middleware convention — route-level RBAC
-lives there). Everywhere this document (or any doc) says `app/...`,
+`src/middleware.ts` (route-level RBAC; deliberately the LEGACY filename, not
+Next 16's `proxy.ts` — proxy.ts is hard-coded to the Node middleware runtime,
+which the Cloudflare adapter can't run; see the file's header note). Everywhere this document (or any doc) says `app/...`,
 `components/...`, or `lib/...`, read it as `src/app/...`, `src/components/...`,
 `src/lib/...`. The `@/*` import alias maps to `./src/*` (so `@/lib/db/db`
 still works unchanged), with one carve-out: `@/prisma/*` maps to the root

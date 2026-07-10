@@ -14,7 +14,8 @@ document mirrors it.** When they disagree, groups.ts wins; fix this file.
 | Operator chrome (sidebar, top control, MiniOrrery) | `src/app/(app)/layout.tsx`, `src/components/orrery/MiniOrrery.tsx` |
 | Superadmin chrome | `src/app/(admin)/layout.tsx` |
 
-The orbit menu is the navigation spine. **5 groups, 45 routes.** The compact
+The orbit menu is the navigation spine. **5 groups, 41 routes** (+ the header
+UserMenu carrying the 6 personal utilities). The compact
 dropdown (`MiniOrrery.tsx`) and the sibling rail read `groups.ts` directly;
 the radial hub (`public/orrery/index.html`) keeps its own index-aligned AR/EN
 arrays and is synced to groups.ts only as a deliberate, isolated step (see the
@@ -50,16 +51,18 @@ from the Brain hub, not the orbit — counted under orphans below.)
 `/messages` · `/tasks` · `/inbox` · `/digest` · `/employees` ·
 `/achievements` · `/users`
 
-### System — ⚠ still overloaded (10 routes)
-`/admin/system` (Mission Control) · `/workflows` · `/integrations` ·
-`/audit-360` · `/activity` · `/search` · `/pinned` · `/trash` ·
-`/settings` · `/help`
+### System — 6 honest routes (IA split #288, shipped 2026-07-10)
+`/admin/system` (Mission Control) · `/admin` (**النواة / The Core** — the
+ERP back-office hub fronting the 13 operator consoles) · `/workflows` ·
+`/integrations` · `/audit-360` · `/activity`
 
-> Trimmed 2026-06-28: `/admin/empire` and `/admin/tenants` now fan out from
-> Mission Control (one clear admin entry point), `/workspace` moved to Group
-> Board, and `/roadmap` was dropped from the menu. Still a junk drawer:
-> platform admin, automation, and personal utilities (search/pinned/trash)
-> share one bucket.
+> Trimmed 2026-06-28: `/admin/empire` and `/admin/tenants` fan out from
+> Mission Control, `/workspace` moved to Group Board, `/roadmap` dropped.
+> **Split 2026-07-10 (IA split B1):** the personal utilities — `/search`,
+> `/pinned`, `/trash`, `/settings`, `/help`, plus `/me` — moved out of the
+> section grid into the header **UserMenu**
+> (`src/components/nav/UserMenu.tsx`, rendered by `PageHeader` on every
+> authenticated page, with Sign out). System is no longer a junk drawer.
 
 ## Superadmin console — `(admin)` tier (ADMIN role only)
 
@@ -86,15 +89,14 @@ Operator / Leave-admin text exits).
 
 ## IA findings
 
-1. **System is overloaded** — 10 routes today (down from 14: Empire/Tenants
-   folded into Mission Control, `/workspace` lifted to Group Board, `/roadmap`
-   dropped), but it still mixes platform-admin with personal utilities.
-   Remaining split: keep platform-admin together and move personal utilities
-   (search/pinned/trash/settings/help) out of the section grid. Scheduled as
-   campaign Batch 3.
-2. **22 orphan routes** float with no home — decide: surface (give an orbit
-   home), fold into an existing section, or retire. Scheduled as campaign
-   Batch 3.
+1. **System overload** — ✅ resolved (IA split #288, 2026-07-10): personal
+   utilities moved to the header UserMenu; System = 6 platform pills including
+   The Core.
+2. **Orphan routes** — ✅ homed (same split): the 13 ERP back-office consoles
+   sit behind the `/admin` Core hub; `/me` lives in the UserMenu;
+   `/changelog` + `/design-system` + `/showcase` are linked from `/help`
+   ("For developers" shelf); `/brain/benchmarks` + `/brain/self-tuning` stay
+   hub-reached by design; `/roadmap` stays unlisted.
 3. **Company-card routing** (fixed 2026-06-28) — dashboard cards linked to
    `/companies/{id}` (a profile) instead of entering that company's
    `/workspace`; cookie default made it land on an unrelated unit.
@@ -107,4 +109,4 @@ Operator / Leave-admin text exits).
 | 2 | Admin rail — monogram wordmark, shared Orbit button, drop Operator | ✅ shipped (PR #265) |
 | 3 | Orbit sections menu — clearer compact dropdown (bloom untouched) | ⏳ needs owner direction |
 | 4 | Dashboard — full redesign | ⏳ mockups next |
-| 5 | Organize the IA — empty System, home the orphans, tighten groups | ⏳ after 3–4 |
+| 5 | Organize the IA — empty System, home the orphans, tighten groups | ✅ shipped (IA split #288, 2026-07-10) |

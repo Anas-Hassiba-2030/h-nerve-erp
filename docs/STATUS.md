@@ -24,7 +24,7 @@ last-updated: 2026-07-10
 | Batch 2 — VAOC | ✅ **Merged.** PR #284: the agent company — `orchestrator` + 6 department heads, 24 workers tagged by `department:`, operating manual at `docs/VAOC.md`. |
 | Batch 3 — docs consolidation | ✅ **Merged.** PR #285: 12 zero-code-reference docs → `docs/{ops,brain,phases}/`, inbound links fixed. **The IA split (System group + orphan routes) is held for owner sign-off** — it needs a new user-menu surface and touches the orbit. |
 | Batch 4 — hardening | ✅ **Merged.** PR #286 (converse: zod schema + per-tenant daily LLM budget, degrades to stub) + PR #287 (dashboard five waves → one `Promise.all`; PgBouncer runbook + ready-to-uncomment `directUrl`). Remaining: owner provisions PgBouncer. |
-| IA split | ⏸ Proposal at `docs/proposals/IA-SPLIT-PROPOSAL.md` (PR #288) — B1 user menu / B2 The Core hub / B3 orphan homing. Awaiting owner B1/B2/B3 sign-off. |
+| IA split | ✅ **Approved + building** (owner sign-off 2026-07-10): B1 UserMenu + System 10→6 pills + The Core pill (this PR); B2 hub page + B3 /help dev links (sibling PR `feat/core-hub`). |
 | Phase 27 module wave | CRM shipped as **draft PR #280** (Lead/Opportunity + `/crm` Kanban + SalesPipelineExpert). HR parked as WIP on `feat/phase27-hr` (`prisma/schema/hr.prisma` + `workspaceScope` registration). |
 | Master-brief campaign | **Batches 1–4 ✅ all merged** (#281, #283, #284, #285, #286, #287). Open: IA sign-off (#288) + the owner-action ledger (§5). |
 
@@ -42,7 +42,7 @@ Folded forward from `docs/AUDIT-2026-06.md`, updated with facts verified 2026-07
 
 ### Organization / quality
 - **`docs/` root** — ✅ consolidated: 12 zero-code-reference docs moved into `docs/{ops,brain,phases}/`. Docs referenced by exact path from code, `CLAUDE.md`, or an agent brief deliberately stay at `docs/` root — moving those silently breaks a comment, a script, or a brief.
-- **IA split (orrery System group + 19 orphan routes)** — ⏸ **awaiting owner sign-off.** Moving Search/Pinned/Trash/Settings/Help out of the System group requires building a user-menu surface that doesn't exist yet (`src/components/layout/` has Topbar + Sidebar, no user menu), and any orrery change touches the sacred hub. Proposal, not a blind ship.
+- **IA split (orrery System group + orphan routes)** — ✅ approved (2026-07-10) and shipping: B1 `UserMenu` in `PageHeader` (Search/Pinned/Trash/Settings/Help/Profile/Sign-out), System group = 6 pills incl. **النواة / The Core** (`/admin`), hub + routeMap hand-synced + `public/orrery` rebuilt via `build-orrery.mjs` — bloom untouched. B2 Core hub page + B3 /help dev links in the sibling PR. |
 - **Component-test floor** — API smoke tests exist (`lib/utils/api-routes.smoke.test.ts`); still zero `app/`/`components/` component-level tests.
 - **Admin back-office hub** — the 13 ERP back-office routes under `app/(app)/admin/*` render fine but have no single Orrery hub ("The Core" — Phase 27b).
 

@@ -1253,8 +1253,13 @@ const GROUPS = [
      ["المركز المالي","sections/finance.html"],["التحليلات","sections/analytics.html"],["مقارنة","sections/compare.html"],["الأسواق","sections/markets.html"],["التقارير","sections/reports.html"],["الاستدامة"],["المشاريع المستقبلية"] ]},
   { id:"team", name:"الفريق", en:"Team", amb:"university", kids:[
      ["الرسائل","sections/messages.html"],["المهام","sections/tasks.html"],["صندوق الوارد","sections/inbox.html"],["الموجز","sections/digest.html"],["الإنجازات","sections/achievements.html"],["الموظفون","sections/employees.html"] ]},
+  // IA split (PR #288, approved 2026-07-10): System mirrors src/lib/orrery/groups.ts
+  // 1:1 — personal utilities (Search/Pinned/Trash/Settings/Help) moved to the
+  // header UserMenu; Tenants/Empire fan out from Mission Control; Workspace
+  // lives on Group Board; "النواة / The Core" fronts the 13 ERP back-office
+  // consoles. DATA-ONLY edit — the bloom/animation is untouched.
   { id:"system", name:"النظام", en:"System", amb:"holding", kids:[
-     ["المستأجرون","sections/admin.html"],["الإمبراطورية","sections/holding.html"],["الإدارة ERP","sections/admin.html"],["مساحة العمل","sections/workspace.html"],["الأتمتة","sections/workflows.html"],["التكاملات","sections/integrations.html"],["التدقيق الشامل","sections/audit.html"],["سجل النشاط","sections/audit.html"],["صحة النظام","sections/system.html"],["البحث","sections/search.html"],["المثبّت","sections/pinned.html"],["المحذوفات","sections/trash.html"],["المساعدة","sections/info.html"],["خارطة الطريق","sections/info.html"],["الإعدادات","sections/system.html"] ]},
+     ["غرفة العمليات"],["النواة","sections/erp.html"],["الأتمتة","sections/workflows.html"],["التكاملات","sections/integrations.html"],["التدقيق الشامل","sections/audit.html"],["سجل النشاط"] ]},
 ];
 // English child labels (parallel to kids order) — for the AR/EN toggle
 const KIDS_EN = {
@@ -1262,7 +1267,7 @@ const KIDS_EN = {
   intel:["Brain Hub","Insights","Alerts","Plans","Documents","Causal Graph","What-if","Council","Memory Lake","Learning","Benchmarks","Brain IQ","Narrate"],
   finance:["Financial Hub","Analytics","Compare","Markets","Reports","Sustainability","Future Projects"],
   team:["Messages","Tasks","Inbox","Digest","Achievements","Staff"],
-  system:["Tenants","Empire","Admin ERP","Workspace","Workflows","Integrations","Audit 360","Activity","System Health","Search","Pinned","Trash","Help","Roadmap","Settings"],
+  system:["Mission Control","The Core","Workflows","Integrations","Audit 360","Activity"],
 };
 const ANCHORS = GROUPS.map(g=>({
   id:g.id, name:g.name, en:g.en, amb:g.amb,

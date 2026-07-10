@@ -13,7 +13,7 @@
 // The user sees the full transcript ("Decision Theater" — Phase 9). The
 // brain stores it for later review and for feedback-loop training.
 //
-// See docs/PHASES-INTELLIGENCE.md — Phase 3.
+// See docs/governance/PHASES-INTELLIGENCE.md — Phase 3.
 
 export type AgentVoice = {
   agentId: string;          // "dairy-expert", "finance-brain", etc.

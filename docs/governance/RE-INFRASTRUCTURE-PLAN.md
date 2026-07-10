@@ -168,14 +168,14 @@ git workflow, tenancy rules.
 | Concern | File(s) |
 |---|---|
 | Conventions / architecture guide | `CLAUDE.md` |
-| Design language | `docs/DESIGN-SKILL.md` |
-| Phase roadmap | `docs/PHASES-INTELLIGENCE.md` |
-| Brain architecture | `docs/BLUEPRINT.md`, `lib/brain/README.md`, `lib/brain/Brain.ts` |
-| Multi-tenancy rules | `docs/ISOLATION.md` |
+| Design language | `docs/governance/DESIGN-SKILL.md` |
+| Phase roadmap | `docs/governance/PHASES-INTELLIGENCE.md` |
+| Brain architecture | `docs/governance/BLUEPRINT.md`, `lib/brain/README.md`, `lib/brain/Brain.ts` |
+| Multi-tenancy rules | `docs/architecture/ISOLATION.md` |
 | Git workflow (bilingual) | `docs/ops/GITHUB-WORKFLOW.md` |
-| Ops / deploy | `docs/RUNBOOK.md`, `docs/DEPLOYMENT.md`, `docs/phases/READINESS.md` |
-| Operating protocol (plain language) | `docs/OPERATING-PROTOCOL.md` |
-| Polish/bug backlog | `docs/PHASES-INTELLIGENCE.md` § Phase 26 |
+| Ops / deploy | `docs/ops/RUNBOOK.md`, `docs/ops/DEPLOYMENT.md`, `docs/phases/READINESS.md` |
+| Operating protocol (plain language) | `docs/governance/OPERATING-PROTOCOL.md` |
+| Polish/bug backlog | `docs/governance/PHASES-INTELLIGENCE.md` § Phase 26 |
 
 When the re-infra session starts: read this file, then generate `docs/spec/`
 (ERD + API catalog first), then build module-by-module against it.

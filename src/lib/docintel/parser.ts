@@ -1,6 +1,6 @@
 // lib/docintel/parser.ts
 //
-// Document Intelligence parser. Phase 18 of docs/PHASES-INTELLIGENCE.md.
+// Document Intelligence parser. Phase 18 of docs/governance/PHASES-INTELLIGENCE.md.
 //
 // Behavior:
 // - LIVE mode (with ANTHROPIC_API_KEY): calls Claude Vision on the

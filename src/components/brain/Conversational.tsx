@@ -18,7 +18,7 @@
 // Citations are first-class. Tab cycles through them; Enter on a focused
 // citation drills through to its href. Click works too.
 //
-// Phase 15 of docs/PHASES-INTELLIGENCE.md.
+// Phase 15 of docs/governance/PHASES-INTELLIGENCE.md.
 
 "use client";
 

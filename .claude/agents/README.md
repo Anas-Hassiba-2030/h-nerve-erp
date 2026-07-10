@@ -97,7 +97,7 @@ reviewers gate merges — they recommend/correct, they don't own features.
 
 | Worker | Role |
 |---|---|
-| `heritage-design-reviewer` | `docs/DESIGN-SKILL.md` enforcement — **read-only** gate |
+| `heritage-design-reviewer` | `docs/governance/DESIGN-SKILL.md` enforcement — **read-only** gate |
 | `i18n-bilingual-reviewer` | ar/en pairing, RTL safety, fonts — fix-capable reviewer |
 | `deploy-preflight` | Railway build safety gate before infra-touching merges |
 | `bug-reproducer` | Triad stage 1 — repro |
@@ -199,7 +199,7 @@ existing agent's surface (extend the owner), or a skill / external tool
 
 ## Further reading
 
-- **`docs/VAOC.md`** — the full operating manual for this company (written
+- **`docs/architecture/VAOC.md`** — the full operating manual for this company (written
   in this same PR).
-- **`docs/SUBAGENTS-AND-MCP-CATALOG.md`** — the catalog of every subagent
+- **`docs/architecture/SUBAGENTS-AND-MCP-CATALOG.md`** — the catalog of every subagent
   and MCP surface.

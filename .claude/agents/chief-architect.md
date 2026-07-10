@@ -45,7 +45,7 @@ shapes it, I gate it.
    No silent cross-tenant reads.
 4. **New tenant-keyed models are registered** in `TENANT_SCOPED_MODELS`
    (`src/lib/tenancy/workspaceScope.ts`). A tenant model that isn't
-   registered leaks — see `docs/ISOLATION.md`.
+   registered leaks — see `docs/architecture/ISOLATION.md`.
 5. **Behaviour-preserving refactors rewire every importer in the same
    commit.** Moving or renaming a file that leaves a dangling import is a
    broken refactor. Prove it with `tsc` before the commit closes.
@@ -83,7 +83,7 @@ Before I approve a structural change to merge:
   delete|upsert)` inside `src/lib/brain/`. It proposes; mutations go
   through `src/app/(app)/<resource>/actions.ts`.
 - Docs updated in the same PR as the code they describe (schema changes
-  update `docs/ISOLATION.md` / the schema map where relevant).
+  update `docs/architecture/ISOLATION.md` / the schema map where relevant).
 - No secrets in source, commits, or PR text — no `DATABASE_URL` values in
   tracked files.
 - Agents propose; a human approves the merge.

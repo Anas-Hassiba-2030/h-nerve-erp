@@ -9,7 +9,7 @@
 //
 // NOTE: Railway has no built-in cron, so this only fires when a scheduler is
 // wired up (a Railway cron service or external cron hitting this URL with the
-// bearer header). See docs/DEPLOYMENT.md § "Scheduled Brain refresh".
+// bearer header). See docs/ops/DEPLOYMENT.md § "Scheduled Brain refresh".
 //
 // On-demand refresh still exists (the /admin/brain "Run analysis" button) and
 // is the fallback when no scheduler is configured.

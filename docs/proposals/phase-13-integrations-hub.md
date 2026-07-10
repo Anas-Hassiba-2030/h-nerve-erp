@@ -15,7 +15,7 @@ Turn the simulated hub into a small number of **real** connectors plus an honest
 2. **Wire `sendThrough` into a real producer** — e.g. Phase 12 alerts/council recommendations call it so a connected Slack/email tile actually streams output (the doc's wow moment).
 3. **Honest state in the UI** — render `functionalState`/`FUNCTIONAL_STATE_LABEL` pills so 22 non-live tiles read "Infrastructure ready"/"Coming soon" instead of a fake "Connect → Connected".
 4. **Security** — encrypt `IntegrationCredential.tokenBlob` (the in-code NS-4 follow-up the detail page admits is owed).
-5. **Per-tenant isolation** — make `scope` the tenant slug instead of `"default"`, register `Integration` in `TENANT_SCOPED_MODELS` per `docs/ISOLATION.md`.
+5. **Per-tenant isolation** — make `scope` the tenant slug instead of `"default"`, register `Integration` in `TENANT_SCOPED_MODELS` per `docs/architecture/ISOLATION.md`.
 6. **(Optional) signature flip animation** — 320ms Y-axis tile flip on connect.
 
 ## Files to touch

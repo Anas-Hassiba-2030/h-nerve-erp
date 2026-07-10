@@ -8,8 +8,8 @@
 > data source, and phase is captured below.
 >
 > Created 2026-06-22. Companion to `docs/prompts/LOGIN-REDESIGN.md` (login is owned
-> by Claude Design — **out of scope here**). See also `docs/RE-INFRASTRUCTURE-PLAN.md`
-> (the broader rebuild) and `docs/DESIGN-SKILL.md` §1.D (Heritage Modern).
+> by Claude Design — **out of scope here**). See also `docs/governance/RE-INFRASTRUCTURE-PLAN.md`
+> (the broader rebuild) and `docs/governance/DESIGN-SKILL.md` §1.D (Heritage Modern).
 
 ---
 
@@ -143,7 +143,7 @@ Arabic`; **mono** = `JetBrains Mono`. Direction: **RTL**. One vocabulary only:
    whiplash for owners, real data on every tile, empty/loading/error states.
 
 Show owners after PR 1 and adjust before going wide. This is also exactly the
-`docs/RE-INFRASTRUCTURE-PLAN.md` philosophy: derive from the working app, module-by-
+`docs/governance/RE-INFRASTRUCTURE-PLAN.md` philosophy: derive from the working app, module-by-
 module, never rebuild from zero.
 
 ---
@@ -155,7 +155,7 @@ module, never rebuild from zero.
 - **Behaviour-preserving** — folding routes must not lose a destination; every old page
   stays reachable.
 - **Heritage Modern only** on this surface; Arabic-first; RTL-safe.
-- **Read first:** `docs/DESIGN-SKILL.md` §1.D, `docs/RE-INFRASTRUCTURE-PLAN.md`,
+- **Read first:** `docs/governance/DESIGN-SKILL.md` §1.D, `docs/governance/RE-INFRASTRUCTURE-PLAN.md`,
   `docs/MAP.md`. Re-verify all file paths/tokens above (this doc can drift).
 
 ---

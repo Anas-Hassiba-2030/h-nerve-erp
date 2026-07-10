@@ -2,10 +2,10 @@
 
 > **Purpose:** name the assets, the trust boundaries, the threats, and the
 > controls — so security is designed, not bolted on. Grounded in the actual auth
-> (`lib/session.ts`), tenancy (`lib/workspaceScope.ts`, `docs/ISOLATION.md`), and
+> (`lib/session.ts`), tenancy (`lib/workspaceScope.ts`, `docs/architecture/ISOLATION.md`), and
 > brain architecture, plus the RAG security analysis (RE-INFRASTRUCTURE-PLAN §2).
 > Owner: platform + security. Last-updated: 2026-06-02.
-> Part of the spec set in `docs/RE-INFRASTRUCTURE-PLAN.md` §3.
+> Part of the spec set in `docs/governance/RE-INFRASTRUCTURE-PLAN.md` §3.
 
 ---
 
@@ -44,7 +44,7 @@ The two hardest boundaries: **tenant ↔ tenant** (isolation middleware) and
   `prismaUnscoped` use, a new model not added to a scoped set).
 - **Controls:** the pure `workspaceScope` middleware (ADR-005), unit-tested;
   every `prismaUnscoped` site carries `// CROSS-TENANT INTENT:`; new tenant-keyed
-  models **must** join `TENANT_SCOPED_MODELS`. See `docs/ISOLATION.md` checklist.
+  models **must** join `TENANT_SCOPED_MODELS`. See `docs/architecture/ISOLATION.md` checklist.
 - **Gap:** no automated test asserts that *every* tenant-keyed model is in a
   scoped set — a new model can be added uncovered. **Add a guard test.**
 

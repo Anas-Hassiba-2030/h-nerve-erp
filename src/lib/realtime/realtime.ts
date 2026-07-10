@@ -2,7 +2,7 @@
 //
 // Real-time collaboration substrate for H-Nerve.
 //
-// Phase 17 of docs/PHASES-INTELLIGENCE.md.
+// Phase 17 of docs/governance/PHASES-INTELLIGENCE.md.
 //
 // Architecture:
 // - In-memory presence store keyed by scopeId (typically a normalized URL).

@@ -1,4 +1,4 @@
-// /brain/scenarios — Phase 2 of docs/PHASES-INTELLIGENCE.md.
+// /brain/scenarios — Phase 2 of docs/governance/PHASES-INTELLIGENCE.md.
 //
 // The What-If lab — verbatim port of docs/design/system/sections/whatif.html.
 // Levers → causal flow → KPIs. The brain narrates. Auto-solve animates levers

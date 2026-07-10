@@ -1,6 +1,6 @@
 # Phase 28 — The Companion
 
-Scoping doc (read-only survey; no code changed). Source: `docs/PHASES-INTELLIGENCE.md` §"Phase 28 — The Companion (the soul)" (lines 889–933). Pitch: a small ambient *light-being* ("the Spark / الشرارة") — an emerald-gold mote that idles in a corner, drifts, and reacts to Brain/insight/toast events. Restraint over mascot.
+Scoping doc (read-only survey; no code changed). Source: `docs/governance/PHASES-INTELLIGENCE.md` §"Phase 28 — The Companion (the soul)" (lines 889–933). Pitch: a small ambient *light-being* ("the Spark / الشرارة") — an emerald-gold mote that idles in a corner, drifts, and reacts to Brain/insight/toast events. Restraint over mascot.
 
 ## Current state (what already exists in the repo, with file paths)
 - **No companion code exists.** Grep for `Companion|light-being|LightBeing|roaming` across `**/*.{ts,tsx,css}` returns nothing; the only hits are a remote git branch `docs/login-prompt-companion-phase`. This is greenfield.

@@ -7,7 +7,7 @@
 // The template is deliberately rich — it cites the actual numbers from the
 // facts payload — so the UI never feels like it's printing placeholder text.
 //
-// Phase 4 of docs/PHASES-INTELLIGENCE.md.
+// Phase 4 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { createHash } from "node:crypto";
 import { prisma } from "@/lib/db/db";

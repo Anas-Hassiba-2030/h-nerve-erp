@@ -3,7 +3,7 @@
 // A peer's comment, sliding in from the inline-end of the page. Stays
 // docked on the right (LTR) / left (RTL) so multiple comments stack.
 //
-// Phase 17 of docs/PHASES-INTELLIGENCE.md.
+// Phase 17 of docs/governance/PHASES-INTELLIGENCE.md.
 
 "use client";
 

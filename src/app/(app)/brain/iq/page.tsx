@@ -5,7 +5,7 @@
 // ./brainiq.css. Prisma queries + server actions are unchanged; only the
 // presentation now follows the reference .br-* structure.
 //
-// Phase 10 of docs/PHASES-INTELLIGENCE.md.
+// Phase 10 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import Link from "next/link";
 import "../../daylight.css";

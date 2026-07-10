@@ -5,7 +5,7 @@
 // Top rail shows act counter + topic + close button. ESC also closes.
 // On scroll, the active act counter updates via IntersectionObserver.
 //
-// Phase 9 of docs/PHASES-INTELLIGENCE.md.
+// Phase 9 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";

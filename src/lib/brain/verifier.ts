@@ -12,7 +12,7 @@
 // see the prose, but they know what to trust.
 //
 // This is pure logic — no I/O, no DB. Deterministic, unit-testable.
-// See docs/PHASES-INTELLIGENCE.md § Phase 22.
+// See docs/governance/PHASES-INTELLIGENCE.md § Phase 22.
 
 export type FactClaim = {
   // The verbatim numeric or entity token that appeared in the narrative.

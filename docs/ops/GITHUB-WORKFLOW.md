@@ -3,7 +3,7 @@
 owner: Anas Hasiba
 last-updated: 2026-07-10
 
-> Phase 25 of `docs/PHASES-INTELLIGENCE.md`.
+> Phase 25 of `docs/governance/PHASES-INTELLIGENCE.md`.
 >
 > **A bilingual (Arabic + English) reference any team member or executive can read
 > to understand exactly what we are doing in GitHub.** No prior git experience
@@ -265,4 +265,4 @@ docs(github): bilingual workflow guide for team onboarding
 
 ---
 
-*This guide is part of Phase 25 of `docs/PHASES-INTELLIGENCE.md`. When the workflow changes, this file changes too.*
+*This guide is part of Phase 25 of `docs/governance/PHASES-INTELLIGENCE.md`. When the workflow changes, this file changes too.*

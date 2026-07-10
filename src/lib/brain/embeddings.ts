@@ -1,7 +1,7 @@
 // lib/brain/embeddings.ts — the RAG embedding seam (Phase RAG-1).
 //
 // The brain's memory recall (memory.live.ts) currently uses a bag-of-words
-// vectorizer. The RAG roadmap (docs/RE-INFRASTRUCTURE-PLAN.md §2) upgrades
+// vectorizer. The RAG roadmap (docs/governance/RE-INFRASTRUCTURE-PLAN.md §2) upgrades
 // recall to real dense embeddings + pgvector. This file is the *seam* that
 // makes that swap a one-line config change:
 //

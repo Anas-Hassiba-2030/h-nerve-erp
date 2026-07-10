@@ -13,7 +13,7 @@
 // at top, hairline border, no shadow. Fraunces serif body. Mono uppercase
 // "BRAIN · NARRATIVE" eyebrow.
 //
-// Phase 4 of docs/PHASES-INTELLIGENCE.md.
+// Phase 4 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { narrate, type NarrateInput, type NarrateResult } from "@/app/(app)/brain/narrate/actions";

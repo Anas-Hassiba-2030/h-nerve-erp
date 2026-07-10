@@ -3,7 +3,7 @@
 // The brain reads its own performance and writes a paragraph about itself.
 // User approves or rejects. On approve, weights commit + IQ ticks up.
 //
-// Phase 10 of docs/PHASES-INTELLIGENCE.md.
+// Phase 10 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { notFound } from "next/navigation";
 import Link from "next/link";

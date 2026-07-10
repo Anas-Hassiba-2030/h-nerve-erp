@@ -7,7 +7,7 @@
 //   4. Run the Moderator with their voices as input.
 //   5. Persist a CouncilSession + CouncilVoices in Prisma.
 //
-// Phase 3 of docs/PHASES-INTELLIGENCE.md.
+// Phase 3 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { prisma } from "@/lib/db/db";
 import { causalGraph } from "./graph.prisma";

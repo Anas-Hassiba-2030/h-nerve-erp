@@ -14,7 +14,7 @@
 // The narrator is bilingual (ar/en). Each register has its own prompt
 // template; outputs are cached per (orgId, dataDigest, register).
 //
-// See docs/PHASES-INTELLIGENCE.md — Phase 4.
+// See docs/governance/PHASES-INTELLIGENCE.md — Phase 4.
 
 export type NarrativeRegister = "headline" | "editorial" | "executive";
 

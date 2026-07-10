@@ -12,7 +12,7 @@ Phase 18 is largely scaffolded and demo-working in stub mode; the gap is real ex
 
 ## Scope (what "shipping this phase" concretely means)
 The pieces from `PHASES-INTELLIGENCE.md §18` exist; "shipping" = hardening from a single-tenant stub demo to a trustworthy multi-tenant feature:
-1. **Tenant isolation fix (blocking).** `Document`/`DocExtraction`/`DocClause` carry a `scope` column defaulting to `"default"` but are **absent** from `TENANT_SCOPED_MODELS` (`lib/workspaceScope.ts`), and `actions.ts`/pages query `prisma.document` with no scope filter — so every tenant sees every tenant's documents. Per `docs/ISOLATION.md`, decide tenant-keying and register the models (or hard-justify why not).
+1. **Tenant isolation fix (blocking).** `Document`/`DocExtraction`/`DocClause` carry a `scope` column defaulting to `"default"` but are **absent** from `TENANT_SCOPED_MODELS` (`lib/workspaceScope.ts`), and `actions.ts`/pages query `prisma.document` with no scope filter — so every tenant sees every tenant's documents. Per `docs/architecture/ISOLATION.md`, decide tenant-keying and register the models (or hard-justify why not).
 2. **Persist bytes.** Today `uploadDocument` deliberately discards file bytes; detail page can't re-render the source. Add storage (disk/object-store) behind an interface, with the "first page renders" animation from the spec.
 3. **Make `commitDocument` real.** It currently just redirects; the spec's CTA is "Add to {module}'s ledger" — wire an actual link/record into the matched Supplier/Customer or module ledger.
 4. **Vision robustness.** Promote Vision from "wired but off" to verified: real PDF/image fixtures, latency/timeout handling, and confirming the stub-fallback path on cap/error.

@@ -6,7 +6,7 @@
 // The interactive cascade lives in components/brain/CausalGraph.tsx, a faithful
 // port of causal-ops.js. No DaylightShell/DaylightPanel — exact reference markup.
 //
-// Phase 1 of docs/PHASES-INTELLIGENCE.md.
+// Phase 1 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import "../../daylight.css";
 import "./causal.css";

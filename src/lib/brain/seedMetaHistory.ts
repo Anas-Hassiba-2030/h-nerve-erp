@@ -1,7 +1,7 @@
 // seedMetaHistory.ts — populate 8 weeks of climbing IQ history + 4
 // historical SelfTuningReports so the demo opens with a credible trail.
 //
-// Phase 10 of docs/PHASES-INTELLIGENCE.md.
+// Phase 10 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { prisma } from "@/lib/db/db";
 

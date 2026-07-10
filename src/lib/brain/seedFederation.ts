@@ -2,7 +2,7 @@
 // each contributing to overlapping pattern clusters. The aggregator then
 // surfaces only the patterns that meet K=5 anonymity.
 //
-// Phase 8 of docs/PHASES-INTELLIGENCE.md.
+// Phase 8 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { prisma } from "@/lib/db/db";
 import { randomBytes } from "node:crypto";

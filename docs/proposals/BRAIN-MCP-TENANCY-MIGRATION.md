@@ -84,4 +84,4 @@ With a real tenant field on `DocHit`/memory rows, wire the dormant `ragGuard.enf
 
 ---
 
-*Cross-refs: `lib/brain/mcp/scope.ts` (KNOWN LIMITATION note), `lib/brain/documents.retrieve.ts` (TENANCY note), `lib/tenancy/workspaceScope.ts` (`TENANT_SCOPED_MODELS`), `docs/ISOLATION.md` (isolation checklist), memory `brain-hardening-2026-06`.*
+*Cross-refs: `lib/brain/mcp/scope.ts` (KNOWN LIMITATION note), `lib/brain/documents.retrieve.ts` (TENANCY note), `lib/tenancy/workspaceScope.ts` (`TENANT_SCOPED_MODELS`), `docs/architecture/ISOLATION.md` (isolation checklist), memory `brain-hardening-2026-06`.*

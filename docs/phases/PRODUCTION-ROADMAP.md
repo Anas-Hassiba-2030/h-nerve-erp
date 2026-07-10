@@ -5,8 +5,8 @@ last-updated: 2026-07-09
 
 > **⚠️ HISTORICAL ROADMAP (superseded 2026-07-09).** This document is kept as
 > the record of the May-2026 path to production. For forward planning use
-> **`docs/BUILD-PLAN.md`** — the single ordered plan that carries this file's
-> still-open items forward. Current health lives in `docs/STATUS.md`.
+> **`docs/status/BUILD-PLAN.md`** — the single ordered plan that carries this file's
+> still-open items forward. Current health lives in `docs/status/STATUS.md`.
 
 _Companion to `docs/phases/READINESS.md`. Phase plan from today's prototype to a
 real, multi-company ERP. Written 2026-05-15._
@@ -208,9 +208,9 @@ Feedback: system feels heavy/laggy. Likely causes: Next **dev mode** +
 See the "Phases audit A→G" table at the bottom of this file.
 
 ### G4 — Operating Protocol (user manual) — ✅ DONE (`c5366d5`)
-`docs/OPERATING-PROTOCOL.md` shipped. Original below.
+`docs/governance/OPERATING-PROTOCOL.md` shipped. Original below.
 Feedback: "I'm lost — rebuild-the-brain, errors, how to run it."
-- `docs/OPERATING-PROTOCOL.md`: how to run (dev vs build), login, every
+- `docs/governance/OPERATING-PROTOCOL.md`: how to run (dev vs build), login, every
   major area, what "rebuild the brain" does + cost, common errors + fixes,
   SQLite↔Postgres toggle, pitch-day checklist.
 
@@ -225,7 +225,7 @@ Feedback: "I'm lost — rebuild-the-brain, errors, how to run it."
 | C | Per-company workspace isolation (data scoping) | ✅ done, merged, 10 tests |
 | D | RBAC on all 28 destructive actions | ✅ core done (create/update + AI rate-limit = future) |
 | E | Regression net (39 tests) + CI gate | 🟡 net+CI live; CRUD-module tests = future |
-| F | Replace stubs (real doc parser, real integrations; Brain.ts ✅ retired PR #240 2026-06-11 — brain is now tools/ + orchestrator + MCP server) | 🟡 partial — doc parser + integrations still open (see `docs/BUILD-PLAN.md`) |
+| F | Replace stubs (real doc parser, real integrations; Brain.ts ✅ retired PR #240 2026-06-11 — brain is now tools/ + orchestrator + MCP server) | 🟡 partial — doc parser + integrations still open (see `docs/status/BUILD-PLAN.md`) |
 | G1 | Real per-company ERP Command Center | ✅ done, browser-verified |
 | G2 | Performance | ✅ done |
 | G3 | This audit | ✅ done |

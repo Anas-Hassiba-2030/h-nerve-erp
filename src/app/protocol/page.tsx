@@ -9,7 +9,7 @@
 // GET /api/protocol wraps) — SSR, no self-fetch. Auth gate is in layout.tsx;
 // the ADMIN edit gate is enforced both here (UI) and in PATCH /api/protocol/[id].
 //
-// Phase 20 of docs/PHASES-INTELLIGENCE.md.
+// Phase 20 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { ScrollText } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";

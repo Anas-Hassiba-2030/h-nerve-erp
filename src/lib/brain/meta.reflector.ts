@@ -9,7 +9,7 @@
 //   4. Persists a SelfTuningReport. The user reviews; on Approve, the
 //      adjustments commit and a new BrainIQHistory snapshot is taken.
 //
-// Phase 10 of docs/PHASES-INTELLIGENCE.md.
+// Phase 10 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { prisma } from "@/lib/db/db";
 import { callLlm, extractJson, type LlmRequest } from "./llm";

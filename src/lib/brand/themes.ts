@@ -2,7 +2,7 @@
 //
 // Each preset overrides the Heritage CSS variables so the rest of the app
 // follows automatically. The preset key is stored on TenantTheme.preset
-// (Phase 11 of docs/PHASES-INTELLIGENCE.md).
+// (Phase 11 of docs/governance/PHASES-INTELLIGENCE.md).
 
 export type ThemeKey =
   | "heritage"

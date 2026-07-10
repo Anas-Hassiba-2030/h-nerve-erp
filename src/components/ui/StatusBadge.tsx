@@ -1,6 +1,6 @@
 // StatusBadge — Heritage Modern variant.
 // Maps every domain status onto one of 5 Heritage tones using the current-color
-// dot pattern from `.heri-pill`. See docs/DESIGN-SKILL.md §5.2.
+// dot pattern from `.heri-pill`. See docs/governance/DESIGN-SKILL.md §5.2.
 //
 // BILINGUAL: the label flips AR/EN. Locale comes from the optional `locale`
 // prop; when omitted it reads the h_nerve_locale cookie (server component) so

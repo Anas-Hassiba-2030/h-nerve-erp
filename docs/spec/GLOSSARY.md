@@ -10,7 +10,7 @@
 > is the secondary label. Values verified against `lib/utils.ts`,
 > `lib/gamification.ts`, `lib/i18n.ts`, and `prisma/seed.ts`.
 > Owner: product + platform. Last-updated: 2026-06-02.
-> Part of the spec set in `docs/RE-INFRASTRUCTURE-PLAN.md` §3.
+> Part of the spec set in `docs/governance/RE-INFRASTRUCTURE-PLAN.md` §3.
 
 ---
 
@@ -81,7 +81,7 @@ The demo tenant's companies (`prisma/seed.ts`). Use these exact names in demos.
 
 ## 6. The Brain subsystems (أنظمة الدماغ)
 
-Phase numbers map to `docs/PHASES-INTELLIGENCE.md`. Files in `lib/brain/`.
+Phase numbers map to `docs/governance/PHASES-INTELLIGENCE.md`. Files in `lib/brain/`.
 
 | Term | العربية | What it is |
 |---|---|---|

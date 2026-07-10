@@ -9,15 +9,15 @@ last-updated: 2026-06-07
 > (`src/lib/brain/tools/` + `orchestrator.ts` + stdio MCP server); the cron
 > workflow was committed; the docintel parser gained a real Claude Vision path;
 > and `/api/converse` gained per-user rate limiting + an LLM call cap. For the
-> current state see **`docs/STATUS.md`**.
+> current state see **`docs/status/STATUS.md`**.
 
 > **Author:** Principal Systems Architect review (backend / frontend / UI-UX / AI systems).
 > **Date:** 2026-06-07. **Method:** every claim below is grounded in the actual code
 > (`lib/brain/*`, `app/api/*`, `prisma/schema/*`, `middleware.ts`) and the existing
 > spec set, not in the marketing narrative. Where the repo's own docs disagree with
 > the code, that is called out as drift.
-> **Companion docs:** `docs/RE-INFRASTRUCTURE-PLAN.md` (strategy + 13-doc gap analysis),
-> `docs/spec/*` (the spec stack), `docs/AUDIT-2026-06.md` (health + backlog).
+> **Companion docs:** `docs/governance/RE-INFRASTRUCTURE-PLAN.md` (strategy + 13-doc gap analysis),
+> `docs/spec/*` (the spec stack), `docs/status/AUDIT-2026-06.md` (health + backlog).
 
 ---
 
@@ -43,7 +43,7 @@ things are true that the screenshot does *not* say:
    AI endpoints (cost/abuse), in-memory conversation state that won't survive
    scale, and `Float`-typed money in a finance system.
 
-None of this requires a rebuild. `docs/RE-INFRASTRUCTURE-PLAN.md` already made
+None of this requires a rebuild. `docs/governance/RE-INFRASTRUCTURE-PLAN.md` already made
 that call ("don't rebuild from zero — derive specs from working code, harden
 module-by-module"), and this assessment agrees. What follows is **targeted
 hardening**, sequenced so it runs *alongside* feature work, not instead of it.
@@ -176,7 +176,7 @@ autonomous write-agent is a liability. Preserve the read-mostly boundary.
 - **Tenancy.** Dual isolation (company-keyed + tenant-keyed) enforced by Prisma
   `$use` middleware over a **pure, unit-tested** decision function
   (`workspaceScope.ts`). Documented in `docs/spec/DATA-MODEL.md` §2 and
-  `docs/ISOLATION.md`.
+  `docs/architecture/ISOLATION.md`.
 - **Auth.** iron-session signed cookies, bcrypt, role gate re-checked in both
   `(app)` and `(admin)` layouts; `isSafeId()` rejects malformed IDs.
 - **Retrieval cores tested** (see Part 1.1). The brain's hardest logic has the

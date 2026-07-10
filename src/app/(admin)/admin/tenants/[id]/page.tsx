@@ -1,6 +1,6 @@
 // /admin/tenants/[id] — single tenant detail with View-as-tenant action.
 //
-// Phase 11 of docs/PHASES-INTELLIGENCE.md.
+// Phase 11 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { notFound } from "next/navigation";
 import Link from "next/link";

@@ -3,7 +3,7 @@
 // Server action that produces an editorial narrative on demand.
 // Called by the <Narrate> tooltip after a 1.2s hover threshold.
 //
-// Phase 4 of docs/PHASES-INTELLIGENCE.md.
+// Phase 4 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { requireUser } from "@/lib/auth/session";
 import { narrator } from "@/lib/brain/narrator.claude";

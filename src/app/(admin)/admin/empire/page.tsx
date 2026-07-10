@@ -4,7 +4,7 @@
 // one screen: live brain IQ, 8-week sparkline, pulse counts, the most
 // recent decision. Quiet Authority aesthetic — institutional, restrained.
 //
-// Phase 19 of docs/PHASES-INTELLIGENCE.md.
+// Phase 19 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import Link from "next/link";
 import { getEmpireTiles, type EmpireTile, type SparkPoint } from "@/lib/empire/aggregator";

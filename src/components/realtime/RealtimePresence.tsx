@@ -12,7 +12,7 @@
 // SSE is server→client only. If EventSource is unavailable or the
 // stream hard-fails, we fall back to the legacy 25s GET poll.
 //
-// Phase 17 of docs/PHASES-INTELLIGENCE.md.
+// Phase 17 of docs/governance/PHASES-INTELLIGENCE.md.
 
 "use client";
 

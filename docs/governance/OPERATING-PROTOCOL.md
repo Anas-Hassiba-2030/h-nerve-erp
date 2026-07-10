@@ -32,11 +32,11 @@ mostly this + the remote database (see §6).
 
 | Doc | What it's for |
 |---|---|
-| `docs/OPERATING-PROTOCOL.md` | **This file** — how to run & use the system |
+| `docs/governance/OPERATING-PROTOCOL.md` | **This file** — how to run & use the system |
 | `docs/phases/READINESS.md` | Honest "is it production-ready" assessment |
 | `docs/phases/PRODUCTION-ROADMAP.md` | The phase plan + status (single source of truth) |
 | `docs/phases/PITCH-WALKTHROUGH.md` | Screen-by-screen pitch review + screenshots |
-| `docs/AUDIT-2026-06.md` | Latest health snapshot (lint/types/tests/build green) |
+| `docs/status/AUDIT-2026-06.md` | Latest health snapshot (lint/types/tests/build green) |
 | `docs/ops/PERFORMANCE.md` | Why it felt laggy + the fix order |
 
 Everything is committed to git on the `main` branch. When you reopen the

@@ -2,7 +2,7 @@
 //
 // The "today" payload. Powers /m — the mobile operations view.
 //
-// Phase 14 of docs/PHASES-INTELLIGENCE.md: "Single screen — three things
+// Phase 14 of docs/governance/PHASES-INTELLIGENCE.md: "Single screen — three things
 // to know, three things to decide, three things to approve. Each is one tap."
 //
 // We rank rows from existing tables (AIInsight / Plan / PlanStep /

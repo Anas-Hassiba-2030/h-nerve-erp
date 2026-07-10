@@ -11,7 +11,7 @@
 // synthetic siblings so the demo always shows the spec's "row of 8 IQ
 // scores" — that's the wow moment.
 //
-// Phase 19 of docs/PHASES-INTELLIGENCE.md.
+// Phase 19 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { prisma } from "@/lib/db/db";
 

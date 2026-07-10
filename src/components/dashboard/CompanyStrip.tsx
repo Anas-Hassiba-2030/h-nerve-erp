@@ -6,7 +6,7 @@
 // current-color pill, ops metric in mono. No gradients. No drop shadows.
 // Single 1px hairline border, sharp 0px corners.
 //
-// See docs/DESIGN-SKILL.md §1.D and §5.1.
+// See docs/governance/DESIGN-SKILL.md §1.D and §5.1.
 
 import { ChevronLeft } from "lucide-react";
 import { enterWorkspace } from "@/app/actions/workspace";

@@ -12,7 +12,7 @@
 // either server-side (against PrismaCausalGraph) or client-side (against
 // an in-memory snapshot for live slider scrubbing).
 //
-// Phase 2 of docs/PHASES-INTELLIGENCE.md.
+// Phase 2 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import type { GraphNode, GraphEdge } from "./graph";
 import type { Perturbation, ImpactRow } from "./simulator";

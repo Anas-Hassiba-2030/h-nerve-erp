@@ -5,7 +5,7 @@
 // These are fictional but consistent with the demo data. They are the
 // kind of stories an executive remembers — not raw rows.
 //
-// Phase 6 of docs/PHASES-INTELLIGENCE.md.
+// Phase 6 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { memoryLake } from "./memory.live";
 

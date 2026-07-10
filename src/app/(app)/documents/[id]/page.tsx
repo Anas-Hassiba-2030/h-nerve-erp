@@ -1,7 +1,7 @@
 // /documents/[id] — Single document detail.
 //
 // Refined / Warm Editorial body. Daylight shell.
-// Phase 18 of docs/PHASES-INTELLIGENCE.md.
+// Phase 18 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { notFound } from "next/navigation";
 import Link from "next/link";

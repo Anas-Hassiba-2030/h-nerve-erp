@@ -8,7 +8,7 @@
 // shows the extracted BrainPatterns + toggles. This one shows the raw
 // signal the patterns are learned FROM.
 //
-// Phase 7 of docs/PHASES-INTELLIGENCE.md.
+// Phase 7 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { useEffect, useState } from "react";
 import { LearningTrend } from "@/components/brain/LearningTrend";

@@ -22,7 +22,7 @@ Each agent file is Markdown with YAML frontmatter (`name`, `description`, `tools
 ## 1. Project subagents — the VAOC (`.claude/agents/`, 31 agents, in-repo)
 
 > **The org chart, routing rules (which topology fires for which task), harmony
-> rules, and hard limits live in [`docs/VAOC.md`](VAOC.md)** — the operating
+> rules, and hard limits live in [`docs/architecture/VAOC.md`](VAOC.md)** — the operating
 > manual. This file is the **roster/catalog**: who exists, what each does, where
 > to edit it. Read VAOC.md for *how work is routed*; read here for *who's on the team*.
 

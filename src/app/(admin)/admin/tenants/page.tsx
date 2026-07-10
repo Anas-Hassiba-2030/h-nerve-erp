@@ -1,6 +1,6 @@
 // /admin/tenants — list every tenant in the federation.
 //
-// Sleek Operator (DESIGN-SKILL §1.F). Phase 11 of docs/PHASES-INTELLIGENCE.md.
+// Sleek Operator (DESIGN-SKILL §1.F). Phase 11 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import Link from "next/link";
 import { prisma } from "@/lib/db/db";

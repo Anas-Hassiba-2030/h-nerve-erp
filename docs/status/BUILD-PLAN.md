@@ -9,12 +9,12 @@ This is the **one ordered forward plan** for the codebase. It reconciles three
 sources into a single sequence:
 
 1. The still-open items of `docs/phases/PRODUCTION-ROADMAP.md` (now historical).
-2. The Phase 27 / 27b / 28 backlog in `docs/PHASES-INTELLIGENCE.md`.
+2. The Phase 27 / 27b / 28 backlog in `docs/governance/PHASES-INTELLIGENCE.md`.
 3. The active **master-brief campaign** (legibility → VAOC → docs/IA → hardening).
 
-**Cross-reference:** current engineering health lives in `docs/STATUS.md`.
+**Cross-reference:** current engineering health lives in `docs/status/STATUS.md`.
 Historical plans and phase write-ups live in `docs/phases/PRODUCTION-ROADMAP.md` and
-`docs/PHASES-INTELLIGENCE.md` — do not plan from those; plan from here.
+`docs/governance/PHASES-INTELLIGENCE.md` — do not plan from those; plan from here.
 
 ---
 
@@ -22,10 +22,10 @@ Historical plans and phase write-ups live in `docs/phases/PRODUCTION-ROADMAP.md`
 
 ### Batch 1 — Legibility ✅ landing
 - **Root hygiene (PR #281)** — front-door README, relocate stray root files, delint worktrees. *Why:* a stranger (or fresh session) orients in seconds. *Lives:* repo root.
-- **Docs spine (this branch)** — `docs/BUILD-PLAN.md` (this file) + `docs/STATUS.md` + historical banners on superseded plans. *Why:* one forward plan, one health page, no stale truth. *Lives:* `docs/`.
+- **Docs spine (this branch)** — `docs/status/BUILD-PLAN.md` (this file) + `docs/status/STATUS.md` + historical banners on superseded plans. *Why:* one forward plan, one health page, no stale truth. *Lives:* `docs/`.
 
 ### Batch 2 — VAOC: the 7-department agent company
-- **Department heads + orchestrator** — seven `.claude/agents/` department-head agents plus an orchestrator that routes work between them, documented in `docs/VAOC.md`. *Why:* turn the ad-hoc subagent roster into a structured agent company that runs the repo. *Lives:* `.claude/agents/`, `docs/VAOC.md`; blueprint at `docs/proposals/VAOC-BLUEPRINT.md`.
+- **Department heads + orchestrator** — seven `.claude/agents/` department-head agents plus an orchestrator that routes work between them, documented in `docs/architecture/VAOC.md`. *Why:* turn the ad-hoc subagent roster into a structured agent company that runs the repo. *Lives:* `.claude/agents/`, `docs/architecture/VAOC.md`; blueprint at `docs/proposals/VAOC-BLUEPRINT.md`.
 
 ### Batch 3 — Docs consolidation + IA fixes
 - **Docs foldering** — consolidate the ~28 loose `docs/*.md` files into `docs/{architecture,ops,brain,phases}/`. *Why:* the same "one folder per pillar" doctrine that fixed `lib/` and `scripts/`. *Lives:* `docs/`.
@@ -71,7 +71,7 @@ Heritage Modern pages + a brain agent pack + an orrery/Core-hub entry.
 ## Later — design tracks & scale
 
 - **Login redesign** — cinematic "living nervous system" login, built in **Claude Design** (coordinate, don't overwrite). Brief: `docs/prompts/LOGIN-REDESIGN.md`; page: `src/app/(auth)/login/`.
-- **Phase 28 — The Companion ("the soul")** — v1 shipped 2026-06-05; further personality/reaction polish is backlog, explicitly **after** the login redesign sets the visual language. Spec: `docs/PHASES-INTELLIGENCE.md` § Phase 28.
+- **Phase 28 — The Companion ("the soul")** — v1 shipped 2026-06-05; further personality/reaction polish is backlog, explicitly **after** the login redesign sets the visual language. Spec: `docs/governance/PHASES-INTELLIGENCE.md` § Phase 28.
 - **pgvector at scale** — move embedding retrieval from in-process cosine ranking to Postgres pgvector when the document/graph corpus outgrows in-memory. *Lives:* `src/lib/brain/embeddings.ts` / `retriever.ts` seam; schema addition.
 
 ---
@@ -81,7 +81,7 @@ Heritage Modern pages + a brain agent pack + an orrery/Core-hub entry.
 | Question | Read |
 |---|---|
 | What do we build next? | **This file.** |
-| Are we green? What's the health? | `docs/STATUS.md` |
-| Why did we plan it this way historically? | `docs/phases/PRODUCTION-ROADMAP.md` (historical), `docs/PHASES-INTELLIGENCE.md` (phases 1–28) |
-| Rebuild/re-infrastructure philosophy | `docs/RE-INFRASTRUCTURE-PLAN.md` |
+| Are we green? What's the health? | `docs/status/STATUS.md` |
+| Why did we plan it this way historically? | `docs/phases/PRODUCTION-ROADMAP.md` (historical), `docs/governance/PHASES-INTELLIGENCE.md` (phases 1–28) |
+| Rebuild/re-infrastructure philosophy | `docs/governance/RE-INFRASTRUCTURE-PLAN.md` |
 | ERP module taxonomy + gap ranking | `docs/ERP-KNOWLEDGE-BASE.md` (with the Phase 27 PRs) |

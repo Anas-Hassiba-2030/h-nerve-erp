@@ -1,6 +1,6 @@
 # Phase 17 — Realtime depth
 
-> Scope-only proposal. Grounded in `docs/PHASES-INTELLIGENCE.md` § Phase 17 ("Real-Time Collaboration") and the code that already ships. No code changes proposed here.
+> Scope-only proposal. Grounded in `docs/governance/PHASES-INTELLIGENCE.md` § Phase 17 ("Real-Time Collaboration") and the code that already ships. No code changes proposed here.
 
 ## Current state (what already exists in the repo, with file paths)
 
@@ -12,7 +12,7 @@ The presence layer is **already partially built** — the phase doc's "WebSocket
 - **`components/realtime/RealtimePresence.tsx`** — client root, mounted via `components/DeferredOverlays.tsx`. SSE inbound with 25s GET-poll fallback; 20s/60s POST heartbeat; 60fps RAF cursor interpolation (14–18% per frame ≈ the spec's 80ms ease); typing-focus detection.
 - **`components/realtime/{Pip,Cursor,CommentBubble,TypingUnderline}.tsx`** — the four render primitives. CSS in `app/globals.css` (`rt-pip-stack`, `rt-comment`, `rt-cursor` — 23 occurrences).
 
-**What the spec asked for vs. what exists:** presence pips ✅, interpolated cursors ✅, typing underline ✅, comment *rendering + dismiss* ✅. **Gaps:** (1) no UI for a real user to **author/place** a comment — `postComment` is only reachable by raw API; the in-app composers (`messages`, `council`) are unrelated features. (2) Comments are **ephemeral** — they live only in the in-memory map, are lost on restart, and don't survive multiple Railway replicas. (3) **No Prisma model** for comments (grep for `model Comment/Presence/Annotation` → none). (4) `scopeId` is a bare URL path with **no tenant scoping** — two tenants on the same path collide (violates `docs/ISOLATION.md`). (5) Highlight/passage-selection sharing from the wow moment doesn't exist.
+**What the spec asked for vs. what exists:** presence pips ✅, interpolated cursors ✅, typing underline ✅, comment *rendering + dismiss* ✅. **Gaps:** (1) no UI for a real user to **author/place** a comment — `postComment` is only reachable by raw API; the in-app composers (`messages`, `council`) are unrelated features. (2) Comments are **ephemeral** — they live only in the in-memory map, are lost on restart, and don't survive multiple Railway replicas. (3) **No Prisma model** for comments (grep for `model Comment/Presence/Annotation` → none). (4) `scopeId` is a bare URL path with **no tenant scoping** — two tenants on the same path collide (violates `docs/architecture/ISOLATION.md`). (5) Highlight/passage-selection sharing from the wow moment doesn't exist.
 
 ## Scope (what "shipping this phase" concretely means)
 

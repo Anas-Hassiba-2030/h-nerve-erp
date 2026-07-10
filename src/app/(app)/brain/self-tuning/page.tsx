@@ -1,6 +1,6 @@
 // /brain/self-tuning — list every self-tuning report.
 //
-// Phase 10 of docs/PHASES-INTELLIGENCE.md.
+// Phase 10 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import Link from "next/link";
 import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";

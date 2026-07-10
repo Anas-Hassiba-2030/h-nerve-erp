@@ -1,6 +1,6 @@
 # Phase 20 — Living Protocol
 
-*Source of truth: `docs/PHASES-INTELLIGENCE.md` §466-481 (Wave D — The Empire). Pitch: "H-Nerve published as an open protocol… The brain has a public API." Wow: a `/dev` portal where anyone registers an agent in 12 lines, a pack in 30, a theme in JSON.*
+*Source of truth: `docs/governance/PHASES-INTELLIGENCE.md` §466-481 (Wave D — The Empire). Pitch: "H-Nerve published as an open protocol… The brain has a public API." Wow: a `/dev` portal where anyone registers an agent in 12 lines, a pack in 30, a theme in JSON.*
 
 ## Current state (what already exists in the repo, with file paths)
 
@@ -31,13 +31,13 @@ Turn the demo into a thin-but-real protocol so the `/dev` wow moment is honest:
 
 - **New:** `app/api/v1/agents/route.ts` (GET list / POST register), `app/api/v1/agents/[slug]/decide/route.ts`, `app/api/v1/packs/route.ts`, `app/api/v1/themes/route.ts`, `app/api/v1/brain/iq/route.ts` — back the OpenAPI doc.
 - **New:** `lib/protocol/sdk.ts` (`defineAgent`/`definePack`/`defineTheme`), `lib/protocol/runtime.ts` (deterministic `decide` runner + trace IDs), `lib/protocol/registry.ts` (DB read/write), `lib/protocol/auth.ts` (bearer-token verify, tenant scope).
-- **New (Prisma):** `model ProtocolAgent` / `ProtocolPack` / `ProtocolTheme` / `ProtocolToken` in `prisma/schema.prisma`; add the tenant-keyed ones to `TENANT_SCOPED_MODELS` (`lib/workspaceScope.ts`) per `docs/ISOLATION.md`.
+- **New (Prisma):** `model ProtocolAgent` / `ProtocolPack` / `ProtocolTheme` / `ProtocolToken` in `prisma/schema.prisma`; add the tenant-keyed ones to `TENANT_SCOPED_MODELS` (`lib/workspaceScope.ts`) per `docs/architecture/ISOLATION.md`.
 - **Modified:** `lib/protocol/spec.ts` (export a live-vs-seed marketplace loader), `app/dev/marketplace/page.tsx` + `app/dev/explorer/page.tsx` (read registry; live curl), `lib/protocol/spec.test.ts` (cover the new shapes), seed (`prisma/seed.ts` or `scripts/seed-brain-local.ts`) to plant the 24 demo agents as rows.
 
 ## Risks (technical + product, ranked)
 
 1. **Read-mostly boundary (highest).** `decide()` and `/api/v1/*` must never mutate domain data — CLAUDE.md cross-cutting rule #10 + `/dev/spec` invariant #3. A POST that writes is a contract violation.
-2. **Tenant isolation.** Public bearer tokens + new tenant-keyed models are a leak surface; every query must go through scoped `prisma`, tokens must bind to one tenant (`docs/ISOLATION.md`).
+2. **Tenant isolation.** Public bearer tokens + new tenant-keyed models are a leak surface; every query must go through scoped `prisma`, tokens must bind to one tenant (`docs/architecture/ISOLATION.md`).
 3. **Determinism/replay.** The spec promises same-input→same-output; non-deterministic agent code or wall-clock/random in the runner breaks the advertised invariant.
 4. **Namespace collision (product).** Two "Protocol" features (`/protocol` clauses vs `/dev` intelligence layer) confuse the pitch; failing to disambiguate is a UX/demo risk.
 5. **Untrusted code execution.** Running externally-registered `decide()` functions in-process is unsafe; v1 should restrict to vetted/seeded agents, not arbitrary upload.

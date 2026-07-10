@@ -4,7 +4,7 @@
 // response panel. Click an endpoint to see its method, path, and the
 // curl sample inline.
 //
-// Phase 20 of docs/PHASES-INTELLIGENCE.md.
+// Phase 20 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { OPENAPI_DOC, PROTOCOL_VERSION } from "@/lib/protocol/spec";
 

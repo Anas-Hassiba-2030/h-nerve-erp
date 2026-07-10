@@ -7,7 +7,7 @@
 // the canvas (1.5s per hop), then prints the trace as a terminal-style
 // log below.
 //
-// Phase 12 of docs/PHASES-INTELLIGENCE.md.
+// Phase 12 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";

@@ -231,7 +231,7 @@ export async function POST(req: NextRequest) {
   — exist and produce deterministic output, but are **not composed** into the
   conversational path (A2).
 - `app/api/brain/cron/route.ts` — the weekly "self-tuning" job. Per
-  `docs/AUDIT-2026-06.md`, it is **NOT firing in production** (Railway has no cron).
+  `docs/status/AUDIT-2026-06.md`, it is **NOT firing in production** (Railway has no cron).
 
 ---
 

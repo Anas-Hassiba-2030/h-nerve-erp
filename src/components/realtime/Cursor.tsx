@@ -4,7 +4,7 @@
 // pixel coords already eased by the parent's RAF loop — we don't apply
 // CSS transitions here, since the parent owns the interpolation.
 //
-// Phase 17 of docs/PHASES-INTELLIGENCE.md.
+// Phase 17 of docs/governance/PHASES-INTELLIGENCE.md.
 
 "use client";
 

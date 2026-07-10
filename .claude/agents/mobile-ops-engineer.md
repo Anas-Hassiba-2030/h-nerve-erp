@@ -21,7 +21,7 @@ three to approve.
 - `.m-*` primitives in `src/app/globals.css`
 
 ## Aesthetic
-**Calm Clinical** per `docs/DESIGN-SKILL.md` §1.E:
+**Calm Clinical** per `docs/governance/DESIGN-SKILL.md` §1.E:
 - Warm white `#fbfaf7`, charcoal text, sage / sky / blush / ochre single tints
 - Generous whitespace, big touch targets, almost no borders
 - Rounded 14px corners on cards, 999px on pips

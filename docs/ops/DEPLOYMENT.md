@@ -3,11 +3,11 @@
 Production runbook for H-Nerve ERP. The app uses **iron-session** (no
 NextAuth) and is **single-tenant by default**. Production runs on **Railway**
 with Railway's managed **PostgreSQL** plugin. For a fast offline demo, revert
-to SQLite per `docs/OPERATING-PROTOCOL.md §6`.
+to SQLite per `docs/governance/OPERATING-PROTOCOL.md §6`.
 
 > History: an earlier plan targeted Vercel + Neon; the project now runs on
 > Railway. The old `vercel.json` was removed. (The legacy Vercel/Neon ops
-> procedures still live in `docs/RUNBOOK.md` and are being migrated.)
+> procedures still live in `docs/ops/RUNBOOK.md` and are being migrated.)
 
 ## Architecture
 
@@ -105,7 +105,7 @@ two-variable switch here. No code change beyond one schema line.
    until the variables exist, because Prisma fails on a referenced-but-unset
    env var at migrate time.
 4. **Verify**: `GET /api/health`, then `npm run brain:doctor` against prod per
-   `docs/BRAIN-DB-LINK-RUNBOOK.md`.
+   `docs/ops/BRAIN-DB-LINK-RUNBOOK.md`.
 
 Keep `numReplicas = 1` until the in-memory realtime store moves to Redis —
 pooling fixes connections, not the SSE presence fan-out.
@@ -127,6 +127,6 @@ In the n8n workflow's HTTP Request node:
 
 ## Local SQLite revert (offline demo)
 
-Per `docs/OPERATING-PROTOCOL.md §6`: in `.env` set `DATABASE_URL="file:./dev.db"`;
+Per `docs/governance/OPERATING-PROTOCOL.md §6`: in `.env` set `DATABASE_URL="file:./dev.db"`;
 in `prisma/schema/schema.prisma` set `provider = "sqlite"`; run `npm run db:reset`.
 Flip both back to `postgresql` before committing.

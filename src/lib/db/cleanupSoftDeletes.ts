@@ -13,7 +13,7 @@ export const SOFT_DELETE_GRACE_MS = 24 * 60 * 60 * 1000; // 24h
 //    Actions `schedule`) hitting a route handler
 //    `app/api/cron/cleanup-soft-deletes/route.ts` that calls
 //    `runSoftDeleteCleanup()` and returns counts. Protect it with a
-//    `CRON_SECRET` header check. See docs/DEPLOYMENT.md § scheduled refresh.
+//    `CRON_SECRET` header check. See docs/ops/DEPLOYMENT.md § scheduled refresh.
 //
 //  - Self-hosted: a node-cron or system cron entry that invokes
 //    `tsx scripts/cleanup-soft-deletes.ts` (a thin wrapper that imports and

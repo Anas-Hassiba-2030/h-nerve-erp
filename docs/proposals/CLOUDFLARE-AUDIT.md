@@ -129,8 +129,8 @@ Workers guide documents this pairing
 (<https://www.prisma.io/docs/orm/prisma-client/deployment/edge/deploy-to-cloudflare>,
 retrieved 2026-07-10). **Hyperdrive** is the documented alternative (works with
 any Postgres, including keeping Railway PG), but Neon stays the recommendation
-per the owner's brief — `docs/BRAIN-DB-LINK-RUNBOOK.md` and
-`docs/DEPLOYMENT.md` already document Neon pooled/direct URL formats from the
+per the owner's brief — `docs/ops/BRAIN-DB-LINK-RUNBOOK.md` and
+`docs/ops/DEPLOYMENT.md` already document Neon pooled/direct URL formats from the
 pre-Railway era. No Prisma 6/7 upgrade inside this migration.
 
 **(f) Deploy model = Workers + static assets, via Workers Builds git

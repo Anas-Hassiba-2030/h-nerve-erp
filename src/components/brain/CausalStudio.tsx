@@ -6,7 +6,7 @@
 // (left) and the impact rail (right). The page stays a thin server
 // shell; this component is where the graph becomes a tool you drive.
 //
-// Phase 1 (graph) + Phase 2 (simulator) of docs/PHASES-INTELLIGENCE.md.
+// Phase 1 (graph) + Phase 2 (simulator) of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { GraphCanvas, type GNode, type GEdge } from "./GraphCanvas";
 import { primaryMetric } from "@/lib/brain/simulator.bfs";

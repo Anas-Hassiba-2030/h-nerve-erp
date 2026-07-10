@@ -1,6 +1,6 @@
 // app/dev — The Living Protocol developer portal.
 //
-// Phase 20 of docs/PHASES-INTELLIGENCE.md.
+// Phase 20 of docs/governance/PHASES-INTELLIGENCE.md.
 //
 // This route group is publicly accessible — the protocol is meant to
 // be public. Brand chrome is intentionally minimal: a single hairline

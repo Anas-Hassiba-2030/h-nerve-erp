@@ -3,7 +3,7 @@
 // the OAuth scopes it would request in production, and a short list of
 // "settings" the connect flow needs (e.g. Slack channels).
 //
-// Phase 13 of docs/PHASES-INTELLIGENCE.md.
+// Phase 13 of docs/governance/PHASES-INTELLIGENCE.md.
 
 export type IntegrationCategory =
   | "messaging"

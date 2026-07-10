@@ -7,11 +7,11 @@
 // While scrubbing back, an ochre rail fills around the pill — a visual
 // countdown of how far back you are (0-180 days).
 //
-// Phase 16 of docs/PHASES-INTELLIGENCE.md.
+// Phase 16 of docs/governance/PHASES-INTELLIGENCE.md.
 //
 // Aesthetic: Heritage Modern body, Brutalist Confidence date pill —
 // sharp ink chip, ochre arrow controls, no rounded corners. Per
-// docs/DESIGN-SKILL.md the contrast is intentional.
+// docs/governance/DESIGN-SKILL.md the contrast is intentional.
 
 "use client";
 

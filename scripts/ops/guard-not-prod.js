@@ -40,7 +40,7 @@ if (PROD_MARKERS.some((m) => url.includes(m))) {
       `        ${url.replace(/:\/\/[^@]*@/, "://***@")}\n\n` +
       "        db:reset / db:push / db:seed are DESTRUCTIVE (the demo\n" +
       "        seed wipes ~25 tables). To refresh LOCAL data, revert to\n" +
-      "        SQLite first (docs/OPERATING-PROTOCOL.md §6), or use\n" +
+      "        SQLite first (docs/governance/OPERATING-PROTOCOL.md §6), or use\n" +
       "        `npm run seed:prod` (upsert-only) for production.\n",
   );
   process.exit(1);

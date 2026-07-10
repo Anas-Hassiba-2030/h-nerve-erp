@@ -5,7 +5,7 @@
 // editorial-quality canned responses so the UI ships and demos cleanly
 // in any environment.
 //
-// Phase 3 of docs/PHASES-INTELLIGENCE.md.
+// Phase 3 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { log } from "@/lib/utils/logger";
 import { toPyLiteral } from "./serialize";

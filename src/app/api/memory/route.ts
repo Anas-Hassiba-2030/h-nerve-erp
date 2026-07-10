@@ -11,7 +11,7 @@
 // (session cookie) or a machine bearing the CRON_SECRET bearer token.
 // Anything anonymous gets 401 — memories are operational intelligence.
 //
-// Phase 6 of docs/PHASES-INTELLIGENCE.md.
+// Phase 6 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/db";

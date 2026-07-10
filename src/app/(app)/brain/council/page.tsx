@@ -5,7 +5,7 @@
 // treatment the transcript uses); KPIs, shared threads, and the archive sit on
 // the cream Daylight surface below.
 //
-// Phase 3 of docs/PHASES-INTELLIGENCE.md.
+// Phase 3 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import Link from "next/link";
 import {

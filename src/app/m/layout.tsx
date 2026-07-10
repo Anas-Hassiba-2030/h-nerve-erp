@@ -1,8 +1,8 @@
 // app/m/ — Mobile-first operations view.
 //
 // A separate route group from (app)/ — no sidebar, no desktop chrome.
-// Calm Clinical aesthetic per docs/DESIGN-SKILL.md §1.E. Phase 14 of
-// docs/PHASES-INTELLIGENCE.md.
+// Calm Clinical aesthetic per docs/governance/DESIGN-SKILL.md §1.E. Phase 14 of
+// docs/governance/PHASES-INTELLIGENCE.md.
 
 import { redirect } from "next/navigation";
 import type { Metadata, Viewport } from "next";

@@ -8,7 +8,7 @@
 //
 // Aesthetic: Heritage Modern. Hairline border, ochre accent on HIGH,
 // terracotta accent on LOW. Tooltip on hover shows the score breakdown.
-// See docs/PHASES-INTELLIGENCE.md § Phase 22.
+// See docs/governance/PHASES-INTELLIGENCE.md § Phase 22.
 
 "use client";
 

@@ -3,7 +3,7 @@
 // The Time Machine — a global "as-of" date filter that reconstructs the
 // system's state on any past day.
 //
-// Phase 16 of docs/PHASES-INTELLIGENCE.md.
+// Phase 16 of docs/governance/PHASES-INTELLIGENCE.md.
 //
 // Storage is a single cookie on the request. Pages call `getAsOf()` at
 // SSR time and pass the resulting Date to their queries. UI components

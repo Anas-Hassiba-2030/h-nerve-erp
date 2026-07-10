@@ -30,8 +30,8 @@ docs describe the system as it actually is.
 ## Docs I own
 | Doc | Role |
 |---|---|
-| `docs/STATUS.md` | Living health — where we stand, what's green, what's in flight |
-| `docs/BUILD-PLAN.md` | Forward plan — what we build next |
+| `docs/status/STATUS.md` | Living health — where we stand, what's green, what's in flight |
+| `docs/status/BUILD-PLAN.md` | Forward plan — what we build next |
 | `docs/INDEX.md` | Table of contents — the map into everything else |
 | `README.md` | Front door — first thing a new reader sees |
 

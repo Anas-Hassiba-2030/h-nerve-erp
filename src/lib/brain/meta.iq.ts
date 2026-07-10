@@ -10,7 +10,7 @@
 // the pitch-critical math must not be welded to a Prisma import.
 //
 // `score` is THE public Brain-IQ number (Phase 10,
-// docs/PHASES-INTELLIGENCE.md). If this drifts or goes non-monotone,
+// docs/governance/PHASES-INTELLIGENCE.md). If this drifts or goes non-monotone,
 // the pitch breaks — see meta.reflector.test.ts for the pinned contract.
 
 export type IQComponents = {

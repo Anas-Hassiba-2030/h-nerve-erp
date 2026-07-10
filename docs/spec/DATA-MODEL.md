@@ -6,7 +6,7 @@
 > understand the model; read `schema.prisma` for the exact columns. Do **not**
 > duplicate field lists here — they drift. Owner: platform. Last-updated: 2026-06-02.
 >
-> Part of the spec set defined in `docs/RE-INFRASTRUCTURE-PLAN.md` §3.
+> Part of the spec set defined in `docs/governance/RE-INFRASTRUCTURE-PLAN.md` §3.
 
 ---
 
@@ -71,7 +71,7 @@ string slug, **not** a FK to `Tenant`.
 **Escape hatch:** `prismaUnscoped` bypasses all scoping. Every call site **must**
 carry a `// CROSS-TENANT INTENT:` comment (Empire dashboard, workspace switcher,
 system-dump, brain cron, layout banner lookups). New tenant-keyed models go in
-`TENANT_SCOPED_MODELS`. Full checklist: `docs/ISOLATION.md`.
+`TENANT_SCOPED_MODELS`. Full checklist: `docs/architecture/ISOLATION.md`.
 
 ---
 

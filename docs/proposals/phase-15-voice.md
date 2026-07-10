@@ -1,6 +1,6 @@
 # Phase 15 — Voice / Web Speech
 
-Phase definition: `docs/PHASES-INTELLIGENCE.md` §"Phase 15 — The Voice & Conversational Layer" (lines 367-382). Pitch: press a key, ask, the brain answers in voice + text with drill-through citations; follow-ups remember context.
+Phase definition: `docs/governance/PHASES-INTELLIGENCE.md` §"Phase 15 — The Voice & Conversational Layer" (lines 367-382). Pitch: press a key, ask, the brain answers in voice + text with drill-through citations; follow-ups remember context.
 
 ## Current state (what already exists in the repo, with file paths)
 
@@ -24,7 +24,7 @@ Close the gap between "works in a demo" and "shippable": (1) reconcile the aesth
 - NEW `lib/brain/converse.test.ts` — unit-test `detectTopic`, `stubAnswer` shape/citation ids, CRAG confidence haircut. Pure-unit, fits `npm test`.
 - MODIFY `components/Conversational.tsx` — graceful "voice unsupported" banner (today it overwrites the draft with a string), confirm RTL underline tracking for Arabic, decide `⌘J` vs `⌘K`.
 - MODIFY `app/globals.css` (`.cv-*` block) — only if the Brutalist aesthetic reconciliation is accepted.
-- MODIFY `docs/PHASES-INTELLIGENCE.md` §Phase 15 — amend `⌘K`→`⌘J` and the aesthetic if the team keeps current implementation.
+- MODIFY `docs/governance/PHASES-INTELLIGENCE.md` §Phase 15 — amend `⌘K`→`⌘J` and the aesthetic if the team keeps current implementation.
 
 ## Risks (technical + product, ranked)
 
@@ -37,5 +37,5 @@ Close the gap between "works in a demo" and "shippable": (1) reconcile the aesth
 ## Recommended slice size (2-4 landable PRs, each behaviour-preserving where possible)
 
 - **PR 1 — Tests + small hardening (behaviour-preserving).** Add `lib/brain/converse.test.ts`; fix the "voice unsupported" UX to a banner instead of clobbering the draft; confirm async voice-load. No API/contract change.
-- **PR 2 — Session persistence.** Add `ConverseSession`/`ConverseTurn` models + `db:push`, swap the in-memory `Map` for a Prisma-backed store behind the same `getOrCreate`/`getSession` signature so `ask()` and the route are untouched. Tenant-scope per `docs/ISOLATION.md`.
+- **PR 2 — Session persistence.** Add `ConverseSession`/`ConverseTurn` models + `db:push`, swap the in-memory `Map` for a Prisma-backed store behind the same `getOrCreate`/`getSession` signature so `ask()` and the route are untouched. Tenant-scope per `docs/architecture/ISOLATION.md`.
 - **PR 3 — Spec reconciliation (docs + optional aesthetic).** Amend `PHASES-INTELLIGENCE.md` to match reality (`⌘J`, advisor look), OR re-skin `.cv-*` to Brutalist — pick one, isolated to CSS + the doc.

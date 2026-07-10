@@ -12,7 +12,7 @@
 //
 // Auth + EXECUTIVE gate live in app/empire/layout.tsx.
 //
-// Phase 19 of docs/PHASES-INTELLIGENCE.md.
+// Phase 19 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { Crown } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";

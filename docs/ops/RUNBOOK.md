@@ -1,6 +1,6 @@
 # RUNBOOK — Operations (Railway + Railway PostgreSQL)
 
-Operational procedures. Pairs with `docs/DEPLOYMENT.md` (one-time setup). This
+Operational procedures. Pairs with `docs/ops/DEPLOYMENT.md` (one-time setup). This
 file is the "something is wrong / something must be rotated" reference.
 
 Two ways to drive Railway: the **dashboard** (Variables / Deployments / the
@@ -209,7 +209,7 @@ When a new business-data model lands on `prisma/schema.prisma`:
 6. Append a per-tenant count to `scripts/test/test-isolation.ts`.
 7. If the demo seed touches this model, include `tenantId` in the upsert.
 
-Full rationale + the two scoping planes are in `docs/ISOLATION.md`.
+Full rationale + the two scoping planes are in `docs/architecture/ISOLATION.md`.
 
 ---
 

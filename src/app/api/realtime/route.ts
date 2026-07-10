@@ -7,7 +7,7 @@
 //   POST  body { scopeId, user, comment: { ... } }    → post a comment
 //   DELETE body { scopeId, commentId }                → dismiss a comment
 //
-// Phase 17 of docs/PHASES-INTELLIGENCE.md.
+// Phase 17 of docs/governance/PHASES-INTELLIGENCE.md.
 
 import { NextRequest, NextResponse } from "next/server";
 import {

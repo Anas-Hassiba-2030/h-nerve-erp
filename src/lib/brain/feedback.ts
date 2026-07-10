@@ -14,7 +14,7 @@
 // The feedback loop is also the input to the Meta brain (Phase 10) — it
 // runs weekly self-reflection over the feedback table.
 //
-// See docs/PHASES-INTELLIGENCE.md — Phase 7.
+// See docs/governance/PHASES-INTELLIGENCE.md — Phase 7.
 
 export type FeedbackKind =
   | "INSIGHT_DISMISSED"

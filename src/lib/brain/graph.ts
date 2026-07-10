@@ -12,7 +12,7 @@
 // The graph is the substrate the Simulator propagates over, the
 // Memory indexes against, and the Narrator references for citations.
 //
-// See docs/PHASES-INTELLIGENCE.md — Phase 1.
+// See docs/governance/PHASES-INTELLIGENCE.md — Phase 1.
 
 export type NodeKind =
   | "Hotel" | "Booking" | "Room"

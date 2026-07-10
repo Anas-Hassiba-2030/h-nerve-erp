@@ -1,5 +1,6 @@
 ---
 name: agri-engineer
+department: domain-ops
 description: |
   Owns the agriculture vertical — Loran farms, crop cycles, irrigation
   signals, greenhouse sensors. Use when the user asks for changes under

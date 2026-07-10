@@ -1,5 +1,6 @@
 ---
 name: workflow-template-author
+department: platform-integrations
 description: |
   Writes new workflow templates for the Phase 12 visual studio — triggers,
   conditions, actions. Use when the user describes a new automation

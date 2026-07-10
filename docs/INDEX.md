@@ -34,7 +34,7 @@ reorg campaign will move the non-bold, non-code-referenced docs into
 
 ## Brain & agents
 
-[SUBAGENTS-AND-MCP-CATALOG.md](SUBAGENTS-AND-MCP-CATALOG.md) (all agents + MCP servers) · [NOTEBOOKLM-BRAIN-SOURCE.md](NOTEBOOKLM-BRAIN-SOURCE.md) (historical snapshot) · [BRAIN-INFRA-ASSESSMENT-2026-06.md](BRAIN-INFRA-ASSESSMENT-2026-06.md) (dated) · `src/lib/brain/README.md` (the architecture itself)
+**[VAOC.md](VAOC.md)** (the agent company: org chart, orchestration catalog, harmony rules) · [SUBAGENTS-AND-MCP-CATALOG.md](SUBAGENTS-AND-MCP-CATALOG.md) (all agents + MCP servers) · [NOTEBOOKLM-BRAIN-SOURCE.md](NOTEBOOKLM-BRAIN-SOURCE.md) (historical snapshot) · [BRAIN-INFRA-ASSESSMENT-2026-06.md](BRAIN-INFRA-ASSESSMENT-2026-06.md) (dated) · `src/lib/brain/README.md` (the architecture itself)
 
 ## Historical / dated
 

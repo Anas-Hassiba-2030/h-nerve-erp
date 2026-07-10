@@ -1,5 +1,6 @@
 ---
 name: time-machine-engineer
+department: platform-integrations
 description: |
   Owns Phase 16 — the Time Machine. The floating "Now" pill, the
   scrubber, the top banner, and the as-of cookie infrastructure. Use

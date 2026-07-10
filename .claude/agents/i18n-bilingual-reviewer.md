@@ -1,5 +1,6 @@
 ---
 name: i18n-bilingual-reviewer
+department: quality-design-l10n
 description: |
   Reviews and fixes Arabic / English pairings, RTL safety, and font
   selection across the codebase. Use when adding new copy, fixing

@@ -20,10 +20,10 @@ last-updated: 2026-07-09
 
 | Track | State |
 |-------|-------|
-| PR #281 — root hygiene | Open |
-| Docs spine (this PR) | `docs/STATUS.md` + audit banner + spine sync |
+| Batch 1 — legibility | ✅ **Merged.** PR #281 (root hygiene: front-door README, strays relocated, stale worktree delinted) + PR #283 (this doc spine + Brain truth-sync + SYSTEM-MAP refresh). |
+| Batch 2 — VAOC (this PR) | The agent company: `orchestrator` + 6 department heads, 24 workers tagged by `department:`, operating manual at `docs/VAOC.md`. |
 | Phase 27 module wave | CRM shipped as **draft PR #280** (Lead/Opportunity + `/crm` Kanban + SalesPipelineExpert). HR parked as WIP on `feat/phase27-hr` (`prisma/schema/hr.prisma` + `workspaceScope` registration). |
-| Master-brief campaign | Batch 1 legibility → Batch 2 VAOC agent company → Batch 3 docs consolidation + IA → Batch 4 hardening (converse zod + per-tenant LLM budget; DB pooling + dashboard cache). |
+| Master-brief campaign | Batch 1 ✅ → Batch 2 VAOC (in flight) → Batch 3 docs consolidation + IA split → Batch 4 hardening (converse zod + per-tenant LLM budget; DB pooling + dashboard cache). |
 
 ## 3. Open items / backlog
 

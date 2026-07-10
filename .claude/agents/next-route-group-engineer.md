@@ -1,5 +1,6 @@
 ---
 name: next-route-group-engineer
+department: architecture-data
 description: |
   Owns Next.js route-group conventions, layouts, server actions, and
   the four route-group boundaries: (app), (admin), (auth), (theater),

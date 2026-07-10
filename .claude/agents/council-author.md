@@ -1,5 +1,6 @@
 ---
 name: council-author
+department: brain-intelligence
 description: |
   Adds, tunes, or debugs council voices — the multi-agent debate that
   runs in src/lib/brain/council.live.ts. Use when the user wants a new

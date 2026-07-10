@@ -1,5 +1,6 @@
 ---
 name: fix-implementer
+department: quality-design-l10n
 description: |
   Stage 3 of the bug-fix triad. Reads .claude/bug-state/repro.md AND
   diagnosis.md, implements the fix, adds a regression test, verifies

@@ -34,12 +34,12 @@ Green gate before every merge: `npx tsc --noEmit` + `npm test` + `npm run lint` 
 | `prisma/schema/` | Prisma schema, one file per pillar (`prismaSchemaFolder`) |
 | `scripts/` | `build/ ops/ seed/ test/ verify/` |
 | `docs/` | All documentation — see the map below |
-| `.claude/agents/` | The agent company (specialist subagent briefs) |
+| `.claude/agents/` | The agent company — 7 departments + orchestrator (see [`docs/VAOC.md`](docs/VAOC.md)) |
 | `public/orrery/` | Generated orbit hub — never hand-edit; built by `scripts/build/build-orrery.mjs` |
 
 ## Documentation map
 
-Living state: **[`docs/STATUS.md`](docs/STATUS.md)** (where we are right now) · **[`docs/BUILD-PLAN.md`](docs/BUILD-PLAN.md)** (the forward plan) · **[`docs/INDEX.md`](docs/INDEX.md)** (full docs table of contents).
+Living state: **[`docs/STATUS.md`](docs/STATUS.md)** (where we are right now) · **[`docs/BUILD-PLAN.md`](docs/BUILD-PLAN.md)** (the forward plan) · **[`docs/INDEX.md`](docs/INDEX.md)** (full docs table of contents) · **[`docs/VAOC.md`](docs/VAOC.md)** (the agent company that builds this).
 
 Start here, in order:
 

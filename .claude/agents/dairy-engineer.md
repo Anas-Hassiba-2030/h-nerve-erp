@@ -1,5 +1,6 @@
 ---
 name: dairy-engineer
+department: domain-ops
 description: |
   Owns the dairy vertical — Maha dairy, DairyBatch lifecycle, QC, expiry
   routing, and the dairy industry pack. Use when the user asks for changes

@@ -1,5 +1,6 @@
 ---
 name: document-intel-engineer
+department: platform-integrations
 description: |
   Owns Phase 18 — Document Intelligence. The drop zone, the extraction
   modal, the parser (currently a stub, target Claude Vision), and the

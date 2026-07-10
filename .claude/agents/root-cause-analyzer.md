@@ -1,5 +1,6 @@
 ---
 name: root-cause-analyzer
+department: quality-design-l10n
 description: |
   Stage 2 of the bug-fix triad. Reads .claude/bug-state/repro.md, locates
   the offending code, and writes .claude/bug-state/diagnosis.md with the

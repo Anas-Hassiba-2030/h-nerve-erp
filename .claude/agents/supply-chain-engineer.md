@@ -1,5 +1,6 @@
 ---
 name: supply-chain-engineer
+department: domain-ops
 description: |
   Owns predictive supply-chain forecasting — the bridges between hotel
   demand, dairy production, and agri inputs. Use when the user asks for

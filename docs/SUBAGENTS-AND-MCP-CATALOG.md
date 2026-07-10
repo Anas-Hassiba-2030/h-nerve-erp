@@ -1,8 +1,11 @@
 # Subagents & MCP Catalog
 
+owner: Anas Hasiba
+last-updated: 2026-07-10
+
 One place to see **every subagent** you have and **every MCP server**, what each does, and where to edit it.
 
-> Snapshot: 2026-06-09. The available set can change when you install/remove plugins or toggle claude.ai connectors. Re-generate by asking Claude to "refresh the subagent/MCP catalog."
+> Snapshot: 2026-07-10. The available set can change when you install/remove plugins or toggle claude.ai connectors. Re-generate by asking Claude to "refresh the subagent/MCP catalog."
 
 ## Where things live (3 tiers — this is what you edit)
 
@@ -16,55 +19,110 @@ Each agent file is Markdown with YAML frontmatter (`name`, `description`, `tools
 
 ---
 
-## 1. Project subagents — `.claude/agents/` (23, yours, in-repo)
+## 1. Project subagents — the VAOC (`.claude/agents/`, 31 agents, in-repo)
 
-**Industry verticals** (own one business domain each):
+> **The org chart, routing rules (which topology fires for which task), harmony
+> rules, and hard limits live in [`docs/VAOC.md`](VAOC.md)** — the operating
+> manual. This file is the **roster/catalog**: who exists, what each does, where
+> to edit it. Read VAOC.md for *how work is routed*; read here for *who's on the team*.
 
-| Agent | Job | File |
-|-------|-----|------|
-| `hospitality-engineer` | Hotels, Bookings, Arena Space surfaces | `.claude/agents/hospitality-engineer.md` |
-| `dairy-engineer` | Maha dairy, DairyBatch lifecycle, QC, expiry routing | `.claude/agents/dairy-engineer.md` |
-| `agri-engineer` | Loran farms, crop cycles, irrigation/greenhouse | `.claude/agents/agri-engineer.md` |
-| `education-engineer` | The Tank incubator (AAU), Program model, cohorts | `.claude/agents/education-engineer.md` |
-| `finance-engineer` | Transactions, group P&L, margin, FX, cash flow | `.claude/agents/finance-engineer.md` |
-| `supply-chain-engineer` | Predictive supply forecasting, demand bridges | `.claude/agents/supply-chain-engineer.md` |
+These **31** agents are the **VAOC (Virtual Agent Orchestration Company)**:
+**1 Orchestrator + 6 department heads + 24 workers**, in **7 departments**. Only
+the 6 heads are new — every worker pre-existed and gained a `department:`
+frontmatter field (no worker was deleted or renamed). `brain-architect` heads
+the Brain department and is counted among the 24 workers (it was already a
+supervisor with the `Agent` tool). Call the **head**, not the workers — the head
+knows its topology and sequences its people (VAOC.md §3).
 
-**Brain & intelligence:**
+### Managing Director
 
-| Agent | Job | File |
-|-------|-----|------|
-| `brain-architect` | Owns all of `lib/brain/` — graph, sim, council, planner, memory, meta | `.claude/agents/brain-architect.md` |
-| `council-author` | Add/tune council voices + the multi-agent debate | `.claude/agents/council-author.md` |
+| Agent | Department | Job | Model | File |
+|-------|-----------|-----|-------|------|
+| `orchestrator` | — (routes all) | Classifies any task, picks a topology, routes to a department head. Supervisor-as-tools over the seven heads. | opus | `.claude/agents/orchestrator.md` |
 
-**Platform features (by phase):**
+### Dept 1 — Domain Operations · head `ops-director` · Supervisor-as-tools (parallel fan-out)
 
-| Agent | Job | File |
-|-------|-----|------|
-| `integrations-engineer` | Connectors hub (Phase 13) — providers, OAuth, webhooks | `.claude/agents/integrations-engineer.md` |
-| `workflow-template-author` | Workflow Studio templates (Phase 12) | `.claude/agents/workflow-template-author.md` |
-| `document-intel-engineer` | Document Intelligence (Phase 18) — drop zone, parser | `.claude/agents/document-intel-engineer.md` |
-| `mobile-ops-engineer` | Mobile-first ops view `/m` (Phase 14) | `.claude/agents/mobile-ops-engineer.md` |
-| `realtime-presence-engineer` | Real-time collab — cursors, presence, comments (Phase 17) | `.claude/agents/realtime-presence-engineer.md` |
-| `protocol-spec-keeper` | Living Protocol / OpenAPI / dev portal (Phase 20) | `.claude/agents/protocol-spec-keeper.md` |
-| `time-machine-engineer` | Time Machine — as-of cursor, scrubber (Phase 16) | `.claude/agents/time-machine-engineer.md` |
-| `empire-curator` | Multi-tenant Empire dashboard `/admin/empire` (Phase 19) | `.claude/agents/empire-curator.md` |
+| Agent | Role | Job | File |
+|-------|------|-----|------|
+| `ops-director` | **head** | Fans cross-vertical ERP work out to the domain engineers in parallel | `.claude/agents/ops-director.md` |
+| `hospitality-engineer` | worker | Hotels, Bookings, Arena Space surfaces | `.claude/agents/hospitality-engineer.md` |
+| `dairy-engineer` | worker | Maha dairy, DairyBatch lifecycle, QC, expiry routing | `.claude/agents/dairy-engineer.md` |
+| `agri-engineer` | worker | Loran farms, crop cycles, irrigation/greenhouse | `.claude/agents/agri-engineer.md` |
+| `education-engineer` | worker | The Tank incubator (AAU), Program model, cohorts | `.claude/agents/education-engineer.md` |
+| `supply-chain-engineer` | worker | Predictive supply forecasting, demand bridges | `.claude/agents/supply-chain-engineer.md` |
 
-**Architecture & quality reviewers:**
+### Dept 2 — Finance & Analytics · head `finance-director` · Sequential pipeline
 
-| Agent | Job | File |
-|-------|-----|------|
-| `prisma-schema-architect` | Prisma schema, migrations, soft-delete, sqlite↔postgres | `.claude/agents/prisma-schema-architect.md` |
-| `next-route-group-engineer` | Route groups, layouts, server actions, auth gates | `.claude/agents/next-route-group-engineer.md` |
-| `heritage-design-reviewer` | Design-system compliance (Heritage Modern, RTL, tokens) | `.claude/agents/heritage-design-reviewer.md` |
-| `i18n-bilingual-reviewer` | Arabic/English pairing, RTL safety, fonts | `.claude/agents/i18n-bilingual-reviewer.md` |
+| Agent | Role | Job | File |
+|-------|------|-----|------|
+| `finance-director` | **head** | Sequences the finance close: pull → compute → validate → narrate | `.claude/agents/finance-director.md` |
+| `finance-engineer` | worker | Transactions, group P&L, margin, FX, cash flow | `.claude/agents/finance-engineer.md` |
 
-**Bug-fix triad** (run in order):
+> **Thin department, stated honestly:** one worker. Analytics, markets, and
+> reporting currently route to `finance-engineer`. Add workers when those
+> surfaces grow — don't pre-create empty briefs.
 
-| Agent | Job | File |
-|-------|-----|------|
-| `bug-reproducer` | Stage 1 — build a minimal repro → `.claude/bug-state/repro.md` | `.claude/agents/bug-reproducer.md` |
-| `root-cause-analyzer` | Stage 2 — locate cause → `.claude/bug-state/diagnosis.md` | `.claude/agents/root-cause-analyzer.md` |
-| `fix-implementer` | Stage 3 — fix + regression test → `.claude/bug-state/fix.md` | `.claude/agents/fix-implementer.md` |
+### Dept 3 — Brain / Intelligence · head `brain-architect` · Network + Supervisor (Moderator synthesizes)
+
+Mirrors the real `src/lib/brain/council.live.ts` — voices argue, the Moderator picks.
+
+| Agent | Role | Job | File |
+|-------|------|-----|------|
+| `brain-architect` | **head** | Owns all of `lib/brain/` — graph, sim, council, planner, memory, meta. Pre-existing supervisor (has the `Agent` tool). | `.claude/agents/brain-architect.md` |
+| `council-author` | worker | Add/tune the council voices + the multi-agent debate | `.claude/agents/council-author.md` |
+
+The **council voices** themselves (Hospitality/Dairy/Agri/Finance/Risk experts + Moderator) are runtime agent classes under `src/lib/brain/agents/*.ts`, not `.md` briefs — authored/tuned via `council-author`.
+
+### Dept 4 — Platform & Integrations · head `platform-director` · Supervisor
+
+| Agent | Role | Job | File |
+|-------|------|-----|------|
+| `platform-director` | **head** | Supervises the phase-feature engineers | `.claude/agents/platform-director.md` |
+| `integrations-engineer` | worker | Connectors hub (Phase 13) — providers, OAuth, webhooks | `.claude/agents/integrations-engineer.md` |
+| `workflow-template-author` | worker | Workflow Studio templates (Phase 12) | `.claude/agents/workflow-template-author.md` |
+| `document-intel-engineer` | worker | Document Intelligence (Phase 18) — drop zone, parser | `.claude/agents/document-intel-engineer.md` |
+| `realtime-presence-engineer` | worker | Real-time collab — cursors, presence, comments (Phase 17) | `.claude/agents/realtime-presence-engineer.md` |
+| `mobile-ops-engineer` | worker | Mobile-first ops view `/m` (Phase 14) | `.claude/agents/mobile-ops-engineer.md` |
+| `time-machine-engineer` | worker | Time Machine — as-of cursor, scrubber (Phase 16) | `.claude/agents/time-machine-engineer.md` |
+| `protocol-spec-keeper` | worker | Living Protocol / OpenAPI / dev portal (Phase 20) | `.claude/agents/protocol-spec-keeper.md` |
+| `empire-curator` | worker | Multi-tenant Empire dashboard `/admin/empire` (Phase 19) | `.claude/agents/empire-curator.md` |
+
+### Dept 5 — Architecture & Data · head `chief-architect` · Supervisor / reviewers-as-gates
+
+| Agent | Role | Job | File |
+|-------|------|-----|------|
+| `chief-architect` | **head** | Gates schema + route-group changes (consulted even when another dept leads) | `.claude/agents/chief-architect.md` |
+| `prisma-schema-architect` | worker | Prisma schema, migrations, soft-delete, sqlite↔postgres | `.claude/agents/prisma-schema-architect.md` |
+| `next-route-group-engineer` | worker | Route groups, layouts, server actions, auth gates | `.claude/agents/next-route-group-engineer.md` |
+
+### Dept 6 — Quality, Design & L10n · head `qa-director` · Sequential bug triad + reviewers as merge gates
+
+| Agent | Role | Job | File |
+|-------|------|-----|------|
+| `qa-director` | **head** | Runs the bug triad in order; fields reviewers as merge gates | `.claude/agents/qa-director.md` |
+| `heritage-design-reviewer` | worker (gate) | Design-system compliance (Heritage Modern, RTL, tokens) | `.claude/agents/heritage-design-reviewer.md` |
+| `i18n-bilingual-reviewer` | worker (gate) | Arabic/English pairing, RTL safety, fonts | `.claude/agents/i18n-bilingual-reviewer.md` |
+| `deploy-preflight` | worker (gate) | Verifies the Railway build actually builds before an infra-touching merge | `.claude/agents/deploy-preflight.md` |
+| `bug-reproducer` | worker (triad 1) | Build a minimal repro → `.claude/bug-state/repro.md` | `.claude/agents/bug-reproducer.md` |
+| `root-cause-analyzer` | worker (triad 2) | Locate cause → `.claude/bug-state/diagnosis.md` | `.claude/agents/root-cause-analyzer.md` |
+| `fix-implementer` | worker (triad 3) | Fix + regression test → `.claude/bug-state/fix.md` | `.claude/agents/fix-implementer.md` |
+
+The bug triad hands off in order via `.claude/bug-state/`. This department also
+includes the **global** GSD agent `gsd-security-auditor` (see §2).
+
+### Dept 7 — Program Office / Docs · head `program-director` · Sequential pipeline (research → synthesize → write → verify)
+
+This department has **no project-tier workers** — its members are all **global**
+GSD agents (see §2): `gsd-doc-writer`, `gsd-doc-classifier`, `gsd-doc-synthesizer`,
+`gsd-roadmapper`, `gsd-codebase-mapper`.
+
+| Agent | Role | Job | File |
+|-------|------|-----|------|
+| `program-director` | **head** | Sequences docs/roadmap work over the global GSD doc agents | `.claude/agents/program-director.md` |
+
+**Department count check:** 1 orchestrator + 6 heads + 24 project workers = **31**
+`.claude/agents/*.md` (excluding `README.md`). Workers by dept: 1→5, 2→1, 3→2
+(incl. `brain-architect`), 4→8, 5→2, 6→6, 7→0 project = 24.
 
 ---
 
@@ -81,6 +139,14 @@ The **GSD ("Getting Stuff Done") pipeline** — a structured plan → execute �
 - **Codebase intel:** `gsd-codebase-mapper`, `gsd-intel-updater`, `gsd-user-profiler`
 
 Each is `C:\Users\hp\.claude\agents\<name>.md`.
+
+**Global GSD agents that belong to a VAOC department** (§1) — global tier, but
+routed as members of a department:
+
+| GSD agent | VAOC department |
+|-----------|-----------------|
+| `gsd-security-auditor` | Dept 6 — Quality, Design & L10n (`qa-director`) |
+| `gsd-doc-writer`, `gsd-doc-classifier`, `gsd-doc-synthesizer`, `gsd-roadmapper`, `gsd-codebase-mapper` | Dept 7 — Program Office / Docs (`program-director`) |
 
 ---
 

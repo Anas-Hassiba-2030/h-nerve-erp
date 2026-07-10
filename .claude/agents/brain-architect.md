@@ -1,5 +1,6 @@
 ---
 name: brain-architect
+department: brain-intelligence
 description: |
   Owns src/lib/brain/ — the entire 10-phase intelligence stack: graph,
   simulator, council, narrator, planner, memory, feedback, federation,

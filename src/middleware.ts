@@ -22,7 +22,14 @@ function sessionPassword() {
   return e && e.length >= 32 ? e : DEV_FALLBACK;
 }
 
-export async function proxy(req: NextRequest) {
+// NOTE (Phase 4 §3): this file is named `middleware.ts` (not Next 16's newer
+// `proxy.ts` convention) ON PURPOSE. Next hard-codes a proxy.ts file to the
+// Node.js middleware runtime (build/index.js: `isProxyFile(page)` → node
+// functions manifest), and @opennextjs/cloudflare supports EDGE middleware
+// only. Everything here is edge-safe (iron-webcrypto unseal, pure permission
+// map, in-memory limiter). Renaming back to proxy.ts breaks the Cloudflare
+// build with "Node.js middleware is not currently supported".
+export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
   // Phase F-UX — forward the current pathname to server components via

@@ -21,7 +21,7 @@ tree is just **8 places**:
 | **Database schema / seeds** | `prisma/` | Schema folder + migrations + seed scripts |
 | **Ops / seed / verify scripts** | `scripts/{ops,seed,verify,build,test}/` | Never a flat dump |
 | **Docs** | `docs/` | This map · `SYSTEM-BLUEPRINT.md` (build-a-system) · `OPERATING-PROTOCOL.md` (how to run) · `DESIGN-SKILL.md` (design) |
-| **Auth/RBAC gate** | `src/proxy.ts` | Runs on every request (Next 16 renamed "middleware" → "proxy") |
+| **Auth/RBAC gate** | `src/middleware.ts` | Runs on every request (kept on the legacy middleware name — Next 16's proxy.ts forces the Node runtime, which Cloudflare can't run) |
 | **Config** (don't move) | repo root | `package.json`, `next.config.mjs`, `tsconfig.json`, `.env*`, `railway.toml` — framework-mandated, immovable |
 
 **Import rule:** `@/...` always means `src/...` (e.g. `@/lib/db/db` →
@@ -43,7 +43,7 @@ pattern.
 | `next.config.mjs` | Next.js config (headers, redirects) |
 | `tailwind.config.ts` | Tailwind tokens |
 | `postcss.config.mjs` | PostCSS (postcss-import enabled) |
-| `src/proxy.ts` | Route-level RBAC proxy (Next 16 middleware convention) + rate limiting |
+| `src/middleware.ts` | Route-level RBAC (edge middleware — see file header for why not proxy.ts) + login rate limiting |
 | `railway.toml` | Railway deploy config (preDeploy seed commands) |
 | `tsconfig.json` | TypeScript paths (`@/*` → `./src/*`; `@/prisma/*` → root `prisma/`) |
 | `vitest.config.ts` | Test runner config (node env, src/lib/**/*.test.ts) |

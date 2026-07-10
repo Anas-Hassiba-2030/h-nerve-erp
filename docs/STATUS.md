@@ -26,7 +26,8 @@ last-updated: 2026-07-10
 | Batch 4 — hardening | ✅ **Merged.** PR #286 (converse: zod schema + per-tenant daily LLM budget, degrades to stub) + PR #287 (dashboard five waves → one `Promise.all`; PgBouncer runbook + ready-to-uncomment `directUrl`). Remaining: owner provisions PgBouncer. |
 | IA split | ✅ **Approved + building** (owner sign-off 2026-07-10): B1 UserMenu + System 10→6 pills + The Core pill (this PR); B2 hub page + B3 /help dev links (sibling PR `feat/core-hub`). |
 | Phase 27 module wave | CRM shipped as **draft PR #280** (Lead/Opportunity + `/crm` Kanban + SalesPipelineExpert). HR parked as WIP on `feat/phase27-hr` (`prisma/schema/hr.prisma` + `workspaceScope` registration). |
-| Master-brief campaign | **Batches 1–4 ✅ all merged** (#281, #283, #284, #285, #286, #287). Open: IA sign-off (#288) + the owner-action ledger (§5). |
+| Master-brief campaign | **Batches 1–4 ✅ all merged** (#281, #283, #284, #285, #286, #287). Open: the owner-action ledger (§5). |
+| Phase 4 — Cloudflare | Audit ✅ #289 · hardening ✅ #290/#291/#292 · IA split ✅ #294 (+#296 hub) · Neon adapter ✅ #295 · **pipeline scaffold: this PR** (OpenNext build passes locally; deploy blocked on creds). §2 rehearsal + §3 cutover fire when the Cloudflare/Neon vars land. |
 
 ## 3. Open items / backlog
 

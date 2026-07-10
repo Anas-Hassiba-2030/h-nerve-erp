@@ -21,9 +21,10 @@ last-updated: 2026-07-09
 | Track | State |
 |-------|-------|
 | Batch 1 — legibility | ✅ **Merged.** PR #281 (root hygiene: front-door README, strays relocated, stale worktree delinted) + PR #283 (this doc spine + Brain truth-sync + SYSTEM-MAP refresh). |
-| Batch 2 — VAOC (this PR) | The agent company: `orchestrator` + 6 department heads, 24 workers tagged by `department:`, operating manual at `docs/VAOC.md`. |
+| Batch 2 — VAOC | ✅ **Merged.** PR #284: the agent company — `orchestrator` + 6 department heads, 24 workers tagged by `department:`, operating manual at `docs/VAOC.md`. |
+| Batch 3 — docs consolidation (this PR) | 12 zero-code-reference docs → `docs/{ops,brain,phases}/`, inbound links fixed. **The IA split (System group + orphan routes) is held for owner sign-off** — it needs a new user-menu surface and touches the orbit. |
 | Phase 27 module wave | CRM shipped as **draft PR #280** (Lead/Opportunity + `/crm` Kanban + SalesPipelineExpert). HR parked as WIP on `feat/phase27-hr` (`prisma/schema/hr.prisma` + `workspaceScope` registration). |
-| Master-brief campaign | Batch 1 ✅ → Batch 2 VAOC (in flight) → Batch 3 docs consolidation + IA split → Batch 4 hardening (converse zod + per-tenant LLM budget; DB pooling + dashboard cache). |
+| Master-brief campaign | Batch 1 ✅ → Batch 2 ✅ → Batch 3 docs ✅ / IA ⏸ owner sign-off → Batch 4 hardening (converse zod + per-tenant LLM budget; DB pooling + dashboard cache). |
 
 ## 3. Open items / backlog
 
@@ -37,7 +38,8 @@ Folded forward from `docs/AUDIT-2026-06.md`, updated with facts verified 2026-07
 - **Phase 24 (Railway maximization)** — custom domain, backups, monitoring — still open.
 
 ### Organization / quality
-- **`docs/` root** — ~24 loose `.md` files; consolidation is **Batch 3** of the campaign (keep the 3 governing docs at their exact `CLAUDE.md`-referenced paths).
+- **`docs/` root** — ✅ consolidated: 12 zero-code-reference docs moved into `docs/{ops,brain,phases}/`. Docs referenced by exact path from code, `CLAUDE.md`, or an agent brief deliberately stay at `docs/` root — moving those silently breaks a comment, a script, or a brief.
+- **IA split (orrery System group + 19 orphan routes)** — ⏸ **awaiting owner sign-off.** Moving Search/Pinned/Trash/Settings/Help out of the System group requires building a user-menu surface that doesn't exist yet (`src/components/layout/` has Topbar + Sidebar, no user menu), and any orrery change touches the sacred hub. Proposal, not a blind ship.
 - **Component-test floor** — API smoke tests exist (`lib/utils/api-routes.smoke.test.ts`); still zero `app/`/`components/` component-level tests.
 - **Admin back-office hub** — the 13 ERP back-office routes under `app/(app)/admin/*` render fine but have no single Orrery hub ("The Core" — Phase 27b).
 

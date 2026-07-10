@@ -1,5 +1,8 @@
 # Why the app feels heavy — and how to make it fast
 
+owner: Anas Hasiba
+last-updated: 2026-07-10
+
 Short version: the app is not slow because of bad code. It is slow for
 **three known reasons**. Fix them in the order below. The first two are
 the big ones.

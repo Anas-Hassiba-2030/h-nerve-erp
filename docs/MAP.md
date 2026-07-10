@@ -337,15 +337,15 @@ prisma/
 |------|---------|
 | `docs/DEPLOYMENT.md` | Railway deploy guide, env vars, cron setup |
 | `docs/ISOLATION.md` | Tenant isolation checklist |
-| `docs/PERFORMANCE.md` | Performance notes |
-| `docs/GITHUB-WORKFLOW.md` | Branch/PR/CI conventions |
+| `docs/ops/PERFORMANCE.md` | Performance notes |
+| `docs/ops/GITHUB-WORKFLOW.md` | Branch/PR/CI conventions |
 
 ### Planning
 | File | Purpose |
 |------|---------|
 | `docs/RE-INFRASTRUCTURE-PLAN.md` | Rebuild-the-right-way spec (docs-first) |
 | `docs/BLUEPRINT.md` | High-level architecture blueprint |
-| `docs/READINESS.md` | Pitch readiness assessment *(historical snapshot 2026-05-15; current state → AUDIT-2026-06.md)* |
+| `docs/phases/READINESS.md` | Pitch readiness assessment *(historical snapshot 2026-05-15; current state → AUDIT-2026-06.md)* |
 | `docs/prompts/LOGIN-REDESIGN.md` | Login cinematic redesign brief (Claude Design) |
 
 ### Design references

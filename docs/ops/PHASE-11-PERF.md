@@ -1,5 +1,8 @@
 # Phase 11 — Performance Audit
 
+owner: Anas Hasiba
+last-updated: 2026-05-18
+
 **Date:** 2026-05-18 · branch `feat/workspace-erp`
 
 ## Done — indexes (the substantive win)

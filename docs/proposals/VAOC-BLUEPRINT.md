@@ -135,7 +135,7 @@ bar as a research finding, not trusted on tone alone.
 ## 7. Readiness note — carry the same discipline as H-Nerve itself
 
 H-Nerve's own external framing is **prototype, supervised pilot** — not
-"production ERP replacement" (see `docs/READINESS.md`). VAOC should get the
+"production ERP replacement" (see `docs/phases/READINESS.md`). VAOC should get the
 same honesty: it's an internal builder-accelerator, not an autonomous company
 that ships unsupervised. Every agent that writes code still needs a human
 merge gate — same "read-mostly / propose-not-mutate" boundary that governs

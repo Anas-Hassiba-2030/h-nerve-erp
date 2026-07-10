@@ -25,7 +25,7 @@ Turn the simulated hub into a small number of **real** connectors plus an honest
 ## Risks (technical + product, ranked)
 1. **Plaintext credentials (HIGH, security).** `tokenBlob` is stored raw; schema comment falsely says "encrypted." Real Slack/Twilio tokens make this a live secret-leak surface. Must encrypt before any real token lands.
 2. **No tenant isolation (HIGH).** Hardcoded `scope="default"` means one tenant's Slack connection is visible/usable group-wide — violates the project's isolation rule. Migrating `"default"` rows needs a backfill.
-3. **Honesty/pitch risk (HIGH, product).** Every tile currently fakes a Connect→Connected handshake. Demoing "24 live integrations" when 22 are mocks undermines the readiness posture (`docs/READINESS.md` — prototype, not production).
+3. **Honesty/pitch risk (HIGH, product).** Every tile currently fakes a Connect→Connected handshake. Demoing "24 live integrations" when 22 are mocks undermines the readiness posture (`docs/phases/READINESS.md` — prototype, not production).
 4. **OAuth secrets + callbacks (MEDIUM).** Real Slack/Google OAuth needs client IDs/secrets in env, redirect URIs registered, and a `/api/` callback route — none exist yet.
 5. **Dormant/dead code (LOW).** `sendThrough` is unwired and `connectAndOpen` is unreachable; shipping without removing them leaves confusing surface.
 6. **Outbound cost/rate limits (LOW).** Twilio SMS and email send cost money; needs a per-tenant cap (mirror Phase 14's 4/day push budget).

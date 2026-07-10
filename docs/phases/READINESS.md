@@ -1,5 +1,8 @@
 # H-Nerve — Production Readiness Assessment
 
+owner: Anas Hasiba
+last-updated: 2026-06-11
+
 > ⚠️ **HISTORICAL SNAPSHOT (2026-05-15).** Several gaps below are now **closed** —
 > for the current state see **`docs/AUDIT-2026-06.md`**. Specifically: the AI is
 > live (ANTHROPIC + Gemini keys set); the admin console is hard-gated to ADMIN
@@ -143,5 +146,5 @@ exactly what the codebase can actually support today.
 ---
 
 _Cross-ref: Tier 0/1/2 here map to Phase A / B+D+E / F+G in
-`docs/PRODUCTION-ROADMAP.md`, which also answers the API-key cost question
+`docs/phases/PRODUCTION-ROADMAP.md`, which also answers the API-key cost question
 and the per-company isolated-ERP feasibility._

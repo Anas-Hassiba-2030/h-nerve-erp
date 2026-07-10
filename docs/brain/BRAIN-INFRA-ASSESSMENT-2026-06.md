@@ -1,5 +1,8 @@
 # H-Nerve — Brain & Infrastructure Assessment
 
+owner: Anas Hasiba
+last-updated: 2026-06-07
+
 > ⚠️ **DATED POINT-IN-TIME ASSESSMENT (2026-06-07).** Several findings below
 > have since been fixed: the stub `Brain.ts` was **retired** (PR #240,
 > merged 2026-06-11) in favor of the wired tool-loop
@@ -128,8 +131,8 @@ Evidence it is **not yet a brain**:
   calls the planner). `makeBrain()` returns a `Proxy` **stub**. It is harmless
   now (because `ask()` dynamic-imports the `.live` modules directly), but the
   composition root is not real.
-- **The repo's own docs are stale here** — `READINESS.md:37` and
-  `PITCH-WALKTHROUGH.md:111` still claim *"Brain.ask not yet wired / throws"*,
+- **The repo's own docs are stale here** — `docs/phases/READINESS.md:37` and
+  `docs/phases/PITCH-WALKTHROUGH.md:111` still claim *"Brain.ask not yet wired / throws"*,
   which the current `Brain.ts` contradicts. **This drift is itself the
   argument** for enforcing specs (Part 3).
 - **The learning loop is inert in prod.** `/api/brain/cron` (daily/weekly
@@ -230,7 +233,7 @@ honest correction is that the work is ~85% done on *paper*. The two things the
 screenshot is *right* about that remain open: **the PRD/acceptance-criteria
 gap**, and the cross-cutting best practice it lists last — **specs must be
 enforced (reviewed in the same PR, never allowed to drift).** The stale
-`READINESS.md` "Brain.ask not yet wired" line is live proof that **existence ≠
+`docs/phases/READINESS.md` "Brain.ask not yet wired" line is live proof that **existence ≠
 enforcement.** That is the real Part-3 work, plus the architectural gaps the
 screenshot never mentions (Part 2.2).
 
@@ -263,7 +266,7 @@ Finish the screenshot, properly.
   **non-goals**. *(Gap: screenshot #1)*
 - **Spec-drift CI gate**: a check that flags schema/route changes not reflected in
   `DATA-MODEL.md` / `API-CONTRACTS.md`; require spec edits in the same PR. Fix the
-  stale `READINESS.md`/`PITCH-WALKTHROUGH.md` Brain lines as the first drift
+  stale `docs/phases/READINESS.md`/`docs/phases/PITCH-WALKTHROUGH.md` Brain lines as the first drift
   caught.
 - **Decision Log discipline:** keep appending `ADRS.md`; a settled question never
   re-opens.

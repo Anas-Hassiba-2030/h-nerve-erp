@@ -1,5 +1,8 @@
 # Workflows studio — smoke test
 
+owner: Anas Hasiba
+last-updated: 2026-05-21
+
 `scripts/test/test-workflow-studio.ts` exercises the full studio lifecycle:
 
 1. Seed example workflows (`lib/workflows/seed.seedWorkflows`)

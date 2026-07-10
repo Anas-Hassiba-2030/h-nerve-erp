@@ -8,12 +8,12 @@ last-updated: 2026-07-09
 This is the **one ordered forward plan** for the codebase. It reconciles three
 sources into a single sequence:
 
-1. The still-open items of `docs/PRODUCTION-ROADMAP.md` (now historical).
+1. The still-open items of `docs/phases/PRODUCTION-ROADMAP.md` (now historical).
 2. The Phase 27 / 27b / 28 backlog in `docs/PHASES-INTELLIGENCE.md`.
 3. The active **master-brief campaign** (legibility → VAOC → docs/IA → hardening).
 
 **Cross-reference:** current engineering health lives in `docs/STATUS.md`.
-Historical plans and phase write-ups live in `docs/PRODUCTION-ROADMAP.md` and
+Historical plans and phase write-ups live in `docs/phases/PRODUCTION-ROADMAP.md` and
 `docs/PHASES-INTELLIGENCE.md` — do not plan from those; plan from here.
 
 ---
@@ -82,6 +82,6 @@ Heritage Modern pages + a brain agent pack + an orrery/Core-hub entry.
 |---|---|
 | What do we build next? | **This file.** |
 | Are we green? What's the health? | `docs/STATUS.md` |
-| Why did we plan it this way historically? | `docs/PRODUCTION-ROADMAP.md` (historical), `docs/PHASES-INTELLIGENCE.md` (phases 1–28) |
+| Why did we plan it this way historically? | `docs/phases/PRODUCTION-ROADMAP.md` (historical), `docs/PHASES-INTELLIGENCE.md` (phases 1–28) |
 | Rebuild/re-infrastructure philosophy | `docs/RE-INFRASTRUCTURE-PLAN.md` |
 | ERP module taxonomy + gap ranking | `docs/ERP-KNOWLEDGE-BASE.md` (with the Phase 27 PRs) |

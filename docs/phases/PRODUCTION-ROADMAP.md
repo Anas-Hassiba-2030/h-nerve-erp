@@ -1,11 +1,14 @@
 # H-Nerve — Path to a Fully Working ERP
 
+owner: Anas Hasiba
+last-updated: 2026-07-09
+
 > **⚠️ HISTORICAL ROADMAP (superseded 2026-07-09).** This document is kept as
 > the record of the May-2026 path to production. For forward planning use
 > **`docs/BUILD-PLAN.md`** — the single ordered plan that carries this file's
 > still-open items forward. Current health lives in `docs/STATUS.md`.
 
-_Companion to `docs/READINESS.md`. Phase plan from today's prototype to a
+_Companion to `docs/phases/READINESS.md`. Phase plan from today's prototype to a
 real, multi-company ERP. Written 2026-05-15._
 
 ---
@@ -194,7 +197,7 @@ generic, not "a fully detailed المها ERP that analyzes everything."
 - `enterWorkspace` redirects to the Command Center, not `/dashboard`.
 
 ### G2 — Performance — ✅ DONE (`8c15dac`)
-Realtime poll 280ms→25s/60s, TTL→60s; `docs/PERFORMANCE.md` (prod-build
+Realtime poll 280ms→25s/60s, TTL→60s; `docs/ops/PERFORMANCE.md` (prod-build
 + optional local-SQLite fix order). Original below.
 Feedback: system feels heavy/laggy. Likely causes: Next **dev mode** +
 **Neon remote latency** (vs instant local SQLite) + realtime SSE polling.

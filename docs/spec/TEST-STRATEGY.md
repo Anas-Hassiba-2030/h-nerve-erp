@@ -58,7 +58,7 @@ This is the candid coverage map — important for the rebuild's risk assessment:
 | React components | ❌ | No component/RTL tests. |
 | Prisma queries / DB | ❌ | No DB-integration tests (suite is DB-free by design). |
 | API routes (`app/api`) | ❌ | No handler tests. |
-| End-to-end (browser) | ❌ | No Playwright/Cypress. Smoke tests are **manual** (`docs/SMOKE-*.md`, `WORKFLOWS-SMOKE-TEST.md`). |
+| End-to-end (browser) | ❌ | No Playwright/Cypress. Smoke tests are **manual** (`docs/SMOKE-*.md`, `docs/ops/WORKFLOWS-SMOKE-TEST.md`). |
 
 The two operator-reported bugs that pure-unit can't catch — 26.7 (FAB disappear)
 and perceived lag — are exactly the class an **e2e/browser** layer would cover.

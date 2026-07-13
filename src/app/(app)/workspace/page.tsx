@@ -10,7 +10,7 @@
 // docs/design/system/sections/workspace.html — a per-company console with
 // five facets (intelligence · finance · operations · pipeline · team) plus
 // a hub strip. Reference class names are preserved; real Prisma data feeds
-// the facets. Scoped under .dl-page (see ./workspace.css + ../daylight.css).
+// the facets. Scoped under .dl-page (see ../../styles/workspace.css + ../daylight.css).
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -24,7 +24,7 @@ import { computeCompanyHealth } from "@/lib/workspace/health";
 import { COMPANY_CODE_TO_TENANT_SLUG } from "@/lib/tenancy/tenancy";
 import { DaylightShell } from "@/components/orrery/daylight";
 import "../daylight.css";
-import "./workspace.css";
+import "../../styles/workspace.css";
 
 export const dynamic = "force-dynamic";
 

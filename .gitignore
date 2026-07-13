@@ -48,6 +48,8 @@ free-claude-code-main.zip
 .claude/settings.local.json
 .claude/worktrees/
 .gstack/
+.playwright-mcp/
+
 
 # Obsidian vault config (local note app)
 .obsidian/

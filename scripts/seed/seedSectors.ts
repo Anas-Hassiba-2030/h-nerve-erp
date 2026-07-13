@@ -21,7 +21,7 @@
 
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
-import { planIncrementalSeed } from "../src/lib/genesis/recipes";
+import { planIncrementalSeed } from "../../src/lib/genesis/recipes";
 import {
   seedHospitality,
   seedDairy,

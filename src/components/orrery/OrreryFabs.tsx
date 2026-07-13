@@ -18,8 +18,8 @@ import "./orrery-fabs.css";
 // (.tm-pill) render UNSTYLED — as raw flow text in the top-left corner (the bug
 // Anas hit). A direct component import guarantees these styles ship with the
 // orrery route no matter what.
-import "../../app/phase15-conversational.css";
-import "../../app/phase16-timemachine.css";
+import "../../app/styles/phase15-conversational.css";
+import "../../app/styles/phase16-timemachine.css";
 import { FabRail } from "@/components/orrery/FabRail";
 import { Conversational } from "@/components/brain/Conversational";
 import { QuickAddFAB } from "@/components/nav/QuickAddFAB";

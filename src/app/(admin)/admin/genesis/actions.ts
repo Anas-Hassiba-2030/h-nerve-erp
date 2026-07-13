@@ -21,7 +21,7 @@
 
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
-import { seedOperator } from "@/prisma/seed";
+import { seedOperator } from "@/scripts/seed/seed";
 
 async function requireAdmin() {
   const user = await getCurrentUser();
@@ -59,7 +59,7 @@ export async function seedMissingGenesis(): Promise<void> {
   // across the whole workspace, exactly like the deploy-time seed — but it only
   // creates EMPTY sectors and never wipes, so it's safe with no confirm token.
   const { prismaUnscoped } = await import("@/lib/db/db");
-  const { seedMissingSectors } = await import("@/prisma/seedSectors");
+  const { seedMissingSectors } = await import("@/scripts/seed/seedSectors");
 
   let result;
   try {
@@ -80,7 +80,7 @@ export async function topUpDemoCorpus(): Promise<void> {
   // CROSS-TENANT INTENT: genesis top-up writes the default-scope demo corpus
   // across the whole workspace, exactly like the deploy-time ensure script.
   const { prismaUnscoped } = await import("@/lib/db/db");
-  const { seedDemoDocuments } = await import("@/prisma/seedDemoDocuments");
+  const { seedDemoDocuments } = await import("@/scripts/seed/seedDemoDocuments");
 
   const existing = await prismaUnscoped.document.count().catch(() => 0);
   if (existing > 0) {

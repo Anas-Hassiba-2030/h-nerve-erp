@@ -6,7 +6,7 @@
    Moving the load to <head> lets the browser open the
    fonts.googleapis.com connection in parallel with parsing this stylesheet. */
 
-@import "./animations.css";
+@import "./styles/animations.css";
 
 /* Phase / feature stylesheets.
    CRITICAL: @import rules are only valid at the TOP of a stylesheet (before any
@@ -16,25 +16,25 @@
    docintel, meta, realtime, …) shipped completely unstyled. Verified with a local
    `next build`: the stranded imports were absent from the output CSS; moved here
    they are present. postcss-import dedupes by path. */
-@import "./hn-animations.css";
-@import "./exec-design.css";
+@import "./styles/hn-animations.css";
+@import "./styles/exec-design.css";
 @import "./heritage-modern.css";
-@import "./phase9-theater.css";
-@import "./phase10-meta.css";
-@import "./phase11-admin.css";
-@import "./phase12-workflow.css";
-@import "./phase13-integrations.css";
-@import "./phase14-mobile.css";
-@import "./phase15-conversational.css";
-@import "./phase16-timemachine.css";
-@import "./phase17-realtime.css";
-@import "./phase18-docintel.css";
-@import "./phase19-empire.css";
-@import "./phase20-protocol.css";
-@import "./brain-slider.css";
-@import "./narrate-tooltip.css";
-@import "./showcase.css";
-@import "./workspace.css";
+@import "./styles/phase9-theater.css";
+@import "./styles/phase10-meta.css";
+@import "./styles/phase11-admin.css";
+@import "./styles/phase12-workflow.css";
+@import "./styles/phase13-integrations.css";
+@import "./styles/phase14-mobile.css";
+@import "./styles/phase15-conversational.css";
+@import "./styles/phase16-timemachine.css";
+@import "./styles/phase17-realtime.css";
+@import "./styles/phase18-docintel.css";
+@import "./styles/phase19-empire.css";
+@import "./styles/phase20-protocol.css";
+@import "./styles/brain-slider.css";
+@import "./styles/narrate-tooltip.css";
+@import "./styles/showcase.css";
+@import "./styles/workspace.css";
 
 @tailwind base;
 @tailwind components;

@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { DEFAULT_PROTOCOL_CLAUSES } from "../src/lib/protocol/clauses";
+import { DEFAULT_PROTOCOL_CLAUSES } from "../../src/lib/protocol/clauses";
 import { seedDemoDocuments } from "./seedDemoDocuments";
 
 const prisma = new PrismaClient();
@@ -1265,7 +1265,7 @@ export async function seedIntelligence(ctx: SeedCtx) {
 
 // Run only when invoked directly as a CLI script (npx tsx prisma/seed.ts).
 // When imported by the seed endpoint, the caller invokes seedOperator().
-if (process.argv[1]?.replace(/\\/g, "/").endsWith("prisma/seed.ts")) {
+if (process.argv[1]?.replace(/\\/g, "/").endsWith("scripts/seed/seed.ts")) {
   seedOperator()
     .catch((e) => {
       console.error(e);

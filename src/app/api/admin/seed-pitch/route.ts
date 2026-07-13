@@ -68,15 +68,15 @@ export async function POST(req: NextRequest) {
   const started = Date.now();
   const steps: Record<string, string> = {};
   try {
-    const { seedOperator } = await import("@/prisma/seed");
+    const { seedOperator } = await import("@/scripts/seed/seed");
     await seedOperator();
     steps.operator = "ok";
 
-    const { seedDemo } = await import("@/prisma/seed-demo");
+    const { seedDemo } = await import("@/scripts/seed/seed-demo");
     await seedDemo();
     steps.erp = "ok";
 
-    const { seedPitch } = await import("@/prisma/seed-pitch");
+    const { seedPitch } = await import("@/scripts/seed/seed-pitch");
     await seedPitch();
     steps.gaps = "ok";
 

@@ -15,8 +15,8 @@
 // .admin-page / .emp-* rules were absent). Same failure + same fix as the
 // orrery panels (PR #202). A direct import binds the CSS to the (admin) route
 // group's chunk so it always ships.
-import "../phase11-admin.css";
-import "../phase19-empire.css";
+import "../styles/phase11-admin.css";
+import "../styles/phase19-empire.css";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";

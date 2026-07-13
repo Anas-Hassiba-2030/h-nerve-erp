@@ -20,5 +20,6 @@ TypeScript scripts import shared code via the `@/` path alias (e.g.
 - **`railway.toml`** → `seed/seed-if-empty.ts`, `seed/ensure-admins.ts` (run on every deploy).
 - **`package.json`** → `ops/guard-not-prod.js`, `seed/seed-demo-extras.ts`, `seed/seed-production.ts`.
 
-> `prisma/seed.ts` intentionally stays under `prisma/` — that's the path Prisma's
-> `db seed` convention expects.
+> Seed scripts (`seed.ts`, `seed-demo.ts`, `seed-pitch.ts`, `seedSectors.ts`,
+> `seedDemoDocuments.ts`) live under `seed/` alongside the rest of the seed
+> pipeline. `prisma/` holds only the schema folder and migrations.

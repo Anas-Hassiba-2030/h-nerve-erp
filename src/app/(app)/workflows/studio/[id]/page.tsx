@@ -9,7 +9,7 @@
 // shipped unstyled (.studio-palette had no panel/background and the palette text
 // fell back to the dark --ink colour → unreadable dark-on-dark). Same fix as the
 // admin shell (#211) and orrery panels (#202).
-import "../../../../phase12-workflow.css";
+import "../../../../styles/phase12-workflow.css";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db/db";
 import Link from "next/link";

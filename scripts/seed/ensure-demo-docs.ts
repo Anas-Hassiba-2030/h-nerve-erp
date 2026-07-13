@@ -14,7 +14,7 @@
 //   npx tsx scripts/seed/ensure-demo-docs.ts
 
 import { PrismaClient } from "@prisma/client";
-import { seedDemoDocuments } from "../../prisma/seedDemoDocuments";
+import { seedDemoDocuments } from "./seedDemoDocuments";
 
 async function main() {
   const prisma = new PrismaClient();

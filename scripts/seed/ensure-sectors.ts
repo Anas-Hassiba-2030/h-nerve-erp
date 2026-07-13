@@ -23,7 +23,7 @@ import { PrismaClient } from "@prisma/client";
 async function main() {
   const prisma = new PrismaClient();
   try {
-    const { seedMissingSectors } = await import("@/prisma/seedSectors");
+    const { seedMissingSectors } = await import("@/scripts/seed/seedSectors");
     const result = await seedMissingSectors(prisma);
     if (result.nothingToDo) {
       console.log("[ensure-sectors] all sectors already populated — skipping.");

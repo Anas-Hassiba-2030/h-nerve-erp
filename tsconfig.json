@@ -27,6 +27,9 @@
       "@/prisma/*": [
         "./prisma/*"
       ],
+      "@/scripts/*": [
+        "./scripts/*"
+      ],
       "@/*": [
         "./src/*"
       ]

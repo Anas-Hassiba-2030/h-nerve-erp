@@ -1,0 +1,10 @@
+{
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "package.json": "package-lock.json, pnpm-lock.yaml, yarn.lock, next-env.d.ts, tsconfig.json, tsconfig.tsbuildinfo, next.config.mjs, tailwind.config.ts, postcss.config.mjs, eslint.config.mjs, vitest.config.ts, .npmrc",
+    "railway.toml": "wrangler.jsonc, open-next.config.ts",
+    ".env.example": ".env, .env.local, .env.railway.template",
+    "README.md": "CLAUDE.md, .gitignore, .gitleaks.toml, .gitattributes"
+  }
+}

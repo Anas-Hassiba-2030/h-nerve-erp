@@ -27,7 +27,8 @@ prisma/schema/dev.db-journal
 .DS_Store
 .vercel
 .idea
-.vscode
+.vscode/*
+!.vscode/settings.json
 
 # Curl / session scratch
 cookies.txt

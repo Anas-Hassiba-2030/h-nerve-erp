@@ -1,0 +1,100 @@
+// =====================================================================
+// HR / PAYROLL (Phase 27 — hnerve-gap-map.md "HR" row, split WFM+HRM
+// per docs/ERP-KNOWLEDGE-BASE.md; this is the HRM half — headcount,
+// leave, payroll. Workforce-management/scheduling deferred). Payroll
+// posts straight into the same JournalEntry engine as invoicing.ts /
+// purchasing.ts / assets.ts: Salary Expense debit / Treasury credit,
+// one entry per run. No payable step — salaries are paid same-run,
+// matching Daftra's payroll-run behavior.
+// =====================================================================
+model Employee {
+  id              String    @id @default(cuid())
+  tenantId        String
+  employeeNumber  String
+  name            String
+  email           String?
+  phone           String?
+  department      String?
+  position        String?
+  hireDate        DateTime  @default(now())
+  terminationDate DateTime?
+  baseSalary      Decimal   @default(0)
+  // ACTIVE | ON_LEAVE | TERMINATED
+  status          String    @default("ACTIVE")
+  // Optional link to a login account (not every employee has one).
+  userId          String?   @unique
+  user            User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  note            String?
+
+  leaveRequests LeaveRequest[]
+  payslips      Payslip[]
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([tenantId, employeeNumber])
+  @@index([tenantId, status])
+}
+
+model LeaveRequest {
+  id         String   @id @default(cuid())
+  tenantId   String
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  // ANNUAL | SICK | UNPAID | OTHER
+  type       String   @default("ANNUAL")
+  startDate  DateTime
+  endDate    DateTime
+  days       Int
+  // PENDING | APPROVED | REJECTED
+  status     String   @default("PENDING")
+  note       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, status])
+  @@index([employeeId])
+}
+
+model PayrollRun {
+  id          String   @id @default(cuid())
+  tenantId    String
+  periodYear  Int
+  periodMonth Int // 1-12
+  treasuryId  String
+  treasury    Treasury @relation(fields: [treasuryId], references: [id])
+  totalAmount Decimal  @default(0)
+  // POSTED (only state in v1 — a run is created already posted, like
+  // a depreciation run; corrections are reversing entries, not edits).
+  status      String   @default("POSTED")
+
+  journalEntryId String?      @unique
+  journalEntry   JournalEntry? @relation(fields: [journalEntryId], references: [id])
+
+  payslips Payslip[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, periodYear, periodMonth])
+  @@index([tenantId, periodYear, periodMonth])
+}
+
+model Payslip {
+  id           String     @id @default(cuid())
+  tenantId     String
+  payrollRunId String
+  payrollRun   PayrollRun @relation(fields: [payrollRunId], references: [id], onDelete: Cascade)
+  employeeId   String
+  employee     Employee   @relation(fields: [employeeId], references: [id])
+  baseSalary   Decimal
+  allowances   Decimal    @default(0)
+  deductions   Decimal    @default(0)
+  netPay       Decimal
+
+  createdAt DateTime @default(now())
+
+  @@unique([payrollRunId, employeeId])
+  @@index([tenantId])
+}

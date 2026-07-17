@@ -43,6 +43,9 @@ model LedgerAccount {
   warehouseId String?
 
   lines       JournalLine[]
+  // Reverse of Treasury.ledgerAccountId (unique FK) — set when this
+  // account is a treasury's cash/bank account, null for ordinary accounts.
+  treasury    Treasury?
 
   createdAt   DateTime @default(now())
 
@@ -79,6 +82,12 @@ model JournalEntry {
   lines       JournalLine[]
   reverses    JournalEntry?   @relation("Reversal", fields: [reversesId], references: [id])
   reversedBy  JournalEntry[]  @relation("Reversal")
+  invoice     Invoice?
+  payment     Payment?
+  purchaseInvoice PurchaseInvoice?
+  supplierPayment SupplierPayment?
+  fixedAsset  FixedAsset?
+  depreciationEntry DepreciationEntry?
 
   postedAt    DateTime?
   createdAt   DateTime @default(now())
@@ -159,6 +168,66 @@ model PurchaseOrderLine {
 }
 
 // =====================================================================
+// PURCHASE INVOICE — Payables (Phase 27, mirror of Invoice against
+// Supplier — hnerve-gap-map.md "Purchases" row). Posts a JournalEntry on
+// issue (Purchases/COGS debit — code 5000 — / Accounts Payable credit —
+// code 2100) through the EXISTING double-entry engine, bootstrapped the
+// same way Invoice bootstraps AR/Revenue. Standalone for now — does not
+// require a source PurchaseOrder (PO→bill conversion is a future step,
+// same shape as Estimate→Invoice).
+// =====================================================================
+model PurchaseInvoice {
+  id                   String   @id @default(cuid())
+  tenantId             String
+  purchaseInvoiceNumber String
+  supplierId           String
+  // DRAFT | UNPAID | PARTIAL | DUE | OVERDUE | PAID | OVERPAID | CANCELLED
+  status               String   @default("DRAFT")
+  issueDate            DateTime @default(now())
+  dueDate              DateTime?
+  currency             String   @default("JOD")
+  subtotal             Decimal  @default(0)
+  taxTotal             Decimal  @default(0)
+  total                Decimal  @default(0)
+  note                 String?
+
+  // Set once the Purchases/AP journal posts (issue-time). Null while DRAFT.
+  journalEntryId String?  @unique
+  journalEntry   JournalEntry? @relation(fields: [journalEntryId], references: [id])
+
+  supplierRef   Supplier @relation(fields: [supplierId], references: [id])
+  lines         PurchaseInvoiceLine[]
+  payments      SupplierPayment[]
+
+  deletedAt     DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([tenantId, purchaseInvoiceNumber])
+  @@index([tenantId, status])
+  @@index([tenantId, supplierId])
+  @@index([tenantId, issueDate])
+}
+
+model PurchaseInvoiceLine {
+  id          String   @id @default(cuid())
+  purchaseInvoiceId String
+  productId   String?
+  description String
+  quantity    Decimal  @default(1)
+  unitPrice   Decimal  @default(0)
+  taxRateId   String?
+  lineTotal   Decimal  @default(0)
+
+  purchaseInvoice PurchaseInvoice @relation(fields: [purchaseInvoiceId], references: [id], onDelete: Cascade)
+  product     Product?  @relation(fields: [productId], references: [id])
+  taxRate     TaxRate?  @relation(fields: [taxRateId], references: [id])
+
+  @@index([purchaseInvoiceId])
+  @@index([productId])
+}
+
+// =====================================================================
 // SALES ORDERS — fulfillment (Phase 6). DRAFT → CONFIRMED → PARTIAL →
 // FULFILLED → CANCELLED. Only FULFILLED/PARTIAL fulfillment writes SOLD
 // movements (negative delta). Stock availability is checked at create
@@ -232,6 +301,8 @@ model Supplier {
 
   products       Product[]
   purchaseOrders PurchaseOrder[]
+  purchaseInvoices PurchaseInvoice[]
+  supplierPayments SupplierPayment[]
 
   deletedAt     DateTime?
   createdAt     DateTime @default(now())
@@ -253,6 +324,9 @@ model Customer {
   notes         String?
 
   salesOrders   SalesOrder[]
+  invoices      Invoice[]
+  estimates     Estimate[]
+  payments      Payment[]
 
   deletedAt     DateTime?
   createdAt     DateTime @default(now())
@@ -260,4 +334,326 @@ model Customer {
 
   @@unique([tenantId, name])
   @@index([tenantId, deletedAt])
+}
+
+// =====================================================================
+// INVOICE — Sales/Billing (Phase 27, docs/spec/ENTITY-ENGINE-PATTERN.md).
+// Tenant-scoped opaque tenantId, same family as Product/Supplier/Customer/
+// LedgerAccount. Posts a JournalEntry on issue (AR debit / Revenue
+// credit) through the EXISTING double-entry engine above — does not
+// duplicate it. Numbering allocated from NumberingScheme, not
+// generateNumber() (that helper has no persisted per-tenant counter).
+// =====================================================================
+model Invoice {
+  id            String   @id @default(cuid())
+  tenantId      String
+  invoiceNumber String
+  customerId    String
+  // DRAFT | UNPAID | PARTIAL | DUE | OVERDUE | PAID | OVERPAID | CANCELLED
+  // PARTIAL/PAID/OVERPAID are set by lib/finance/invoicing.ts statusForPaid()
+  // whenever a Payment posts against this invoice.
+  status        String   @default("DRAFT")
+  issueDate     DateTime @default(now())
+  dueDate       DateTime?
+  currency      String   @default("JOD")
+  subtotal      Decimal  @default(0)
+  taxTotal      Decimal  @default(0)
+  total         Decimal  @default(0)
+  note          String?
+
+  // Set once the AR/Revenue journal posts (issue-time). Null while DRAFT.
+  journalEntryId String?  @unique
+  journalEntry   JournalEntry? @relation(fields: [journalEntryId], references: [id])
+
+  customerRef   Customer @relation(fields: [customerId], references: [id])
+  lines         InvoiceLine[]
+  payments      Payment[]
+  // Reverse of Estimate.convertedInvoiceId (unique FK) — set when this
+  // invoice was created via /estimates convertToInvoice, null otherwise.
+  fromEstimate  Estimate?
+
+  deletedAt     DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([tenantId, invoiceNumber])
+  @@index([tenantId, status])
+  @@index([tenantId, customerId])
+  @@index([tenantId, issueDate])
+}
+
+model InvoiceLine {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  productId   String?
+  description String
+  quantity    Decimal  @default(1)
+  unitPrice   Decimal  @default(0)
+  taxRateId   String?
+  lineTotal   Decimal  @default(0)
+
+  invoice     Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  product     Product?  @relation(fields: [productId], references: [id])
+  taxRate     TaxRate?  @relation(fields: [taxRateId], references: [id])
+
+  @@index([invoiceId])
+  @@index([productId])
+}
+
+// =====================================================================
+// ESTIMATE — Sales/Billing (Phase 27). Same shape as Invoice, no journal
+// posting (a quote is not an accounting event). convertToInvoice
+// (invoices actions, shared via lib/finance/invoicing.ts) creates a real
+// Invoice from an estimate's lines and links back here — one estimate
+// converts to at most one invoice (unique FK, mirrors Invoice.journalEntryId).
+// =====================================================================
+model Estimate {
+  id             String   @id @default(cuid())
+  tenantId       String
+  estimateNumber String
+  customerId     String
+  // DRAFT | SENT | ACCEPTED | DECLINED | EXPIRED | CONVERTED
+  status         String   @default("DRAFT")
+  issueDate      DateTime @default(now())
+  expiryDate     DateTime?
+  currency       String   @default("JOD")
+  subtotal       Decimal  @default(0)
+  taxTotal       Decimal  @default(0)
+  total          Decimal  @default(0)
+  note           String?
+
+  convertedInvoiceId String?  @unique
+  convertedInvoice   Invoice? @relation(fields: [convertedInvoiceId], references: [id])
+
+  customerRef    Customer @relation(fields: [customerId], references: [id])
+  lines          EstimateLine[]
+
+  deletedAt      DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([tenantId, estimateNumber])
+  @@index([tenantId, status])
+  @@index([tenantId, customerId])
+}
+
+model EstimateLine {
+  id          String   @id @default(cuid())
+  estimateId  String
+  productId   String?
+  description String
+  quantity    Decimal  @default(1)
+  unitPrice   Decimal  @default(0)
+  taxRateId   String?
+  lineTotal   Decimal  @default(0)
+
+  estimate    Estimate  @relation(fields: [estimateId], references: [id], onDelete: Cascade)
+  product     Product?  @relation(fields: [productId], references: [id])
+  taxRate     TaxRate?  @relation(fields: [taxRateId], references: [id])
+
+  @@index([estimateId])
+  @@index([productId])
+}
+
+// =====================================================================
+// TREASURY — Sales/Billing (Phase 27, hnerve-gap-map.md "Payments" row).
+// A physical cash box or bank account. Each treasury owns exactly one
+// LedgerAccount (unique FK, bootstrapped at create time — no manual COA
+// setup needed) so payments post real double-entry, not just a Payment
+// row. Money IN (customer Payments, debit) and OUT (SupplierPayments,
+// credit); balance = inflows − outflows. Transfers between treasuries
+// are a separate future build (Finance — cash row).
+// =====================================================================
+model Treasury {
+  id              String   @id @default(cuid())
+  tenantId        String
+  name            String
+  // CASH | BANK
+  type            String   @default("CASH")
+  currency        String   @default("JOD")
+  // Ledger account code this treasury posts to, e.g. "1000". Chosen at
+  // create time (not auto-generated) so it's stable and human-readable
+  // in reports.
+  accountCode     String
+  ledgerAccountId String   @unique
+  ledgerAccount   LedgerAccount @relation(fields: [ledgerAccountId], references: [id])
+
+  payments         Payment[]
+  supplierPayments SupplierPayment[] @relation("TreasuryOutflows")
+
+  active          Boolean  @default(true)
+  deletedAt       DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([tenantId, accountCode])
+  @@index([tenantId, active])
+}
+
+// =====================================================================
+// PAYMENT — a customer payment, optionally applied to one Invoice
+// (nullable invoiceId — an on-account payment with no invoice is valid,
+// mirrors Daftra's Client Payments). Posts a JournalEntry (Treasury
+// debit / AR credit) through the same immutable-once-posted convention
+// as Invoice. Deliberately NO delete/update action once created — Posted
+// JournalEntries are immutable (decision #2 on JournalEntry above); a
+// mistaken payment is corrected with a reversing entry, not an edit.
+// =====================================================================
+model Payment {
+  id            String   @id @default(cuid())
+  tenantId      String
+  paymentNumber String
+  customerId    String
+  invoiceId     String?
+  treasuryId    String
+  amount        Decimal
+  currency      String   @default("JOD")
+  // CASH | BANK_TRANSFER | CHEQUE | CARD | OTHER
+  method        String   @default("CASH")
+  paidAt        DateTime @default(now())
+  note          String?
+
+  journalEntryId String?  @unique
+  journalEntry   JournalEntry? @relation(fields: [journalEntryId], references: [id])
+
+  customerRef   Customer @relation(fields: [customerId], references: [id])
+  invoice       Invoice? @relation(fields: [invoiceId], references: [id])
+  treasury      Treasury @relation(fields: [treasuryId], references: [id])
+
+  createdAt     DateTime @default(now())
+
+  @@unique([tenantId, paymentNumber])
+  @@index([tenantId, customerId])
+  @@index([tenantId, invoiceId])
+  @@index([tenantId, treasuryId])
+}
+
+// =====================================================================
+// SUPPLIER PAYMENT — payables mirror of Payment: money OUT of a treasury
+// to a supplier, optionally applied to one PurchaseInvoice (nullable —
+// an on-account payment is valid). Posts a JournalEntry (AP debit /
+// Treasury credit). Same immutability convention as Payment: NO
+// update/delete action — corrections are reversing entries.
+// =====================================================================
+model SupplierPayment {
+  id                String   @id @default(cuid())
+  tenantId          String
+  paymentNumber     String
+  supplierId        String
+  purchaseInvoiceId String?
+  treasuryId        String
+  amount            Decimal
+  currency          String   @default("JOD")
+  // CASH | BANK_TRANSFER | CHEQUE | CARD | OTHER
+  method            String   @default("CASH")
+  paidAt            DateTime @default(now())
+  note              String?
+
+  journalEntryId String?  @unique
+  journalEntry   JournalEntry? @relation(fields: [journalEntryId], references: [id])
+
+  supplierRef     Supplier         @relation(fields: [supplierId], references: [id])
+  purchaseInvoice PurchaseInvoice? @relation(fields: [purchaseInvoiceId], references: [id])
+  treasury        Treasury         @relation("TreasuryOutflows", fields: [treasuryId], references: [id])
+
+  createdAt     DateTime @default(now())
+
+  @@unique([tenantId, paymentNumber])
+  @@index([tenantId, supplierId])
+  @@index([tenantId, purchaseInvoiceId])
+  @@index([tenantId, treasuryId])
+}
+
+// =====================================================================
+// FIXED ASSET — hnerve-gap-map.md "Fixed assets" row. Straight-line
+// depreciation only in v1 (Daftra offers 4 methods; the others are a
+// method-column away). Acquisition posts Fixed Assets (1500) debit /
+// Accounts Payable (2100) credit. Monthly depreciation runs post
+// Depreciation Expense (6100) debit / Accumulated Depreciation (1590,
+// contra-asset) credit via DepreciationEntry rows — one per asset per
+// month, unique-constrained so a run can never double-post.
+// =====================================================================
+model FixedAsset {
+  id              String   @id @default(cuid())
+  tenantId        String
+  assetNumber     String
+  name            String
+  category        String?
+  purchaseDate    DateTime @default(now())
+  purchaseCost    Decimal
+  salvageValue    Decimal  @default(0)
+  usefulLifeMonths Int
+  // STRAIGHT_LINE (only method in v1)
+  method          String   @default("STRAIGHT_LINE")
+  // ACTIVE | DISPOSED
+  status          String   @default("ACTIVE")
+  note            String?
+
+  // Acquisition journal entry (1500 debit / 2100 credit).
+  journalEntryId String?  @unique
+  journalEntry   JournalEntry? @relation(fields: [journalEntryId], references: [id])
+
+  depreciation   DepreciationEntry[]
+
+  deletedAt      DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([tenantId, assetNumber])
+  @@index([tenantId, status])
+}
+
+model DepreciationEntry {
+  id          String   @id @default(cuid())
+  tenantId    String
+  assetId     String
+  periodYear  Int
+  periodMonth Int // 1-12
+  amount      Decimal
+
+  journalEntryId String?  @unique
+  journalEntry   JournalEntry? @relation(fields: [journalEntryId], references: [id])
+
+  asset       FixedAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@unique([assetId, periodYear, periodMonth])
+  @@index([tenantId, periodYear, periodMonth])
+}
+
+// =====================================================================
+// TAX RATE — config prerequisite (Daftra: Tax Settings). Blocks real
+// invoicing until it exists.
+// =====================================================================
+model TaxRate {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String   // "16% GST", "0% Exempt"
+  rate      Decimal  // 0.16
+  active    Boolean  @default(true)
+
+  invoiceLines  InvoiceLine[]
+  estimateLines EstimateLine[]
+  purchaseInvoiceLines PurchaseInvoiceLine[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId, active])
+}
+
+// =====================================================================
+// NUMBERING SCHEME — config prerequisite (Daftra: Auto Number Settings).
+// Per-tenant, per-doc-type persisted sequence. generateNumber()
+// (lib/utils/utils.ts) is a one-shot generator with no persisted
+// counter/prefix — this is the gap that blocks configurable numbering.
+// =====================================================================
+model NumberingScheme {
+  id        String   @id @default(cuid())
+  tenantId  String
+  docType   String   // "INVOICE" | "ESTIMATE" | "PURCHASE_ORDER" | ...
+  prefix    String   @default("")
+  nextValue Int      @default(1)
+  padTo     Int      @default(6)
+
+  @@unique([tenantId, docType])
 }

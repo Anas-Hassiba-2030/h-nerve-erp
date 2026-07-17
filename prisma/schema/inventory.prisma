@@ -44,6 +44,9 @@ model Product {
   movements       InventoryMovement[]
   poLines         PurchaseOrderLine[]
   soLines         SalesOrderLine[]
+  invoiceLines    InvoiceLine[]
+  estimateLines   EstimateLine[]
+  purchaseInvoiceLines PurchaseInvoiceLine[]
   supplierRef     Supplier? @relation(fields: [supplierId], references: [id])
   warehouseRef    Warehouse @relation(fields: [warehouseId], references: [id])
 

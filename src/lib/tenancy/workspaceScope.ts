@@ -38,6 +38,17 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
   "LedgerAccount",
   "FinancialPeriod",
   "JournalEntry",
+  // Phase 27 — Invoice/Billing (docs/spec/ENTITY-ENGINE-PATTERN.md).
+  "Invoice",
+  "Estimate",
+  "Treasury",
+  "Payment",
+  "PurchaseInvoice",
+  "SupplierPayment",
+  "FixedAsset",
+  "DepreciationEntry",
+  "TaxRate",
+  "NumberingScheme",
   "TenantImportMapping",
   "BrainInsight",
   // Phase F4 — Booking + Crop now carry a denormalized tenantId

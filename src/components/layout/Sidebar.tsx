@@ -9,6 +9,7 @@ import {
   ListChecks, Trophy, Users, Settings, LogOut, Activity, ChevronLeft,
   ChevronRight, UserSquare2, ArrowLeftRight, Search, FileText, HelpCircle,
   GitBranch, Map, Pin, MessageSquare, Bell, Workflow, Heart, Network, Zap, Target, Globe2, Plug, ScrollText, Sparkles as SparklesIcon, PlayCircle, Cpu, Palette, ScanSearch, Trash2,
+  Landmark, CreditCard, Truck, ReceiptText, Scale, Banknote,
 } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
 import { canAccess } from "@/lib/auth/permissions";
@@ -169,6 +170,16 @@ export function Sidebar({
       label: ar ? "النمو والاستثمار" : "Growth & Capital",
       items: [
         { href: "/finance", label: messages["nav.finance"], icon: Wallet },
+        { href: "/invoices", label: ar ? "الفواتير" : "Invoices", icon: FileText },
+        { href: "/estimates", label: ar ? "عروض الأسعار" : "Estimates", icon: GitBranch },
+        { href: "/payments", label: ar ? "الدفعات" : "Payments", icon: CreditCard },
+        { href: "/treasuries", label: ar ? "الخزائن" : "Treasuries", icon: Landmark },
+        { href: "/purchase-invoices", label: ar ? "فواتير المشتريات" : "Purchase Invoices", icon: ReceiptText },
+        { href: "/purchase-payments", label: ar ? "دفعات الموردين" : "Supplier Payments", icon: Banknote },
+        { href: "/customers", label: ar ? "العملاء" : "Customers", icon: UserSquare2 },
+        { href: "/suppliers", label: ar ? "الموردون" : "Suppliers", icon: Truck },
+        { href: "/statements", label: ar ? "القوائم المالية" : "Statements", icon: Scale },
+        { href: "/assets", label: ar ? "الأصول الثابتة" : "Fixed Assets", icon: Building2 },
         { href: "/markets", label: messages["nav.markets"], icon: TrendingUp },
         { href: "/sustainability", label: messages["nav.sustainability"], icon: Leaf },
         { href: "/projects", label: messages["nav.projects"], icon: FlaskConical },

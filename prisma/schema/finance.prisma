@@ -88,6 +88,7 @@ model JournalEntry {
   supplierPayment SupplierPayment?
   fixedAsset  FixedAsset?
   depreciationEntry DepreciationEntry?
+  payrollRun  PayrollRun?
 
   postedAt    DateTime?
   createdAt   DateTime @default(now())
@@ -480,6 +481,7 @@ model Treasury {
 
   payments         Payment[]
   supplierPayments SupplierPayment[] @relation("TreasuryOutflows")
+  payrollRuns      PayrollRun[]
 
   active          Boolean  @default(true)
   deletedAt       DateTime?

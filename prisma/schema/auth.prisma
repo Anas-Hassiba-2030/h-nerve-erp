@@ -48,6 +48,9 @@ model User {
   councilShares  CouncilDiscussion[] @relation("CouncilShares")
   // Phase V3-NEW-5 — replies posted on Council threads.
   councilReplies CouncilReply[]      @relation("CouncilReplies")
+
+  // Phase 27 — optional link from a login account to its HR employee record.
+  employee       Employee?
 }
 
 // Phase P5 — interactive role-route permissions. Replaces the

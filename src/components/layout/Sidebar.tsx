@@ -9,7 +9,7 @@ import {
   ListChecks, Trophy, Users, Settings, LogOut, Activity, ChevronLeft,
   ChevronRight, UserSquare2, ArrowLeftRight, Search, FileText, HelpCircle,
   GitBranch, Map, Pin, MessageSquare, Bell, Workflow, Heart, Network, Zap, Target, Globe2, Plug, ScrollText, Sparkles as SparklesIcon, PlayCircle, Cpu, Palette, ScanSearch, Trash2,
-  Landmark, CreditCard, Truck, ReceiptText, Scale, Banknote,
+  Landmark, CreditCard, Truck, ReceiptText, Scale, Banknote, CalendarDays,
 } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
 import { canAccess } from "@/lib/auth/permissions";
@@ -192,6 +192,9 @@ export function Sidebar({
         { href: "/tasks", label: messages["nav.tasks"], icon: ListChecks },
         { href: "/achievements", label: messages["nav.achievements"], icon: Trophy },
         { href: "/employees", label: messages["nav.employees"], icon: UserSquare2 },
+        { href: "/hr/employees", label: ar ? "سجل الموظفين" : "Employee Records", icon: Users },
+        { href: "/hr/leave", label: ar ? "طلبات الإجازة" : "Leave Requests", icon: CalendarDays },
+        { href: "/hr/payroll", label: ar ? "مسير الرواتب" : "Payroll", icon: Wallet },
         { href: "/users", label: messages["nav.users"], icon: Users },
       ],
     },

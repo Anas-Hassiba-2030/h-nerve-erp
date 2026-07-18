@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaD1 } from "@prisma/adapter-d1";
-import { PrismaLibSQL } from "@prisma/adapter-libsql";
+import { createRequire } from "node:module";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 // D1Database without depending on @cloudflare/workers-types: exactly the
@@ -55,8 +55,20 @@ function d1AdapterClient(db: D1Database): PrismaClient {
 }
 
 function sqliteFileClient(url: string): PrismaClient {
-  // libsql over a local file — pure prebuilt N-API, no node-gyp toolchain
-  // needed on dev machines (better-sqlite3 requires VS build tools on Windows).
+  // libsql over a local file — prebuilt N-API, no node-gyp toolchain needed
+  // on dev machines (better-sqlite3 requires VS build tools on Windows).
+  //
+  // Loaded via createRequire, NOT a static import: libsql ships native .node
+  // binaries that can never be bundled for workerd, and the Workers build
+  // only ever takes the D1 branch above. createRequire is invisible to
+  // webpack's static analysis, so the dependency stays out of the bundle
+  // while resolving normally under Node (dev server, seeds, scripts).
+  const nodeRequire = createRequire(
+    typeof __filename !== "undefined" ? __filename : `${process.cwd()}/`,
+  );
+  const { PrismaLibSQL } = nodeRequire(
+    "@prisma/adapter-libsql",
+  ) as typeof import("@prisma/adapter-libsql");
   const adapter = new PrismaLibSQL({ url });
   return new PrismaClient({ adapter, log: logLevels() });
 }

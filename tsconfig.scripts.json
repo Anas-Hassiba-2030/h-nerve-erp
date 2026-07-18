@@ -1,0 +1,20 @@
+{
+  // tsx/Node runtime config for scripts/ (seeds, ops, verify).
+  //
+  // The base tsconfig aliases "@prisma/client" to the CLOUDFLARE-runtime
+  // generated client, which only loads on workerd — under Node it throws
+  // "The loaded wasm module was unexpectedly undefined". Scripts (and the
+  // lib/ code they import, e.g. @/lib/db/db) must resolve the Node-runtime
+  // twin instead. Run scripts with:
+  //   npx tsx --tsconfig tsconfig.scripts.json scripts/…
+  // (vitest does the same via its own resolve.alias — see vitest.config.ts)
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@prisma/client": ["./src/generated/prisma-node/client.ts"],
+      "@/prisma/*": ["./prisma/*"],
+      "@/scripts/*": ["./scripts/*"],
+      "@/*": ["./src/*"]
+    }
+  }
+}

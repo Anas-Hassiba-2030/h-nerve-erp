@@ -183,6 +183,7 @@ export function Sidebar({
         { href: "/assets", label: ar ? "الأصول الثابتة" : "Fixed Assets", icon: Building2 },
         { href: "/manufacturing", label: ar ? "التصنيع" : "Manufacturing", icon: Factory },
         { href: "/pos", label: ar ? "نقطة البيع" : "Point of Sale", icon: ShoppingCart },
+        { href: "/e-invoicing", label: ar ? "الفوترة الإلكترونية" : "E-Invoicing", icon: ReceiptText, hint: "JO" },
         { href: "/markets", label: messages["nav.markets"], icon: TrendingUp },
         { href: "/sustainability", label: messages["nav.sustainability"], icon: Leaf },
         { href: "/projects", label: messages["nav.projects"], icon: FlaskConical },

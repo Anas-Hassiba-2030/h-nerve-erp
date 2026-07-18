@@ -375,6 +375,7 @@ model Invoice {
   // Reverse of Estimate.convertedInvoiceId (unique FK) — set when this
   // invoice was created via /estimates convertToInvoice, null otherwise.
   fromEstimate  Estimate?
+  eInvoice      EInvoiceRecord?
 
   deletedAt     DateTime?
   createdAt     DateTime @default(now())

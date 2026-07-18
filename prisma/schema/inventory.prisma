@@ -47,6 +47,8 @@ model Product {
   invoiceLines    InvoiceLine[]
   estimateLines   EstimateLine[]
   purchaseInvoiceLines PurchaseInvoiceLine[]
+  bomOutputs      BillOfMaterials[] @relation("BomOutput")
+  bomComponentLines BomLine[]       @relation("BomComponent")
   supplierRef     Supplier? @relation(fields: [supplierId], references: [id])
   warehouseRef    Warehouse @relation(fields: [warehouseId], references: [id])
 
@@ -72,6 +74,7 @@ model InventoryMovement {
   productId         String
   // IMPORT | RECEIVED | SOLD | TRANSFER_OUT | TRANSFER_IN | ADJUSTMENT
   // | DAMAGED | RETURN_FROM_CUSTOMER | RETURN_TO_SUPPLIER
+  // | MFG_CONSUME | MFG_PRODUCE (manufacturing-order completion)
   type              String
   // Signed: positive = stock in, negative = stock out.
   delta             Int

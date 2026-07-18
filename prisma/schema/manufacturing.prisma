@@ -1,0 +1,86 @@
+// =====================================================================
+// MANUFACTURING (Phase 27, hnerve-gap-map.md "Manufacturing" row).
+// BillOfMaterials describes how one output Product is assembled from
+// component Products; ManufacturingOrder is one production run of a
+// BOM. Completing an order writes MFG_CONSUME / MFG_PRODUCE rows into
+// the existing InventoryMovement ledger (stock truth) and — when the
+// BOM carries labor/overhead cost — one JournalEntry into the existing
+// double-entry engine. String-union statuses per the CLAUDE.md SQLite
+// rule; tenantId is the same opaque label as Product/InventoryMovement.
+// =====================================================================
+
+model BillOfMaterials {
+  id           String    @id @default(cuid())
+  tenantId     String
+  bomNumber    String // BOM-000001 via NumberingScheme
+  name         String
+  // The output product this BOM assembles.
+  productId    String
+  // How many units of the output one run of the BOM yields.
+  outputQty    Int       @default(1)
+  // Extra per-run costs beyond materials. Money (12,2).
+  laborCost    Decimal   @default(0)
+  overheadCost Decimal   @default(0)
+  active       Boolean   @default(true)
+  note         String?
+
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  product      Product              @relation("BomOutput", fields: [productId], references: [id])
+  lines        BomLine[]
+  orders       ManufacturingOrder[]
+
+  @@unique([tenantId, bomNumber])
+  @@index([tenantId, deletedAt])
+  @@index([tenantId, productId])
+}
+
+model BomLine {
+  id                 String @id @default(cuid())
+  bomId              String
+  componentProductId String
+  // Component units consumed per ONE run of the BOM (not per output unit).
+  quantity           Int
+
+  bom                BillOfMaterials @relation(fields: [bomId], references: [id], onDelete: Cascade)
+  component          Product         @relation("BomComponent", fields: [componentProductId], references: [id])
+
+  @@index([bomId])
+  @@index([componentProductId])
+}
+
+model ManufacturingOrder {
+  id             String    @id @default(cuid())
+  tenantId       String
+  orderNumber    String // MO-000001 via NumberingScheme
+  bomId          String
+  // How many runs of the BOM this order executes (output = runs * outputQty).
+  runs           Int       @default(1)
+  // DRAFT | IN_PROGRESS | DONE | CANCELLED
+  status         String    @default("DRAFT")
+  // Cost rollup, frozen at completion. Money (12,2).
+  materialCost   Decimal?
+  laborCost      Decimal?
+  overheadCost   Decimal?
+  totalCost      Decimal?
+  // totalCost / output units — becomes the MFG_PRODUCE movement's unitCost.
+  unitCost       Decimal?
+  // The labor/overhead accrual entry, when one was posted.
+  journalEntryId String?   @unique
+  note           String?
+  startedAt      DateTime?
+  completedAt    DateTime?
+
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  bom            BillOfMaterials @relation(fields: [bomId], references: [id])
+  journalEntry   JournalEntry?   @relation(fields: [journalEntryId], references: [id])
+
+  @@unique([tenantId, orderNumber])
+  @@index([tenantId, status])
+  @@index([tenantId, deletedAt])
+}

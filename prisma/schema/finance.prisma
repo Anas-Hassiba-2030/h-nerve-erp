@@ -89,6 +89,7 @@ model JournalEntry {
   fixedAsset  FixedAsset?
   depreciationEntry DepreciationEntry?
   payrollRun  PayrollRun?
+  manufacturingOrder ManufacturingOrder?
 
   postedAt    DateTime?
   createdAt   DateTime @default(now())

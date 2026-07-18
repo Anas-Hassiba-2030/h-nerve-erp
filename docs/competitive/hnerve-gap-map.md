@@ -25,11 +25,11 @@ backlog. Legend: ✅ parity · 🟡 partial · 🔴 missing.
 | **Inventory — catalog** | Products & services, SKU, pricing | `Product` model (tenant-scoped, warehouse-linked) | ✅ | — |
 | **Inventory — stock** | Multi-warehouse, stocktaking (recorded vs actual), requisitions (in/out) | `Warehouse` + `InventoryMovement` (append-only ledger) exist; no stocktaking-count or requisition UI | 🟡 | Stocktaking session + requisition workflow on top of existing movement ledger |
 | **Inventory — traceability** | Serial number, lot & expiry tracking, avg-cost | none (Product has no serial/lot fields) | 🔴 | Serial/lot/expiry fields + moving-average cost |
-| **Manufacturing** | BOM, routing, mfg orders, stage/workstation, cost rollup | none (DairyBatch is closest) | 🔴 | BOM + manufacturing-order engine (seed from DairyBatch) |
+| **Manufacturing** | BOM, routing, mfg orders, stage/workstation, cost rollup | `BillOfMaterials`+`BomLine`+`ManufacturingOrder` (PR #301) — material/labor/overhead rollup, consume/produce into `InventoryMovement`, accrual journal | ✅ v1 / 🟠 | Core shipped. Routings/workstations/scrap/indirect-cost distribution = v2 (see [modules/manufacturing.md](modules/manufacturing.md)) |
 | **Inventory — pricing** | Price lists per segment | none | 🔴 | Price list entity |
 | **Purchases** | Purchase invoices, refunds, debit notes, suppliers, payments | `Supplier` + `PurchaseOrder`/`PurchaseOrderLine` exist; no purchase-invoice/payables doc | 🟡 | Purchase Invoice (mirror of Sales Invoice) + debit note + payables |
 | **Finance — cash** | Expenses, incomes, treasuries/banks, transfers, cheque cycle | `Transaction` ledger, group P&L | 🟡 | Split into expense/income + treasury + cheque cycle |
-| **HR — payroll** | Salary structures, pay runs, loans, attendance, ESS, contracts | roles/RBAC only | 🔴 | Payroll engine (posts to cost centers/journals) |
+| **HR — payroll** | Salary structures, pay runs, loans, attendance, ESS, contracts | `Employee`+`LeaveRequest`+`PayrollRun`+`Payslip` (PR #300) — pay runs post one JournalEntry (6200 Salary Expense / treasury) | ✅ v1 / 🟠 | Core shipped. Allowances/deductions inputs, loans, attendance, ESS = v2 |
 | **Accounting — double-entry** | COA, journal entries, cost centers | `LedgerAccount` + `JournalEntry` + `JournalLine` + `FinancialPeriod` (`finance.prisma`) — real double-entry, posted entries immutable | ✅ | Already built. Invoice/Payroll/Payables should **post into this**, not duplicate it |
 | **Accounting — assets** | Fixed assets + depreciation (straight-line, declining-balance, units-of-production) | none | 🔴 | Asset entity + multi-method depreciation schedule |
 | **Reports — financial** | Trial balance, P&L, balance sheet, ledgers | dashboards + Brain insights; ledger data exists but no statement views | 🟡 | Statement views reading off the existing `JournalLine` data |
@@ -45,27 +45,28 @@ backlog. Legend: ✅ parity · 🟡 partial · 🔴 missing.
 | **Apps / plugins** | Apps Manager marketplace | industry packs + integrations hub | ✅ | — |
 | **API** | API keys | Living Protocol + OpenAPI | ✅ | — |
 
-## Recommended Phase 27 build order (corrected — accounting engine already built)
+## Phase 27 build order — status (accounting engine was already built)
 
-Dependency-ordered — each unlocks the next:
+Dependency-ordered. Steps 1–9 **shipped**:
 
-1. **TaxRate + NumberingScheme** (config prerequisites — genuine gap, blocks real invoicing).
-2. **Invoice + InvoiceLine** — posts into the *existing* `JournalEntry`/`LedgerAccount`
-   engine (AR debit / Revenue credit). Uses the *existing* `Customer` model as
-   the bill-to (Daftra's "Client" ≈ H-Nerve's `Customer`, already tenant-scoped).
-   See [ENTITY-ENGINE-PATTERN.md](../spec/ENTITY-ENGINE-PATTERN.md) for the sketch.
-3. **Payments + Treasury**, applied against Invoice.
-4. **Estimate** (near-identical shape to Invoice, `convertToInvoice` action).
-5. **Purchase Invoice + payables** — mirror of Invoice against the *existing*
-   `Supplier`/`PurchaseOrder`, posts AP.
-6. **Financial statement views** (P&L, balance sheet, trial balance) — read off
-   the *existing* `JournalLine` data, no new engine.
-7. **Inventory**: stocktaking-count + requisition workflow on the *existing*
-   `InventoryMovement` ledger; serial/lot/expiry fields; price lists.
-8. **Fixed assets + multi-method depreciation** (genuinely greenfield).
-9. Optional / vertical-driven: **Manufacturing** (BOM/orders — seed from DairyBatch),
-   **Payroll** (posts to journals/cost centers), **POS**, **Client portal + loyalty**,
-   **regional e-invoicing** (ZATCA/JO if Hourani needs gov compliance).
+1. ✅ **TaxRate + NumberingScheme** (config prerequisites).
+2. ✅ **Invoice + InvoiceLine** — posts into the *existing* `JournalEntry`/`LedgerAccount`
+   engine (AR debit / Revenue credit) against the *existing* `Customer`.
+   See [ENTITY-ENGINE-PATTERN.md](../spec/ENTITY-ENGINE-PATTERN.md).
+3. ✅ **Payments + Treasury**, applied against Invoice.
+4. ✅ **Estimate** (`convertToInvoice`).
+5. ✅ **Purchase Invoice + payables** — mirror against `Supplier`/`PurchaseOrder`, posts AP.
+6. ✅ **Financial statement views** (P&L, balance sheet, trial balance) off `JournalLine`.
+7. 🟡 **Inventory** enrich: stocktaking-count + requisition + serial/lot/expiry + price lists (movement ledger exists; workflows still partial).
+8. ✅ **Fixed assets + multi-method depreciation**.
+9. ✅ **HR/Payroll** (PR #300) — pay runs post 6200 Salary Expense / treasury.
+10. ✅ **Manufacturing** (PR #301) — BOM + manufacturing-order engine; consume/produce into `InventoryMovement`, labor/overhead accrual journal.
+
+**Remaining frontiers** (unbuilt, tenant-driven):
+- 🟠 **Manufacturing v2** — production routings, workstations/stage costing, scrap items, indirect-cost distribution (see [modules/manufacturing.md](modules/manufacturing.md)).
+- 🔴 **POS** — in-store sales, cash sessions/shifts, cash drawer, receipts.
+- 🔴 **Client portal + loyalty** — branded self-service (invoices/statements/bookings), loyalty points, memberships.
+- 🔴 **Regional e-invoicing** — Jordan **JoFotara** (income-tax dept clearance) / KSA **ZATCA** (Fatoora: signed XML, UUID, hash chain, cryptographic stamp, Base64 TLV QR). Only if Hourani needs government compliance. *(Research pass gathered public-doc facts here but verification hit an account limit — treat details as unverified until re-run.)*
 
 > **Pitch note — do NOT copy their AI.** Daftra markets "AI Automation" as reactive
 > convenience (auto-fill, suggestions). H-Nerve's Brain (causal graph + council +

@@ -9,7 +9,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db/db";
 import { requireUser } from "@/lib/auth/session";
-import { getActiveTenantSlug } from "@/lib/tenancy/tenancy";
+import { activeTenantSlug } from "@/lib/tenancy/tenancy";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { flashToast } from "@/lib/utils/toast";
 import { lineInputSchema, computeLineTotals, postPurchaseInvoiceFromComputed } from "@/lib/finance/purchasing";
@@ -26,7 +26,7 @@ const purchaseInvoiceSchema = z.object({
 export async function createPurchaseInvoice(formData: FormData): Promise<void> {
   await requireUser();
   const ar = (await getLocale()) === "ar";
-  const tenantId = await getActiveTenantSlug();
+  const tenantId = await activeTenantSlug();
   if (!tenantId) {
     await flashToast({
       type: "info",

@@ -43,6 +43,23 @@ export async function getActiveTenantSlug(): Promise<string | null> {
   }
 }
 
+// The canonical single-tenant fallback. In single-tenant deployments (the
+// current one) the tenant cookie is often absent — a freshly-logged-in
+// operator has no `h_nerve_tenant` set, so `getActiveTenantSlug()` returns
+// null and every ERP write action that guarded on it dead-ended ("No active
+// tenant"). That reads as a broken button. This is the group's primary
+// tenant slug, used identically as the fallback across the codebase
+// (COMPANY_CODE_TO_TENANT_SLUG, seeds, council/share actions).
+export const DEFAULT_TENANT_SLUG = "hourani-hotels";
+
+// Write-path tenant resolver: the active tenant, or the primary tenant when
+// no cookie is set. ERP operator actions (invoices, POS, payroll, …) call
+// THIS instead of getActiveTenantSlug() so their create buttons work in
+// single-tenant mode without a tenant cookie.
+export async function activeTenantSlug(): Promise<string> {
+  return (await getActiveTenantSlug()) ?? DEFAULT_TENANT_SLUG;
+}
+
 export type TenantStatus = "PROVISIONING" | "ACTIVE" | "SUSPENDED" | "ARCHIVED";
 
 export type ProvisioningStepKey =

@@ -13,7 +13,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db/db";
 import { requireUser } from "@/lib/auth/session";
-import { getActiveTenantSlug } from "@/lib/tenancy/tenancy";
+import { activeTenantSlug } from "@/lib/tenancy/tenancy";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { flashToast } from "@/lib/utils/toast";
 import { postAssetAcquisition, runMonthlyDepreciation } from "@/lib/finance/assets";
@@ -39,7 +39,7 @@ const assetSchema = z.object({
 export async function createFixedAsset(formData: FormData): Promise<void> {
   await gate();
   const ar = (await getLocale()) === "ar";
-  const tenantId = await getActiveTenantSlug();
+  const tenantId = await activeTenantSlug();
   if (!tenantId) {
     await flashToast({
       type: "info",
@@ -98,7 +98,7 @@ export async function createFixedAsset(formData: FormData): Promise<void> {
 export async function runDepreciation(): Promise<void> {
   await gate();
   const ar = (await getLocale()) === "ar";
-  const tenantId = await getActiveTenantSlug();
+  const tenantId = await activeTenantSlug();
   if (!tenantId) {
     await flashToast({ type: "info", entity: "info", label: ar ? "لا يوجد مستأجر نشط" : "No active tenant" });
     return;

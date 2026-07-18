@@ -12,7 +12,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db/db";
 import { requireUser } from "@/lib/auth/session";
-import { getActiveTenantSlug } from "@/lib/tenancy/tenancy";
+import { activeTenantSlug } from "@/lib/tenancy/tenancy";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { flashToast } from "@/lib/utils/toast";
 import {
@@ -34,7 +34,7 @@ const estimateSchema = z.object({
 export async function createEstimate(formData: FormData): Promise<void> {
   await requireUser();
   const ar = (await getLocale()) === "ar";
-  const tenantId = await getActiveTenantSlug();
+  const tenantId = await activeTenantSlug();
   if (!tenantId) {
     await flashToast({
       type: "info",
@@ -151,7 +151,7 @@ export async function deleteEstimate(formData: FormData): Promise<void> {
 export async function convertToInvoice(formData: FormData): Promise<void> {
   await requireUser();
   const ar = (await getLocale()) === "ar";
-  const tenantId = await getActiveTenantSlug();
+  const tenantId = await activeTenantSlug();
   const id = String(formData.get("id") ?? "");
   if (!id || !tenantId) return;
 

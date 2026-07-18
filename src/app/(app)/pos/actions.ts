@@ -10,7 +10,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/db/db";
 import { requireUser } from "@/lib/auth/session";
-import { getActiveTenantSlug } from "@/lib/tenancy/tenancy";
+import { activeTenantSlug } from "@/lib/tenancy/tenancy";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { flashToast } from "@/lib/utils/toast";
 import { openCashSession, closeCashSession, completePosSale, voidPosSale } from "@/lib/pos/pos";
@@ -31,7 +31,7 @@ const openSchema = z.object({
 export async function openSession(formData: FormData): Promise<void> {
   const user = await gate();
   const ar = (await getLocale()) === "ar";
-  const tenantId = await getActiveTenantSlug();
+  const tenantId = await activeTenantSlug();
   if (!tenantId) {
     await flashToast({ type: "info", entity: "info", label: ar ? "لا يوجد مستأجر نشط" : "No active tenant" });
     return;
@@ -76,7 +76,7 @@ const closeSchema = z.object({
 export async function closeSession(formData: FormData): Promise<void> {
   const user = await gate();
   const ar = (await getLocale()) === "ar";
-  const tenantId = await getActiveTenantSlug();
+  const tenantId = await activeTenantSlug();
   if (!tenantId) return;
 
   const parsed = closeSchema.safeParse({
@@ -131,7 +131,7 @@ const saleSchema = z.object({
 export async function checkout(formData: FormData): Promise<void> {
   const user = await gate();
   const ar = (await getLocale()) === "ar";
-  const tenantId = await getActiveTenantSlug();
+  const tenantId = await activeTenantSlug();
   if (!tenantId) {
     await flashToast({ type: "info", entity: "info", label: ar ? "لا يوجد مستأجر نشط" : "No active tenant" });
     return;
@@ -194,7 +194,7 @@ export async function checkout(formData: FormData): Promise<void> {
 export async function voidSale(formData: FormData): Promise<void> {
   const user = await gate();
   const ar = (await getLocale()) === "ar";
-  const tenantId = await getActiveTenantSlug();
+  const tenantId = await activeTenantSlug();
   const id = String(formData.get("id") ?? "");
   const reason = String(formData.get("reason") ?? "").trim();
   if (!id || !tenantId || !reason) {

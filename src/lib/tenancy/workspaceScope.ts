@@ -51,6 +51,8 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
   "LeaveRequest",
   "PayrollRun",
   "Payslip",
+  "BillOfMaterials",
+  "ManufacturingOrder",
   "TaxRate",
   "NumberingScheme",
   "TenantImportMapping",

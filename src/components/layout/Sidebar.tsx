@@ -10,6 +10,7 @@ import {
   ChevronRight, UserSquare2, ArrowLeftRight, Search, FileText, HelpCircle,
   GitBranch, Map, Pin, MessageSquare, Bell, Workflow, Heart, Network, Zap, Target, Globe2, Plug, ScrollText, Sparkles as SparklesIcon, PlayCircle, Cpu, Palette, ScanSearch, Trash2,
   Landmark, CreditCard, Truck, ReceiptText, Scale, Banknote, CalendarDays,
+  Factory,
 } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
 import { canAccess } from "@/lib/auth/permissions";
@@ -180,6 +181,7 @@ export function Sidebar({
         { href: "/suppliers", label: ar ? "الموردون" : "Suppliers", icon: Truck },
         { href: "/statements", label: ar ? "القوائم المالية" : "Statements", icon: Scale },
         { href: "/assets", label: ar ? "الأصول الثابتة" : "Fixed Assets", icon: Building2 },
+        { href: "/manufacturing", label: ar ? "التصنيع" : "Manufacturing", icon: Factory },
         { href: "/markets", label: messages["nav.markets"], icon: TrendingUp },
         { href: "/sustainability", label: messages["nav.sustainability"], icon: Leaf },
         { href: "/projects", label: messages["nav.projects"], icon: FlaskConical },

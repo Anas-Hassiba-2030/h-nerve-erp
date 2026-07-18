@@ -31,6 +31,8 @@ export const MOVEMENT_TYPES = [
   "DAMAGED",
   "RETURN_FROM_CUSTOMER",
   "RETURN_TO_SUPPLIER",
+  "MFG_CONSUME",
+  "MFG_PRODUCE",
 ] as const;
 
 export type MovementType = (typeof MOVEMENT_TYPES)[number];

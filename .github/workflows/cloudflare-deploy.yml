@@ -1,0 +1,45 @@
+# Manual Cloudflare Workers deploy — runs on Linux (ubuntu-latest).
+#
+# WHY THIS EXISTS: OpenNext's build is "not fully compatible with Windows"
+# (its own build warning). On Windows the Prisma query-compiler WASM bundling
+# fails — Turbopack emits an absolute wasm import path wrangler can't resolve,
+# and the webpack path doesn't place the wasm where the Worker reads it. On
+# Linux OpenNext's wasm pipeline works, so this workflow is the supported way
+# to ship the Cloudflare Worker from this repo.
+#
+# ONE-TIME SETUP (repo → Settings → Secrets and variables → Actions):
+#   - CLOUDFLARE_API_TOKEN   — a Cloudflare API token with the "Edit
+#                              Cloudflare Workers" template permissions.
+#   - CLOUDFLARE_ACCOUNT_ID  — your Cloudflare account id.
+# The Worker's runtime secrets (NEON_DATABASE_URL, session passwords, …) are
+# already set on the Worker via `wrangler secret put` and persist across
+# deploys — this workflow does not touch them.
+#
+# Trigger it from the Actions tab ("Run workflow"). It does NOT run on push,
+# so it can never auto-deploy unattended.
+
+name: Cloudflare Deploy (manual)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      # postinstall runs `prisma generate` + the datamodel extractor.
+      - run: npm ci
+      - name: Build + deploy to Cloudflare Workers
+        run: npm run cf:deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # next build needs the Prisma client (postinstall) but not a live DB;
+          # dynamic (cookie-driven) pages aren't rendered at build time.
+          DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci
+          NEXT_TELEMETRY_DISABLED: "1"

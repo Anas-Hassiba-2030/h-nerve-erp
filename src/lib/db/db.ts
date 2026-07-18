@@ -1,8 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { Pool as PgPool } from "pg";
-import { Pool, neonConfig } from "@neondatabase/serverless";
+import { neonConfig } from "@neondatabase/serverless";
 import ws from "ws";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { getActiveWorkspaceId } from "@/lib/tenancy/workspace";
@@ -19,10 +18,11 @@ import { applyWorkspaceScope } from "@/lib/tenancy/workspaceScope";
 //                    cross-company views: the Empire dashboard, group P&L,
 //                    and the workspace switcher itself.
 //
-// We use $use middleware (not $extends) on purpose: it keeps the exported
-// type as `PrismaClient`, so none of the ~628 existing call sites change
-// type. $extends would alter the export type and risk a typecheck cascade
-// across the whole codebase right before the pitch.
+// Prisma 6.19 (Rust-free client, engineType="client"): the legacy `$use`
+// middleware no longer exists on the generated client — only `$extends`. The
+// scoping is therefore wired through a `$extends` query hook (below) instead
+// of `$use`. We cast the extended client back to `PrismaClient` so the export
+// type is unchanged and none of the ~628 existing call sites need edits.
 
 const globalForPrisma = globalThis as unknown as {
   prismaScoped: PrismaClient | undefined;
@@ -39,25 +39,24 @@ function logLevels(): ("query" | "info" | "warn" | "error")[] {
   return base;
 }
 
-// Phase 4 §2 (Cloudflare audit) — Neon serverless driver adapter, env-gated.
-// NEON_DATABASE_URL set → Prisma runs over Neon's WebSocket driver against the
-// pooled (-pooler) URL. Unset → the plain direct-TCP client below, so Railway
-// keeps its current path from the same codebase.
+// A driver adapter is MANDATORY on the Rust-free client — there is no built-in
+// connector anymore. Neon serverless (WebSocket) on the Cloudflare edge; plain
+// node-postgres everywhere else. Both wrap the same Postgres.
+//
+// Neon's WebSocket driver is HTTP/WS based and safe to reuse across Workers
+// requests. Node < 22 has no global WebSocket, so feed it `ws`; on Workers /
+// Node 22+ the native WebSocket global is used.
 function neonAdapterClient(connectionString: string): PrismaClient {
-  // Node < 22 has no global WebSocket; the Neon driver needs one for Pool.
-  // On Workers/Node 22+ the native WebSocket global is used instead of ws.
   if (typeof WebSocket === "undefined") neonConfig.webSocketConstructor = ws;
-  const adapter = new PrismaNeon(new Pool({ connectionString }));
+  const adapter = new PrismaNeon({ connectionString });
   return new PrismaClient({ adapter, log: logLevels() });
 }
 
-// PG_DATABASE_URL set → Prisma runs over node-postgres via the pg driver
-// adapter. This is the Cloudflare Workers path to a plain (non-Neon) Postgres
-// such as the Railway prod DB — workerd's nodejs_compat provides the TCP
-// socket layer pg needs. Unset everywhere else, so Railway/local keep their
-// existing paths from the same codebase.
+// node-postgres adapter: the path for Railway prod and local dev (plain
+// DATABASE_URL) and for a non-Neon Postgres reached over TCP from Workers
+// (PG_DATABASE_URL, workerd's nodejs_compat provides the socket layer).
 function pgAdapterClient(connectionString: string): PrismaClient {
-  const adapter = new PrismaPg(new PgPool({ connectionString, max: 5 }));
+  const adapter = new PrismaPg({ connectionString });
   return new PrismaClient({ adapter, log: logLevels() });
 }
 
@@ -79,65 +78,68 @@ function readEnv(key: string): string | undefined {
 }
 
 function baseClient(): PrismaClient {
-  // Neon FIRST on the adapter path: its serverless driver is HTTP/WebSocket
-  // based and safe to reuse across Workers requests. A raw pg Pool (below)
-  // reused across reused isolates causes "subsequent requests fail" on
-  // workerd (opennext.js.org/cloudflare/howtos/db). Both prefixed vars are
-  // only ever set on Cloudflare — Railway/local hit neither branch and fall
-  // through to the plain direct client, so this ordering is Railway-neutral.
+  // Neon FIRST on the edge: its serverless driver is WebSocket-based and safe
+  // to reuse across Workers isolates. Both prefixed vars are only ever set on
+  // Cloudflare. Railway/local set only DATABASE_URL and fall to the pg adapter.
   const neonUrl = readEnv("NEON_DATABASE_URL");
   if (neonUrl) return neonAdapterClient(neonUrl);
-  const pgUrl = readEnv("PG_DATABASE_URL");
+  const pgUrl = readEnv("PG_DATABASE_URL") ?? readEnv("DATABASE_URL");
   if (pgUrl) return pgAdapterClient(pgUrl);
-  // Direct connection; pool size = Prisma default (num_cpus × 2 + 1) unless
-  // DATABASE_URL carries ?connection_limit=. At ~15+ concurrent users the
-  // direct Postgres budget exhausts — the fix is the PgBouncer sidecar, an
-  // env-only switch documented in docs/DEPLOYMENT.md § Connection pooling.
-  return new PrismaClient({ log: logLevels() });
+  throw new Error(
+    "No database URL configured: set DATABASE_URL (Railway/local) or NEON_DATABASE_URL / PG_DATABASE_URL (Cloudflare).",
+  );
+}
+
+// PascalCase model name (as delivered by the $extends query hook) → the
+// camelCase delegate on the client (`User` → `user`, `DairyBatch` → `dairyBatch`).
+function delegateName(model: string): string {
+  return model.charAt(0).toLowerCase() + model.slice(1);
 }
 
 function makeScopedClient(): PrismaClient {
-  const client = baseClient();
-  client.$use(async (params, next) =>
-    applyWorkspaceScope(
-      params,
-      next,
-      await getActiveWorkspaceId(),
-      await getActiveTenantSlug(),
-    ),
-  );
-  return client;
+  const base = baseClient();
+  // Bridge the pure `applyWorkspaceScope` middleware (still $use-shaped:
+  // (params, next, workspaceId, tenantSlug)) onto the $extends query API.
+  //  - `next(p)` for the CURRENT operation → run it via `query(p.args)`.
+  //  - `next(p)` for a DIFFERENT action (the by-id write-guard probe, which
+  //    reads the target row with a synthetic findUnique) → run it on the RAW
+  //    unextended `base` client so it neither recurses through this hook nor
+  //    gets re-scoped — exactly what the old $use `next(probe)` did.
+  const scoped = base.$extends({
+    query: {
+      $allModels: {
+        async $allOperations({ model, operation, args, query }) {
+          const workspaceId = await getActiveWorkspaceId();
+          const tenantSlug = await getActiveTenantSlug();
+          const params = { model, action: operation, args };
+          const next = async (p: { action: string; args?: unknown }) => {
+            if (p.action === operation) return query(p.args ?? {});
+            const delegate = (base as unknown as Record<string, Record<string, (a: unknown) => Promise<unknown>>>)[
+              delegateName(model)
+            ];
+            return delegate[p.action](p.args);
+          };
+          return applyWorkspaceScope(params, next, workspaceId, tenantSlug);
+        },
+      },
+    },
+  });
+  return scoped as unknown as PrismaClient;
 }
 
-// Cloudflare Workers gotcha (1 of 2, fixed here): `baseClient()`/
-// `makeScopedClient()` read env (PG_DATABASE_URL etc.) to pick the driver
-// adapter. Building the real PrismaClient eagerly at module scope read
-// that env before it was ready and/or via a channel Workers doesn't
-// expose it on (see readEnv() below). A lazy Proxy defers construction
-// to the first property access, which always happens inside a request.
-// Railway/local Node aren't affected either way.
+// Cloudflare Workers gotcha (fixed): `baseClient()` reads env (NEON_DATABASE_URL
+// etc.) to build the driver adapter. Constructing the real PrismaClient eagerly
+// at module scope read that env before the Workers request context existed (see
+// readEnv()). A lazy Proxy defers construction to the first property access,
+// which always happens inside a request. Railway/local Node are unaffected.
 //
-// Cloudflare Workers gotcha (2 of 2, STILL OPEN — verified against
-// Prisma's own docs 2026-07-18, not fixable from this file): even with
-// an adapter passed and the env read correctly, Prisma 5.22's legacy
-// `prisma-client-js` generator (this repo's generator, see
-// prisma/schema/schema.prisma) still boots its WASM query engine
-// internally, and that engine's loader uses eval — which Workers blocks
-// (`EvalError: Code generation from strings disallowed for this
-// context`, thrown from loadLibrary→loadEngine→instantiateLibrary).
-// Prisma's official Cloudflare Workers guide
-// (prisma.io/docs/orm/prisma-client/deployment/edge/deploy-to-cloudflare)
-// uses `generator client { provider = "prisma-client" }` — the Prisma 6.x
-// ESM-native generator, which is fully adapter-only with no WASM engine.
-// Fixing this for real means upgrading to Prisma 6 and migrating the
-// generator (a real, invasive change — new import paths, regenerated
-// client, needs its own PR and testing on Railway too, not a one-file
-// patch). Until then this Worker deploy will 500 on any DB-touching
-// route; Railway prod is unaffected (plain Node, no eval restriction).
+// The former "eval" gotcha (library query engine's loader uses eval, which
+// workerd blocks) is resolved at the root: the Rust-free client (engineType=
+// "client") has no such engine. See prisma/schema/schema.prisma.
 function lazyClient(factory: () => PrismaClient, globalKey: "prismaRaw" | "prismaScoped"): PrismaClient {
   let instance: PrismaClient | undefined = globalForPrisma[globalKey];
   return new Proxy({} as PrismaClient, {
-    get(_target, prop, receiver) {
+    get(_target, prop) {
       if (!instance) {
         instance = factory();
         if (process.env.NODE_ENV !== "production") {

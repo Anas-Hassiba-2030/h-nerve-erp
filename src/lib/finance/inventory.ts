@@ -59,7 +59,8 @@ export type RecordMovementInput = {
   documentRef?: string | null;
   /** Costed inflows only (IMPORT/RECEIVED) — feeds weighted-avg COGS
    *  (Phase 8). Null/omitted = excluded from the costing pool. */
-  unitCost?: Prisma.Decimal.Value | null;
+  // Prisma 6 Rust-free client dropped the Prisma.Decimal.Value namespace type.
+  unitCost?: string | number | Prisma.Decimal | null;
   /** Phase 9: warehouse this movement happened at. Omitted/null →
    *  resolved from the product's warehouseId, so Phase 6/7/8 callsites
    *  (receivePO/fulfillSO/adjustStock) stay untouched. An explicit

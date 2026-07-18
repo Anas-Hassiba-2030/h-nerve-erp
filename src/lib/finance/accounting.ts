@@ -22,6 +22,10 @@ import { Prisma } from "@prisma/client";
 
 type Db = Prisma.TransactionClient;
 
+// Prisma 6's Rust-free client no longer exposes the Prisma.Decimal.Value
+// namespace type. This is the same accepted-input union (decimal.js Value).
+type DecimalInput = string | number | Prisma.Decimal;
+
 /** Standard Hourani CoA codes — single source of truth, imported by the
  *  seed script AND every wiring call so a code can never be transposed. */
 export const ACCT = {
@@ -35,7 +39,7 @@ export const ACCT = {
   INVENTORY_ADJUSTMENT: "5002",
 } as const;
 
-const D = (v: Prisma.Decimal.Value | null | undefined): Prisma.Decimal =>
+const D = (v: DecimalInput | null | undefined): Prisma.Decimal =>
   new Prisma.Decimal(v ?? 0);
 const ZERO = new Prisma.Decimal(0);
 // Defense-in-depth only; correctness comes from caller-side rounding.
@@ -43,7 +47,7 @@ const TOLERANCE = new Prisma.Decimal("0.001");
 
 /** Round a money amount to 2dp, banker's rounding. Callers use this for
  *  each contributing line BEFORE summing into a JE line. */
-export function money(v: Prisma.Decimal.Value): Prisma.Decimal {
+export function money(v: DecimalInput): Prisma.Decimal {
   return new Prisma.Decimal(v).toDecimalPlaces(2, Prisma.Decimal.ROUND_HALF_EVEN);
 }
 
@@ -79,8 +83,8 @@ export async function getLedgerAccount(db: Db, tenantId: string, code: string) {
 
 export type JournalLineInput = {
   accountCode: string;
-  debit?: Prisma.Decimal.Value | null;
-  credit?: Prisma.Decimal.Value | null;
+  debit?: DecimalInput | null;
+  credit?: DecimalInput | null;
   memo?: string | null;
 };
 

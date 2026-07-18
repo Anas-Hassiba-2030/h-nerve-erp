@@ -1,9 +1,10 @@
 import { PrismaClient } from "@prisma/client";
+import { makePrismaClient } from "@/scripts/_prisma";
 import bcrypt from "bcryptjs";
 import { DEFAULT_PROTOCOL_CLAUSES } from "../../src/lib/protocol/clauses";
 import { seedDemoDocuments } from "./seedDemoDocuments";
 
-const prisma = new PrismaClient();
+const prisma = makePrismaClient();
 
 const day = 24 * 60 * 60 * 1000;
 const today = new Date();

@@ -21,7 +21,9 @@
 
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
-import { seedOperator } from "@/scripts/seed/seed";
+// seed.ts is imported dynamically (below) so its module-scope Prisma client is
+// never constructed during Next's build-time page-data collection — matching
+// the sibling additive seeds, and keeping the seed bundle out of every other route.
 
 async function requireAdmin() {
   const user = await getCurrentUser();
@@ -45,6 +47,7 @@ export async function runGenesisSeed(formData: FormData): Promise<void> {
   // no idea whether the DB was left half-wiped. Catch → report via the page's
   // banner, matching the additive seeds (?fill=error / ?topup=error).
   try {
+    const { seedOperator } = await import("@/scripts/seed/seed");
     await seedOperator();
   } catch {
     redirect("/admin/genesis?error=seed");

@@ -1,6 +1,16 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["prismaSchemaFolder", "driverAdapters"]
+  // Rust-free / WASM-free client (Prisma 6.19). engineType="client" swaps the
+  // library query ENGINE (whose WASM loader uses eval — the exact thing
+  // Cloudflare workerd blocks: "Code generation from strings disallowed") for
+  // the pure query COMPILER. Requires a driver adapter in every environment and
+  // a mandatory custom `output`. moduleFormat=cjs keeps the client CommonJS so
+  // it stays a drop-in behind the tsconfig `@prisma/client` alias (no import
+  // sites move). See src/lib/db/db.ts for the adapter wiring.
+  provider     = "prisma-client"
+  engineType   = "client"
+  runtime      = "nodejs"
+  moduleFormat = "cjs"
+  output       = "../../src/generated/prisma"
 }
 
 datasource db {

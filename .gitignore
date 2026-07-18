@@ -73,3 +73,6 @@ graphify-out/
 # OpenNext / Cloudflare build output (Phase 4)
 .open-next/
 .wrangler/
+
+# Prisma 6 Rust-free client — generated artifact (postinstall regenerates it)
+/src/generated/

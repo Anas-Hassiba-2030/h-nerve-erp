@@ -7,7 +7,17 @@
 // db.introspect.test.ts. NO database IO here; it only reads metadata.
 // The pages do the querying (via prismaUnscoped, cross-tenant by intent).
 
-import { Prisma } from "@prisma/client";
+// Prisma 6's Rust-free client dropped the runtime `Prisma.dmmf`. We read the
+// trimmed runtime data model that `prisma generate` embeds in the client,
+// lifted to a static JSON by scripts/build/extract-datamodel.mjs (postinstall +
+// build). It carries name/kind/type per field but NOT isId/isRequired/isList,
+// so those two flags degrade: idField is inferred from a field literally named
+// "id" (this schema's universal PK), and isRequired defaults false. Full DMMF
+// fidelity would need a build-time @prisma/internals getDMMF pass (follow-up).
+import datamodel from "@/generated/prisma/datamodel.json";
+
+type DmField = { name: string; kind: string; type: string; relationName?: string };
+type DmModel = { fields: DmField[]; dbName: string | null };
 
 export type DbColumnKind = "scalar" | "enum";
 
@@ -43,20 +53,21 @@ function toProp(name: string): string {
   return name.length ? name[0].toLowerCase() + name.slice(1) : name;
 }
 
-function buildMeta(model: Prisma.DMMF.Model): DbModelMeta {
+function buildMeta(name: string, model: DmModel): DbModelMeta {
   const columns: DbColumn[] = [];
-  let idField: string | null = null;
+  // isId is absent in the trimmed model; this schema uses a field named "id"
+  // as the PK for every model, so infer it by name.
+  const idField: string | null = model.fields.some((f) => f.name === "id") ? "id" : null;
 
   for (const f of model.fields) {
-    if (f.isId) idField = f.name;
-    // Skip relations (kind "object") and list fields — not renderable as a cell.
-    if ((f.kind === "scalar" || f.kind === "enum") && !f.isList) {
+    // Skip relations (kind "object") — not renderable as a cell.
+    if (f.kind === "scalar" || f.kind === "enum") {
       columns.push({
         name: f.name,
         type: f.type,
         kind: f.kind === "enum" ? "enum" : "scalar",
-        isId: !!f.isId,
-        isRequired: !!f.isRequired,
+        isId: f.name === idField,
+        isRequired: f.name === idField, // required flag degraded; id is always required
       });
     }
   }
@@ -73,8 +84,8 @@ function buildMeta(model: Prisma.DMMF.Model): DbModelMeta {
     .map((c) => c.name);
 
   return {
-    name: model.name,
-    prop: toProp(model.name),
+    name,
+    prop: toProp(name),
     dbName: model.dbName ?? null,
     columns,
     searchable,
@@ -86,8 +97,9 @@ function buildMeta(model: Prisma.DMMF.Model): DbModelMeta {
 
 /** Every model in the schema, alphabetised by name. */
 export function listModels(): DbModelMeta[] {
-  return [...Prisma.dmmf.datamodel.models]
-    .map(buildMeta)
+  const models = (datamodel as { models: Record<string, DmModel> }).models;
+  return Object.entries(models)
+    .map(([name, def]) => buildMeta(name, def))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 

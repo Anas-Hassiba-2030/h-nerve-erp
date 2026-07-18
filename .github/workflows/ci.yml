@@ -34,7 +34,10 @@ jobs:
       - name: Unit tests
         run: npx vitest run
       - name: Build (catches deploy-target build breaks CI would otherwise miss)
-        run: npx next build
+        # --webpack to match the Cloudflare deploy builder (open-next.config.ts).
+        # next.config carries a webpack() hook for the Prisma wasm; the default
+        # Turbopack builder errors on a webpack config with no turbopack config.
+        run: npx next build --webpack
         env:
           # Throwaway — next build needs the Prisma client (postinstall), not a
           # live DB. Dynamic (cookie-driven) pages aren't rendered at build time.

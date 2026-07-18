@@ -1,0 +1,26 @@
+// =====================================================================
+// CLIENT PORTAL — customer self-service (Phase 27, hnerve-gap-map.md
+// "Client portal + loyalty" row, v1: portal auth + read-only invoice
+// view; loyalty deferred). A CustomerPortalAccount is a SEPARATE
+// identity from User — it authenticates via its own iron-session
+// cookie (lib/auth/portalSession.ts), never gains a User role, and can
+// only ever read its own Customer's Invoice/Payment rows. Provisioned
+// by staff (ADMIN/EXECUTIVE/MANAGER) from the customer edit page.
+// =====================================================================
+
+model CustomerPortalAccount {
+  id            String    @id @default(cuid())
+  tenantId      String
+  customerId    String    @unique
+  customer      Customer  @relation(fields: [customerId], references: [id])
+  email         String    @unique
+  passwordHash  String
+  active        Boolean   @default(true)
+  lastLoginAt   DateTime?
+
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([tenantId])
+}

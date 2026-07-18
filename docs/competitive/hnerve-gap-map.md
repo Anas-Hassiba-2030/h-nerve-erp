@@ -15,7 +15,7 @@ backlog. Legend: ✅ parity · 🟡 partial · 🔴 missing.
 |------|-------------------|---------------|--------|-----------------|
 | **Auth / RBAC** | Employees + roles + granular per-module perms | SessionUser roles, route RBAC, admin users | ✅ / 🟡 | Add per-module permission grants |
 | **CRM — accounts** | Client (individual/business) + contacts + statements | Companies/tenants; Lead/Opportunity draft (PR #280) | 🟡 | Add Client + Contact entities, statement of account |
-| **CRM — client portal** | Branded self-service portal, service bookings, appointments | none | 🔴 | Client portal + booking/appointment entities |
+| **CRM — client portal** | Branded self-service portal, service bookings, appointments | `CustomerPortalAccount` (PR #303) — separate portal auth, invoice list + balance + detail | ✅ v1 / 🔴 | Core (auth + invoices) shipped. Booking/appointment entities, loyalty = v2 |
 | **CRM — loyalty** | Loyalty points + memberships/subscriptions + SLA | none | 🔴 | Loyalty/points + membership plans |
 | **Sales — invoicing** | Invoice w/ line items, tax, discount, statuses | none (Transaction is a generic ledger row, not an invoice doc) | 🔴 | **Invoice + InvoiceLine, posts to existing JournalEntry engine** — see [ENTITY-ENGINE-PATTERN.md](../spec/ENTITY-ENGINE-PATTERN.md) |
 | **Sales — estimates** | Estimate → invoice conversion | none | 🔴 | Estimate entity + convert action |
@@ -62,11 +62,12 @@ Dependency-ordered. Steps 1–9 **shipped**:
 9. ✅ **HR/Payroll** (PR #300) — pay runs post 6200 Salary Expense / treasury.
 10. ✅ **Manufacturing** (PR #301) — BOM + manufacturing-order engine; consume/produce into `InventoryMovement`, labor/overhead accrual journal.
 11. ✅ **POS** (PR #302) — `CashSession`+`PosSale`+`PosSaleLine`; checkout posts SOLD into `InventoryMovement` + Treasury debit/Sales Revenue credit journal (no re-posted COGS, same rule as Manufacturing); session-close variance (counted cash vs expected); void reverses both the journal and the stock.
+12. ✅ **Client portal** (PR #303) — `CustomerPortalAccount`, a SEPARATE identity from `User` with its own iron-session cookie (`lib/auth/portalSession.ts`). Staff grant/reset/revoke access from the customer edit page; the portal itself (`/portal`) is strictly read-only — invoice list, outstanding balance, per-invoice detail + payment history — and every query is scoped to the logged-in customer's own `customerId` (cross-customer ids 404, never 403, to avoid leaking existence).
 
 **Remaining frontiers** (unbuilt, tenant-driven):
 - 🟠 **Manufacturing v2** — production routings, workstations/stage costing, scrap items, indirect-cost distribution (see [modules/manufacturing.md](modules/manufacturing.md)).
 - 🟠 **POS v2** — shifts/multi-cashier, receipt printing, barcode scan, price lists/promotions, offline mode.
-- 🔴 **Client portal + loyalty** — branded self-service (invoices/statements/bookings), loyalty points, memberships.
+- 🟠 **Client portal v2** — service bookings/appointments, loyalty points, membership tiers, online payment (currently view-only).
 - 🔴 **Regional e-invoicing** — Jordan **JoFotara** (income-tax dept clearance) / KSA **ZATCA** (Fatoora: signed XML, UUID, hash chain, cryptographic stamp, Base64 TLV QR). Only if Hourani needs government compliance. *(Research pass gathered public-doc facts here but verification hit an account limit — treat details as unverified until re-run.)*
 
 > **Pitch note — do NOT copy their AI.** Daftra markets "AI Automation" as reactive

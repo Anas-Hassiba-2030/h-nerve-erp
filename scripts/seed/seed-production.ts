@@ -22,11 +22,12 @@
 // payload sends (schema: Product/Warehouse/LedgerAccount.tenantId is an
 // opaque string, NOT a Tenant FK). Keep these aligned or imports orphan.
 
+import { makePrismaClient } from "../_prisma";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { ACCT } from "@/lib/finance/accounting";
 
-const prisma = new PrismaClient();
+const prisma = makePrismaClient();
 
 // Opaque tenant label used by imports + the accounting/warehouse ledger.
 // MUST equal the `tenantId` the n8n payload sends.

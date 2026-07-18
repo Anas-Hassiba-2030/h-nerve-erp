@@ -76,3 +76,7 @@ graphify-out/
 
 # Prisma 6 Rust-free client — generated artifact (postinstall regenerates it)
 /src/generated/
+
+# local D1 seed/import artifacts
+/prisma/d1-seed.db
+/prisma/d1-import*.sql

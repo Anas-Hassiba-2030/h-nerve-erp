@@ -14,6 +14,7 @@
 //
 //   npx tsx scripts/seed/ensure-supply-forecasts.ts
 
+import { makePrismaClient } from "../_prisma";
 import { PrismaClient } from "@prisma/client";
 
 function dayOffset(days: number, hour = 8): Date {
@@ -24,7 +25,7 @@ function dayOffset(days: number, hour = 8): Date {
 }
 
 async function main() {
-  const prisma = new PrismaClient();
+  const prisma = makePrismaClient();
   try {
     const existing = await prisma.supplyForecast.count();
     if (existing > 0) {

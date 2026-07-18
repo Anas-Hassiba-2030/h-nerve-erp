@@ -62,6 +62,20 @@ const nextConfig = {
   // (needed when the WASM engine had to be externalized) now mis-resolves the
   // aliased local client and yields a runtime ChunkLoadError on the Worker.
   serverExternalPackages: [".prisma/client"],
+  // libsql is the LOCAL-ONLY database driver (file: SQLite for dev/seeds);
+  // production uses the D1 binding. Its native .node binaries can never run
+  // on workerd, but Next's output file tracing follows the createRequire in
+  // db.ts/_prisma.ts and copies the whole package into the server bundle,
+  // where wrangler's bundler then dies on optional deps
+  // ("Could not resolve @libsql/isomorphic-ws"). Exclude it from tracing —
+  // the Worker never executes that code path.
+  outputFileTracingExcludes: {
+    "*": [
+      "node_modules/@prisma/adapter-libsql/**",
+      "node_modules/@libsql/**",
+      "node_modules/libsql/**",
+    ],
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: "5mb",

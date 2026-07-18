@@ -29,6 +29,7 @@
 //
 //   npx tsx scripts/ensure-admins.ts
 
+import { makePrismaClient } from "../_prisma";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { ownerEmails } from "@/lib/auth/owner";
@@ -69,7 +70,7 @@ async function ensure(
 }
 
 async function main() {
-  const prisma = new PrismaClient();
+  const prisma = makePrismaClient();
   const resetPasswordOnUpdate = process.env.ENSURE_ADMINS_RESET_PASSWORD !== "0";
   const ownerPassword = process.env.SEED_ADMIN_PASSWORD || DEMO_ADMIN_PASSWORD;
 

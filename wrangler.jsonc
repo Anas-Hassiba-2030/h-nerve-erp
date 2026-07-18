@@ -24,6 +24,15 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  "d1_databases": [
+    {
+      // Production database — Cloudflare D1 (SQLite). Reached via
+      // @prisma/adapter-d1 in src/lib/db/db.ts (binding name `DB`).
+      "binding": "DB",
+      "database_name": "h-nerve-erp-db",
+      "database_id": "3ecef340-ad2d-4587-9a41-1d8d7d4d38ae"
+    }
+  ],
   "services": [
     {
       // Self-reference service binding — the service name must match "name"

@@ -10,10 +10,11 @@
 // If you ever want to force a fresh reseed, use /admin/genesis →
 // "Re-seed from scratch" (that path is intentional and destructive).
 
+import { makePrismaClient } from "../_prisma";
 import { PrismaClient } from "@prisma/client";
 
 async function main() {
-  const prisma = new PrismaClient();
+  const prisma = makePrismaClient();
   try {
     const companies = await prisma.company.count();
     if (companies > 0) {

@@ -17,16 +17,16 @@
 // not threaded into the where-clause.
 
 import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaLibSQL } from "@prisma/adapter-libsql";
 import { applyWorkspaceScope } from "@/lib/tenancy/workspaceScope";
 
 // Prisma 6 Rust-free client: a driver adapter is mandatory, and scoping is now
 // a $extends query hook (the old $use middleware is gone). Mirrors the wiring
 // in src/lib/db/db.ts so this diagnostic exercises the real code path.
 function makeBase(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) throw new Error("DATABASE_URL not set");
-  return new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+  const url = process.env.DATABASE_URL;
+  if (!url?.startsWith("file:")) throw new Error("DATABASE_URL must be a file: SQLite URL");
+  return new PrismaClient({ adapter: new PrismaLibSQL({ url }) });
 }
 
 function delegateName(model: string): string {

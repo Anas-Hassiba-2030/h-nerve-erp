@@ -14,9 +14,10 @@
 // NULL is the machine marker the Incoming Purchase Intent panel filters
 // on.
 
+import { makePrismaClient } from "../_prisma";
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+const prisma = makePrismaClient();
 
 const BUYER_TENANT = "hourani-hotels";
 

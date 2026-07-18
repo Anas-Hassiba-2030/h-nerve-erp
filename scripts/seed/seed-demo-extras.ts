@@ -17,9 +17,10 @@
 //   - Extra Bookings to fill the 60-day occupancy chart for the
 //     Hourani Hotels workspace.
 
+import { makePrismaClient } from "../_prisma";
 import { PrismaClient, Prisma } from "@prisma/client";
 
-const prisma = new PrismaClient();
+const prisma = makePrismaClient();
 
 // Deterministic PRNG — same trick as prisma/seed.ts so the demo extras
 // are reproducible (trustworthy) instead of jittering on every reseed.

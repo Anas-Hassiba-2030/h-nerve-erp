@@ -14,9 +14,10 @@
 //   2. LedgerAccounts for "hourani-hotels" (from seed-production.ts)
 //   3. At least one Warehouse with code "AMM-A" (from seed-production.ts)
 
+import { makePrismaClient } from "../_prisma";
 import { PrismaClient, Prisma } from "@prisma/client";
 
-const prisma = new PrismaClient();
+const prisma = makePrismaClient();
 
 // Money helper
 const m = (v: number) => new Prisma.Decimal(v.toFixed(2));

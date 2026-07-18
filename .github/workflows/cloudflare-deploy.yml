@@ -34,12 +34,33 @@ jobs:
           cache: npm
       # postinstall runs `prisma generate` + the datamodel extractor.
       - run: npm ci
-      - name: Build + deploy to Cloudflare Workers
-        run: npm run cf:deploy
+      # Secrets are unreadable from `if:` directly — surface presence as a
+      # step output so the job can branch on it.
+      - name: Check for Cloudflare token
+        id: cf
+        run: echo "has=${{ secrets.CLOUDFLARE_API_TOKEN != '' }}" >> "$GITHUB_OUTPUT"
+      - name: Build the Worker bundle (OpenNext)
+        run: npm run cf:build
+        env:
+          # next build needs the Prisma client (postinstall) but not a live DB;
+          # dynamic (cookie-driven) pages aren't rendered at build time.
+          DATABASE_URL: file:./ci.db
+          NEXT_TELEMETRY_DISABLED: "1"
+      - name: Deploy to Cloudflare Workers
+        if: steps.cf.outputs.has == 'true'
+        run: npx opennextjs-cloudflare deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          # next build needs the Prisma client (postinstall) but not a live DB;
-          # dynamic (cookie-driven) pages aren't rendered at build time.
-          DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci
-          NEXT_TELEMETRY_DISABLED: "1"
+      # No token configured: publish the Linux-built bundle as an artifact so
+      # it can be deployed from any machine that has wrangler auth
+      # (`gh run download -n open-next-bundle -D .open-next && npx wrangler deploy`).
+      # This keeps the CF token out of GitHub entirely if the owner prefers.
+      - name: Upload bundle artifact (no token configured)
+        if: steps.cf.outputs.has != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-next-bundle
+          path: .open-next/
+          include-hidden-files: true
+          retention-days: 3

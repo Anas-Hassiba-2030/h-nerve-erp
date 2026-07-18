@@ -12,9 +12,10 @@
  *
  *   DATABASE_URL=... npx tsx prisma/seed-pitch.ts
  */
+import { makePrismaClient } from "../_prisma";
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+const prisma = makePrismaClient();
 
 const TENANTS = ["hourani-hotels", "maha-dairy", "loran-agri", "tank-incubator"];
 const at = (daysAgo: number, hour = 10) => {

@@ -34,15 +34,14 @@ generator clientNode {
 }
 
 datasource db {
-  // PRODUCTION: Railway injects DATABASE_URL automatically.
-  // POOLING (the 100-user unlock — see docs/DEPLOYMENT.md § Connection pooling):
-  // once the PgBouncer sidecar exists, point DATABASE_URL at the pooler with
-  // `?pgbouncer=true&connection_limit=10`, set DIRECT_DATABASE_URL to the raw
-  // Postgres URL, and uncomment directUrl below so migrations bypass the pooler.
-  // It stays commented until then — Prisma fails on a referenced-but-unset env
-  // var at migrate time, which would break the Railway preDeploy.
-  // LOCAL DEV: provider="sqlite", DATABASE_URL="file:./dev.db".
-  provider = "postgresql"
+  // PRODUCTION: Cloudflare D1 (SQLite), bound as `DB` in wrangler.jsonc and
+  // reached through @prisma/adapter-d1 (see src/lib/db/db.ts). The Railway
+  // Postgres era is over — both old Postgres endpoints are dead and the app
+  // is Cloudflare-only now. The schema was kept sqlite-portable by design
+  // (string unions instead of enums, JSON-as-String columns), so this is the
+  // provider it ships with. `url` is only used by local tooling
+  // (db push / seeds / Studio) against a file DB; the Worker ignores it.
+  // LOCAL DEV: DATABASE_URL="file:./dev.db" (unchanged).
+  provider = "sqlite"
   url      = env("DATABASE_URL")
-  // directUrl = env("DIRECT_DATABASE_URL")
 }

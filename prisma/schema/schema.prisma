@@ -8,7 +8,13 @@ generator client {
   // sites move). See src/lib/db/db.ts for the adapter wiring.
   provider     = "prisma-client"
   engineType   = "client"
-  runtime      = "nodejs"
+  // runtime="cloudflare" (alias workerd): the client imports the query-compiler
+  // WASM as a bundleable module instead of reading it from __dirname/fs at load
+  // (what runtime="nodejs" does — that throws a ChunkLoadError on workerd, since
+  // the module-scope getPrismaClientClass(__dirname) has no filesystem there).
+  // This branch targets Cloudflare only; a Railway build would regenerate with
+  // runtime="nodejs" (see docs/… follow-up before this lands on the trunk).
+  runtime      = "cloudflare"
   moduleFormat = "cjs"
   output       = "../../src/generated/prisma"
 }

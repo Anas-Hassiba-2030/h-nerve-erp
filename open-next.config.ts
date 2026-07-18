@@ -12,6 +12,12 @@ const config = defineCloudflareConfig();
 // db push + next build) — `db push` needs a live DB and must never run inside
 // a Cloudflare build. Build the Next app directly; `prisma generate` already
 // ran via postinstall.
-config.buildCommand = "npx next build";
+// Force the webpack builder (Next 16 defaults `next build` to Turbopack).
+// Turbopack emits the Prisma query-compiler WASM as a dynamic import() with an
+// ABSOLUTE path, which wrangler's module-collector then double-prefixes into a
+// nonexistent path (ENOENT on `.open-next/server-functions/default/<abs>/…wasm`)
+// and the deploy bundling fails. Webpack emits a resolvable relative wasm import
+// that wrangler bundles cleanly — and webpack is OpenNext's tested build output.
+config.buildCommand = "npx next build --webpack";
 
 export default config;

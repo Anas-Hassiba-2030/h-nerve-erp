@@ -79,10 +79,16 @@ function readEnv(key: string): string | undefined {
 }
 
 function baseClient(): PrismaClient {
-  const pgUrl = readEnv("PG_DATABASE_URL");
-  if (pgUrl) return pgAdapterClient(pgUrl);
+  // Neon FIRST on the adapter path: its serverless driver is HTTP/WebSocket
+  // based and safe to reuse across Workers requests. A raw pg Pool (below)
+  // reused across reused isolates causes "subsequent requests fail" on
+  // workerd (opennext.js.org/cloudflare/howtos/db). Both prefixed vars are
+  // only ever set on Cloudflare — Railway/local hit neither branch and fall
+  // through to the plain direct client, so this ordering is Railway-neutral.
   const neonUrl = readEnv("NEON_DATABASE_URL");
   if (neonUrl) return neonAdapterClient(neonUrl);
+  const pgUrl = readEnv("PG_DATABASE_URL");
+  if (pgUrl) return pgAdapterClient(pgUrl);
   // Direct connection; pool size = Prisma default (num_cpus × 2 + 1) unless
   // DATABASE_URL carries ?connection_limit=. At ~15+ concurrent users the
   // direct Postgres budget exhausts — the fix is the PgBouncer sidecar, an

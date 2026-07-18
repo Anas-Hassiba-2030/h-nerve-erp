@@ -9,6 +9,7 @@
 
 import type { prisma as prismaType } from "@/lib/db/db";
 import { ensureLedgerAccount, ensureOpenPeriod } from "@/lib/finance/invoicing";
+import { createPostedJournalEntry } from "@/lib/finance/accounting";
 import { recordMovement, recalcProductQuantity } from "@/lib/finance/inventory";
 
 type Tx = typeof prismaType;
@@ -139,20 +140,16 @@ export async function completeManufacturingOrder(
       ensureLedgerAccount(tx, tenantId, "2150", "Accrued Manufacturing Costs", "LIABILITY"),
       ensureOpenPeriod(tx, tenantId),
     ]);
-    const entry = await tx.journalEntry.create({
-      data: {
-        tenantId,
-        periodId: period.id,
-        description: label,
-        reference: order.orderNumber,
-        status: "POSTED",
-        postedAt: new Date(),
-        lines: {
-          create: [
-            { accountId: expenseAccount.id, debit: accrual, credit: 0, memo: label },
-            { accountId: accruedAccount.id, debit: 0, credit: accrual, memo: label },
-          ],
-        },
+    const entry = await createPostedJournalEntry(tx, {
+      tenantId,
+      periodId: period.id,
+      description: label,
+      reference: order.orderNumber,
+      lines: {
+        create: [
+          { accountId: expenseAccount.id, debit: accrual, credit: 0, memo: label },
+          { accountId: accruedAccount.id, debit: 0, credit: accrual, memo: label },
+        ],
       },
     });
     journalEntryId = entry.id;

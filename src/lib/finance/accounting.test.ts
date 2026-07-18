@@ -10,7 +10,7 @@
 
 import { describe, it, expect } from "vitest";
 import { Prisma } from "@prisma/client";
-import { ACCT, money } from "@/lib/finance/accounting";
+import { ACCT, money, createPostedJournalEntry } from "@/lib/finance/accounting";
 
 // ─────────────────────────────────────────────────────────────────────
 // ACCT — standard Hourani Chart of Accounts codes
@@ -121,5 +121,72 @@ describe("money()", () => {
     const totalDebit = debit1.plus(debit2);
     const totalCredit = credit;
     expect(totalDebit.toString()).toBe(totalCredit.toString());
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────
+// createPostedJournalEntry — the D1 atomicity pattern (draft-first,
+// flip-last). D1 has no interactive transactions, so this contract is
+// what keeps a mid-write crash from ever leaving a partial POSTED entry.
+// Tested against a hand-rolled fake TransactionClient (pure, no DB).
+// ─────────────────────────────────────────────────────────────────────
+
+describe("createPostedJournalEntry (D1 atomicity pattern)", () => {
+  const minimalData = {
+    tenantId: "t1",
+    periodId: "p1",
+    description: "test entry",
+    lines: { create: [] },
+  } as Parameters<typeof createPostedJournalEntry>[1];
+
+  it("creates as DRAFT (postedAt null) then flips to POSTED with one atomic update", async () => {
+    const calls: string[] = [];
+    let createdData: Record<string, unknown> = {};
+    let updateArgs: { where?: unknown; data?: Record<string, unknown> } = {};
+    const fakeDb = {
+      journalEntry: {
+        create: async (args: { data: Record<string, unknown> }) => {
+          calls.push("create");
+          createdData = args.data;
+          return { id: "je1" };
+        },
+        update: async (args: { where: unknown; data: Record<string, unknown> }) => {
+          calls.push("update");
+          updateArgs = args;
+          return { id: "je1" };
+        },
+      },
+    } as unknown as Prisma.TransactionClient;
+
+    const res = await createPostedJournalEntry(fakeDb, minimalData);
+
+    expect(res).toEqual({ id: "je1" });
+    expect(calls).toEqual(["create", "update"]);
+    // The INSERT must never carry POSTED — readers filter status="POSTED",
+    // so an interrupted write stays invisible.
+    expect(createdData.status).toBe("DRAFT");
+    expect(createdData.postedAt).toBeNull();
+    // The flip is a single-row UPDATE — atomic on D1.
+    expect(updateArgs.where).toEqual({ id: "je1" });
+    expect(updateArgs.data?.status).toBe("POSTED");
+    expect(updateArgs.data?.postedAt).toBeInstanceOf(Date);
+  });
+
+  it("never flips to POSTED when the create throws (no partial POSTED entry)", async () => {
+    let updated = false;
+    const fakeDb = {
+      journalEntry: {
+        create: async () => {
+          throw new Error("boom");
+        },
+        update: async () => {
+          updated = true;
+          return { id: "je1" };
+        },
+      },
+    } as unknown as Prisma.TransactionClient;
+
+    await expect(createPostedJournalEntry(fakeDb, minimalData)).rejects.toThrow("boom");
+    expect(updated).toBe(false);
   });
 });

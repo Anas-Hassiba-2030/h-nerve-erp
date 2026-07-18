@@ -23,7 +23,7 @@ const { prisma, runAgent, runModerator, llmEnabled, ROSTER } = vi.hoisted(() => 
     supplyForecast: { findMany: vi.fn() },
     transaction: { findMany: vi.fn(), groupBy: vi.fn() },
     councilSession: { create: vi.fn(), update: vi.fn(), findUnique: vi.fn() },
-    councilVoice: { create: vi.fn() },
+    councilVoice: { create: vi.fn(), createMany: vi.fn() },
     $transaction: vi.fn(),
   },
   runAgent: vi.fn(),
@@ -79,6 +79,9 @@ function wireHappy() {
   });
   prisma.councilSession.update.mockResolvedValue({});
   prisma.councilVoice.create.mockImplementation((arg: unknown) => arg);
+  // D1-aware persistence: voices land in ONE createMany (single multi-row
+  // INSERT — atomic on D1), then the session flips DONE in a separate update.
+  prisma.councilVoice.createMany.mockResolvedValue({ count: 0 });
   // $transaction takes an array of (already-issued) ops; just resolve it.
   prisma.$transaction.mockImplementation((ops: unknown[]) => Promise.resolve(ops));
   runAgent.mockImplementation((agent: { id: string }) =>
@@ -140,15 +143,12 @@ describe("LiveCouncil.convene — orchestration", () => {
     wireHappy();
     await council().convene("Expand?", []);
 
-    // One councilVoice.create per specialist + 1 for the moderator.
-    expect(prisma.councilVoice.create).toHaveBeenCalledTimes(ROSTER.length + 1);
-    const persistedIds = prisma.councilVoice.create.mock.calls.map(
-      (c) => c[0].data.agentId,
-    );
-    expect(persistedIds).toContain("moderator");
-
-    // The session is closed out as DONE with the synthesis fields.
-    expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+    // ONE createMany carrying every specialist + the moderator (single
+    // multi-row INSERT — atomic on D1, 1 network round trip instead of 8).
+    expect(prisma.councilVoice.createMany).toHaveBeenCalledTimes(1);
+    const rows = prisma.councilVoice.createMany.mock.calls[0][0].data;
+    expect(rows).toHaveLength(ROSTER.length + 1);
+    expect(rows.map((r: any) => r.agentId)).toContain("moderator");
     const doneUpdate = prisma.councilSession.update.mock.calls.find(
       (c) => c[0].data.status === "DONE",
     );
@@ -177,7 +177,7 @@ describe("LiveCouncil.convene — orchestration", () => {
     llmEnabled.value = true;
     await council().convene("Expand?", []);
     expect(prisma.councilSession.create.mock.calls[0][0].data.usedLiveLlm).toBe(true);
-    const voiceData = prisma.councilVoice.create.mock.calls[0][0].data;
+    const voiceData = prisma.councilVoice.createMany.mock.calls[0][0].data[0];
     expect(voiceData.isStub).toBe(false);
     expect(voiceData.llmModel).toBe("claude-sonnet-4-6");
   });

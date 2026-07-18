@@ -9,6 +9,7 @@
 
 import type { prisma as prismaType } from "@/lib/db/db";
 import { ensureLedgerAccount, ensureOpenPeriod, nextDocNumber } from "@/lib/finance/invoicing";
+import { createPostedJournalEntry } from "@/lib/finance/accounting";
 import { recordMovement, recalcProductQuantity } from "@/lib/finance/inventory";
 
 type Tx = typeof prismaType;
@@ -147,20 +148,16 @@ export async function completePosSale(
     ensureOpenPeriod(tx, tenantId),
   ]);
 
-  const journalEntry = await tx.journalEntry.create({
-    data: {
-      tenantId,
-      periodId: period.id,
-      description: label,
-      reference: saleNumber,
-      status: "POSTED",
-      postedAt: new Date(),
-      lines: {
-        create: [
-          { accountId: session.treasury.ledgerAccountId, debit: total, credit: 0, memo: label },
-          { accountId: revenueAccount.id, debit: 0, credit: total, memo: label },
-        ],
-      },
+  const journalEntry = await createPostedJournalEntry(tx, {
+    tenantId,
+    periodId: period.id,
+    description: label,
+    reference: saleNumber,
+    lines: {
+      create: [
+        { accountId: session.treasury.ledgerAccountId, debit: total, credit: 0, memo: label },
+        { accountId: revenueAccount.id, debit: 0, credit: total, memo: label },
+      ],
     },
   });
 
@@ -233,22 +230,18 @@ export async function voidPosSale(
       include: { lines: true },
     });
     const period = await ensureOpenPeriod(tx, tenantId);
-    await tx.journalEntry.create({
-      data: {
-        tenantId,
-        periodId: period.id,
-        description: label,
-        reference: sale.saleNumber,
-        status: "POSTED",
-        postedAt: new Date(),
-        lines: {
-          create: original.lines.map((l) => ({
-            accountId: l.accountId,
-            debit: l.credit,
-            credit: l.debit,
-            memo: label,
-          })),
-        },
+    await createPostedJournalEntry(tx, {
+      tenantId,
+      periodId: period.id,
+      description: label,
+      reference: sale.saleNumber,
+      lines: {
+        create: original.lines.map((l) => ({
+          accountId: l.accountId,
+          debit: l.credit,
+          credit: l.debit,
+          memo: label,
+        })),
       },
     });
   }

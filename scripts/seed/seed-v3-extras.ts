@@ -5,8 +5,9 @@
 //   - One example CouncilDiscussion per tenant so /brain/council has
 //     content above the system-generated CouncilSession list
 
+import { makePrismaClient } from "../_prisma";
 import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+const prisma = makePrismaClient();
 
 function did(...parts: (string | number)[]) {
   return `demo-v3-${parts.join("-")}`;

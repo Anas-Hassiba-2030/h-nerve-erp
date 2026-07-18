@@ -22,6 +22,7 @@
 //
 //   npx tsx scripts/seed/ensure-brain-seed.ts
 
+import { makePrismaClient } from "../_prisma";
 import { PrismaClient } from "@prisma/client";
 import { seedBrainGraph } from "@/lib/brain/seedGraph";
 import { seedFederation } from "@/lib/brain/seedFederation";
@@ -30,7 +31,7 @@ import { seedMemoryLake } from "@/lib/brain/seedMemories";
 import { learnPatterns } from "@/lib/brain/feedback.live";
 
 async function main() {
-  const prisma = new PrismaClient();
+  const prisma = makePrismaClient();
   try {
     const nodes = await prisma.brainNode.count();
     if (nodes === 0) {

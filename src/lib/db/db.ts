@@ -1,9 +1,11 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { neonConfig } from "@neondatabase/serverless";
-import ws from "ws";
+import { PrismaD1 } from "@prisma/adapter-d1";
+import { PrismaLibSQL } from "@prisma/adapter-libsql";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+
+// D1Database without depending on @cloudflare/workers-types: exactly the
+// type the adapter's constructor accepts.
+type D1Database = ConstructorParameters<typeof PrismaD1>[0];
 import { getActiveWorkspaceId } from "@/lib/tenancy/workspace";
 import { getActiveTenantSlug } from "@/lib/tenancy/tenancy";
 import { applyWorkspaceScope } from "@/lib/tenancy/workspaceScope";
@@ -40,23 +42,22 @@ function logLevels(): ("query" | "info" | "warn" | "error")[] {
 }
 
 // A driver adapter is MANDATORY on the Rust-free client — there is no built-in
-// connector anymore. Neon serverless (WebSocket) on the Cloudflare edge; plain
-// node-postgres everywhere else. Both wrap the same Postgres.
+// connector anymore. Cloudflare D1 in production (the `DB` binding in
+// wrangler.jsonc); better-sqlite3 against a `file:` URL for local dev, seeds,
+// and ops scripts. Same SQLite dialect either way.
 //
-// Neon's WebSocket driver is HTTP/WS based and safe to reuse across Workers
-// requests. Node < 22 has no global WebSocket, so feed it `ws`; on Workers /
-// Node 22+ the native WebSocket global is used.
-function neonAdapterClient(connectionString: string): PrismaClient {
-  if (typeof WebSocket === "undefined") neonConfig.webSocketConstructor = ws;
-  const adapter = new PrismaNeon({ connectionString });
+// NOTE: D1 has no interactive transactions — `$transaction(callback)` runs the
+// statements without atomicity (a documented Prisma/D1 limitation). Acceptable
+// at pilot scale; revisit before multi-writer accounting loads.
+function d1AdapterClient(db: D1Database): PrismaClient {
+  const adapter = new PrismaD1(db);
   return new PrismaClient({ adapter, log: logLevels() });
 }
 
-// node-postgres adapter: the path for Railway prod and local dev (plain
-// DATABASE_URL) and for a non-Neon Postgres reached over TCP from Workers
-// (PG_DATABASE_URL, workerd's nodejs_compat provides the socket layer).
-function pgAdapterClient(connectionString: string): PrismaClient {
-  const adapter = new PrismaPg({ connectionString });
+function sqliteFileClient(url: string): PrismaClient {
+  // libsql over a local file — pure prebuilt N-API, no node-gyp toolchain
+  // needed on dev machines (better-sqlite3 requires VS build tools on Windows).
+  const adapter = new PrismaLibSQL({ url });
   return new PrismaClient({ adapter, log: logLevels() });
 }
 
@@ -77,16 +78,23 @@ function readEnv(key: string): string | undefined {
   return process.env[key];
 }
 
+// The D1 binding when running inside a Workers request; undefined elsewhere.
+function readD1Binding(): D1Database | undefined {
+  try {
+    const { env } = getCloudflareContext();
+    return (env as unknown as { DB?: D1Database }).DB;
+  } catch {
+    return undefined; // not a Workers request (local Node, seeds, tests)
+  }
+}
+
 function baseClient(): PrismaClient {
-  // Neon FIRST on the edge: its serverless driver is WebSocket-based and safe
-  // to reuse across Workers isolates. Both prefixed vars are only ever set on
-  // Cloudflare. Railway/local set only DATABASE_URL and fall to the pg adapter.
-  const neonUrl = readEnv("NEON_DATABASE_URL");
-  if (neonUrl) return neonAdapterClient(neonUrl);
-  const pgUrl = readEnv("PG_DATABASE_URL") ?? readEnv("DATABASE_URL");
-  if (pgUrl) return pgAdapterClient(pgUrl);
+  const d1 = readD1Binding();
+  if (d1) return d1AdapterClient(d1);
+  const url = readEnv("DATABASE_URL");
+  if (url?.startsWith("file:")) return sqliteFileClient(url);
   throw new Error(
-    "No database URL configured: set DATABASE_URL (Railway/local) or NEON_DATABASE_URL / PG_DATABASE_URL (Cloudflare).",
+    "No database configured: expected the D1 `DB` binding (Cloudflare) or a file: DATABASE_URL (local dev/scripts).",
   );
 }
 
@@ -97,21 +105,31 @@ function baseClient(): PrismaClient {
 export type DbProbeResult = Record<string, "ok" | "fail" | "not_configured">;
 
 export async function probeDatabases(): Promise<DbProbeResult> {
-  const sources: Array<[name: string, mk: (url: string) => PrismaClient]> = [
-    ["NEON_DATABASE_URL", neonAdapterClient],
-    ["PG_DATABASE_URL", pgAdapterClient],
-    ["DATABASE_URL", pgAdapterClient],
+  const sources: Array<[name: string, mk: () => PrismaClient | undefined]> = [
+    [
+      "D1",
+      () => {
+        const d1 = readD1Binding();
+        return d1 ? d1AdapterClient(d1) : undefined;
+      },
+    ],
+    [
+      "DATABASE_URL",
+      () => {
+        const url = readEnv("DATABASE_URL");
+        return url?.startsWith("file:") ? sqliteFileClient(url) : undefined;
+      },
+    ],
   ];
   const out: DbProbeResult = {};
   for (const [name, mk] of sources) {
-    const url = readEnv(name);
-    if (!url) {
-      out[name] = "not_configured";
-      continue;
-    }
     let client: PrismaClient | undefined;
     try {
-      client = mk(url);
+      client = mk();
+      if (!client) {
+        out[name] = "not_configured";
+        continue;
+      }
       await client.$queryRaw`SELECT 1`;
       out[name] = "ok";
     } catch (err) {

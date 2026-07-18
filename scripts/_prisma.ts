@@ -11,14 +11,14 @@
 // next/headers, no getCloudflareContext) so it is safe to import from a plain
 // node/tsx process — unlike src/lib/db/db.ts, which is request-scoped.
 import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaLibSQL } from "@prisma/adapter-libsql";
 
 export function makePrismaClient(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
+  const url = process.env.DATABASE_URL;
+  if (!url?.startsWith("file:")) {
     throw new Error(
-      "DATABASE_URL is not set — required to build the Prisma pg driver adapter.",
+      "DATABASE_URL must be a file: SQLite URL (e.g. file:./dev.db) — the app is D1/SQLite now.",
     );
   }
-  return new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+  return new PrismaClient({ adapter: new PrismaLibSQL({ url }) });
 }

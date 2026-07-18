@@ -44,7 +44,7 @@ jobs:
         env:
           # next build needs the Prisma client (postinstall) but not a live DB;
           # dynamic (cookie-driven) pages aren't rendered at build time.
-          DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci
+          DATABASE_URL: file:./ci.db
           NEXT_TELEMETRY_DISABLED: "1"
       - name: Deploy to Cloudflare Workers
         if: steps.cf.outputs.has == 'true'

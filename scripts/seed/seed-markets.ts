@@ -4,8 +4,9 @@
 // 7-point sparkline series so the /markets cards render with
 // meaningful charts instead of flat lines.
 
+import { makePrismaClient } from "../_prisma";
 import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+const prisma = makePrismaClient();
 
 function walk(seed: number, len = 7, vol = 0.018): number[] {
   // Deterministic random walk per ticker so the sparkline is stable

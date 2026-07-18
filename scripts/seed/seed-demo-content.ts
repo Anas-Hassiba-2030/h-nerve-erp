@@ -14,9 +14,10 @@
 //
 //   npx tsx scripts/seed/seed-demo-content.ts
 
+import { makePrismaClient } from "../_prisma";
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+const prisma = makePrismaClient();
 
 function sid(...parts: (string | number)[]): string {
   return `demo-content-${parts.join("-")}`;

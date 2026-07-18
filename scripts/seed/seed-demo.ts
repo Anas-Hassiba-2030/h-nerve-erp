@@ -21,9 +21,10 @@
 // Jordanian and MENA brands. Hotel nightly rates are 80-300 JOD,
 // dairy unit prices 0.50-3 JOD, agri 0.40-8.50 JOD.
 
+import { makePrismaClient } from "../_prisma";
 import { PrismaClient, Prisma } from "@prisma/client";
 
-const prisma = new PrismaClient();
+const prisma = makePrismaClient();
 
 const D = (v: string | number) => new Prisma.Decimal(v);
 

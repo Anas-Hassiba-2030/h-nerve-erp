@@ -12,6 +12,7 @@
 //
 //   npx tsx scripts/seed/ensure-sustainability.ts
 
+import { makePrismaClient } from "../_prisma";
 import { PrismaClient } from "@prisma/client";
 
 // Plausible ESG envelope per sector (env, social, gov, carbonTons, waterCubicM,
@@ -29,7 +30,7 @@ function round1(n: number): number {
 }
 
 async function main() {
-  const prisma = new PrismaClient();
+  const prisma = makePrismaClient();
   try {
     const existing = await prisma.sustainabilityScore.count();
     if (existing > 0) {

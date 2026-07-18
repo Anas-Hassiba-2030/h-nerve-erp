@@ -6,10 +6,11 @@
 //
 //   npx tsx scripts/seed-role-permissions.ts
 
+import { makePrismaClient } from "../_prisma";
 import { PrismaClient } from "@prisma/client";
 import { canAccess, GATED_ROLES, type PermRole } from "@/lib/auth/permissions";
 
-const prisma = new PrismaClient();
+const prisma = makePrismaClient();
 
 // Every route the permissions-preview UI surfaces. Adding a route to
 // SECTIONS in app/(admin)/admin/permissions-preview/page.tsx? Add it

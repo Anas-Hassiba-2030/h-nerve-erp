@@ -41,7 +41,7 @@ jobs:
         env:
           # Throwaway — next build needs the Prisma client (postinstall), not a
           # live DB. Dynamic (cookie-driven) pages aren't rendered at build time.
-          DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci
+          DATABASE_URL: file:./ci.db
           NEXT_TELEMETRY_DISABLED: "1"
 
   # A pasted key must never land on a branch undetected (RUNBOOK §1 makes

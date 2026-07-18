@@ -17,9 +17,10 @@
 // it never deletes or touches any other data, so it is safe on a populated
 // prod database.
 
+import { makePrismaClient } from "../_prisma";
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+const prisma = makePrismaClient();
 
 // Deterministic PRNG — same trick as prisma/seed.ts so the enriched figures
 // are reproducible (trustworthy in a pitch) instead of jittering each run.

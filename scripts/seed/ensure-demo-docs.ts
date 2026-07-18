@@ -13,11 +13,12 @@
 //
 //   npx tsx scripts/seed/ensure-demo-docs.ts
 
+import { makePrismaClient } from "../_prisma";
 import { PrismaClient } from "@prisma/client";
 import { seedDemoDocuments } from "./seedDemoDocuments";
 
 async function main() {
-  const prisma = new PrismaClient();
+  const prisma = makePrismaClient();
   try {
     const docs = await prisma.document.count();
     if (docs > 0) {

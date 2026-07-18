@@ -18,10 +18,11 @@
 //
 //   npx tsx scripts/seed/ensure-sectors.ts
 
+import { makePrismaClient } from "../_prisma";
 import { PrismaClient } from "@prisma/client";
 
 async function main() {
-  const prisma = new PrismaClient();
+  const prisma = makePrismaClient();
   try {
     const { seedMissingSectors } = await import("@/scripts/seed/seedSectors");
     const result = await seedMissingSectors(prisma);

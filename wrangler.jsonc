@@ -12,7 +12,14 @@
   "name": "h-nerve-erp",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-06-01",
-  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // nodejs_compat_populate_process_env: without this, Worker secrets/vars
+  // (PG_DATABASE_URL, NEON_DATABASE_URL, SESSION_PASSWORD, …) are NOT
+  // exposed on process.env at all — reading process.env.X just silently
+  // returns undefined. lib/db/db.ts's baseClient() falls through to the
+  // no-adapter branch when that happens, which then tries to boot
+  // Prisma's native/WASM query engine — blocked by Workers' eval
+  // restriction (EvalError: Code generation from strings disallowed).
+  "compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env", "global_fetch_strictly_public"],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"

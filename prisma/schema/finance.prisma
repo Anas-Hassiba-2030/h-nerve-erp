@@ -330,6 +330,7 @@ model Customer {
   invoices      Invoice[]
   estimates     Estimate[]
   payments      Payment[]
+  portalAccount CustomerPortalAccount?
 
   deletedAt     DateTime?
   createdAt     DateTime @default(now())

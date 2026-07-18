@@ -49,6 +49,7 @@ model Product {
   purchaseInvoiceLines PurchaseInvoiceLine[]
   bomOutputs      BillOfMaterials[] @relation("BomOutput")
   bomComponentLines BomLine[]       @relation("BomComponent")
+  posSaleLines    PosSaleLine[]   @relation("PosSaleLineProduct")
   supplierRef     Supplier? @relation(fields: [supplierId], references: [id])
   warehouseRef    Warehouse @relation(fields: [warehouseId], references: [id])
 

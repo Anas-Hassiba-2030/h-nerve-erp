@@ -1,0 +1,88 @@
+// =====================================================================
+// POS — walk-in retail checkout: cash-drawer sessions + immediate
+// cash/card sales. Distinct from SalesOrder (finance.prisma), which is
+// the B2B quote-to-invoice flow with AR. A PosSale is paid in full at
+// the register, so it posts straight to the Treasury account — no AR
+// leg. Stock leaves via the InventoryMovement ledger (SALE) same as
+// every other module; per the manufacturing precedent, products are
+// already expensed at purchase (5000 Purchases), so a POS sale does
+// NOT re-post COGS — only the Cash/Bank debit / Sales Revenue credit.
+// =====================================================================
+
+model CashSession {
+  id            String    @id @default(cuid())
+  tenantId      String
+  treasuryId    String
+  treasury      Treasury  @relation(fields: [treasuryId], references: [id])
+  openedBy      String?
+  openingFloat  Decimal
+  // OPEN | CLOSED
+  status        String    @default("OPEN")
+  openedAt      DateTime  @default(now())
+  closedBy      String?
+  closedAt      DateTime?
+  // Counted cash at close; expectedCash = openingFloat + cash sales total.
+  closingCash   Decimal?
+  expectedCash  Decimal?
+  variance      Decimal?
+
+  sales         PosSale[]
+
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([tenantId, status])
+  @@index([tenantId, openedAt])
+}
+
+model PosSale {
+  id              String    @id @default(cuid())
+  tenantId        String
+  saleNumber      String    @unique
+  sessionId       String
+  session         CashSession @relation(fields: [sessionId], references: [id])
+  customerId      String?
+
+  subtotal        Decimal
+  discountTotal   Decimal   @default(0)
+  taxTotal        Decimal   @default(0)
+  total           Decimal
+
+  // CASH | CARD | TRANSFER
+  paymentMethod   String    @default("CASH")
+  // COMPLETED | VOID
+  status          String    @default("COMPLETED")
+  journalEntryId  String?   @unique
+  journalEntry    JournalEntry? @relation(fields: [journalEntryId], references: [id])
+
+  soldBy          String?
+  voidedAt        DateTime?
+  voidReason      String?
+
+  lines           PosSaleLine[]
+
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([tenantId, saleNumber])
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+}
+
+model PosSaleLine {
+  id          String   @id @default(cuid())
+  saleId      String
+  sale        PosSale  @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation("PosSaleLineProduct", fields: [productId], references: [id])
+  quantity    Int
+  unitPrice   Decimal
+  lineTotal   Decimal
+
+  createdAt   DateTime @default(now())
+
+  @@index([saleId])
+  @@index([productId])
+}

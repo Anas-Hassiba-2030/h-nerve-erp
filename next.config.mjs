@@ -55,6 +55,14 @@ const securityHeaders = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // OpenNext/Cloudflare Workers: Prisma's generated client + engine must be
+  // treated as external server packages so OpenNext can patch them for the
+  // workerd runtime. WITHOUT this, the bundler inlines @prisma/client and the
+  // client falls back to booting its native/WASM library engine, whose loader
+  // uses eval — which Workers blocks (`EvalError: Code generation from strings
+  // disallowed`, the live login 500). This is the officially documented fix
+  // (opennext.js.org/cloudflare/howtos/db). No effect on Railway/local Node.
+  serverExternalPackages: ["@prisma/client", ".prisma/client"],
   experimental: {
     serverActions: {
       bodySizeLimit: "5mb",

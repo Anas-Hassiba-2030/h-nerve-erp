@@ -24,6 +24,9 @@
     ],
     "baseUrl": ".",
     "paths": {
+      "@prisma/client": [
+        "./src/generated/prisma/client.ts"
+      ],
       "@/prisma/*": [
         "./prisma/*"
       ],

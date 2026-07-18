@@ -17,24 +17,54 @@
 // not threaded into the where-clause.
 
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { applyWorkspaceScope } from "@/lib/tenancy/workspaceScope";
 
-const prisma = new PrismaClient();
+// Prisma 6 Rust-free client: a driver adapter is mandatory, and scoping is now
+// a $extends query hook (the old $use middleware is gone). Mirrors the wiring
+// in src/lib/db/db.ts so this diagnostic exercises the real code path.
+function makeBase(): PrismaClient {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) throw new Error("DATABASE_URL not set");
+  return new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+}
 
-// Phase F2 — build a workspace-scoped client without any request
-// context so we can prove the middleware filters even without going
-// through Next's cookie pipeline.
+function delegateName(model: string): string {
+  return model.charAt(0).toLowerCase() + model.slice(1);
+}
+
+function scopedClient(workspaceId: string | null, tenantSlug: string | null): PrismaClient {
+  const base = makeBase();
+  const scoped = base.$extends({
+    query: {
+      $allModels: {
+        async $allOperations({ model, operation, args, query }) {
+          const params = { model, action: operation, args };
+          const next = async (p: { action: string; args?: unknown }) => {
+            if (p.action === operation) return query(p.args ?? {});
+            const delegate = (base as unknown as Record<string, Record<string, (a: unknown) => Promise<unknown>>>)[
+              delegateName(model)
+            ];
+            return delegate[p.action](p.args);
+          };
+          return applyWorkspaceScope(params, next, workspaceId, tenantSlug);
+        },
+      },
+    },
+  });
+  return scoped as unknown as PrismaClient;
+}
+
+const prisma = makeBase();
+
+// Phase F2 — build a workspace-scoped client without any request context.
 function makeScopedClient(workspaceId: string | null) {
-  const c = new PrismaClient();
-  c.$use((params, next) => applyWorkspaceScope(params as any, next, workspaceId));
-  return c;
+  return scopedClient(workspaceId, null);
 }
 
 // Phase F3 — tenant-slug-scoped client (the other half of the middleware).
 function makeTenantScopedClient(tenantSlug: string | null) {
-  const c = new PrismaClient();
-  c.$use((params, next) => applyWorkspaceScope(params as any, next, null, tenantSlug));
-  return c;
+  return scopedClient(null, tenantSlug);
 }
 
 function row(label: string, all: number, perTenant: Record<string, number>) {
@@ -119,7 +149,7 @@ async function main() {
 
   // ---- F2 plumbing proof: middleware scoping by Company.id ----
   console.log("\n--- F2 simulated middleware (Hotel scoping by Company.id) ---");
-  const allCompanies = await new PrismaClient().company.findMany({
+  const allCompanies = await makeBase().company.findMany({
     select: { id: true, code: true },
   });
   for (const co of allCompanies) {

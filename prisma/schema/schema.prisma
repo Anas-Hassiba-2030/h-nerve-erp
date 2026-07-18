@@ -1,6 +1,36 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["prismaSchemaFolder", "driverAdapters"]
+  // Rust-free / WASM-free client (Prisma 6.19). engineType="client" swaps the
+  // library query ENGINE (whose WASM loader uses eval — the exact thing
+  // Cloudflare workerd blocks: "Code generation from strings disallowed") for
+  // the pure query COMPILER. Requires a driver adapter in every environment and
+  // a mandatory custom `output`. moduleFormat=cjs keeps the client CommonJS so
+  // it stays a drop-in behind the tsconfig `@prisma/client` alias (no import
+  // sites move). See src/lib/db/db.ts for the adapter wiring.
+  provider     = "prisma-client"
+  engineType   = "client"
+  // runtime="cloudflare" (alias workerd): the client imports the query-compiler
+  // WASM as a bundleable module instead of reading it from __dirname/fs at load
+  // (what runtime="nodejs" does — that throws a ChunkLoadError on workerd, since
+  // the module-scope getPrismaClientClass(__dirname) has no filesystem there).
+  // This branch targets Cloudflare only; a Railway build would regenerate with
+  // runtime="nodejs" (see docs/… follow-up before this lands on the trunk).
+  runtime      = "cloudflare"
+  moduleFormat = "cjs"
+  output       = "../../src/generated/prisma"
+}
+
+// Node-runtime twin of the client above, used ONLY by the vitest suite (see
+// vitest.config.ts alias). The cloudflare-runtime client re-exports Decimal /
+// PrismaClientKnownRequestError from @prisma/client/runtime/wasm-compiler-edge,
+// which provides them on workerd but NOT on Node — so unit tests that do
+// `new Prisma.Decimal(...)` fail under Node. This twin exposes the same API
+// backed by the Node runtime so the pure-unit suite runs green off-worker.
+generator clientNode {
+  provider     = "prisma-client"
+  engineType   = "client"
+  runtime      = "nodejs"
+  moduleFormat = "cjs"
+  output       = "../../src/generated/prisma-node"
 }
 
 datasource db {

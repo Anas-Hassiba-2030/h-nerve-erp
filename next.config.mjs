@@ -55,18 +55,27 @@ const securityHeaders = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // OpenNext/Cloudflare Workers: Prisma's generated client + engine must be
-  // treated as external server packages so OpenNext can patch them for the
-  // workerd runtime. WITHOUT this, the bundler inlines @prisma/client and the
-  // client falls back to booting its native/WASM library engine, whose loader
-  // uses eval — which Workers blocks (`EvalError: Code generation from strings
-  // disallowed`, the live login 500). This is the officially documented fix
-  // (opennext.js.org/cloudflare/howtos/db). No effect on Railway/local Node.
-  serverExternalPackages: ["@prisma/client", ".prisma/client"],
+  // Prisma 6 Rust-free client (engineType="client"): pure TypeScript, no WASM
+  // library engine, no eval. It is generated into src/generated/prisma and
+  // aliased back to "@prisma/client" (tsconfig paths), so it must be BUNDLED
+  // like any local module — the old `serverExternalPackages: ["@prisma/client"]`
+  // (needed when the WASM engine had to be externalized) now mis-resolves the
+  // aliased local client and yields a runtime ChunkLoadError on the Worker.
+  serverExternalPackages: [".prisma/client"],
   experimental: {
     serverActions: {
       bodySizeLimit: "5mb",
     },
+  },
+  // The Prisma 6 cloudflare-runtime client imports its query-compiler as
+  // `query_compiler_bg.wasm?module`. Under the webpack builder (forced in
+  // open-next.config.ts, since Turbopack emits an absolute wasm import path
+  // that wrangler's module-collector can't resolve), webpack needs the
+  // async-WebAssembly experiment enabled to parse that import instead of
+  // failing with "Module parse failed: Unexpected character".
+  webpack(config) {
+    config.experiments = { ...(config.experiments ?? {}), asyncWebAssembly: true };
+    return config;
   },
   async headers() {
     // The /orrery page renders the cinematic hub in a SAME-ORIGIN <iframe>

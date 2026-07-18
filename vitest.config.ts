@@ -13,8 +13,18 @@ export default defineConfig({
     reporters: "default",
   },
   resolve: {
-    alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
-    },
+    // Array form so "@prisma/client" matches EXACTLY — a bare string alias
+    // would also rewrite subpaths like "@prisma/client/runtime/client" (which
+    // the generated client imports internally) and break them.
+    alias: [
+      // The app aliases "@prisma/client" -> the cloudflare-runtime client
+      // (tsconfig), whose Decimal/error classes only exist on workerd. Tests
+      // run on Node, so point the bare import at the nodejs-runtime twin.
+      {
+        find: /^@prisma\/client$/,
+        replacement: fileURLToPath(new URL("./src/generated/prisma-node/client.ts", import.meta.url)),
+      },
+      { find: /^@\//, replacement: fileURLToPath(new URL("./src/", import.meta.url)) },
+    ],
   },
 });

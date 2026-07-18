@@ -117,6 +117,16 @@ export function WelcomeSplash({ locale }: { locale: "ar" | "en" }) {
     }
   }
 
+  // ESC always closes — a blocking modal with no keyboard escape is a trap.
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") close();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   function next() {
     if (slide < SLIDES.length - 1) {
       setSlide(slide + 1);

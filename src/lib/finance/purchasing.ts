@@ -7,6 +7,7 @@
 
 import type { prisma as prismaType } from "@/lib/db/db";
 import { ensureLedgerAccount, ensureOpenPeriod, nextDocNumber, computeLineTotals } from "./invoicing";
+import { createPostedJournalEntry } from "./accounting";
 import type { LineInput } from "./invoicing";
 
 type Tx = typeof prismaType;
@@ -51,20 +52,16 @@ export async function postSupplierPayment(
     ensureOpenPeriod(tx, tenantId),
   ]);
 
-  const journalEntry = await tx.journalEntry.create({
-    data: {
-      tenantId,
-      periodId: period.id,
-      description: `Supplier Payment ${paymentNumber}`,
-      reference: paymentNumber,
-      status: "POSTED",
-      postedAt: new Date(),
-      lines: {
-        create: [
-          { accountId: apAccount.id, debit: amount, credit: 0, memo: paymentNumber },
-          { accountId: treasury.ledgerAccountId, debit: 0, credit: amount, memo: paymentNumber },
-        ],
-      },
+  const journalEntry = await createPostedJournalEntry(tx, {
+    tenantId,
+    periodId: period.id,
+    description: `Supplier Payment ${paymentNumber}`,
+    reference: paymentNumber,
+    lines: {
+      create: [
+        { accountId: apAccount.id, debit: amount, credit: 0, memo: paymentNumber },
+        { accountId: treasury.ledgerAccountId, debit: 0, credit: amount, memo: paymentNumber },
+      ],
     },
   });
 
@@ -105,20 +102,16 @@ export async function postPurchaseInvoiceFromComputed(
     ensureOpenPeriod(tx, tenantId),
   ]);
 
-  const journalEntry = await tx.journalEntry.create({
-    data: {
-      tenantId,
-      periodId: period.id,
-      description: `Purchase Invoice ${purchaseInvoiceNumber}`,
-      reference: purchaseInvoiceNumber,
-      status: "POSTED",
-      postedAt: new Date(),
-      lines: {
-        create: [
-          { accountId: purchasesAccount.id, debit: computed.total, credit: 0, memo: purchaseInvoiceNumber },
-          { accountId: apAccount.id, debit: 0, credit: computed.total, memo: purchaseInvoiceNumber },
-        ],
-      },
+  const journalEntry = await createPostedJournalEntry(tx, {
+    tenantId,
+    periodId: period.id,
+    description: `Purchase Invoice ${purchaseInvoiceNumber}`,
+    reference: purchaseInvoiceNumber,
+    lines: {
+      create: [
+        { accountId: purchasesAccount.id, debit: computed.total, credit: 0, memo: purchaseInvoiceNumber },
+        { accountId: apAccount.id, debit: 0, credit: computed.total, memo: purchaseInvoiceNumber },
+      ],
     },
   });
 

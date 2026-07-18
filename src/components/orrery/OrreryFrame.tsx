@@ -1,6 +1,6 @@
 "use client";
 
-// Hosts the Orrery hub (public/orrery/index.html) full-screen. A dive arrives as a
+// Hosts the Orrery hub (public/hub/index.html) full-screen. A dive arrives as a
 // postMessage and navigates to the matching real app route via the single,
 // unit-tested resolver in lib/orrery/routeMap. Real identity + locale are pushed
 // into the hub after load.
@@ -68,7 +68,10 @@ export function OrreryFrame({ identity }: { identity: OrreryIdentity }) {
   return (
     <iframe
       ref={frameRef}
-      src="/orrery/index.html"
+      // /hub, NOT /orrery: on Cloudflare Workers the assets layer would serve a
+      // public/orrery/index.html at /orrery BEFORE the Worker runs, shadowing
+      // this very route — the asset dir must never share a path with a route.
+      src="/hub/index.html"
       title="H-Nerve · Orrery"
       onLoad={pushIdentity}
       style={{

@@ -7,6 +7,7 @@
 
 import type { prisma as prismaType } from "@/lib/db/db";
 import { ensureLedgerAccount, ensureOpenPeriod, nextDocNumber } from "./invoicing";
+import { createPostedJournalEntry } from "./accounting";
 
 type Tx = typeof prismaType;
 
@@ -76,20 +77,16 @@ export async function postAssetAcquisition(
     ensureOpenPeriod(tx, tenantId),
   ]);
 
-  const journalEntry = await tx.journalEntry.create({
-    data: {
-      tenantId,
-      periodId: period.id,
-      description: `Fixed asset ${assetNumber} — ${args.name}`,
-      reference: assetNumber,
-      status: "POSTED",
-      postedAt: new Date(),
-      lines: {
-        create: [
-          { accountId: faAccount.id, debit: args.purchaseCost, credit: 0, memo: assetNumber },
-          { accountId: apAccount.id, debit: 0, credit: args.purchaseCost, memo: assetNumber },
-        ],
-      },
+  const journalEntry = await createPostedJournalEntry(tx, {
+    tenantId,
+    periodId: period.id,
+    description: `Fixed asset ${assetNumber} — ${args.name}`,
+    reference: assetNumber,
+    lines: {
+      create: [
+        { accountId: faAccount.id, debit: args.purchaseCost, credit: 0, memo: assetNumber },
+        { accountId: apAccount.id, debit: 0, credit: args.purchaseCost, memo: assetNumber },
+      ],
     },
   });
 
@@ -146,20 +143,16 @@ export async function runMonthlyDepreciation(
     if (due <= 0) continue;
 
     const label = `Depreciation ${asset.assetNumber} ${year}-${String(month).padStart(2, "0")}`;
-    const journalEntry = await tx.journalEntry.create({
-      data: {
-        tenantId,
-        periodId: period.id,
-        description: label,
-        reference: asset.assetNumber,
-        status: "POSTED",
-        postedAt: new Date(),
-        lines: {
-          create: [
-            { accountId: expenseAccount.id, debit: due, credit: 0, memo: label },
-            { accountId: accumAccount.id, debit: 0, credit: due, memo: label },
-          ],
-        },
+    const journalEntry = await createPostedJournalEntry(tx, {
+      tenantId,
+      periodId: period.id,
+      description: label,
+      reference: asset.assetNumber,
+      lines: {
+        create: [
+          { accountId: expenseAccount.id, debit: due, credit: 0, memo: label },
+          { accountId: accumAccount.id, debit: 0, credit: due, memo: label },
+        ],
       },
     });
     await tx.depreciationEntry.create({

@@ -81,12 +81,43 @@ export function OnboardingTour({ locale = "en" }: { locale?: "ar" | "en" }) {
     if (typeof window === "undefined") return;
     if (process.env.NEXT_PUBLIC_DISABLE_INTRO === "1") return; // pitch/demo machine
     const seen = window.localStorage.getItem(STORAGE_KEY);
-    if (!seen) setOpen(true);
+    if (seen) return;
+    // Never stack under the Morning Brief: two simultaneous full-screen
+    // modals mean the user dismisses one dark overlay only to hit another —
+    // in live use that chain read as "the app froze". Wait until the brief's
+    // overlay leaves the DOM, then open the tour.
+    if (!document.querySelector(".mb-overlay.show")) {
+      setOpen(true);
+      return;
+    }
+    const poll = window.setInterval(() => {
+      if (!document.querySelector(".mb-overlay.show")) {
+        window.clearInterval(poll);
+        setOpen(true);
+      }
+    }, 400);
+    return () => window.clearInterval(poll);
   }, []);
+
+  // ESC always skips — a blocking modal with no keyboard escape is a trap.
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") close();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   function close() {
     try {
       window.localStorage.setItem(STORAGE_KEY, "1");
+      // A user who just finished (or skipped) THIS tour has seen the current
+      // product — never chase them with the "what's new in v1.4" splash on the
+      // very next navigation. That serial modal ambush (brief → tour → splash)
+      // read as "the system froze" in live use. The splash stays reserved for
+      // users onboarded BEFORE v1.4 shipped.
+      window.localStorage.setItem("h_nerve_welcome_v1.4_seen", "1");
     } catch {}
     setOpen(false);
   }

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Build the served Orrery hub (public/orrery/*) from the pristine design reference
+// Build the served Orrery hub (public/hub/*) from the pristine design reference
 // at docs/design/orrery/index.html (itself unpacked from a Claude Design standalone
 // export — see docs/design/orrery/PORT-MAP.md).
 //
@@ -7,8 +7,15 @@
 //
 // Pipeline: extract <style> blocks + body markup + inline engine from the reference,
 // rewire the engine's hard navigations into a postMessage bridge (window.__hnNavigate),
-// point font urls at /orrery/fonts, copy fonts + GSAP into public/, then assemble a
+// point font urls at /hub/fonts, copy fonts + GSAP into public/, then assemble a
 // single self-contained doc that the OrreryFrame iframe loads. Idempotent.
+//
+// WHY public/hub and not public/orrery: on Cloudflare Workers the static-assets
+// layer answers BEFORE the Worker runs and auto-serves directory index.html files,
+// so public/orrery/index.html shadowed the Next /orrery route entirely — users got
+// the bare static doc top-level, where the postMessage navigation bridge has no
+// parent listening and every orbit click silently did nothing ("the system froze").
+// The asset dir must NEVER share a path with a Next route. See PR notes 2026-07-19.
 import { readFileSync, writeFileSync, copyFileSync, mkdirSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -17,7 +24,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const REF_DIR = join(ROOT, "docs/design/orrery");
 const REF = join(REF_DIR, "index.html");
 const RES = join(REF_DIR, "resources");
-const OUT = join(ROOT, "public/orrery");
+const OUT = join(ROOT, "public/hub");
 const OUT_FONTS = join(OUT, "fonts");
 
 const html = readFileSync(REF, "utf8");
@@ -25,8 +32,8 @@ const html = readFileSync(REF, "utf8");
 // 1) styles — concatenate every <style> block from the reference <head>
 const styles = [...html.matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]);
 let css = styles.join("\n\n/* ── next block ── */\n\n");
-// fonts resolve from /orrery/fonts in the app
-css = css.replace(/url\("resources\/([^"]+\.woff2)"\)/g, 'url("/orrery/fonts/$1")');
+// fonts resolve from /hub/fonts in the app
+css = css.replace(/url\("resources\/([^"]+\.woff2)"\)/g, 'url("/hub/fonts/$1")');
 
 // 2) body markup — between <body> and the first inline <script>, minus any <script src>
 let markup = /<body>([\s\S]*?)<script>/.exec(html)[1];
@@ -76,11 +83,16 @@ const doc = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>H-Nerve · المدار</title>
 <style>${css}</style>
-<script src="/orrery/gsap.js"></script>
+<script src="/hub/gsap.js"></script>
 </head>
 <body>
 ${markup}
 <script>
+/* Standalone guard: this doc only functions inside the OrreryFrame iframe —
+   the navigation bridge posts to the parent. Opened top-level (old bookmark,
+   direct asset hit), no parent listens and every click would dead-end, so
+   self-heal into the real authenticated hub route instead. */
+if (window === window.parent) { location.replace("/orrery"); }
 /* bridge: dives post up to the Next router instead of hard navigation */
 window.__hnNavigate = function(h){ try{ parent.postMessage({__orreryNav:h}, "*"); }catch(e){ location.href=h; } };
 /* receiver: the host pushes real identity + locale after load */
@@ -100,5 +112,5 @@ window.addEventListener("message", function(e){
 `;
 writeFileSync(join(OUT, "index.html"), doc);
 console.log(
-  `built public/orrery/index.html (${doc.length} chars) · ${styles.length} style blocks · ${fonts} fonts · gsap ✓`,
+  `built public/hub/index.html (${doc.length} chars) · ${styles.length} style blocks · ${fonts} fonts · gsap ✓`,
 );

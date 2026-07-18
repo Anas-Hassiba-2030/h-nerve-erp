@@ -7,6 +7,7 @@
 
 import { z } from "zod";
 import type { prisma as prismaType } from "@/lib/db/db";
+import { createPostedJournalEntry } from "./accounting";
 
 export const lineInputSchema = z.object({
   productId: z.string().trim().optional().or(z.literal("")),
@@ -112,20 +113,16 @@ export async function postInvoiceFromComputed(
     ensureOpenPeriod(tx, tenantId),
   ]);
 
-  const journalEntry = await tx.journalEntry.create({
-    data: {
-      tenantId,
-      periodId: period.id,
-      description: `Invoice ${invoiceNumber}`,
-      reference: invoiceNumber,
-      status: "POSTED",
-      postedAt: new Date(),
-      lines: {
-        create: [
-          { accountId: arAccount.id, debit: computed.total, credit: 0, memo: invoiceNumber },
-          { accountId: revenueAccount.id, debit: 0, credit: computed.total, memo: invoiceNumber },
-        ],
-      },
+  const journalEntry = await createPostedJournalEntry(tx, {
+    tenantId,
+    periodId: period.id,
+    description: `Invoice ${invoiceNumber}`,
+    reference: invoiceNumber,
+    lines: {
+      create: [
+        { accountId: arAccount.id, debit: computed.total, credit: 0, memo: invoiceNumber },
+        { accountId: revenueAccount.id, debit: 0, credit: computed.total, memo: invoiceNumber },
+      ],
     },
   });
 
@@ -199,20 +196,16 @@ export async function postPayment(
     ensureOpenPeriod(tx, tenantId),
   ]);
 
-  const journalEntry = await tx.journalEntry.create({
-    data: {
-      tenantId,
-      periodId: period.id,
-      description: `Payment ${paymentNumber}`,
-      reference: paymentNumber,
-      status: "POSTED",
-      postedAt: new Date(),
-      lines: {
-        create: [
-          { accountId: treasury.ledgerAccountId, debit: amount, credit: 0, memo: paymentNumber },
-          { accountId: arAccount.id, debit: 0, credit: amount, memo: paymentNumber },
-        ],
-      },
+  const journalEntry = await createPostedJournalEntry(tx, {
+    tenantId,
+    periodId: period.id,
+    description: `Payment ${paymentNumber}`,
+    reference: paymentNumber,
+    lines: {
+      create: [
+        { accountId: treasury.ledgerAccountId, debit: amount, credit: 0, memo: paymentNumber },
+        { accountId: arAccount.id, debit: 0, credit: amount, memo: paymentNumber },
+      ],
     },
   });
 

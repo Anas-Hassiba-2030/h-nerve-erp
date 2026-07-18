@@ -169,6 +169,25 @@ Tailwind with H-Nerve brand classes in `app/globals.css` (`.btn`, `.btn-primary`
 
 ## Conventions worth preserving
 
+- **A `public/` directory must NEVER share a path with a Next route.** On
+  Cloudflare Workers the static-assets layer answers BEFORE the Worker runs and
+  auto-serves directory `index.html` files — `public/orrery/` silently shadowed
+  the `/orrery` route in production (dead orbit menu, "the system froze"). The
+  static hub therefore lives at `public/hub/*` and the `/orrery` route iframes
+  `/hub/index.html`. Check for collisions whenever adding files under `public/`.
+- **Journal entries post via `createPostedJournalEntry()`** (`lib/finance/accounting.ts`),
+  never a direct `journalEntry.create({ status: "POSTED" })`. D1 runs
+  `$transaction` callbacks WITHOUT atomicity, so the helper writes DRAFT first
+  and flips to POSTED with one atomic UPDATE — an interrupted write can leave an
+  inert DRAFT orphan but never a partial POSTED entry. Ledger readers must keep
+  filtering `status: "POSTED"`. Same pattern for multi-row writes elsewhere:
+  prefer ONE `createMany` + a final status-flip UPDATE over per-row creates in a
+  `$transaction` array (each array item is a separate D1 round trip).
+- **Full-screen modals must never stack or chain.** Morning Brief, Onboarding
+  Tour, and Welcome Splash are all `aria-modal` overlays; they coordinate (tour
+  waits for brief; finishing the tour marks the splash seen) and every one
+  dismisses on ESC + backdrop click. A new overlay must follow the same rules —
+  serial click-eating modals read as a frozen app.
 - **Companies + Hotels are the canonical CRUD pattern** — list, create, edit, delete via server actions, with `Topbar` + KPI cards on the index page. Mirror them when adding new resources.
 - **`Topbar` (`components/Topbar.tsx`) is the shared page header** — every authenticated page should render one with title (Arabic), optional subtitle, and an actions slot. Don't ship a page without it.
 - **`lib/utils/utils.ts` provides `cn()`, `formatMoney()`, `formatDate()`, `formatNumber()`, `generateNumber()`, `arabicMonth()`** — use these rather than reimplementing.

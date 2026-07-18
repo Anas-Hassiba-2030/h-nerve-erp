@@ -93,35 +93,37 @@ class LiveCouncil implements Council {
         },
       ];
 
-      await prisma.$transaction([
-        ...allVoices.map((v, i) =>
-          prisma.councilVoice.create({
-            data: {
-              sessionId: session.id,
-              agentId: v.agentId,
-              speakerLabelAr: v.speakerLabel.ar,
-              speakerLabelEn: v.speakerLabel.en,
-              position: v.position,
-              thesis: v.thesis,
-              evidenceJson: JSON.stringify(v.evidence ?? []),
-              orderIndex: i,
-              isStub: !llmConfig().enabled,
-              llmModel: llmConfig().enabled ? llmConfig().model : null,
-            },
-          })
-        ),
-        prisma.councilSession.update({
-          where: { id: session.id },
-          data: {
-            status: "DONE",
-            recommendation: moderation.recommendation,
-            confidence: moderation.confidence,
-            dissentNote: moderation.dissentNote ?? null,
-            durationMs: Date.now() - t0,
-            sourcesJson: JSON.stringify(sources),
-          },
-        }),
-      ]);
+      // D1-aware persistence. `$transaction([...7 creates, update])` executed
+      // as 8 sequential network round trips on D1 (no real transaction there),
+      // ~2s of pure latency per convene. `createMany` collapses the voices
+      // into ONE multi-row INSERT (atomic as a single statement), and the
+      // session flip to DONE runs LAST — so an interrupted convene leaves a
+      // RUNNING session with no recommendation, never a half-written "DONE".
+      await prisma.councilVoice.createMany({
+        data: allVoices.map((v, i) => ({
+          sessionId: session.id,
+          agentId: v.agentId,
+          speakerLabelAr: v.speakerLabel.ar,
+          speakerLabelEn: v.speakerLabel.en,
+          position: v.position,
+          thesis: v.thesis,
+          evidenceJson: JSON.stringify(v.evidence ?? []),
+          orderIndex: i,
+          isStub: !llmConfig().enabled,
+          llmModel: llmConfig().enabled ? llmConfig().model : null,
+        })),
+      });
+      await prisma.councilSession.update({
+        where: { id: session.id },
+        data: {
+          status: "DONE",
+          recommendation: moderation.recommendation,
+          confidence: moderation.confidence,
+          dissentNote: moderation.dissentNote ?? null,
+          durationMs: Date.now() - t0,
+          sourcesJson: JSON.stringify(sources),
+        },
+      });
 
       return {
         id: session.id,

@@ -149,24 +149,53 @@ export async function postJournalEntry(
   }
 
   const status = input.status ?? "POSTED";
-  const entry = await db.journalEntry.create({
-    data: {
-      tenantId: input.tenantId,
-      periodId: period.id,
-      description: input.description,
-      reference: input.reference ?? null,
-      status,
-      reversesId: input.reversesId ?? null,
-      postedAt: status === "POSTED" ? new Date() : null,
-      lines: {
-        create: lines.map((l) => ({
-          accountId: byCode.get(l.accountCode)!,
-          debit: D(l.debit),
-          credit: D(l.credit),
-          memo: l.memo ?? null,
-        })),
-      },
+  const data = {
+    tenantId: input.tenantId,
+    periodId: period.id,
+    description: input.description,
+    reference: input.reference ?? null,
+    reversesId: input.reversesId ?? null,
+    lines: {
+      create: lines.map((l) => ({
+        accountId: byCode.get(l.accountCode)!,
+        debit: D(l.debit),
+        credit: D(l.credit),
+        memo: l.memo ?? null,
+      })),
     },
+  };
+  if (status === "POSTED") return createPostedJournalEntry(db, data);
+  return db.journalEntry.create({
+    data: { ...data, status, postedAt: null },
+    select: { id: true },
+  });
+}
+
+/**
+ * D1-safe replacement for `journalEntry.create({ status: "POSTED", ... })`.
+ *
+ * Cloudflare D1 has no interactive transactions — `$transaction(callback)`
+ * executes its statements WITHOUT atomicity, so a crash between the entry
+ * INSERT and its line INSERTs could otherwise leave a partial POSTED entry
+ * that silently corrupts every report built on JournalLine aggregates.
+ *
+ * Instead: write the entry (with its nested lines) as DRAFT first, then flip
+ * it to POSTED with a single atomic UPDATE only after every line has landed.
+ * Every ledger reader (admin/journal, admin/accounts, statements) counts only
+ * status="POSTED" rows, so an interrupted write leaves an inert DRAFT orphan —
+ * never a partial entry in the books. Costs one extra UPDATE per entry.
+ */
+export async function createPostedJournalEntry(
+  db: Db,
+  data: Omit<Prisma.JournalEntryUncheckedCreateInput, "status" | "postedAt">,
+): Promise<{ id: string }> {
+  const entry = await db.journalEntry.create({
+    data: { ...data, status: "DRAFT", postedAt: null },
+    select: { id: true },
+  });
+  await db.journalEntry.update({
+    where: { id: entry.id },
+    data: { status: "POSTED", postedAt: new Date() },
     select: { id: true },
   });
   return entry;

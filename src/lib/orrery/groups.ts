@@ -3,7 +3,7 @@
 // sibling rail (components/orrery/ConstellationRail.tsx).
 //
 // These five groups MUST stay 1-to-1 (same set, same ORDER) with the main
-// Orrery hub served at public/orrery/index.html (the GROUPS array there). The
+// Orrery hub served at public/hub/index.html (the GROUPS array there). The
 // hub uses design-export section hrefs; here we use real Next routes — same
 // destinations, different href scheme. PR #256 merged the old standalone
 // "Sectors" anchor into "Group Board", so the sector businesses (Arena, Maha,

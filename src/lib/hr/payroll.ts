@@ -7,6 +7,7 @@
 
 import type { prisma as prismaType } from "@/lib/db/db";
 import { ensureLedgerAccount, ensureOpenPeriod } from "@/lib/finance/invoicing";
+import { createPostedJournalEntry } from "@/lib/finance/accounting";
 
 type Tx = typeof prismaType;
 
@@ -57,20 +58,16 @@ export async function runPayroll(
   ]);
 
   const label = `Payroll ${year}-${String(month).padStart(2, "0")}`;
-  const journalEntry = await tx.journalEntry.create({
-    data: {
-      tenantId,
-      periodId: period.id,
-      description: label,
-      reference: label,
-      status: "POSTED",
-      postedAt: new Date(),
-      lines: {
-        create: [
-          { accountId: expenseAccount.id, debit: total, credit: 0, memo: label },
-          { accountId: treasury.ledgerAccountId, debit: 0, credit: total, memo: label },
-        ],
-      },
+  const journalEntry = await createPostedJournalEntry(tx, {
+    tenantId,
+    periodId: period.id,
+    description: label,
+    reference: label,
+    lines: {
+      create: [
+        { accountId: expenseAccount.id, debit: total, credit: 0, memo: label },
+        { accountId: treasury.ledgerAccountId, debit: 0, credit: total, memo: label },
+      ],
     },
   });
 

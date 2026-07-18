@@ -1,72 +1,62 @@
 // GET /api/health
 //
-// Phase 24 (Railway Infrastructure Maximization) — extended liveness probe.
+// Extended liveness probe (Phase 24, updated for the Cloudflare deploy).
+// Suitable for uptime monitors (Betterstack, Checkly, etc.).
 //
-// Polled by Railway's healthcheckPath every 30s (railway.toml).
-// Also suitable for uptime monitors (Betterstack, Checkly, etc.).
+//   200 { status: "ok", checks: { db: "ok", sources: {...} }, ... }   — all good
+//   200 { status: "degraded", ... }              — up but non-critical check failed
+//   503 { status: "error", checks: { db: "error" } }                  — no DB reachable
 //
-//   200 { status: "ok", checks: { db: "ok" }, ... }     — all good
-//   200 { status: "degraded", ... }                     — up but non-critical check failed
-//   503 { status: "error", checks: { db: "error" }, ... } — DB unreachable
+// `checks.sources` reports per-URL-source connectivity (NEON_DATABASE_URL /
+// PG_DATABASE_URL / DATABASE_URL → ok | fail | not_configured) so a broken
+// DB path is visible from the outside instead of masquerading as an empty
+// system (the phantom "users: 0" failure mode that twice hid a dead DB
+// during the Cloudflare migration). Deliberately leaks NOTHING about the
+// URLs themselves — no hosts, no driver error text; failure detail goes to
+// the server log only.
 //
-// Read-only, no auth. prismaUnscoped: infra probe needs raw DB access.
+// Read-only, no auth. Probes raw connectivity (no tenant scoping).
 
 import { NextResponse } from "next/server";
-import { prismaUnscoped } from "@/lib/db/db";
+import { probeDatabases } from "@/lib/db/db";
 import { log } from "@/lib/utils/logger";
 
-export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// process.uptime() is seconds since the Node process started.
+// process start reference; Workers isolates recycle so treat as isolate age.
 const STARTED_AT = Date.now();
-
-// Required env vars for a healthy production deployment.
-const REQUIRED_ENV = ["DATABASE_URL"] as const;
 
 export async function GET() {
   const uptimeSeconds = Math.round((Date.now() - STARTED_AT) / 1000);
 
-  // ── DB liveness ──────────────────────────────────────────────────────────
-  let dbStatus: "ok" | "error" = "ok";
-  let dbLatencyMs: number | undefined;
+  // ── DB liveness, per configured source ──────────────────────────────────
+  const t0 = Date.now();
+  const sources = await probeDatabases();
+  const dbLatencyMs = Date.now() - t0;
 
-  try {
-    const t0 = Date.now();
-    await prismaUnscoped.$queryRaw`SELECT 1`;
-    dbLatencyMs = Date.now() - t0;
-  } catch (e) {
-    dbStatus = "error";
-    log.error("health: DB unreachable", { err: String(e) });
+  const values = Object.values(sources);
+  const dbStatus: "ok" | "error" = values.includes("ok") ? "ok" : "error";
+  // A configured-but-failing source alongside a working one = degraded.
+  const anyFailing = values.includes("fail");
+  if (dbStatus === "error") {
+    log.error("health: no database source reachable", { sources });
+  } else if (anyFailing) {
+    log.warn("health: some database sources failing", { sources });
   }
 
-  // ── Env check ────────────────────────────────────────────────────────────
-  const missingEnv = REQUIRED_ENV.filter((k) => !process.env[k]);
-  const envStatus: "ok" | "warn" = missingEnv.length === 0 ? "ok" : "warn";
-  if (missingEnv.length > 0) {
-    log.warn("health: missing env vars", { missing: missingEnv });
-  }
-
-  // ── Aggregate ────────────────────────────────────────────────────────────
   const overallStatus =
-    dbStatus === "error"
-      ? "error"
-      : envStatus === "warn"
-      ? "degraded"
-      : "ok";
+    dbStatus === "error" ? "error" : anyFailing ? "degraded" : "ok";
 
-  const body: Record<string, unknown> = {
+  const body = {
     status: overallStatus,
     uptime: uptimeSeconds,
     ts: new Date().toISOString(),
     checks: {
       db: dbStatus,
-      ...(dbLatencyMs !== undefined ? { db_latency_ms: dbLatencyMs } : {}),
-      env: envStatus,
-      ...(missingEnv.length > 0 ? { missing_env: missingEnv } : {}),
+      db_latency_ms: dbLatencyMs,
+      sources,
     },
   };
 
-  const httpStatus = dbStatus === "error" ? 503 : 200;
-  return NextResponse.json(body, { status: httpStatus });
+  return NextResponse.json(body, { status: dbStatus === "error" ? 503 : 200 });
 }

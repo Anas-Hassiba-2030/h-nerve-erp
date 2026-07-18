@@ -90,6 +90,40 @@ function baseClient(): PrismaClient {
   );
 }
 
+// Connectivity probe for /api/health: try each configured database URL with
+// its matching adapter and report ok/fail per source WITHOUT ever exposing
+// the URL, host, or error detail to the caller — detail goes to the server
+// log only (readable via `wrangler tail`, which requires account auth).
+export type DbProbeResult = Record<string, "ok" | "fail" | "not_configured">;
+
+export async function probeDatabases(): Promise<DbProbeResult> {
+  const sources: Array<[name: string, mk: (url: string) => PrismaClient]> = [
+    ["NEON_DATABASE_URL", neonAdapterClient],
+    ["PG_DATABASE_URL", pgAdapterClient],
+    ["DATABASE_URL", pgAdapterClient],
+  ];
+  const out: DbProbeResult = {};
+  for (const [name, mk] of sources) {
+    const url = readEnv(name);
+    if (!url) {
+      out[name] = "not_configured";
+      continue;
+    }
+    let client: PrismaClient | undefined;
+    try {
+      client = mk(url);
+      await client.$queryRaw`SELECT 1`;
+      out[name] = "ok";
+    } catch (err) {
+      out[name] = "fail";
+      console.error(`[health] ${name} probe failed:`, err);
+    } finally {
+      await client?.$disconnect().catch(() => {});
+    }
+  }
+  return out;
+}
+
 // PascalCase model name (as delivered by the $extends query hook) → the
 // camelCase delegate on the client (`User` → `user`, `DairyBatch` → `dairyBatch`).
 function delegateName(model: string): string {

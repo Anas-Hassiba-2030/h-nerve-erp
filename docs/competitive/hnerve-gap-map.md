@@ -35,7 +35,7 @@ backlog. Legend: ✅ parity · 🟡 partial · 🔴 missing.
 | **Reports — financial** | Trial balance, P&L, balance sheet, ledgers | dashboards + Brain insights; ledger data exists but no statement views | 🟡 | Statement views reading off the existing `JournalLine` data |
 | **Reports — operational** | Sales/purchase/stock/client reports | sector dashboards | 🟡 | Fill per-domain report set |
 | **Config — tax** | Tax definitions + rates | none | 🔴 | Tax engine (blocks real invoicing) |
-| **E-invoicing (gov)** | ZATCA(KSA)/JO/EGY/UAE compliance, QR, auto-VAT | none | 🔴 | Regional e-invoice compliance (if selling in KSA/JO) |
+| **E-invoicing (gov)** | ZATCA(KSA)/JO/EGY/UAE compliance, QR, auto-VAT | `EInvoiceSupplierProfile`+`EInvoiceRecord` (PR #304) — Jordan JoFotara UNCERTIFIED v1 scaffold: UUID/UBL-shaped XML/TLV pre-clearance QR, no live ISTD API call | 🟡 uncertified scaffold | Real ISTD sandbox integration needed before "compliant" (see [docs/compliance/JOFOTARA.md](../compliance/JOFOTARA.md)). ZATCA(KSA) out of scope — Hourani operates in Jordan only |
 | **POS** | In-store sales, cash sessions, offline desktop app, loyalty | `CashSession`+`PosSale`+`PosSaleLine` (PR #302) — checkout, session open/close/variance, void | ✅ v1 / 🟠 | Core shipped. Shifts/multi-cashier, receipts, barcode, offline mode = v2 |
 | **Config — numbering** | Auto-number schemes | `generateNumber()` | 🟡 | Configurable per-doc numbering |
 | **Config — payment methods** | Gateways + manual methods | none | 🔴 | Payment method registry |
@@ -63,12 +63,14 @@ Dependency-ordered. Steps 1–9 **shipped**:
 10. ✅ **Manufacturing** (PR #301) — BOM + manufacturing-order engine; consume/produce into `InventoryMovement`, labor/overhead accrual journal.
 11. ✅ **POS** (PR #302) — `CashSession`+`PosSale`+`PosSaleLine`; checkout posts SOLD into `InventoryMovement` + Treasury debit/Sales Revenue credit journal (no re-posted COGS, same rule as Manufacturing); session-close variance (counted cash vs expected); void reverses both the journal and the stock.
 12. ✅ **Client portal** (PR #303) — `CustomerPortalAccount`, a SEPARATE identity from `User` with its own iron-session cookie (`lib/auth/portalSession.ts`). Staff grant/reset/revoke access from the customer edit page; the portal itself (`/portal`) is strictly read-only — invoice list, outstanding balance, per-invoice detail + payment history — and every query is scoped to the logged-in customer's own `customerId` (cross-customer ids 404, never 403, to avoid leaking existence).
+13. 🟡 **E-invoicing — Jordan JoFotara** (PR #304) — **UNCERTIFIED v1 scaffold**, not real government compliance. `EInvoiceSupplierProfile` (tenant tax config) + `EInvoiceRecord` (per-invoice UUID/UBL-shaped XML/TLV pre-clearance QR, `READY` status only). Deliberately does NOT call the live ISTD API — `submitToJoFotara()` is a stub that refuses to fabricate a result; no ISTD sandbox credentials exist in this environment, and the field/XML shape comes from secondary public sources, not a machine-read of ISTD's primary spec. Full honesty writeup + what real certification needs: [docs/compliance/JOFOTARA.md](../compliance/JOFOTARA.md).
 
 **Remaining frontiers** (unbuilt, tenant-driven):
 - 🟠 **Manufacturing v2** — production routings, workstations/stage costing, scrap items, indirect-cost distribution (see [modules/manufacturing.md](modules/manufacturing.md)).
 - 🟠 **POS v2** — shifts/multi-cashier, receipt printing, barcode scan, price lists/promotions, offline mode.
 - 🟠 **Client portal v2** — service bookings/appointments, loyalty points, membership tiers, online payment (currently view-only).
-- 🔴 **Regional e-invoicing** — Jordan **JoFotara** (income-tax dept clearance) / KSA **ZATCA** (Fatoora: signed XML, UUID, hash chain, cryptographic stamp, Base64 TLV QR). Only if Hourani needs government compliance. *(Research pass gathered public-doc facts here but verification hit an account limit — treat details as unverified until re-run.)*
+- 🔴 **JoFotara real certification** — ISTD sandbox credentials, primary-spec/XSD validation, signed submission, `SUBMITTED→CLEARED/REJECTED` lifecycle (see JOFOTARA.md's checklist).
+- 🔴 **KSA ZATCA** — out of scope; Hourani Group operates in Jordan only. Revisit only on real KSA expansion.
 
 > **Pitch note — do NOT copy their AI.** Daftra markets "AI Automation" as reactive
 > convenience (auto-fill, suggestions). H-Nerve's Brain (causal graph + council +

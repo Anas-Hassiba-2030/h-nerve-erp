@@ -1,0 +1,58 @@
+// =====================================================================
+// E-INVOICING (Jordan JoFotara) — hnerve-gap-map.md "E-invoicing (gov)"
+// row. UNCERTIFIED v1 SCAFFOLD: builds the UUID/UBL-shaped XML/TLV
+// pre-clearance QR fields that public JoFotara documentation describes
+// (ISTD — Income & Sales Tax Department), but does NOT call the live
+// ISTD API — there are no sandbox credentials in this environment and
+// the public spec could not be primary-source-verified this session.
+// See docs/compliance/JOFOTARA.md before treating any tenant as
+// compliant. This is a compliance OVERLAY on the existing Invoice —
+// it never posts to the GL; Invoice already posts AR/Revenue at issue.
+// =====================================================================
+
+model EInvoiceSupplierProfile {
+  id                   String    @id @default(cuid())
+  tenantId             String    @unique
+  // ISTD taxpayer TIN (8-9 digits per public docs).
+  taxRegistrationNumber String
+  // ISTD "activity number" — registered economic-activity code.
+  activityNumber       String
+  // "تسلسل مصدر الدخل" — supplier's income-source sequence, JoFotara-specific.
+  incomeSourceSequence String
+  sellerName           String
+
+  deletedAt            DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+model EInvoiceRecord {
+  id             String    @id @default(cuid())
+  tenantId       String
+  invoiceId      String    @unique
+  invoice        Invoice   @relation(fields: [invoiceId], references: [id])
+
+  uuid           String    @unique
+  // 388 = standard tax invoice, 381 = credit note (UN/CEFACT codes
+  // referenced by public JoFotara integration guides).
+  invoiceTypeCode String   @default("388")
+
+  xmlPayload     String
+  // Base64 TLV pre-clearance QR payload — the official ISTD QR only
+  // exists after live clearance (v2, not implemented).
+  qrPayload      String
+
+  // READY = built locally, never submitted. SUBMITTED/CLEARED/REJECTED
+  // are reserved for a real ISTD integration (v2) — this scaffold never
+  // sets them itself.
+  status         String    @default("READY")
+  submittedAt    DateTime?
+  clearedAt      DateTime?
+  rejectionReason String?
+
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([tenantId, status])
+}

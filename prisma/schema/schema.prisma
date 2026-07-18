@@ -19,6 +19,20 @@ generator client {
   output       = "../../src/generated/prisma"
 }
 
+// Node-runtime twin of the client above, used ONLY by the vitest suite (see
+// vitest.config.ts alias). The cloudflare-runtime client re-exports Decimal /
+// PrismaClientKnownRequestError from @prisma/client/runtime/wasm-compiler-edge,
+// which provides them on workerd but NOT on Node — so unit tests that do
+// `new Prisma.Decimal(...)` fail under Node. This twin exposes the same API
+// backed by the Node runtime so the pure-unit suite runs green off-worker.
+generator clientNode {
+  provider     = "prisma-client"
+  engineType   = "client"
+  runtime      = "nodejs"
+  moduleFormat = "cjs"
+  output       = "../../src/generated/prisma-node"
+}
+
 datasource db {
   // PRODUCTION: Railway injects DATABASE_URL automatically.
   // POOLING (the 100-user unlock — see docs/DEPLOYMENT.md § Connection pooling):

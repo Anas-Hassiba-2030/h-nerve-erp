@@ -92,9 +92,17 @@ export async function POST(req: Request) {
   }
 }
 
-// GET — simple status check
+// GET — simple status check. A DB failure must NOT read as "needs_setup":
+// that exact masking (count() error swallowed into a phantom 0) previously
+// hid a completely broken DB path behind a healthy-looking response.
 export async function GET() {
-  const userCount = await prisma.user.count().catch(() => -1);
+  let userCount: number;
+  try {
+    userCount = await prisma.user.count();
+  } catch (err) {
+    console.error("[setup] status check failed:", err);
+    return NextResponse.json({ status: "db_error" }, { status: 503 });
+  }
   if (userCount > 0) {
     return NextResponse.json({ status: "already_configured", users: userCount });
   }

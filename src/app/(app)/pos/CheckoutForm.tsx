@@ -40,6 +40,34 @@ export function CheckoutForm({
     updateLine(i, { productId, unitPrice: String(product?.unitCost ?? 0) });
   }
 
+  const [scanValue, setScanValue] = useState("");
+  const [scanError, setScanError] = useState("");
+
+  function handleScan() {
+    const sku = scanValue.trim();
+    if (!sku) return;
+    const product = products.find((p) => p.sku.toLowerCase() === sku.toLowerCase());
+    if (!product) {
+      setScanError(ar ? `لم يُعثر على المنتج بالرمز ${sku}` : `No product found for SKU ${sku}`);
+      setScanValue("");
+      return;
+    }
+    setScanError("");
+    setScanValue("");
+    setLines((prev) => {
+      const existing = prev.findIndex((l) => l.productId === product.id);
+      if (existing >= 0) {
+        const line = prev[existing];
+        const patched = { ...line, quantity: String((Number(line.quantity) || 0) + 1) };
+        return prev.map((l, idx) => (idx === existing ? patched : l));
+      }
+      const empty = prev.findIndex((l) => !l.productId);
+      const newLine = { productId: product.id, quantity: "1", unitPrice: String(product.unitCost ?? 0) };
+      if (empty >= 0) return prev.map((l, idx) => (idx === empty ? newLine : l));
+      return [...prev, newLine];
+    });
+  }
+
   const subtotal = useMemo(
     () =>
       r2(
@@ -74,6 +102,33 @@ export function CheckoutForm({
       <input type="hidden" name="linesJson" value={linesJson} />
       <input type="hidden" name="discountTotal" value={discountTotal} />
       <input type="hidden" name="taxTotal" value={taxTotal} />
+
+      <div>
+        <label className="block text-sm font-medium mb-1">{ar ? "مسح الباركود / الرمز" : "Scan barcode / SKU"}</label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            className="input"
+            value={scanValue}
+            onChange={(e) => setScanValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleScan();
+              }
+            }}
+            placeholder={ar ? "امسح أو اكتب الرمز ثم اضغط Enter" : "Scan or type a SKU, then press Enter"}
+          />
+          <button type="button" onClick={handleScan} className="btn-ghost">
+            {ar ? "إضافة" : "Add"}
+          </button>
+        </div>
+        {scanError ? (
+          <p className="text-sm mt-1" style={{ color: "#b91c1c" }}>
+            {scanError}
+          </p>
+        ) : null}
+      </div>
 
       <div>
         <div className="flex items-center justify-between mb-2">

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { prisma } from "@/lib/db/db";
 import { getLocale } from "@/lib/i18n/i18n.server";
@@ -140,6 +141,7 @@ export default async function PosPage() {
                   <th>{ar ? "الإجمالي" : "Total"}</th>
                   <th>{ar ? "الحالة" : "Status"}</th>
                   <th>{ar ? "الوقت" : "Time"}</th>
+                  <th />
                   {canManage ? <th /> : null}
                 </tr>
               </thead>
@@ -157,6 +159,11 @@ export default async function PosPage() {
                         </span>
                       </td>
                       <td>{formatDate(s.createdAt, ar ? "ar" : "en")}</td>
+                      <td>
+                        <Link href={`/pos/receipts/${s.id}`} className="btn-ghost text-sm">
+                          {ar ? "الإيصال" : "Receipt"}
+                        </Link>
+                      </td>
                       {canManage ? (
                         <td>
                           {s.status === "COMPLETED" ? (

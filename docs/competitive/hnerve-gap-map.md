@@ -67,7 +67,7 @@ Dependency-ordered. Steps 1–9 **shipped**:
 
 **Remaining frontiers** (unbuilt, tenant-driven):
 - 🟠 **Manufacturing v2** — production routings, workstations/stage costing, scrap items, indirect-cost distribution (see [modules/manufacturing.md](modules/manufacturing.md)).
-- 🟠 **POS v2** — shifts/multi-cashier, receipt printing, barcode scan, price lists/promotions, offline mode.
+- 🟡 **POS v2** — receipt view/print (`/pos/receipts/[id]`) and SKU/barcode-scan quick-add shipped. Still open: shifts/multi-cashier handoff, price lists/promotions, offline mode.
 - 🟠 **Client portal v2** — service bookings/appointments, loyalty points, membership tiers, online payment (currently view-only).
 - 🔴 **JoFotara real certification** — ISTD sandbox credentials, primary-spec/XSD validation, signed submission, `SUBMITTED→CLEARED/REJECTED` lifecycle (see JOFOTARA.md's checklist).
 - 🔴 **KSA ZATCA** — out of scope; Hourani Group operates in Jordan only. Revisit only on real KSA expansion.

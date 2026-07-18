@@ -36,7 +36,7 @@ backlog. Legend: ✅ parity · 🟡 partial · 🔴 missing.
 | **Reports — operational** | Sales/purchase/stock/client reports | sector dashboards | 🟡 | Fill per-domain report set |
 | **Config — tax** | Tax definitions + rates | none | 🔴 | Tax engine (blocks real invoicing) |
 | **E-invoicing (gov)** | ZATCA(KSA)/JO/EGY/UAE compliance, QR, auto-VAT | none | 🔴 | Regional e-invoice compliance (if selling in KSA/JO) |
-| **POS** | In-store sales, cash sessions, offline desktop app, loyalty | none | 🔴 | POS surface + cash-session engine |
+| **POS** | In-store sales, cash sessions, offline desktop app, loyalty | `CashSession`+`PosSale`+`PosSaleLine` (PR #302) — checkout, session open/close/variance, void | ✅ v1 / 🟠 | Core shipped. Shifts/multi-cashier, receipts, barcode, offline mode = v2 |
 | **Config — numbering** | Auto-number schemes | `generateNumber()` | 🟡 | Configurable per-doc numbering |
 | **Config — payment methods** | Gateways + manual methods | none | 🔴 | Payment method registry |
 | **Comms** | SMTP, email templates, reminder rules | Workflows engine (no email) | 🟡 | Wire SMTP + email templates to Workflows |
@@ -61,10 +61,11 @@ Dependency-ordered. Steps 1–9 **shipped**:
 8. ✅ **Fixed assets + multi-method depreciation**.
 9. ✅ **HR/Payroll** (PR #300) — pay runs post 6200 Salary Expense / treasury.
 10. ✅ **Manufacturing** (PR #301) — BOM + manufacturing-order engine; consume/produce into `InventoryMovement`, labor/overhead accrual journal.
+11. ✅ **POS** (PR #302) — `CashSession`+`PosSale`+`PosSaleLine`; checkout posts SOLD into `InventoryMovement` + Treasury debit/Sales Revenue credit journal (no re-posted COGS, same rule as Manufacturing); session-close variance (counted cash vs expected); void reverses both the journal and the stock.
 
 **Remaining frontiers** (unbuilt, tenant-driven):
 - 🟠 **Manufacturing v2** — production routings, workstations/stage costing, scrap items, indirect-cost distribution (see [modules/manufacturing.md](modules/manufacturing.md)).
-- 🔴 **POS** — in-store sales, cash sessions/shifts, cash drawer, receipts.
+- 🟠 **POS v2** — shifts/multi-cashier, receipt printing, barcode scan, price lists/promotions, offline mode.
 - 🔴 **Client portal + loyalty** — branded self-service (invoices/statements/bookings), loyalty points, memberships.
 - 🔴 **Regional e-invoicing** — Jordan **JoFotara** (income-tax dept clearance) / KSA **ZATCA** (Fatoora: signed XML, UUID, hash chain, cryptographic stamp, Base64 TLV QR). Only if Hourani needs government compliance. *(Research pass gathered public-doc facts here but verification hit an account limit — treat details as unverified until re-run.)*
 

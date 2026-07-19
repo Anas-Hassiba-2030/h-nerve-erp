@@ -1,5 +1,6 @@
-// /admin — "النواة / The Core" hub. The single entry point into the ERP
-// back office: the front-office operator surfaces (invoicing, POS, treasury,
+// /admin — "العمليات / Operations" hub (renamed from "The Core"). The single
+// business entry point into the ERP: the front-office operator surfaces
+// (invoicing, POS, treasury,
 // purchasing, payroll, assets, manufacturing) FIRST, then the raw back-office
 // consoles (imports, inventory, orders, books). Same conventions as the admin
 // family ((app) group, Heritage Modern daylight register, auth inherited from
@@ -105,7 +106,7 @@ export default async function CoreHubPage() {
     <DaylightShell dir={ar ? "rtl" : "ltr"}>
       <DaylightHeader
         eyebrow={ar ? "النظام · الباك أوفيس" : "System · Back office"}
-        title={ar ? "النواة" : "The Core"}
+        title={ar ? "العمليات" : "Operations"}
         subtitle={
           ar
             ? "الباك أوفيس التشغيلي الكامل — من الفوترة ونقطة البيع والخزائن إلى المحاسبة والرواتب والتصنيع. كل وحدة على بُعد نقرة."

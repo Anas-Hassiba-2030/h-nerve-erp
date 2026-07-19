@@ -102,13 +102,15 @@ export const ORRERY_GROUPS: OrreryGroup[] = [
     nameAr: "النظام",
     nameEn: "System",
     children: [
-      // Mission Control — the admin command deck. It already fans out to every
-      // admin sub-console (Empire/Tenants included), so those two no longer get
-      // their own top-level pills here — one clear entry point, less clutter.
+      // Mission Control — the PLATFORM superadmin deck ONLY: tenants, users,
+      // permissions, audit, raw data browser. The business/ERP consoles used to
+      // be duplicated here too; they now live solely under Operations (below),
+      // so each thing has exactly one home.
       { label: "غرفة العمليات", labelEn: "Mission Control", route: "/admin/system" },
-      // The Core — the ERP back-office hub: one pill fronting the 13 operator
-      // consoles under /admin/* (accounts, journal, products, warehouses, …).
-      { label: "النواة", labelEn: "The Core", route: "/admin" },
+      // Operations — the ERP business hub: one pill fronting every operator
+      // console under /admin/* + the front-office surfaces (invoicing, POS,
+      // treasury, payroll, inventory, orders, …). Renamed from "The Core".
+      { label: "العمليات", labelEn: "Operations", route: "/admin" },
       { label: "الأتمتة", labelEn: "Workflows", route: "/workflows" },
       { label: "التكاملات", labelEn: "Integrations", route: "/integrations" },
       { label: "التدقيق", labelEn: "Audit", route: "/audit-360" },

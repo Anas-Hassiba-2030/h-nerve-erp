@@ -71,6 +71,10 @@ const NAME_MAP: Record<string, string> = {
   "الإنجازات": "/achievements",
   "الفريق": "/users",
   "الإدارة ERP": "/admin",
+  "العمليات": "/admin",
+  "Operations": "/admin",
+  // Legacy aliases (section renamed The Core → Operations) — kept so any
+  // persisted ?s= deep-links or bookmarks still resolve.
   "النواة": "/admin",
   "The Core": "/admin",
   "الإعدادات": "/settings",

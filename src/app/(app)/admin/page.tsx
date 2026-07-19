@@ -1,32 +1,27 @@
-// /admin — "النواة / The Core" hub. The landing page of the ERP
-// back-office family: a static, light directory of the 13 consoles
-// (imports → mappings → inventory → orders → parties → books → brain).
-// Same conventions as the admin family ((app) group, Heritage Modern
-// daylight register, auth inherited from the (app) layout, server
-// component). Deliberately query-free — this page must stay light;
-// each console carries its own KPIs.
+// /admin — "النواة / The Core" hub. The single entry point into the ERP
+// back office: the front-office operator surfaces (invoicing, POS, treasury,
+// purchasing, payroll, assets, manufacturing) FIRST, then the raw back-office
+// consoles (imports, inventory, orders, books). Same conventions as the admin
+// family ((app) group, Heritage Modern daylight register, auth inherited from
+// the (app) layout, server component). Query-free — each console carries its
+// own KPIs — plus a one-click demo-data seed for the whole back office.
 
 import Link from "next/link";
 import {
-  Inbox,
-  Map as MapIcon,
-  Package,
-  ArrowLeftRight,
-  Warehouse,
-  Truck,
-  ShoppingCart,
-  ShoppingBag,
-  Users,
-  UserSquare,
-  BookOpen,
-  Library,
-  BrainCircuit,
+  Inbox, Map as MapIcon, Package, ArrowLeftRight, Warehouse, Truck,
+  ShoppingCart, ShoppingBag, Users, UserSquare, BookOpen, Library,
+  BrainCircuit, FileText, GitBranch, ReceiptText, CreditCard, Landmark,
+  Banknote, Scale, Building2, Factory, CalendarDays, Wallet,
 } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
+import { getCurrentUser } from "@/lib/auth/session";
 import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
+import { SeedErpButton } from "@/components/genesis/SeedErpButton";
 import "../daylight.css";
 
-type GroupId = "ingest" | "inventory" | "orders" | "parties" | "books" | "intelligence";
+type GroupId =
+  | "sales" | "purchasing" | "treasury" | "books" | "assets" | "manufacturing"
+  | "hr" | "parties" | "inventory" | "ingest" | "orders" | "intelligence";
 
 type Console = {
   href: string;
@@ -38,36 +33,73 @@ type Console = {
   group: GroupId;
 };
 
-// The 13 back-office consoles, clustered by accountant-meaning — the same
-// grouping AdminFamilyNav uses on every console page.
+// Front office FIRST (the operator surfaces the user reaches every day), then
+// the raw back-office consoles. Every href is a real, reachable route.
 const CONSOLES: Console[] = [
-  { href: "/admin/imports",         ar: "الاستيراد",    en: "Imports",         icon: Inbox,          group: "ingest",       desc_ar: "استيراد ملفات البيانات ومتابعة معالجتها.",            desc_en: "Import data files and track their processing." },
-  { href: "/admin/mappings",        ar: "الربط",        en: "Mappings",        icon: MapIcon,        group: "ingest",       desc_ar: "ربط أعمدة الملفات المستوردة بحقول النظام.",           desc_en: "Map imported file columns to system fields." },
-  { href: "/admin/products",        ar: "المنتجات",     en: "Products",        icon: Package,        group: "inventory",    desc_ar: "كتالوج المنتجات ووحدات القياس والأسعار.",             desc_en: "Product catalog, units, and pricing." },
-  { href: "/admin/movements",       ar: "الحركات",      en: "Movements",       icon: ArrowLeftRight, group: "inventory",    desc_ar: "سجل حركات المخزون الداخلة والخارجة.",                 desc_en: "Ledger of inbound and outbound stock movements." },
-  { href: "/admin/warehouses",      ar: "المستودعات",   en: "Warehouses",      icon: Warehouse,      group: "inventory",    desc_ar: "مواقع التخزين ومستويات المخزون لكل مستودع.",          desc_en: "Storage locations and per-warehouse stock levels." },
-  { href: "/admin/transfers",       ar: "التحويلات",    en: "Transfers",       icon: Truck,          group: "inventory",    desc_ar: "تحويلات المخزون بين المستودعات.",                     desc_en: "Stock transfers between warehouses." },
-  { href: "/admin/purchase-orders", ar: "أوامر الشراء", en: "Purchase Orders", icon: ShoppingCart,   group: "orders",       desc_ar: "أوامر الشراء من المورّدين ودورة الاستلام.",           desc_en: "Supplier purchase orders and the receiving cycle." },
-  { href: "/admin/sales-orders",    ar: "أوامر البيع",  en: "Sales Orders",    icon: ShoppingBag,    group: "orders",       desc_ar: "أوامر البيع للعملاء ودورة التنفيذ.",                  desc_en: "Customer sales orders and the fulfilment cycle." },
-  { href: "/admin/suppliers",       ar: "الموردون",     en: "Suppliers",       icon: Users,          group: "parties",      desc_ar: "سجل المورّدين وشروط الدفع.",                          desc_en: "Supplier registry and payment terms." },
-  { href: "/admin/customers",       ar: "العملاء",      en: "Customers",       icon: UserSquare,     group: "parties",      desc_ar: "سجل العملاء وأوامر البيع المرتبطة بهم.",              desc_en: "Customer registry and their linked sales orders." },
-  { href: "/admin/journal",         ar: "القيود",       en: "Journal",         icon: BookOpen,       group: "books",        desc_ar: "قيود اليومية المحاسبية مزدوجة القيد.",                desc_en: "Double-entry accounting journal." },
-  { href: "/admin/accounts",        ar: "الحسابات",     en: "Accounts",        icon: Library,        group: "books",        desc_ar: "شجرة الحسابات ودفتر الأستاذ العام.",                  desc_en: "Chart of accounts and the general ledger." },
-  { href: "/admin/brain",           ar: "دماغ النواة",  en: "Core Brain",      icon: BrainCircuit,   group: "intelligence", desc_ar: "رؤى ذكية على دفاتر الباك أوفيس — مخزون منخفض وتوصيات.", desc_en: "AI insights over the back-office books — low stock, reorders." },
+  // ── Sales & invoicing ──
+  { href: "/invoices",     ar: "الفواتير",         en: "Invoices",        icon: FileText,    group: "sales",        desc_ar: "إصدار فواتير المبيعات وتحصيلها.",              desc_en: "Issue and collect sales invoices." },
+  { href: "/estimates",    ar: "عروض الأسعار",     en: "Estimates",       icon: GitBranch,   group: "sales",        desc_ar: "عروض أسعار قابلة للتحويل إلى فواتير.",         desc_en: "Quotes that convert into invoices." },
+  { href: "/pos",          ar: "نقطة البيع",       en: "Point of Sale",   icon: ShoppingCart,group: "sales",        desc_ar: "جلسات نقدية وبيع مباشر.",                      desc_en: "Cash sessions and direct retail sales." },
+  { href: "/e-invoicing",  ar: "الفوترة الإلكترونية", en: "E-Invoicing",  icon: ReceiptText, group: "sales",        desc_ar: "الفوترة الإلكترونية المتوافقة (الأردن).",       desc_en: "Compliant e-invoicing (Jordan)." },
+  // ── Purchasing ──
+  { href: "/purchase-invoices", ar: "فواتير المشتريات", en: "Purchase Invoices", icon: ShoppingBag, group: "purchasing", desc_ar: "فواتير المورّدين والالتزامات.",           desc_en: "Supplier bills and payables." },
+  { href: "/purchase-payments", ar: "دفعات الموردين",   en: "Supplier Payments", icon: Banknote,    group: "purchasing", desc_ar: "سداد المورّدين من الخزائن.",              desc_en: "Pay suppliers from the treasuries." },
+  // ── Treasury & receivables ──
+  { href: "/treasuries",   ar: "الخزائن",          en: "Treasuries",      icon: Landmark,    group: "treasury",     desc_ar: "الصناديق النقدية والحسابات البنكية.",          desc_en: "Cash boxes and bank accounts." },
+  { href: "/payments",     ar: "دفعات العملاء",    en: "Payments",        icon: CreditCard,  group: "treasury",     desc_ar: "تحصيل دفعات العملاء على الفواتير.",            desc_en: "Collect customer payments on invoices." },
+  // ── Accounting / books ──
+  { href: "/statements",   ar: "القوائم المالية",  en: "Statements",      icon: Scale,       group: "books",        desc_ar: "الميزانية وقائمة الدخل من دفتر الأستاذ.",       desc_en: "Balance sheet and P&L from the ledger." },
+  { href: "/admin/journal",ar: "القيود",           en: "Journal",         icon: BookOpen,    group: "books",        desc_ar: "قيود اليومية المحاسبية مزدوجة القيد.",          desc_en: "Double-entry accounting journal." },
+  { href: "/admin/accounts",ar: "الحسابات",        en: "Accounts",        icon: Library,     group: "books",        desc_ar: "شجرة الحسابات ودفتر الأستاذ العام.",            desc_en: "Chart of accounts and general ledger." },
+  // ── Assets ──
+  { href: "/assets",       ar: "الأصول الثابتة",   en: "Fixed Assets",    icon: Building2,   group: "assets",       desc_ar: "الأصول واستهلاكها الشهري.",                    desc_en: "Assets and monthly depreciation." },
+  // ── Manufacturing ──
+  { href: "/manufacturing",ar: "التصنيع",          en: "Manufacturing",   icon: Factory,     group: "manufacturing",desc_ar: "قوائم المواد وأوامر التصنيع.",                 desc_en: "Bills of materials and work orders." },
+  // ── HR ──
+  { href: "/hr/employees", ar: "سجل الموظفين",     en: "Employees",       icon: Users,       group: "hr",           desc_ar: "سجل الموظفين ورواتبهم الأساسية.",              desc_en: "Employee records and base salaries." },
+  { href: "/hr/leave",     ar: "طلبات الإجازة",    en: "Leave",           icon: CalendarDays,group: "hr",           desc_ar: "طلبات الإجازة والموافقات.",                    desc_en: "Leave requests and approvals." },
+  { href: "/hr/payroll",   ar: "مسير الرواتب",     en: "Payroll",         icon: Wallet,      group: "hr",           desc_ar: "تشغيل الرواتب الشهرية وترحيلها.",              desc_en: "Run and post monthly payroll." },
+  // ── Parties ──
+  { href: "/customers",    ar: "العملاء",          en: "Customers",       icon: UserSquare,  group: "parties",      desc_ar: "سجل العملاء وشروط الدفع.",                     desc_en: "Customer registry and payment terms." },
+  { href: "/suppliers",    ar: "الموردون",         en: "Suppliers",       icon: Truck,       group: "parties",      desc_ar: "سجل المورّدين وشروط الدفع.",                   desc_en: "Supplier registry and payment terms." },
+  // ── Inventory (back office) ──
+  { href: "/admin/products",   ar: "المنتجات",     en: "Products",        icon: Package,     group: "inventory",    desc_ar: "كتالوج المنتجات ووحدات القياس والأسعار.",     desc_en: "Product catalog, units, and pricing." },
+  { href: "/admin/movements",  ar: "الحركات",      en: "Movements",       icon: ArrowLeftRight, group: "inventory", desc_ar: "سجل حركات المخزون الداخلة والخارجة.",         desc_en: "Ledger of inbound/outbound stock." },
+  { href: "/admin/warehouses", ar: "المستودعات",   en: "Warehouses",      icon: Warehouse,   group: "inventory",    desc_ar: "مواقع التخزين ومستويات المخزون.",             desc_en: "Storage locations and stock levels." },
+  { href: "/admin/transfers",  ar: "التحويلات",    en: "Transfers",       icon: Truck,       group: "inventory",    desc_ar: "تحويلات المخزون بين المستودعات.",             desc_en: "Stock transfers between warehouses." },
+  // ── Ingest ──
+  { href: "/admin/imports",  ar: "الاستيراد",      en: "Imports",         icon: Inbox,       group: "ingest",       desc_ar: "استيراد ملفات البيانات ومتابعة معالجتها.",    desc_en: "Import data files and track processing." },
+  { href: "/admin/mappings", ar: "الربط",          en: "Mappings",        icon: MapIcon,     group: "ingest",       desc_ar: "ربط أعمدة الملفات المستوردة بحقول النظام.",    desc_en: "Map imported columns to system fields." },
+  // ── Orders (back office) ──
+  { href: "/admin/purchase-orders", ar: "أوامر الشراء", en: "Purchase Orders", icon: ShoppingCart, group: "orders", desc_ar: "أوامر الشراء من المورّدين ودورة الاستلام.",   desc_en: "Supplier purchase orders and receiving." },
+  { href: "/admin/sales-orders",    ar: "أوامر البيع",  en: "Sales Orders",    icon: ShoppingBag,  group: "orders", desc_ar: "أوامر البيع للعملاء ودورة التنفيذ.",          desc_en: "Customer sales orders and fulfilment." },
+  // ── Intelligence ──
+  { href: "/admin/brain",    ar: "دماغ النواة",    en: "Core Brain",      icon: BrainCircuit,group: "intelligence", desc_ar: "رؤى ذكية على دفاتر الباك أوفيس.",              desc_en: "AI insights over the back-office books." },
 ];
 
 const GROUP_LABELS: Record<GroupId, { ar: string; en: string }> = {
-  ingest:       { ar: "الاستيعاب", en: "Ingest" },
-  inventory:    { ar: "المخزون",   en: "Inventory" },
-  orders:       { ar: "الطلبات",   en: "Orders" },
-  parties:      { ar: "الأطراف",   en: "Parties" },
-  books:        { ar: "الدفاتر",   en: "Books" },
-  intelligence: { ar: "الذكاء",    en: "Intelligence" },
+  sales:         { ar: "المبيعات والفوترة", en: "Sales & Invoicing" },
+  purchasing:    { ar: "المشتريات",         en: "Purchasing" },
+  treasury:      { ar: "الخزينة والتحصيل",  en: "Treasury & Receivables" },
+  books:         { ar: "المحاسبة",          en: "Accounting" },
+  assets:        { ar: "الأصول",            en: "Assets" },
+  manufacturing: { ar: "التصنيع",           en: "Manufacturing" },
+  hr:            { ar: "الموارد البشرية",   en: "Human Resources" },
+  parties:       { ar: "الأطراف",           en: "Parties" },
+  inventory:     { ar: "المخزون",           en: "Inventory" },
+  ingest:        { ar: "الاستيعاب",         en: "Ingest" },
+  orders:        { ar: "الطلبات",           en: "Orders" },
+  intelligence:  { ar: "الذكاء",            en: "Intelligence" },
 };
-const GROUP_ORDER: GroupId[] = ["ingest", "inventory", "orders", "parties", "books", "intelligence"];
+const GROUP_ORDER: GroupId[] = [
+  "sales", "purchasing", "treasury", "books", "assets", "manufacturing",
+  "hr", "parties", "inventory", "ingest", "orders", "intelligence",
+];
 
 export default async function CoreHubPage() {
   const ar = (await getLocale()) === "ar";
+  const user = await getCurrentUser();
+  const isAdmin = user?.role === "ADMIN";
 
   return (
     <DaylightShell dir={ar ? "rtl" : "ltr"}>
@@ -76,14 +108,34 @@ export default async function CoreHubPage() {
         title={ar ? "النواة" : "The Core"}
         subtitle={
           ar
-            ? "الباك أوفيس التشغيلي — 13 وحدة تُدار منها دفاتر المجموعة: من الاستيراد إلى القيود."
-            : "The operational back office — 13 consoles running the group's books, from imports to journal entries."
+            ? "الباك أوفيس التشغيلي الكامل — من الفوترة ونقطة البيع والخزائن إلى المحاسبة والرواتب والتصنيع. كل وحدة على بُعد نقرة."
+            : "The full operational back office — from invoicing, POS, and treasuries to accounting, payroll, and manufacturing. Every console one click away."
         }
-        status={ar ? "13 وحدة" : "13 consoles"}
+        status={ar ? `${CONSOLES.length} وحدة` : `${CONSOLES.length} consoles`}
       />
+
+      {isAdmin ? (
+        <div
+          className="panel"
+          style={{ marginBottom: 20, padding: "16px 20px", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12 }}
+        >
+          <div style={{ minWidth: 0 }}>
+            <div className="text-sm font-extrabold" style={{ color: "var(--ink)" }}>
+              {ar ? "بيانات تجريبية للباك أوفيس" : "Back-office demo data"}
+            </div>
+            <div className="text-xs" style={{ color: "var(--ink-muted)", marginTop: 2 }}>
+              {ar
+                ? "تعبئة عملاء ومورّدين وفواتير ودفعات وخزائن وأصول ورواتب — بنقرة واحدة. آمن لإعادة التشغيل."
+                : "Populate customers, suppliers, invoices, payments, treasuries, assets, and payroll in one click. Safe to re-run."}
+            </div>
+          </div>
+          <SeedErpButton ar={ar} />
+        </div>
+      ) : null}
 
       {GROUP_ORDER.map((g) => {
         const items = CONSOLES.filter((c) => c.group === g);
+        if (items.length === 0) return null;
         return (
           <section key={g} className="mb-6">
             <div

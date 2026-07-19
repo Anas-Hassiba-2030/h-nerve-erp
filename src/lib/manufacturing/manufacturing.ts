@@ -155,7 +155,10 @@ export async function completeManufacturingOrder(
     journalEntryId = entry.id;
   }
 
-  await tx.manufacturingOrder.update({
+  // updateMany, NOT update({ where: { id } }): ManufacturingOrder is
+  // tenant-scoped and a by-id update trips the workspace write-guard probe
+  // inside the transaction (see createPostedJournalEntry).
+  await tx.manufacturingOrder.updateMany({
     where: { id: order.id },
     data: {
       status: "DONE",

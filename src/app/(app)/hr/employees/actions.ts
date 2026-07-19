@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/db";
 import { requireUser } from "@/lib/auth/session";
-import { getActiveTenantSlug } from "@/lib/tenancy/tenancy";
+import { activeTenantSlug } from "@/lib/tenancy/tenancy";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { flashToast } from "@/lib/utils/toast";
 import { nextDocNumber } from "@/lib/finance/invoicing";
@@ -31,7 +31,7 @@ function readFields(formData: FormData) {
 export async function createEmployee(formData: FormData): Promise<void> {
   await gate();
   const ar = (await getLocale()) === "ar";
-  const tenantId = await getActiveTenantSlug();
+  const tenantId = await activeTenantSlug();
   if (!tenantId) {
     await flashToast({ type: "info", entity: "info", label: ar ? "لا يوجد مستأجر نشط لإضافة موظف له" : "No active tenant to add an employee to" });
     return;

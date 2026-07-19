@@ -77,7 +77,12 @@ export async function closeCashSession(
   const expectedCash = r2(Number(session.openingFloat) + cashTotal);
   const variance = r2(closingCash - expectedCash);
 
-  return tx.cashSession.update({
+  // updateMany, NOT update({ where: { id } }): CashSession is tenant-scoped and
+  // a by-id update trips the workspace write-guard probe inside the transaction
+  // (see createPostedJournalEntry). updateMany returns a count, so re-read the
+  // row to preserve this fn's return contract; the findUnique guard uses the
+  // current (transaction) query, not the base-client probe, so it's safe.
+  await tx.cashSession.updateMany({
     where: { id: session.id },
     data: {
       status: "CLOSED",
@@ -88,6 +93,7 @@ export async function closeCashSession(
       variance,
     },
   });
+  return tx.cashSession.findUniqueOrThrow({ where: { id: session.id } });
 }
 
 // ── Sale ─────────────────────────────────────────────────────────────────
@@ -259,7 +265,10 @@ export async function voidPosSale(
     await recalcProductQuantity(tx, line.productId);
   }
 
-  await tx.posSale.update({
+  // updateMany, NOT update({ where: { id } }): PosSale is tenant-scoped and a
+  // by-id update trips the workspace write-guard probe inside the transaction
+  // (see createPostedJournalEntry).
+  await tx.posSale.updateMany({
     where: { id: sale.id },
     data: { status: "VOID", voidedAt: new Date(), voidReason: reason },
   });

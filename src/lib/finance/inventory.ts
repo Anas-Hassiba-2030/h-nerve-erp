@@ -141,7 +141,12 @@ export async function recalcProductQuantity(
     where: { productId, deletedAt: null },
   });
   const quantity = agg._sum.delta ?? 0;
-  await db.product.update({ where: { id: productId }, data: { quantity } });
+  // updateMany, NOT update({ where: { id } }): Product is tenant-scoped, and a
+  // by-id update on the scoped client trips the workspace write-guard probe
+  // which throws inside a $transaction (see createPostedJournalEntry). updateMany
+  // is where-stamped by the hook — no probe — so POS/manufacturing stock
+  // recalcs work inside the sale/order transaction.
+  await db.product.updateMany({ where: { id: productId }, data: { quantity } });
   return quantity;
 }
 

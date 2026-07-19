@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/db";
 import { requireUser } from "@/lib/auth/session";
-import { getActiveTenantSlug } from "@/lib/tenancy/tenancy";
+import { activeTenantSlug } from "@/lib/tenancy/tenancy";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { flashToast } from "@/lib/utils/toast";
 import { ensureLedgerAccount } from "@/lib/finance/invoicing";
@@ -25,7 +25,7 @@ async function gate() {
 export async function createTreasury(formData: FormData): Promise<void> {
   await gate();
   const ar = (await getLocale()) === "ar";
-  const tenantId = await getActiveTenantSlug();
+  const tenantId = await activeTenantSlug();
   if (!tenantId) {
     await flashToast({
       type: "info",

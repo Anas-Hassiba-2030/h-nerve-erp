@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/db";
 import { requireUser } from "@/lib/auth/session";
-import { getActiveTenantSlug } from "@/lib/tenancy/tenancy";
+import { activeTenantSlug } from "@/lib/tenancy/tenancy";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { flashToast } from "@/lib/utils/toast";
 
@@ -34,7 +34,7 @@ function readFields(formData: FormData) {
 export async function createSupplier(formData: FormData): Promise<void> {
   await gate();
   const ar = (await getLocale()) === "ar";
-  const tenantId = await getActiveTenantSlug();
+  const tenantId = await activeTenantSlug();
   if (!tenantId) {
     await flashToast({
       type: "info",

@@ -184,6 +184,16 @@ export async function postJournalEntry(
  * Every ledger reader (admin/journal, admin/accounts, statements) counts only
  * status="POSTED" rows, so an interrupted write leaves an inert DRAFT orphan —
  * never a partial entry in the books. Costs one extra UPDATE per entry.
+ *
+ * The flip is an `updateMany({ where: { id } })`, NOT `update({ where: { id } })`,
+ * and this matters. JournalEntry is a TENANT_SCOPED_MODEL; on the scoped client
+ * a by-id `update` trips the workspace-scope write-guard, which probes the row
+ * with a synthetic findUnique routed through the UNextended base client. Inside
+ * the caller's `prisma.$transaction(...)` that probe can't see the just-written
+ * DRAFT (read-your-writes gap), so it throws "Cross-tenant write blocked" and
+ * every ERP create button silently fails. `updateMany` is where-clause-stamped
+ * by the same hook (it appends `tenantId`) with no probe, so it scopes cleanly
+ * and works inside a transaction.
  */
 export async function createPostedJournalEntry(
   db: Db,
@@ -193,10 +203,9 @@ export async function createPostedJournalEntry(
     data: { ...data, status: "DRAFT", postedAt: null },
     select: { id: true },
   });
-  await db.journalEntry.update({
+  await db.journalEntry.updateMany({
     where: { id: entry.id },
     data: { status: "POSTED", postedAt: new Date() },
-    select: { id: true },
   });
   return entry;
 }

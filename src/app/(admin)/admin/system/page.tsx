@@ -58,6 +58,9 @@ export default async function AdminSystemPage() {
 
   // Platform-only count badges (the ERP consoles moved to Operations). Plain
   // count() so a schema drift can never crash the hub.
+  // CROSS-TENANT INTENT: Mission Control is the superadmin's group-wide deck —
+  // these badges count users/activity across every tenant, so they read the
+  // unscoped client deliberately (same intent as the federation totals above).
   const [cUsers, cAudit] = await Promise.all([
     n(prismaUnscoped.user.count()),
     n(prismaUnscoped.activityLog.count()),

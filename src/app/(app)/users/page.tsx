@@ -79,12 +79,20 @@ export default async function UsersPage() {
     const tiers = ROLE_TIERS.map((r) => users.filter((u) => u.role === r));
     tiers[tiers.length - 1].push(...users.filter((u) => !known.has(u.role)));
     const nonEmpty = tiers.filter((t) => t.length > 0);
-    nonEmpty.forEach((tier, i) => {
-      const parents = i === 0 ? null : nonEmpty[i - 1];
-      tier.forEach((u, j) =>
-        parentOf.set(u.id, parents ? parents[j % parents.length].id : null),
-      );
-    });
+    if (nonEmpty.length <= 1) {
+      // Only one role tier present (e.g. an all-STAFF fresh tenant) — a role
+      // hierarchy can't be built, but still avoid the flat wall: make the first
+      // person the root and nest everyone else one level beneath them.
+      const flat = nonEmpty[0] ?? [];
+      flat.forEach((u, j) => parentOf.set(u.id, j === 0 ? null : flat[0].id));
+    } else {
+      nonEmpty.forEach((tier, i) => {
+        const parents = i === 0 ? null : nonEmpty[i - 1];
+        tier.forEach((u, j) =>
+          parentOf.set(u.id, parents ? parents[j % parents.length].id : null),
+        );
+      });
+    }
   }
 
   const byParent = new Map<string | null, Member[]>();
@@ -95,7 +103,13 @@ export default async function UsersPage() {
     byParent.set(parent, arr);
   }
 
+  // Guard against a cycle in real reportsTo data (A→B→A). isRealEdge already
+  // drops self-loops, but a multi-node loop would otherwise recurse forever and
+  // 500 the page. A visited set makes render total regardless of the data.
+  const seen = new Set<string>();
   function renderNode(u: Member) {
+    if (seen.has(u.id)) return null;
+    seen.add(u.id);
     const kids = byParent.get(u.id) ?? [];
     const sector = u.company?.name ?? "";
     const role = isAr ? (ROLE_AR[u.role] ?? u.role) : (ROLE_EN[u.role] ?? u.role);

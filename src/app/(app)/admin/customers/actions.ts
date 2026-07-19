@@ -1,8 +1,16 @@
 "use server";
 
-// Server actions for /admin/customers (Phase 7). Mirror of the
-// suppliers actions — soft delete blocked while the customer still has
-// non-cancelled sales orders.
+// Server actions for the (now-redirected) /admin/customers surface (Phase 7).
+// The PAGE forwards to the canonical /customers; these actions are RETAINED
+// deliberately because createCustomer is the reference implementation of the
+// #174 cross-tenant WRITE-leak guard (submitted tenantId → resolveAdminTenantId
+// override) that adminActionScope.actions.test.ts asserts. The canonical
+// /customers/actions uses activeTenantSlug() instead (no submitted tenantId,
+// so leak-proof by construction) — a different, equally-safe model. Do not
+// delete these without moving that regression guard.
+//
+// Mirror of the suppliers actions — soft delete blocked while the customer
+// still has non-cancelled sales orders.
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/session";

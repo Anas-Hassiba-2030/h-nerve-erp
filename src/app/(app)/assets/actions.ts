@@ -87,14 +87,10 @@ export async function createFixedAsset(formData: FormData): Promise<void> {
       });
     });
   } catch (err) {
-    console.error("[createAsset] failed:", err instanceof Error ? err.stack ?? err.message : err);
-    await flashToast({
-      type: "info",
-      entity: "info",
-      label: ar
-        ? "تعذر إنشاء الأصل"
-        : `Could not create the asset${err instanceof Error ? ": " + err.message.slice(0, 300) : ""}`,
-    });
+    // Log server-side so a failed create is never silent (a bare `catch {}`
+    // hid the D1 interactive-transaction error for a long time).
+    console.error("[createAsset] failed:", err instanceof Error ? err.message : err);
+    await flashToast({ type: "info", entity: "info", label: ar ? "تعذر إنشاء الأصل" : "Could not create the asset" });
     return;
   }
 

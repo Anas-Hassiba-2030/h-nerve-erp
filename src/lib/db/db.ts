@@ -202,15 +202,46 @@ function makeScopedClient(): PrismaClient {
 // "client") has no such engine. See prisma/schema/schema.prisma.
 function lazyClient(factory: () => PrismaClient, globalKey: "prismaRaw" | "prismaScoped"): PrismaClient {
   let instance: PrismaClient | undefined = globalForPrisma[globalKey];
+  const ensure = (): PrismaClient => {
+    if (!instance) {
+      instance = factory();
+      if (process.env.NODE_ENV !== "production") {
+        globalForPrisma[globalKey] = instance;
+      }
+    }
+    return instance;
+  };
   return new Proxy({} as PrismaClient, {
     get(_target, prop) {
-      if (!instance) {
-        instance = factory();
-        if (process.env.NODE_ENV !== "production") {
-          globalForPrisma[globalKey] = instance;
-        }
+      const inst = ensure();
+      // D1 has NO interactive transactions. Prisma's engine HARD-THROWS
+      // ("Cloudflare D1 does not support interactive transactions") the moment
+      // `$transaction(callback)` is called — which silently broke EVERY write
+      // that wrapped its steps in one (all ~30 ERP create/mutation actions:
+      // invoices, payments, POS, payroll, assets, manufacturing, …). The batch
+      // form `$transaction([...])` IS supported by D1, so keep delegating that.
+      //
+      // For the callback form we run the callback against the client directly:
+      // no BEGIN/COMMIT, statements auto-commit individually. That is exactly
+      // D1's own "transactions are ignored and run as individual queries"
+      // behaviour, and it is safe here because the one place atomicity mattered
+      // — posting a journal entry — is already crash-safe by construction
+      // (createPostedJournalEntry writes DRAFT then flips to POSTED, and every
+      // ledger reader counts POSTED only). A mid-sequence failure can leave an
+      // inert orphan (a DRAFT entry, an unreferenced doc) but never a corrupt,
+      // half-visible record.
+      if (prop === "$transaction") {
+        return (arg: unknown, ...rest: unknown[]) => {
+          if (typeof arg === "function") {
+            return (arg as (client: PrismaClient) => unknown)(inst);
+          }
+          const realTx = Reflect.get(inst as object, "$transaction", inst) as (
+            ...a: unknown[]
+          ) => unknown;
+          return realTx.call(inst, arg, ...rest);
+        };
       }
-      return Reflect.get(instance as object, prop, instance);
+      return Reflect.get(inst as object, prop, inst);
     },
   });
 }

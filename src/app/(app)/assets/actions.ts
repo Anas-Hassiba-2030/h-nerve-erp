@@ -86,8 +86,15 @@ export async function createFixedAsset(formData: FormData): Promise<void> {
         note: data.note,
       });
     });
-  } catch {
-    await flashToast({ type: "info", entity: "info", label: ar ? "تعذر إنشاء الأصل" : "Could not create the asset" });
+  } catch (err) {
+    console.error("[createAsset] failed:", err instanceof Error ? err.stack ?? err.message : err);
+    await flashToast({
+      type: "info",
+      entity: "info",
+      label: ar
+        ? "تعذر إنشاء الأصل"
+        : `Could not create the asset${err instanceof Error ? ": " + err.message.slice(0, 300) : ""}`,
+    });
     return;
   }
 

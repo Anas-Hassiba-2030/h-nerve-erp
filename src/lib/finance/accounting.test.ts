@@ -139,7 +139,7 @@ describe("createPostedJournalEntry (D1 atomicity pattern)", () => {
     lines: { create: [] },
   } as Parameters<typeof createPostedJournalEntry>[1];
 
-  it("creates as DRAFT (postedAt null) then flips to POSTED with one atomic update", async () => {
+  it("creates as DRAFT (postedAt null) then flips to POSTED via updateMany (no by-id probe)", async () => {
     const calls: string[] = [];
     let createdData: Record<string, unknown> = {};
     let updateArgs: { where?: unknown; data?: Record<string, unknown> } = {};
@@ -150,10 +150,13 @@ describe("createPostedJournalEntry (D1 atomicity pattern)", () => {
           createdData = args.data;
           return { id: "je1" };
         },
-        update: async (args: { where: unknown; data: Record<string, unknown> }) => {
-          calls.push("update");
+        // updateMany, NOT update: a by-id update on the tenant-scoped
+        // JournalEntry trips the workspace write-guard probe inside a
+        // transaction. updateMany is where-stamped by the hook, no probe.
+        updateMany: async (args: { where: unknown; data: Record<string, unknown> }) => {
+          calls.push("updateMany");
           updateArgs = args;
-          return { id: "je1" };
+          return { count: 1 };
         },
       },
     } as unknown as Prisma.TransactionClient;
@@ -161,12 +164,12 @@ describe("createPostedJournalEntry (D1 atomicity pattern)", () => {
     const res = await createPostedJournalEntry(fakeDb, minimalData);
 
     expect(res).toEqual({ id: "je1" });
-    expect(calls).toEqual(["create", "update"]);
+    expect(calls).toEqual(["create", "updateMany"]);
     // The INSERT must never carry POSTED — readers filter status="POSTED",
     // so an interrupted write stays invisible.
     expect(createdData.status).toBe("DRAFT");
     expect(createdData.postedAt).toBeNull();
-    // The flip is a single-row UPDATE — atomic on D1.
+    // The flip targets the one row by id and stamps POSTED.
     expect(updateArgs.where).toEqual({ id: "je1" });
     expect(updateArgs.data?.status).toBe("POSTED");
     expect(updateArgs.data?.postedAt).toBeInstanceOf(Date);
@@ -179,9 +182,9 @@ describe("createPostedJournalEntry (D1 atomicity pattern)", () => {
         create: async () => {
           throw new Error("boom");
         },
-        update: async () => {
+        updateMany: async () => {
           updated = true;
-          return { id: "je1" };
+          return { count: 1 };
         },
       },
     } as unknown as Prisma.TransactionClient;

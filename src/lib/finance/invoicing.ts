@@ -81,7 +81,13 @@ export async function nextDocNumber(
     create: { tenantId, docType, prefix: defaultPrefix, nextValue: 1, padTo: 6 },
     update: {},
   });
-  await tx.numberingScheme.update({
+  // updateMany, NOT update({ where: { id } }): NumberingScheme is tenant-scoped,
+  // and a by-id `update` on the scoped client trips the workspace write-guard
+  // probe (a base-client findUnique) which can't see this row's just-written
+  // state inside the caller's $transaction → "Cross-tenant write blocked",
+  // failing EVERY ERP create (nextDocNumber runs on all of them). updateMany is
+  // where-clause-stamped by the same hook, no probe. See createPostedJournalEntry.
+  await tx.numberingScheme.updateMany({
     where: { id: scheme.id },
     data: { nextValue: { increment: 1 } },
   });

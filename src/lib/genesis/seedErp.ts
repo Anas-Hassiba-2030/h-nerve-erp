@@ -37,6 +37,11 @@ import { postAssetAcquisition } from "@/lib/finance/assets";
 import { openCashSession, completePosSale } from "@/lib/pos/pos";
 import { runPayroll } from "@/lib/hr/payroll";
 import { completeManufacturingOrder } from "@/lib/manufacturing/manufacturing";
+import { recordMovement, recalcProductQuantity } from "@/lib/finance/inventory";
+
+// Marker on the opening-stock movement so the seed is idempotent AND can heal
+// a product whose quantity was driven negative by a prior partial run.
+const OPENING_REASON = "Opening stock (ERP seed)";
 
 // The core fns are typed for Prisma.TransactionClient; on D1 we hand them the
 // plain client (no real transactions there anyway). One alias, cast once.
@@ -127,13 +132,33 @@ export async function seedErp(
   for (const p of productDefs) {
     let row = await db.product.findFirst({ where: { tenantId, sku: p.sku } });
     if (!row) {
+      // quantity starts at 0 — stock arrives via the opening IMPORT movement
+      // below, because Product.quantity is the SUM of movements (the invariant
+      // recordMovement/recalcProductQuantity maintain). Seeding a non-zero
+      // quantity with no matching movement breaks it: the first sale's recalc
+      // resets quantity to the (negative) movement sum.
       row = await db.product.create({
         data: {
-          tenantId, sku: p.sku, name: p.name, quantity: 2000,
+          tenantId, sku: p.sku, name: p.name, quantity: 0,
           reorderPoint: 200, unitCost: p.unitCost, warehouseId: warehouse.id,
         },
       });
       bump("products");
+    }
+    // Opening stock — idempotent. POS and manufacturing draw down the
+    // movement-derived quantity, so every product needs a real inflow. Skip if
+    // one already exists; recalc reconciles quantity (also heals any product a
+    // prior partial run drove negative).
+    const hasOpening = await db.inventoryMovement.findFirst({
+      where: { productId: row.id, type: "IMPORT", reason: OPENING_REASON },
+    });
+    if (!hasOpening) {
+      await recordMovement(t, {
+        tenantId, productId: row.id, type: "IMPORT", delta: 5000,
+        unitCost: p.unitCost, reason: OPENING_REASON,
+      });
+      await recalcProductQuantity(t, row.id);
+      bump("openingStock");
     }
     products[p.sku] = { id: row.id, price: p.price };
   }

@@ -1252,4 +1252,52 @@ aside[aria-label="القائمة الجانبية"] > div:first-child::after {
 /* sidebar should NOT animate-in from the side every navigation (felt jittery) */
 aside[aria-label="Sidebar"], aside[aria-label="القائمة الجانبية"] { animation: none !important; }
 
+/* =================================================================
+   Workspace COMMAND-page facets — the per-company "Claude Design"
+   console surface (hub strip + 5-up facet grid + facet lines/
+   priorities + ws-btn pill). Ported from
+   docs/design/system/sections/workspace.html, SCOPED under .dl-page.
+
+   These MUST live in this globally-@imported file (globals.css imports
+   it). They were previously stranded in an orphaned
+   app/(app)/workspace/workspace.css that NO module imported — so the
+   /workspace command page rendered its hub/grid/facets completely
+   unstyled (bare emoji + label stack). Base daylight tokens + sec-head/
+   kpi-grid/panel already live in app/(app)/daylight.css; this block adds
+   only what daylight.css lacks. Reference class names preserved.
+   ================================================================= */
+
+/* Reference stylesheets used --display + --ui; daylight.css exposes the
+   serif as --dl-display. Alias so the reference rules resolve unchanged. */
+.dl-page { --display: var(--dl-display); --ui: "Cairo", "Reem Kufi", system-ui, sans-serif; }
+
+.dl-page .ws-picker { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.dl-page .ws-picker label { font-size: 11px; font-weight: 700; color: var(--ink-muted); }
+.dl-page .ws-picker select { background: var(--cream); border: 1px solid var(--line); border-radius: 12px; color: var(--ink); font-family: var(--ui); font-size: 15px; font-weight: 700; padding: 10px 16px; outline: none; cursor: pointer; }
+
+.dl-page .ws-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+@media (max-width: 900px) { .dl-page .ws-grid { grid-template-columns: 1fr; } }
+
+.dl-page .ws-facet { background: var(--cream); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+.dl-page .ws-facet h3 { font-family: var(--display); font-size: 18px; font-weight: 600; color: var(--emerald); margin-bottom: 3px; display: flex; align-items: center; gap: 8px; }
+.dl-page .ws-facet .fsub { font-size: 11px; color: var(--ink-muted); margin-bottom: 14px; }
+
+.dl-page .ws-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.dl-page .ws-line:last-child { border-bottom: 0; }
+.dl-page .ws-line .v { font-family: var(--display); font-weight: 600; color: var(--emerald); font-variant-numeric: tabular-nums; }
+
+.dl-page .ws-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--emerald-soft), var(--emerald)); border: 0; border-radius: 999px; padding: 8px 14px; cursor: pointer; margin-top: 12px; text-decoration: none; }
+.dl-page .ws-btn.ghost { color: var(--emerald); background: rgba(31,77,63,.06); border: 1.5px solid rgba(31,77,63,.28); }
+
+.dl-page .ws-pri { display: flex; align-items: center; gap: 9px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--ink); }
+.dl-page .ws-pri .dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 8px; }
+
+.dl-page .ws-hub { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 16px; }
+@media (max-width: 760px) { .dl-page .ws-hub { grid-template-columns: repeat(2, 1fr); } }
+
+.dl-page .hub-tile { background: linear-gradient(160deg, #fffdf8, var(--cream)); border: 1px solid var(--line); border-radius: 14px; padding: 14px; text-align: center; cursor: pointer; transition: transform .2s, border-color .2s; text-decoration: none; }
+.dl-page .hub-tile:hover { transform: translateY(-2px); border-color: var(--gold); }
+.dl-page .hub-tile .hi { font-size: 22px; margin-bottom: 6px; }
+.dl-page .hub-tile .ht { font-size: 12.5px; font-weight: 700; color: var(--ink); }
+
 

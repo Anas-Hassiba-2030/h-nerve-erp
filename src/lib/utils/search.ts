@@ -40,7 +40,7 @@ export async function universalSearch(qRaw: string): Promise<SearchHit[]> {
       take: PER, select: { id: true, name: true, email: true },
     });
     for (const r of rows)
-      hits.push({ id: r.id, kind: "customer", label: r.name, sub: r.email ?? "", href: "/admin/customers" });
+      hits.push({ id: r.id, kind: "customer", label: r.name, sub: r.email ?? "", href: "/customers" });
   } catch { /* fail-soft */ }
 
   try {
@@ -49,7 +49,7 @@ export async function universalSearch(qRaw: string): Promise<SearchHit[]> {
       take: PER, select: { id: true, name: true, email: true },
     });
     for (const r of rows)
-      hits.push({ id: r.id, kind: "supplier", label: r.name, sub: r.email ?? "", href: "/admin/suppliers" });
+      hits.push({ id: r.id, kind: "supplier", label: r.name, sub: r.email ?? "", href: "/suppliers" });
   } catch { /* fail-soft */ }
 
   try {

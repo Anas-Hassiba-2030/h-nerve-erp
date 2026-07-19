@@ -43,8 +43,8 @@ const FAMILY: Item[] = [
   { href: "/admin/transfers",       ar: "التحويلات",   en: "Transfers",       icon: Truck,          group: "inventory" },
   { href: "/admin/purchase-orders", ar: "أوامر الشراء", en: "Purchase Orders", icon: ShoppingCart,   group: "orders" },
   { href: "/admin/sales-orders",    ar: "أوامر البيع",  en: "Sales Orders",    icon: ShoppingBag,    group: "orders" },
-  { href: "/admin/suppliers",       ar: "المورّدون",    en: "Suppliers",       icon: Users,          group: "parties" },
-  { href: "/admin/customers",       ar: "العملاء",      en: "Customers",       icon: UserSquare,     group: "parties" },
+  { href: "/suppliers",             ar: "المورّدون",    en: "Suppliers",       icon: Users,          group: "parties" },
+  { href: "/customers",             ar: "العملاء",      en: "Customers",       icon: UserSquare,     group: "parties" },
   { href: "/admin/journal",         ar: "اليومية",      en: "Journal",         icon: BookOpen,       group: "books" },
   { href: "/admin/accounts",        ar: "الحسابات",     en: "Accounts",        icon: Library,        group: "books" },
 ];

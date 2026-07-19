@@ -1,5 +1,11 @@
 "use server";
 
+// The /admin/suppliers PAGE now redirects to the canonical /suppliers; these
+// actions are RETAINED as the sibling of the #174 tenant-scope-wiring guard
+// exercised via admin/customers/actions (see that file's header). Kept so the
+// legacy write path stays typed/tested. Canonical writes go through
+// /suppliers/actions (activeTenantSlug-based).
+//
 // Server actions for /admin/suppliers (Phase 7). CRUD over Supplier.
 // Mirrors the mappings/products action conventions: gate(), flashToast
 // + revalidate, friendly toast on the unique-name collision, soft

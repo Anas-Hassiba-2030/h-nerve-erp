@@ -30,6 +30,15 @@ import { ConstellationRail } from "@/components/orrery/ConstellationRail";
 import { FabRail } from "@/components/orrery/FabRail";
 import { MorningBrief } from "@/components/brain/MorningBrief";
 import "./living.css";
+// Daylight work-surface styles are used by ~40 (app) pages (Operations, the
+// admin family, achievements, employees, …). Importing here — at the layout,
+// not per-page — guarantees the .dl-page palette tokens (--ink/--emerald/…)
+// AND the display-font var (--dl-display) are in <head> at first paint on EVERY
+// navigation, including client-side ones. When it was imported per-page the CSS
+// chunk landed AFTER the RSC commit on client-nav, so var(--ink)/var(--dl-display)
+// briefly resolved to nothing → wrong colours + headings falling back to the
+// body font ("letters don't appear well"), correcting only on a hard refresh.
+import "./daylight.css";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getCurrentUser();

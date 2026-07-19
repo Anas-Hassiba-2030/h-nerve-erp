@@ -59,6 +59,20 @@
   --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.04), 0 6px 24px color-mix(in srgb, var(--brand-deep) 8%, transparent);
   --shadow-glow: 0 0 0 1px color-mix(in srgb, var(--brand) 12%, transparent),
                  0 12px 48px -12px color-mix(in srgb, var(--brand) 35%, transparent);
+
+  /* Daylight palette — global FALLBACK values. The canonical definitions live
+     scoped under `.dl-page` in (app)/daylight.css and, being more specific,
+     always win where a daylight page is mounted. Hoisting the same values to
+     :root guarantees inline `style={{ color: "var(--ink)" }}` references (the
+     Operations hub uses these directly) resolve at FIRST paint even if the
+     scoped stylesheet is applied a beat late on a client navigation — no more
+     wrong-colour flash that only corrected on a hard refresh. */
+  --gold: #c2a35a; --gold-soft: #dcc38a;
+  --emerald: #1f4d3f; --emerald-soft: #2e6b57;
+  --ink: #2a2a26; --ink-muted: #6b6459;
+  --cream: #fefcf7; --ivory: #f6f1e7; --line: #e4dccb;
+  --sage: #7e9b86; --brick: #a86a5c;
+  --dl-display: "Fraunces", "Cormorant Garamond", "Newsreader", "Reem Kufi", Georgia, serif;
 }
 
 html, body {
@@ -83,7 +97,10 @@ html[lang="en"] body {
    Arabic: Reem Kufi for modern, Aref Ruqaa for editorial moments */
 .font-display-latin { font-family: "Fraunces", "GT Sectra", "Tiempos Headline", Georgia, serif; font-optical-sizing: auto; }
 .font-display-arabic { font-family: "Reem Kufi", "Aref Ruqaa", "Cairo", serif; }
-.font-display { font-family: "Reem Kufi", "Fraunces", "Aref Ruqaa", serif; font-optical-sizing: auto; }
+/* Fraunces (Latin) leads; Arabic text has no Fraunces glyphs so it falls
+   through per-glyph to Reem Kufi. Reem-Kufi-first made Latin headlines render
+   in that Arabic face's cramped Latin fallback. */
+.font-display { font-family: "Fraunces", "Reem Kufi", "Aref Ruqaa", serif; font-optical-sizing: auto; }
 .font-editorial-arabic { font-family: "Aref Ruqaa", "Reem Kufi", serif; }
 .font-mono-tech { font-family: "JetBrains Mono", "IBM Plex Mono", "GT America Mono", ui-monospace, monospace; }
 

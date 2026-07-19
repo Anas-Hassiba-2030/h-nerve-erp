@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { hasRole } from "@/lib/auth/authz";
 import { formatNumber, formatMoney } from "@/lib/utils/utils";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { terminateEmployee, deleteEmployee } from "./actions";
 import "../../daylight.css";
 
@@ -30,23 +31,27 @@ export default async function EmployeesPage() {
   });
 
   return (
-    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
-      <div className="max-w-5xl mx-auto py-8 px-4 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold">{ar ? "سجل الموظفين" : "Employee Records"}</h1>
-            <p style={{ fontSize: 13, color: "var(--ink-muted)" }}>
-              {ar ? `${formatNumber(employees.length)} موظف` : `${formatNumber(employees.length)} employees`}
-            </p>
-          </div>
-          {canManage ? (
-            <Link href="/hr/employees/new" className="btn btn-primary">
+    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+      <DaylightHeader
+        eyebrow={ar ? "الموارد البشرية" : "Human Resources"}
+        title={ar ? "سجل الموظفين" : "Employees"}
+        subtitle={
+          ar
+            ? "سجل الموظفين ورواتبهم الأساسية — الأساس الذي يُشغّل عليه مسير الرواتب."
+            : "Employee records and base salaries — the basis payroll runs against."
+        }
+        status={ar ? `${formatNumber(employees.length)} موظف` : `${formatNumber(employees.length)} employees`}
+        actions={
+          canManage ? (
+            <Link href="/hr/employees/new" className="dl-btn dl-btn-primary">
               <Plus className="h-4 w-4" />
               {ar ? "موظف جديد" : "New employee"}
             </Link>
-          ) : null}
-        </div>
+          ) : undefined
+        }
+      />
 
+      <div>
         {employees.length === 0 ? (
           <EmptyState
             icon={Users}
@@ -58,7 +63,7 @@ export default async function EmployeesPage() {
             }
             action={
               canManage ? (
-                <Link href="/hr/employees/new" className="btn btn-primary">
+                <Link href="/hr/employees/new" className="dl-btn dl-btn-primary">
                   <Plus className="h-4 w-4" />
                   {ar ? "موظف جديد" : "New employee"}
                 </Link>
@@ -66,7 +71,7 @@ export default async function EmployeesPage() {
             }
           />
         ) : (
-          <div className="table-wrap">
+          <div className="panel reveal table-wrap" style={{ padding: 0 }}>
             <table className="w-full text-sm">
               <thead>
                 <tr>
@@ -119,6 +124,6 @@ export default async function EmployeesPage() {
           </div>
         )}
       </div>
-    </div>
+    </DaylightShell>
   );
 }

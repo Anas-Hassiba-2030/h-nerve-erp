@@ -37,6 +37,7 @@ import { postAssetAcquisition } from "@/lib/finance/assets";
 import { openCashSession, completePosSale } from "@/lib/pos/pos";
 import { runPayroll } from "@/lib/hr/payroll";
 import { completeManufacturingOrder } from "@/lib/manufacturing/manufacturing";
+import { plannedWorkOrderMinutes, workOrderLaborCost } from "@/lib/manufacturing/routing";
 import { recordMovement, recalcProductQuantity } from "@/lib/finance/inventory";
 
 // Marker on the opening-stock movement so the seed is idempotent AND can heal
@@ -304,8 +305,26 @@ export async function seedErp(
     if (run) bump("payrollRuns");
   } else skipped.push("payrollRuns");
 
-  // Manufacturing — one BOM (gift basket from 3 components) + a completed order.
+  // Manufacturing — two work centers, one ROUTED BOM (gift basket from 3
+  // components, prep + packing stages), and a completed order whose stages
+  // were executed so the cost rollup carries real routing labor (v2).
   if ((await db.manufacturingOrder.count({ where: { tenantId } })) === 0) {
+    const wcPrepCode = await nextDocNumber(t, tenantId, "WORK_CENTER", "WC-");
+    const wcPrep = await db.workCenter.create({
+      data: {
+        tenantId, code: wcPrepCode, name: "محطة التجهيز", nameEn: "Prep station",
+        costPerHour: 6, efficiency: 100, setupMinutes: 10, cleanupMinutes: 5,
+      },
+    });
+    const wcPackCode = await nextDocNumber(t, tenantId, "WORK_CENTER", "WC-");
+    const wcPack = await db.workCenter.create({
+      data: {
+        tenantId, code: wcPackCode, name: "محطة التعبئة", nameEn: "Packing line",
+        costPerHour: 4.5, efficiency: 100,
+      },
+    });
+    bump("workCenters");
+
     const bomNumber = await nextDocNumber(t, tenantId, "BOM", "BOM-");
     const bom = await db.billOfMaterials.create({
       data: {
@@ -318,13 +337,40 @@ export async function seedErp(
             { componentProductId: products["DATES-1KG"].id, quantity: 1 },
           ],
         },
+        operations: {
+          create: [
+            { sequence: 10, name: "تجهيز المكوّنات", workCenterId: wcPrep.id, durationMinutes: 4 },
+            { sequence: 20, name: "تعبئة وتغليف", workCenterId: wcPack.id, durationMinutes: 6 },
+          ],
+        },
       },
+      include: { operations: { orderBy: { sequence: "asc" } } },
     });
     bump("boms");
+
     const orderNumber = await nextDocNumber(t, tenantId, "MFG_ORDER", "MO-");
     const order = await db.manufacturingOrder.create({
       data: { tenantId, orderNumber, bomId: bom.id, runs: 25, status: "IN_PROGRESS" },
     });
+    // Execute both stages (prep: 10+5 setup/cleanup + 4×25 = 115 min at 6/h;
+    // packing: 6×25 = 150 min at 4.5/h) so completion sees routed labor.
+    for (const op of bom.operations) {
+      const wc = op.workCenterId === wcPrep.id ? wcPrep : wcPack;
+      const planned = plannedWorkOrderMinutes({
+        durationMinutes: Number(op.durationMinutes), runs: 25,
+        efficiency: wc.efficiency, setupMinutes: Number(wc.setupMinutes),
+        cleanupMinutes: Number(wc.cleanupMinutes),
+      });
+      await db.workOrder.create({
+        data: {
+          tenantId, orderId: order.id, operationId: op.id, workCenterId: wc.id,
+          sequence: op.sequence, name: op.name, status: "DONE",
+          plannedMinutes: planned, costPerHour: Number(wc.costPerHour),
+          laborCost: workOrderLaborCost({ minutes: planned, costPerHour: Number(wc.costPerHour) }),
+          startedAt: new Date(), finishedAt: new Date(),
+        },
+      });
+    }
     await completeManufacturingOrder(t, { tenantId, orderId: order.id });
     bump("manufacturingOrders");
   } else skipped.push("manufacturingOrders");

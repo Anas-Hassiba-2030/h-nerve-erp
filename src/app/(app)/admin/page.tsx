@@ -12,7 +12,7 @@ import {
   Inbox, Map as MapIcon, Package, ArrowLeftRight, Warehouse, Truck,
   ShoppingCart, ShoppingBag, Users, UserSquare, BookOpen, Library,
   BrainCircuit, FileText, GitBranch, ReceiptText, CreditCard, Landmark,
-  Banknote, Scale, Building2, Factory, CalendarDays, Wallet,
+  Banknote, Scale, Building2, Factory, CalendarDays, Wallet, PackageSearch,
 } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -46,6 +46,7 @@ const CONSOLES: Console[] = [
   { href: "/purchase-invoices", ar: "فواتير المشتريات", en: "Purchase Invoices", icon: ShoppingBag, group: "purchasing", desc_ar: "فواتير المورّدين والالتزامات.",           desc_en: "Supplier bills and payables." },
   { href: "/purchase-payments", ar: "دفعات الموردين",   en: "Supplier Payments", icon: Banknote,    group: "purchasing", desc_ar: "سداد المورّدين من الخزائن.",              desc_en: "Pay suppliers from the treasuries." },
   { href: "/admin/purchase-orders", ar: "أوامر الشراء", en: "Purchase Orders", icon: ShoppingCart, group: "purchasing", desc_ar: "أوامر الشراء من المورّدين ودورة الاستلام.",   desc_en: "Supplier purchase orders and receiving." },
+  { href: "/admin/replenishment",   ar: "إعادة التزويد", en: "Replenishment",  icon: PackageSearch, group: "purchasing", desc_ar: "قواعد الحد الأدنى/الأقصى ومسودات الشراء التلقائية.", desc_en: "Min/max reorder rules and one-click draft POs." },
   // ── Treasury & accounting (cash + the books) ──
   { href: "/treasuries",   ar: "الخزائن",          en: "Treasuries",      icon: Landmark,    group: "treasury",     desc_ar: "الصناديق النقدية والحسابات البنكية.",          desc_en: "Cash boxes and bank accounts." },
   { href: "/payments",     ar: "دفعات العملاء",    en: "Payments",        icon: CreditCard,  group: "treasury",     desc_ar: "تحصيل دفعات العملاء على الفواتير.",            desc_en: "Collect customer payments on invoices." },

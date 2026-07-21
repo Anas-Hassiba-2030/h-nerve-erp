@@ -5,6 +5,9 @@ import {
   allocateByproductCost,
   workOrdersComplete,
   routingLaborTotal,
+  hasDependencyCycle,
+  stageUnblocked,
+  autoStageDuration,
 } from "./routing";
 import { rollupCost } from "./manufacturing";
 
@@ -157,5 +160,100 @@ describe("rollupCost with routing labor", () => {
     });
     expect(r.laborCost).toBe(6);
     expect(r.totalCost).toBe(18);
+  });
+});
+
+describe("hasDependencyCycle", () => {
+  it("passes a plain linear chain", () => {
+    expect(
+      hasDependencyCycle(["a", "b", "c"], [
+        { operationId: "b", blockedByOperationId: "a" },
+        { operationId: "c", blockedByOperationId: "b" },
+      ]),
+    ).toBe(false);
+  });
+
+  it("passes a fan-in (multiple blockers, one stage)", () => {
+    expect(
+      hasDependencyCycle(["a", "b", "c"], [
+        { operationId: "c", blockedByOperationId: "a" },
+        { operationId: "c", blockedByOperationId: "b" },
+      ]),
+    ).toBe(false);
+  });
+
+  it("passes no edges at all", () => {
+    expect(hasDependencyCycle(["a", "b"], [])).toBe(false);
+  });
+
+  it("catches a direct 2-cycle", () => {
+    expect(
+      hasDependencyCycle(["a", "b"], [
+        { operationId: "a", blockedByOperationId: "b" },
+        { operationId: "b", blockedByOperationId: "a" },
+      ]),
+    ).toBe(true);
+  });
+
+  it("catches a longer cycle (a<-b<-c<-a)", () => {
+    expect(
+      hasDependencyCycle(["a", "b", "c"], [
+        { operationId: "a", blockedByOperationId: "c" },
+        { operationId: "b", blockedByOperationId: "a" },
+        { operationId: "c", blockedByOperationId: "b" },
+      ]),
+    ).toBe(true);
+  });
+
+  it("ignores edges referencing operations outside the set", () => {
+    expect(
+      hasDependencyCycle(["a", "b"], [{ operationId: "a", blockedByOperationId: "ghost" }]),
+    ).toBe(false);
+  });
+});
+
+describe("stageUnblocked", () => {
+  it("is unblocked with no blockers", () => {
+    expect(stageUnblocked([], [])).toBe(true);
+  });
+
+  it("blocks while a required blocker is still open", () => {
+    expect(
+      stageUnblocked(["op-a"], [{ operationId: "op-a", status: "IN_PROGRESS" }]),
+    ).toBe(false);
+  });
+
+  it("unblocks once every blocker is DONE or CANCELLED", () => {
+    expect(
+      stageUnblocked(["op-a", "op-b"], [
+        { operationId: "op-a", status: "DONE" },
+        { operationId: "op-b", status: "CANCELLED" },
+      ]),
+    ).toBe(true);
+  });
+
+  it("requires ALL blockers, not just one", () => {
+    expect(
+      stageUnblocked(["op-a", "op-b"], [
+        { operationId: "op-a", status: "DONE" },
+        { operationId: "op-b", status: "PENDING" },
+      ]),
+    ).toBe(false);
+  });
+});
+
+describe("autoStageDuration", () => {
+  it("falls back to the manual duration with no history", () => {
+    expect(autoStageDuration({ recentMinutes: [], fallbackManualMinutes: 60 })).toBe(60);
+  });
+
+  it("averages the recent sample", () => {
+    expect(autoStageDuration({ recentMinutes: [10, 20, 30], fallbackManualMinutes: 999 })).toBe(20);
+  });
+
+  it("caps the sample at n (most-recent-first)", () => {
+    expect(
+      autoStageDuration({ recentMinutes: [10, 10, 10, 100, 100], fallbackManualMinutes: 0, n: 3 }),
+    ).toBe(10);
   });
 });

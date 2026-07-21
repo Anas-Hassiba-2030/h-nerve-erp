@@ -33,6 +33,7 @@ export const MOVEMENT_TYPES = [
   "RETURN_TO_SUPPLIER",
   "MFG_CONSUME",
   "MFG_PRODUCE",
+  "SCRAP",
 ] as const;
 
 export type MovementType = (typeof MOVEMENT_TYPES)[number];

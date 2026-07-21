@@ -9,11 +9,19 @@ type ProductOption = { id: string; name: string; sku: string };
 type WorkCenterOption = { id: string; name: string; code: string };
 
 type Line = { componentProductId: string; quantity: string };
-type OpRow = { name: string; workCenterId: string; durationMinutes: string };
+type OpRow = {
+  name: string;
+  workCenterId: string;
+  durationMinutes: string;
+  durationMode: "manual" | "auto";
+  // Indexes into the live `ops` array (not yet re-sequenced) of stages
+  // that must finish before this one can start.
+  blockedByIndexes: number[];
+};
 type ByRow = { productId: string; quantity: string; costSharePercent: string; isScrap: boolean };
 
 const emptyLine: Line = { componentProductId: "", quantity: "1" };
-const emptyOp: OpRow = { name: "", workCenterId: "", durationMinutes: "60" };
+const emptyOp: OpRow = { name: "", workCenterId: "", durationMinutes: "60", durationMode: "manual", blockedByIndexes: [] };
 const emptyBy: ByRow = { productId: "", quantity: "1", costSharePercent: "0", isScrap: false };
 
 export function BomForm({
@@ -51,10 +59,24 @@ export function BomForm({
       .filter((l) => l.componentProductId)
       .map((l) => ({ componentProductId: l.componentProductId, quantity: l.quantity })),
   );
+  // blockedByIndexes are indexed into the LIVE ops array; a filtered-out
+  // (incomplete) row would otherwise desync those indexes from what the
+  // server receives, so remap old->new indexes here rather than filtering
+  // and mapping in two independent passes.
+  const validOps = ops
+    .map((o, i) => ({ o, i }))
+    .filter(({ o }) => o.name.trim() && o.workCenterId);
+  const opIndexRemap = new Map(validOps.map(({ i }, newIdx) => [i, newIdx]));
   const operationsJson = JSON.stringify(
-    ops
-      .filter((o) => o.name.trim() && o.workCenterId)
-      .map((o) => ({ name: o.name, workCenterId: o.workCenterId, durationMinutes: o.durationMinutes })),
+    validOps.map(({ o }) => ({
+      name: o.name,
+      workCenterId: o.workCenterId,
+      durationMinutes: o.durationMinutes,
+      durationMode: o.durationMode,
+      blockedByIndexes: o.blockedByIndexes
+        .filter((j) => opIndexRemap.has(j))
+        .map((j) => opIndexRemap.get(j)),
+    })),
   );
   const byproductsJson = JSON.stringify(
     byproducts
@@ -196,46 +218,106 @@ export function BomForm({
               : "Create work centers first to add routing stages — labor cost is then computed from each stage's minutes."}
           </p>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {ops.map((o, i) => (
-              <div key={i} className="grid gap-2 items-end" style={{ gridTemplateColumns: "1fr 1fr 110px 32px" }}>
-                <input
-                  className="input"
-                  placeholder={ar ? "اسم المرحلة (خلط، تعبئة…)" : "Stage name (mixing, packing…)"}
-                  value={o.name}
-                  onChange={(e) => updateOp(i, { name: e.target.value })}
-                  maxLength={200}
-                />
-                <select
-                  className="select"
-                  value={o.workCenterId}
-                  onChange={(e) => updateOp(i, { workCenterId: e.target.value })}
-                >
-                  <option value="">{ar ? "مركز العمل" : "Work center"}</option>
-                  {workCenters.map((w) => (
-                    <option key={w.id} value={w.id}>
-                      {w.name} ({w.code})
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  min={1}
-                  className="input"
-                  title={ar ? "دقائق لكل دورة" : "Minutes per run"}
-                  value={o.durationMinutes}
-                  onChange={(e) => updateOp(i, { durationMinutes: e.target.value })}
-                />
-                <button
-                  type="button"
-                  onClick={() => setOps((prev) => prev.filter((_, idx) => idx !== i))}
-                  className="btn-ghost"
-                  aria-label={ar ? "حذف المرحلة" : "Remove stage"}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+              <div key={i} className="rounded-lg p-2" style={{ border: "1px solid var(--line)" }}>
+                <div className="grid gap-2 items-end" style={{ gridTemplateColumns: "1fr 1fr 90px 110px 32px" }}>
+                  <input
+                    className="input"
+                    placeholder={ar ? "اسم المرحلة (خلط، تعبئة…)" : "Stage name (mixing, packing…)"}
+                    value={o.name}
+                    onChange={(e) => updateOp(i, { name: e.target.value })}
+                    maxLength={200}
+                  />
+                  <select
+                    className="select"
+                    value={o.workCenterId}
+                    onChange={(e) => updateOp(i, { workCenterId: e.target.value })}
+                  >
+                    <option value="">{ar ? "مركز العمل" : "Work center"}</option>
+                    {workCenters.map((w) => (
+                      <option key={w.id} value={w.id}>
+                        {w.name} ({w.code})
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    className="select"
+                    title={ar ? "طريقة احتساب المدة" : "Duration mode"}
+                    value={o.durationMode}
+                    onChange={(e) => updateOp(i, { durationMode: e.target.value as "manual" | "auto" })}
+                  >
+                    <option value="manual">{ar ? "يدوي" : "Manual"}</option>
+                    <option value="auto">{ar ? "تلقائي" : "Auto"}</option>
+                  </select>
+                  <input
+                    type="number"
+                    min={1}
+                    className="input"
+                    title={
+                      o.durationMode === "auto"
+                        ? ar
+                          ? "قيمة مبدئية حتى تتوفر بيانات سابقة"
+                          : "Starting value until history exists"
+                        : ar
+                          ? "دقائق لكل دورة"
+                          : "Minutes per run"
+                    }
+                    value={o.durationMinutes}
+                    onChange={(e) => updateOp(i, { durationMinutes: e.target.value })}
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOps((prev) =>
+                        prev
+                          .filter((_, idx) => idx !== i)
+                          .map((row) => ({
+                            ...row,
+                            blockedByIndexes: row.blockedByIndexes
+                              .filter((j) => j !== i)
+                              .map((j) => (j > i ? j - 1 : j)),
+                          })),
+                      )
+                    }
+                    className="btn-ghost"
+                    aria-label={ar ? "حذف المرحلة" : "Remove stage"}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+                {ops.length > 1 ? (
+                  <div className="mt-2 flex flex-wrap items-center gap-3" style={{ fontSize: 12.5 }}>
+                    <span style={{ color: "var(--ink-muted)" }}>
+                      {ar ? "تعتمد على:" : "Blocked by:"}
+                    </span>
+                    {ops.map((other, j) =>
+                      j === i ? null : (
+                        <label key={j} className="flex items-center gap-1">
+                          <input
+                            type="checkbox"
+                            checked={o.blockedByIndexes.includes(j)}
+                            onChange={(e) =>
+                              updateOp(i, {
+                                blockedByIndexes: e.target.checked
+                                  ? [...o.blockedByIndexes, j]
+                                  : o.blockedByIndexes.filter((x) => x !== j),
+                              })
+                            }
+                          />
+                          {other.name.trim() || (ar ? `مرحلة ${j + 1}` : `Stage ${j + 1}`)}
+                        </label>
+                      ),
+                    )}
+                  </div>
+                ) : null}
               </div>
             ))}
+            <p style={{ fontSize: 12, color: "var(--ink-muted)" }}>
+              {ar
+                ? "بلا اعتماديات محددة، تُطبَّق القاعدة الافتراضية: كل مرحلة تنتظر جميع المراحل السابقة لها بالترتيب."
+                : "With no dependencies checked, the default applies: every stage waits for all earlier-listed stages."}
+            </p>
           </div>
         )}
       </div>

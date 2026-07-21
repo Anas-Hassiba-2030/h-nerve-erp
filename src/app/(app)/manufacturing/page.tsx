@@ -8,7 +8,7 @@ import { formatMoney, formatDate, formatNumber } from "@/lib/utils/utils";
 import { EmptyState } from "@/components/ui/EmptyState";
 import {
   startOrder, completeOrder, cancelOrder,
-  startWorkOrder, completeWorkOrder, cancelWorkOrder,
+  startWorkOrder, completeWorkOrder, cancelWorkOrder, reassignWorkOrder, scrapProduction,
 } from "./actions";
 import "../daylight.css";
 
@@ -36,8 +36,11 @@ export default async function ManufacturingPage() {
     where: { deletedAt: null },
     orderBy: { createdAt: "desc" },
     include: {
-      bom: { include: { product: true } },
-      workOrders: { orderBy: { sequence: "asc" }, include: { workCenter: true } },
+      bom: { include: { product: true, lines: { include: { component: true } } } },
+      workOrders: {
+        orderBy: { sequence: "asc" },
+        include: { workCenter: { include: { alternatives: { select: { id: true, name: true } } } } },
+      },
     },
     take: 100,
   });
@@ -130,7 +133,7 @@ export default async function ManufacturingPage() {
                       </td>
                       <td>{formatDate(o.completedAt ?? o.createdAt, ar ? "ar" : "en")}</td>
                       {canManage ? (
-                        <td className="flex gap-2">
+                        <td className="flex flex-wrap gap-2 items-center">
                           {o.status === "DRAFT" ? (
                             <>
                               <form action={startOrder}>
@@ -163,6 +166,52 @@ export default async function ManufacturingPage() {
                               </form>
                             </>
                           ) : null}
+                          {o.status === "IN_PROGRESS" || o.status === "DONE" ? (
+                            <details>
+                              <summary className="text-sm" style={{ cursor: "pointer", color: "var(--ink-muted)" }}>
+                                {ar ? "هدر" : "Scrap"}
+                              </summary>
+                              <form
+                                action={scrapProduction}
+                                className="mt-2 space-y-1"
+                                style={{ minWidth: 200 }}
+                              >
+                                <input type="hidden" name="orderId" value={o.id} />
+                                <select name="productId" className="select" style={{ fontSize: 12.5 }}>
+                                  {o.bom.lines.map((l) => (
+                                    <option key={l.componentProductId} value={l.componentProductId}>
+                                      {l.component.name} ({ar ? "مكوّن" : "component"})
+                                    </option>
+                                  ))}
+                                  {o.status === "DONE" ? (
+                                    <option value={o.bom.productId}>
+                                      {o.bom.product.name} ({ar ? "منتج نهائي" : "finished"})
+                                    </option>
+                                  ) : null}
+                                </select>
+                                <input
+                                  type="number"
+                                  name="quantity"
+                                  min={1}
+                                  defaultValue={1}
+                                  className="input"
+                                  style={{ fontSize: 12.5, paddingBlock: 4 }}
+                                  placeholder={ar ? "الكمية" : "Quantity"}
+                                />
+                                <input
+                                  type="text"
+                                  name="reason"
+                                  className="input"
+                                  style={{ fontSize: 12.5, paddingBlock: 4 }}
+                                  placeholder={ar ? "السبب (اختياري)" : "Reason (optional)"}
+                                  maxLength={500}
+                                />
+                                <button type="submit" className="btn-ghost text-sm">
+                                  {ar ? "تسجيل الهدر" : "Record scrap"}
+                                </button>
+                              </form>
+                            </details>
+                          ) : null}
                         </td>
                       ) : null}
                     </tr>
@@ -179,11 +228,6 @@ export default async function ManufacturingPage() {
               {ar ? "مراحل الأوامر الجارية" : "Stages of orders in progress"}
             </h2>
             {activeRouted.map((o) => {
-              // First non-terminal stage is the only startable one (sequential
-              // routing — matches the server-side gate in startWorkOrder).
-              const nextIdx = o.workOrders.findIndex(
-                (w) => w.status !== "DONE" && w.status !== "CANCELLED",
-              );
               return (
                 <div key={o.id} className="card card-pad space-y-2">
                   <div className="flex items-center justify-between">
@@ -208,7 +252,7 @@ export default async function ManufacturingPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {o.workOrders.map((w, i) => {
+                        {o.workOrders.map((w) => {
                           const ws = STATUS_LABEL[w.status === "PENDING" ? "DRAFT" : w.status] ?? {
                             ar: w.status,
                             en: w.status,
@@ -225,14 +269,39 @@ export default async function ManufacturingPage() {
                                 </span>
                               </td>
                               {canManage ? (
-                                <td>
-                                  {w.status === "PENDING" && i === nextIdx ? (
-                                    <form action={startWorkOrder} className="inline-flex">
-                                      <input type="hidden" name="id" value={w.id} />
-                                      <button type="submit" className="btn-ghost text-sm">
-                                        {ar ? "بدء المرحلة" : "Start stage"}
-                                      </button>
-                                    </form>
+                                <td className="flex flex-wrap items-center gap-2">
+                                  {w.status === "PENDING" ? (
+                                    <>
+                                      <form action={startWorkOrder} className="inline-flex">
+                                        <input type="hidden" name="id" value={w.id} />
+                                        <button type="submit" className="btn-ghost text-sm">
+                                          {ar ? "بدء المرحلة" : "Start stage"}
+                                        </button>
+                                      </form>
+                                      {w.workCenter.alternatives.length > 0 ? (
+                                        <form action={reassignWorkOrder} className="inline-flex items-center gap-1">
+                                          <input type="hidden" name="id" value={w.id} />
+                                          <select
+                                            name="workCenterId"
+                                            className="select"
+                                            style={{ fontSize: 12, paddingBlock: 2 }}
+                                            defaultValue=""
+                                          >
+                                            <option value="" disabled>
+                                              {ar ? "نقل إلى…" : "Move to…"}
+                                            </option>
+                                            {w.workCenter.alternatives.map((alt) => (
+                                              <option key={alt.id} value={alt.id}>
+                                                {alt.name}
+                                              </option>
+                                            ))}
+                                          </select>
+                                          <button type="submit" className="btn-ghost text-sm">
+                                            {ar ? "نقل" : "Move"}
+                                          </button>
+                                        </form>
+                                      ) : null}
+                                    </>
                                   ) : null}
                                   {w.status === "IN_PROGRESS" ? (
                                     <div className="flex items-center gap-2">

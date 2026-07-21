@@ -1,0 +1,41 @@
+// =====================================================================
+// MASTER PRODUCTION SCHEDULE (Odoo mps, translated). Manual per-product
+// per-period demand + safety stock + min/max replenish; the engine
+// (lib/supply/mps.ts) rolls forward period-to-period (opening stock =
+// prior period's forecasted ending stock) and nets in INDIRECT demand
+// via a single-level BOM explosion of sibling products' OWN manual
+// demand (never their computed suggestion — that would make netting
+// recursive/circular across products for no real payoff in a forward-
+// planning tool with no confirmed future MOs to chain from).
+//
+// MUTUALLY EXCLUSIVE WITH ReorderRule (Odoo's own docs: don't run MPS
+// and reordering rules on the same product — they fight over
+// replenishment). Enforced in both server actions (saveMpsForecast /
+// saveReorderRule), not just here — a product may have EITHER, never
+// both, at the DB level nothing stops it without an app-level check
+// since they're independent tables with no natural FK to share.
+// =====================================================================
+
+model MpsForecast {
+  id                String    @id @default(cuid())
+  tenantId          String
+  productId         String
+  // "YYYY-MM" — opaque, sortable-as-string period key.
+  period            String
+  // Manually entered — the planner's demand estimate for this period.
+  forecastedDemand  Int       @default(0)
+  safetyStockTarget Int       @default(0)
+  minToReplenish    Int       @default(0)
+  maxToReplenish    Int       @default(0)
+  note              String?
+
+  deletedAt         DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  product           Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, productId, period])
+  @@index([tenantId, period])
+  @@index([tenantId, productId])
+}

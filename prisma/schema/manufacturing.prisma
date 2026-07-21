@@ -88,6 +88,12 @@ model WorkCenter {
 
   operations  BomOperation[]
   workOrders  WorkOrder[]
+  // Odoo alternative_workcenter_ids — fallback centers the planner can
+  // reassign a PENDING work order to when this one is unavailable.
+  // Symmetric in practice: the app always writes both connect directions
+  // on save, so callers only ever need to read `alternatives`.
+  alternatives  WorkCenter[] @relation("WorkCenterAlternatives")
+  alternativeOf WorkCenter[] @relation("WorkCenterAlternatives")
 
   @@unique([tenantId, code])
   @@index([tenantId, deletedAt])
@@ -97,15 +103,28 @@ model BomOperation {
   id              String @id @default(cuid())
   bomId           String
   workCenterId    String
-  // Execution order within the routing (10, 20, 30…).
+  // Execution order within the routing (10, 20, 30…). Still used as the
+  // default/display order; actual start-gating now runs on blockedByOps
+  // below, not on this number.
   sequence        Int    @default(10)
   name            String
-  // Expected minutes for ONE run of the BOM at 100% efficiency.
+  // Expected minutes for ONE run of the BOM at 100% efficiency. Ignored
+  // when durationMode is "auto" (used only as the pre-history fallback).
   durationMinutes Decimal @default(60)
+  // manual = durationMinutes as authored; auto = averaged from the last
+  // N DONE work orders' actual (or planned) minutes for this operation —
+  // Odoo time_mode "based on last N work orders".
+  durationMode    String  @default("manual")
 
   bom             BillOfMaterials @relation(fields: [bomId], references: [id], onDelete: Cascade)
   workCenter      WorkCenter      @relation(fields: [workCenterId], references: [id])
   workOrders      WorkOrder[]
+  // Odoo "Operation Dependencies" — an arbitrary DAG, not just numeric
+  // sequence order. blockedByOps must reach DONE/CANCELLED before a
+  // generated work order for this stage may start; blockingOps is the
+  // reverse view (which stages this one gates).
+  blockedByOps    BomOperation[] @relation("OperationBlocks")
+  blockingOps     BomOperation[] @relation("OperationBlocks")
 
   @@index([bomId])
   @@index([workCenterId])
@@ -171,6 +190,9 @@ model WorkOrder {
   @@index([tenantId, status])
   @@index([orderId])
   @@index([workCenterId])
+  // Feeds resolveBaseDuration's "auto" mode: last-N-DONE-per-operation,
+  // most-recent-first.
+  @@index([operationId, status, finishedAt])
 }
 
 model ManufacturingOrder {
@@ -202,8 +224,36 @@ model ManufacturingOrder {
   bom            BillOfMaterials @relation(fields: [bomId], references: [id])
   journalEntry   JournalEntry?   @relation(fields: [journalEntryId], references: [id])
   workOrders     WorkOrder[]
+  scraps         ProductionScrap[]
 
   @@unique([tenantId, orderNumber])
   @@index([tenantId, status])
   @@index([tenantId, deletedAt])
+}
+
+// =====================================================================
+// PRODUCTION SCRAP (Odoo stock.scrap, manufacturing-triggered). Distinct
+// from BomByproduct.isScrap: byproducts model EXPECTED waste baked into
+// the BOM's own cost rollup; ProductionScrap is UNPLANNED floor loss —
+// a component wasted before completion, or a finished unit rejected
+// after. Posts one SCRAP InventoryMovement (negative delta, no cost
+// re-attribution — the unit's cost was already counted upstream) and is
+// never reversed; a miscount is corrected with a compensating entry,
+// same append-only discipline as InventoryMovement itself.
+// =====================================================================
+model ProductionScrap {
+  id         String   @id @default(cuid())
+  tenantId   String
+  orderId    String
+  productId  String
+  quantity   Int
+  reason     String?
+  userId     String?
+  scrappedAt DateTime @default(now())
+
+  order      ManufacturingOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product    Product            @relation("ProductionScrapProduct", fields: [productId], references: [id])
+
+  @@index([tenantId, orderId])
+  @@index([productId])
 }

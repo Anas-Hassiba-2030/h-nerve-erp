@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { hasRole } from "@/lib/auth/authz";
 import { formatMoney, formatNumber } from "@/lib/utils/utils";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { createWorkCenter, toggleWorkCenter, deleteWorkCenter } from "../actions";
+import { createWorkCenter, toggleWorkCenter, deleteWorkCenter, setWorkCenterAlternatives } from "../actions";
 import "../../daylight.css";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +19,10 @@ export default async function WorkCentersPage() {
   const centers = await prisma.workCenter.findMany({
     where: { deletedAt: null },
     orderBy: { createdAt: "asc" },
-    include: { _count: { select: { operations: true, workOrders: true } } },
+    include: {
+      _count: { select: { operations: true, workOrders: true } },
+      alternatives: { select: { id: true } },
+    },
     take: 200,
   });
 
@@ -109,6 +112,7 @@ export default async function WorkCentersPage() {
                   <th>{ar ? "الكفاءة" : "Efficiency"}</th>
                   <th>{ar ? "تجهيز/تنظيف" : "Setup / cleanup"}</th>
                   <th>{ar ? "الاستخدام" : "Usage"}</th>
+                  <th>{ar ? "البدائل" : "Alternatives"}</th>
                   <th>{ar ? "الحالة" : "Status"}</th>
                   {canManage ? <th /> : null}
                 </tr>
@@ -132,6 +136,40 @@ export default async function WorkCentersPage() {
                     <td className="font-mono">
                       {formatNumber(c._count.operations)} {ar ? "مرحلة" : "ops"} ·{" "}
                       {formatNumber(c._count.workOrders)} {ar ? "أمر" : "WOs"}
+                    </td>
+                    <td>
+                      {canManage && centers.length > 1 ? (
+                        <details>
+                          <summary style={{ cursor: "pointer", fontSize: 12.5 }}>
+                            {formatNumber(c.alternatives.length)} {ar ? "بديل" : "alt"}
+                          </summary>
+                          <form
+                            action={setWorkCenterAlternatives}
+                            className="mt-2 space-y-1"
+                            style={{ minWidth: 180 }}
+                          >
+                            <input type="hidden" name="id" value={c.id} />
+                            {centers
+                              .filter((other) => other.id !== c.id)
+                              .map((other) => (
+                                <label key={other.id} className="flex items-center gap-1.5" style={{ fontSize: 12.5 }}>
+                                  <input
+                                    type="checkbox"
+                                    name="alternativeIds"
+                                    value={other.id}
+                                    defaultChecked={c.alternatives.some((a) => a.id === other.id)}
+                                  />
+                                  {other.name}
+                                </label>
+                              ))}
+                            <button type="submit" className="btn-ghost text-sm mt-1">
+                              {ar ? "حفظ" : "Save"}
+                            </button>
+                          </form>
+                        </details>
+                      ) : (
+                        <span className="font-mono">{formatNumber(c.alternatives.length)}</span>
+                      )}
                     </td>
                     <td>
                       <span className={c.active ? "badge-emerald" : "badge-slate"}>

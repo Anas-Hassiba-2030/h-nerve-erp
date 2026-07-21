@@ -238,3 +238,73 @@ export async function completeManufacturingOrder(
     totalCost: rollup.totalCost,
   };
 }
+
+/**
+ * Records unplanned production-floor scrap (Odoo stock.scrap) — distinct
+ * from BomByproduct.isScrap, which models EXPECTED waste baked into the
+ * BOM's own cost rollup. A component may be scrapped any time before the
+ * order is cancelled/done (floor damage, not yet consumed); the finished
+ * product only once the order is DONE (a rejected produced unit). Posts
+ * one SCRAP movement (negative delta, no cost re-attribution — the
+ * scrapped unit's cost was already counted upstream at MFG_CONSUME/
+ * MFG_PRODUCE time) and one ProductionScrap audit row. Caller owns the
+ * transaction boundary.
+ */
+export async function postProductionScrap(
+  tx: Tx,
+  args: { tenantId: string; orderId: string; productId: string; quantity: number; reason?: string | null; userId?: string },
+): Promise<{ orderNumber: string; productName: string }> {
+  const { tenantId, orderId, productId, quantity, userId } = args;
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    throw new Error("Scrap quantity must be a positive whole number");
+  }
+
+  const order = await tx.manufacturingOrder.findUniqueOrThrow({
+    where: { id: orderId },
+    include: { bom: { include: { lines: true, product: true } } },
+  });
+  if (order.tenantId !== tenantId) throw new Error("Cross-tenant manufacturing order");
+  if (order.status === "CANCELLED") throw new Error("Cannot scrap against a cancelled order");
+
+  const isFinishedProduct = productId === order.bom.productId;
+  const isComponent = order.bom.lines.some((l) => l.componentProductId === productId);
+  if (!isFinishedProduct && !isComponent) {
+    throw new Error("Product is neither this order's output nor one of its components");
+  }
+  if (isFinishedProduct && order.status !== "DONE") {
+    throw new Error("The finished product can only be scrapped once the order is done");
+  }
+
+  // tenantId is redundant given productId is already constrained above to
+  // this order's own BOM output/components — kept explicit anyway per
+  // house style (never trust a by-id lookup without also scoping it).
+  const product = await tx.product.findFirstOrThrow({ where: { id: productId, tenantId } });
+  if (product.quantity < quantity) {
+    throw new Error(`Insufficient stock for ${product.name}: have ${product.quantity}, scrapping ${quantity}`);
+  }
+
+  const label = `Scrap — ${order.orderNumber} (${order.bom.name})`;
+  await recordMovement(tx, {
+    tenantId,
+    productId,
+    type: "SCRAP",
+    delta: -quantity,
+    reason: args.reason?.trim() || label,
+    documentRef: order.orderNumber,
+    userId: userId ?? null,
+  });
+  await recalcProductQuantity(tx, productId);
+
+  await tx.productionScrap.create({
+    data: {
+      tenantId,
+      orderId,
+      productId,
+      quantity,
+      reason: args.reason?.trim() || null,
+      userId: userId ?? null,
+    },
+  });
+
+  return { orderNumber: order.orderNumber, productName: product.name };
+}

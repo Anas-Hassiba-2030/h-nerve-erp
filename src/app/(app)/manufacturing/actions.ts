@@ -15,8 +15,10 @@ import { activeTenantSlug } from "@/lib/tenancy/tenancy";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { flashToast } from "@/lib/utils/toast";
 import { nextDocNumber } from "@/lib/finance/invoicing";
-import { completeManufacturingOrder } from "@/lib/manufacturing/manufacturing";
-import { plannedWorkOrderMinutes, workOrderLaborCost } from "@/lib/manufacturing/routing";
+import { completeManufacturingOrder, postProductionScrap } from "@/lib/manufacturing/manufacturing";
+import {
+  plannedWorkOrderMinutes, workOrderLaborCost, hasDependencyCycle, stageUnblocked, autoStageDuration,
+} from "@/lib/manufacturing/routing";
 
 async function gate() {
   const user = await requireUser();
@@ -35,6 +37,13 @@ const bomOperationSchema = z.object({
   name: z.string().trim().min(1).max(200),
   workCenterId: z.string().trim().min(1),
   durationMinutes: z.coerce.number().min(1),
+  // manual = durationMinutes as authored; auto = averaged from recent
+  // completed work orders (falls back to durationMinutes with no history).
+  durationMode: z.enum(["manual", "auto"]).default("manual"),
+  // Indexes (into THIS submission's operations array) of stages that must
+  // finish before this one can start — Odoo "Operation Dependencies".
+  // Empty = falls back to "every earlier-sequence stage" at gate time.
+  blockedByIndexes: z.array(z.number().int().min(0)).max(50).default([]),
 });
 
 const bomByproductSchema = z.object({
@@ -121,11 +130,46 @@ export async function createBom(formData: FormData): Promise<void> {
     return;
   }
 
+  // Operation dependencies are submitted as indexes into this array —
+  // validate the graph BEFORE any write. Indexes reference each other by
+  // position, so out-of-range self/forward-index typos would otherwise
+  // silently no-op at connect time; catch them here too.
+  const opIndexes = data.operations.map((_, i) => String(i));
+  const depEdges = data.operations.flatMap((o, i) =>
+    o.blockedByIndexes.map((j) => ({ operationId: String(i), blockedByOperationId: String(j) })),
+  );
+  if (depEdges.some((e) => e.blockedByOperationId === e.operationId)) {
+    await flashToast({
+      type: "info",
+      entity: "info",
+      label: ar ? "لا يمكن أن تعتمد مرحلة على نفسها" : "A stage cannot depend on itself",
+    });
+    return;
+  }
+  if (depEdges.some((e) => !opIndexes.includes(e.blockedByOperationId))) {
+    await flashToast({
+      type: "info",
+      entity: "info",
+      label: ar ? "مرجع مرحلة غير صالح في الاعتماديات" : "Invalid stage reference in operation dependencies",
+    });
+    return;
+  }
+  if (hasDependencyCycle(opIndexes, depEdges)) {
+    await flashToast({
+      type: "info",
+      entity: "info",
+      label: ar
+        ? "دورة اعتماديات بين المراحل — لا يمكن جدولتها أبداً"
+        : "Operation dependencies form a cycle — that routing could never be scheduled",
+    });
+    return;
+  }
+
   try {
     await prisma.$transaction(async (tx) => {
       const t = tx as unknown as typeof prisma;
       const bomNumber = await nextDocNumber(t, tenantId, "BOM", "BOM-");
-      await t.billOfMaterials.create({
+      const bom = await t.billOfMaterials.create({
         data: {
           tenantId,
           bomNumber,
@@ -147,6 +191,7 @@ export async function createBom(formData: FormData): Promise<void> {
               name: o.name,
               workCenterId: o.workCenterId,
               durationMinutes: o.durationMinutes,
+              durationMode: o.durationMode,
             })),
           },
           byproducts: {
@@ -158,7 +203,25 @@ export async function createBom(formData: FormData): Promise<void> {
             })),
           },
         },
+        include: { operations: { orderBy: { sequence: "asc" } } },
       });
+
+      // Dependency edges reference siblings that must exist first, so
+      // they're wired as a second pass — bom.operations is returned in
+      // the same order the nested create was given (index i == input i,
+      // sequence = (i+1)*10 is monotonic with it).
+      for (let i = 0; i < data.operations.length; i++) {
+        const blockedByIndexes = data.operations[i].blockedByIndexes;
+        if (blockedByIndexes.length === 0) continue;
+        await t.bomOperation.update({
+          where: { id: bom.operations[i].id },
+          data: {
+            blockedByOps: {
+              connect: blockedByIndexes.map((j) => ({ id: bom.operations[j].id })),
+            },
+          },
+        });
+      }
     });
   } catch {
     await flashToast({
@@ -285,6 +348,27 @@ export async function createOrder(formData: FormData): Promise<void> {
   redirect("/manufacturing");
 }
 
+/**
+ * Base per-run duration for one BOM operation: the authored manual value,
+ * or — in "auto" mode — the average of its last 5 DONE work orders'
+ * actual-or-planned minutes, normalized per run (see autoStageDuration).
+ * Shared by startOrder (generation) and reassignWorkOrder (recompute on
+ * a center swap) so "auto" stages behave identically in both places.
+ */
+async function resolveBaseDuration(op: { id: string; durationMinutes: unknown; durationMode: string }): Promise<number> {
+  if (op.durationMode !== "auto") return Number(op.durationMinutes);
+  const rows = await prisma.workOrder.findMany({
+    where: { operationId: op.id, status: "DONE" },
+    orderBy: { finishedAt: "desc" },
+    include: { order: { select: { runs: true } } },
+    take: 5,
+  });
+  return autoStageDuration({
+    recentMinutes: rows.map((h) => (h.actualMinutes == null ? Number(h.plannedMinutes) : Number(h.actualMinutes)) / h.order.runs),
+    fallbackManualMinutes: Number(op.durationMinutes),
+  });
+}
+
 export async function startOrder(formData: FormData): Promise<void> {
   await gate();
   const ar = (await getLocale()) === "ar";
@@ -313,6 +397,15 @@ export async function startOrder(formData: FormData): Promise<void> {
     // work-center edits never rewrite this order's plan. createMany first,
     // status flip last — the D1-safe write order (CLAUDE.md ledger rule).
     if (order.bom.operations.length > 0 && order.workOrders.length === 0) {
+      // durationMode "auto" ops resolve per-operation (see
+      // resolveBaseDuration) — queried individually, not one shared-`take`
+      // global query, so one operation's history can't crowd out another's.
+      const baseDurations = new Map<string, number>(
+        await Promise.all(
+          order.bom.operations.map(async (op) => [op.id, await resolveBaseDuration(op)] as const),
+        ),
+      );
+
       await prisma.workOrder.createMany({
         data: order.bom.operations.map((op) => ({
           tenantId: order.tenantId,
@@ -322,7 +415,7 @@ export async function startOrder(formData: FormData): Promise<void> {
           sequence: op.sequence,
           name: op.name,
           plannedMinutes: plannedWorkOrderMinutes({
-            durationMinutes: Number(op.durationMinutes),
+            durationMinutes: baseDurations.get(op.id)!,
             runs: order.runs,
             efficiency: op.workCenter.efficiency,
             setupMinutes: Number(op.workCenter.setupMinutes),
@@ -365,7 +458,10 @@ export async function startWorkOrder(formData: FormData): Promise<void> {
   try {
     const wo = await prisma.workOrder.findUnique({
       where: { id },
-      include: { order: { include: { workOrders: { select: { sequence: true, status: true } } } } },
+      include: {
+        operation: { include: { blockedByOps: { select: { id: true } } } },
+        order: { include: { workOrders: { select: { operationId: true, sequence: true, status: true } } } },
+      },
     });
     if (!wo || wo.status !== "PENDING" || wo.order.status !== "IN_PROGRESS") {
       await flashToast({
@@ -375,12 +471,24 @@ export async function startWorkOrder(formData: FormData): Promise<void> {
       });
       return;
     }
-    // Sequential gating (Odoo "waiting for another WO"): every earlier
-    // stage must be finished or cancelled first.
-    const blocked = wo.order.workOrders.some(
-      (s) => s.sequence < wo.sequence && s.status !== "DONE" && s.status !== "CANCELLED",
+    // v2 gating (Odoo "Operation Dependencies"): if the routing declared
+    // explicit blockers, use exactly those. Otherwise fall back to the
+    // original implicit rule — every earlier-sequence stage must finish
+    // first — so BOMs saved without dependencies behave unchanged. BOMs
+    // have no edit path (create-or-delete only), so re-reading the live
+    // operation graph here is safe: it cannot drift after the order started.
+    const explicitBlockers = wo.operation?.blockedByOps.map((o) => o.id) ?? [];
+    const blockedByIds =
+      explicitBlockers.length > 0
+        ? explicitBlockers
+        : wo.order.workOrders
+            .filter((s) => s.sequence < wo.sequence && s.operationId)
+            .map((s) => s.operationId as string);
+    const unblocked = stageUnblocked(
+      blockedByIds,
+      wo.order.workOrders.map((s) => ({ operationId: s.operationId, status: s.status })),
     );
-    if (blocked) {
+    if (!unblocked) {
       await flashToast({
         type: "info",
         entity: "info",
@@ -495,6 +603,157 @@ export async function cancelWorkOrder(formData: FormData): Promise<void> {
     label: ar ? "أُلغيت المرحلة" : "Stage cancelled",
   });
   revalidatePath("/manufacturing");
+}
+
+/**
+ * Reassigns a PENDING stage to one of its current work center's
+ * configured alternatives (Odoo alternative_workcenter_ids) — the
+ * planner's escape hatch when a center is down. Recomputes plannedMinutes
+ * + costPerHour from the NEW center (own efficiency/setup/cleanup/rate);
+ * only meaningful for BOM-generated stages (operationId present) since an
+ * ad-hoc stage has no authored base duration to recompute from.
+ */
+export async function reassignWorkOrder(formData: FormData): Promise<void> {
+  await gate();
+  const ar = (await getLocale()) === "ar";
+  const id = String(formData.get("id") ?? "");
+  const newWorkCenterId = String(formData.get("workCenterId") ?? "");
+  if (!id || !newWorkCenterId) return;
+
+  try {
+    const wo = await prisma.workOrder.findUnique({
+      where: { id },
+      include: {
+        operation: true,
+        order: { select: { runs: true } },
+        workCenter: { include: { alternatives: { select: { id: true } } } },
+      },
+    });
+    if (!wo || wo.status !== "PENDING" || !wo.operation) {
+      await flashToast({
+        type: "info",
+        entity: "info",
+        label: ar ? "لا يمكن إعادة إسناد هذه المرحلة" : "This stage cannot be reassigned",
+      });
+      return;
+    }
+    const isAlternative = wo.workCenter.alternatives.some((a) => a.id === newWorkCenterId);
+    if (!isAlternative) {
+      await flashToast({
+        type: "info",
+        entity: "info",
+        label: ar
+          ? "المركز المختار ليس بديلاً معرّفاً لهذا المركز"
+          : "The selected center isn't a configured alternative for this stage's center",
+      });
+      return;
+    }
+    // tenantId is redundant given `isAlternative` already constrains
+    // newWorkCenterId to setWorkCenterAlternatives' same-tenant-only
+    // connect list — kept explicit anyway, never trust a caller-supplied
+    // id on a by-id lookup without also scoping it.
+    const newCenter = await prisma.workCenter.findFirst({
+      where: { id: newWorkCenterId, tenantId: wo.tenantId, active: true, deletedAt: null },
+    });
+    if (!newCenter) {
+      await flashToast({
+        type: "info",
+        entity: "info",
+        label: ar ? "المركز البديل غير متاح" : "The alternative center is unavailable",
+      });
+      return;
+    }
+    const baseDuration = await resolveBaseDuration(wo.operation);
+    await prisma.workOrder.update({
+      where: { id },
+      data: {
+        workCenterId: newCenter.id,
+        costPerHour: newCenter.costPerHour,
+        plannedMinutes: plannedWorkOrderMinutes({
+          durationMinutes: baseDuration,
+          runs: wo.order.runs,
+          efficiency: newCenter.efficiency,
+          setupMinutes: Number(newCenter.setupMinutes),
+          cleanupMinutes: Number(newCenter.cleanupMinutes),
+        }),
+      },
+    });
+  } catch {
+    await flashToast({
+      type: "info",
+      entity: "info",
+      label: ar ? "تعذر إعادة الإسناد" : "Could not reassign the stage",
+    });
+    return;
+  }
+
+  await flashToast({
+    type: "info",
+    entity: "info",
+    label: ar ? "أُعيد إسناد المرحلة" : "Stage reassigned",
+  });
+  revalidatePath("/manufacturing");
+}
+
+const scrapSchema = z.object({
+  orderId: z.string().trim().min(1),
+  productId: z.string().trim().min(1),
+  quantity: z.coerce.number().int().min(1),
+  reason: z.string().trim().max(500).optional(),
+});
+
+export async function scrapProduction(formData: FormData): Promise<void> {
+  const user = await gate();
+  const ar = (await getLocale()) === "ar";
+  const tenantId = await activeTenantSlug();
+  if (!tenantId) return;
+
+  const parsed = scrapSchema.safeParse({
+    orderId: formData.get("orderId"),
+    productId: formData.get("productId"),
+    quantity: formData.get("quantity"),
+    reason: formData.get("reason") ?? "",
+  });
+  if (!parsed.success) {
+    await flashToast({
+      type: "info",
+      entity: "info",
+      label: ar ? "بيانات الهدر غير صالحة" : "Invalid scrap data",
+    });
+    return;
+  }
+  const data = parsed.data;
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      const t = tx as unknown as typeof prisma;
+      await postProductionScrap(t, {
+        tenantId,
+        orderId: data.orderId,
+        productId: data.productId,
+        quantity: data.quantity,
+        reason: data.reason,
+        userId: user.id,
+      });
+    });
+  } catch (err) {
+    await flashToast({
+      type: "info",
+      entity: "info",
+      label: ar
+        ? "تعذر تسجيل الهدر"
+        : `Could not record the scrap${err instanceof Error && err.message.length < 120 ? `: ${err.message}` : ""}`,
+    });
+    return;
+  }
+
+  await flashToast({
+    type: "info",
+    entity: "info",
+    label: ar ? "تم تسجيل الهدر" : "Scrap recorded",
+  });
+  revalidatePath("/manufacturing");
+  revalidatePath("/admin/movements");
 }
 
 export async function completeOrder(formData: FormData): Promise<void> {
@@ -725,6 +984,76 @@ export async function deleteWorkCenter(formData: FormData): Promise<void> {
     type: "info",
     entity: "info",
     label: ar ? "تم حذف مركز العمل" : "Work center deleted",
+  });
+  revalidatePath("/manufacturing/workcenters");
+}
+
+/**
+ * Sets a work center's alternative-center list (Odoo alternative_
+ * workcenter_ids) — the fallback centers a PENDING stage can be
+ * reassigned to via reassignWorkOrder. `set`, not add/remove: the form
+ * submits the full checked list each time.
+ *
+ * Prisma's implicit self-relation is directional (like the classic
+ * "follows" pattern): connecting A.alternatives -> B does NOT also add A
+ * to B.alternatives — it only populates B's `alternativeOf` reverse view.
+ * True mutual symmetry ("either center's `alternatives` field lists the
+ * other", which is what reassignWorkOrder relies on) needs both edges
+ * written explicitly: A's full list is `set` in one call, then each
+ * newly-added B gets A connected, and each REMOVED B gets A disconnected
+ * from ITS `alternatives` — otherwise a stale one-directional entry
+ * survives (B still offers A as a fallback after A dropped B).
+ */
+export async function setWorkCenterAlternatives(formData: FormData): Promise<void> {
+  await gate();
+  const ar = (await getLocale()) === "ar";
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const alternativeIds = formData.getAll("alternativeIds").map(String).filter((v) => v && v !== id);
+
+  try {
+    const wc = await prisma.workCenter.findUnique({
+      where: { id },
+      select: { tenantId: true, alternatives: { select: { id: true } } },
+    });
+    if (!wc) return;
+    // Only connect centers actually in this tenant — formData is
+    // trusted-shaped but not trusted-scoped.
+    const validIds = (
+      await prisma.workCenter.findMany({
+        where: { id: { in: alternativeIds }, tenantId: wc.tenantId },
+        select: { id: true },
+      })
+    ).map((w) => w.id);
+    const oldIds = wc.alternatives.map((a) => a.id);
+    const added = validIds.filter((wid) => !oldIds.includes(wid));
+    const removed = oldIds.filter((wid) => !validIds.includes(wid));
+
+    await prisma.$transaction([
+      prisma.workCenter.update({
+        where: { id },
+        data: { alternatives: { set: validIds.map((wid) => ({ id: wid })) } },
+      }),
+      ...added.map((wid) =>
+        prisma.workCenter.update({ where: { id: wid }, data: { alternatives: { connect: { id } } } }),
+      ),
+      ...removed.map((wid) =>
+        prisma.workCenter.update({ where: { id: wid }, data: { alternatives: { disconnect: { id } } } }),
+      ),
+    ]);
+  } catch {
+    await flashToast({
+      type: "info",
+      entity: "info",
+      label: ar ? "تعذر تحديث البدائل" : "Could not update the alternatives",
+    });
+    return;
+  }
+
+  await flashToast({
+    type: "info",
+    entity: "info",
+    label: ar ? "تم تحديث بدائل مركز العمل" : "Work-center alternatives updated",
   });
   revalidatePath("/manufacturing/workcenters");
 }

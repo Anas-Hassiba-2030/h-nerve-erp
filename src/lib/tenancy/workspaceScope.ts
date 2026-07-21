@@ -56,6 +56,7 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
   "ReorderRule",
   "WorkCenter",
   "WorkOrder",
+  "ProductionScrap",
   "CashSession",
   "PosSale",
   "CustomerPortalAccount",

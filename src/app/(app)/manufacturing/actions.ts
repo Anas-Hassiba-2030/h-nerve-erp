@@ -687,6 +687,19 @@ export async function deleteWorkCenter(formData: FormData): Promise<void> {
   if (!id) return;
 
   try {
+    const openWoCount = await prisma.workOrder.count({
+      where: { workCenterId: id, status: { in: ["PENDING", "IN_PROGRESS"] } },
+    });
+    if (openWoCount > 0) {
+      await flashToast({
+        type: "info",
+        entity: "info",
+        label: ar
+          ? "لا يمكن حذف مركز عمل لديه مراحل قيد التنفيذ"
+          : "Cannot delete a work center with stages still in progress",
+      });
+      return;
+    }
     const opCount = await prisma.bomOperation.count({ where: { workCenterId: id } });
     if (opCount > 0) {
       await flashToast({

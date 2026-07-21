@@ -163,6 +163,11 @@ model WorkOrder {
   operation    BomOperation?      @relation(fields: [operationId], references: [id], onDelete: SetNull)
   workCenter   WorkCenter         @relation(fields: [workCenterId], references: [id])
 
+  // One generated work order per (order, routing stage): makes the
+  // startOrder createMany idempotent under double-submit — the second
+  // racer P2002s instead of duplicating stages. NULL operationIds
+  // (ad-hoc stages) are exempt (SQLite treats NULLs as distinct).
+  @@unique([orderId, operationId])
   @@index([tenantId, status])
   @@index([orderId])
   @@index([workCenterId])

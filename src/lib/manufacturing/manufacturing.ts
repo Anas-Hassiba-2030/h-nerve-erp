@@ -171,9 +171,11 @@ export async function completeManufacturingOrder(
 
   // Byproduct outputs (incl. expected scrap) enter stock alongside the
   // main product, each carrying its allocated share of the order cost.
-  for (let i = 0; i < bom.byproducts.length; i++) {
-    const bp = bom.byproducts[i];
-    const alloc = allocation.byproducts[i];
+  // Zip line-and-allocation in ONE expression: allocateByproductCost
+  // preserves input order, and pairing here (instead of parallel index
+  // reads) makes that alignment structurally impossible to drift.
+  const byproductPairs = bom.byproducts.map((bp, i) => ({ bp, alloc: allocation.byproducts[i] }));
+  for (const { bp, alloc } of byproductPairs) {
     if (alloc.units <= 0) continue;
     await recordMovement(tx, {
       tenantId,

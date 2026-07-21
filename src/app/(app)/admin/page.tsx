@@ -122,12 +122,17 @@ export default async function CoreHubPage() {
         </div>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-3 lg:items-start">
+      {/* True masonry: CSS multi-column, not CSS grid. A grid's row TRACK
+          height is set by the tallest cell in that row band, so uneven
+          section heights (5-item Sales next to 2-item Parties) leave dead
+          whitespace under every shorter column. Columns instead let each
+          section stack tight in whichever column has room next. */}
+      <div className="columns-1 lg:columns-2 2xl:columns-3" style={{ columnGap: 24 }}>
         {GROUP_ORDER.map((g) => {
           const items = CONSOLES.filter((c) => c.group === g);
           if (items.length === 0) return null;
           return (
-            <section key={g}>
+            <section key={g} className="mb-6 break-inside-avoid">
               <div
                 className="mb-3 flex items-baseline gap-2 text-xs font-bold uppercase tracking-widest"
                 style={{ color: "var(--ink-muted)" }}

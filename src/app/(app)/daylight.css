@@ -121,7 +121,7 @@
 body:has(.dl-page) aside { display: none !important; }
 body:has(.dl-page) .flex.min-h-screen.flex-1.flex-col.nerve-bg { flex: 1 1 100% !important; }
 /* give the page comfortable margins now that the rail is gone */
-.dl-page { max-width: 1240px; margin-inline: auto; padding-inline: clamp(16px, 3vw, 34px); }
+.dl-page { max-width: 1680px; margin-inline: auto; padding-inline: clamp(16px, 3vw, 40px); }
 /* the fixed ↺ Orbit pill is the nav home on full-bleed pages — lift it above content */
 body:has(.dl-page) .orbit-return { z-index: 70; }
 

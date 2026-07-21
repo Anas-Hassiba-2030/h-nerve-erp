@@ -30,6 +30,8 @@ model BillOfMaterials {
 
   product      Product              @relation("BomOutput", fields: [productId], references: [id])
   lines        BomLine[]
+  operations   BomOperation[]
+  byproducts   BomByproduct[]
   orders       ManufacturingOrder[]
 
   @@unique([tenantId, bomNumber])
@@ -49,6 +51,121 @@ model BomLine {
 
   @@index([bomId])
   @@index([componentProductId])
+}
+
+// =====================================================================
+// MANUFACTURING v2 — production routings (Odoo mrp model, translated).
+// WorkCenter = a station/machine/line with an hourly rate; BomOperation
+// = one ordered routing stage on a BOM, executed at a work center for
+// an expected duration; WorkOrder = the per-stage execution record
+// generated from the BOM's operations when an order starts. Routing
+// labor (Σ actual-or-planned minutes × the rate frozen at start) is
+// ADDED to the BOM's flat per-run laborCost in the cost rollup — BOMs
+// without operations behave exactly as v1. BomByproduct = secondary
+// outputs (incl. expected scrap) that take a % share of total cost.
+// =====================================================================
+
+model WorkCenter {
+  id          String    @id @default(cuid())
+  tenantId    String
+  code        String // WC-000001 via NumberingScheme
+  name        String
+  nameEn      String?
+  // Cost of one hour of this work center's time. Money (12,2).
+  costPerHour Decimal   @default(0)
+  // Time efficiency %, Odoo-style: real duration = expected / (efficiency/100).
+  efficiency  Int       @default(100)
+  // Flat minutes added once per work order, before/after the operation
+  // itself (Odoo time_start / time_stop).
+  setupMinutes   Decimal @default(0)
+  cleanupMinutes Decimal @default(0)
+  active      Boolean   @default(true)
+  note        String?
+
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  operations  BomOperation[]
+  workOrders  WorkOrder[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId, deletedAt])
+}
+
+model BomOperation {
+  id              String @id @default(cuid())
+  bomId           String
+  workCenterId    String
+  // Execution order within the routing (10, 20, 30…).
+  sequence        Int    @default(10)
+  name            String
+  // Expected minutes for ONE run of the BOM at 100% efficiency.
+  durationMinutes Decimal @default(60)
+
+  bom             BillOfMaterials @relation(fields: [bomId], references: [id], onDelete: Cascade)
+  workCenter      WorkCenter      @relation(fields: [workCenterId], references: [id])
+  workOrders      WorkOrder[]
+
+  @@index([bomId])
+  @@index([workCenterId])
+}
+
+model BomByproduct {
+  id               String  @id @default(cuid())
+  bomId            String
+  productId        String
+  // Byproduct units yielded per ONE run of the BOM.
+  quantity         Int
+  // % of the order's total cost carried by this byproduct (0–100).
+  // The main output carries the remainder. Odoo mrp.bom.byproduct
+  // cost_share, same semantics.
+  costSharePercent Decimal @default(0)
+  // Expected waste (scrap) vs a genuinely sellable secondary output.
+  isScrap          Boolean @default(false)
+
+  bom              BillOfMaterials @relation(fields: [bomId], references: [id], onDelete: Cascade)
+  product          Product         @relation("BomByproductOut", fields: [productId], references: [id])
+
+  @@index([bomId])
+  @@index([productId])
+}
+
+model WorkOrder {
+  id           String    @id @default(cuid())
+  tenantId     String
+  orderId      String
+  // Source routing stage; SetNull so deleting a BOM operation never
+  // orphans history — the snapshot fields below stay authoritative.
+  operationId  String?
+  workCenterId String
+  sequence     Int
+  name         String
+  // PENDING | IN_PROGRESS | DONE | CANCELLED
+  status       String    @default("PENDING")
+  // Expected minutes for the WHOLE order (duration × runs, efficiency-
+  // adjusted), frozen at generation time.
+  plannedMinutes Decimal
+  // Operator-reported minutes, set at completion; null = use planned.
+  actualMinutes  Decimal?
+  // Work-center hourly rate frozen when the order started, so later
+  // rate edits never rewrite history. Money (12,2).
+  costPerHour  Decimal
+  // (actual ?? planned) / 60 × costPerHour, frozen at completion.
+  laborCost    Decimal?
+  startedAt    DateTime?
+  finishedAt   DateTime?
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  order        ManufacturingOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  operation    BomOperation?      @relation(fields: [operationId], references: [id], onDelete: SetNull)
+  workCenter   WorkCenter         @relation(fields: [workCenterId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([orderId])
+  @@index([workCenterId])
 }
 
 model ManufacturingOrder {
@@ -79,6 +196,7 @@ model ManufacturingOrder {
 
   bom            BillOfMaterials @relation(fields: [bomId], references: [id])
   journalEntry   JournalEntry?   @relation(fields: [journalEntryId], references: [id])
+  workOrders     WorkOrder[]
 
   @@unique([tenantId, orderNumber])
   @@index([tenantId, status])

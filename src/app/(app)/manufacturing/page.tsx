@@ -1,12 +1,15 @@
 import Link from "next/link";
-import { Plus, Factory, ListTree } from "lucide-react";
+import { Plus, Factory, ListTree, Workflow } from "lucide-react";
 import { prisma } from "@/lib/db/db";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { hasRole } from "@/lib/auth/authz";
 import { formatMoney, formatDate, formatNumber } from "@/lib/utils/utils";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { startOrder, completeOrder, cancelOrder } from "./actions";
+import {
+  startOrder, completeOrder, cancelOrder,
+  startWorkOrder, completeWorkOrder, cancelWorkOrder,
+} from "./actions";
 import "../daylight.css";
 
 export const dynamic = "force-dynamic";
@@ -32,9 +35,17 @@ export default async function ManufacturingPage() {
   const orders = await prisma.manufacturingOrder.findMany({
     where: { deletedAt: null },
     orderBy: { createdAt: "desc" },
-    include: { bom: { include: { product: true } } },
+    include: {
+      bom: { include: { product: true } },
+      workOrders: { orderBy: { sequence: "asc" }, include: { workCenter: true } },
+    },
     take: 100,
   });
+
+  // Routed orders currently in progress — their stages render below the table.
+  const activeRouted = orders.filter(
+    (o) => o.status === "IN_PROGRESS" && o.workOrders.length > 0,
+  );
 
   const inProgress = orders.filter((o) => o.status === "IN_PROGRESS").length;
   const producedValue = orders
@@ -54,6 +65,10 @@ export default async function ManufacturingPage() {
             </p>
           </div>
           <div className="flex gap-2">
+            <Link href="/manufacturing/workcenters" className="btn-ghost">
+              <Workflow className="h-4 w-4" />
+              {ar ? "مراكز العمل" : "Work centers"}
+            </Link>
             <Link href="/manufacturing/boms" className="btn-ghost">
               <ListTree className="h-4 w-4" />
               {ar ? "قوائم المواد" : "Bills of materials"}
@@ -85,6 +100,7 @@ export default async function ManufacturingPage() {
                   <th>{ar ? "الرقم" : "Number"}</th>
                   <th>{ar ? "المنتج" : "Product"}</th>
                   <th>{ar ? "الدورات" : "Runs"}</th>
+                  <th>{ar ? "المراحل" : "Stages"}</th>
                   <th>{ar ? "الحالة" : "Status"}</th>
                   <th>{ar ? "الكلفة" : "Cost"}</th>
                   <th>{ar ? "التاريخ" : "Date"}</th>
@@ -99,6 +115,11 @@ export default async function ManufacturingPage() {
                       <td className="font-mono">{o.orderNumber}</td>
                       <td>{o.bom.product.name}</td>
                       <td className="font-mono">{formatNumber(o.runs)}</td>
+                      <td className="font-mono">
+                        {o.workOrders.length > 0
+                          ? `${o.workOrders.filter((w) => w.status === "DONE").length}/${o.workOrders.length}`
+                          : "—"}
+                      </td>
                       <td>
                         <span className={STATUS_BADGE[o.status] ?? "badge-slate"}>
                           {ar ? status.ar : status.en}
@@ -151,6 +172,105 @@ export default async function ManufacturingPage() {
             </table>
           </div>
         )}
+
+        {activeRouted.length > 0 ? (
+          <div className="space-y-4">
+            <h2 className="text-base font-bold">
+              {ar ? "مراحل الأوامر الجارية" : "Stages of orders in progress"}
+            </h2>
+            {activeRouted.map((o) => {
+              // First non-terminal stage is the only startable one (sequential
+              // routing — matches the server-side gate in startWorkOrder).
+              const nextIdx = o.workOrders.findIndex(
+                (w) => w.status !== "DONE" && w.status !== "CANCELLED",
+              );
+              return (
+                <div key={o.id} className="card card-pad space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-bold">
+                      <span className="font-mono">{o.orderNumber}</span> · {o.bom.product.name}
+                    </div>
+                    <div style={{ fontSize: 12, color: "var(--ink-muted)" }}>
+                      {formatNumber(o.workOrders.filter((w) => w.status === "DONE").length)}/
+                      {formatNumber(o.workOrders.length)} {ar ? "مرحلة مكتملة" : "stages done"}
+                    </div>
+                  </div>
+                  <div className="table-wrap">
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>{ar ? "المرحلة" : "Stage"}</th>
+                          <th>{ar ? "مركز العمل" : "Work center"}</th>
+                          <th>{ar ? "الدقائق المخططة" : "Planned min"}</th>
+                          <th>{ar ? "الحالة" : "Status"}</th>
+                          {canManage ? <th /> : null}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {o.workOrders.map((w, i) => {
+                          const ws = STATUS_LABEL[w.status === "PENDING" ? "DRAFT" : w.status] ?? {
+                            ar: w.status,
+                            en: w.status,
+                          };
+                          return (
+                            <tr key={w.id}>
+                              <td className="font-mono">{w.sequence}</td>
+                              <td>{w.name}</td>
+                              <td>{w.workCenter.name}</td>
+                              <td className="font-mono">{formatNumber(Number(w.plannedMinutes))}</td>
+                              <td>
+                                <span className={STATUS_BADGE[w.status === "PENDING" ? "DRAFT" : w.status] ?? "badge-slate"}>
+                                  {w.status === "PENDING" ? (ar ? "بالانتظار" : "Pending") : ar ? ws.ar : ws.en}
+                                </span>
+                              </td>
+                              {canManage ? (
+                                <td>
+                                  {w.status === "PENDING" && i === nextIdx ? (
+                                    <form action={startWorkOrder} className="inline-flex">
+                                      <input type="hidden" name="id" value={w.id} />
+                                      <button type="submit" className="btn-ghost text-sm">
+                                        {ar ? "بدء المرحلة" : "Start stage"}
+                                      </button>
+                                    </form>
+                                  ) : null}
+                                  {w.status === "IN_PROGRESS" ? (
+                                    <div className="flex items-center gap-2">
+                                      <form action={completeWorkOrder} className="inline-flex items-center gap-2">
+                                        <input type="hidden" name="id" value={w.id} />
+                                        <input
+                                          type="number"
+                                          name="actualMinutes"
+                                          min={0}
+                                          placeholder={ar ? "دقائق فعلية" : "Actual min"}
+                                          className="input"
+                                          style={{ width: 110, paddingBlock: 4 }}
+                                        />
+                                        <button type="submit" className="btn-ghost text-sm">
+                                          {ar ? "إنهاء" : "Done"}
+                                        </button>
+                                      </form>
+                                      <form action={cancelWorkOrder} className="inline-flex">
+                                        <input type="hidden" name="id" value={w.id} />
+                                        <button type="submit" className="btn-ghost text-sm">
+                                          {ar ? "إلغاء" : "Cancel"}
+                                        </button>
+                                      </form>
+                                    </div>
+                                  ) : null}
+                                </td>
+                              ) : null}
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
       </div>
     </div>
   );

@@ -11,6 +11,7 @@ import type { prisma as prismaType } from "@/lib/db/db";
 import { ensureLedgerAccount, ensureOpenPeriod } from "@/lib/finance/invoicing";
 import { createPostedJournalEntry } from "@/lib/finance/accounting";
 import { recordMovement, recalcProductQuantity } from "@/lib/finance/inventory";
+import { allocateByproductCost, routingLaborTotal, workOrdersComplete } from "./routing";
 
 type Tx = typeof prismaType;
 
@@ -32,6 +33,12 @@ export function rollupCost(args: {
   overheadCost: number;
   runs: number;
   outputQty: number;
+  /**
+   * v2 — routing labor from the order's DONE work orders (already a
+   * whole-order total, NOT per run). Additive to the flat per-run
+   * laborCost so v1 BOMs without operations are unchanged.
+   */
+  routingLaborCost?: number;
 }): {
   materialCost: number;
   laborCost: number;
@@ -47,7 +54,7 @@ export function rollupCost(args: {
   const materialCost = r2(
     components.reduce((s, c) => s + c.quantity * runs * c.unitCost, 0),
   );
-  const laborCost = r2(args.laborCost * runs);
+  const laborCost = r2(args.laborCost * runs + (args.routingLaborCost ?? 0));
   const overheadCost = r2(args.overheadCost * runs);
   const totalCost = r2(materialCost + laborCost + overheadCost);
   const unitCost = r2(totalCost / outputUnits);
@@ -74,7 +81,14 @@ export async function completeManufacturingOrder(
   const order = await tx.manufacturingOrder.findUniqueOrThrow({
     where: { id: orderId },
     include: {
-      bom: { include: { lines: { include: { component: true } }, product: true } },
+      bom: {
+        include: {
+          lines: { include: { component: true } },
+          byproducts: { include: { product: true } },
+          product: true,
+        },
+      },
+      workOrders: true,
     },
   });
   if (order.tenantId !== tenantId) throw new Error("Cross-tenant manufacturing order");
@@ -83,6 +97,14 @@ export async function completeManufacturingOrder(
   }
   const { bom } = order;
   if (bom.lines.length === 0) throw new Error(`BOM ${bom.bomNumber} has no components`);
+
+  // v2 routing gate: every generated stage must be DONE or CANCELLED
+  // before the order can close (Odoo: work orders gate Close Production).
+  if (!workOrdersComplete(order.workOrders.map((w) => w.status))) {
+    throw new Error(
+      `Order ${order.orderNumber} still has open work orders — finish or cancel every stage first`,
+    );
+  }
 
   // Stock sufficiency, checked before any write.
   for (const line of bom.lines) {
@@ -103,6 +125,21 @@ export async function completeManufacturingOrder(
     overheadCost: Number(bom.overheadCost),
     runs: order.runs,
     outputQty: bom.outputQty,
+    routingLaborCost: routingLaborTotal(
+      order.workOrders.map((w) => ({ status: w.status, laborCost: w.laborCost == null ? null : Number(w.laborCost) })),
+    ),
+  });
+
+  // v2 byproducts: split total cost by cost-share %; the main output's
+  // MFG_PRODUCE carries the remainder as its unit cost.
+  const allocation = allocateByproductCost({
+    totalCost: rollup.totalCost,
+    outputUnits: rollup.outputUnits,
+    runs: order.runs,
+    byproducts: bom.byproducts.map((b) => ({
+      quantity: b.quantity,
+      costSharePercent: Number(b.costSharePercent),
+    })),
   });
 
   const label = `Manufacturing ${order.orderNumber} (${bom.name})`;
@@ -127,10 +164,29 @@ export async function completeManufacturingOrder(
     delta: rollup.outputUnits,
     reason: label,
     documentRef: order.orderNumber,
-    unitCost: rollup.unitCost,
+    unitCost: allocation.main.unitCost,
     userId: userId ?? null,
   });
   await recalcProductQuantity(tx, bom.productId);
+
+  // Byproduct outputs (incl. expected scrap) enter stock alongside the
+  // main product, each carrying its allocated share of the order cost.
+  for (let i = 0; i < bom.byproducts.length; i++) {
+    const bp = bom.byproducts[i];
+    const alloc = allocation.byproducts[i];
+    if (alloc.units <= 0) continue;
+    await recordMovement(tx, {
+      tenantId,
+      productId: bp.productId,
+      type: "MFG_PRODUCE",
+      delta: alloc.units,
+      reason: `${label} — ${bp.isScrap ? "scrap" : "byproduct"}`,
+      documentRef: order.orderNumber,
+      unitCost: alloc.unitCost,
+      userId: userId ?? null,
+    });
+    await recalcProductQuantity(tx, bp.productId);
+  }
 
   const accrual = r2(rollup.laborCost + rollup.overheadCost);
   let journalEntryId: string | null = null;
@@ -167,7 +223,9 @@ export async function completeManufacturingOrder(
       laborCost: rollup.laborCost,
       overheadCost: rollup.overheadCost,
       totalCost: rollup.totalCost,
-      unitCost: rollup.unitCost,
+      // Matches the main MFG_PRODUCE movement: byproduct cost shares are
+      // already carved out (v1 BOMs: identical to rollup.unitCost).
+      unitCost: allocation.main.unitCost,
       journalEntryId,
     },
   });

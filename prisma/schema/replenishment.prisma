@@ -1,0 +1,33 @@
+// =====================================================================
+// REPLENISHMENT — Odoo stock.warehouse.orderpoint, translated (supply-
+// chain wave). One ReorderRule per Product row; since a Product row is
+// already per-warehouse (tenantId+sku+warehouseId unique), a rule is
+// naturally per-location like Odoo's orderpoint. When on-hand quantity
+// falls below minQty, the replenishment console suggests ordering back
+// up to maxQty (rounded to qtyMultiple) and can draft one DRAFT
+// PurchaseOrder per supplier through lib/finance/orders.createPO.
+// String unions / opaque tenantId per the CLAUDE.md SQLite rules.
+// =====================================================================
+
+model ReorderRule {
+  id          String    @id @default(cuid())
+  tenantId    String
+  productId   String    @unique
+  // Trigger threshold: suggest replenishment when on-hand < minQty.
+  minQty      Int
+  // Replenish back up to this level.
+  maxQty      Int
+  // Order quantities snap to this multiple (pack/pallet size).
+  qtyMultiple Int       @default(1)
+  active      Boolean   @default(true)
+  note        String?
+
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, active])
+  @@index([tenantId, deletedAt])
+}

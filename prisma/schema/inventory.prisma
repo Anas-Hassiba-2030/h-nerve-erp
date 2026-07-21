@@ -50,6 +50,7 @@ model Product {
   bomOutputs      BillOfMaterials[] @relation("BomOutput")
   bomComponentLines BomLine[]       @relation("BomComponent")
   posSaleLines    PosSaleLine[]   @relation("PosSaleLineProduct")
+  reorderRule     ReorderRule?
   supplierRef     Supplier? @relation(fields: [supplierId], references: [id])
   warehouseRef    Warehouse @relation(fields: [warehouseId], references: [id])
 

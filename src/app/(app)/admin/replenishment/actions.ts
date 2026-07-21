@@ -74,6 +74,23 @@ export async function saveReorderRule(formData: FormData): Promise<void> {
       });
       return;
     }
+    // MPS and reorder rules must never both drive the same product (Odoo's
+    // own guidance — they'd fight over replenishment). A product on MPS
+    // has to drop its forecasts there first.
+    const hasMps = await prisma.mpsForecast.findFirst({
+      where: { productId: data.productId, tenantId, deletedAt: null },
+      select: { id: true },
+    });
+    if (hasMps) {
+      await flashToast({
+        type: "info",
+        entity: "info",
+        label: ar
+          ? "هذا المنتج مُدار عبر جدول الإنتاج (MPS) — احذف توقعاته أولاً"
+          : "This product is managed via MPS — remove its forecasts first",
+      });
+      return;
+    }
     await prisma.reorderRule.upsert({
       where: { productId: data.productId },
       create: {

@@ -53,6 +53,7 @@ model Product {
   productionScraps  ProductionScrap[] @relation("ProductionScrapProduct")
   posSaleLines    PosSaleLine[]   @relation("PosSaleLineProduct")
   reorderRule     ReorderRule?
+  mpsForecasts    MpsForecast[]
   supplierRef     Supplier? @relation(fields: [supplierId], references: [id])
   warehouseRef    Warehouse @relation(fields: [warehouseId], references: [id])
 

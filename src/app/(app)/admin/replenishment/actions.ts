@@ -84,6 +84,9 @@ export async function saveReorderRule(formData: FormData): Promise<void> {
         qtyMultiple: data.qtyMultiple,
       },
       update: {
+        // Re-stamp tenantId: the product-ownership check above proved the
+        // product is in-tenant, so any pre-existing rule row follows it.
+        tenantId,
         minQty: data.minQty,
         maxQty: data.maxQty,
         qtyMultiple: data.qtyMultiple,
@@ -173,9 +176,14 @@ export async function draftReplenishmentPOs(): Promise<void> {
     return;
   }
 
+  // Machine marker on auto-drafted POs — the idempotency key that stops a
+  // double-submit (or an unreviewed prior sweep) from stacking duplicates.
+  const AUTO_NOTE = "AUTO-REPLENISH";
+
   let drafted = 0;
   let lineCount = 0;
   let unassignedCount = 0;
+  let skippedExisting = 0;
   try {
     const rules = await prisma.reorderRule.findMany({
       where: { tenantId, active: true, deletedAt: null },
@@ -200,7 +208,26 @@ export async function draftReplenishmentPOs(): Promise<void> {
     const { drafts, unassigned } = groupNeedsBySupplier(needs);
     unassignedCount = unassigned.length;
 
+    // One un-actioned auto-draft per supplier at a time: while a previous
+    // sweep's DRAFT still exists, the supplier is skipped instead of
+    // getting a duplicate.
+    const existing = await prisma.purchaseOrder.findMany({
+      where: {
+        tenantId,
+        status: "DRAFT",
+        deletedAt: null,
+        note: { contains: AUTO_NOTE },
+        supplierId: { in: drafts.map((d) => d.supplierId) },
+      },
+      select: { supplierId: true },
+    });
+    const alreadyDrafted = new Set(existing.map((e) => e.supplierId));
+
     for (const d of drafts) {
+      if (alreadyDrafted.has(d.supplierId)) {
+        skippedExisting += 1;
+        continue;
+      }
       await createPO({
         tenantId,
         supplierId: d.supplierId,
@@ -209,7 +236,7 @@ export async function draftReplenishmentPOs(): Promise<void> {
           quantity: l.quantity,
           unitCost: unitCostByProduct.get(l.productId) ?? null,
         })),
-        note: ar ? "مسودة تلقائية من قواعد إعادة الطلب" : "Auto-drafted from reorder rules",
+        note: `[${AUTO_NOTE}] ${ar ? "مسودة تلقائية من قواعد إعادة الطلب" : "Auto-drafted from reorder rules"}`,
       });
       drafted += 1;
       lineCount += d.lines.length;
@@ -229,15 +256,19 @@ export async function draftReplenishmentPOs(): Promise<void> {
     label:
       drafted > 0
         ? ar
-          ? `تم إنشاء ${drafted} مسودة أمر شراء (${lineCount} بند)${unassignedCount ? ` — ${unassignedCount} منتج بلا مورّد` : ""}`
-          : `Drafted ${drafted} purchase order${drafted === 1 ? "" : "s"} (${lineCount} lines)${unassignedCount ? ` — ${unassignedCount} product(s) missing a supplier` : ""}`
+          ? `تم إنشاء ${drafted} مسودة أمر شراء (${lineCount} بند)${skippedExisting ? ` — ${skippedExisting} مورّد لديه مسودة قائمة` : ""}${unassignedCount ? ` — ${unassignedCount} منتج بلا مورّد` : ""}`
+          : `Drafted ${drafted} purchase order${drafted === 1 ? "" : "s"} (${lineCount} lines)${skippedExisting ? ` — ${skippedExisting} supplier(s) already have an open draft` : ""}${unassignedCount ? ` — ${unassignedCount} product(s) missing a supplier` : ""}`
         : ar
-          ? unassignedCount
-            ? `لا مسودات — ${unassignedCount} منتج محتاج لكن بلا مورّد`
-            : "لا نقص حالياً — كل المنتجات فوق الحد الأدنى"
-          : unassignedCount
-            ? `No drafts — ${unassignedCount} product(s) need stock but have no supplier`
-            : "Nothing to order — every product is above its minimum",
+          ? skippedExisting
+            ? `لا مسودات جديدة — ${skippedExisting} مورّد لديه مسودة تلقائية قائمة بالفعل`
+            : unassignedCount
+              ? `لا مسودات — ${unassignedCount} منتج محتاج لكن بلا مورّد`
+              : "لا نقص حالياً — كل المنتجات فوق الحد الأدنى"
+          : skippedExisting
+            ? `No new drafts — ${skippedExisting} supplier(s) already have an open auto-draft`
+            : unassignedCount
+              ? `No drafts — ${unassignedCount} product(s) need stock but have no supplier`
+              : "Nothing to order — every product is above its minimum",
   });
   revalidatePath("/admin/replenishment");
   revalidatePath("/admin/purchase-orders");

@@ -348,6 +348,27 @@ export async function createOrder(formData: FormData): Promise<void> {
   redirect("/manufacturing");
 }
 
+/**
+ * Base per-run duration for one BOM operation: the authored manual value,
+ * or — in "auto" mode — the average of its last 5 DONE work orders'
+ * actual-or-planned minutes, normalized per run (see autoStageDuration).
+ * Shared by startOrder (generation) and reassignWorkOrder (recompute on
+ * a center swap) so "auto" stages behave identically in both places.
+ */
+async function resolveBaseDuration(op: { id: string; durationMinutes: unknown; durationMode: string }): Promise<number> {
+  if (op.durationMode !== "auto") return Number(op.durationMinutes);
+  const rows = await prisma.workOrder.findMany({
+    where: { operationId: op.id, status: "DONE" },
+    orderBy: { finishedAt: "desc" },
+    include: { order: { select: { runs: true } } },
+    take: 5,
+  });
+  return autoStageDuration({
+    recentMinutes: rows.map((h) => (h.actualMinutes == null ? Number(h.plannedMinutes) : Number(h.actualMinutes)) / h.order.runs),
+    fallbackManualMinutes: Number(op.durationMinutes),
+  });
+}
+
 export async function startOrder(formData: FormData): Promise<void> {
   await gate();
   const ar = (await getLocale()) === "ar";
@@ -376,57 +397,32 @@ export async function startOrder(formData: FormData): Promise<void> {
     // work-center edits never rewrite this order's plan. createMany first,
     // status flip last — the D1-safe write order (CLAUDE.md ledger rule).
     if (order.bom.operations.length > 0 && order.workOrders.length === 0) {
-      // durationMode "auto" ops: pull the last 5 DONE work orders for
-      // that exact operation, most-recent-first, normalize each sample
-      // to per-run minutes ((actual ?? planned) / that order's runs), and
-      // average — see autoStageDuration for the fallback-to-manual rule.
-      const autoOps = order.bom.operations.filter((op) => op.durationMode === "auto");
-      // Queried per-operation (not one shared-`take` global query): a
-      // global order-by-finishedAt-desc with a combined limit can let one
-      // operation's history crowd out another's most recent completions.
-      const historyByOp = new Map<string, number[]>(
+      // durationMode "auto" ops resolve per-operation (see
+      // resolveBaseDuration) — queried individually, not one shared-`take`
+      // global query, so one operation's history can't crowd out another's.
+      const baseDurations = new Map<string, number>(
         await Promise.all(
-          autoOps.map(async (op) => {
-            const rows = await prisma.workOrder.findMany({
-              where: { operationId: op.id, status: "DONE" },
-              orderBy: { finishedAt: "desc" },
-              include: { order: { select: { runs: true } } },
-              take: 5,
-            });
-            return [
-              op.id,
-              rows.map((h) => (h.actualMinutes == null ? Number(h.plannedMinutes) : Number(h.actualMinutes)) / h.order.runs),
-            ] as const;
-          }),
+          order.bom.operations.map(async (op) => [op.id, await resolveBaseDuration(op)] as const),
         ),
       );
 
       await prisma.workOrder.createMany({
-        data: order.bom.operations.map((op) => {
-          const baseDuration =
-            op.durationMode === "auto"
-              ? autoStageDuration({
-                  recentMinutes: historyByOp.get(op.id) ?? [],
-                  fallbackManualMinutes: Number(op.durationMinutes),
-                })
-              : Number(op.durationMinutes);
-          return {
-            tenantId: order.tenantId,
-            orderId: order.id,
-            operationId: op.id,
-            workCenterId: op.workCenterId,
-            sequence: op.sequence,
-            name: op.name,
-            plannedMinutes: plannedWorkOrderMinutes({
-              durationMinutes: baseDuration,
-              runs: order.runs,
-              efficiency: op.workCenter.efficiency,
-              setupMinutes: Number(op.workCenter.setupMinutes),
-              cleanupMinutes: Number(op.workCenter.cleanupMinutes),
-            }),
-            costPerHour: Number(op.workCenter.costPerHour),
-          };
-        }),
+        data: order.bom.operations.map((op) => ({
+          tenantId: order.tenantId,
+          orderId: order.id,
+          operationId: op.id,
+          workCenterId: op.workCenterId,
+          sequence: op.sequence,
+          name: op.name,
+          plannedMinutes: plannedWorkOrderMinutes({
+            durationMinutes: baseDurations.get(op.id)!,
+            runs: order.runs,
+            efficiency: op.workCenter.efficiency,
+            setupMinutes: Number(op.workCenter.setupMinutes),
+            cleanupMinutes: Number(op.workCenter.cleanupMinutes),
+          }),
+          costPerHour: Number(op.workCenter.costPerHour),
+        })),
       });
     }
 
@@ -652,8 +648,12 @@ export async function reassignWorkOrder(formData: FormData): Promise<void> {
       });
       return;
     }
+    // tenantId is redundant given `isAlternative` already constrains
+    // newWorkCenterId to setWorkCenterAlternatives' same-tenant-only
+    // connect list — kept explicit anyway, never trust a caller-supplied
+    // id on a by-id lookup without also scoping it.
     const newCenter = await prisma.workCenter.findFirst({
-      where: { id: newWorkCenterId, active: true, deletedAt: null },
+      where: { id: newWorkCenterId, tenantId: wo.tenantId, active: true, deletedAt: null },
     });
     if (!newCenter) {
       await flashToast({
@@ -663,13 +663,14 @@ export async function reassignWorkOrder(formData: FormData): Promise<void> {
       });
       return;
     }
+    const baseDuration = await resolveBaseDuration(wo.operation);
     await prisma.workOrder.update({
       where: { id },
       data: {
         workCenterId: newCenter.id,
         costPerHour: newCenter.costPerHour,
         plannedMinutes: plannedWorkOrderMinutes({
-          durationMinutes: Number(wo.operation.durationMinutes),
+          durationMinutes: baseDuration,
           runs: wo.order.runs,
           efficiency: newCenter.efficiency,
           setupMinutes: Number(newCenter.setupMinutes),

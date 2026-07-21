@@ -190,6 +190,9 @@ model WorkOrder {
   @@index([tenantId, status])
   @@index([orderId])
   @@index([workCenterId])
+  // Feeds resolveBaseDuration's "auto" mode: last-N-DONE-per-operation,
+  // most-recent-first.
+  @@index([operationId, status, finishedAt])
 }
 
 model ManufacturingOrder {

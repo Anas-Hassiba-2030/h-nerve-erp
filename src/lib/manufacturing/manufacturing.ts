@@ -275,7 +275,10 @@ export async function postProductionScrap(
     throw new Error("The finished product can only be scrapped once the order is done");
   }
 
-  const product = await tx.product.findUniqueOrThrow({ where: { id: productId } });
+  // tenantId is redundant given productId is already constrained above to
+  // this order's own BOM output/components — kept explicit anyway per
+  // house style (never trust a by-id lookup without also scoping it).
+  const product = await tx.product.findFirstOrThrow({ where: { id: productId, tenantId } });
   if (product.quantity < quantity) {
     throw new Error(`Insufficient stock for ${product.name}: have ${product.quantity}, scrapping ${quantity}`);
   }

@@ -13,18 +13,26 @@ export default async function NewBomPage() {
   const session = await getCurrentUser();
   if (!hasRole(session, "MANAGER")) redirect("/manufacturing/boms");
 
-  const products = await prisma.product.findMany({
-    where: { deletedAt: null },
-    orderBy: { name: "asc" },
-    select: { id: true, name: true, sku: true },
-    take: 500,
-  });
+  const [products, workCenters] = await Promise.all([
+    prisma.product.findMany({
+      where: { deletedAt: null },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, sku: true },
+      take: 500,
+    }),
+    prisma.workCenter.findMany({
+      where: { deletedAt: null, active: true },
+      orderBy: { createdAt: "asc" },
+      select: { id: true, name: true, code: true },
+      take: 200,
+    }),
+  ]);
 
   return (
     <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
       <div className="max-w-3xl mx-auto py-8 px-4 space-y-6">
         <h1 className="text-xl font-bold">{ar ? "قائمة مواد جديدة" : "New bill of materials"}</h1>
-        <BomForm ar={ar} products={products} />
+        <BomForm ar={ar} products={products} workCenters={workCenters} />
       </div>
     </div>
   );

@@ -91,6 +91,12 @@ const nextConfig = {
     config.experiments = { ...(config.experiments ?? {}), asyncWebAssembly: true };
     return config;
   },
+  // Next 16 defaults `next dev` to Turbopack and hard-errors when a
+  // `webpack()` hook exists with no matching `turbopack` key (it can't tell
+  // the hook above is production-build-only, applied by open-next.config.ts).
+  // Empty object = local dev keeps using Turbopack as normal; the webpack()
+  // hook still fires for the Cloudflare/OpenNext production build untouched.
+  turbopack: {},
   async headers() {
     // The /orrery page renders the cinematic hub in a SAME-ORIGIN <iframe>
     // pointing at /hub/index.html (static asset — deliberately NOT under

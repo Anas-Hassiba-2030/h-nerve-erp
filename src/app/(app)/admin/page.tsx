@@ -21,8 +21,7 @@ import { SeedErpButton } from "@/components/genesis/SeedErpButton";
 import "../daylight.css";
 
 type GroupId =
-  | "sales" | "purchasing" | "treasury" | "books" | "assets" | "manufacturing"
-  | "hr" | "parties" | "inventory" | "ingest" | "orders" | "intelligence";
+  | "sales" | "purchasing" | "treasury" | "inventory" | "hr" | "parties" | "data";
 
 type Console = {
   href: string;
@@ -37,64 +36,53 @@ type Console = {
 // Front office FIRST (the operator surfaces the user reaches every day), then
 // the raw back-office consoles. Every href is a real, reachable route.
 const CONSOLES: Console[] = [
-  // ── Sales & invoicing ──
+  // ── Sales & invoicing (front-office sales cycle, incl. sales orders) ──
   { href: "/invoices",     ar: "الفواتير",         en: "Invoices",        icon: FileText,    group: "sales",        desc_ar: "إصدار فواتير المبيعات وتحصيلها.",              desc_en: "Issue and collect sales invoices." },
   { href: "/estimates",    ar: "عروض الأسعار",     en: "Estimates",       icon: GitBranch,   group: "sales",        desc_ar: "عروض أسعار قابلة للتحويل إلى فواتير.",         desc_en: "Quotes that convert into invoices." },
   { href: "/pos",          ar: "نقطة البيع",       en: "Point of Sale",   icon: ShoppingCart,group: "sales",        desc_ar: "جلسات نقدية وبيع مباشر.",                      desc_en: "Cash sessions and direct retail sales." },
   { href: "/e-invoicing",  ar: "الفوترة الإلكترونية", en: "E-Invoicing",  icon: ReceiptText, group: "sales",        desc_ar: "الفوترة الإلكترونية المتوافقة (الأردن).",       desc_en: "Compliant e-invoicing (Jordan)." },
-  // ── Purchasing ──
+  { href: "/admin/sales-orders",    ar: "أوامر البيع",  en: "Sales Orders",    icon: ShoppingBag,  group: "sales", desc_ar: "أوامر البيع للعملاء ودورة التنفيذ.",          desc_en: "Customer sales orders and fulfilment." },
+  // ── Purchasing (front-office purchase cycle, incl. purchase orders) ──
   { href: "/purchase-invoices", ar: "فواتير المشتريات", en: "Purchase Invoices", icon: ShoppingBag, group: "purchasing", desc_ar: "فواتير المورّدين والالتزامات.",           desc_en: "Supplier bills and payables." },
   { href: "/purchase-payments", ar: "دفعات الموردين",   en: "Supplier Payments", icon: Banknote,    group: "purchasing", desc_ar: "سداد المورّدين من الخزائن.",              desc_en: "Pay suppliers from the treasuries." },
-  // ── Treasury & receivables ──
+  { href: "/admin/purchase-orders", ar: "أوامر الشراء", en: "Purchase Orders", icon: ShoppingCart, group: "purchasing", desc_ar: "أوامر الشراء من المورّدين ودورة الاستلام.",   desc_en: "Supplier purchase orders and receiving." },
+  // ── Treasury & accounting (cash + the books) ──
   { href: "/treasuries",   ar: "الخزائن",          en: "Treasuries",      icon: Landmark,    group: "treasury",     desc_ar: "الصناديق النقدية والحسابات البنكية.",          desc_en: "Cash boxes and bank accounts." },
   { href: "/payments",     ar: "دفعات العملاء",    en: "Payments",        icon: CreditCard,  group: "treasury",     desc_ar: "تحصيل دفعات العملاء على الفواتير.",            desc_en: "Collect customer payments on invoices." },
-  // ── Accounting / books ──
-  { href: "/statements",   ar: "القوائم المالية",  en: "Statements",      icon: Scale,       group: "books",        desc_ar: "الميزانية وقائمة الدخل من دفتر الأستاذ.",       desc_en: "Balance sheet and P&L from the ledger." },
-  { href: "/admin/journal",ar: "القيود",           en: "Journal",         icon: BookOpen,    group: "books",        desc_ar: "قيود اليومية المحاسبية مزدوجة القيد.",          desc_en: "Double-entry accounting journal." },
-  { href: "/admin/accounts",ar: "الحسابات",        en: "Accounts",        icon: Library,     group: "books",        desc_ar: "شجرة الحسابات ودفتر الأستاذ العام.",            desc_en: "Chart of accounts and general ledger." },
-  // ── Assets ──
-  { href: "/assets",       ar: "الأصول الثابتة",   en: "Fixed Assets",    icon: Building2,   group: "assets",       desc_ar: "الأصول واستهلاكها الشهري.",                    desc_en: "Assets and monthly depreciation." },
-  // ── Manufacturing ──
-  { href: "/manufacturing",ar: "التصنيع",          en: "Manufacturing",   icon: Factory,     group: "manufacturing",desc_ar: "قوائم المواد وأوامر التصنيع.",                 desc_en: "Bills of materials and work orders." },
-  // ── HR ──
-  { href: "/hr/employees", ar: "سجل الموظفين",     en: "Employees",       icon: Users,       group: "hr",           desc_ar: "سجل الموظفين ورواتبهم الأساسية.",              desc_en: "Employee records and base salaries." },
-  { href: "/hr/leave",     ar: "طلبات الإجازة",    en: "Leave",           icon: CalendarDays,group: "hr",           desc_ar: "طلبات الإجازة والموافقات.",                    desc_en: "Leave requests and approvals." },
-  { href: "/hr/payroll",   ar: "مسير الرواتب",     en: "Payroll",         icon: Wallet,      group: "hr",           desc_ar: "تشغيل الرواتب الشهرية وترحيلها.",              desc_en: "Run and post monthly payroll." },
+  { href: "/statements",   ar: "القوائم المالية",  en: "Statements",      icon: Scale,       group: "treasury",     desc_ar: "الميزانية وقائمة الدخل من دفتر الأستاذ.",       desc_en: "Balance sheet and P&L from the ledger." },
+  { href: "/admin/journal",ar: "القيود",           en: "Journal",         icon: BookOpen,    group: "treasury",     desc_ar: "قيود اليومية المحاسبية مزدوجة القيد.",          desc_en: "Double-entry accounting journal." },
+  { href: "/admin/accounts",ar: "الحسابات",        en: "Accounts",        icon: Library,     group: "treasury",     desc_ar: "شجرة الحسابات ودفتر الأستاذ العام.",            desc_en: "Chart of accounts and general ledger." },
   // ── Parties ──
   { href: "/customers",    ar: "العملاء",          en: "Customers",       icon: UserSquare,  group: "parties",      desc_ar: "سجل العملاء وشروط الدفع.",                     desc_en: "Customer registry and payment terms." },
   { href: "/suppliers",    ar: "الموردون",         en: "Suppliers",       icon: Truck,       group: "parties",      desc_ar: "سجل المورّدين وشروط الدفع.",                   desc_en: "Supplier registry and payment terms." },
-  // ── Inventory (back office) ──
+  // ── Inventory, assets & manufacturing (everything that's physical stock) ──
   { href: "/admin/products",   ar: "المنتجات",     en: "Products",        icon: Package,     group: "inventory",    desc_ar: "كتالوج المنتجات ووحدات القياس والأسعار.",     desc_en: "Product catalog, units, and pricing." },
   { href: "/admin/movements",  ar: "الحركات",      en: "Movements",       icon: ArrowLeftRight, group: "inventory", desc_ar: "سجل حركات المخزون الداخلة والخارجة.",         desc_en: "Ledger of inbound/outbound stock." },
   { href: "/admin/warehouses", ar: "المستودعات",   en: "Warehouses",      icon: Warehouse,   group: "inventory",    desc_ar: "مواقع التخزين ومستويات المخزون.",             desc_en: "Storage locations and stock levels." },
   { href: "/admin/transfers",  ar: "التحويلات",    en: "Transfers",       icon: Truck,       group: "inventory",    desc_ar: "تحويلات المخزون بين المستودعات.",             desc_en: "Stock transfers between warehouses." },
-  // ── Ingest ──
-  { href: "/admin/imports",  ar: "الاستيراد",      en: "Imports",         icon: Inbox,       group: "ingest",       desc_ar: "استيراد ملفات البيانات ومتابعة معالجتها.",    desc_en: "Import data files and track processing." },
-  { href: "/admin/mappings", ar: "الربط",          en: "Mappings",        icon: MapIcon,     group: "ingest",       desc_ar: "ربط أعمدة الملفات المستوردة بحقول النظام.",    desc_en: "Map imported columns to system fields." },
-  // ── Orders (back office) ──
-  { href: "/admin/purchase-orders", ar: "أوامر الشراء", en: "Purchase Orders", icon: ShoppingCart, group: "orders", desc_ar: "أوامر الشراء من المورّدين ودورة الاستلام.",   desc_en: "Supplier purchase orders and receiving." },
-  { href: "/admin/sales-orders",    ar: "أوامر البيع",  en: "Sales Orders",    icon: ShoppingBag,  group: "orders", desc_ar: "أوامر البيع للعملاء ودورة التنفيذ.",          desc_en: "Customer sales orders and fulfilment." },
-  // ── Intelligence ──
-  { href: "/admin/brain",    ar: "دماغ النواة",    en: "Core Brain",      icon: BrainCircuit,group: "intelligence", desc_ar: "رؤى ذكية على دفاتر الباك أوفيس.",              desc_en: "AI insights over the back-office books." },
+  { href: "/assets",       ar: "الأصول الثابتة",   en: "Fixed Assets",    icon: Building2,   group: "inventory",    desc_ar: "الأصول واستهلاكها الشهري.",                    desc_en: "Assets and monthly depreciation." },
+  { href: "/manufacturing",ar: "التصنيع",          en: "Manufacturing",   icon: Factory,     group: "inventory",    desc_ar: "قوائم المواد وأوامر التصنيع.",                 desc_en: "Bills of materials and work orders." },
+  // ── HR & payroll ──
+  { href: "/hr/employees", ar: "سجل الموظفين",     en: "Employees",       icon: Users,       group: "hr",           desc_ar: "سجل الموظفين ورواتبهم الأساسية.",              desc_en: "Employee records and base salaries." },
+  { href: "/hr/leave",     ar: "طلبات الإجازة",    en: "Leave",           icon: CalendarDays,group: "hr",           desc_ar: "طلبات الإجازة والموافقات.",                    desc_en: "Leave requests and approvals." },
+  { href: "/hr/payroll",   ar: "مسير الرواتب",     en: "Payroll",         icon: Wallet,      group: "hr",           desc_ar: "تشغيل الرواتب الشهرية وترحيلها.",              desc_en: "Run and post monthly payroll." },
+  // ── Data & intelligence (ingest + AI insights) ──
+  { href: "/admin/imports",  ar: "الاستيراد",      en: "Imports",         icon: Inbox,       group: "data",         desc_ar: "استيراد ملفات البيانات ومتابعة معالجتها.",    desc_en: "Import data files and track processing." },
+  { href: "/admin/mappings", ar: "الربط",          en: "Mappings",        icon: MapIcon,     group: "data",         desc_ar: "ربط أعمدة الملفات المستوردة بحقول النظام.",    desc_en: "Map imported columns to system fields." },
+  { href: "/admin/brain",    ar: "دماغ النواة",    en: "Core Brain",      icon: BrainCircuit,group: "data",         desc_ar: "رؤى ذكية على دفاتر الباك أوفيس.",              desc_en: "AI insights over the back-office books." },
 ];
 
 const GROUP_LABELS: Record<GroupId, { ar: string; en: string }> = {
-  sales:         { ar: "المبيعات والفوترة", en: "Sales & Invoicing" },
-  purchasing:    { ar: "المشتريات",         en: "Purchasing" },
-  treasury:      { ar: "الخزينة والتحصيل",  en: "Treasury & Receivables" },
-  books:         { ar: "المحاسبة",          en: "Accounting" },
-  assets:        { ar: "الأصول",            en: "Assets" },
-  manufacturing: { ar: "التصنيع",           en: "Manufacturing" },
-  hr:            { ar: "الموارد البشرية",   en: "Human Resources" },
-  parties:       { ar: "الأطراف",           en: "Parties" },
-  inventory:     { ar: "المخزون",           en: "Inventory" },
-  ingest:        { ar: "الاستيعاب",         en: "Ingest" },
-  orders:        { ar: "الطلبات",           en: "Orders" },
-  intelligence:  { ar: "الذكاء",            en: "Intelligence" },
+  sales:      { ar: "المبيعات والفوترة",       en: "Sales & Invoicing" },
+  purchasing: { ar: "المشتريات",               en: "Purchasing" },
+  treasury:   { ar: "الخزينة والمحاسبة",       en: "Treasury & Accounting" },
+  parties:    { ar: "الأطراف",                 en: "Parties" },
+  inventory:  { ar: "المخزون والأصول والتصنيع", en: "Inventory, Assets & Manufacturing" },
+  hr:         { ar: "الموارد البشرية",         en: "Human Resources" },
+  data:       { ar: "البيانات والذكاء",        en: "Data & Intelligence" },
 };
 const GROUP_ORDER: GroupId[] = [
-  "sales", "purchasing", "treasury", "books", "assets", "manufacturing",
-  "hr", "parties", "inventory", "ingest", "orders", "intelligence",
+  "sales", "purchasing", "treasury", "parties", "inventory", "hr", "data",
 ];
 
 export default async function CoreHubPage() {
@@ -134,48 +122,53 @@ export default async function CoreHubPage() {
         </div>
       ) : null}
 
-      {GROUP_ORDER.map((g) => {
-        const items = CONSOLES.filter((c) => c.group === g);
-        if (items.length === 0) return null;
-        return (
-          <section key={g} className="mb-6">
-            <div
-              className="mb-2 text-[11px] font-bold uppercase tracking-widest"
-              style={{ color: "var(--ink-muted)" }}
-            >
-              {ar ? GROUP_LABELS[g].ar : GROUP_LABELS[g].en}
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((c) => {
-                const Icon = c.icon;
-                return (
-                  <Link
-                    key={c.href}
-                    href={c.href}
-                    className="panel reveal flex items-start gap-3"
-                    style={{ marginBottom: 0, padding: "18px 20px" }}
-                  >
-                    <Icon className="mt-0.5 h-5 w-5 shrink-0" style={{ color: "var(--emerald)" }} />
-                    <span className="min-w-0">
-                      <span className="flex flex-wrap items-baseline gap-x-2">
-                        <span className="text-sm font-extrabold" style={{ color: "var(--ink)" }}>
-                          {ar ? c.ar : c.en}
+      <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-3 lg:items-start">
+        {GROUP_ORDER.map((g) => {
+          const items = CONSOLES.filter((c) => c.group === g);
+          if (items.length === 0) return null;
+          return (
+            <section key={g}>
+              <div
+                className="mb-3 flex items-baseline gap-2 text-xs font-bold uppercase tracking-widest"
+                style={{ color: "var(--ink-muted)" }}
+              >
+                <span>{ar ? GROUP_LABELS[g].ar : GROUP_LABELS[g].en}</span>
+                <span className="font-normal normal-case tracking-normal opacity-70">
+                  {items.length}
+                </span>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {items.map((c) => {
+                  const Icon = c.icon;
+                  return (
+                    <Link
+                      key={c.href}
+                      href={c.href}
+                      className="panel reveal flex items-start gap-3"
+                      style={{ marginBottom: 0, padding: "20px 22px" }}
+                    >
+                      <Icon className="mt-0.5 h-6 w-6 shrink-0" style={{ color: "var(--emerald)" }} />
+                      <span className="min-w-0">
+                        <span className="flex flex-wrap items-baseline gap-x-2">
+                          <span className="text-base font-extrabold" style={{ color: "var(--ink)" }}>
+                            {ar ? c.ar : c.en}
+                          </span>
+                          <span className="text-xs" style={{ color: "var(--ink-muted)" }}>
+                            {ar ? c.en : c.ar}
+                          </span>
                         </span>
-                        <span className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
-                          {ar ? c.en : c.ar}
+                        <span className="mt-1.5 block text-sm leading-relaxed" style={{ color: "var(--ink-muted)" }}>
+                          {ar ? c.desc_ar : c.desc_en}
                         </span>
                       </span>
-                      <span className="mt-1 block text-xs leading-relaxed" style={{ color: "var(--ink-muted)" }}>
-                        {ar ? c.desc_ar : c.desc_en}
-                      </span>
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
-        );
-      })}
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })}
+      </div>
     </DaylightShell>
   );
 }

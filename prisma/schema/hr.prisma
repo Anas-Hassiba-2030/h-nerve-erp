@@ -30,6 +30,7 @@ model Employee {
   payslips      Payslip[]
   attendance    Attendance[]
   shiftAssignments ShiftAssignment[]
+  timesheetEntries TimesheetEntry[]
 
   deletedAt DateTime?
   createdAt DateTime  @default(now())

@@ -118,6 +118,13 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
   // convention. LandedCostLine has no tenantId column (scoped through
   // its parent LandedCost, same precedent as JournalLine/JournalEntry).
   "LandedCost",
+  // Project accounting / timesheets (docs/HOURANI-ERP-GAPS.md #9). Same
+  // opaque tenantId convention. ProjectExpense has its own tenantId
+  // column too (unlike LandedCostLine) since it's queried directly by
+  // tenant in reports, not only ever read through its parent.
+  "Project",
+  "TimesheetEntry",
+  "ProjectExpense",
 ]);
 
 // Phase ISO-2 — models owned by TWO Company FKs at once (a bridge row).

@@ -1,0 +1,83 @@
+// =====================================================================
+// PROJECT ACCOUNTING / TIMESHEETS — docs/HOURANI-ERP-GAPS.md #9 🟠 (the
+// last item on the ranked build order). Distinct from FutureProject
+// (engagement.prisma) — that's the company-keyed strategic idea/roadmap
+// board on the Group dashboard (stage IDEA→DONE, a static budgetJod
+// number, no execution tracking). This is tenant-scoped OPERATIONAL
+// project accounting: a budget, real labor cost from logged
+// TimesheetEntry hours (rate derived from Employee.baseSalary via the
+// same lib/hr/attendance.ts hourlyRateFromMonthlySalary used by
+// payroll overtime), plus ad-hoc ProjectExpense lines, rolled up into a
+// budget-vs-actual P&L (lib/projects/projects.ts). The education arm's
+// incubator programmes and any contracting work are the first users.
+//
+// Deliberately NOT wired into the double-entry ledger this phase (no
+// WIP asset account, no automatic JournalEntry) — that would require
+// deciding how project labor cost relates to payroll's ALREADY-POSTED
+// Salary Expense (double-counting risk) and is a bigger design question
+// than "add a budget report." A computed, read-only P&L against logged
+// actuals is the honestly-scoped v1; ledger integration is a clean
+// follow-up once real project data exists to design against.
+// =====================================================================
+
+model Project {
+  id          String    @id @default(cuid())
+  tenantId    String
+  code        String
+  name        String
+  description String?
+  // PLANNING | ACTIVE | ON_HOLD | COMPLETED | CANCELLED
+  status      String    @default("PLANNING")
+  budget      Decimal   @default(0)
+  startDate   DateTime?
+  endDate     DateTime?
+
+  timesheetEntries TimesheetEntry[]
+  expenses         ProjectExpense[]
+
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([tenantId, code])
+  @@index([tenantId, status])
+}
+
+model TimesheetEntry {
+  id         String   @id @default(cuid())
+  tenantId   String
+  projectId  String
+  employeeId String
+  date       DateTime
+  hours      Decimal
+  // Optional per-entry override; null = derive from
+  // Employee.baseSalary via hourlyRateFromMonthlySalary at read time,
+  // so a salary change doesn't silently rewrite historical entries but
+  // an entry never NEEDS a manual rate either.
+  hourlyRate Decimal?
+  billable   Boolean  @default(true)
+  note       String?
+
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  createdAt  DateTime @default(now())
+
+  @@index([tenantId, projectId])
+  @@index([tenantId, employeeId, date])
+}
+
+model ProjectExpense {
+  id          String   @id @default(cuid())
+  tenantId    String
+  projectId   String
+  description String
+  amount      Decimal
+  incurredAt  DateTime @default(now())
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId, projectId])
+}

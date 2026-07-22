@@ -31,6 +31,7 @@ import {
   Building2,
   ClipboardCheck,
   Ship,
+  Briefcase,
 } from "lucide-react";
 
 type Item = {
@@ -64,6 +65,7 @@ const FAMILY: Item[] = [
   { href: "/finance/ageing",        ar: "أعمار الذمم",  en: "AR/AP Ageing",    icon: Hourglass,      group: "books" },
   { href: "/admin/reconciliation",  ar: "التسوية البنكية", en: "Bank Reconciliation", icon: Landmark, group: "books" },
   { href: "/admin/cost-centers",    ar: "مراكز التكلفة", en: "Cost Centres",  icon: Building2,     group: "books" },
+  { href: "/admin/projects",        ar: "محاسبة المشاريع", en: "Project Accounting", icon: Briefcase, group: "books" },
 ];
 
 const GROUP_LABELS: Record<GroupId, { ar: string; en: string }> = {

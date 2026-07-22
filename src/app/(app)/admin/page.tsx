@@ -13,7 +13,7 @@ import {
   ShoppingCart, ShoppingBag, Users, UserSquare, BookOpen, Library,
   BrainCircuit, FileText, GitBranch, ReceiptText, CreditCard, Landmark,
   Banknote, Scale, Building2, Factory, CalendarDays, CalendarRange, Wallet, PackageSearch,
-  Handshake, Hourglass, ClipboardCheck, Wrench, CalendarClock, Ship,
+  Handshake, Hourglass, ClipboardCheck, Wrench, CalendarClock, Ship, Briefcase,
 } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -55,6 +55,7 @@ const CONSOLES: Console[] = [
   { href: "/finance/ageing", ar: "أعمار الذمم",   en: "AR/AP Ageing",    icon: Hourglass,   group: "treasury",     desc_ar: "من يدين لي ولمن أدين، وكم تأخّر السداد.",       desc_en: "Who owes you, who you owe, and how overdue." },
   { href: "/admin/reconciliation", ar: "التسوية البنكية", en: "Bank Reconciliation", icon: Landmark, group: "treasury", desc_ar: "طابق كشوفات الحساب البنكي بالدفعات المسجّلة.", desc_en: "Match bank statements against recorded payments." },
   { href: "/admin/cost-centers", ar: "مراكز التكلفة", en: "Cost Centres", icon: Building2, group: "treasury", desc_ar: "بُعد تحليلي على القيود — أرباح وخسائر لكل وحدة عمل.", desc_en: "Analytic dimension on journal entries — per-unit P&L." },
+  { href: "/admin/projects", ar: "محاسبة المشاريع", en: "Project Accounting", icon: Briefcase, group: "treasury", desc_ar: "ميزانية مقابل فعلي من الساعات المسجّلة والمصاريف.", desc_en: "Budget vs. actual from logged hours and expenses." },
   { href: "/admin/journal",ar: "القيود",           en: "Journal",         icon: BookOpen,    group: "treasury",     desc_ar: "قيود اليومية المحاسبية مزدوجة القيد.",          desc_en: "Double-entry accounting journal." },
   { href: "/admin/accounts",ar: "الحسابات",        en: "Accounts",        icon: Library,     group: "treasury",     desc_ar: "شجرة الحسابات ودفتر الأستاذ العام.",            desc_en: "Chart of accounts and general ledger." },
   // ── Parties ──

@@ -60,6 +60,14 @@ export async function runDueRecurringInvoices(
 
   const invoiceIds: string[] = [];
   for (const t of due) {
+    // Advance nextRunDate BEFORE posting: D1 $transaction callbacks run
+    // without atomicity, so a crash mid-loop must fail toward under-billing
+    // (this template just waits for the next manual run) rather than
+    // double-billing (re-posting an invoice that already went out).
+    await tx.recurringInvoiceTemplate.update({
+      where: { id: t.id },
+      data: { nextRunDate: computeNextRunDate(asOf, t.dayOfMonth), lastRunAt: asOf },
+    });
     const computed = await computeLineTotals(tx, args.tenantId, [
       {
         description: t.description,

@@ -271,6 +271,50 @@ const HOTELS: HotelSeed[] = [
   },
 ];
 
+// ---------------------------------------------------------------------------
+// REPOINT, don't delete.
+//
+// A database seeded under the old assumptions holds rows that contradict the
+// new ones — invented hotels and Loran vegetable farms. The obvious fix is to
+// delete them, but prod's four fabricated hotels carry **518 bookings** and the
+// Loran plots carry crops; deleting cascades all of it away and guts the demo.
+//
+// Every one of those rows has a real counterpart, so they are RENAMED onto it
+// instead. Same visible outcome (only real entities on screen), zero history
+// destroyed. Keyed on the old name, so it is a no-op on a fresh database and
+// safe to re-run.
+const HOTEL_REMAP: Record<string, { name: string; toCompany: string }> = {
+  "أرينا سبيس عمّان": { name: "فندق أرينا سبيس", toCompany: "ARENA" },
+  // The Dead Sea property does not exist; its bookings are re-homed onto the
+  // group's flagship Amman property rather than thrown away.
+  "أرينا سبيس البحر الميت": { name: "فندق موفنبيك عمّان", toCompany: "SHARQ" },
+  // There is no Sofia hotel — Arena Hotels Ltd. is REGISTERED in Sofia. The
+  // actual Bulgarian properties are in Smolyan, Varna, and Velingrad.
+  "أرينا سبيس صوفيا": { name: "فندق سموليان", toCompany: "ARENABG" },
+  "أرينا سبيس فارنا": { name: "فندق أتلانتيك", toCompany: "ARENABG" },
+};
+
+// Loran does grow crops — FODDER crops. So the plots stay and become what they
+// really are, and the vegetables growing on them become the fodder the company
+// actually produces.
+const FARM_REMAP: Record<string, { name: string; type: string; toCompany?: string; location?: string }> = {
+  "حظائر لوران للأبقار": {
+    name: "مزرعة الحلابات",
+    type: "LIVESTOCK",
+    toCompany: "UNIONAGRI",
+    location: "الحلابات، الزرقاء",
+  },
+  "دفيئة لوران 1 — الأغوار": { name: "مزارع لوران للمحاصيل العلفية", type: "OPEN_FIELD" },
+  "حقول لوران المكشوفة": { name: "حقول لوران العلفية المكشوفة", type: "OPEN_FIELD" },
+};
+
+const CROP_REMAP: Record<string, string> = {
+  "طماطم": "برسيم",
+  "خيار": "شعير علفي",
+  "بطاطا": "ذرة علفية",
+  "بصل": "قش وسيلاج",
+};
+
 // Correcting the registry is only half the job. A database seeded under the OLD
 // assumptions still holds rows that contradict the new ones — invented hotels
 // ("أرينا سبيس البحر الميت" is not a real property) and Loran greenhouse/
@@ -318,12 +362,72 @@ async function main() {
     (await db.company.findMany({ select: { id: true, code: true } })).map((c) => [c.code, c.id]),
   );
 
+  // Repoint first, so the upsert below matches the remapped names and updates
+  // the existing row (with its bookings) instead of creating a duplicate.
+  let repointed = 0;
+  for (const [oldName, to] of Object.entries(HOTEL_REMAP)) {
+    const row = await db.hotel.findFirst({ where: { name: oldName }, select: { id: true } });
+    if (!row) continue;
+    const already = await db.hotel.findFirst({
+      where: { name: to.name, NOT: { id: row.id } },
+      select: { id: true },
+    });
+    // If the real name is already taken by another row, renaming would collide
+    // two properties into one identity. Leave it and report rather than merge.
+    if (already) {
+      console.log(`  ! hotel "${oldName}" not repointed — "${to.name}" already exists`);
+      continue;
+    }
+    // The owner moves too: Movenpick sits under Al-Sharq and the Bulgarian
+    // properties under Arena Hotels Ltd., not under the Amman Arena company.
+    // Without this the upsert below would not recognise the row and would
+    // create a duplicate beside it.
+    const owner = byCode.get(to.toCompany);
+    await db.hotel.update({
+      where: { id: row.id },
+      data: { name: to.name, ...(owner ? { companyId: owner } : {}) },
+    });
+    repointed++;
+  }
+
+  for (const [oldName, to] of Object.entries(FARM_REMAP)) {
+    const row = await db.farm.findFirst({ where: { name: oldName }, select: { id: true } });
+    if (!row) continue;
+    const already = await db.farm.findFirst({
+      where: { name: to.name, NOT: { id: row.id } },
+      select: { id: true },
+    });
+    if (already) {
+      console.log(`  ! farm "${oldName}" not repointed — "${to.name}" already exists`);
+      continue;
+    }
+    const target = to.toCompany ? byCode.get(to.toCompany) : undefined;
+    await db.farm.update({
+      where: { id: row.id },
+      data: {
+        name: to.name,
+        type: to.type,
+        ...(to.location ? { location: to.location } : {}),
+        ...(target ? { companyId: target } : {}),
+      },
+    });
+    repointed++;
+  }
+
+  for (const [oldName, realName] of Object.entries(CROP_REMAP)) {
+    const n = await db.crop.updateMany({ where: { name: oldName }, data: { name: realName } });
+    repointed += n.count;
+  }
+
   let hotelsCreated = 0;
   let hotelsUpdated = 0;
   for (const h of HOTELS) {
     const companyId = byCode.get(h.companyCode);
     if (!companyId) throw new Error(`company ${h.companyCode} missing for hotel ${h.nameEn}`);
-    const existing = await db.hotel.findFirst({ where: { companyId, name: h.name } });
+    // Matched on NAME alone, not (companyId, name): a repointed row may have
+    // just changed owner, and a companyId-scoped lookup would miss it and
+    // create a duplicate.
+    const existing = await db.hotel.findFirst({ where: { name: h.name } });
     const data = {
       companyId,
       name: h.name,
@@ -381,7 +485,13 @@ async function main() {
   });
   const hotelsToRetire = staleHotels.filter((h) => !realHotelNames.has(h.name));
 
-  const realFarmNames = new Set(["مزرعة الحلابات"]);
+  // Loran DOES farm — fodder. The repointed fodder plots are legitimate and
+  // must not be reported as contradictions.
+  const realFarmNames = new Set([
+    "مزرعة الحلابات",
+    "مزارع لوران للمحاصيل العلفية",
+    "حقول لوران العلفية المكشوفة",
+  ]);
   const staleFarms = await db.farm.findMany({
     where: { company: { sector: "AGRICULTURE" } },
     select: { id: true, name: true, type: true, _count: { select: { crops: true } } },
@@ -410,7 +520,7 @@ async function main() {
   console.log(
     `Hourani real-entity seed: companies ${created} created / ${updated} updated · ` +
       `hotels ${hotelsCreated} created / ${hotelsUpdated} updated · Al-Hallabat farm ${farmNote} · ` +
-      `contradicting rows: ${retired}`,
+      `${repointed} legacy rows repointed onto real entities · leftovers: ${retired}`,
   );
   console.log(
     "NOTE: per-company headcounts, SKU-level catalogues, and the chart of accounts " +

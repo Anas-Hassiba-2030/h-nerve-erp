@@ -26,6 +26,7 @@ import {
   PackageSearch,
   CalendarRange,
   Handshake,
+  Hourglass,
 } from "lucide-react";
 
 type Item = {
@@ -54,6 +55,7 @@ const FAMILY: Item[] = [
   { href: "/customers",             ar: "العملاء",      en: "Customers",       icon: UserSquare,     group: "parties" },
   { href: "/admin/journal",         ar: "اليومية",      en: "Journal",         icon: BookOpen,       group: "books" },
   { href: "/admin/accounts",        ar: "الحسابات",     en: "Accounts",        icon: Library,        group: "books" },
+  { href: "/finance/ageing",        ar: "أعمار الذمم",  en: "AR/AP Ageing",    icon: Hourglass,      group: "books" },
 ];
 
 const GROUP_LABELS: Record<GroupId, { ar: string; en: string }> = {

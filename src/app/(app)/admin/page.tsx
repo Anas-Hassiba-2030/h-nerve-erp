@@ -129,42 +129,93 @@ export default async function CoreHubPage() {
           section heights (5-item Sales next to 2-item Parties) leave dead
           whitespace under every shorter column. Columns instead let each
           section stack tight in whichever column has room next. */}
-      <div className="columns-1 lg:columns-2 2xl:columns-3" style={{ columnGap: 24 }}>
+      {/* ONE card per column-row — never a nested 2-up grid. The nested grid
+          put 6 tiles across the canvas, collapsing each to ~250px so copy
+          wrapped after two words. But the real lever is the COLUMN COUNT, not
+          full-width cards: at 3 columns a tile is ~537px holding a ~35-char
+          description, which reads as an empty shelf rather than as luxury.
+          4 columns at 2xl / 3 at xl / 2 at lg holds every tile in a ~390-470px
+          band at EVERY breakpoint — wide enough to breathe, tight enough that
+          the description actually fills the card, and short enough that the
+          hub stays near one screen instead of becoming an endless scroll. */}
+      <div className="columns-1 md:columns-2 xl:columns-3 2xl:columns-4" style={{ columnGap: 34 }}>
         {GROUP_ORDER.map((g) => {
           const items = CONSOLES.filter((c) => c.group === g);
           if (items.length === 0) return null;
           return (
-            <section key={g} className="mb-6 break-inside-avoid">
+            <section key={g} className="break-inside-avoid" style={{ marginBottom: 40 }}>
+              {/* Emerald, NOT gold: gold (#c2a35a) on cream (#fefcf7) is only
+                  2.36:1 — it fails WCAG AA (4.5:1) outright, so a gold group
+                  label buys decoration at the cost of legibility. Emerald is
+                  9.35:1 and still on-brand; gold survives as the tick rule. */}
+              {/* Arabic is CURSIVE — letter-spacing wedges gaps into joined
+                  glyph runs and visually shreds the word, and uppercase is a
+                  no-op for a script with no case. Both are Latin-only affordances,
+                  so they are applied only when the locale is English. Arabic
+                  gets a slightly larger size instead, which is how that script
+                  actually gains presence. */}
               <div
-                className="mb-3 flex items-baseline gap-2 text-xs font-bold uppercase tracking-widest"
-                style={{ color: "var(--ink-muted)" }}
+                className="flex items-center gap-2.5 font-bold"
+                style={{
+                  color: "var(--emerald)",
+                  fontSize: ar ? 15.5 : 13,
+                  letterSpacing: ar ? 0 : ".13em",
+                  textTransform: ar ? "none" : "uppercase",
+                  marginBottom: 14,
+                  paddingInlineStart: 2,
+                }}
               >
+                <span
+                  aria-hidden
+                  style={{ width: 18, height: 2, background: "var(--gold)", borderRadius: 2, flexShrink: 0 }}
+                />
                 <span>{ar ? GROUP_LABELS[g].ar : GROUP_LABELS[g].en}</span>
-                <span className="font-normal normal-case tracking-normal opacity-70">
+                <span className="font-semibold normal-case" style={{ letterSpacing: 0, color: "var(--ink-muted)" }}>
                   {items.length}
                 </span>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid" style={{ gap: 18 }}>
                 {items.map((c) => {
                   const Icon = c.icon;
                   return (
                     <Link
                       key={c.href}
                       href={c.href}
-                      className="panel reveal flex items-start gap-3"
-                      style={{ marginBottom: 0, padding: "20px 22px" }}
+                      className="panel reveal flex items-start"
+                      style={{ marginBottom: 0, padding: "24px 26px", gap: 16 }}
                     >
-                      <Icon className="mt-0.5 h-6 w-6 shrink-0" style={{ color: "var(--emerald)" }} />
+                      <Icon
+                        className="shrink-0"
+                        style={{ color: "var(--emerald)", width: 28, height: 28, marginTop: 2 }}
+                      />
+                      {/* Arabic needs ~20-25% more size than Latin at the same
+                          nominal px to read equally well (connected letterforms,
+                          diacritics, ligatures) — so each slot is sized by the
+                          SCRIPT it actually carries, not by one flat number.
+                          In Arabic locale the title/description are Arabic and
+                          the companion label is Latin; in English it is the
+                          reverse, so the two sizes swap with the locale. */}
                       <span className="min-w-0">
-                        <span className="flex flex-wrap items-baseline gap-x-2">
-                          <span className="text-base font-extrabold" style={{ color: "var(--ink)" }}>
+                        <span className="flex flex-wrap items-baseline" style={{ columnGap: 9 }}>
+                          <span
+                            className="font-extrabold"
+                            style={{ color: "var(--ink)", fontSize: ar ? 23 : 19, letterSpacing: ar ? 0 : "-.01em" }}
+                          >
                             {ar ? c.ar : c.en}
                           </span>
-                          <span className="text-xs" style={{ color: "var(--ink-muted)" }}>
+                          <span style={{ color: "var(--ink-muted)", fontSize: ar ? 14 : 15.5 }}>
                             {ar ? c.en : c.ar}
                           </span>
                         </span>
-                        <span className="mt-1.5 block text-sm leading-relaxed" style={{ color: "var(--ink-muted)" }}>
+                        <span
+                          className="block"
+                          style={{
+                            color: "var(--ink-muted)",
+                            fontSize: ar ? 18 : 15,
+                            lineHeight: ar ? 1.8 : 1.6,
+                            marginTop: 7,
+                          }}
+                        >
                           {ar ? c.desc_ar : c.desc_en}
                         </span>
                       </span>

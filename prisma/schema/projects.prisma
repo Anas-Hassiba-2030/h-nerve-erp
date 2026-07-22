@@ -50,10 +50,10 @@ model TimesheetEntry {
   employeeId String
   date       DateTime
   hours      Decimal
-  // Optional per-entry override; null = derive from
-  // Employee.baseSalary via hourlyRateFromMonthlySalary at read time,
-  // so a salary change doesn't silently rewrite historical entries but
-  // an entry never NEEDS a manual rate either.
+  // Optional per-entry override; null = derive from Employee.baseSalary
+  // via hourlyRateFromMonthlySalary at READ time, so a later salary
+  // change DOES reprice past entries (moving-rate, like WAC) unless a
+  // rate was frozen at log time via this override.
   hourlyRate Decimal?
   billable   Boolean  @default(true)
   note       String?

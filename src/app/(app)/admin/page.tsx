@@ -137,13 +137,24 @@ export default async function CoreHubPage() {
           wrapped after two words. But the real lever is the COLUMN COUNT, not
           full-width cards: at 3 columns a tile is ~537px holding a ~35-char
           description, which reads as an empty shelf rather than as luxury.
-          Owner picked 5 columns at the top breakpoint (denser, closer to one
-          screen). 5 only pays off on a widened canvas — `dl-page-wide` lifts the
-          cap to 2080px so a tile still lands ~370px instead of crushing to 270px
-          and wrapping Arabic titles mid-word. Below 2xl the ladder steps down
-          4 → 3 → 2 → 1 so the band never falls under ~350px. */}
+          Owner picked 5 columns (denser, closer to one screen). The breakpoints
+          below are NOT Tailwind's defaults, deliberately: the default ladder
+          (md/lg/xl/2xl = 768/1024/1280/1536) puts 5 columns at 1536px, where a
+          tile computes to 264px — narrower than the nested-grid layout this
+          whole redesign replaced, and right back to wrapping Arabic titles
+          mid-word.
+
+          Each breakpoint below is derived from the arithmetic instead:
+            tile = (min(vw, 2080) − 2×40 padding − 34×(n−1) gaps) ÷ n
+          and every step is placed at the width where its column count first
+          clears ~340px:
+            2 cols from  820px → ~365px      4 cols from 1600px → ~354px
+            3 cols from 1180px → ~347px      5 cols from 1920px → ~341px
+          A 1920 monitor at 100% scaling therefore gets the 5 columns; the same
+          monitor at 125% Windows scaling reports 1536 CSS px and gets 4 at
+          ~338px. Neither is cramped, which is the whole point. */}
       <div
-        className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 2xl:columns-5"
+        className="columns-1 min-[820px]:columns-2 min-[1180px]:columns-3 min-[1600px]:columns-4 min-[1920px]:columns-5"
         style={{ columnGap: 34 }}
       >
         {GROUP_ORDER.map((g) => {

@@ -86,6 +86,9 @@ export type JournalLineInput = {
   debit?: DecimalInput | null;
   credit?: DecimalInput | null;
   memo?: string | null;
+  /** Analytic dimension (docs/HOURANI-ERP-GAPS.md #2) — optional, only
+   *  manual journal entries tag it today. */
+  costCenterId?: string | null;
 };
 
 /**
@@ -161,6 +164,7 @@ export async function postJournalEntry(
         debit: D(l.debit),
         credit: D(l.credit),
         memo: l.memo ?? null,
+        costCenterId: l.costCenterId ?? null,
       })),
     },
   };
@@ -273,6 +277,7 @@ export async function reverseJournalEntry(
       debit: D(l.credit),
       credit: D(l.debit),
       memo: l.memo,
+      costCenterId: l.costCenterId,
     })),
   });
 }

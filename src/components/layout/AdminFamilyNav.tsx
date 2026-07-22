@@ -28,6 +28,7 @@ import {
   Handshake,
   Hourglass,
   Landmark,
+  Building2,
 } from "lucide-react";
 
 type Item = {
@@ -58,6 +59,7 @@ const FAMILY: Item[] = [
   { href: "/admin/accounts",        ar: "الحسابات",     en: "Accounts",        icon: Library,        group: "books" },
   { href: "/finance/ageing",        ar: "أعمار الذمم",  en: "AR/AP Ageing",    icon: Hourglass,      group: "books" },
   { href: "/admin/reconciliation",  ar: "التسوية البنكية", en: "Bank Reconciliation", icon: Landmark, group: "books" },
+  { href: "/admin/cost-centers",    ar: "مراكز التكلفة", en: "Cost Centres",  icon: Building2,     group: "books" },
 ];
 
 const GROUP_LABELS: Record<GroupId, { ar: string; en: string }> = {

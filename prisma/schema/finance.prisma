@@ -107,12 +107,47 @@ model JournalLine {
   debit          Decimal  @default(0)
   credit         Decimal  @default(0)
   memo           String?
+  // Analytic dimension (docs/HOURANI-ERP-GAPS.md #2 🔴 — "what did the
+  // Amman hotel cost me, separately from the dairy plant"). Optional:
+  // automated postings (invoicing, POS, payroll, ...) don't tag it yet —
+  // v1 wiring is manual journal entries at /admin/journal, which lets an
+  // accountant assign a cost centre per line. A dimension-filtered P&L
+  // (lib/finance/statements.ts incomeStatement, called with rows already
+  // filtered to one costCenterId) reads it back out.
+  costCenterId   String?
 
   entry          JournalEntry  @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
   account        LedgerAccount @relation(fields: [accountId], references: [id])
+  costCenter     CostCenter?   @relation(fields: [costCenterId], references: [id])
 
   @@index([journalEntryId])
   @@index([accountId])
+  @@index([costCenterId])
+}
+
+// =====================================================================
+// COST CENTRE — analytic dimension (docs/HOURANI-ERP-GAPS.md #2 🔴). One
+// row per business unit the group wants to see separately in a P&L
+// (e.g. "Amman Hotel", "Dairy Plant"). Deliberately NOT tied to Company —
+// a tenant workspace can have several cost centres (a hotel workspace
+// might split front-of-house vs F&B) and the mapping is the owner's
+// call, not a 1:1 schema assumption.
+// =====================================================================
+model CostCenter {
+  id        String   @id @default(cuid())
+  tenantId  String
+  code      String
+  name      String
+  active    Boolean  @default(true)
+
+  lines     JournalLine[]
+
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, code])
+  @@index([tenantId, active])
 }
 
 // =====================================================================

@@ -368,6 +368,7 @@ model Customer {
   estimates     Estimate[]
   payments      Payment[]
   portalAccount CustomerPortalAccount?
+  recurringInvoiceTemplates RecurringInvoiceTemplate[]
 
   deletedAt     DateTime?
   createdAt     DateTime @default(now())

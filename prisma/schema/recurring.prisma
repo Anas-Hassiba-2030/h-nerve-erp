@@ -1,0 +1,41 @@
+// =====================================================================
+// RECURRING INVOICES — docs/HOURANI-ERP-GAPS.md #11 ⚪ (relevant if the
+// incubator charges programme fees monthly). Monthly only, deliberately —
+// a frequency selector with untested weekly/quarterly/annual options
+// would be the same half-finished trap CLAUDE.md warns against for
+// stock-valuation methods. One line per template (description + flat
+// amount, no tax breakdown) — real line-item/tax invoices still go
+// through the normal /invoices flow; this is for a fixed recurring fee.
+//
+// A due template is turned into a REAL Invoice via the existing
+// postInvoiceFromComputed (lib/finance/invoicing.ts) — same AR/Revenue
+// posting every other invoice uses, no parallel accounting path.
+//
+// Execution model matches the existing /api/brain/cron precedent exactly:
+// a bearer-secured HTTP endpoint an external scheduler must hit (this repo
+// has no wrangler cron trigger wired), plus a manual "Run due now" button
+// as the on-demand fallback. See src/app/api/cron/recurring-invoices/route.ts.
+// =====================================================================
+
+model RecurringInvoiceTemplate {
+  id          String    @id @default(cuid())
+  tenantId    String
+  customerId  String
+  description String
+  amount      Decimal
+  currency    String    @default("JOD")
+  // 1-28 — clamped away from 29-31 so every month has that day (no
+  // "Feb 30" edge case to special-case in the date math).
+  dayOfMonth  Int
+  active      Boolean   @default(true)
+  nextRunDate DateTime
+  lastRunAt   DateTime?
+
+  customer    Customer  @relation(fields: [customerId], references: [id])
+
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([tenantId, active, nextRunDate])
+}

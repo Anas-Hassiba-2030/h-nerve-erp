@@ -13,7 +13,7 @@ import {
   ShoppingCart, ShoppingBag, Users, UserSquare, BookOpen, Library,
   BrainCircuit, FileText, GitBranch, ReceiptText, CreditCard, Landmark,
   Banknote, Scale, Building2, Factory, CalendarDays, CalendarRange, Wallet, PackageSearch,
-  Handshake,
+  Handshake, Hourglass,
 } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -52,6 +52,7 @@ const CONSOLES: Console[] = [
   { href: "/treasuries",   ar: "الخزائن",          en: "Treasuries",      icon: Landmark,    group: "treasury",     desc_ar: "الصناديق النقدية والحسابات البنكية.",          desc_en: "Cash boxes and bank accounts." },
   { href: "/payments",     ar: "دفعات العملاء",    en: "Payments",        icon: CreditCard,  group: "treasury",     desc_ar: "تحصيل دفعات العملاء على الفواتير.",            desc_en: "Collect customer payments on invoices." },
   { href: "/statements",   ar: "القوائم المالية",  en: "Statements",      icon: Scale,       group: "treasury",     desc_ar: "الميزانية وقائمة الدخل من دفتر الأستاذ.",       desc_en: "Balance sheet and P&L from the ledger." },
+  { href: "/finance/ageing", ar: "أعمار الذمم",   en: "AR/AP Ageing",    icon: Hourglass,   group: "treasury",     desc_ar: "من يدين لي ولمن أدين، وكم تأخّر السداد.",       desc_en: "Who owes you, who you owe, and how overdue." },
   { href: "/admin/journal",ar: "القيود",           en: "Journal",         icon: BookOpen,    group: "treasury",     desc_ar: "قيود اليومية المحاسبية مزدوجة القيد.",          desc_en: "Double-entry accounting journal." },
   { href: "/admin/accounts",ar: "الحسابات",        en: "Accounts",        icon: Library,     group: "treasury",     desc_ar: "شجرة الحسابات ودفتر الأستاذ العام.",            desc_en: "Chart of accounts and general ledger." },
   // ── Parties ──

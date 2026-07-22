@@ -114,6 +114,22 @@ export const COMPANY_CODE_TO_TENANT_SLUG: Record<string, string> = {
   LORAN: "loran-agri",
   TANK: "tank-incubator",
   AAU: "tank-incubator",
+  // Real-entity registry (scripts/seed/seed-hourani-real.ts, sourced in
+  // docs/HOURANI-GROUP-PROFILE.md). These are the group's ACTUAL published
+  // companies; they fold into the four existing tenant slugs rather than
+  // minting new tenants, because a tenant is a workspace, not a legal entity.
+  SHARQ: "hourani-hotels",     // owns the Mövenpick Amman property
+  ARENABG: "hourani-hotels",   // the three Bulgarian hotels
+  DJD: "maha-dairy",           // Danish Jordanian Dairy — brand Baladna
+  UNIONAGRI: "loran-agri",     // owns the Al-Hallabat dairy farm
+  // The "tank-incubator" slug is a legacy misnomer: "The Tank" is Umniah's
+  // incubator, not the group's (see docs/HOURANI-GROUP-PROFILE.md). The slug
+  // is load-bearing — it is written into tenantId columns across the DB — so
+  // it is kept as an opaque identifier for the EDUCATION workspace rather
+  // than renamed. Read it as "education", not as a claim about The Tank.
+  JSS: "tank-incubator",       // Al-Jami'a Secondary Schools
+  TABAQAT: "hourani-hotels",   // real estate — no workspace of its own yet
+  MAHER: "hourani-hotels",     // security — no workspace of its own yet
 };
 
 // Sector-keyed fallback for the few writes that have a Company.sector

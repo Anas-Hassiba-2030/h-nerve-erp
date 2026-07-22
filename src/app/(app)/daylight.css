@@ -132,6 +132,10 @@ body:has(.dl-page) aside { display: none !important; }
 body:has(.dl-page) .flex.min-h-screen.flex-1.flex-col.nerve-bg { flex: 1 1 100% !important; }
 /* give the page comfortable margins now that the rail is gone */
 .dl-page { max-width: 1680px; margin-inline: auto; padding-inline: clamp(16px, 3vw, 40px); }
+/* Tile hubs only (see DaylightShell `wide`): a 5-column console grid needs more
+   canvas than a reading page, or every tile crushes to ~270px and the Arabic
+   titles wrap mid-word. Never apply this to prose. */
+.dl-page-wide { max-width: 2080px; }
 /* the fixed ↺ Orbit pill is the nav home on full-bleed pages — lift it above content */
 body:has(.dl-page) .orbit-return { z-index: 70; }
 

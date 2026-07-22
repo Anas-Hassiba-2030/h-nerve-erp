@@ -90,7 +90,15 @@ export default async function JournalPage(props: { searchParams: Promise<SP> }) 
         }
       />
 
-      <AdminFamilyNav current="/admin/journal" ar={ar} />
+      <AdminFamilyNav
+        current="/admin/journal"
+        ar={ar}
+        extra={
+          <Link href="/admin/journal/new" className="btn btn-primary text-sm">
+            {ar ? "قيد يدوي جديد" : "New manual entry"}
+          </Link>
+        }
+      />
 
       <DaylightKpiGrid>
         <DaylightKpi label={ar ? "قيود الفترة" : "Entries (period)"} value={formatNumber(entries.length)} />

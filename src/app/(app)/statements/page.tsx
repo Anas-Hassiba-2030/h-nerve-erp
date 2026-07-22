@@ -21,13 +21,18 @@ import "../daylight.css";
 
 export const dynamic = "force-dynamic";
 
-async function accountRows(accountIds: string[], year?: number): Promise<Map<string, { debit: number; credit: number }>> {
+async function accountRows(
+  accountIds: string[],
+  year?: number,
+  costCenterId?: string,
+): Promise<Map<string, { debit: number; credit: number }>> {
   if (accountIds.length === 0) return new Map();
   const grouped = await prisma.journalLine.groupBy({
     by: ["accountId"],
     where: {
       accountId: { in: accountIds },
       entry: year ? { status: "POSTED", period: { year } } : { status: "POSTED" },
+      ...(costCenterId ? { costCenterId } : {}),
     },
     _sum: { debit: true, credit: true },
   });
@@ -69,26 +74,28 @@ function SectionTable({ title, lines, totalLabel, total }: { title: string; line
   );
 }
 
-export default async function StatementsPage(props: { searchParams: Promise<{ year?: string }> }) {
+export default async function StatementsPage(props: { searchParams: Promise<{ year?: string; costCenter?: string }> }) {
   const searchParams = await props.searchParams;
   const locale = await getLocale();
   const ar = locale === "ar";
 
   // Tenant-scoped account list; JournalLines are then restricted to these
   // account ids, so every aggregate below is tenant-scoped transitively.
-  const [accounts, periods] = await Promise.all([
+  const [accounts, periods, costCenters] = await Promise.all([
     prisma.ledgerAccount.findMany({ orderBy: { code: "asc" }, take: 500 }),
     prisma.financialPeriod.findMany({ orderBy: { year: "desc" }, select: { year: true }, take: 120 }),
+    prisma.costCenter.findMany({ where: { deletedAt: null }, orderBy: { code: "asc" } }),
   ]);
   const years = [...new Set(periods.map((p) => p.year))];
   const currentYear = new Date().getFullYear();
   const parsedYear = Number(searchParams.year);
   const year = years.includes(parsedYear) ? parsedYear : (years[0] ?? currentYear);
+  const costCenterId = costCenters.some((c) => c.id === searchParams.costCenter) ? searchParams.costCenter : undefined;
 
   const accountIds = accounts.map((a) => a.id);
   const [allTime, yearOnly] = await Promise.all([
     accountRows(accountIds),
-    accountRows(accountIds, year),
+    accountRows(accountIds, year, costCenterId),
   ]);
 
   const toRows = (sums: Map<string, { debit: number; credit: number }>): AccountBalanceRow[] =>
@@ -110,11 +117,29 @@ export default async function StatementsPage(props: { searchParams: Promise<{ ye
       <div className="flex items-center gap-2 flex-wrap">
         <span style={{ fontSize: 13, color: "var(--ink-muted)" }}>{ar ? "السنة المالية:" : "Fiscal year:"}</span>
         {(years.length ? years : [currentYear]).map((y) => (
-          <Link key={y} href={`/statements?year=${y}`} className={y === year ? "btn btn-primary" : "btn"} style={{ paddingBlock: 4 }}>
+          <Link key={y} href={`/statements?year=${y}${costCenterId ? `&costCenter=${costCenterId}` : ""}`} className={y === year ? "btn btn-primary" : "btn"} style={{ paddingBlock: 4 }}>
             {y}
           </Link>
         ))}
       </div>
+      {costCenters.length > 0 ? (
+        <div className="flex items-center gap-2 flex-wrap">
+          <span style={{ fontSize: 13, color: "var(--ink-muted)" }}>{ar ? "مركز التكلفة:" : "Cost centre:"}</span>
+          <Link href={`/statements?year=${year}`} className={!costCenterId ? "btn btn-primary" : "btn"} style={{ paddingBlock: 4 }}>
+            {ar ? "كل الوحدات" : "All units"}
+          </Link>
+          {costCenters.map((c) => (
+            <Link
+              key={c.id}
+              href={`/statements?year=${year}&costCenter=${c.id}`}
+              className={c.id === costCenterId ? "btn btn-primary" : "btn"}
+              style={{ paddingBlock: 4 }}
+            >
+              {c.code}
+            </Link>
+          ))}
+        </div>
+      ) : null}
       <SectionTable
         title={ar ? "الإيرادات" : "Revenue"}
         lines={pl.revenue}

@@ -16,9 +16,7 @@ import { hasRole } from "@/lib/auth/authz";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getActiveTenantSlug } from "@/lib/tenancy/tenancy";
 import { flashToast } from "@/lib/utils/toast";
-import { ensureLedgerAccount, ensureOpenPeriod } from "@/lib/finance/invoicing";
-import { createPostedJournalEntry, ACCT } from "@/lib/finance/accounting";
-import { allocateLandedCost, type AllocationInput } from "@/lib/inventory/landedCost";
+import { allocateLandedCost, postLandedCost, type AllocationInput } from "@/lib/inventory/landedCost";
 
 const PATH = "/admin/landed-costs";
 
@@ -84,48 +82,18 @@ export async function createLandedCost(formData: FormData): Promise<void> {
 
   const tenantId = await tenant(po.tenantId);
   try {
-    await prisma.$transaction(async (tx) => {
-      const t = tx as unknown as typeof prisma;
-      const treasury = await t.treasury.findUniqueOrThrow({ where: { id: treasuryId } });
-      if (treasury.tenantId !== tenantId) throw new Error("Cross-tenant treasury");
-
-      const [inventoryAccount, period] = await Promise.all([
-        ensureLedgerAccount(t, tenantId, ACCT.INVENTORY, "Inventory", "ASSET"),
-        ensureOpenPeriod(t, tenantId),
-      ]);
-
-      const label = `Landed cost — ${description} (${po.poNumber})`;
-      const journalEntry = await createPostedJournalEntry(t, {
+    await prisma.$transaction((tx) =>
+      postLandedCost(tx as unknown as typeof prisma, {
         tenantId,
-        periodId: period.id,
-        description: label,
-        reference: po.poNumber,
-        lines: {
-          create: [
-            { accountId: inventoryAccount.id, debit: totalAmount, credit: 0, memo: label },
-            { accountId: treasury.ledgerAccountId, debit: 0, credit: totalAmount, memo: label },
-          ],
-        },
-      });
-
-      await t.landedCost.create({
-        data: {
-          tenantId,
-          purchaseOrderId: po.id,
-          description,
-          totalAmount,
-          allocationMethod,
-          journalEntryId: journalEntry.id,
-          lines: {
-            create: allocations.map((a) => ({
-              movementId: a.movementId,
-              productId: a.productId,
-              allocatedAmount: a.allocatedAmount,
-            })),
-          },
-        },
-      });
-    });
+        purchaseOrderId: po.id,
+        poNumber: po.poNumber,
+        description,
+        totalAmount,
+        allocationMethod: allocationMethod as "BY_VALUE" | "BY_QUANTITY",
+        treasuryId,
+        allocations,
+      }),
+    );
   } catch (e) {
     console.error("createLandedCost failed", e);
     return fail(ar ? "تعذّر إنشاء التكلفة اللاحقة" : "could not create the landed cost");

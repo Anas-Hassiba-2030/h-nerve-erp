@@ -138,7 +138,7 @@ export default async function CoreHubPage() {
           band at EVERY breakpoint — wide enough to breathe, tight enough that
           the description actually fills the card, and short enough that the
           hub stays near one screen instead of becoming an endless scroll. */}
-      <div className="columns-1 lg:columns-2 xl:columns-3 2xl:columns-4" style={{ columnGap: 34 }}>
+      <div className="columns-1 md:columns-2 xl:columns-3 2xl:columns-4" style={{ columnGap: 34 }}>
         {GROUP_ORDER.map((g) => {
           const items = CONSOLES.filter((c) => c.group === g);
           if (items.length === 0) return null;
@@ -148,12 +148,19 @@ export default async function CoreHubPage() {
                   2.36:1 — it fails WCAG AA (4.5:1) outright, so a gold group
                   label buys decoration at the cost of legibility. Emerald is
                   9.35:1 and still on-brand; gold survives as the tick rule. */}
+              {/* Arabic is CURSIVE — letter-spacing wedges gaps into joined
+                  glyph runs and visually shreds the word, and uppercase is a
+                  no-op for a script with no case. Both are Latin-only affordances,
+                  so they are applied only when the locale is English. Arabic
+                  gets a slightly larger size instead, which is how that script
+                  actually gains presence. */}
               <div
-                className="flex items-center gap-2.5 font-bold uppercase"
+                className="flex items-center gap-2.5 font-bold"
                 style={{
                   color: "var(--emerald)",
-                  fontSize: 13,
-                  letterSpacing: ".13em",
+                  fontSize: ar ? 14.5 : 13,
+                  letterSpacing: ar ? 0 : ".13em",
+                  textTransform: ar ? "none" : "uppercase",
                   marginBottom: 14,
                   paddingInlineStart: 2,
                 }}

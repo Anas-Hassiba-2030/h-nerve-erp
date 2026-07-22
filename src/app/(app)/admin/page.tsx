@@ -59,6 +59,7 @@ const CONSOLES: Console[] = [
   // ── Inventory, assets & manufacturing (everything that's physical stock) ──
   { href: "/admin/products",   ar: "المنتجات",     en: "Products",        icon: Package,     group: "inventory",    desc_ar: "كتالوج المنتجات ووحدات القياس والأسعار.",     desc_en: "Product catalog, units, and pricing." },
   { href: "/admin/movements",  ar: "الحركات",      en: "Movements",       icon: ArrowLeftRight, group: "inventory", desc_ar: "سجل حركات المخزون الداخلة والخارجة.",         desc_en: "Ledger of inbound/outbound stock." },
+  { href: "/admin/lots",       ar: "الدفعات والصلاحية", en: "Lots & Expiry", icon: PackageSearch, group: "inventory", desc_ar: "تتبّع الدفعات وتواريخ الانتهاء والصرف بالأقدم انتهاءً.", desc_en: "Batch tracking, expiry dates, and first-expired-first-out issuing." },
   { href: "/admin/warehouses", ar: "المستودعات",   en: "Warehouses",      icon: Warehouse,   group: "inventory",    desc_ar: "مواقع التخزين ومستويات المخزون.",             desc_en: "Storage locations and stock levels." },
   { href: "/admin/transfers",  ar: "التحويلات",    en: "Transfers",       icon: Truck,       group: "inventory",    desc_ar: "تحويلات المخزون بين المستودعات.",             desc_en: "Stock transfers between warehouses." },
   { href: "/assets",       ar: "الأصول الثابتة",   en: "Fixed Assets",    icon: Building2,   group: "inventory",    desc_ar: "الأصول واستهلاكها الشهري.",                    desc_en: "Assets and monthly depreciation." },

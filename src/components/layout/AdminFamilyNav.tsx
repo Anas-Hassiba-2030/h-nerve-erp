@@ -41,6 +41,7 @@ const FAMILY: Item[] = [
   { href: "/admin/mappings",        ar: "الخرائط",      en: "Mappings",        icon: MapIcon,        group: "ingest" },
   { href: "/admin/products",        ar: "المنتجات",     en: "Products",        icon: Package,        group: "inventory" },
   { href: "/admin/movements",       ar: "الحركات",      en: "Movements",       icon: ArrowLeftRight, group: "inventory" },
+  { href: "/admin/lots",              ar: "الدفعات والصلاحية", en: "Lots & Expiry", icon: PackageSearch,  group: "inventory" },
   { href: "/admin/warehouses",      ar: "المستودعات",  en: "Warehouses",      icon: Warehouse,      group: "inventory" },
   { href: "/admin/transfers",       ar: "التحويلات",   en: "Transfers",       icon: Truck,          group: "inventory" },
   { href: "/admin/purchase-orders", ar: "أوامر الشراء", en: "Purchase Orders", icon: ShoppingCart,   group: "orders" },

@@ -1,0 +1,63 @@
+// =====================================================================
+// LOT / BATCH TRACEABILITY — Odoo's `stock.lot` translated.
+//
+// WHY THIS EXISTS: the group runs perishables (dairy — المها, agriculture
+// — لوران). Until now expiry lived ONLY on DairyBatch, a company-scoped
+// island with no link to Product or InventoryMovement — so the stock
+// ledger had no idea anything could expire, and "what expires this week"
+// could not be answered from inventory at all. StockLot puts expiry on
+// the GENERIC inventory spine, so every perishable tenant gets it, not
+// just the dairy vertical.
+//
+// SHAPE: a lot is a quantity of ONE product that shares a production date
+// and an expiry date. Product.quantity stays the denormalized total; the
+// lots partition it. Lot tracking is OPT-IN per product
+// (Product.trackingMode) — a hotel's bath towels must not be forced
+// through a lot picker.
+//
+// Same house conventions as inventory.prisma: cuid id, OPAQUE string
+// tenantId (no Tenant FK — see the Product header for why), status as a
+// String union per the CLAUDE.md SQLite rule, soft delete via deletedAt.
+// Both models are registered in TENANT_SCOPED_MODELS.
+// =====================================================================
+
+model StockLot {
+  id             String    @id @default(cuid())
+  tenantId       String
+  productId      String
+  // Human-facing batch code ("MAHA-2026-07-21-A"). Unique per product so
+  // two different products may legitimately reuse a supplier's code.
+  lotNumber      String
+  // Null = a tracked-but-non-perishable lot (serial-style traceability
+  // without a shelf life). FEFO sorts nulls last — a lot that never
+  // expires is always the LAST thing you should ship.
+  expiryDate     DateTime?
+  producedAt     DateTime  @default(now())
+  // Remaining quantity in this lot. Decremented by consumption, never
+  // below zero (enforced in lib/inventory/lots.ts, not the schema —
+  // SQLite has no CHECK support through Prisma).
+  quantity       Int       @default(0)
+  // Quantity as originally received/produced. quantity/originalQuantity
+  // gives depletion without replaying the whole movement ledger.
+  originalQuantity Int     @default(0)
+  // ACTIVE | QUARANTINE | EXPIRED | CONSUMED
+  // QUARANTINE = received but failed/awaiting QC; never FEFO-allocatable.
+  status         String    @default("ACTIVE")
+  // Free text: supplier lot ref, QC certificate no., pasteurisation batch.
+  supplierLotRef String?
+  note           String?
+
+  product        Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  movements      InventoryMovement[]
+
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([productId, lotNumber])
+  // The FEFO index: "give me this tenant's allocatable lots, soonest
+  // expiry first" is the single hottest query in the module.
+  @@index([tenantId, expiryDate])
+  @@index([tenantId, productId, status])
+  @@index([tenantId, status, expiryDate])
+}

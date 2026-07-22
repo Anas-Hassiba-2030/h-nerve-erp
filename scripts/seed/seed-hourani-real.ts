@@ -271,6 +271,18 @@ const HOTELS: HotelSeed[] = [
   },
 ];
 
+// Correcting the registry is only half the job. A database seeded under the OLD
+// assumptions still holds rows that contradict the new ones — invented hotels
+// ("أرينا سبيس البحر الميت" is not a real property) and Loran greenhouse/
+// open-field farms that encode the exact mistake this seed exists to fix.
+// Leaving them produces something worse than either version alone: a registry
+// saying "Loran is a feed company" sitting next to four Loran vegetable farms.
+//
+// Retiring them DELETES rows, and Hotel→Booking / Farm→Crop cascade. So it is
+// OFF by default: without the flag the script only REPORTS what contradicts the
+// real registry, and a human decides. Pass --retire-unlisted to actually remove.
+const RETIRE = process.argv.includes("--retire-unlisted");
+
 async function main() {
   const db = makePrismaClient();
   let created = 0;
@@ -361,9 +373,44 @@ async function main() {
     }
   }
 
+  // ---- reconcile: find rows that contradict the real registry ----------
+  const realHotelNames = new Set(HOTELS.map((h) => h.name));
+  const staleHotels = await db.hotel.findMany({
+    where: { company: { sector: "HOSPITALITY" } },
+    select: { id: true, name: true, city: true, _count: { select: { bookings: true } } },
+  });
+  const hotelsToRetire = staleHotels.filter((h) => !realHotelNames.has(h.name));
+
+  const realFarmNames = new Set(["مزرعة الحلابات"]);
+  const staleFarms = await db.farm.findMany({
+    where: { company: { sector: "AGRICULTURE" } },
+    select: { id: true, name: true, type: true, _count: { select: { crops: true } } },
+  });
+  const farmsToRetire = staleFarms.filter((f) => !realFarmNames.has(f.name));
+
+  let retired = "none";
+  if (hotelsToRetire.length || farmsToRetire.length) {
+    console.log("\n--- Rows that CONTRADICT the real registry ---");
+    for (const h of hotelsToRetire) {
+      console.log(`  hotel  "${h.name}" (${h.city}) — ${h._count.bookings} bookings would cascade`);
+    }
+    for (const f of farmsToRetire) {
+      console.log(`  farm   "${f.name}" (${f.type}) — ${f._count.crops} crops would cascade`);
+    }
+    if (RETIRE) {
+      await db.hotel.deleteMany({ where: { id: { in: hotelsToRetire.map((h) => h.id) } } });
+      await db.farm.deleteMany({ where: { id: { in: farmsToRetire.map((f) => f.id) } } });
+      retired = `${hotelsToRetire.length} hotels + ${farmsToRetire.length} farms DELETED`;
+    } else {
+      retired = "reported only — re-run with --retire-unlisted to delete them";
+    }
+    console.log("---\n");
+  }
+
   console.log(
     `Hourani real-entity seed: companies ${created} created / ${updated} updated · ` +
-      `hotels ${hotelsCreated} created / ${hotelsUpdated} updated · Al-Hallabat farm ${farmNote}`,
+      `hotels ${hotelsCreated} created / ${hotelsUpdated} updated · Al-Hallabat farm ${farmNote} · ` +
+      `contradicting rows: ${retired}`,
   );
   console.log(
     "NOTE: per-company headcounts, SKU-level catalogues, and the chart of accounts " +

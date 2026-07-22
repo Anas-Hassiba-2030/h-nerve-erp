@@ -16,6 +16,13 @@ model Product {
   quantity        Int       @default(0)
   // Phase 10: Brain low-stock threshold. Null → the engine uses 50.
   reorderPoint    Int?
+  // NONE | LOT — opt-in lot/expiry traceability (see lots.prisma).
+  // Deliberately per-product, not per-tenant: one warehouse legitimately
+  // holds both perishable yoghurt and non-perishable packaging.
+  trackingMode    String    @default("NONE")
+  // Shelf life in days, used to default a new lot's expiry at receipt.
+  // Null = no default; the operator types the date.
+  shelfLifeDays   Int?
   // Money, precision/scale (12,2). Applied at the Phase 11 Postgres
   // cutover (same precedent as ImportRow.unitCost).
   unitCost        Decimal?
@@ -54,6 +61,7 @@ model Product {
   posSaleLines    PosSaleLine[]   @relation("PosSaleLineProduct")
   reorderRule     ReorderRule?
   mpsForecasts    MpsForecast[]
+  lots            StockLot[]
   supplierRef     Supplier? @relation(fields: [supplierId], references: [id])
   warehouseRef    Warehouse @relation(fields: [warehouseId], references: [id])
 
@@ -101,6 +109,9 @@ model InventoryMovement {
   // TRANSFER_OUT / TRANSFER_IN created in the same transaction.
   warehouseId       String?
   transferRef       String?
+  // Which lot this movement drew from / added to. Null for every
+  // non-tracked product — the ledger stays valid for both modes.
+  lotId             String?
 
   // Append-only (decision #1): no edit/delete UI. deletedAt exists for
   // exceptional admin correction only; recalc excludes soft-deleted rows.
@@ -108,7 +119,12 @@ model InventoryMovement {
   createdAt         DateTime @default(now())
 
   product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  // SetNull, not Cascade: an expired lot may be purged one day, but the
+  // stock movements it produced are an append-only audit trail and must
+  // survive it.
+  lot               StockLot? @relation(fields: [lotId], references: [id], onDelete: SetNull)
 
+  @@index([tenantId, lotId])
   @@index([tenantId, productId, occurredAt])
   @@index([tenantId, type, occurredAt])
   @@index([productId, deletedAt])

@@ -25,6 +25,7 @@ import {
   Library,
   PackageSearch,
   CalendarRange,
+  Handshake,
 } from "lucide-react";
 
 type Item = {
@@ -47,6 +48,7 @@ const FAMILY: Item[] = [
   { href: "/admin/sales-orders",    ar: "أوامر البيع",  en: "Sales Orders",    icon: ShoppingBag,    group: "orders" },
   { href: "/admin/replenishment",   ar: "إعادة التزويد", en: "Replenishment",  icon: PackageSearch,  group: "orders" },
   { href: "/admin/mps",             ar: "جدول الإنتاج",  en: "MPS",             icon: CalendarRange,  group: "orders" },
+  { href: "/crm",                   ar: "إدارة العلاقات", en: "CRM",             icon: Handshake,      group: "parties" },
   { href: "/suppliers",             ar: "المورّدون",    en: "Suppliers",       icon: Users,          group: "parties" },
   { href: "/customers",             ar: "العملاء",      en: "Customers",       icon: UserSquare,     group: "parties" },
   { href: "/admin/journal",         ar: "اليومية",      en: "Journal",         icon: BookOpen,       group: "books" },

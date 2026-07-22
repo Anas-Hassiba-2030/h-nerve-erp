@@ -93,7 +93,7 @@ export default async function CoreHubPage() {
   const isAdmin = user?.role === "ADMIN";
 
   return (
-    <DaylightShell dir={ar ? "rtl" : "ltr"}>
+    <DaylightShell dir={ar ? "rtl" : "ltr"} wide>
       <DaylightHeader
         eyebrow={ar ? "النظام · الباك أوفيس" : "System · Back office"}
         title={ar ? "العمليات" : "Operations"}
@@ -134,11 +134,15 @@ export default async function CoreHubPage() {
           wrapped after two words. But the real lever is the COLUMN COUNT, not
           full-width cards: at 3 columns a tile is ~537px holding a ~35-char
           description, which reads as an empty shelf rather than as luxury.
-          4 columns at 2xl / 3 at xl / 2 at lg holds every tile in a ~390-470px
-          band at EVERY breakpoint — wide enough to breathe, tight enough that
-          the description actually fills the card, and short enough that the
-          hub stays near one screen instead of becoming an endless scroll. */}
-      <div className="columns-1 md:columns-2 xl:columns-3 2xl:columns-4" style={{ columnGap: 34 }}>
+          Owner picked 5 columns at the top breakpoint (denser, closer to one
+          screen). 5 only pays off on a widened canvas — `dl-page-wide` lifts the
+          cap to 2080px so a tile still lands ~370px instead of crushing to 270px
+          and wrapping Arabic titles mid-word. Below 2xl the ladder steps down
+          4 → 3 → 2 → 1 so the band never falls under ~350px. */}
+      <div
+        className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 2xl:columns-5"
+        style={{ columnGap: 34 }}
+      >
         {GROUP_ORDER.map((g) => {
           const items = CONSOLES.filter((c) => c.group === g);
           if (items.length === 0) return null;

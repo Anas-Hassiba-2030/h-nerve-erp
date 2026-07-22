@@ -4,9 +4,12 @@ import type { ReactNode } from "react";
 // app/(app)/daylight.css (styles scoped under .dl-page). Presentational only —
 // pages keep their own real-data queries + server actions and just render these.
 
-export function DaylightShell({ children, dir }: { children: ReactNode; dir?: "rtl" | "ltr" }) {
+// `wide` opts a page out of the 1680px reading cap. Only for dense tile hubs
+// (the Operations console grid) where more columns beat a narrower measure —
+// never for prose pages, where a longer line length hurts readability.
+export function DaylightShell({ children, dir, wide }: { children: ReactNode; dir?: "rtl" | "ltr"; wide?: boolean }) {
   return (
-    <div className="dl-page" dir={dir}>
+    <div className={wide ? "dl-page dl-page-wide" : "dl-page"} dir={dir}>
       {children}
     </div>
   );

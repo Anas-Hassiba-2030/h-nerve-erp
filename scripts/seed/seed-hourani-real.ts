@@ -28,7 +28,7 @@
 
 import { makePrismaClient } from "../_prisma";
 
-type CompanySeed = {
+export type CompanySeed = {
   code: string;
   name: string;
   nameEn: string;
@@ -43,7 +43,7 @@ type CompanySeed = {
 
 // ~11 named entities. The group claims 14; the other ~3 are not published, so
 // they are not seeded — an invented subsidiary is worse than a short list.
-const COMPANIES: CompanySeed[] = [
+export const COMPANIES: CompanySeed[] = [
   {
     code: "HH",
     name: "الشركة الأردنية المتحدة للاستثمار",
@@ -200,7 +200,7 @@ const COMPANIES: CompanySeed[] = [
   },
 ];
 
-type HotelSeed = {
+export type HotelSeed = {
   companyCode: string;
   name: string;
   nameEn: string;
@@ -212,7 +212,7 @@ type HotelSeed = {
   description: string;
 };
 
-const HOTELS: HotelSeed[] = [
+export const HOTELS: HotelSeed[] = [
   {
     companyCode: "SHARQ",
     name: "فندق موفنبيك عمّان",
@@ -283,7 +283,7 @@ const HOTELS: HotelSeed[] = [
 // instead. Same visible outcome (only real entities on screen), zero history
 // destroyed. Keyed on the old name, so it is a no-op on a fresh database and
 // safe to re-run.
-const HOTEL_REMAP: Record<string, { name: string; toCompany: string }> = {
+export const HOTEL_REMAP: Record<string, { name: string; toCompany: string }> = {
   "أرينا سبيس عمّان": { name: "فندق أرينا سبيس", toCompany: "ARENA" },
   // The Dead Sea property does not exist; its bookings are re-homed onto the
   // group's flagship Amman property rather than thrown away.
@@ -297,7 +297,7 @@ const HOTEL_REMAP: Record<string, { name: string; toCompany: string }> = {
 // Loran does grow crops — FODDER crops. So the plots stay and become what they
 // really are, and the vegetables growing on them become the fodder the company
 // actually produces.
-const FARM_REMAP: Record<string, { name: string; type: string; toCompany?: string; location?: string }> = {
+export const FARM_REMAP: Record<string, { name: string; type: string; toCompany?: string; location?: string }> = {
   "حظائر لوران للأبقار": {
     name: "مزرعة الحلابات",
     type: "LIVESTOCK",
@@ -308,7 +308,7 @@ const FARM_REMAP: Record<string, { name: string; type: string; toCompany?: strin
   "حقول لوران المكشوفة": { name: "حقول لوران العلفية المكشوفة", type: "OPEN_FIELD" },
 };
 
-const CROP_REMAP: Record<string, string> = {
+export const CROP_REMAP: Record<string, string> = {
   "طماطم": "برسيم",
   "خيار": "شعير علفي",
   "بطاطا": "ذرة علفية",
@@ -528,7 +528,13 @@ async function main() {
   );
 }
 
-main().catch((e) => {
-  console.error("Hourani real-entity seed FAILED:", e);
-  process.exit(1);
-});
+// Only auto-run as a script. scripts/build/hourani-seed-to-d1.ts imports the
+// constants above to emit the equivalent SQL for the remote D1 database, and
+// must not trigger a local seed as a side effect of importing them.
+const INVOKED_DIRECTLY = (process.argv[1] ?? "").split("\\").join("/").endsWith("seed-hourani-real.ts");
+if (INVOKED_DIRECTLY) {
+  main().catch((e) => {
+    console.error("Hourani real-entity seed FAILED:", e);
+    process.exit(1);
+  });
+}

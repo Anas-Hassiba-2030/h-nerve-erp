@@ -110,6 +110,10 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
   "QualityCheck",
   // Maintenance (docs/HOURANI-ERP-GAPS.md #5). Same opaque tenantId convention.
   "MaintenanceOrder",
+  // Attendance/shifts (docs/HOURANI-ERP-GAPS.md #7). Same opaque tenantId convention.
+  "Shift",
+  "ShiftAssignment",
+  "Attendance",
 ]);
 
 // Phase ISO-2 — models owned by TWO Company FKs at once (a bridge row).

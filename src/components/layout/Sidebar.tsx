@@ -171,6 +171,7 @@ export function Sidebar({
       label: ar ? "النمو والاستثمار" : "Growth & Capital",
       items: [
         { href: "/finance", label: messages["nav.finance"], icon: Wallet },
+        { href: "/crm", label: messages["nav.crm"], icon: Users },
         { href: "/invoices", label: ar ? "الفواتير" : "Invoices", icon: FileText },
         { href: "/estimates", label: ar ? "عروض الأسعار" : "Estimates", icon: GitBranch },
         { href: "/payments", label: ar ? "الدفعات" : "Payments", icon: CreditCard },

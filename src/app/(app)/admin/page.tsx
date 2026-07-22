@@ -13,6 +13,7 @@ import {
   ShoppingCart, ShoppingBag, Users, UserSquare, BookOpen, Library,
   BrainCircuit, FileText, GitBranch, ReceiptText, CreditCard, Landmark,
   Banknote, Scale, Building2, Factory, CalendarDays, CalendarRange, Wallet, PackageSearch,
+  Handshake,
 } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -54,6 +55,7 @@ const CONSOLES: Console[] = [
   { href: "/admin/journal",ar: "القيود",           en: "Journal",         icon: BookOpen,    group: "treasury",     desc_ar: "قيود اليومية المحاسبية مزدوجة القيد.",          desc_en: "Double-entry accounting journal." },
   { href: "/admin/accounts",ar: "الحسابات",        en: "Accounts",        icon: Library,     group: "treasury",     desc_ar: "شجرة الحسابات ودفتر الأستاذ العام.",            desc_en: "Chart of accounts and general ledger." },
   // ── Parties ──
+  { href: "/crm",          ar: "إدارة العلاقات",   en: "CRM",             icon: Handshake,   group: "parties",      desc_ar: "العملاء المحتملون وخط أنابيب الفرص حتى الإغلاق.", desc_en: "Leads and the opportunity pipeline through to close." },
   { href: "/customers",    ar: "العملاء",          en: "Customers",       icon: UserSquare,  group: "parties",      desc_ar: "سجل العملاء وشروط الدفع.",                     desc_en: "Customer registry and payment terms." },
   { href: "/suppliers",    ar: "الموردون",         en: "Suppliers",       icon: Truck,       group: "parties",      desc_ar: "سجل المورّدين وشروط الدفع.",                   desc_en: "Supplier registry and payment terms." },
   // ── Inventory, assets & manufacturing (everything that's physical stock) ──

@@ -147,14 +147,16 @@ export default async function CoreHubPage() {
           Each breakpoint below is derived from the arithmetic instead:
             tile = (min(vw, 2080) − 2×40 padding − 34×(n−1) gaps) ÷ n
           and every step is placed at the width where its column count first
-          clears ~340px:
-            2 cols from  820px → ~365px      4 cols from 1600px → ~354px
-            3 cols from 1180px → ~347px      5 cols from 1920px → ~341px
-          A 1920 monitor at 100% scaling therefore gets the 5 columns; the same
-          monitor at 125% Windows scaling reports 1536 CSS px and gets 4 at
-          ~338px. Neither is cramped, which is the whole point. */}
+          clears ~337px — the tile width #322 shipped and the owner accepted,
+          NOT a rounder-looking 350, because a stricter floor pushes 4 columns
+          past 1536 and a 125%-scaled 1920 monitor then drops to THREE. Fewer
+          columns is the opposite of what was asked for.
+            2 cols from  820px → ~368px      4 cols from 1530px → ~337px
+            3 cols from 1180px → ~347px      5 cols from 1900px → ~337px
+          So a 1920 monitor at 100% scaling gets 5 columns at ~341px, and the
+          same monitor at 125% (1536 CSS px) gets 4 at ~338px. */}
       <div
-        className="columns-1 min-[820px]:columns-2 min-[1180px]:columns-3 min-[1600px]:columns-4 min-[1920px]:columns-5"
+        className="columns-1 min-[820px]:columns-2 min-[1180px]:columns-3 min-[1530px]:columns-4 min-[1900px]:columns-5"
         style={{ columnGap: 34 }}
       >
         {GROUP_ORDER.map((g) => {

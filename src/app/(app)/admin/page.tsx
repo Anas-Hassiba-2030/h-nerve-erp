@@ -188,18 +188,33 @@ export default async function CoreHubPage() {
                         className="shrink-0"
                         style={{ color: "var(--emerald)", width: 28, height: 28, marginTop: 2 }}
                       />
+                      {/* Arabic needs ~20-25% more size than Latin at the same
+                          nominal px to read equally well (connected letterforms,
+                          diacritics, ligatures) — so each slot is sized by the
+                          SCRIPT it actually carries, not by one flat number.
+                          In Arabic locale the title/description are Arabic and
+                          the companion label is Latin; in English it is the
+                          reverse, so the two sizes swap with the locale. */}
                       <span className="min-w-0">
                         <span className="flex flex-wrap items-baseline" style={{ columnGap: 9 }}>
-                          <span className="font-extrabold" style={{ color: "var(--ink)", fontSize: 19, letterSpacing: "-.01em" }}>
+                          <span
+                            className="font-extrabold"
+                            style={{ color: "var(--ink)", fontSize: ar ? 21 : 19, letterSpacing: ar ? 0 : "-.01em" }}
+                          >
                             {ar ? c.ar : c.en}
                           </span>
-                          <span style={{ color: "var(--ink-muted)", fontSize: 13.5 }}>
+                          <span style={{ color: "var(--ink-muted)", fontSize: ar ? 13.5 : 15 }}>
                             {ar ? c.en : c.ar}
                           </span>
                         </span>
                         <span
                           className="block"
-                          style={{ color: "var(--ink-muted)", fontSize: 15, lineHeight: 1.6, marginTop: 7 }}
+                          style={{
+                            color: "var(--ink-muted)",
+                            fontSize: ar ? 16.5 : 15,
+                            lineHeight: ar ? 1.75 : 1.6,
+                            marginTop: 7,
+                          }}
                         >
                           {ar ? c.desc_ar : c.desc_en}
                         </span>

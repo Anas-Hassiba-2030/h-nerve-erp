@@ -13,7 +13,7 @@ import {
   ShoppingCart, ShoppingBag, Users, UserSquare, BookOpen, Library,
   BrainCircuit, FileText, GitBranch, ReceiptText, CreditCard, Landmark,
   Banknote, Scale, Building2, Factory, CalendarDays, CalendarRange, Wallet, PackageSearch,
-  Handshake, Hourglass, ClipboardCheck, Wrench, CalendarClock,
+  Handshake, Hourglass, ClipboardCheck, Wrench, CalendarClock, Ship,
 } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -68,6 +68,7 @@ const CONSOLES: Console[] = [
   { href: "/admin/quality",   ar: "إدارة الجودة",  en: "Quality (QMS)", icon: ClipboardCheck, group: "inventory", desc_ar: "نقاط فحص بحدود رقمية — الفشل يوقف الدفعة تلقائياً.", desc_en: "Checkpoints with numeric thresholds — a failure auto-quarantines the lot." },
   { href: "/admin/warehouses", ar: "المستودعات",   en: "Warehouses",      icon: Warehouse,   group: "inventory",    desc_ar: "مواقع التخزين ومستويات المخزون.",             desc_en: "Storage locations and stock levels." },
   { href: "/admin/transfers",  ar: "التحويلات",    en: "Transfers",       icon: Truck,       group: "inventory",    desc_ar: "تحويلات المخزون بين المستودعات.",             desc_en: "Stock transfers between warehouses." },
+  { href: "/admin/landed-costs", ar: "التكاليف اللاحقة", en: "Landed Costs", icon: Ship,     group: "inventory",    desc_ar: "وزّع الشحن والجمارك على المستلم — يرفع تكلفة البضاعة.", desc_en: "Spread freight/customs onto a receipt — raises real COGS." },
   { href: "/assets",       ar: "الأصول الثابتة",   en: "Fixed Assets",    icon: Building2,   group: "inventory",    desc_ar: "الأصول واستهلاكها الشهري.",                    desc_en: "Assets and monthly depreciation." },
   { href: "/manufacturing",ar: "التصنيع",          en: "Manufacturing",   icon: Factory,     group: "inventory",    desc_ar: "قوائم المواد وأوامر التصنيع.",                 desc_en: "Bills of materials and work orders." },
   { href: "/maintenance",  ar: "الصيانة",          en: "Maintenance",     icon: Wrench,      group: "inventory",    desc_ar: "أوامر صيانة للأصول ومراكز العمل.",             desc_en: "Maintenance orders for assets and work centres." },

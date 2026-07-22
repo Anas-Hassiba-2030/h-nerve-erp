@@ -91,6 +91,7 @@ model JournalEntry {
   payrollRun  PayrollRun?
   manufacturingOrder ManufacturingOrder?
   posSale            PosSale?
+  landedCost         LandedCost?
 
   postedAt    DateTime?
   createdAt   DateTime @default(now())
@@ -177,6 +178,7 @@ model PurchaseOrder {
   sourceForecast   SupplyForecast? @relation("ForecastSourcedPO", fields: [sourceForecastId], references: [id], onDelete: SetNull)
 
   lines       PurchaseOrderLine[]
+  landedCosts LandedCost[]
   supplierRef Supplier  @relation(fields: [supplierId], references: [id])
 
   deletedAt   DateTime?
@@ -763,4 +765,60 @@ model BankStatementLine {
 
   @@index([bankStatementId])
   @@index([tenantId, bankStatementId, status])
+}
+
+// =====================================================================
+// LANDED COST — docs/HOURANI-ERP-GAPS.md #8 🟠, the second half (stock
+// valuation method is left implicit/weighted-average only — properly
+// supporting FIFO/standard cost is a bigger rebuild of the costing
+// engine than this pass, and a half-working cost-method switch is worse
+// than none). Landed cost is the concrete, high-value half: freight /
+// customs / clearing spread across a receipt's lines. lib/inventory/
+// landedCost.ts allocates the total (by value or by quantity); each
+// LandedCostLine points at the SPECIFIC RECEIVED InventoryMovement it
+// augments (found via documentRef=po.poNumber, the existing PO→movement
+// link) so lib/finance/accounting.ts's getWeightedAverageCost can add
+// the allocated amount into that movement's cost contribution WITHOUT
+// touching the movement row itself — the append-only ledger invariant
+// (decision #1) stays intact; this is an additive side-table, not an edit.
+// =====================================================================
+model LandedCost {
+  id              String   @id @default(cuid())
+  tenantId        String
+  purchaseOrderId String
+  description     String
+  totalAmount     Decimal
+  // BY_VALUE (proportional to received qty x unit cost) | BY_QUANTITY
+  allocationMethod String  @default("BY_VALUE")
+
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  lines           LandedCostLine[]
+
+  // Posts Inventory (1001) debit / the paying Treasury credit once
+  // allocated — same journalEntryId-nullable-until-posted convention as
+  // Invoice/PurchaseInvoice.
+  journalEntryId  String?  @unique
+  journalEntry    JournalEntry? @relation(fields: [journalEntryId], references: [id])
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([tenantId, purchaseOrderId])
+}
+
+model LandedCostLine {
+  id              String   @id @default(cuid())
+  landedCostId    String
+  movementId      String
+  productId       String
+  allocatedAmount Decimal
+
+  landedCost      LandedCost        @relation(fields: [landedCostId], references: [id], onDelete: Cascade)
+  movement        InventoryMovement @relation(fields: [movementId], references: [id])
+  product         Product           @relation(fields: [productId], references: [id])
+
+  createdAt       DateTime @default(now())
+
+  @@index([landedCostId])
+  @@index([movementId])
 }

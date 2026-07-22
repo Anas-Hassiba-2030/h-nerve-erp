@@ -114,6 +114,10 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
   "Shift",
   "ShiftAssignment",
   "Attendance",
+  // Landed cost (docs/HOURANI-ERP-GAPS.md #8). Same opaque tenantId
+  // convention. LandedCostLine has no tenantId column (scoped through
+  // its parent LandedCost, same precedent as JournalLine/JournalEntry).
+  "LandedCost",
 ]);
 
 // Phase ISO-2 — models owned by TWO Company FKs at once (a bridge row).

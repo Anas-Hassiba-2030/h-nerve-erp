@@ -49,6 +49,7 @@ model StockLot {
 
   product        Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   movements      InventoryMovement[]
+  qualityChecks  QualityCheck[]
 
   deletedAt      DateTime?
   createdAt      DateTime  @default(now())

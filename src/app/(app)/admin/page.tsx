@@ -129,29 +129,41 @@ export default async function CoreHubPage() {
           section heights (5-item Sales next to 2-item Parties) leave dead
           whitespace under every shorter column. Columns instead let each
           section stack tight in whichever column has room next. */}
-      {/* ONE card per column-row — never a nested 2-up grid. With 3 masonry
-          columns a nested grid made 6 cards span the canvas, so each tile
-          collapsed to ~250px: text wrapped after two words and the whole hub
-          read as a cramped wall. One full-width card per column gives every
-          tile ~500px of breathing room, which is what makes the copy legible. */}
-      <div className="columns-1 lg:columns-2 2xl:columns-3" style={{ columnGap: 34 }}>
+      {/* ONE card per column-row — never a nested 2-up grid. The nested grid
+          put 6 tiles across the canvas, collapsing each to ~250px so copy
+          wrapped after two words. But the real lever is the COLUMN COUNT, not
+          full-width cards: at 3 columns a tile is ~537px holding a ~35-char
+          description, which reads as an empty shelf rather than as luxury.
+          4 columns at 2xl / 3 at xl / 2 at lg holds every tile in a ~390-470px
+          band at EVERY breakpoint — wide enough to breathe, tight enough that
+          the description actually fills the card, and short enough that the
+          hub stays near one screen instead of becoming an endless scroll. */}
+      <div className="columns-1 lg:columns-2 xl:columns-3 2xl:columns-4" style={{ columnGap: 34 }}>
         {GROUP_ORDER.map((g) => {
           const items = CONSOLES.filter((c) => c.group === g);
           if (items.length === 0) return null;
           return (
             <section key={g} className="break-inside-avoid" style={{ marginBottom: 40 }}>
+              {/* Emerald, NOT gold: gold (#c2a35a) on cream (#fefcf7) is only
+                  2.36:1 — it fails WCAG AA (4.5:1) outright, so a gold group
+                  label buys decoration at the cost of legibility. Emerald is
+                  9.35:1 and still on-brand; gold survives as the tick rule. */}
               <div
-                className="flex items-baseline gap-2.5 font-bold uppercase"
+                className="flex items-center gap-2.5 font-bold uppercase"
                 style={{
-                  color: "var(--gold)",
+                  color: "var(--emerald)",
                   fontSize: 13,
                   letterSpacing: ".13em",
                   marginBottom: 14,
                   paddingInlineStart: 2,
                 }}
               >
+                <span
+                  aria-hidden
+                  style={{ width: 18, height: 2, background: "var(--gold)", borderRadius: 2, flexShrink: 0 }}
+                />
                 <span>{ar ? GROUP_LABELS[g].ar : GROUP_LABELS[g].en}</span>
-                <span className="font-semibold normal-case" style={{ letterSpacing: 0, opacity: 0.65 }}>
+                <span className="font-semibold normal-case" style={{ letterSpacing: 0, color: "var(--ink-muted)" }}>
                   {items.length}
                 </span>
               </div>

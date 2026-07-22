@@ -642,6 +642,7 @@ model FixedAsset {
   journalEntry   JournalEntry? @relation(fields: [journalEntryId], references: [id])
 
   depreciation   DepreciationEntry[]
+  maintenanceOrders MaintenanceOrder[]
 
   deletedAt      DateTime?
   createdAt      DateTime @default(now())

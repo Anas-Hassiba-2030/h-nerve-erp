@@ -88,6 +88,7 @@ model WorkCenter {
 
   operations  BomOperation[]
   workOrders  WorkOrder[]
+  maintenanceOrders MaintenanceOrder[]
   // Odoo alternative_workcenter_ids — fallback centers the planner can
   // reassign a PENDING work order to when this one is unavailable.
   // Symmetric in practice: the app always writes both connect directions
@@ -256,4 +257,44 @@ model ProductionScrap {
 
   @@index([tenantId, orderId])
   @@index([productId])
+}
+
+// =====================================================================
+// MAINTENANCE — docs/HOURANI-ERP-GAPS.md #5 🟠. FixedAsset already
+// exists (Phase 27) and WorkCenter already has an `active` toggle
+// (routing depth, PR #316-318) that the reassignment path already
+// respects (`actions.ts` gates alternative-work-center picks on
+// `active: true`) — this just gives that toggle a REASON: starting a
+// maintenance order takes the work centre offline automatically instead
+// of an operator remembering to flip it by hand.
+//
+// Exactly one of assetId/workCenterId is set — validated in the action
+// layer, not the schema (SQLite has no CHECK constraint through Prisma).
+// =====================================================================
+model MaintenanceOrder {
+  id           String    @id @default(cuid())
+  tenantId     String
+  // CORRECTIVE (something broke) | PREVENTIVE (scheduled)
+  type         String    @default("CORRECTIVE")
+  // SCHEDULED | IN_PROGRESS | DONE | CANCELLED
+  status       String    @default("SCHEDULED")
+  description  String
+  assetId      String?
+  workCenterId String?
+  scheduledAt  DateTime?
+  startedAt    DateTime?
+  completedAt  DateTime?
+  // Money, precision/scale (12,2) — same precedent as FixedAsset.purchaseCost.
+  cost         Decimal?
+  note         String?
+
+  asset        FixedAsset? @relation(fields: [assetId], references: [id])
+  workCenter   WorkCenter? @relation(fields: [workCenterId], references: [id])
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([tenantId, status])
+  @@index([tenantId, assetId])
+  @@index([tenantId, workCenterId])
 }

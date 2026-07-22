@@ -13,7 +13,7 @@ import {
   ShoppingCart, ShoppingBag, Users, UserSquare, BookOpen, Library,
   BrainCircuit, FileText, GitBranch, ReceiptText, CreditCard, Landmark,
   Banknote, Scale, Building2, Factory, CalendarDays, CalendarRange, Wallet, PackageSearch,
-  Handshake, Hourglass, ClipboardCheck,
+  Handshake, Hourglass, ClipboardCheck, Wrench,
 } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -70,6 +70,7 @@ const CONSOLES: Console[] = [
   { href: "/admin/transfers",  ar: "التحويلات",    en: "Transfers",       icon: Truck,       group: "inventory",    desc_ar: "تحويلات المخزون بين المستودعات.",             desc_en: "Stock transfers between warehouses." },
   { href: "/assets",       ar: "الأصول الثابتة",   en: "Fixed Assets",    icon: Building2,   group: "inventory",    desc_ar: "الأصول واستهلاكها الشهري.",                    desc_en: "Assets and monthly depreciation." },
   { href: "/manufacturing",ar: "التصنيع",          en: "Manufacturing",   icon: Factory,     group: "inventory",    desc_ar: "قوائم المواد وأوامر التصنيع.",                 desc_en: "Bills of materials and work orders." },
+  { href: "/maintenance",  ar: "الصيانة",          en: "Maintenance",     icon: Wrench,      group: "inventory",    desc_ar: "أوامر صيانة للأصول ومراكز العمل.",             desc_en: "Maintenance orders for assets and work centres." },
   { href: "/admin/mps",    ar: "جدول الإنتاج",     en: "MPS",             icon: CalendarRange, group: "inventory",  desc_ar: "توقّع الطلب ورول-فورورد التزويد لكل منتج/فترة.", desc_en: "Demand forecast + rolling replenishment per product/period." },
   // ── HR & payroll ──
   { href: "/hr/employees", ar: "سجل الموظفين",     en: "Employees",       icon: Users,       group: "hr",           desc_ar: "سجل الموظفين ورواتبهم الأساسية.",              desc_en: "Employee records and base salaries." },

@@ -97,6 +97,11 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
   "Lead",
   "Opportunity",
   "CrmActivity",
+  // Bank reconciliation (docs/HOURANI-ERP-GAPS.md #1). BankStatementLine
+  // carries a denormalized tenantId (same precedent as Booking/Crop) so
+  // the middleware filters without joining through BankStatement.
+  "BankStatement",
+  "BankStatementLine",
 ]);
 
 // Phase ISO-2 — models owned by TWO Company FKs at once (a bridge row).

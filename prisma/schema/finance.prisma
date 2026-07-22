@@ -487,6 +487,7 @@ model Treasury {
   supplierPayments SupplierPayment[] @relation("TreasuryOutflows")
   payrollRuns      PayrollRun[]
   cashSessions     CashSession[]
+  bankStatements   BankStatement[]
 
   active          Boolean  @default(true)
   deletedAt       DateTime?
@@ -526,6 +527,9 @@ model Payment {
   customerRef   Customer @relation(fields: [customerId], references: [id])
   invoice       Invoice? @relation(fields: [invoiceId], references: [id])
   treasury      Treasury @relation(fields: [treasuryId], references: [id])
+  // Reverse of BankStatementLine.matchedPaymentId (unique FK) — set once
+  // a bank statement line is reconciled against this payment.
+  bankStatementLine BankStatementLine?
 
   createdAt     DateTime @default(now())
 
@@ -562,6 +566,8 @@ model SupplierPayment {
   supplierRef     Supplier         @relation(fields: [supplierId], references: [id])
   purchaseInvoice PurchaseInvoice? @relation(fields: [purchaseInvoiceId], references: [id])
   treasury        Treasury         @relation("TreasuryOutflows", fields: [treasuryId], references: [id])
+  // Reverse of BankStatementLine.matchedSupplierPaymentId (unique FK).
+  bankStatementLine BankStatementLine?
 
   createdAt     DateTime @default(now())
 
@@ -663,4 +669,62 @@ model NumberingScheme {
   padTo     Int      @default(6)
 
   @@unique([tenantId, docType])
+}
+
+// =====================================================================
+// BANK RECONCILIATION — hnerve-gap-map.md "Bank reconciliation" row
+// (docs/HOURANI-ERP-GAPS.md #1 🔴). A BankStatement is one imported/pasted
+// statement for one Treasury; its lines are matched against existing
+// Payment (money in) / SupplierPayment (money out) rows by
+// lib/finance/reconciliation.ts. Matching NEVER creates a Payment — it
+// only links a line to one that already exists, so the ledger stays the
+// single source of truth and reconciliation can't double-post money.
+// tenantId is denormalized onto BankStatementLine (same precedent as
+// Booking/Crop/CouncilReply) so the tenant middleware filters without a
+// join through the parent statement.
+// =====================================================================
+model BankStatement {
+  id              String   @id @default(cuid())
+  tenantId        String
+  treasuryId      String
+  statementDate   DateTime @default(now())
+  startingBalance Decimal  @default(0)
+  endingBalance   Decimal  @default(0)
+  note            String?
+
+  treasury        Treasury @relation(fields: [treasuryId], references: [id])
+  lines           BankStatementLine[]
+
+  deletedAt       DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([tenantId, treasuryId])
+  @@index([tenantId, statementDate])
+}
+
+model BankStatementLine {
+  id              String   @id @default(cuid())
+  tenantId        String
+  bankStatementId String
+  date            DateTime
+  description     String
+  reference       String?
+  // Signed: positive = deposit (money in, matches against Payment),
+  // negative = withdrawal (money out, matches against SupplierPayment).
+  amount          Decimal
+  // UNMATCHED | MATCHED | IGNORED
+  status          String   @default("UNMATCHED")
+
+  matchedPaymentId         String?  @unique
+  matchedSupplierPaymentId String?  @unique
+  matchedPayment           Payment?         @relation(fields: [matchedPaymentId], references: [id])
+  matchedSupplierPayment   SupplierPayment? @relation(fields: [matchedSupplierPaymentId], references: [id])
+
+  statement       BankStatement @relation(fields: [bankStatementId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+
+  @@index([bankStatementId])
+  @@index([tenantId, bankStatementId, status])
 }

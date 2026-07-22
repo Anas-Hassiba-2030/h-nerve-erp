@@ -63,9 +63,17 @@ function sqliteFileClient(url: string): PrismaClient {
   // only ever takes the D1 branch above. createRequire is invisible to
   // webpack's static analysis, so the dependency stays out of the bundle
   // while resolving normally under Node (dev server, seeds, scripts).
-  const nodeRequire = createRequire(
-    typeof __filename !== "undefined" ? __filename : `${process.cwd()}/`,
-  );
+  //
+  // Base path is ALWAYS process.cwd(), never __filename: under `next dev`
+  // (Turbopack), __filename inside a bundled server module is a fake
+  // POSIX-style virtual path (e.g. "/ROOT/Downloads/BMV2026/src/lib/db/db.ts"
+  // on Windows) that doesn't exist on disk — createRequire from it can't
+  // find node_modules and throws "Cannot find module '@prisma/adapter-libsql'"
+  // on every DB-touching route, including /login. process.cwd() is the repo
+  // root in every context this branch runs in (dev server, seeds, scripts —
+  // same fix already proven in scripts/_prisma.ts), so it's the only base
+  // that's reliable here.
+  const nodeRequire = createRequire(`${process.cwd()}/`);
   const { PrismaLibSQL } = nodeRequire(
     "@prisma/adapter-libsql",
   ) as typeof import("@prisma/adapter-libsql");

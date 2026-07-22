@@ -38,6 +38,7 @@ model User {
   threads      ThreadParticipant[]
   messages     Message[]
   alertRules   AlertRule[]
+  qualityChecks QualityCheck[]
 
   // Phase V3-P13 — org-tree self-relation.
   reportsToId  String?

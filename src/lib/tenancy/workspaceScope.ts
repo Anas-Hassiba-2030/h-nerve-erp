@@ -105,6 +105,9 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
   // Cost centres (docs/HOURANI-ERP-GAPS.md #2). Same opaque tenantId
   // convention as every other analytic/entity-registry model here.
   "CostCenter",
+  // QMS (docs/HOURANI-ERP-GAPS.md #6). Same opaque tenantId convention.
+  "QualityCheckPoint",
+  "QualityCheck",
 ]);
 
 // Phase ISO-2 — models owned by TWO Company FKs at once (a bridge row).

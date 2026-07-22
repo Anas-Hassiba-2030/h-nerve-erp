@@ -1,0 +1,67 @@
+// =====================================================================
+// QUALITY MANAGEMENT (QMS) — docs/HOURANI-ERP-GAPS.md #6 🟠. Dairy is a
+// regulated food business — a QC result is a legal record, not a
+// nice-to-have. Lots can already be quarantined (PR #324's StockLot
+// FEFO work); this gives quarantine a REASON: a checkpoint with
+// optional numeric thresholds, and a check result that auto-quarantines
+// its lot on fail. tenantId is the same opaque-string convention as
+// every other tenant-keyed model in this schema.
+// =====================================================================
+
+model QualityCheckPoint {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  // RECEIPT | PRODUCTION | TRANSFER — where in the flow this check runs.
+  stage     String
+  // Optional: a checkpoint can be product-specific (e.g. "yoghurt pH
+  // range") or apply generally (productId null — the check is recorded
+  // per-product anyway via QualityCheck.productId, this just scopes
+  // which checkpoints show up as an option for a given product).
+  productId String?
+  // Numeric acceptance range. Null on either side = unbounded that side;
+  // both null = this checkpoint is pass/fail-only (e.g. visual
+  // inspection), no auto-evaluation possible — see lib/quality/quality.ts.
+  minValue  Decimal?
+  maxValue  Decimal?
+  unit      String?
+  active    Boolean  @default(true)
+
+  product   Product? @relation(fields: [productId], references: [id])
+  checks    QualityCheck[]
+
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId, stage, active])
+  @@index([productId])
+}
+
+model QualityCheck {
+  id          String   @id @default(cuid())
+  tenantId    String
+  checkPointId String
+  productId   String
+  // Optional: a receipt/transfer check may not yet have a lot (the lot
+  // is created FROM a passing receipt check in some flows); a
+  // production check almost always has one.
+  lotId       String?
+  measuredValue Decimal?
+  passed      Boolean
+  note        String?
+  checkedById String?
+  checkedAt   DateTime @default(now())
+
+  checkPoint  QualityCheckPoint @relation(fields: [checkPointId], references: [id])
+  product     Product  @relation(fields: [productId], references: [id])
+  lot         StockLot? @relation(fields: [lotId], references: [id])
+  checkedBy   User?    @relation(fields: [checkedById], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId, checkPointId])
+  @@index([tenantId, lotId])
+  @@index([tenantId, productId, passed])
+}

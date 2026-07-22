@@ -13,7 +13,7 @@ import {
   ShoppingCart, ShoppingBag, Users, UserSquare, BookOpen, Library,
   BrainCircuit, FileText, GitBranch, ReceiptText, CreditCard, Landmark,
   Banknote, Scale, Building2, Factory, CalendarDays, CalendarRange, Wallet, PackageSearch,
-  Handshake, Hourglass,
+  Handshake, Hourglass, ClipboardCheck,
 } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -65,6 +65,7 @@ const CONSOLES: Console[] = [
   { href: "/admin/products",   ar: "المنتجات",     en: "Products",        icon: Package,     group: "inventory",    desc_ar: "كتالوج المنتجات ووحدات القياس والأسعار.",     desc_en: "Product catalog, units, and pricing." },
   { href: "/admin/movements",  ar: "الحركات",      en: "Movements",       icon: ArrowLeftRight, group: "inventory", desc_ar: "سجل حركات المخزون الداخلة والخارجة.",         desc_en: "Ledger of inbound/outbound stock." },
   { href: "/admin/lots",       ar: "الدفعات والصلاحية", en: "Lots & Expiry", icon: PackageSearch, group: "inventory", desc_ar: "تتبّع الدفعات وتواريخ الانتهاء والصرف بالأقدم انتهاءً.", desc_en: "Batch tracking, expiry dates, and first-expired-first-out issuing." },
+  { href: "/admin/quality",   ar: "إدارة الجودة",  en: "Quality (QMS)", icon: ClipboardCheck, group: "inventory", desc_ar: "نقاط فحص بحدود رقمية — الفشل يوقف الدفعة تلقائياً.", desc_en: "Checkpoints with numeric thresholds — a failure auto-quarantines the lot." },
   { href: "/admin/warehouses", ar: "المستودعات",   en: "Warehouses",      icon: Warehouse,   group: "inventory",    desc_ar: "مواقع التخزين ومستويات المخزون.",             desc_en: "Storage locations and stock levels." },
   { href: "/admin/transfers",  ar: "التحويلات",    en: "Transfers",       icon: Truck,       group: "inventory",    desc_ar: "تحويلات المخزون بين المستودعات.",             desc_en: "Stock transfers between warehouses." },
   { href: "/assets",       ar: "الأصول الثابتة",   en: "Fixed Assets",    icon: Building2,   group: "inventory",    desc_ar: "الأصول واستهلاكها الشهري.",                    desc_en: "Assets and monthly depreciation." },

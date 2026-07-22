@@ -77,6 +77,16 @@
 
 /* panels */
 .dl-page .panel { background: var(--cream); border: 1px solid var(--line); border-radius: 18px; padding: 24px 26px; margin-bottom: 22px; }
+/* A panel used as a LINK (the Operations hub tiles) gets a tactile lift —
+   without it a wall of identical cream cards reads as flat, dead chrome and
+   gives no feedback that the whole tile is clickable. */
+.dl-page a.panel { transition: transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s, border-color .28s; }
+.dl-page a.panel:hover {
+  transform: translateY(-3px);
+  border-color: var(--gold-soft);
+  box-shadow: 0 16px 34px -24px rgba(31,77,63,.55);
+}
+@media (prefers-reduced-motion: reduce) { .dl-page a.panel:hover { transform: none; } }
 .dl-page .panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
 .dl-page .panel-title { font-family: var(--dl-display); font-size: 24px; font-weight: 600; color: var(--emerald); }
 .dl-page .panel-aside { font-size: 12.5px; color: var(--ink-muted); }

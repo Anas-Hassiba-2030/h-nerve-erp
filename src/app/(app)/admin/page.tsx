@@ -129,42 +129,59 @@ export default async function CoreHubPage() {
           section heights (5-item Sales next to 2-item Parties) leave dead
           whitespace under every shorter column. Columns instead let each
           section stack tight in whichever column has room next. */}
-      <div className="columns-1 lg:columns-2 2xl:columns-3" style={{ columnGap: 24 }}>
+      {/* ONE card per column-row — never a nested 2-up grid. With 3 masonry
+          columns a nested grid made 6 cards span the canvas, so each tile
+          collapsed to ~250px: text wrapped after two words and the whole hub
+          read as a cramped wall. One full-width card per column gives every
+          tile ~500px of breathing room, which is what makes the copy legible. */}
+      <div className="columns-1 lg:columns-2 2xl:columns-3" style={{ columnGap: 34 }}>
         {GROUP_ORDER.map((g) => {
           const items = CONSOLES.filter((c) => c.group === g);
           if (items.length === 0) return null;
           return (
-            <section key={g} className="mb-6 break-inside-avoid">
+            <section key={g} className="break-inside-avoid" style={{ marginBottom: 40 }}>
               <div
-                className="mb-3 flex items-baseline gap-2 text-xs font-bold uppercase tracking-widest"
-                style={{ color: "var(--ink-muted)" }}
+                className="flex items-baseline gap-2.5 font-bold uppercase"
+                style={{
+                  color: "var(--gold)",
+                  fontSize: 13,
+                  letterSpacing: ".13em",
+                  marginBottom: 14,
+                  paddingInlineStart: 2,
+                }}
               >
                 <span>{ar ? GROUP_LABELS[g].ar : GROUP_LABELS[g].en}</span>
-                <span className="font-normal normal-case tracking-normal opacity-70">
+                <span className="font-semibold normal-case" style={{ letterSpacing: 0, opacity: 0.65 }}>
                   {items.length}
                 </span>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid" style={{ gap: 18 }}>
                 {items.map((c) => {
                   const Icon = c.icon;
                   return (
                     <Link
                       key={c.href}
                       href={c.href}
-                      className="panel reveal flex items-start gap-3"
-                      style={{ marginBottom: 0, padding: "20px 22px" }}
+                      className="panel reveal flex items-start"
+                      style={{ marginBottom: 0, padding: "24px 26px", gap: 16 }}
                     >
-                      <Icon className="mt-0.5 h-6 w-6 shrink-0" style={{ color: "var(--emerald)" }} />
+                      <Icon
+                        className="shrink-0"
+                        style={{ color: "var(--emerald)", width: 28, height: 28, marginTop: 2 }}
+                      />
                       <span className="min-w-0">
-                        <span className="flex flex-wrap items-baseline gap-x-2">
-                          <span className="text-base font-extrabold" style={{ color: "var(--ink)" }}>
+                        <span className="flex flex-wrap items-baseline" style={{ columnGap: 9 }}>
+                          <span className="font-extrabold" style={{ color: "var(--ink)", fontSize: 19, letterSpacing: "-.01em" }}>
                             {ar ? c.ar : c.en}
                           </span>
-                          <span className="text-xs" style={{ color: "var(--ink-muted)" }}>
+                          <span style={{ color: "var(--ink-muted)", fontSize: 13.5 }}>
                             {ar ? c.en : c.ar}
                           </span>
                         </span>
-                        <span className="mt-1.5 block text-sm leading-relaxed" style={{ color: "var(--ink-muted)" }}>
+                        <span
+                          className="block"
+                          style={{ color: "var(--ink-muted)", fontSize: 15, lineHeight: 1.6, marginTop: 7 }}
+                        >
                           {ar ? c.desc_ar : c.desc_en}
                         </span>
                       </span>

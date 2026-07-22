@@ -28,6 +28,8 @@ model Employee {
 
   leaveRequests LeaveRequest[]
   payslips      Payslip[]
+  attendance    Attendance[]
+  shiftAssignments ShiftAssignment[]
 
   deletedAt DateTime?
   createdAt DateTime  @default(now())
@@ -97,4 +99,73 @@ model Payslip {
 
   @@unique([payrollRunId, employeeId])
   @@index([tenantId])
+}
+
+// =====================================================================
+// ATTENDANCE + SHIFTS — docs/HOURANI-ERP-GAPS.md #7 🟠. Payroll runs off
+// Employee.baseSalary alone today; hotels and a farm both run shift
+// labour where the flat monthly figure is wrong the moment someone
+// works overtime. Shift is a reusable roster template (a name + a time
+// window); ShiftAssignment puts one employee on one shift for one
+// calendar day; Attendance is the actual clock-in/out for that day,
+// whose overtime hours feed into PayrollRun.allowances (see
+// lib/hr/attendance.ts + lib/hr/payroll.ts's overtime wiring).
+// =====================================================================
+model Shift {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  // "HH:MM" 24h, e.g. "07:00" / "15:00". Plain strings, not DateTime —
+  // a shift is a recurring daily WINDOW, not a specific day.
+  startTime String
+  endTime   String
+  active    Boolean  @default(true)
+
+  assignments ShiftAssignment[]
+
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, name])
+  @@index([tenantId, active])
+}
+
+model ShiftAssignment {
+  id         String   @id @default(cuid())
+  tenantId   String
+  employeeId String
+  shiftId    String
+  date       DateTime
+
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  shift      Shift    @relation(fields: [shiftId], references: [id])
+
+  createdAt  DateTime @default(now())
+
+  // One shift per employee per day — reassigning replaces, never stacks.
+  @@unique([employeeId, date])
+  @@index([tenantId, date])
+  @@index([shiftId])
+}
+
+model Attendance {
+  id          String    @id @default(cuid())
+  tenantId    String
+  employeeId  String
+  date        DateTime
+  clockIn     DateTime?
+  clockOut    DateTime?
+  // PRESENT | ABSENT | LATE — set at clock-in (LATE if past the
+  // assigned shift's startTime); ABSENT rows are created explicitly by
+  // a manager, never inferred from a missing clock-in.
+  status      String    @default("PRESENT")
+  note        String?
+
+  employee    Employee  @relation(fields: [employeeId], references: [id])
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([employeeId, date])
+  @@index([tenantId, date])
 }

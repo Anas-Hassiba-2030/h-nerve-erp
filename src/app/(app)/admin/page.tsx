@@ -13,7 +13,7 @@ import {
   ShoppingCart, ShoppingBag, Users, UserSquare, BookOpen, Library,
   BrainCircuit, FileText, GitBranch, ReceiptText, CreditCard, Landmark,
   Banknote, Scale, Building2, Factory, CalendarDays, CalendarRange, Wallet, PackageSearch,
-  Handshake, Hourglass, ClipboardCheck, Wrench,
+  Handshake, Hourglass, ClipboardCheck, Wrench, CalendarClock,
 } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -76,6 +76,7 @@ const CONSOLES: Console[] = [
   { href: "/hr/employees", ar: "سجل الموظفين",     en: "Employees",       icon: Users,       group: "hr",           desc_ar: "سجل الموظفين ورواتبهم الأساسية.",              desc_en: "Employee records and base salaries." },
   { href: "/hr/leave",     ar: "طلبات الإجازة",    en: "Leave",           icon: CalendarDays,group: "hr",           desc_ar: "طلبات الإجازة والموافقات.",                    desc_en: "Leave requests and approvals." },
   { href: "/hr/payroll",   ar: "مسير الرواتب",     en: "Payroll",         icon: Wallet,      group: "hr",           desc_ar: "تشغيل الرواتب الشهرية وترحيلها.",              desc_en: "Run and post monthly payroll." },
+  { href: "/hr/attendance", ar: "الحضور والورديات", en: "Attendance & Shifts", icon: CalendarClock, group: "hr",     desc_ar: "الورديات والحضور — يغذّي العمل الإضافي في الرواتب.", desc_en: "Shifts and clock-in/out — feeds overtime into payroll." },
   // ── Data & intelligence (ingest + AI insights) ──
   { href: "/admin/imports",  ar: "الاستيراد",      en: "Imports",         icon: Inbox,       group: "data",         desc_ar: "استيراد ملفات البيانات ومتابعة معالجتها.",    desc_en: "Import data files and track processing." },
   { href: "/admin/mappings", ar: "الربط",          en: "Mappings",        icon: MapIcon,     group: "data",         desc_ar: "ربط أعمدة الملفات المستوردة بحقول النظام.",    desc_en: "Map imported columns to system fields." },

@@ -8,6 +8,7 @@
 import type { prisma as prismaType } from "@/lib/db/db";
 import { ensureLedgerAccount, ensureOpenPeriod } from "@/lib/finance/invoicing";
 import { createPostedJournalEntry } from "@/lib/finance/accounting";
+import { overtimeHours, hourlyRateFromMonthlySalary, overtimePay } from "@/lib/hr/attendance";
 
 type Tx = typeof prismaType;
 
@@ -44,10 +45,37 @@ export async function runPayroll(
   const treasury = await tx.treasury.findUniqueOrThrow({ where: { id: treasuryId } });
   if (treasury.tenantId !== tenantId) throw new Error("Cross-tenant treasury");
 
+  // Overtime (docs/HOURANI-ERP-GAPS.md #7) — every clocked day this
+  // period with both a clock-in and clock-out feeds into the payslip's
+  // allowances line via lib/hr/attendance.ts. An employee with no
+  // Attendance rows (most tenants today — this is opt-in, not forced)
+  // simply gets 0 overtime, same as before this feature existed.
+  const periodStart = new Date(Date.UTC(year, month - 1, 1));
+  const periodEnd = new Date(Date.UTC(year, month, 1));
+  const attendance = await tx.attendance.findMany({
+    where: {
+      tenantId,
+      employeeId: { in: employees.map((e) => e.id) },
+      date: { gte: periodStart, lt: periodEnd },
+      clockIn: { not: null },
+      clockOut: { not: null },
+    },
+    select: { employeeId: true, clockIn: true, clockOut: true },
+  });
+  const overtimeHoursByEmployee = new Map<string, number>();
+  for (const a of attendance) {
+    if (!a.clockIn || !a.clockOut) continue;
+    const worked = r2((a.clockOut.getTime() - a.clockIn.getTime()) / 3_600_000);
+    const ot = overtimeHours(Math.max(0, worked));
+    overtimeHoursByEmployee.set(a.employeeId, r2((overtimeHoursByEmployee.get(a.employeeId) ?? 0) + ot));
+  }
+
   const lines = employees.map((e) => {
     const baseSalary = Number(e.baseSalary);
-    const netPay = computeNetPay(baseSalary, 0, 0);
-    return { employeeId: e.id, baseSalary, netPay };
+    const otHours = overtimeHoursByEmployee.get(e.id) ?? 0;
+    const allowances = otHours > 0 ? overtimePay(otHours, hourlyRateFromMonthlySalary(baseSalary)) : 0;
+    const netPay = computeNetPay(baseSalary, allowances, 0);
+    return { employeeId: e.id, baseSalary, allowances, netPay };
   });
   const total = r2(lines.reduce((s, l) => s + l.netPay, 0));
   if (total <= 0) return null;
@@ -84,7 +112,7 @@ export async function runPayroll(
           tenantId,
           employeeId: l.employeeId,
           baseSalary: l.baseSalary,
-          allowances: 0,
+          allowances: l.allowances,
           deductions: 0,
           netPay: l.netPay,
         })),

@@ -30,6 +30,7 @@ import {
   Landmark,
   Building2,
   ClipboardCheck,
+  Ship,
 } from "lucide-react";
 
 type Item = {
@@ -50,6 +51,7 @@ const FAMILY: Item[] = [
   { href: "/admin/quality",           ar: "إدارة الجودة", en: "Quality (QMS)", icon: ClipboardCheck, group: "inventory" },
   { href: "/admin/warehouses",      ar: "المستودعات",  en: "Warehouses",      icon: Warehouse,      group: "inventory" },
   { href: "/admin/transfers",       ar: "التحويلات",   en: "Transfers",       icon: Truck,          group: "inventory" },
+  { href: "/admin/landed-costs",    ar: "التكاليف اللاحقة", en: "Landed Costs", icon: Ship,           group: "inventory" },
   { href: "/admin/purchase-orders", ar: "أوامر الشراء", en: "Purchase Orders", icon: ShoppingCart,   group: "orders" },
   { href: "/admin/sales-orders",    ar: "أوامر البيع",  en: "Sales Orders",    icon: ShoppingBag,    group: "orders" },
   { href: "/admin/replenishment",   ar: "إعادة التزويد", en: "Replenishment",  icon: PackageSearch,  group: "orders" },

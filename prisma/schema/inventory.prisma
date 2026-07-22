@@ -64,6 +64,7 @@ model Product {
   lots            StockLot[]
   qualityCheckPoints QualityCheckPoint[]
   qualityChecks   QualityCheck[]
+  landedCostLines LandedCostLine[]
   supplierRef     Supplier? @relation(fields: [supplierId], references: [id])
   warehouseRef    Warehouse @relation(fields: [warehouseId], references: [id])
 
@@ -125,6 +126,7 @@ model InventoryMovement {
   // stock movements it produced are an append-only audit trail and must
   // survive it.
   lot               StockLot? @relation(fields: [lotId], references: [id], onDelete: SetNull)
+  landedCostLines   LandedCostLine[]
 
   @@index([tenantId, lotId])
   @@index([tenantId, productId, occurredAt])

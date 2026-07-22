@@ -221,6 +221,12 @@ export async function createPostedJournalEntry(
  * pool is NOT depleted on sale) — exactly the spec formula (decision
  * #5/#8); a deliberate simplification. Returns Decimal(0) when there is
  * no costed inflow (caller then skips the COGS side → no degenerate JE).
+ *
+ * Landed cost (docs/HOURANI-ERP-GAPS.md #8) adds to the VALUE term only,
+ * never the quantity — a LandedCostLine augments a specific receipt's
+ * cost without touching the immutable InventoryMovement row itself
+ * (lib/inventory/landedCost.ts's header comment explains why this is an
+ * additive side-table, not an edit).
  */
 export async function getWeightedAverageCost(
   db: Db,
@@ -233,7 +239,7 @@ export async function getWeightedAverageCost(
       type: { in: ["IMPORT", "RECEIVED"] },
       unitCost: { not: null },
     },
-    select: { delta: true, unitCost: true },
+    select: { id: true, delta: true, unitCost: true },
   });
   let qty = ZERO;
   let value = ZERO;
@@ -241,6 +247,13 @@ export async function getWeightedAverageCost(
     const d = new Prisma.Decimal(m.delta);
     qty = qty.plus(d);
     value = value.plus(d.times(D(m.unitCost)));
+  }
+  if (moves.length > 0) {
+    const landedCost = await db.landedCostLine.aggregate({
+      where: { movementId: { in: moves.map((m) => m.id) } },
+      _sum: { allocatedAmount: true },
+    });
+    value = value.plus(D(landedCost._sum.allocatedAmount));
   }
   if (qty.isZero()) return ZERO;
   return value.dividedBy(qty);

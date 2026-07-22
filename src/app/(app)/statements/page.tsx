@@ -44,28 +44,69 @@ async function accountRows(
   );
 }
 
-function SectionTable({ title, lines, totalLabel, total }: { title: string; lines: StatementLine[]; totalLabel: string; total: number }) {
+function SectionTable({
+  title,
+  lines,
+  totalLabel,
+  total,
+  budgets = new Map(),
+  ar,
+  goodWhenOver = true,
+}: {
+  title: string;
+  lines: StatementLine[];
+  totalLabel: string;
+  total: number;
+  budgets?: Map<string, number>;
+  ar: boolean;
+  /** Revenue: exceeding budget is good. Expense: exceeding budget is bad. */
+  goodWhenOver?: boolean;
+}) {
+  const hasBudgets = budgets.size > 0;
+  // Compute per-line, not via a code-keyed Map: the admin's cross-tenant
+  // view (no active-tenant cookie) can render MULTIPLE lines sharing the
+  // same account code — one per tenant — each with its own actual. A
+  // code→row Map would collapse those into the last one, silently
+  // showing every same-code row the same (wrong) variance.
+  const r2 = (n: number) => Math.round(n * 100) / 100;
   return (
     <div className="table-wrap">
       <table className="table">
         <thead>
           <tr>
             <th>{title}</th>
-            <th style={{ textAlign: "end" }} />
+            {hasBudgets ? <th style={{ textAlign: "end" }}>{ar ? "الميزانية" : "Budget"}</th> : null}
+            {hasBudgets ? <th style={{ textAlign: "end" }}>{ar ? "الفرق" : "Variance"}</th> : null}
+            <th style={{ textAlign: "end" }}>{ar ? "الفعلي" : "Actual"}</th>
           </tr>
         </thead>
         <tbody>
-          {lines.map((l) => (
-            <tr key={l.code}>
-              <td>
-                <span className="font-mono" style={{ marginInlineEnd: 8, color: "var(--ink-muted)" }}>{l.code}</span>
-                {l.name}
-              </td>
-              <td className="font-mono" style={{ textAlign: "end" }}>{formatMoney(l.amount)}</td>
-            </tr>
-          ))}
+          {lines.map((l, i) => {
+            const budget = budgets.get(l.code);
+            const variance = budget !== undefined ? r2(l.amount - budget) : undefined;
+            const good = variance === undefined || (goodWhenOver ? variance >= 0 : variance <= 0);
+            return (
+              <tr key={`${l.code}-${i}`}>
+                <td>
+                  <span className="font-mono" style={{ marginInlineEnd: 8, color: "var(--ink-muted)" }}>{l.code}</span>
+                  {l.name}
+                </td>
+                {hasBudgets ? (
+                  <td className="font-mono" style={{ textAlign: "end" }}>{budget !== undefined ? formatMoney(budget) : "—"}</td>
+                ) : null}
+                {hasBudgets ? (
+                  <td className={`font-mono ${variance !== undefined ? (good ? "metric-up" : "metric-down") : ""}`} style={{ textAlign: "end" }}>
+                    {variance !== undefined ? formatMoney(variance) : "—"}
+                  </td>
+                ) : null}
+                <td className="font-mono" style={{ textAlign: "end" }}>{formatMoney(l.amount)}</td>
+              </tr>
+            );
+          })}
           <tr style={{ fontWeight: 700 }}>
             <td>{totalLabel}</td>
+            {hasBudgets ? <td /> : null}
+            {hasBudgets ? <td /> : null}
             <td className="font-mono" style={{ textAlign: "end" }}>{formatMoney(total)}</td>
           </tr>
         </tbody>
@@ -81,10 +122,11 @@ export default async function StatementsPage(props: { searchParams: Promise<{ ye
 
   // Tenant-scoped account list; JournalLines are then restricted to these
   // account ids, so every aggregate below is tenant-scoped transitively.
-  const [accounts, periods, costCenters] = await Promise.all([
+  const [accounts, periods, costCenters, budgetRows] = await Promise.all([
     prisma.ledgerAccount.findMany({ orderBy: { code: "asc" }, take: 500 }),
     prisma.financialPeriod.findMany({ orderBy: { year: "desc" }, select: { year: true }, take: 120 }),
     prisma.costCenter.findMany({ where: { deletedAt: null }, orderBy: { code: "asc" } }),
+    prisma.budget.findMany({ select: { accountCode: true, amount: true, year: true } }),
   ]);
   const years = [...new Set(periods.map((p) => p.year))];
   const currentYear = new Date().getFullYear();
@@ -111,6 +153,9 @@ export default async function StatementsPage(props: { searchParams: Promise<{ ye
   const pl = incomeStatement(toRows(yearOnly));
   const bs = balanceSheet(toRows(allTime));
   const hasPostings = tb.totalDebit > 0 || tb.totalCredit > 0;
+  const budgetsForYear = new Map(
+    budgetRows.filter((b) => b.year === year).map((b) => [b.accountCode, Number(b.amount)]),
+  );
 
   const plNode = (
     <div className="space-y-4">
@@ -145,12 +190,18 @@ export default async function StatementsPage(props: { searchParams: Promise<{ ye
         lines={pl.revenue}
         totalLabel={ar ? "إجمالي الإيرادات" : "Total revenue"}
         total={pl.totalRevenue}
+        budgets={budgetsForYear}
+        ar={ar}
+        goodWhenOver={true}
       />
       <SectionTable
         title={ar ? "المصروفات" : "Expenses"}
         lines={pl.expenses}
         totalLabel={ar ? "إجمالي المصروفات" : "Total expenses"}
         total={pl.totalExpenses}
+        budgets={budgetsForYear}
+        ar={ar}
+        goodWhenOver={false}
       />
       <div className="card" style={{ padding: 16, display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
         <span>{ar ? "صافي الربح" : "Net profit"}</span>
@@ -166,18 +217,21 @@ export default async function StatementsPage(props: { searchParams: Promise<{ ye
         lines={bs.assets}
         totalLabel={ar ? "إجمالي الأصول" : "Total assets"}
         total={bs.totalAssets}
+        ar={ar}
       />
       <SectionTable
         title={ar ? "الالتزامات" : "Liabilities"}
         lines={bs.liabilities}
         totalLabel={ar ? "إجمالي الالتزامات" : "Total liabilities"}
         total={bs.totalLiabilities}
+        ar={ar}
       />
       <SectionTable
         title={ar ? "حقوق الملكية" : "Equity"}
         lines={[...bs.equity, { code: "—", name: ar ? "أرباح الفترة الحالية" : "Current earnings", amount: bs.currentEarnings }]}
         totalLabel={ar ? "إجمالي حقوق الملكية" : "Total equity"}
         total={bs.totalEquity}
+        ar={ar}
       />
       <div className="card" style={{ padding: 16, display: "flex", justifyContent: "space-between" }}>
         <span>{ar ? "المعادلة المحاسبية" : "Accounting equation"}</span>

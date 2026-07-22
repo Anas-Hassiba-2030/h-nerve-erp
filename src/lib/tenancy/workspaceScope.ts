@@ -125,6 +125,11 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
   "Project",
   "TimesheetEntry",
   "ProjectExpense",
+  // Budgeting (docs/HOURANI-ERP-GAPS.md #10). Same opaque tenantId convention.
+  "Budget",
+  // Recurring invoices (docs/HOURANI-ERP-GAPS.md #11). Same opaque tenantId
+  // convention.
+  "RecurringInvoiceTemplate",
 ]);
 
 // Phase ISO-2 — models owned by TWO Company FKs at once (a bridge row).

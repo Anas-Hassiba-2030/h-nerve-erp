@@ -13,7 +13,7 @@ import {
   ShoppingCart, ShoppingBag, Users, UserSquare, BookOpen, Library,
   BrainCircuit, FileText, GitBranch, ReceiptText, CreditCard, Landmark,
   Banknote, Scale, Building2, Factory, CalendarDays, CalendarRange, Wallet, PackageSearch,
-  Handshake, Hourglass, ClipboardCheck, Wrench, CalendarClock, Ship, Briefcase,
+  Handshake, Hourglass, ClipboardCheck, Wrench, CalendarClock, Ship, Briefcase, Target, Repeat,
 } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -56,6 +56,8 @@ const CONSOLES: Console[] = [
   { href: "/admin/reconciliation", ar: "التسوية البنكية", en: "Bank Reconciliation", icon: Landmark, group: "treasury", desc_ar: "طابق كشوفات الحساب البنكي بالدفعات المسجّلة.", desc_en: "Match bank statements against recorded payments." },
   { href: "/admin/cost-centers", ar: "مراكز التكلفة", en: "Cost Centres", icon: Building2, group: "treasury", desc_ar: "بُعد تحليلي على القيود — أرباح وخسائر لكل وحدة عمل.", desc_en: "Analytic dimension on journal entries — per-unit P&L." },
   { href: "/admin/projects", ar: "محاسبة المشاريع", en: "Project Accounting", icon: Briefcase, group: "treasury", desc_ar: "ميزانية مقابل فعلي من الساعات المسجّلة والمصاريف.", desc_en: "Budget vs. actual from logged hours and expenses." },
+  { href: "/admin/budgets", ar: "الموازنة", en: "Budgeting", icon: Target, group: "treasury", desc_ar: "ميزانية سنوية لكل حساب — تظهر في قائمة الدخل.", desc_en: "Annual budget per account — shown on the income statement." },
+  { href: "/admin/recurring-invoices", ar: "الفواتير الدورية", en: "Recurring Invoices", icon: Repeat, group: "treasury", desc_ar: "رسوم شهرية ثابتة تُصدر فاتورة تلقائياً عند الاستحقاق.", desc_en: "Fixed monthly fees that post a real invoice when due." },
   { href: "/admin/journal",ar: "القيود",           en: "Journal",         icon: BookOpen,    group: "treasury",     desc_ar: "قيود اليومية المحاسبية مزدوجة القيد.",          desc_en: "Double-entry accounting journal." },
   { href: "/admin/accounts",ar: "الحسابات",        en: "Accounts",        icon: Library,     group: "treasury",     desc_ar: "شجرة الحسابات ودفتر الأستاذ العام.",            desc_en: "Chart of accounts and general ledger." },
   // ── Parties ──

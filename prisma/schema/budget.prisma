@@ -1,0 +1,22 @@
+// =====================================================================
+// BUDGETING — docs/HOURANI-ERP-GAPS.md #10 ⚪ ("no Budget model, so no
+// budget-vs-actual column on any statement"). Annual budget per ledger
+// account, compared against the SAME year the /statements income
+// statement already filters by — no new monthly-granularity UI nobody
+// asked for. lib/finance/budget.ts computes the variance; this model is
+// just the stored target.
+// =====================================================================
+
+model Budget {
+  id          String   @id @default(cuid())
+  tenantId    String
+  accountCode String
+  year        Int
+  amount      Decimal
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tenantId, accountCode, year])
+  @@index([tenantId, year])
+}

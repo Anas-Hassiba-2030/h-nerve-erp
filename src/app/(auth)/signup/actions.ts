@@ -6,7 +6,25 @@ import { hashPassword } from "@/lib/auth/auth";
 import { passwordError } from "@/lib/auth/password";
 import { getSession, type SessionUser } from "@/lib/auth/session";
 
+// Public self-registration is CLOSED in production unless explicitly
+// opted in (H_NERVE_OPEN_SIGNUP=true). The login page never linked here —
+// this was an unlisted-but-open door on a deployment holding real Hourani
+// operational data, and prod provisioning already guarantees admin
+// accounts via scripts/seed/ensure-admins.ts, so nothing legitimate
+// needs it. Dev/local keeps signup open for convenience.
+function signupOpen(): boolean {
+  return (
+    process.env.H_NERVE_OPEN_SIGNUP === "true" ||
+    process.env.NODE_ENV !== "production"
+  );
+}
+
 export async function signupAction(formData: FormData) {
+  if (!signupOpen()) {
+    redirect(
+      `/login?error=${encodeURIComponent("التسجيل الذاتي مغلق. تواصل مع مدير النظام.")}`
+    );
+  }
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");

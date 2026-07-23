@@ -20,23 +20,32 @@ export type SessionData = {
 };
 
 // Session secret — used to sign session cookies (NOT a login password).
-// Falls back to a deterministic baked-in value so the system never refuses
-// to start because SESSION_PASSWORD is missing or short. iron-session
-// requires ≥32 chars, so the fallback is 70 chars to satisfy that hard
-// limit unconditionally.
-const FALLBACK_PASSWORD =
+//
+// SECURITY (hardening 2026-07-23): in production a missing/short
+// SESSION_PASSWORD now FAILS CLOSED with a thrown error instead of
+// silently falling back to the baked-in dev value. The fallback string
+// lives in a public repo — any silent fallback in prod would make every
+// session cookie forgeable by anyone who can read GitHub, with zero
+// operational signal that it happened. The Worker's secret store carries
+// SESSION_PASSWORD (verified via `wrangler secret list`), so a throw here
+// only fires on a real misconfiguration — exactly when we WANT requests
+// to fail loudly rather than authenticate silently against a public key.
+// Dev/build keep the fallback so local runs and `next build` page
+// collection never require the secret.
+const DEV_ONLY_FALLBACK_PASSWORD =
   "h-nerve-erp-session-secret-default-2026-hourani-group-XkP9mQ7zRT4nL8vB3jW";
 
 function resolveSessionPassword(): string {
   const env = process.env.SESSION_PASSWORD?.trim();
   if (env && env.length >= 32) return env;
-  // Anything else — missing, empty, short — falls back. We pad the env
-  // value (when present) onto the fallback so a custom secret still
-  // influences the signing key even if it's short.
-  if (env && env.length > 0) {
-    return (env + FALLBACK_PASSWORD).slice(0, 70);
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "SESSION_PASSWORD is missing or shorter than 32 chars in production. " +
+        "Set it with `wrangler secret put SESSION_PASSWORD` — refusing to " +
+        "sign sessions with the public dev fallback.",
+    );
   }
-  return FALLBACK_PASSWORD;
+  return DEV_ONLY_FALLBACK_PASSWORD;
 }
 
 // Phase 12 — sessions expire after 24h. iron-session re-issues the

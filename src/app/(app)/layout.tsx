@@ -131,7 +131,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           hub (/orrery) + the global ↺ Orbit return pill below. One removal =
           no page can ever show the old chrome again. */}
       <LivingAtmosphere />
-      <OrbitReturn locale={locale} />
+      <OrbitReturn locale={locale} userName={dbUser.name} />
       <FabRail locale={locale} />
       <div className="flex min-h-screen flex-1 flex-col nerve-bg">
         <ConstellationRail locale={locale} />

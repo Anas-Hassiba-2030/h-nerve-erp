@@ -41,20 +41,22 @@ export async function middleware(req: NextRequest) {
   reqHeaders.set("x-pathname", path);
   const passThrough = () => NextResponse.next({ request: { headers: reqHeaders } });
 
-  // Phase 12 — brute-force guard on the login POST. Runs BEFORE the
+  // Phase 12 — brute-force guard on login POSTs (staff /login AND the
+  // customer /portal/login — server actions POST to their own page path,
+  // so both credential doors are covered by one rule). Runs BEFORE the
   // break-glass return (login is break-glass for the permission gate,
   // but the rate cap must still apply). Fail-soft: a limiter error
   // never blocks a legitimate sign-in.
-  if (path === "/login" && req.method === "POST") {
+  if ((path === "/login" || path === "/portal/login") && req.method === "POST") {
     try {
       const ip =
         req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
         (req as any).ip ||
         "unknown";
-      const r = rateLimit(`login:${ip}`, 8, 60_000);
+      const r = rateLimit(`login:${path}:${ip}`, 8, 60_000);
       if (!r.allowed) {
         const url = req.nextUrl.clone();
-        url.pathname = "/login";
+        url.pathname = path;
         url.search = `?error=${encodeURIComponent(
           "محاولات تسجيل دخول كثيرة. انتظر دقيقة. · Too many login attempts, wait a minute.",
         )}`;

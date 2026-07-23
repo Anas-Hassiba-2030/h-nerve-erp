@@ -80,3 +80,7 @@ graphify-out/
 # local D1 seed/import artifacts
 /prisma/d1-seed.db
 /prisma/d1-import*.sql
+
+# root-level local dev SQLite (app reads DATABASE_URL=file:./dev.db)
+/dev.db
+/dev.db-journal

@@ -29,24 +29,24 @@
 }
 .dl-page .sec-eyebrow {
   display: inline-flex; align-items: center; gap: 9px;
-  font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--gold); margin-bottom: 12px;
+  font-size: 14px; font-weight: 700; letter-spacing: .04em; color: var(--gold); margin-bottom: 12px;
 }
 .dl-page .sec-eyebrow .tick { width: 22px; height: 1.5px; background: var(--gold); display: inline-block; }
 .dl-page .sec-title {
-  font-family: var(--dl-display); font-size: clamp(34px, 4.6vw, 56px); font-weight: 600;
+  font-family: var(--dl-display); font-size: clamp(36px, 4.8vw, 60px); font-weight: 600;
   line-height: 1.02; color: var(--emerald); letter-spacing: -.01em;
 }
-.dl-page .sec-sub { font-size: 15px; color: var(--ink-muted); margin-top: 12px; max-width: 60ch; }
+.dl-page .sec-sub { font-size: 17px; color: var(--ink-muted); margin-top: 12px; max-width: 62ch; }
 .dl-page .sec-head-aside { text-align: end; flex-shrink: 0; }
 .dl-page .sec-status {
   display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 999px;
-  background: var(--cream); border: 1px solid var(--line); font-size: 12.5px; font-weight: 600; color: var(--ink-muted);
+  background: var(--cream); border: 1px solid var(--line); font-size: 14px; font-weight: 600; color: var(--ink-muted);
 }
 .dl-page .sec-status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sage); }
 .dl-page .sec-actions { display: flex; gap: 10px; margin-top: 14px; justify-content: flex-end; flex-wrap: wrap; }
 .dl-page .dl-btn {
-  display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700;
-  border-radius: 999px; padding: 9px 16px; cursor: pointer; transition: transform .2s, box-shadow .2s, border-color .2s;
+  display: inline-flex; align-items: center; gap: 7px; font-size: 14.5px; font-weight: 700;
+  border-radius: 999px; padding: 10px 18px; cursor: pointer; transition: transform .2s, box-shadow .2s, border-color .2s;
 }
 .dl-page .dl-btn-primary { color: #fff; background: linear-gradient(135deg, var(--emerald-soft), var(--emerald)); border: 0; box-shadow: 0 6px 16px -8px rgba(31,77,63,.5); }
 .dl-page .dl-btn-secondary { color: var(--emerald); background: rgba(31,77,63,.06); border: 1.5px solid rgba(31,77,63,.28); }
@@ -67,11 +67,11 @@
 }
 .dl-page .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 22px 50px -26px rgba(31,77,63,.4); border-color: rgba(194,163,90,.4); }
 .dl-page .kpi-card:hover::before { transform: scaleX(1); }
-.dl-page .kpi-label { font-size: 12px; font-weight: 700; letter-spacing: .03em; color: var(--ink-muted); }
-.dl-page .kpi-val { font-family: var(--dl-display); font-size: 42px; font-weight: 600; line-height: 1; color: var(--emerald); margin-top: 14px; font-variant-numeric: tabular-nums; }
+.dl-page .kpi-label { font-size: 13.5px; font-weight: 700; letter-spacing: .03em; color: var(--ink-muted); }
+.dl-page .kpi-val { font-family: var(--dl-display); font-size: 44px; font-weight: 600; line-height: 1; color: var(--emerald); margin-top: 14px; font-variant-numeric: tabular-nums; }
 .dl-page .kpi-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 14px; }
-.dl-page .kpi-hint { font-size: 11.5px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
-.dl-page .delta { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+.dl-page .kpi-hint { font-size: 13px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+.dl-page .delta { display: inline-flex; align-items: center; gap: 3px; font-size: 12.5px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
 .dl-page .delta.up { color: #3c7a5c; background: rgba(126,155,134,.18); }
 .dl-page .delta.down { color: #9a5648; background: rgba(168,106,92,.16); }
 
@@ -88,13 +88,13 @@
 }
 @media (prefers-reduced-motion: reduce) { .dl-page a.panel:hover { transform: none; } }
 .dl-page .panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
-.dl-page .panel-title { font-family: var(--dl-display); font-size: 24px; font-weight: 600; color: var(--emerald); }
-.dl-page .panel-aside { font-size: 12.5px; color: var(--ink-muted); }
+.dl-page .panel-title { font-family: var(--dl-display); font-size: 26px; font-weight: 600; color: var(--emerald); }
+.dl-page .panel-aside { font-size: 14px; color: var(--ink-muted); }
 
 /* daylight table */
 .dl-page .dl-table { width: 100%; border-collapse: collapse; }
-.dl-page .dl-table th, .dl-page .dl-table td { text-align: start; padding: 13px 12px; font-size: 13.5px; border-bottom: 1px solid var(--line); }
-.dl-page .dl-table th { font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--ink-muted); }
+.dl-page .dl-table th, .dl-page .dl-table td { text-align: start; padding: 14px 12px; font-size: 15px; border-bottom: 1px solid var(--line); }
+.dl-page .dl-table th { font-size: 12.5px; font-weight: 700; letter-spacing: .04em; color: var(--ink-muted); }
 .dl-page .dl-table td { color: var(--ink); }
 .dl-page .dl-table td.num, .dl-page .dl-table th.num { text-align: end; font-variant-numeric: tabular-nums; }
 .dl-page .dl-table tbody tr { transition: background .25s; }
@@ -156,14 +156,14 @@ body:has(.dl-page) .orbit-return { z-index: 70; }
 }
 .dl-page .afn-cluster { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .dl-page .afn-cluster-head {
-  font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
   color: var(--gold); padding-inline-start: 2px;
 }
 .dl-page .afn-cluster-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
 .dl-page .afn-tab {
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 9px 13px; border-radius: 10px;
-  font-size: 13px; font-weight: 600; color: var(--ink-muted);
+  padding: 10px 15px; border-radius: 10px;
+  font-size: 14.5px; font-weight: 600; color: var(--ink-muted);
   background: transparent; border: 1px solid transparent;
   transition: color .2s, background .2s, border-color .2s, box-shadow .2s;
   white-space: nowrap;

@@ -63,14 +63,34 @@ async function main() {
   // ════════════════════════════════════════════════════════════════════════
   // 1. WAREHOUSES
   // ════════════════════════════════════════════════════════════════════════
+  // Dairy + agri warehouse NAMES/ADDRESSES are grounded in the real group's
+  // public facts (web-researched 2026-07-23; see the memory note this session
+  // wrote up for sources). CODES are kept stable — IZR-A/IZR-B, ZRQ-A/ZRQ-B —
+  // because downstream products/movements/POs/SOs key off them by code; only
+  // renaming the labels a human reads, not the join keys.
+  //   - Al-Maha's dairy operation runs TWO real plants, both in Rusaifa,
+  //     Zarqa governorate — one processes milk/labneh/yogurt/cheese/jameed,
+  //     the other makes the plastic packaging for it (jordandairy.com "About").
+  //   - Loran (est. 2019, Amman-registered) supplies animal feed/fodder for
+  //     dairy cattle — it is NOT a crop farm (a prior seed wrongly modelled
+  //     it as one; the PRODUCT catalog below still reflects that older,
+  //     incorrect assumption and is flagged, not rewritten, this session —
+  //     re-theming ~10 dependent sections blind was judged too risky to do
+  //     without dedicated verification). The real cattle farm is a separate
+  //     300-dunum operation producing ~60 tons/day of raw milk, publicly
+  //     reported at Al-Hallabat, Zarqa governorate — used for warehouse
+  //     geography only, kept under the existing IZR-* codes.
+  // Hotels warehouses stay generic Jordan tourism geography (Amman/Aqaba/
+  // Dead Sea) — no public source ties a specific hotel-ops warehouse to an
+  // address, so those three are left as plausible placeholders, not fact.
   const WAREHOUSES = [
     { tenantId: T_HOTELS, code: "AMM-A", name: "عمّان — المستودع الرئيسي", address: "شارع المدينة الصناعية، عمّان", type: "MAIN" },
     { tenantId: T_HOTELS, code: "AQB-B", name: "العقبة — التخزين البارد",  address: "منطقة الموانئ، العقبة",          type: "COLD" },
     { tenantId: T_HOTELS, code: "DLB-C", name: "البحر الميت — مخزن جاف",  address: "منطقة السياحة، البحر الميت",     type: "DRY"  },
-    { tenantId: T_DAIRY,  code: "ZRQ-A", name: "الزرقاء — المصنع الرئيسي", address: "المنطقة الصناعية، الزرقاء",     type: "MAIN" },
-    { tenantId: T_DAIRY,  code: "ZRQ-B", name: "الزرقاء — التخزين المبرّد", address: "المنطقة الصناعية، الزرقاء",    type: "COLD" },
-    { tenantId: T_AGRI,   code: "IZR-A", name: "إربد — مخزن المزرعة",     address: "المفرق–إربد، طريق الزراعة",     type: "MAIN" },
-    { tenantId: T_AGRI,   code: "IZR-B", name: "إربد — التخزين البارد",   address: "المفرق–إربد، طريق الزراعة",     type: "COLD" },
+    { tenantId: T_DAIRY,  code: "ZRQ-A", name: "الرصيفة — مصنع الألبان",   address: "الرصيفة، محافظة الزرقاء",       type: "MAIN" },
+    { tenantId: T_DAIRY,  code: "ZRQ-B", name: "الرصيفة — التخزين المبرّد", address: "الرصيفة، محافظة الزرقاء",      type: "COLD" },
+    { tenantId: T_AGRI,   code: "IZR-A", name: "الحلابات — مزرعة الأبقار الحلوب", address: "الحلابات، محافظة الزرقاء", type: "MAIN" },
+    { tenantId: T_AGRI,   code: "IZR-B", name: "الحلابات — التخزين البارد",       address: "الحلابات، محافظة الزرقاء", type: "COLD" },
   ];
 
   const warehouseIds: Record<string, string> = {};

@@ -346,18 +346,18 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
   border-color:#e4dccb;
 }
 .al-rail .rail-grp{
-  font-size:10.5px; font-weight:700; letter-spacing:.1em;
-  color:var(--gold,#C2A35A); opacity:.8; margin-inline-end:4px;
+  font-size:14px; font-weight:800; letter-spacing:.06em;
+  color:var(--gold,#C2A35A); opacity:.9; margin-inline-end:6px;
 }
 .al-rail .rail-toggle{
   margin-inline-start:auto; background:none; border:0; cursor:pointer;
-  color:var(--gold-soft,#DCC38A); font-size:13px;
+  color:var(--gold-soft,#DCC38A); font-size:16px;
 }
 .al-rail.light .rail-toggle{ color:var(--emerald,#2E6B57); }
 .rail-item{
-  display:inline-flex; align-items:center; min-height:34px;
-  padding:6px 13px; border-radius:999px;
-  font-family:var(--ui,"Cairo",sans-serif); font-size:12.5px; font-weight:600;
+  display:inline-flex; align-items:center; min-height:40px;
+  padding:8px 16px; border-radius:999px;
+  font-family:var(--ui,"Cairo",sans-serif); font-size:15px; font-weight:600;
   cursor:pointer; text-decoration:none;
   color:var(--mist,#CDE0D6);
   background:rgba(13,31,26,.4); border:1px solid rgba(194,163,90,.18);

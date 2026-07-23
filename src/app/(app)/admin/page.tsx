@@ -189,7 +189,7 @@ export default async function CoreHubPage() {
                 className="flex items-center gap-2.5 font-bold"
                 style={{
                   color: "var(--emerald)",
-                  fontSize: ar ? 15.5 : 13,
+                  fontSize: ar ? 17 : 14.5,
                   letterSpacing: ar ? 0 : ".13em",
                   textTransform: ar ? "none" : "uppercase",
                   marginBottom: 14,
@@ -230,11 +230,11 @@ export default async function CoreHubPage() {
                         <span className="flex flex-wrap items-baseline" style={{ columnGap: 9 }}>
                           <span
                             className="font-extrabold"
-                            style={{ color: "var(--ink)", fontSize: ar ? 23 : 19, letterSpacing: ar ? 0 : "-.01em" }}
+                            style={{ color: "var(--ink)", fontSize: ar ? 25 : 21, letterSpacing: ar ? 0 : "-.01em" }}
                           >
                             {ar ? c.ar : c.en}
                           </span>
-                          <span style={{ color: "var(--ink-muted)", fontSize: ar ? 14 : 15.5 }}>
+                          <span style={{ color: "var(--ink-muted)", fontSize: ar ? 15.5 : 17 }}>
                             {ar ? c.en : c.ar}
                           </span>
                         </span>
@@ -242,7 +242,7 @@ export default async function CoreHubPage() {
                           className="block"
                           style={{
                             color: "var(--ink-muted)",
-                            fontSize: ar ? 18 : 15,
+                            fontSize: ar ? 19.5 : 16.5,
                             lineHeight: ar ? 1.8 : 1.6,
                             marginTop: 7,
                           }}

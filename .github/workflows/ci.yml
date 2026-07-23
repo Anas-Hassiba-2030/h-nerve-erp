@@ -45,10 +45,12 @@ jobs:
           NEXT_TELEMETRY_DISABLED: "1"
 
   # Browser-level regression gate — the class of bug unit tests can't see
-  # (dead buttons, auth loops, role lockouts, crashed pages). Builds the
-  # prod-shaped output (`next build --webpack` + `next start`, mirroring the
-  # Cloudflare builder) and drives real Chromium through login, logout,
-  # navigation, and permission enforcement against a seeded throwaway SQLite.
+  # (dead buttons, auth loops, role lockouts, crashed pages). Drives real
+  # Chromium through login, logout, navigation, and permission enforcement
+  # against a seeded throwaway SQLite. Runs on `next dev`: a prod-node
+  # `next start` can't work here (the bundle carries the Cloudflare-runtime
+  # Prisma client, whose wasm only loads on workerd) — prod-only behavior
+  # like the strict CSP is verified against the live Workers deployment.
   e2e:
     runs-on: ubuntu-latest
     steps:
@@ -59,11 +61,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - name: Build (prod-shaped server for the e2e run)
-        run: npx next build --webpack
-        env:
-          DATABASE_URL: file:./e2e.db
-          NEXT_TELEMETRY_DISABLED: "1"
       - name: E2E tests
         run: npm run e2e
       - uses: actions/upload-artifact@v4

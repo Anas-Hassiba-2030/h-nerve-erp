@@ -5,9 +5,13 @@
 // role enforcement). Runs with H_NERVE_PERMS_ENFORCED=true so the suite
 // exercises production enforcement semantics, not the open dev default.
 //
-// Locally the server is `next dev` (reused if already listening); in CI it
-// is `next build --webpack` + `next start` — prod-shaped output, so things
-// like CSP/nonce and hydration behave as they will on the Worker.
+// The server is ALWAYS `next dev` — including CI. A prod-node `next start`
+// cannot work here by construction: the app bundle carries the CLOUDFLARE-
+// runtime Prisma client (tsconfig aliases @prisma/client to it), whose wasm
+// query-compiler only loads on workerd ("The loaded wasm module was
+// unexpectedly undefined" on plain Node). Prod-only behavior (the strict
+// CSP nonce pipeline) is therefore verified against the real Workers
+// deployment, not here.
 
 import { defineConfig } from "@playwright/test";
 
@@ -32,7 +36,7 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: process.env.CI ? `npx next start -p ${PORT}` : `npx next dev -p ${PORT}`,
+    command: `npx next dev -p ${PORT}`,
     url: `http://localhost:${PORT}/api/health`,
     timeout: 240_000,
     reuseExistingServer: !process.env.CI,

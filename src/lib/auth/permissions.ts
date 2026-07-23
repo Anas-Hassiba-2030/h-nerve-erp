@@ -14,34 +14,68 @@ export type PermRole = "ADMIN" | "EXECUTIVE" | "MANAGER" | "STAFF";
 
 // Always allowed, even with no/!valid session — never gate these or you
 // can't get back in to fix a bad gate.
-const BREAK_GLASS = ["/login", "/signup", "/logout", "/api/health", "/"];
+export const BREAK_GLASS = ["/login", "/signup", "/logout", "/api/health", "/"];
 
 // Allowed for ANY authenticated role (self-service / universal).
-const UNIVERSAL = [
+// /portal is here because portal CUSTOMERS carry their own cookie
+// (bmv2026_portal_session) — the middleware never sees a role for them —
+// but an OPERATOR who is also signed in must not be bounced off the
+// customer door. /dev + /protocol are the public developer portal.
+export const UNIVERSAL = [
   "/dashboard", "/settings", "/search", "/help", "/messages",
   "/tasks", "/pinned", "/showcase", "/changelog", "/roadmap",
   "/achievements", "/digest", "/notifications", "/inbox",
+  "/me", "/activity", "/orrery", "/m", "/learning", "/design-system",
+  "/portal", "/dev", "/protocol",
 ];
+
+// ADMIN-only surfaces (everything not granted below is ADMIN-only by the
+// deny-by-default model — this list exists so the route-coverage test can
+// prove every shipped route was CLASSIFIED, not forgotten).
+// /integrations holds connector secrets; /trash restores soft-deleted rows.
+// The platform console under app/(admin) is ADDITIONALLY hard-gated to
+// ADMIN by its layout regardless of this map.
+export const ADMIN_ONLY = ["/integrations", "/trash"];
 
 // Per-role allow-list (path prefixes), ON TOP of UNIVERSAL.
 // ADMIN is special-cased to all access (not listed here).
-const POLICY: Record<Exclude<PermRole, "ADMIN">, string[]> = {
-  // Financials, reports, dashboards — explicitly NO admin panel.
+//
+// NOTE on /admin: the (app) route group serves the ERP operator consoles
+// (journal, accounts, products, warehouses, …) under /admin/*, while the
+// PLATFORM console (tenants, empire, genesis, …) lives in the (admin)
+// group whose layout hard-redirects non-ADMIN roles. Granting the /admin
+// prefix to EXECUTIVE/MANAGER therefore opens the ERP consoles only.
+export const POLICY: Record<Exclude<PermRole, "ADMIN">, string[]> = {
+  // Financial + strategic: full finance suite, analysis, org views,
+  // the Brain, Theater, Empire and Workspace. No connector secrets.
   EXECUTIVE: [
-    "/finance", "/reports", "/analytics", "/markets", "/insights",
-    "/sustainability", "/compare", "/companies", "/supply-chain",
-    "/brain", "/audit-360", "/plans", "/alerts", "/documents",
+    "/finance", "/invoices", "/payments", "/purchase-invoices",
+    "/purchase-payments", "/estimates", "/statements", "/treasuries",
+    "/e-invoicing", "/reports", "/analytics", "/markets", "/insights",
+    "/sustainability", "/compare", "/audit-360", "/brain", "/memory",
+    "/plans", "/alerts", "/companies", "/customers", "/suppliers",
+    "/crm", "/assets", "/projects", "/employees", "/hr", "/users",
+    "/documents", "/supply-chain", "/workflows", "/workspace",
+    "/system", "/theater", "/empire", "/admin",
   ],
-  // Operational + own-unit modules. No /admin/* (superadmin or the
-  // org-wide admin family). Data scoping deferred to Phase 11.
+  // Operational: verticals, sales/purchasing cycle, production,
+  // maintenance, HR, the ERP consoles. No treasury, no Brain/Empire,
+  // no markets/sustainability analysis surfaces.
   MANAGER: [
     "/companies", "/hotels", "/dairy", "/farms", "/education",
     "/supply-chain", "/finance", "/projects", "/insights", "/alerts",
     "/workflows", "/documents", "/employees", "/analytics", "/reports",
+    "/crm", "/customers", "/suppliers", "/invoices", "/payments",
+    "/purchase-invoices", "/purchase-payments", "/estimates",
+    "/statements", "/e-invoicing", "/pos", "/manufacturing",
+    "/maintenance", "/assets", "/hr", "/users", "/admin",
+    "/workspace", "/theater",
   ],
-  // Limited operational pages only. No finance/reports/analytics/admin.
+  // Front-line operational pages only: the verticals they work in,
+  // the POS register, shop-floor manufacturing, maintenance tickets.
   STAFF: [
     "/hotels", "/dairy", "/farms", "/education", "/documents",
+    "/pos", "/manufacturing", "/maintenance",
   ],
 };
 

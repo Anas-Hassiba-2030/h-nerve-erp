@@ -27,6 +27,19 @@ below is the full manual list behind it. Status column = last verified
 | 13 | e2e suite green (auth, logout, nav, roles) | CI `e2e` job | ✅ |
 | 14 | Brain read-mostly boundary intact | review: `src/lib/brain/` has no direct domain writes | ✅ |
 
+## Accepted risk (won't-fix, documented)
+
+- **`@hono/node-server` <2.0.5 — Windows path traversal in `serve-static`
+  (GHSA-frvp-7c67-39w9, moderate)**. Pulled in transitively by
+  `@modelcontextprotocol/sdk`, which pins `^1.19.9` — no patched 1.x release
+  exists, and bumping to 2.x breaks the SDK's own dependency range. Real
+  exposure: near zero. `serve-static` is never invoked — the Brain's MCP
+  server (`scripts/ops/brain-mcp.ts`) is stdio-only, not an HTTP server, and
+  nothing in this repo serves static files through Hono. Re-check on every
+  `@modelcontextprotocol/sdk` bump (`npm view @modelcontextprotocol/sdk
+  dependencies.@hono/node-server`) — once the SDK allows 2.x this clears
+  itself via `npm install`.
+
 ## Cadence
 
 - **After every deploy**: run `security-check.mjs` (one command, ~10s).

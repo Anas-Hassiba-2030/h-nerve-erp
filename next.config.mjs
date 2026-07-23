@@ -24,33 +24,35 @@ const securityHeaders = [
   // Cross-origin isolation — keeps our window separate from any embed.
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
   { key: "X-DNS-Prefetch-Control", value: "off" },
-  // Phase 12 — CSP ENFORCED. The policy was validated in Report-Only
-  // across every page; it intentionally keeps script-src/style-src
-  // 'unsafe-inline' 'unsafe-eval' because Next.js's runtime + recharts
-  // require them without nonce wiring, so enforcing this exact policy
-  // changes no page behavior — it only blocks unlisted origins
-  // (foreign script/connect/object/frame). Tighten by removing the
-  // unsafe-* tokens once a nonce pipeline lands (post-pitch).
-  {
-    key: "Content-Security-Policy",
-    value: [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-      // BUG-C — globals.css @imports the Heritage type stack from Google
-      // Fonts. Without these two origins the CSP blocks the stylesheet +
-      // woff2 files and the whole app silently falls back to system fonts
-      // (off-brand: no Reem Kufi / Cairo / Inter). See app/globals.css:3.
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: blob:",
-      "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self'",
-      "frame-ancestors 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "object-src 'none'",
-    ].join("; "),
-  },
+  // NOTE: the Content-Security-Policy for every Next-rendered DOCUMENT now
+  // comes from src/middleware.ts — a per-request nonce + 'strict-dynamic'
+  // policy with NO 'unsafe-inline'/'unsafe-eval' (production only, kill
+  // switch H_NERVE_CSP_STRICT=false). It cannot live here: static headers
+  // can't carry a per-request nonce. The ONLY document that still needs a
+  // static CSP is the Orrery hub below (a static asset the middleware
+  // never sees).
 ];
+
+// Legacy CSP for the static hub document only. /hub/index.html is a
+// prebuilt asset full of inline scripts (the orbit animation) that can't
+// be nonce'd per request — it keeps the origin-allowlist policy, framed
+// same-origin by /orrery.
+const hubCsp = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  // BUG-C — globals.css @imports the Heritage type stack from Google
+  // Fonts. Without these two origins the CSP blocks the stylesheet +
+  // woff2 files and the whole app silently falls back to system fonts
+  // (off-brand: no Reem Kufi / Cairo / Inter). See app/globals.css:3.
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "img-src 'self' data: blob:",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  "connect-src 'self'",
+  "frame-ancestors 'self'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+].join("; ");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -101,18 +103,13 @@ const nextConfig = {
     // The /orrery page renders the cinematic hub in a SAME-ORIGIN <iframe>
     // pointing at /hub/index.html (static asset — deliberately NOT under
     // /orrery, which is a Next route; on Cloudflare Workers the assets layer
-    // would shadow the route). The global X-Frame-Options: DENY + CSP
-    // frame-ancestors 'none' would block that frame, so relax ONLY this
-    // one document to same-origin framing. Everything else stays DENY.
-    const orreryFrameHeaders = securityHeaders.map((h) => {
-      if (h.key === "X-Frame-Options") return { key: h.key, value: "SAMEORIGIN" };
-      if (h.key === "Content-Security-Policy")
-        return {
-          key: h.key,
-          value: h.value.replace("frame-ancestors 'none'", "frame-ancestors 'self'"),
-        };
-      return h;
-    });
+    // would shadow the route). The global X-Frame-Options: DENY would block
+    // that frame, so relax ONLY this one document to same-origin framing —
+    // and give it the static legacy CSP (see hubCsp above). Everything else
+    // stays DENY, with the nonce CSP arriving from the middleware.
+    const orreryFrameHeaders = securityHeaders
+      .map((h) => (h.key === "X-Frame-Options" ? { key: h.key, value: "SAMEORIGIN" } : h))
+      .concat([{ key: "Content-Security-Policy", value: hubCsp }]);
     return [
       {
         // The embedded Orrery hub doc — allow same-origin framing.

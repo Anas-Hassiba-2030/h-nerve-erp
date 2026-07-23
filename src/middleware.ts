@@ -29,6 +29,30 @@ function sessionPassword() {
 // only. Everything here is edge-safe (iron-webcrypto unseal, pure permission
 // map, in-memory limiter). Renaming back to proxy.ts breaks the Cloudflare
 // build with "Node.js middleware is not currently supported".
+// Strict CSP (production only). A fresh nonce per request; Next.js reads the
+// Content-Security-Policy REQUEST header set below and stamps the nonce onto
+// every framework <script> tag it renders, so 'unsafe-inline'/'unsafe-eval'
+// can finally go. 'strict-dynamic' lets those nonce'd root scripts load the
+// chunk graph. Dev is exempt (the dev overlay + fast refresh need eval), and
+// H_NERVE_CSP_STRICT=false is the instant, deploy-only kill switch.
+// The static Orrery hub doc (/hub/index.html) never passes through the
+// middleware — it keeps its own legacy CSP from next.config.mjs headers().
+function buildStrictCsp(nonce: string): string {
+  return [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "img-src 'self' data: blob:",
+    "font-src 'self' data: https://fonts.gstatic.com",
+    "connect-src 'self'",
+    "frame-src 'self'",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "object-src 'none'",
+  ].join("; ");
+}
+
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
@@ -39,7 +63,26 @@ export async function middleware(req: NextRequest) {
   // the rate-limit / perms branches.
   const reqHeaders = new Headers(req.headers);
   reqHeaders.set("x-pathname", path);
-  const passThrough = () => NextResponse.next({ request: { headers: reqHeaders } });
+
+  const strictCsp =
+    process.env.NODE_ENV === "production" &&
+    process.env.H_NERVE_CSP_STRICT !== "false";
+  let csp: string | null = null;
+  if (strictCsp) {
+    const bytes = crypto.getRandomValues(new Uint8Array(16));
+    const nonce = btoa(String.fromCharCode(...bytes));
+    csp = buildStrictCsp(nonce);
+    // Request header: Next.js picks this up and nonces its own scripts.
+    reqHeaders.set("content-security-policy", csp);
+    reqHeaders.set("x-nonce", nonce);
+  }
+
+  const passThrough = () => {
+    const res = NextResponse.next({ request: { headers: reqHeaders } });
+    // Response header: what the browser actually enforces.
+    if (csp) res.headers.set("content-security-policy", csp);
+    return res;
+  };
 
   // Phase 12 — brute-force guard on login POSTs (staff /login AND the
   // customer /portal/login — server actions POST to their own page path,

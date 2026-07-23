@@ -44,7 +44,12 @@
   "vars": {
     // Non-secret runtime vars. NEXT_PUBLIC_APP_URL is overridden per
     // environment in the dashboard once the final hostname exists.
-    "NEXT_TELEMETRY_DISABLED": "1"
+    "NEXT_TELEMETRY_DISABLED": "1",
+    // Role-based route enforcement (src/middleware.ts + the (app) layout).
+    // Map validated by src/lib/auth/permissions.coverage.test.ts — every
+    // shipped route must be classified before this can safely stay on.
+    // Flip to "false" for an instant, deploy-only rollback to open browsing.
+    "H_NERVE_PERMS_ENFORCED": "true"
   },
   "observability": {
     "enabled": true

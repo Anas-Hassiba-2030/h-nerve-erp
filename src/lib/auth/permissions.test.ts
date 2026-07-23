@@ -41,10 +41,13 @@ describe("effectiveCanAccess — Phase P5 DB-override layer", () => {
 
   it("with no override, falls back to the hardcoded POLICY", async () => {
     const load = async (): Promise<Row[]> => [];
-    // EXECUTIVE default has /finance.
+    // EXECUTIVE default has /finance (and, since the 2026-07 map refresh,
+    // the ERP consoles under /admin — the PLATFORM console stays ADMIN-only
+    // via the (admin) layout gate).
     expect(await effectiveCanAccess("EXECUTIVE", "/finance", load)).toBe(true);
-    // EXECUTIVE default does NOT have /hotels (no admin family).
-    expect(await effectiveCanAccess("EXECUTIVE", "/admin/products", load)).toBe(false);
+    expect(await effectiveCanAccess("EXECUTIVE", "/admin/products", load)).toBe(true);
+    // Connector secrets stay ADMIN-only.
+    expect(await effectiveCanAccess("EXECUTIVE", "/integrations", load)).toBe(false);
   });
 
   it("override prefix matches sub-routes (longest-match)", async () => {

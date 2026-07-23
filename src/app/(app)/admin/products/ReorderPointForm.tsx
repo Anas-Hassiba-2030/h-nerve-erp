@@ -19,7 +19,7 @@ export function ReorderPointForm({
   return (
     <form action={setReorderPoint} className="flex flex-wrap items-end gap-2">
       <input type="hidden" name="productId" value={productId} />
-      <label className="flex flex-col gap-1 text-[11px] font-bold">
+      <label className="flex flex-col gap-1 text-[13px] font-bold">
         {ar ? "نقطة إعادة الطلب" : "Reorder point"}
         <input
           type="number"

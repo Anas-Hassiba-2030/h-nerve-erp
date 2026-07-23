@@ -57,12 +57,12 @@
 .dl-page .bar { width: 100%; border-radius: 5px 5px 0 0; transition: height 1s cubic-bezier(.22,1,.36,1); }
 .dl-page .bar.rev { background: linear-gradient(180deg, var(--emerald-soft), var(--emerald)); }
 .dl-page .bar.exp { background: rgba(194,163,90,.55); }
-.dl-page .bar-x { font-size: 11px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+.dl-page .bar-x { font-size: 13px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
 
 /* ── raw <table> inside arena panels (reference uses bare <table>, not .dl-table) ── */
 .dl-page .panel table { width: 100%; border-collapse: collapse; }
 .dl-page .panel th, .dl-page .panel td { text-align: start; padding: 13px 12px; font-size: 14px; border-bottom: 1px solid var(--line); }
-.dl-page .panel th { font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--ink-muted); text-transform: none; }
+.dl-page .panel th { font-size: 13px; font-weight: 700; letter-spacing: .04em; color: var(--ink-muted); text-transform: none; }
 .dl-page .panel td { color: var(--ink); }
 .dl-page .panel td.num, .dl-page .panel th.num { text-align: end; font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
 .dl-page .panel tbody tr { transition: background .25s; }

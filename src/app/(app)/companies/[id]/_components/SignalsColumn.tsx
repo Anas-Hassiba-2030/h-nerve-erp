@@ -53,14 +53,14 @@ export function SignalsColumn({
             <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--ink)" }}>
               <Brain className="h-4 w-4" style={{ color: "var(--gold)" }} />
               {en ? "Supply-chain signals" : "إشارات السلسلة"}                  </h3>
-            <Link href="/supply-chain" className="text-[11px] font-bold" style={{ color: "var(--gold)" }}>
+            <Link href="/supply-chain" className="text-[13px] font-bold" style={{ color: "var(--gold)" }}>
               {en ? "View all →" : "عرض الكل ←"}
             </Link>
           </header>
 
           {company.forecastsOut.length > 0 ? (
             <div className="mb-3">
-              <div className="mb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
+              <div className="mb-1 text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
                 {en ? "Outbound" : "صادرة منها"}                    </div>
               <ul className="space-y-1.5">
                 {company.forecastsOut.map((f) => (
@@ -76,7 +76,7 @@ export function SignalsColumn({
                       </span>
                       <span style={{ color: "var(--ink-muted)" }}>→ {f.target.code}</span>
                     </div>
-                    <span className="font-mono text-[10px]" style={{ color: "var(--ink-muted)" }}>
+                    <span className="font-mono text-[12px]" style={{ color: "var(--ink-muted)" }}>
                       {formatNumber(f.predictedDemand)} {localizeUnit(f.unit, !en)}
                     </span>
                   </li>
@@ -87,7 +87,7 @@ export function SignalsColumn({
 
           {company.forecastsIn.length > 0 ? (
             <div>
-              <div className="mb-1 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
+              <div className="mb-1 text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
                 {en ? "Inbound" : "واردة إليها"}                    </div>
               <ul className="space-y-1.5">
                 {company.forecastsIn.map((f) => (
@@ -103,7 +103,7 @@ export function SignalsColumn({
                       </span>
                       <span style={{ color: "var(--ink-muted)" }}>← {f.source.code}</span>
                     </div>
-                    <span className="font-mono text-[10px]" style={{ color: "var(--ink-muted)" }}>
+                    <span className="font-mono text-[12px]" style={{ color: "var(--ink-muted)" }}>
                       {formatNumber(f.predictedDemand)} {localizeUnit(f.unit, !en)}
                     </span>
                   </li>
@@ -121,7 +121,7 @@ export function SignalsColumn({
             <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--ink)" }}>
               <Wallet className="h-4 w-4" style={{ color: "var(--gold)" }} />
               {en ? "Recent transactions" : "حركات مالية أخيرة"}                  </h3>
-            <Link href="/finance" className="text-[11px] font-bold" style={{ color: "var(--gold)" }}>
+            <Link href="/finance" className="text-[13px] font-bold" style={{ color: "var(--gold)" }}>
               {en ? "View all →" : "عرض الكل ←"}
             </Link>
           </header>
@@ -137,7 +137,7 @@ export function SignalsColumn({
                     <div className="truncate font-bold" style={{ color: "var(--ink)" }}>
                       {t.description ?? t.category}
                     </div>
-                    <div className="font-mono text-[10px]" style={{ color: "var(--ink-muted)" }}>
+                    <div className="font-mono text-[12px]" style={{ color: "var(--ink-muted)" }}>
                       {t.reference} • {formatShortDate(t.occurredAt)}
                     </div>
                   </div>
@@ -162,7 +162,7 @@ export function SignalsColumn({
             <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--ink)" }}>
               <FlaskConical className="h-4 w-4" style={{ color: "var(--gold)" }} />
               {en ? "Future projects" : "المشاريع المستقبلية"}                  </h3>
-            <Link href="/projects" className="text-[11px] font-bold" style={{ color: "var(--gold)" }}>
+            <Link href="/projects" className="text-[13px] font-bold" style={{ color: "var(--gold)" }}>
               {en ? "View all →" : "عرض الكل ←"}
             </Link>
           </header>
@@ -178,7 +178,7 @@ export function SignalsColumn({
                     <div className="truncate text-xs font-bold" style={{ color: "var(--ink)" }}>
                       {p.title}
                     </div>
-                    <div className="text-[10px]" style={{ color: "var(--ink-muted)" }}>
+                    <div className="text-[12px]" style={{ color: "var(--ink-muted)" }}>
                       {p.startQuarter ?? "—"} → {p.targetQuarter ?? "—"}
                     </div>
                   </div>
@@ -187,7 +187,7 @@ export function SignalsColumn({
                   </span>
                 </div>
                 {p.budgetJod > 0 ? (
-                  <div className="mt-1 text-[10px] font-mono" style={{ color: "var(--ink-muted)" }}>
+                  <div className="mt-1 text-[12px] font-mono" style={{ color: "var(--ink-muted)" }}>
                     {en ? "Budget" : "ميزانية"} {formatMoney(p.budgetJod)}
                   </div>
                 ) : null}
@@ -219,7 +219,7 @@ export function SignalsColumn({
             <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--ink)" }}>
               <Leaf className="h-4 w-4" style={{ color: "var(--gold)" }} />
               {en ? "Sustainability (ESG)" : "الاستدامة (ESG)"}                  </h3>
-            <span className="text-[10px] font-mono" style={{ color: "var(--ink-muted)" }}>
+            <span className="text-[12px] font-mono" style={{ color: "var(--ink-muted)" }}>
               {latestEsg.period} {latestEsg.year}
             </span>
           </header>
@@ -230,7 +230,7 @@ export function SignalsColumn({
               { label: "حوكمة", v: latestEsg.governanceScore, color: "#6d28d9" },
             ].map((row) => (
               <div key={row.label}>
-                <div className="flex items-center justify-between text-[10px] font-bold" style={{ color: "var(--ink-muted)" }}>
+                <div className="flex items-center justify-between text-[12px] font-bold" style={{ color: "var(--ink-muted)" }}>
                   <span>{row.label}</span>
                   <span style={{ color: "var(--ink)" }}>{Math.round(row.v)}/100</span>
                 </div>
@@ -251,7 +251,7 @@ export function SignalsColumn({
             ))}
           </div>
           {latestEsg.carbonTons > 0 || latestEsg.renewablePct > 0 ? (
-            <div className="mt-3 grid grid-cols-2 gap-2 text-[10px]" style={{ color: "var(--ink-muted)" }}>
+            <div className="mt-3 grid grid-cols-2 gap-2 text-[12px]" style={{ color: "var(--ink-muted)" }}>
               {latestEsg.carbonTons > 0 ? (
                 <div>
                   {en ? "Carbon:" : "كربون:"} <span className="font-mono font-bold" style={{ color: "var(--ink)" }}>

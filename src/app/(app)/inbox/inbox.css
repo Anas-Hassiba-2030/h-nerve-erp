@@ -15,13 +15,13 @@
 .dl-page .ib-wrap { max-width: 1000px; margin: 0 auto; padding: 14px 24px 80px; }
 .dl-page .ib-top { display: flex; align-items: stretch; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
 .dl-page .ib-title-box { display: flex; flex-direction: column; justify-content: center; padding-inline-end: 16px; border-inline-end: 1px solid rgba(194, 163, 90, .2); min-width: 170px; }
-.dl-page .ib-title-box .eb { display: inline-flex; align-items: center; gap: 7px; font-size: 10px; font-weight: 700; letter-spacing: .14em; color: var(--gold-soft); text-transform: uppercase; margin-bottom: 4px; }
+.dl-page .ib-title-box .eb { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; letter-spacing: .14em; color: var(--gold-soft); text-transform: uppercase; margin-bottom: 4px; }
 .dl-page .ib-title-box .eb .tick { width: 18px; height: 1.5px; background: var(--gold-soft); }
 .dl-page .ib-title-box h1 { font-family: var(--display); font-size: 34px; font-weight: 600; color: #fff; line-height: 1; }
 .dl-page .ib-kpis { display: flex; gap: 12px; flex: 1; flex-wrap: wrap; }
 .dl-page .ib-kpi { flex: 1; min-width: 120px; background: linear-gradient(160deg, rgba(20, 46, 38, .5), rgba(13, 31, 26, .46)); border: 1px solid rgba(194, 163, 90, .2); border-radius: 14px; padding: 11px 16px; }
 .dl-page .ib-kpi .v { font-family: var(--display); font-variant-numeric: tabular-nums; font-size: 25px; font-weight: 600; color: #fff; line-height: 1; }
-.dl-page .ib-kpi .k { font-size: 11px; color: var(--mist); opacity: .7; margin-top: 4px; }
+.dl-page .ib-kpi .k { font-size: 13px; color: var(--mist); opacity: .7; margin-top: 4px; }
 
 .dl-page .ib-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
 .dl-page .ib-pills { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -45,8 +45,8 @@
 .dl-page .item .ibody { flex: 1; min-width: 0; }
 .dl-page .item .it { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 3px; }
 .dl-page .item .ip { font-size: 12.5px; color: var(--mist); opacity: .7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dl-page .item .chip { font-size: 10.5px; color: var(--gold-soft); opacity: .8; background: rgba(194, 163, 90, .1); padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
-.dl-page .item .tm { font-size: 11px; color: var(--mist); opacity: .5; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.dl-page .item .chip { font-size: 12px; color: var(--gold-soft); opacity: .8; background: rgba(194, 163, 90, .1); padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.dl-page .item .tm { font-size: 13px; color: var(--mist); opacity: .5; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .dl-page .item .go { width: 30px; height: 30px; flex: 0 0 30px; border-radius: 50%; display: grid; place-items: center; color: var(--gold-soft); background: rgba(194, 163, 90, .1); font-size: 15px; }
 .dl-page .ib-empty { text-align: center; padding: 60px 20px; display: none; }
 .dl-page .ib-empty.show { display: block; }

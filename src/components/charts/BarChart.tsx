@@ -40,7 +40,7 @@ export function BarChart({
               {/* Value label */}
               {showValues ? (
                 <div
-                  className="mb-1 text-[10px] font-bold opacity-0"
+                  className="mb-1 text-[12px] font-bold opacity-0"
                   style={{
                     color: "var(--text)",
                     animation: "fade-in .6s ease forwards",
@@ -78,7 +78,7 @@ export function BarChart({
               </div>
               {/* X label */}
               <div
-                className="mt-1.5 line-clamp-1 text-[10px] font-bold"
+                className="mt-1.5 line-clamp-1 text-[12px] font-bold"
                 style={{ color: "var(--text-muted)" }}
                 title={d.label}
               >

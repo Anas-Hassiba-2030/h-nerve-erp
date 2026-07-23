@@ -54,7 +54,7 @@
 .studio-back:hover { color: var(--studio-cyan); border-color: var(--studio-cyan); }
 .studio-eyebrow {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--studio-cyan);
@@ -70,7 +70,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 500;
   background: transparent;
   color: var(--studio-text-muted);
@@ -110,13 +110,13 @@
 }
 .palette-eyebrow {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--studio-cyan);
 }
 .palette-hint {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--studio-text-faint);
   font-style: italic;
 }
@@ -126,7 +126,7 @@
   align-items: center;
   gap: 8px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   margin-bottom: 8px;
   padding: 0 4px;
@@ -156,7 +156,7 @@
   display: inline-flex;
   align-items: center;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--studio-text-faint);
@@ -166,7 +166,7 @@
   border: 1px solid var(--studio-rule-strong);
 }
 .palette-item-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: -0.005em;
   white-space: nowrap;
@@ -259,7 +259,7 @@
   color: var(--studio-amber);
   border: 1px solid var(--studio-amber);
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
@@ -299,7 +299,7 @@
   align-items: center;
   gap: 8px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--studio-text);
@@ -310,7 +310,7 @@
   gap: 6px;
   color: var(--studio-rose);
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.06em;
 }
 
@@ -328,7 +328,7 @@
   align-items: baseline;
   padding: 4px 8px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--studio-text);
   background: var(--studio-bg);
   border: 1px solid var(--studio-rule);
@@ -347,7 +347,7 @@
 .studio-trace-msg {
   color: var(--studio-text);
   font-family: "Inter Tight", "Inter", sans-serif;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: -0.005em;
 }
 .studio-trace-ms {

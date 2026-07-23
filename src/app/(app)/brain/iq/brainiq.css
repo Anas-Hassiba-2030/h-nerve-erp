@@ -30,7 +30,7 @@
 /* ── slim ribbon ─────────────────────────────────────────────────────── */
 .dl-page .br-ribbon { display: flex; align-items: stretch; gap: 18px; margin-bottom: 16px; flex-wrap: wrap; }
 .dl-page .br-title-box { display: flex; flex-direction: column; justify-content: center; padding-inline-end: 18px; border-inline-end: 1px solid rgba(194,163,90,.2); min-width: 170px; }
-.dl-page .br-title-box .eb { display: inline-flex; align-items: center; gap: 7px; font-size: 10px; font-weight: 700; letter-spacing: .14em; color: var(--gold-soft); text-transform: uppercase; margin-bottom: 4px; }
+.dl-page .br-title-box .eb { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; letter-spacing: .14em; color: var(--gold-soft); text-transform: uppercase; margin-bottom: 4px; }
 .dl-page .br-title-box .eb .tick { width: 18px; height: 1.5px; background: var(--gold-soft); }
 .dl-page .br-title-box h1 { font-family: var(--display); font-size: 36px; font-weight: 600; color: #fff; line-height: 1; }
 .dl-page .br-intro { display: flex; align-items: center; flex: 1; font-size: 14px; line-height: 1.5; color: var(--mist); opacity: .82; background: linear-gradient(160deg, rgba(20,46,38,.5), rgba(13,31,26,.46)); border: 1px solid rgba(194,163,90,.2); border-radius: 16px; padding: 14px 20px; }
@@ -47,7 +47,7 @@
 .dl-page .br-kpis { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 .dl-page .br-kpi { flex: 1; min-width: 120px; background: linear-gradient(160deg, rgba(20,46,38,.5), rgba(13,31,26,.46)); border: 1px solid rgba(194,163,90,.2); border-radius: 14px; padding: 13px 16px; }
 .dl-page .br-kpi .v { font-family: var(--display); font-variant-numeric: tabular-nums; font-size: 25px; font-weight: 600; color: #fff; line-height: 1; }
-.dl-page .br-kpi .k { font-size: 11px; color: var(--mist); opacity: .7; margin-top: 4px; }
+.dl-page .br-kpi .k { font-size: 13px; color: var(--mist); opacity: .7; margin-top: 4px; }
 
 /* ── panel (self-report + trend) ─────────────────────────────────────── */
 .dl-page .br-panel { background: linear-gradient(160deg, rgba(17,42,35,.5), rgba(13,31,26,.46)); backdrop-filter: blur(12px); border: 1px solid rgba(194,163,90,.2); border-radius: 18px; padding: 20px; margin-bottom: 16px;
@@ -58,7 +58,7 @@
   --heri-ink: #fff; --heri-ink-3: var(--mist); --heri-rule: rgba(194,163,90,.28);
   --heri-cream: #0e2620; --heri-ochre: var(--gold-soft); }
 .dl-page .br-panel h2 { font-family: var(--display); font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 4px; }
-.dl-page .br-panel .sub { font-size: 11.5px; color: var(--mist); opacity: .7; margin-bottom: 14px; }
+.dl-page .br-panel .sub { font-size: 13px; color: var(--mist); opacity: .7; margin-bottom: 14px; }
 
 /* ── thinking indicator ──────────────────────────────────────────────── */
 .dl-page .br-thinking { display: inline-flex; align-items: center; gap: 8px; color: var(--gold-soft); font-size: 13px; font-weight: 700; }

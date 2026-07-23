@@ -200,7 +200,7 @@ export default async function TransfersPage(
       <div className="panel reveal mt-3">
         <form
           method="GET"
-          className="flex flex-wrap items-end gap-2 text-[11px] font-bold"
+          className="flex flex-wrap items-end gap-2 text-[13px] font-bold"
         >
           <label className="flex flex-col gap-1">
             {ar ? "الصنف" : "SKU"}

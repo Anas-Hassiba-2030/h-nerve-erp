@@ -266,7 +266,7 @@ export default async function HotelDetailPage(
                         </span>
                         <StatusBadge status={b.status} />
                       </div>
-                      <div className="text-[11px] font-mono" style={{ color: "var(--ink-muted)" }}>
+                      <div className="text-[13px] font-mono" style={{ color: "var(--ink-muted)" }}>
                         {b.reference} • {loc(ROOM_TYPES_AR, ROOM_TYPES_EN, locale, b.roomType)} •{" "}
                         {b.rooms} {en ? "rooms" : "غرفة"} • {b.guests} {en ? "guests" : "ضيف"}
                       </div>
@@ -275,7 +275,7 @@ export default async function HotelDetailPage(
                       <div className="text-xs font-bold" style={{ color: "var(--ink)" }}>
                         {formatShortDate(b.checkIn)}
                       </div>
-                      <div className="text-[10px]" style={{ color: "var(--ink-muted)" }}>
+                      <div className="text-[12px]" style={{ color: "var(--ink-muted)" }}>
                         → {formatShortDate(b.checkOut)}
                       </div>
                     </div>
@@ -314,7 +314,7 @@ export default async function HotelDetailPage(
                         </span>
                         <StatusBadge status={b.status} />
                       </div>
-                      <div className="text-[11px] font-mono" style={{ color: "var(--ink-muted)" }}>
+                      <div className="text-[13px] font-mono" style={{ color: "var(--ink-muted)" }}>
                         {b.reference} • {formatShortDate(b.checkIn)} →{" "}
                         {formatShortDate(b.checkOut)}
                       </div>
@@ -341,7 +341,7 @@ export default async function HotelDetailPage(
                       : 0;
                   return (
                     <div key={g.status}>
-                      <div className="mb-0.5 flex items-center justify-between text-[10px] font-bold">
+                      <div className="mb-0.5 flex items-center justify-between text-[12px] font-bold">
                         <StatusBadge status={g.status} />
                         <span style={{ color: "var(--ink)" }}>
                           {formatNumber(g._count)}

@@ -155,7 +155,7 @@ export default async function SalesOrdersPage(
 
       <div className="panel reveal mt-3 flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
+          <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
             {ar ? "الحالة" : "Status"}
           </span>
           <Link href={hrefWith("status", "")} className={statusF ? "badge-slate" : "badge-emerald"}>
@@ -169,7 +169,7 @@ export default async function SalesOrdersPage(
         </div>
         {customers.length > 0 ? (
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
+            <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
               {ar ? "العميل" : "Customer"}
             </span>
             <Link href={hrefWith("customer", "")} className={customerF ? "badge-slate" : "badge-emerald"}>
@@ -216,7 +216,7 @@ export default async function SalesOrdersPage(
                   </span>
                   <span className="badge-slate">{so.customerRef?.name ?? "—"}</span>
                   <span className={orderStatusBadge(so.status)}>{oLabel(so.status)}</span>
-                  <span className="ms-auto flex flex-wrap items-center gap-2 text-[11px]">
+                  <span className="ms-auto flex flex-wrap items-center gap-2 text-[13px]">
                     <span style={{ color: "var(--ink-muted)" }}>
                       {ar ? "بنود" : "lines"}{" "}
                       <b style={{ color: "var(--ink)" }}>{formatNumber(so.lines.length)}</b>
@@ -268,7 +268,7 @@ export default async function SalesOrdersPage(
                 </div>
 
                 <div className="flex flex-col gap-3 px-4 py-3" style={{ borderTop: "1px solid var(--line)" }}>
-                  <div className="flex flex-wrap items-center gap-3 text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                  <div className="flex flex-wrap items-center gap-3 text-[13px]" style={{ color: "var(--ink-muted)" }}>
                     <span className="font-bold" style={{ color: "var(--ink)" }}>
                       {so.customerRef?.name ?? "—"}
                     </span>

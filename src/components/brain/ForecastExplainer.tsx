@@ -78,7 +78,7 @@ export function ForecastExplainer({
       }}
     >
       <summary className="flex cursor-pointer items-center justify-between gap-2 rounded-xl px-3 py-2 list-none">
-        <span className="flex items-center gap-2 text-[11.5px] font-extrabold" style={{ color: "var(--brand-deep)" }}>
+        <span className="flex items-center gap-2 text-[13px] font-extrabold" style={{ color: "var(--brand-deep)" }}>
           <Brain className="h-3.5 w-3.5" />
           {ar ? "لماذا هذا التنبؤ؟" : "Why this prediction?"}
         </span>
@@ -104,10 +104,10 @@ export function ForecastExplainer({
                 >
                   <Icon className="h-2.5 w-2.5" />
                 </span>
-                <div className="text-[11.5px] font-extrabold" style={{ color: step.color }}>
+                <div className="text-[13px] font-extrabold" style={{ color: step.color }}>
                   {step.title}
                 </div>
-                <p className="mt-0.5 text-[11px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                <p className="mt-0.5 text-[13px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
                   {step.body}
                 </p>
               </li>

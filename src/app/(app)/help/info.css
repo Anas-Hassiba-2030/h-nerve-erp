@@ -18,7 +18,7 @@
 
 /* ── section header (from _section.css) ── */
 .dl-page .sec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding: 20px 24px; margin-bottom: 30px; background: linear-gradient(180deg, rgba(254,252,247,.82), rgba(254,252,247,.66)); backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 10px 30px -22px rgba(31,77,63,.4); }
-.dl-page .sec-eyebrow { display: inline-flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--gold); margin-bottom: 12px; }
+.dl-page .sec-eyebrow { display: inline-flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 700; letter-spacing: .04em; color: var(--gold); margin-bottom: 12px; }
 .dl-page .sec-eyebrow .tick { width: 22px; height: 1.5px; background: var(--gold); }
 .dl-page .sec-title { font-family: var(--display); font-size: clamp(40px,5.5vw,68px); font-weight: 600; line-height: 1.0; color: var(--emerald); letter-spacing: -.01em; }
 .dl-page .sec-sub { font-size: 15px; color: var(--ink-muted); margin-top: 12px; max-width: 60ch; }
@@ -39,7 +39,7 @@
 
 .dl-page .ops-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
 .dl-page .ops-toolbar h2 { font-family: var(--display); font-size: 24px; font-weight: 600; color: var(--emerald); }
-.dl-page .ops-tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 11px; border-radius: 999px; }
+.dl-page .ops-tag { display: inline-block; font-size: 13px; font-weight: 700; padding: 3px 11px; border-radius: 999px; }
 .dl-page .ops-tag.ok { color: #3c7a5c; background: rgba(126,155,134,.2); }
 .dl-page .ops-tag.warn { color: #8a6a1f; background: rgba(194,163,90,.2); }
 .dl-page .ops-tag.crit { color: #9a5648; background: rgba(168,106,92,.18); }
@@ -50,7 +50,7 @@
 .dl-page .br-row:hover { border-color: rgba(194,163,90,.4); }
 .dl-page .br-row .rt { flex: 1; min-width: 0; }
 .dl-page .br-row .rt .tt { font-size: 14px; font-weight: 700; color: #fff; }
-.dl-page .br-row .rt .ts { font-size: 12px; color: var(--mist); opacity: .7; margin-top: 2px; }
+.dl-page .br-row .rt .ts { font-size: 13px; color: var(--mist); opacity: .7; margin-top: 2px; }
 
 /* ── panels + titles (from _section.css) ── */
 .dl-page .panel { background: var(--cream); border: 1px solid var(--line); border-radius: 18px; padding: 24px 26px; margin-bottom: 22px; }

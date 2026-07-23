@@ -103,13 +103,13 @@ body:has(.dl-page[data-section="brain"]) .flex.min-h-screen.flex-1.flex-col.nerv
 @keyframes b-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .dl-page .brain-orb-ring { animation: none; } }
 .dl-page .brain-iq { position: relative; z-index: 1; font-family: var(--display); font-size: 56px; font-weight: 600; color: #fff; line-height: .9; text-shadow: 0 0 26px rgba(220, 235, 224, .75), 0 2px 10px rgba(0, 0, 0, .6); }
-.dl-page .brain-iq-cap { font-size: 11px; color: var(--gold-soft); letter-spacing: .04em; }
+.dl-page .brain-iq-cap { font-size: 13px; color: var(--gold-soft); letter-spacing: .04em; }
 .dl-page .brain-hero-txt { flex: 1; min-width: 240px; }
 .dl-page .brain-hero-txt h2 { font-family: var(--display); font-size: 30px; font-weight: 600; color: #fff; line-height: 1.1; }
 .dl-page .brain-hero-txt p { font-size: 14.5px; color: var(--mist); opacity: .85; margin-top: 10px; line-height: 1.6; max-width: 54ch; }
 .dl-page .brain-stats { display: flex; gap: 26px; margin-top: 16px; flex-wrap: wrap; }
 .dl-page .brain-stat .v { font-family: var(--display); font-size: 26px; font-weight: 600; color: var(--gold-soft); font-variant-numeric: tabular-nums; }
-.dl-page .brain-stat .l { font-size: 11px; color: var(--mist); opacity: .7; }
+.dl-page .brain-stat .l { font-size: 13px; color: var(--mist); opacity: .7; }
 /* council mini */
 .dl-page .council-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 @media (max-width: 760px) { .dl-page .council-row { grid-template-columns: 1fr; } }
@@ -118,7 +118,7 @@ body:has(.dl-page[data-section="brain"]) .flex.min-h-screen.flex-1.flex-col.nerv
 .dl-page .adv.s::before { background: var(--sage); } .dl-page .adv.o::before { background: var(--brick); } .dl-page .adv.q::before { background: var(--gold); }
 .dl-page .adv-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .dl-page .adv-name { font-family: var(--display); font-size: 18px; font-weight: 600; color: #fff; }
-.dl-page .adv-pos { font-size: 10px; font-weight: 700; letter-spacing: .08em; padding: 3px 9px; border-radius: 999px; }
+.dl-page .adv-pos { font-size: 12px; font-weight: 700; letter-spacing: .08em; padding: 3px 9px; border-radius: 999px; }
 .dl-page .adv.s .adv-pos { color: var(--sage); background: rgba(126, 155, 134, .18); }
 .dl-page .adv.o .adv-pos { color: #cf9384; background: rgba(168, 106, 92, .2); }
 .dl-page .adv.q .adv-pos { color: var(--gold-soft); background: rgba(194, 163, 90, .18); }
@@ -129,6 +129,6 @@ body:has(.dl-page[data-section="brain"]) .flex.min-h-screen.flex-1.flex-col.nerv
 .dl-page .driver-rank { font-family: var(--display); font-size: 22px; font-weight: 600; color: var(--gold-soft); width: 30px; text-align: center; font-variant-numeric: tabular-nums; }
 .dl-page .driver-body { flex: 1; min-width: 0; }
 .dl-page .driver-title { font-size: 14.5px; font-weight: 600; color: #fff; }
-.dl-page .driver-sub { font-size: 12px; color: var(--mist); opacity: .7; margin-top: 2px; }
+.dl-page .driver-sub { font-size: 13px; color: var(--mist); opacity: .7; margin-top: 2px; }
 .dl-page .driver-impact { font-family: var(--display); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .dl-page .driver-impact.up { color: var(--sage); } .dl-page .driver-impact.down { color: #cf9384; }

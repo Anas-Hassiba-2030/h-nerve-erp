@@ -128,7 +128,7 @@ export function ExportMenu({
         className={
           variant === "heritage"
             ? "dl-btn dl-btn-secondary inline-flex items-center gap-1.5 transition"
-            : "inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[11px] font-extrabold uppercase tracking-[0.16em] transition"
+            : "inline-flex items-center gap-1.5 px-3.5 py-2 font-mono text-[13px] font-extrabold uppercase tracking-[0.16em] transition"
         }
         style={
           variant === "sleek"

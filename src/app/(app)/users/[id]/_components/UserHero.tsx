@@ -53,7 +53,7 @@ export async function UserHero({
             {currentRank.symbol}
           </div>
           <div className="text-center">
-            <div className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-80">
+            <div className="text-[12px] font-bold uppercase tracking-[0.22em] opacity-80">
               {currentRank.en}
             </div>
             <div
@@ -69,7 +69,7 @@ export async function UserHero({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className="rounded-full px-2 py-0.5 text-[10px] font-bold"
+              className="rounded-full px-2 py-0.5 text-[12px] font-bold"
               style={{
                 background: "rgba(255,255,255,.2)",
                 border: "1px solid rgba(255,255,255,.3)",
@@ -80,7 +80,7 @@ export async function UserHero({
             {user.company ? (
               <Link
                 href={`/companies/${user.company.id}`}
-                className="rounded-full px-2 py-0.5 text-[10px] font-bold transition hover:bg-white/30"
+                className="rounded-full px-2 py-0.5 text-[12px] font-bold transition hover:bg-white/30"
                 style={{
                   background: "rgba(255,255,255,.2)",
                   border: "1px solid rgba(255,255,255,.3)",
@@ -96,7 +96,7 @@ export async function UserHero({
           {user.title ? (
             <p className="text-sm opacity-90">{user.title}</p>
           ) : null}
-          <div className="mt-2 flex flex-wrap gap-2 text-[11px]">
+          <div className="mt-2 flex flex-wrap gap-2 text-[13px]">
             <span
               className="flex items-center gap-1.5 rounded-full px-3 py-1 font-mono"
               style={{
@@ -124,7 +124,7 @@ export async function UserHero({
 
           {/* XP progress */}
           <div className="mt-4 space-y-1.5">
-            <div className="flex items-center justify-between text-[11px] font-bold opacity-95">
+            <div className="flex items-center justify-between text-[13px] font-bold opacity-95">
               <span>
                 <span className="font-mono text-sm">
                   {formatNumber(xp)}
@@ -190,7 +190,7 @@ export async function UserHero({
                 >
                   {r.symbol}
                 </span>
-                <span className="text-[10px] font-bold opacity-95">
+                <span className="text-[12px] font-bold opacity-95">
                   {en ? r.en : r.ar}
                 </span>
               </div>

@@ -134,7 +134,7 @@ function Satellite({
       title={tooltip}
     >
       <div
-        className="flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-[10px] font-black text-white shadow-lg ring-2 ring-white/40"
+        className="flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-[12px] font-black text-white shadow-lg ring-2 ring-white/40"
         style={{ background: color }}
       >
         {label}
@@ -152,7 +152,7 @@ export function LogoLockup({ size = 36 }: { size?: number }) {
         <div className="text-[15px] font-extrabold tracking-tight" style={{ color: "var(--text)" }}>
           H‑Nerve <span style={{ color: "var(--accent)" }}>ERP</span>
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] font-bold" style={{ color: "var(--text-muted)" }}>
+        <div className="flex items-center gap-1.5 text-[12px] font-bold" style={{ color: "var(--text-muted)" }}>
           <span className="nerve-dot" />
           مجموعة الحوراني
         </div>

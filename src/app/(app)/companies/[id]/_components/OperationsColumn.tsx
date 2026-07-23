@@ -39,7 +39,7 @@ export function OperationsColumn({
             <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--ink)" }}>
               <Hotel className="h-4 w-4" style={{ color: "var(--gold)" }} />
               {en ? "Hotels" : "الفنادق"}                  </h3>
-            <Link href="/hotels" className="text-[11px] font-bold" style={{ color: "var(--gold)" }}>
+            <Link href="/hotels" className="text-[13px] font-bold" style={{ color: "var(--gold)" }}>
               {en ? "View all →" : "عرض الكل ←"}
             </Link>
           </header>
@@ -49,11 +49,11 @@ export function OperationsColumn({
                 <div className="min-w-0">
                   <div className="truncate text-sm font-bold" style={{ color: "var(--ink)" }}>
                     {en ? (h.nameEn ?? h.name) : h.name}{" "}
-                    <span className="font-mono text-[10px]" style={{ color: "var(--ink-muted)" }}>
+                    <span className="font-mono text-[12px]" style={{ color: "var(--ink-muted)" }}>
                       {"★".repeat(h.starRating)}
                     </span>
                   </div>
-                  <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                  <div className="text-[13px]" style={{ color: "var(--ink-muted)" }}>
                     {h.city} • {loc(TIERS_AR, TIERS_EN, locale, h.tier)} • {formatNumber(h.totalRooms)} غرفة
                   </div>
                 </div>
@@ -73,7 +73,7 @@ export function OperationsColumn({
             <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--ink)" }}>
               <Milk className="h-4 w-4" style={{ color: "var(--gold)" }} />
               {en ? "Recent dairy batches" : "دفعات الألبان الأخيرة"}                  </h3>
-            <Link href="/dairy" className="text-[11px] font-bold" style={{ color: "var(--gold)" }}>
+            <Link href="/dairy" className="text-[13px] font-bold" style={{ color: "var(--gold)" }}>
               {en ? "View all →" : "عرض الكل ←"}
             </Link>
           </header>
@@ -84,7 +84,7 @@ export function OperationsColumn({
                   <div className="truncate text-sm font-bold" style={{ color: "var(--ink)" }}>
                     {en ? (b.product || b.productAr) : (b.productAr || b.product)}
                   </div>
-                  <div className="text-[11px] font-mono" style={{ color: "var(--ink-muted)" }}>
+                  <div className="text-[13px] font-mono" style={{ color: "var(--ink-muted)" }}>
                     {b.batchNumber} • {formatShortDate(b.productionDate)}
                   </div>
                 </div>
@@ -108,7 +108,7 @@ export function OperationsColumn({
             <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--ink)" }}>
               <Sprout className="h-4 w-4" style={{ color: "var(--gold)" }} />
               {en ? "Farms" : "المزارع"}                  </h3>
-            <Link href="/farms" className="text-[11px] font-bold" style={{ color: "var(--gold)" }}>
+            <Link href="/farms" className="text-[13px] font-bold" style={{ color: "var(--gold)" }}>
               {en ? "View all →" : "عرض الكل ←"}
             </Link>
           </header>
@@ -119,7 +119,7 @@ export function OperationsColumn({
                   <div className="truncate text-sm font-bold" style={{ color: "var(--ink)" }}>
                     {en ? (f.nameEn ?? f.name) : f.name}
                   </div>
-                  <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                  <div className="text-[13px]" style={{ color: "var(--ink-muted)" }}>
                     {loc(FARM_TYPES_AR, FARM_TYPES_EN, locale, f.type)} • {f.location} • {formatNumber(f.areaDunum)} {en ? "dunum" : "دونم"}
                   </div>
                 </div>
@@ -140,7 +140,7 @@ export function OperationsColumn({
             <h3 className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--ink)" }}>
               <GraduationCap className="h-4 w-4" style={{ color: "var(--gold)" }} />
               {en ? "Programs & incubators" : "البرامج والحاضنات"}                  </h3>
-            <Link href="/education" className="text-[11px] font-bold" style={{ color: "var(--gold)" }}>
+            <Link href="/education" className="text-[13px] font-bold" style={{ color: "var(--gold)" }}>
               {en ? "View all →" : "عرض الكل ←"}
             </Link>
           </header>
@@ -151,7 +151,7 @@ export function OperationsColumn({
                   <div className="truncate text-sm font-bold" style={{ color: "var(--ink)" }}>
                     {en ? (p.nameEn ?? p.name) : p.name}
                   </div>
-                  <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                  <div className="text-[13px]" style={{ color: "var(--ink-muted)" }}>
                     {loc(VERTICALS_AR, VERTICALS_EN, locale, p.vertical)} • {en ? "Founder:" : "مؤسس:"} {p.founder} • {en ? "Cohort" : "فوج"} {p.cohort}
                   </div>
                 </div>

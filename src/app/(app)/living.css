@@ -277,8 +277,8 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 .mo-orbit-head{
   position:absolute; top:13px; left:0; right:0; text-align:center;
   font-family:"JetBrains Mono","IBM Plex Mono",ui-monospace,monospace;
-  font-size:10px; letter-spacing:.3em; text-transform:uppercase;
-  color:#C2A35A; font-weight:700; pointer-events:none;
+  font-size:13px; letter-spacing:.24em; text-transform:uppercase;
+  color:#DCC38A; font-weight:700; pointer-events:none;
 }
 
 /* The central core — doubles as the back / close control. */
@@ -312,9 +312,9 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 }
 .mo-orbit-node.is-child .mo-orbit-dot{ width:8px; height:8px; }
 .mo-orbit-lbl{
-  font-size:11.5px; font-weight:600; color:#eef3ee;
-  background:rgba(8,18,14,.9); border:1px solid rgba(194,163,90,.3);
-  padding:3px 9px; border-radius:999px; white-space:nowrap;
+  font-size:14px; font-weight:700; color:#f4f8f4;
+  background:rgba(8,18,14,.94); border:1px solid rgba(194,163,90,.45);
+  padding:5px 13px; border-radius:999px; white-space:nowrap;
   transition:background .14s, color .14s, border-color .14s;
 }
 .mo-orbit-node:hover .mo-orbit-lbl{ background:#C2A35A; color:#0b1a15; border-color:#C2A35A; }
@@ -334,9 +334,12 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
    ════════════════════════════════════════════════════════════════ */
 .al-rail{
   position:relative; z-index:30;
-  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
-  margin:0 auto 14px; max-width:1180px;
-  padding:9px 14px;
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  /* Full available width (owner request 2026-07-23): the old 1180px cap
+     squeezed big groups into cramped multi-row wraps while the page margins
+     sat empty. The rail now stretches edge to edge of the content column. */
+  margin:0 0 16px; max-width:none; width:100%;
+  padding:11px 18px;
   background:linear-gradient(160deg,rgba(20,46,38,.4),rgba(13,31,26,.36));
   border:1px solid rgba(194,163,90,.2);
   border-radius:14px;
@@ -346,24 +349,29 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
   border-color:#e4dccb;
 }
 .al-rail .rail-grp{
-  font-size:14px; font-weight:800; letter-spacing:.06em;
-  color:var(--gold,#C2A35A); opacity:.9; margin-inline-end:6px;
+  display:inline-flex; align-items:center; min-height:42px;
+  padding:8px 18px; border-radius:12px;
+  font-size:16px; font-weight:800; letter-spacing:.04em;
+  color:#fff; background:linear-gradient(135deg,#2E6B57,#1E4D3E);
+  border:1px solid rgba(194,163,90,.45);
+  margin-inline-end:10px;
 }
+.al-rail.light .rail-grp{ color:#fff; }
 .al-rail .rail-toggle{
   margin-inline-start:auto; background:none; border:0; cursor:pointer;
   color:var(--gold-soft,#DCC38A); font-size:16px;
 }
 .al-rail.light .rail-toggle{ color:var(--emerald,#2E6B57); }
 .rail-item{
-  display:inline-flex; align-items:center; min-height:40px;
-  padding:8px 16px; border-radius:999px;
-  font-family:var(--ui,"Cairo",sans-serif); font-size:15px; font-weight:600;
+  display:inline-flex; align-items:center; min-height:42px;
+  padding:9px 18px; border-radius:999px;
+  font-family:var(--ui,"Cairo",sans-serif); font-size:16px; font-weight:600;
   cursor:pointer; text-decoration:none;
   color:var(--mist,#CDE0D6);
   background:rgba(13,31,26,.4); border:1px solid rgba(194,163,90,.18);
   transition:all .2s;
 }
-.al-rail.light .rail-item{ color:#6B6459; background:#fff; border-color:#e4dccb; }
+.al-rail.light .rail-item{ color:#4A443A; background:#fff; border-color:#e4dccb; }
 .rail-item:hover{ border-color:var(--gold,#C2A35A); }
 .rail-item.cur{
   background:linear-gradient(135deg,#DCC38A,#C2A35A);
@@ -429,7 +437,7 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 .hn-fab__lbl{
   position:absolute; inset-inline-start:64px; white-space:nowrap;
   background:rgba(13,31,26,.92); color:#fff;
-  font-family:var(--ui,"Cairo",sans-serif); font-size:12px; font-weight:700;
+  font-family:var(--ui,"Cairo",sans-serif); font-size:13px; font-weight:700;
   padding:6px 12px; border-radius:8px;
   opacity:0; pointer-events:none; transition:opacity .2s;
 }
@@ -504,7 +512,7 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 }
 .mb-overlay.show .mb-card{ transform:none; }
 .mb-eyebrow{
-  font-family:var(--ui,"Cairo",sans-serif); font-size:11.5px; font-weight:700;
+  font-family:var(--ui,"Cairo",sans-serif); font-size:13px; font-weight:700;
   letter-spacing:.14em; color:#DCC38A; text-transform:uppercase;
 }
 .mb-greet{
@@ -520,7 +528,7 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 .mb-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px; }
 .mb-chip{
   display:inline-flex; align-items:center; gap:6px;
-  font-size:12px; font-weight:700;
+  font-size:13px; font-weight:700;
   padding:6px 12px; border-radius:999px;
   background:rgba(13,31,26,.5); border:1px solid rgba(194,163,90,.22);
   color:#CDE0D6;

@@ -43,7 +43,7 @@
 /* Eyebrow (Heritage variant — gold-leaning ink) */
 .heri-eyebrow {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px; font-weight: 500; line-height: 1;
+  font-size: 13px; font-weight: 500; line-height: 1;
   text-transform: uppercase; letter-spacing: 0.18em;
   color: var(--heri-copper);
 }
@@ -85,7 +85,7 @@
   padding: 4px 10px;
   border-radius: 999px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px; font-weight: 500;
+  font-size: 12px; font-weight: 500;
   text-transform: uppercase; letter-spacing: 0.12em;
   border: 1px solid currentColor;
   background: color-mix(in srgb, currentColor 8%, transparent);
@@ -267,13 +267,13 @@
 }
 .view-as-banner-text code {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   background: transparent;
   color: var(--heri-ink-2);
 }
 .view-as-banner-key {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--heri-ink);
@@ -283,7 +283,7 @@
 }
 .view-as-banner-exit {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   background: var(--heri-ink);

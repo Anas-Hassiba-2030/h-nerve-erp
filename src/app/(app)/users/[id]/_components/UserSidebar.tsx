@@ -78,7 +78,7 @@ export async function UserSidebar({
               {earnedAchievements.slice(0, 3).map((e) => (
                 <div
                   key={e.id}
-                  className="flex items-center justify-between gap-2 text-[11px]"
+                  className="flex items-center justify-between gap-2 text-[13px]"
                 >
                   <span
                     className="truncate font-bold"
@@ -106,7 +106,7 @@ export async function UserSidebar({
             {forecasts.map((f) => (
               <li
                 key={f.id}
-                className="rounded-lg px-2 py-1.5 text-[11px]"
+                className="rounded-lg px-2 py-1.5 text-[13px]"
                 style={{
                   background: "color-mix(in srgb, var(--gold) 5%, transparent)",
                 }}
@@ -118,12 +118,12 @@ export async function UserSidebar({
                   >
                     {en ? (f.productLabelEn || f.productLabel) : f.productLabel}
                   </span>
-                  <span className="font-mono text-[10px]" style={{ color: "var(--ink-muted)" }}>
+                  <span className="font-mono text-[12px]" style={{ color: "var(--ink-muted)" }}>
                     {Math.round(f.confidence * 100)}٪
                   </span>
                 </div>
                 <div
-                  className="font-mono text-[10px]"
+                  className="font-mono text-[12px]"
                   style={{ color: "var(--ink-muted)" }}
                 >
                   {f.source.code} → {f.target.code}
@@ -143,7 +143,7 @@ export async function UserSidebar({
               return (
                 <li
                   key={t.id}
-                  className="flex items-center justify-between gap-2 text-[11px]"
+                  className="flex items-center justify-between gap-2 text-[13px]"
                 >
                   <div className="min-w-0">
                     <div
@@ -153,7 +153,7 @@ export async function UserSidebar({
                       {t.description ?? t.category}
                     </div>
                     <div
-                      className="font-mono text-[10px]"
+                      className="font-mono text-[12px]"
                       style={{ color: "var(--ink-muted)" }}
                     >
                       {t.company.code} • {formatShortDate(t.occurredAt)}

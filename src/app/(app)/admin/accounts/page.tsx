@@ -128,7 +128,7 @@ export default async function AccountsPage(props: { searchParams: Promise<SP> })
       </div>
 
       <div className="panel reveal mt-3 flex flex-wrap items-center gap-1.5">
-        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
+        <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
           {ar ? "الفترة" : "Period"}
         </span>
         {periods.length === 0 ? (

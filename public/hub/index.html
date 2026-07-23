@@ -1276,8 +1276,17 @@ const GROUPS = [
      ["أرينا","sections/arena.html"],["المها","sections/maha.html"],["لوران","sections/loran.html"],["الحاضنة","sections/ahliyya.html"],["سلسلة التوريد","sections/supply.html"] ]},
   { id:"intel", name:"العقل", en:"The Brain", amb:"cosmic", kids:[
      ["مركز الدماغ","sections/brain.html"],["الرؤى","sections/insights.html"],["التنبيهات","sections/alerts.html"],["الخطط","sections/plans.html"],["المستندات","sections/documents.html"],["الرسم السببي","sections/causal.html"],["ماذا لو","sections/whatif.html"],["المجلس","sections/council.html"],["بحيرة الذاكرة","sections/memory.html"],["التعلّم","sections/learning.html"],["المعايير","sections/benchmarks.html"],["ذكاء الدماغ","sections/brainiq.html"],["الراوي","sections/narrate.html"] ]},
+  // ERP taxonomy split (2026-07-23, owner-directed): finance had absorbed every
+  // front-office surface — 22 pills in one bloom. Split into Finance (ledger/
+  // treasury/reporting), Sales (order-to-cash), and Purchasing & Production
+  // (procure-to-pay + make/maintain), mirroring src/lib/orrery/groups.ts 1:1.
+  // DATA-ONLY edit — the bloom/animation is untouched.
   { id:"finance", name:"المالية", en:"Finance", amb:"finance", kids:[
-     ["المركز المالي","sections/finance.html"],["التحليلات","sections/analytics.html"],["مقارنة","sections/compare.html"],["الأسواق","sections/markets.html"],["التقارير","sections/reports.html"],["الاستدامة"],["المشاريع المستقبلية"] ]},
+     ["المركز المالي","sections/finance.html"],["القوائم المالية"],["التقارير","sections/reports.html"],["الخزائن"],["الأصول الثابتة"],["التحليلات","sections/analytics.html"],["مقارنة","sections/compare.html"],["الأسواق","sections/markets.html"],["الاستدامة"] ]},
+  { id:"sales", name:"المبيعات", en:"Sales", amb:"finance", kids:[
+     ["العلاقات"],["العملاء"],["عروض الأسعار"],["الفواتير"],["دفعات العملاء"],["نقطة البيع"],["الفوترة الإلكترونية"] ]},
+  { id:"ops", name:"المشتريات والإنتاج", en:"Purchasing & Production", amb:"finance", kids:[
+     ["الموردون"],["فواتير المشتريات"],["دفعات الموردين"],["التصنيع"],["الصيانة"],["المشاريع المستقبلية"] ]},
   { id:"team", name:"الفريق", en:"Team", amb:"university", kids:[
      ["الرسائل","sections/messages.html"],["المهام","sections/tasks.html"],["صندوق الوارد","sections/inbox.html"],["الموجز","sections/digest.html"],["الإنجازات","sections/achievements.html"],["الموظفون","sections/employees.html"] ]},
   // IA split (PR #288, approved 2026-07-10): System mirrors src/lib/orrery/groups.ts
@@ -1292,7 +1301,9 @@ const GROUPS = [
 const KIDS_EN = {
   overview:["Group Board","Companies","Arena","Maha","Loran","Incubator","Supply Chain"],
   intel:["Brain Hub","Insights","Alerts","Plans","Documents","Causal Graph","What-if","Council","Memory Lake","Learning","Benchmarks","Brain IQ","Narrate"],
-  finance:["Financial Hub","Analytics","Compare","Markets","Reports","Sustainability","Future Projects"],
+  finance:["Financial Hub","Statements","Reports","Treasuries","Fixed Assets","Analytics","Compare","Markets","Sustainability"],
+  sales:["CRM","Customers","Estimates","Invoices","Payments","Point of Sale","E-Invoicing"],
+  ops:["Suppliers","Purchase Invoices","Supplier Payments","Manufacturing","Maintenance","Projects"],
   team:["Messages","Tasks","Inbox","Digest","Achievements","Staff"],
   system:["Mission Control","The Core","Workflows","Integrations","Audit 360","Activity"],
 };

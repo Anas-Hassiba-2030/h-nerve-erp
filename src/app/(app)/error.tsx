@@ -47,7 +47,7 @@ export default function AppError({
               <AlertTriangle className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.22em] opacity-80">
+              <div className="text-[13px] font-semibold uppercase tracking-[0.22em] opacity-80">
                 {ar ? "حدث خطأ" : "Something went wrong"}
               </div>
               {/*
@@ -108,7 +108,7 @@ export default function AppError({
               />
             </summary>
             <div
-              className="border-t px-3 py-3 font-mono text-[11px] leading-relaxed"
+              className="border-t px-3 py-3 font-mono text-[13px] leading-relaxed"
               style={{
                 color: "var(--ink)",
                 borderColor: "var(--line)",

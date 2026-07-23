@@ -250,7 +250,7 @@ export function WelcomeSplash({ locale }: { locale: "ar" | "en" }) {
 
           {/* Slide pill */}
           <div
-            className="absolute start-4 top-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.2em]"
+            className="absolute start-4 top-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-extrabold uppercase tracking-[0.2em]"
             style={{
               background: "rgba(0,0,0,0.32)",
               color: "white",
@@ -288,7 +288,7 @@ export function WelcomeSplash({ locale }: { locale: "ar" | "en" }) {
                 style={{ color: "var(--text)" }}
               >
                 <span
-                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black text-white"
+                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[12px] font-black text-white"
                   style={{
                     background:
                       "linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%)",
@@ -367,7 +367,7 @@ export function WelcomeSplash({ locale }: { locale: "ar" | "en" }) {
           <button
             type="button"
             onClick={close}
-            className="text-[10px] font-bold underline-offset-2 hover:underline"
+            className="text-[12px] font-bold underline-offset-2 hover:underline"
             style={{ color: "var(--text-muted)" }}
           >
             {ar ? "تخطّي الجولة" : "Skip the tour"}

@@ -59,7 +59,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: .14em;
   color: var(--gold-soft);
@@ -91,7 +91,7 @@
 /* the question */
 .dl-page .co-question { position: relative; text-align: center; margin: 8px 0 22px; }
 .dl-page .co-question .lbl {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: .14em;
   color: var(--gold-soft);
@@ -190,8 +190,8 @@
   opacity: 0;
   transition: opacity .3s;
 }
-.dl-page .seat .nm { font-size: 12px; font-weight: 700; color: rgba(246, 241, 231, .88); line-height: 1.2; }
-.dl-page .seat .ro { font-size: 10px; color: rgba(246, 241, 231, .6); margin-top: 1px; }
+.dl-page .seat .nm { font-size: 13px; font-weight: 700; color: rgba(246, 241, 231, .88); line-height: 1.2; }
+.dl-page .seat .ro { font-size: 12px; color: rgba(246, 241, 231, .6); margin-top: 1px; }
 .dl-page .seat .think {
   position: absolute;
   top: 46px;
@@ -274,8 +274,8 @@
 .dl-page .dbt .dbody { flex: 1; min-width: 0; }
 .dl-page .dbt .dhead { display: flex; align-items: center; gap: 9px; margin-bottom: 5px; flex-wrap: wrap; }
 .dl-page .dbt .dnm { font-size: 13.5px; font-weight: 700; color: #fff; }
-.dl-page .dbt .dro { font-size: 10.5px; color: rgba(246, 241, 231, .58); }
-.dl-page .dbt .stance { font-size: 10px; font-weight: 700; letter-spacing: .04em; padding: 2px 9px; border-radius: 999px; }
+.dl-page .dbt .dro { font-size: 12px; color: rgba(246, 241, 231, .58); }
+.dl-page .dbt .stance { font-size: 12px; font-weight: 700; letter-spacing: .04em; padding: 2px 9px; border-radius: 999px; }
 .dl-page .dbt.support .stance { color: var(--sage); background: rgba(126, 155, 134, .18); }
 .dl-page .dbt.oppose .stance { color: #cf9384; background: rgba(168, 106, 92, .2); }
 .dl-page .dbt.qualify .stance { color: var(--gold-soft); background: rgba(194, 163, 90, .18); }
@@ -336,13 +336,13 @@
 .dl-page .ring-wrap svg { transform: rotate(-90deg); }
 .dl-page .ring-wrap .rtxt { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
 .dl-page .ring-wrap .rtxt b { font-family: var(--dl-display); font-size: 30px; font-weight: 600; color: #fff; line-height: 1; font-variant-numeric: tabular-nums; }
-.dl-page .ring-wrap .rtxt span { font-size: 9px; color: var(--gold-soft); letter-spacing: .08em; }
+.dl-page .ring-wrap .rtxt span { font-size: 12px; color: var(--gold-soft); letter-spacing: .08em; }
 .dl-page .mod-body { flex: 1; min-width: 240px; }
 .dl-page .mod-body .mlbl {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: .12em;
   color: var(--gold-soft);
@@ -382,7 +382,7 @@
   display: block;
   font-family: var(--font-body-arabic, inherit);
   font-style: normal;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;

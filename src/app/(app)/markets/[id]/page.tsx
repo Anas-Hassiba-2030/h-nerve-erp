@@ -215,7 +215,7 @@ export default async function MarketDetailPage(
                   {stock.ticker}
                 </span>
                 <span
-                  className="rounded-full px-2 py-0.5 text-[10px] font-bold"
+                  className="rounded-full px-2 py-0.5 text-[12px] font-bold"
                   style={{
                     background: "rgba(255,255,255,.2)",
                     border: "1px solid rgba(255,255,255,.3)",
@@ -224,7 +224,7 @@ export default async function MarketDetailPage(
                   {exchangeLabel}
                 </span>
                 <span
-                  className="rounded-full px-2 py-0.5 text-[10px] font-bold"
+                  className="rounded-full px-2 py-0.5 text-[12px] font-bold"
                   style={{
                     background: "rgba(255,255,255,.2)",
                     border: "1px solid rgba(255,255,255,.3)",
@@ -236,7 +236,7 @@ export default async function MarketDetailPage(
                 {stock.company ? (
                   <Link
                     href={`/companies/${stock.company.id}`}
-                    className="rounded-full px-2 py-0.5 text-[10px] font-bold transition hover:bg-white/30"
+                    className="rounded-full px-2 py-0.5 text-[12px] font-bold transition hover:bg-white/30"
                     style={{
                       background: "rgba(255,255,255,.2)",
                       border: "1px solid rgba(255,255,255,.3)",
@@ -259,7 +259,7 @@ export default async function MarketDetailPage(
 
             {/* Price block */}
             <div className="text-end">
-              <div className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-90">
+              <div className="text-[12px] font-bold uppercase tracking-[0.22em] opacity-90">
                 {en ? "Last Price" : "آخر سعر"}
               </div>
               <div

@@ -33,7 +33,7 @@ export function RankBadge({
           <span className="text-xs font-extrabold" style={{ color: "var(--text)" }}>
             {ar ? r.ar : r.en}
           </span>
-          <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+          <span className="text-[12px]" style={{ color: "var(--text-muted)" }}>
             +{r.bonusPercent}{ar ? "٪ بونص" : "% bonus"}
           </span>
         </span>

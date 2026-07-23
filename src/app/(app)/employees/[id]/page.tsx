@@ -104,7 +104,7 @@ export default async function EmployeeProfilePage(props: { params: Promise<{ id:
               <div className="text-lg font-bold" style={{ color: "var(--ink)" }}>
                 {ar ? r.ar : r.en}
               </div>
-              <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
+              <div className="text-[13px]" style={{ color: "var(--ink-muted)" }}>
                 {ar ? r.description : r.descriptionEn}
               </div>
             </div>
@@ -123,7 +123,7 @@ export default async function EmployeeProfilePage(props: { params: Promise<{ id:
           <div className="card card-pad">
             <div className="flex items-center justify-between">
               <div className="section-title">{ar ? "تقدم الرتبة" : "Rank progress"}</div>
-              <span className="text-[11px] font-mono" style={{ color: "var(--ink-muted)" }}>
+              <span className="text-[13px] font-mono" style={{ color: "var(--ink-muted)" }}>
                 {formatNumber(user.xp)} XP
               </span>
             </div>
@@ -141,7 +141,7 @@ export default async function EmployeeProfilePage(props: { params: Promise<{ id:
                     }}
                   >
                     {isCurrent ? (
-                      <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-[var(--gold)] px-1.5 text-[8px] font-bold text-[#1a0e02]">
+                      <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-[var(--gold)] px-1.5 text-[12px] font-bold text-[#1a0e02]">
                         {ar ? "الآن" : "NOW"}
                       </span>
                     ) : null}
@@ -154,10 +154,10 @@ export default async function EmployeeProfilePage(props: { params: Promise<{ id:
                     >
                       {rank.symbol}
                     </div>
-                    <div className="text-[11px] font-semibold" style={{ color: "var(--ink)" }}>
+                    <div className="text-[13px] font-semibold" style={{ color: "var(--ink)" }}>
                       {ar ? rank.ar : rank.en}
                     </div>
-                    <div className="font-mono text-[9px]" style={{ color: "var(--ink-muted)" }}>
+                    <div className="font-mono text-[12px]" style={{ color: "var(--ink-muted)" }}>
                       {rank.minXp} XP
                     </div>
                   </div>
@@ -166,7 +166,7 @@ export default async function EmployeeProfilePage(props: { params: Promise<{ id:
             </div>
             {next ? (
               <div className="mt-4">
-                <div className="mb-1 flex items-center justify-between text-[11px]">
+                <div className="mb-1 flex items-center justify-between text-[13px]">
                   <span style={{ color: "var(--ink-muted)" }}>
                     {ar ? `إلى رتبة ${next.ar}` : `Toward ${next.en}`}
                   </span>
@@ -257,11 +257,11 @@ export default async function EmployeeProfilePage(props: { params: Promise<{ id:
                       <div className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
                         {ar ? ua.achievement.name : ua.achievement.nameEn}
                       </div>
-                      <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                      <div className="text-[13px]" style={{ color: "var(--ink-muted)" }}>
                         {ua.achievement.description}
                       </div>
                     </div>
-                    <span className="text-[10px] font-mono" style={{ color: "var(--ink-muted)" }}>
+                    <span className="text-[12px] font-mono" style={{ color: "var(--ink-muted)" }}>
                       {formatRelative(ua.earnedAt, lc)}
                     </span>
                   </div>
@@ -285,13 +285,13 @@ export default async function EmployeeProfilePage(props: { params: Promise<{ id:
                     <div className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
                       {t.title}
                     </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px]">
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[13px]">
                       <span className={STATUS_TONE[t.status]}>{loc(STATUS_AR, STATUS_EN, lc, t.status)}</span>
                       {t.kind === "SIDE" ? <span className="badge-amber">⚡ {ar ? "جانبية" : "Side"}</span> : null}
                       <span className="badge-violet">+{Math.round(t.points * (t.kind === "SIDE" ? 1.5 : 1))} XP</span>
                     </div>
                   </div>
-                  <span className="font-mono text-[10px]" style={{ color: "var(--ink-muted)" }}>
+                  <span className="font-mono text-[12px]" style={{ color: "var(--ink-muted)" }}>
                     {t.dueAt ? formatShortDate(t.dueAt, lc) : "—"}
                   </span>
                 </div>

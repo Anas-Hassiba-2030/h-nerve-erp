@@ -31,7 +31,7 @@ export function NewTransferForm({
         className="grid gap-3 px-4 pb-4 sm:grid-cols-2 lg:grid-cols-4"
         style={{ borderTop: "1px solid var(--border)" }}
       >
-        <label className="flex flex-col gap-1 text-[11px] font-bold sm:col-span-2">
+        <label className="flex flex-col gap-1 text-[13px] font-bold sm:col-span-2">
           {ar ? "المصدر (صنف @ مستودع)" : "Source (SKU @ warehouse)"}
           <select name="fromProductId" required className="input text-xs">
             <option value="">{ar ? "— اختر —" : "— select —"}</option>
@@ -42,7 +42,7 @@ export function NewTransferForm({
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-[11px] font-bold">
+        <label className="flex flex-col gap-1 text-[13px] font-bold">
           {ar ? "المستودع الوجهة" : "Destination warehouse"}
           <select name="toWarehouseId" required className="input text-xs">
             <option value="">{ar ? "— اختر —" : "— select —"}</option>
@@ -53,7 +53,7 @@ export function NewTransferForm({
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-[11px] font-bold">
+        <label className="flex flex-col gap-1 text-[13px] font-bold">
           {ar ? "الكمية" : "Quantity"}
           <input
             name="qty"
@@ -64,7 +64,7 @@ export function NewTransferForm({
             className="input text-xs"
           />
         </label>
-        <label className="flex flex-col gap-1 text-[11px] font-bold sm:col-span-2 lg:col-span-4">
+        <label className="flex flex-col gap-1 text-[13px] font-bold sm:col-span-2 lg:col-span-4">
           {ar ? "السبب" : "Reason"}
           <input
             name="reason"

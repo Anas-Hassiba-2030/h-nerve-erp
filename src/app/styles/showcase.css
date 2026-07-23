@@ -33,7 +33,7 @@
 .sc-wave-eyebrow {
   margin: 0 0 8px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--heri-ink-3);
@@ -191,7 +191,7 @@
 }
 .sc-card-cta {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--heri-copper);
@@ -209,7 +209,7 @@
 .sc-close-eyebrow {
   margin: 0 0 10px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--heri-copper);

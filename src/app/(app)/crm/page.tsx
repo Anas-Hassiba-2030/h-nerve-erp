@@ -155,7 +155,7 @@ export default async function CrmPage() {
                 <div key={st.key} className="panel" style={{ padding: 10, background: "var(--surface, #fff)" }}>
                   <div className="mb-2 flex items-center justify-between">
                     <span className={st.badge}>{ar ? st.ar : st.en}</span>
-                    <span className="text-[11px] font-mono" style={{ color: "var(--ink-muted)" }}>{col.length} · {formatMoney(colValue)}</span>
+                    <span className="text-[13px] font-mono" style={{ color: "var(--ink-muted)" }}>{col.length} · {formatMoney(colValue)}</span>
                   </div>
                   <div className="flex flex-col gap-2">
                     {col.map((o) => (
@@ -185,13 +185,13 @@ export default async function CrmPage() {
                             </form>
                           </div>
                         ) : st.key === "WON" ? (
-                          <div className="mt-1 flex items-center gap-1 text-[11px]" style={{ color: "var(--ok, #0a7)" }}><Trophy className="h-3 w-3" />{ar ? "رابحة" : "Won"}</div>
+                          <div className="mt-1 flex items-center gap-1 text-[13px]" style={{ color: "var(--ok, #0a7)" }}><Trophy className="h-3 w-3" />{ar ? "رابحة" : "Won"}</div>
                         ) : o.lostReason ? (
-                          <div className="mt-1 text-[11px]" style={{ color: "var(--ink-muted)" }}>{o.lostReason}</div>
+                          <div className="mt-1 text-[13px]" style={{ color: "var(--ink-muted)" }}>{o.lostReason}</div>
                         ) : null}
                       </div>
                     ))}
-                    {col.length === 0 ? <p className="text-[11px]" style={{ color: "var(--ink-muted)" }}>—</p> : null}
+                    {col.length === 0 ? <p className="text-[13px]" style={{ color: "var(--ink-muted)" }}>—</p> : null}
                   </div>
                 </div>
               );

@@ -46,7 +46,7 @@ export function UserActivityColumn({
             {Object.entries(tasksByStatus).map(([status, count]) => (
               <span
                 key={status}
-                className="rounded-full px-2.5 py-1 text-[11px] font-bold"
+                className="rounded-full px-2.5 py-1 text-[13px] font-bold"
                 style={{
                   background:
                     "color-mix(in srgb, var(--gold) 8%, transparent)",
@@ -89,7 +89,7 @@ export function UserActivityColumn({
                     </span>
                   </div>
                   <div
-                    className="text-[11px]"
+                    className="text-[13px]"
                     style={{ color: "var(--ink-muted)" }}
                   >
                     {(en ? TASK_STATUS_EN[t.status] : TASK_STATUS_AR[t.status]) ?? t.status} •{" "}
@@ -132,7 +132,7 @@ export function UserActivityColumn({
                   </span>
                 </div>
                 <div
-                  className="mt-0.5 text-[11px]"
+                  className="mt-0.5 text-[13px]"
                   style={{ color: "var(--ink-muted)" }}
                 >
                   {ins.module} • {formatRelative(ins.createdAt)}

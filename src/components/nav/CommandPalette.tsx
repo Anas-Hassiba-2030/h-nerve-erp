@@ -176,7 +176,7 @@ export function CommandPalette({ locale = "ar" }: { locale?: "ar" | "en" }) {
         <Search className="h-3.5 w-3.5" />
         <span>{locale === "ar" ? "بحث سريع" : "Quick search"}</span>
         <kbd
-          className="rounded px-1 font-mono text-[10px]"
+          className="rounded px-1 font-mono text-[12px]"
           style={{ background: "color-mix(in srgb, var(--text-muted) 16%, transparent)" }}
         >
           ⌘K
@@ -213,7 +213,7 @@ export function CommandPalette({ locale = "ar" }: { locale?: "ar" | "en" }) {
                 style={{ color: "var(--text)" }}
               />
               <kbd
-                className="rounded px-1.5 py-0.5 font-mono text-[10px]"
+                className="rounded px-1.5 py-0.5 font-mono text-[12px]"
                 style={{ background: "color-mix(in srgb, var(--text-muted) 18%, transparent)", color: "var(--text-muted)" }}
               >
                 ESC
@@ -224,7 +224,7 @@ export function CommandPalette({ locale = "ar" }: { locale?: "ar" | "en" }) {
               {/* Recents section — shown only when no query */}
               {!q && recentEntries.length > 0 ? (
                 <div className="mb-2">
-                  <div className="px-3 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                  <div className="px-3 pb-1 pt-2 text-[12px] font-extrabold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
                     {locale === "ar" ? "تصفّحت مؤخراً" : "Recent"}
                   </div>
                   {recentEntries.map((it) => {
@@ -239,7 +239,7 @@ export function CommandPalette({ locale = "ar" }: { locale?: "ar" | "en" }) {
                       >
                         <Icon className="h-4 w-4 shrink-0" style={{ color: "var(--text-muted)" }} />
                         <span className="flex-1 truncate text-sm font-bold">{it.label}</span>
-                        <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "var(--accent)" }}>
+                        <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--accent)" }}>
                           {locale === "ar" ? "أخير" : "Recent"}
                         </span>
                       </button>
@@ -255,7 +255,7 @@ export function CommandPalette({ locale = "ar" }: { locale?: "ar" | "en" }) {
               ) : (
                 groupBy(filtered, "group").map(([group, items]) => (
                   <div key={group} className="mb-2">
-                    <div className="px-3 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                    <div className="px-3 pb-1 pt-2 text-[12px] font-extrabold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
                       {group}
                     </div>
                     {items.map((it) => {
@@ -276,7 +276,7 @@ export function CommandPalette({ locale = "ar" }: { locale?: "ar" | "en" }) {
                         >
                           <Icon className="h-4 w-4 shrink-0" style={{ color: active ? "var(--brand)" : "var(--text-muted)" }} />
                           <span className="flex-1 truncate text-sm font-bold">{it.label}</span>
-                          <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>{it.hint}</span>
+                          <span className="text-[12px]" style={{ color: "var(--text-muted)" }}>{it.hint}</span>
                           <ChevronRight className="h-3.5 w-3.5 rtl:rotate-180" style={{ color: "var(--text-muted)" }} />
                         </button>
                       );
@@ -286,7 +286,7 @@ export function CommandPalette({ locale = "ar" }: { locale?: "ar" | "en" }) {
               )}
             </div>
 
-            <div className="flex items-center justify-between gap-3 px-4 py-2 text-[10px]"
+            <div className="flex items-center justify-between gap-3 px-4 py-2 text-[12px]"
                  style={{ borderTop: "1px solid var(--border)", color: "var(--text-muted)" }}>
               <span>↑↓ {locale === "ar" ? "للتنقل" : "navigate"}</span>
               <span>↵ {locale === "ar" ? "للفتح" : "open"}</span>

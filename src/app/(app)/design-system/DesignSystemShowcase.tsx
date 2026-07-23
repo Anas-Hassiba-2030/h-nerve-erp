@@ -31,7 +31,7 @@ export function DesignSystemShowcase({ ar }: { ar: boolean }) {
           border: "1px solid var(--line)",
         }}
       >
-        <p className="text-[11px] font-semibold leading-snug" style={{ color: "var(--ink-muted)" }}>
+        <p className="text-[13px] font-semibold leading-snug" style={{ color: "var(--ink-muted)" }}>
           {ar
             ? "كل اسم صنف قابل للنسخ بالنقر. الحركات تُعرض حيّة — اضغط «إعادة» لتشغيل حركات الدخول مرة أخرى."
             : "Every class name is click-to-copy. Animations play live — hit Replay to re-fire entrance motion."}
@@ -438,7 +438,7 @@ function Swatch({ name, value, ar }: { name: string; value: string; ar: boolean 
       <div className="px-2 py-1.5">
         <CopyChip text={name} block />
         <div
-          className="mt-0.5 font-mono-tech text-[10px] tabular-nums"
+          className="mt-0.5 font-mono-tech text-[12px] tabular-nums"
           style={{ color: "var(--ink-muted)", direction: "ltr" }}
         >
           {isColor ? value : (ar ? "محسوب" : "computed")}
@@ -461,7 +461,7 @@ function ExprChip({ name, value }: { name: string; value: string }) {
         />
       )}
       <CopyChip text={name} block />
-      <div className="mt-0.5 font-mono-tech text-[10px] leading-tight" style={{ color: "var(--ink-muted)", direction: "ltr" }}>
+      <div className="mt-0.5 font-mono-tech text-[12px] leading-tight" style={{ color: "var(--ink-muted)", direction: "ltr" }}>
         {value}
       </div>
     </div>
@@ -537,14 +537,14 @@ function ThemeCard({
         ))}
       </div>
       <div className="flex items-center justify-between gap-1 px-2 py-1.5" style={{ background: "var(--cream)" }}>
-        <span className="flex items-center gap-1 text-[11px] font-bold" style={{ color: "var(--ink)" }}>
+        <span className="flex items-center gap-1 text-[13px] font-bold" style={{ color: "var(--ink)" }}>
           {emblem ? <span style={{ color: "var(--gold)" }}>{emblem}</span> : null}
           {name}
         </span>
         {isNew ? (
-          <span className="badge badge-gold text-[8px]">{ar ? "جديد" : "NEW"}</span>
+          <span className="badge badge-gold text-[12px]">{ar ? "جديد" : "NEW"}</span>
         ) : dark ? (
-          <span className="text-[8px] font-bold" style={{ color: "var(--ink-muted)" }}>
+          <span className="text-[12px] font-bold" style={{ color: "var(--ink-muted)" }}>
             {ar ? "داكن" : "DARK"}
           </span>
         ) : null}
@@ -566,7 +566,7 @@ function CopyChip({ text, block, light }: { text: string; block?: boolean; light
           setTimeout(() => setCopied(false), 1100);
         } catch { /* clipboard unavailable — no-op */ }
       }}
-      className={`inline-flex items-center gap-1 font-mono-tech text-[10px] focus-visible:[outline:2px_solid_var(--gold)] focus-visible:[outline-offset:1px] ${block ? "w-full justify-between" : ""}`}
+      className={`inline-flex items-center gap-1 font-mono-tech text-[12px] focus-visible:[outline:2px_solid_var(--gold)] focus-visible:[outline-offset:1px] ${block ? "w-full justify-between" : ""}`}
       style={{
         direction: "ltr",
         padding: "2px 6px",

@@ -68,7 +68,7 @@ export default async function ReportsIndexPage() {
                     <span className="flex h-9 w-9 items-center justify-center text-lg font-bold text-white" style={{ borderRadius: 10, background: "rgba(255,255,255,0.18)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,.3)" }}>{brand.emblem}</span>
                     <div className="min-w-0">
                       <div className="line-clamp-1 text-sm font-semibold text-white">{ar ? c.name : c.nameEn}</div>
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-white/80">{c.code} · {c.sector}</div>
+                      <div className="text-[12px] font-bold uppercase tracking-wider text-white/80">{c.code} · {c.sector}</div>
                     </div>
                     <FileText className="ms-auto h-4 w-4 text-white/80" />
                   </div>

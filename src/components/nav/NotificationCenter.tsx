@@ -120,7 +120,7 @@ export function NotificationCenter({
         <Bell className="h-4 w-4" />
         {total > 0 ? (
           <span
-            className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-black anim-pop"
+            className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[12px] font-black anim-pop"
             style={{
               background: "linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%)",
               color: "white",
@@ -168,7 +168,7 @@ export function NotificationCenter({
                     {ar ? "مركز الإشعارات" : "Notification center"}
                   </div>
                   <div
-                    className="text-[10px]"
+                    className="text-[12px]"
                     style={{ color: "var(--text-muted)" }}
                   >
                     {ar
@@ -253,13 +253,13 @@ export function NotificationCenter({
                                 {it.title}
                               </div>
                               <div
-                                className="line-clamp-2 text-[11px]"
+                                className="line-clamp-2 text-[13px]"
                                 style={{ color: "var(--text-muted)" }}
                               >
                                 {it.body}
                               </div>
                               <div
-                                className="mt-1 flex items-center gap-2 text-[10px]"
+                                className="mt-1 flex items-center gap-2 text-[12px]"
                                 style={{ color: "var(--text-muted)" }}
                               >
                                 <span
@@ -319,7 +319,7 @@ export function NotificationCenter({
                                 {ar ? it.summary : it.summaryEn ?? it.summary}
                               </div>
                               <div
-                                className="flex items-center gap-1.5 text-[9.5px]"
+                                className="flex items-center gap-1.5 text-[12px]"
                                 style={{ color: "var(--text-muted)" }}
                               >
                                 {it.actorName ? (
@@ -374,7 +374,7 @@ export function NotificationCenter({
                               >
                                 {t.title}
                               </div>
-                              <div className="flex items-center gap-1.5 text-[9.5px]">
+                              <div className="flex items-center gap-1.5 text-[12px]">
                                 <span
                                   className="rounded-full px-1.5 py-0.5 font-extrabold"
                                   style={{
@@ -477,7 +477,7 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className="relative flex flex-1 items-center justify-center gap-1.5 px-3 py-2.5 text-[11.5px] font-extrabold transition"
+      className="relative flex flex-1 items-center justify-center gap-1.5 px-3 py-2.5 text-[13px] font-extrabold transition"
       style={{
         color: active ? "var(--brand)" : "var(--text-muted)",
         background: active ? "var(--brand-soft)" : "transparent",
@@ -489,7 +489,7 @@ function TabButton({
       <Icon className="h-3.5 w-3.5" />
       {label}
       <span
-        className="rounded-full px-1.5 py-0.5 font-mono text-[9px]"
+        className="rounded-full px-1.5 py-0.5 font-mono text-[12px]"
         style={{
           background: active
             ? "var(--brand)"
@@ -501,7 +501,7 @@ function TabButton({
       </span>
       {badge && badge > 0 ? (
         <span
-          className="absolute -top-0.5 right-1 flex h-3 min-w-3 items-center justify-center rounded-full px-1 text-[8px] font-black anim-pop"
+          className="absolute -top-0.5 right-1 flex h-3 min-w-3 items-center justify-center rounded-full px-1 text-[12px] font-black anim-pop"
           style={{
             background: "#dc2626",
             color: "white",
@@ -521,7 +521,7 @@ function Empty({ icon: Icon, text }: { icon: any; text: string }) {
       style={{ color: "var(--text-muted)" }}
     >
       <Icon className="h-8 w-8 opacity-50" />
-      <p className="text-[11px] font-bold">{text}</p>
+      <p className="text-[13px] font-bold">{text}</p>
     </div>
   );
 }

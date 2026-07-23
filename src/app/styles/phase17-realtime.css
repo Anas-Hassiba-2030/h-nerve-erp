@@ -45,7 +45,7 @@
 }
 .rt-pip-mono {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 9.5px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
   color: var(--rt-color, #5a7d4a);
@@ -70,7 +70,7 @@
 }
 .rt-pip-more {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.06em;
   color: var(--heri-ink-2, #4a4434);
   font-variant-numeric: tabular-nums;
@@ -103,7 +103,7 @@
   background: var(--rt-color, #5a7d4a);
   color: #fff;
   font-family: "Inter Tight", "Inter", "Noto Sans Arabic", system-ui, sans-serif;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.005em;
   white-space: nowrap;
   border-radius: 0;
@@ -121,7 +121,7 @@
   height: 18px;
   background: rgba(255,255,255,0.18);
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -191,7 +191,7 @@
   background: color-mix(in srgb, var(--rt-color, #5a7d4a) 14%, var(--heri-cream, #f4ede0));
   border: 1.5px solid var(--rt-color, #5a7d4a);
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
   color: var(--rt-color, #5a7d4a);
@@ -209,7 +209,7 @@
 }
 .rt-comment-ago {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.04em;
   color: var(--heri-ink-3, #6b6552);
 }

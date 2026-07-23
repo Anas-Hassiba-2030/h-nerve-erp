@@ -152,7 +152,7 @@ export default async function ForecastDetailPage(
                 aria-hidden
               />
               <div className="relative">
-                <div className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-80">
+                <div className="text-[12px] font-bold uppercase tracking-[0.22em] opacity-80">
                   {en ? "Source" : "المصدر"}
                 </div>
                 <div className="mt-1 text-2xl font-bold">
@@ -167,7 +167,7 @@ export default async function ForecastDetailPage(
             {/* Arrow with predicted demand */}
             <div className="flex flex-col items-center justify-center px-2">
               <div
-                className="mb-1 text-[10px] font-bold uppercase tracking-widest"
+                className="mb-1 text-[12px] font-bold uppercase tracking-widest"
                 style={{ color: "var(--ink-muted)" }}
               >
                 {en ? "Predicted Demand" : "الطلب المتوقع"}
@@ -216,7 +216,7 @@ export default async function ForecastDetailPage(
                 aria-hidden
               />
               <div className="relative">
-                <div className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-80">
+                <div className="text-[12px] font-bold uppercase tracking-[0.22em] opacity-80">
                   {en ? "Destination" : "الوجهة"}
                 </div>
                 <div className="mt-1 text-2xl font-bold">
@@ -250,7 +250,7 @@ export default async function ForecastDetailPage(
           <div className="dl-bar">
             <i style={{ width: `${conf * 100}%` }} />
           </div>
-          <div className="mt-1 text-[10px]" style={{ color: "var(--ink-muted)" }}>
+          <div className="mt-1 text-[12px]" style={{ color: "var(--ink-muted)" }}>
             {confTone === "emerald"
               ? en ? "High confidence — direct adoption recommended" : "ثقة عالية — يوصى بالاعتماد المباشر"
               : confTone === "amber"
@@ -286,7 +286,7 @@ export default async function ForecastDetailPage(
                             {formatNumber(r.predictedDemand)} {localizeUnit(r.unit, !en)}
                           </span>
                         </div>
-                        <div className="text-[11px] font-mono" style={{ color: "var(--ink-muted)" }}>
+                        <div className="text-[13px] font-mono" style={{ color: "var(--ink-muted)" }}>
                           {r.source.code} → {r.target.code} • {Math.round(r.confidence * 100)}{en ? "% confidence" : "٪ ثقة"}
                         </div>
                       </Link>
@@ -302,16 +302,16 @@ export default async function ForecastDetailPage(
             <DaylightPanel title={<span className="flex items-center gap-2"><Calendar className="h-4 w-4" style={{ color: "var(--gold)" }} />{en ? "Time Period" : "الفترة الزمنية"}</span>}>
               <div className="mb-2 flex items-center justify-between text-xs">
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>{en ? "From" : "من"}</div>
+                  <div className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>{en ? "From" : "من"}</div>
                   <div className="font-bold" style={{ color: "var(--ink)" }}>{formatShortDate(f.periodStart)}</div>
                 </div>
                 <ArrowRight className="h-4 w-4" style={{ color: "var(--ink-muted)" }} />
                 <div className="text-end">
-                  <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>{en ? "To" : "إلى"}</div>
+                  <div className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>{en ? "To" : "إلى"}</div>
                   <div className="font-bold" style={{ color: "var(--ink)" }}>{formatShortDate(f.periodEnd)}</div>
                 </div>
               </div>
-              <div className="text-[11px] text-center" style={{ color: "var(--ink-muted)" }}>
+              <div className="text-[13px] text-center" style={{ color: "var(--ink-muted)" }}>
                 {formatNumber(periodDays)} {en ? "days • avg" : "يوم • متوسط"}{" "}
                 {formatNumber(f.predictedDemand / periodDays)} {localizeUnit(f.unit, !en)}{en ? "/day" : "/يوم"}
               </div>
@@ -327,7 +327,7 @@ export default async function ForecastDetailPage(
                   })()}
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-semibold" style={{ color: "var(--ink)" }}>{f.generatedBy.name}</div>
-                    <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                    <div className="text-[13px]" style={{ color: "var(--ink-muted)" }}>
                       {f.generatedBy.role} • <span className="font-mono">{formatNumber(f.generatedBy.xp)} XP</span>
                     </div>
                   </div>
@@ -335,7 +335,7 @@ export default async function ForecastDetailPage(
               </DaylightPanel>
             ) : (
               <DaylightPanel title={<span className="flex items-center gap-2"><Brain className="h-4 w-4" style={{ color: "var(--gold)" }} />{en ? "Automated Engine" : "محرك تلقائي"}</span>}>
-                <p className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                <p className="text-[13px]" style={{ color: "var(--ink-muted)" }}>
                   {en ? "This forecast was generated by the system's predictive engine without human intervention." : "هذا التوقع صادر عن المحرك التنبؤي للنظام دون تدخل بشري."}
                 </p>
               </DaylightPanel>

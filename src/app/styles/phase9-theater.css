@@ -40,7 +40,7 @@
   align-items: baseline;
   gap: 14px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--theater-ink-soft);
@@ -74,7 +74,7 @@
   align-items: center;
   gap: 8px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--theater-ink);
@@ -86,7 +86,7 @@
 }
 .theater-close:hover { background: color-mix(in srgb, var(--theater-accent) 8%, transparent); }
 .theater-close-key {
-  font-size: 9px;
+  font-size: 12px;
   padding: 1px 5px;
   background: var(--theater-ink);
   color: var(--theater-bg);
@@ -130,7 +130,7 @@
   align-items: baseline;
   gap: 14px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--theater-accent);
@@ -234,7 +234,7 @@
 .theater-metric-label {
   display: block;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--theater-ink-soft);
@@ -262,7 +262,7 @@
   flex-wrap: wrap;
   gap: 14px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--theater-ink-soft);
@@ -297,7 +297,7 @@
 .theater-memory-lesson-tag {
   display: inline-block;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--theater-accent);
@@ -331,7 +331,7 @@
 }
 .theater-impact-rank {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.18em;
   color: var(--theater-ink-soft);
   font-variant-numeric: tabular-nums;
@@ -345,7 +345,7 @@
 }
 .theater-impact-meta {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--theater-ink-soft);
@@ -425,7 +425,7 @@
   gap: 12px;
   margin-top: 20px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--pullquote-accent, var(--theater-accent));
@@ -462,7 +462,7 @@
 }
 .theater-verdict-confidence-label {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--theater-ink-soft);
@@ -492,7 +492,7 @@
 .theater-verdict-dissent-tag {
   display: block;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--theater-accent);
@@ -520,14 +520,14 @@
 }
 .theater-plan-eyebrow {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--theater-accent);
 }
 .theater-plan-link {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--theater-accent);
@@ -566,7 +566,7 @@
 }
 .theater-plan-step-num {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.2em;
   color: var(--theater-accent);
   font-variant-numeric: tabular-nums;
@@ -582,7 +582,7 @@
 }
 .theater-plan-step-meta {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--theater-ink-soft);
@@ -590,7 +590,7 @@
 }
 .theater-plan-step-more {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--theater-ink-soft);

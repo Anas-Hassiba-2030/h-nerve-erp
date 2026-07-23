@@ -38,7 +38,7 @@ export function ThemeSwitch({
           />
           <div className="absolute end-0 z-50 mt-2 w-72 anim-fade-up rounded-2xl border bg-[var(--surface-elevated)] p-2 shadow-glow"
                style={{ borderColor: "var(--border)" }}>
-            <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest"
+            <div className="px-3 py-2 text-[12px] font-bold uppercase tracking-widest"
                  style={{ color: "var(--text-muted)" }}>
               {ar ? "اختر السمة" : "Choose theme"}
             </div>
@@ -92,7 +92,7 @@ function ThemeOption({
           <div className="text-sm font-extrabold" style={{ color: "var(--text)" }}>
             {ar ? theme.name : theme.nameEn}
           </div>
-          <div className="line-clamp-1 text-[11px]" style={{ color: "var(--text-muted)" }}>
+          <div className="line-clamp-1 text-[13px]" style={{ color: "var(--text-muted)" }}>
             {ar ? theme.description : theme.descriptionEn}
           </div>
         </div>

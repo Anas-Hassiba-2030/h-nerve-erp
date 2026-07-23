@@ -37,7 +37,7 @@
 /* slim ribbon + search */
 .dl-page .ml-ribbon { display: flex; align-items: stretch; gap: 18px; margin-bottom: 16px; flex-wrap: wrap; }
 .dl-page .ml-title-box { display: flex; flex-direction: column; justify-content: center; padding-inline-end: 18px; border-inline-end: 1px solid rgba(194,163,90,.2); min-width: 180px; }
-.dl-page .ml-title-box .eb { display: inline-flex; align-items: center; gap: 7px; font-size: 10px; font-weight: 700; letter-spacing: .14em; color: var(--gold-soft); text-transform: uppercase; margin-bottom: 4px; }
+.dl-page .ml-title-box .eb { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; letter-spacing: .14em; color: var(--gold-soft); text-transform: uppercase; margin-bottom: 4px; }
 .dl-page .ml-title-box .eb .tick { width: 18px; height: 1.5px; background: var(--gold-soft); }
 .dl-page .ml-title-box h1 { font-family: var(--display); font-size: 38px; font-weight: 600; color: #fff; line-height: 1; }
 .dl-page .ml-search { flex: 1; min-width: 260px; display: flex; align-items: center; gap: 12px;
@@ -45,12 +45,12 @@
 .dl-page .ml-search .ic { font-size: 18px; color: var(--gold-soft); opacity: .8; }
 .dl-page .ml-search input { flex: 1; background: none; border: 0; outline: none; color: #fff; font-family: var(--ui); font-size: 15px; padding: 16px 0; }
 .dl-page .ml-search input::placeholder { color: var(--mist); opacity: .5; }
-.dl-page .ml-search .cnt { font-size: 12px; color: var(--mist); opacity: .6; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dl-page .ml-search .cnt { font-size: 13px; color: var(--mist); opacity: .6; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 /* filter pills */
 .dl-page .ml-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
 .dl-page .ml-fgroup { display: flex; gap: 5px; align-items: center; padding: 4px; border-radius: 999px; background: rgba(13,31,26,.4); border: 1px solid rgba(194,163,90,.16); }
-.dl-page .ml-fgroup .glbl { font-size: 10px; color: var(--mist); opacity: .5; padding: 0 8px; letter-spacing: .06em; }
+.dl-page .ml-fgroup .glbl { font-size: 12px; color: var(--mist); opacity: .5; padding: 0 8px; letter-spacing: .06em; }
 .dl-page .pill { padding: 6px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: var(--mist); opacity: .7; cursor: pointer; transition: all .25s cubic-bezier(.22,1,.36,1); background: none; border: 0; font-family: var(--ui); }
 .dl-page .pill:hover { opacity: 1; }
 .dl-page .pill.on { background: linear-gradient(135deg, var(--gold-soft), var(--gold)); color: #241b06; opacity: 1; font-weight: 700; }
@@ -74,15 +74,15 @@
 .dl-page .mem:hover .mcard { transform: translateY(-2px); }
 .dl-page .mem.related .node { transform: scale(1.4); box-shadow: 0 0 18px rgba(126,155,134,.9); }
 .dl-page .mem.dim { opacity: .28; }
-.dl-page .mcard .date { font-family: var(--font-mono, monospace); font-size: 11px; color: var(--gold-soft); letter-spacing: .06em; margin-bottom: 6px; }
+.dl-page .mcard .date { font-family: var(--font-mono, monospace); font-size: 13px; color: var(--gold-soft); letter-spacing: .06em; margin-bottom: 6px; }
 .dl-page .mcard .sit { font-family: var(--display); font-size: 18px; font-weight: 600; color: #fff; line-height: 1.35; margin-bottom: 9px; }
 .dl-page .mcard .dec { font-size: 13px; color: var(--mist); opacity: .82; line-height: 1.5; margin-bottom: 10px; }
 .dl-page .mcard .dec b { color: var(--gold-soft); font-weight: 600; }
 .dl-page .mcard .foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.dl-page .mcard .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; padding: 4px 11px; border-radius: 999px; }
+.dl-page .mcard .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; padding: 4px 11px; border-radius: 999px; }
 .dl-page .mcard .badge.good { color: var(--sage); background: rgba(126,155,134,.18); }
 .dl-page .mcard .badge.bad { color: #cf9384; background: rgba(168,106,92,.2); }
-.dl-page .mcard .dom { font-size: 11px; color: var(--mist); opacity: .55; }
+.dl-page .mcard .dom { font-size: 13px; color: var(--mist); opacity: .55; }
 .dl-page .mem.hidden { display: none; }
 .dl-page .ml-empty { text-align: center; padding: 40px; color: var(--mist); opacity: .6; font-family: var(--display); font-size: 20px; }
 @media (prefers-reduced-motion: reduce) { .dl-page #lake .wave { animation: none; } .dl-page .mem { opacity: 1; transform: none; } }
@@ -95,7 +95,7 @@
 /* maintenance controls (re-seed / clear-all) — not in the reference HTML,
    they keep the operator surface honest without breaking the night look. */
 .dl-page .ml-maint { position: relative; z-index: 1; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; margin-top: 24px; padding-top: 18px; border-top: 1px solid rgba(194,163,90,.16); }
-.dl-page .ml-maint-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 6px 12px; cursor: pointer; font-family: var(--ui); color: var(--mist); background: rgba(194,163,90,.1); border: 1px solid rgba(194,163,90,.3); transition: all .25s cubic-bezier(.22,1,.36,1); }
+.dl-page .ml-maint-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; border-radius: 999px; padding: 6px 12px; cursor: pointer; font-family: var(--ui); color: var(--mist); background: rgba(194,163,90,.1); border: 1px solid rgba(194,163,90,.3); transition: all .25s cubic-bezier(.22,1,.36,1); }
 .dl-page .ml-maint-btn:hover { background: rgba(194,163,90,.2); color: #fff; }
 .dl-page .ml-maint-btn.danger { color: #cf9384; border-color: rgba(168,106,92,.4); background: rgba(168,106,92,.1); }
 .dl-page .ml-maint-btn.primary { color: #241b06; background: linear-gradient(135deg, var(--gold-soft), var(--gold)); border: 0; padding: 9px 16px; font-size: 13px; }

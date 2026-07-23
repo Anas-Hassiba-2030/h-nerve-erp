@@ -2,7 +2,7 @@
 // surfaces — the mini-orbit popup (components/orrery/MiniOrrery.tsx) and the
 // sibling rail (components/orrery/ConstellationRail.tsx).
 //
-// These five groups MUST stay 1-to-1 (same set, same ORDER) with the main
+// These SEVEN groups MUST stay 1-to-1 (same set, same ORDER) with the main
 // Orrery hub served at public/hub/index.html (the GROUPS array there). The
 // hub uses design-export section hrefs; here we use real Next routes — same
 // destinations, different href scheme. PR #256 merged the old standalone
@@ -69,38 +69,54 @@ export const ORRERY_GROUPS: OrreryGroup[] = [
       { label: "ذكاء الدماغ", labelEn: "IQ", route: "/brain/iq" },
     ],
   },
+  // ERP taxonomy split (2026-07-23, owner-directed): the finance group had
+  // swallowed 22 children (every front-office surface from PR #346) — the rail
+  // wrapped into three cramped rows and the mini-orbit bloom scattered 22 pills
+  // in one ring. Standard ERP practice (NetSuite/Odoo) separates the money
+  // ledger from order-to-cash and procure-to-make, so the 22 split into three
+  // honest groups: Finance (accounting/treasury/reporting), Sales (CRM→cash),
+  // and Purchasing & Production (procure-to-pay + make/maintain).
   {
     id: "finance",
     nameAr: "المالية",
     nameEn: "Finance",
     children: [
       { label: "المركز المالي", labelEn: "Finance", route: "/finance" },
+      { label: "القوائم المالية", labelEn: "Statements", route: "/statements" },
+      { label: "التقارير", labelEn: "Reports", route: "/reports" },
+      { label: "الخزائن", labelEn: "Treasuries", route: "/treasuries" },
+      { label: "الأصول الثابتة", labelEn: "Fixed Assets", route: "/assets" },
       { label: "التحليلات", labelEn: "Analytics", route: "/analytics" },
       { label: "مقارنة", labelEn: "Compare", route: "/compare" },
       { label: "الأسواق", labelEn: "Markets", route: "/markets" },
-      { label: "التقارير", labelEn: "Reports", route: "/reports" },
       { label: "الاستدامة", labelEn: "Sustainability", route: "/sustainability" },
-      { label: "المشاريع", labelEn: "Projects", route: "/projects" },
+    ],
+  },
+  {
+    id: "sales",
+    nameAr: "المبيعات",
+    nameEn: "Sales",
+    children: [
       { label: "العلاقات", labelEn: "CRM", route: "/crm" },
-      // Front-office sales/purchasing/treasury surfaces (docs/HOURANI-ERP-GAPS.md
-      // Phase 27 "Sales & Invoicing"/"Purchasing"/"Treasury" tiles on /admin) —
-      // these are real, reachable routes but were never added here, so
-      // ConstellationRail's detectOrreryGroup() returned null on all of them:
-      // no rail nav, no back-link, no breadcrumb header (owner-reported gap).
-      { label: "الفواتير", labelEn: "Invoices", route: "/invoices" },
+      { label: "العملاء", labelEn: "Customers", route: "/customers" },
       { label: "عروض الأسعار", labelEn: "Estimates", route: "/estimates" },
+      { label: "الفواتير", labelEn: "Invoices", route: "/invoices" },
+      { label: "دفعات العملاء", labelEn: "Payments", route: "/payments" },
       { label: "نقطة البيع", labelEn: "Point of Sale", route: "/pos" },
       { label: "الفوترة الإلكترونية", labelEn: "E-Invoicing", route: "/e-invoicing" },
+    ],
+  },
+  {
+    id: "ops",
+    nameAr: "المشتريات والإنتاج",
+    nameEn: "Purchasing & Production",
+    children: [
+      { label: "الموردون", labelEn: "Suppliers", route: "/suppliers" },
       { label: "فواتير المشتريات", labelEn: "Purchase Invoices", route: "/purchase-invoices" },
       { label: "دفعات الموردين", labelEn: "Supplier Payments", route: "/purchase-payments" },
-      { label: "الخزائن", labelEn: "Treasuries", route: "/treasuries" },
-      { label: "دفعات العملاء", labelEn: "Payments", route: "/payments" },
-      { label: "القوائم المالية", labelEn: "Statements", route: "/statements" },
-      { label: "العملاء", labelEn: "Customers", route: "/customers" },
-      { label: "الموردون", labelEn: "Suppliers", route: "/suppliers" },
-      { label: "الأصول الثابتة", labelEn: "Fixed Assets", route: "/assets" },
       { label: "التصنيع", labelEn: "Manufacturing", route: "/manufacturing" },
       { label: "الصيانة", labelEn: "Maintenance", route: "/maintenance" },
+      { label: "المشاريع", labelEn: "Projects", route: "/projects" },
     ],
   },
   {

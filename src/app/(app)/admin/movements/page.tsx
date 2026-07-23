@@ -210,7 +210,7 @@ export default async function MovementsAdminPage(
         {/* Date-range pills */}
         <div className="flex flex-wrap items-center gap-1.5">
           <span
-            className="text-[10px] font-bold uppercase tracking-widest"
+            className="text-[12px] font-bold uppercase tracking-widest"
             style={{ color: "var(--ink-muted)" }}
           >
             {ar ? "المدة" : "Range"}
@@ -236,7 +236,7 @@ export default async function MovementsAdminPage(
         {/* Type pills */}
         <div className="flex flex-wrap items-center gap-1.5">
           <span
-            className="text-[10px] font-bold uppercase tracking-widest"
+            className="text-[12px] font-bold uppercase tracking-widest"
             style={{ color: "var(--ink-muted)" }}
           >
             {ar ? "النوع" : "Type"}
@@ -262,7 +262,7 @@ export default async function MovementsAdminPage(
         {whCodes.length > 0 ? (
           <div className="flex flex-wrap items-center gap-1.5">
             <span
-              className="text-[10px] font-bold uppercase tracking-widest"
+              className="text-[12px] font-bold uppercase tracking-widest"
               style={{ color: "var(--ink-muted)" }}
             >
               {ar ? "المستودع" : "Warehouse"}
@@ -320,7 +320,7 @@ export default async function MovementsAdminPage(
                     aria-hidden
                   />
                   <span
-                    className="font-mono text-[11px]"
+                    className="font-mono text-[13px]"
                     style={{ color: "var(--ink-muted)" }}
                     title={formatDateTime(mv.occurredAt, ar ? "ar" : "en")}
                   >
@@ -346,7 +346,7 @@ export default async function MovementsAdminPage(
                   <span className="truncate text-sm" style={{ color: "var(--ink)" }}>
                     {mv.product.name}
                   </span>
-                  <span className="ms-auto flex flex-wrap items-center gap-2 text-[11px]">
+                  <span className="ms-auto flex flex-wrap items-center gap-2 text-[13px]">
                     <span
                       className="font-mono text-sm font-extrabold"
                       style={{ color: positive ? "#15803d" : "#b91c1c" }}
@@ -488,7 +488,7 @@ function Detail({
   return (
     <div className={wide ? "sm:col-span-2" : undefined}>
       <span
-        className="me-2 text-[10px] font-bold uppercase tracking-widest"
+        className="me-2 text-[12px] font-bold uppercase tracking-widest"
         style={{ color: "var(--ink-muted)" }}
       >
         {label}

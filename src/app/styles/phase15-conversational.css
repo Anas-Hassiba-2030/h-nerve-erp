@@ -92,7 +92,7 @@
 }
 .cv-orb-label {
   position: absolute; top: -2px; left: 50%; transform: translateX(-50%);
-  font-size: 10.5px; font-weight: 700; letter-spacing: .16em;
+  font-size: 12px; font-weight: 700; letter-spacing: .16em;
   color: var(--gold-soft, #DCC38A); opacity: .7; text-transform: uppercase;
   white-space: nowrap;
 }
@@ -170,14 +170,14 @@
   background: rgba(13,31,26,.6);
   color: var(--mist, #CDE0D6);
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.08em;
   border: 1px solid rgba(194,163,90,.25);
   border-radius: 6px;
 }
 .cv-head-sep {
   color: rgba(205,224,214,.4);
-  font-size: 10px;
+  font-size: 12px;
 }
 .cv-head-mute,
 .cv-head-close {
@@ -216,7 +216,7 @@
 }
 .cv-empty-eyebrow {
   margin: 0;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   font-weight: 700;
@@ -290,7 +290,7 @@
 }
 .cv-turn-mark {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: #707070;
@@ -364,7 +364,7 @@
   border: 1px solid #2a2a2a;
   color: #f4f1e6;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   cursor: pointer;
   transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
 }
@@ -426,7 +426,7 @@
   align-items: center;
   gap: 10px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #707070;

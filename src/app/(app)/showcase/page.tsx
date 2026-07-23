@@ -427,7 +427,7 @@ function Stat({
         padding: "14px 18px",
       }}
     >
-      <div className="text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--ink-muted)" }}>
+      <div className="text-[12px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--ink-muted)" }}>
         <span>{label}</span>
         <span style={{ margin: "0 6px", color: "var(--line)" }}>·</span>
         <span style={{ opacity: 0.65 }}>{labelEn}</span>

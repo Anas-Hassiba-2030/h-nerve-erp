@@ -85,7 +85,7 @@ export function PinButton({
         type="button"
         onClick={handle}
         disabled={pending}
-        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-bold transition"
+        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[13px] font-bold transition"
         style={{
           color: pinned ? "var(--brand)" : "var(--text-muted)",
           background: pinned ? "var(--brand-soft)" : "transparent",

@@ -20,11 +20,11 @@
 .dl-page .srch-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
 
 /* ── filter pills (search-ops.js inline → ported to .pill) ── */
-.dl-page .pill { padding: 6px 13px; border-radius: 999px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--ui); border: 1px solid var(--line); background: var(--cream); color: var(--ink-muted); }
+.dl-page .pill { padding: 6px 13px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--ui); border: 1px solid var(--line); background: var(--cream); color: var(--ink-muted); }
 .dl-page .pill.on { background: linear-gradient(135deg, var(--emerald-soft), var(--emerald)); color: #fff; }
 
 /* ── category tag (ops.css) ── */
-.dl-page .ops-tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 11px; border-radius: 999px; }
+.dl-page .ops-tag { display: inline-block; font-size: 13px; font-weight: 700; padding: 3px 11px; border-radius: 999px; }
 .dl-page .ops-tag.ok { color: #3c7a5c; background: rgba(126,155,134,.2); }
 .dl-page .ops-tag.warn { color: #8a6a1f; background: rgba(194,163,90,.2); }
 .dl-page .ops-tag.crit { color: #9a5648; background: rgba(168,106,92,.18); }
@@ -36,5 +36,5 @@
 .dl-page .br-row:hover { border-color: rgba(194,163,90,.4); }
 .dl-page .br-row .rt { flex: 1; min-width: 0; }
 .dl-page .br-row .rt .tt { font-size: 14px; font-weight: 700; color: var(--ink); }
-.dl-page .br-row .rt .ts { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+.dl-page .br-row .rt .ts { font-size: 13px; color: var(--ink-muted); margin-top: 2px; }
 .dl-page .br-row .go { color: var(--gold); font-size: 16px; }

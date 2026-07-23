@@ -69,7 +69,7 @@ export function KpiCard({
               {delta.value}
             </div>
           ) : hint ? (
-            <div className="mt-1 text-[11px]" style={{ color: "var(--text-muted)" }}>{hint}</div>
+            <div className="mt-1 text-[13px]" style={{ color: "var(--text-muted)" }}>{hint}</div>
           ) : null}
         </div>
         {Icon ? (

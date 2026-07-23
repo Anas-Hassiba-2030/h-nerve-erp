@@ -117,7 +117,7 @@ export default async function ThreadPage(props: { params: Promise<{ id: string }
                 {main.name}
               </div>
               <div
-                className="line-clamp-1 text-[11px] font-bold"
+                className="line-clamp-1 text-[13px] font-bold"
                 style={{ color: "var(--ink-muted)" }}
               >
                 {main.title ?? main.role} · {main.email}
@@ -173,7 +173,7 @@ export default async function ThreadPage(props: { params: Promise<{ id: string }
                     style={{ background: "var(--line)" }}
                   />
                   <span
-                    className="text-[10px] font-semibold uppercase tracking-[0.18em]"
+                    className="text-[12px] font-semibold uppercase tracking-[0.18em]"
                     style={{ color: "var(--ink-muted)" }}
                   >
                     {new Intl.DateTimeFormat(ar ? "ar-JO-u-nu-latn" : "en-US", {
@@ -199,7 +199,7 @@ export default async function ThreadPage(props: { params: Promise<{ id: string }
                       className={`flex items-end gap-2 ${mine ? "flex-row-reverse" : ""}`}
                     >
                       <span
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[12px] font-bold text-white"
                         style={{ background: color }}
                       >
                         {initials(m.author.name)}
@@ -245,7 +245,7 @@ export default async function ThreadPage(props: { params: Promise<{ id: string }
                           </div>
                         ) : null}
                         <div
-                          className={`mt-1 text-[9.5px] font-bold ${mine ? "opacity-80" : ""}`}
+                          className={`mt-1 text-[12px] font-bold ${mine ? "opacity-80" : ""}`}
                           style={{ color: mine ? "white" : "var(--ink-muted)" }}
                         >
                           {formatTime(m.createdAt, ar)}

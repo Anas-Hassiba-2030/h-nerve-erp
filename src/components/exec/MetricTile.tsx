@@ -140,7 +140,7 @@ export function MetricTile({
         )}
         {hint ? (
           <span
-            className="text-[10px] font-bold"
+            className="text-[12px] font-bold"
             style={{ color: "var(--text-muted)" }}
           >
             {hint}

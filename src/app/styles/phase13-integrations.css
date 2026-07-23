@@ -116,7 +116,7 @@
   position: relative;
   z-index: 1;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 9.5px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.92);
@@ -179,7 +179,7 @@
 }
 .integration-card-account-value {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11.5px;
+  font-size: 13px;
   color: var(--heri-ink);
   letter-spacing: 0.01em;
   word-break: break-all;
@@ -191,7 +191,7 @@
   flex-wrap: wrap;
   gap: 6px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.06em;
   color: var(--heri-ink-3);
 }
@@ -213,7 +213,7 @@
   color: var(--heri-cream);
   border: 1px solid var(--heri-ink);
   font-family: "Inter Tight", "Inter", system-ui, sans-serif;
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.02em;
   cursor: pointer;

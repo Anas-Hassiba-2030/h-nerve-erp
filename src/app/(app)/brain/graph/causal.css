@@ -18,7 +18,7 @@
 .dl-page .br-wrap { max-width: 1180px; margin: 0 auto; padding: 14px 24px 80px; }
 .dl-page .br-ribbon { display: flex; align-items: stretch; gap: 18px; margin-bottom: 16px; flex-wrap: wrap; }
 .dl-page .br-title-box { display: flex; flex-direction: column; justify-content: center; padding-inline-end: 18px; border-inline-end: 1px solid rgba(194, 163, 90, 0.2); min-width: 170px; }
-.dl-page .br-title-box .eb { display: inline-flex; align-items: center; gap: 7px; font-size: 10px; font-weight: 700; letter-spacing: .14em; color: var(--gold-soft); text-transform: uppercase; margin-bottom: 4px; }
+.dl-page .br-title-box .eb { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; letter-spacing: .14em; color: var(--gold-soft); text-transform: uppercase; margin-bottom: 4px; }
 .dl-page .br-title-box .eb .tick { width: 18px; height: 1.5px; background: var(--gold-soft); }
 .dl-page .br-title-box h1 { font-family: var(--display); font-size: 36px; font-weight: 600; color: #fff; line-height: 1; }
 .dl-page .br-intro { display: flex; align-items: center; flex: 1; font-size: 14px; line-height: 1.5; color: var(--mist); opacity: .82; background: linear-gradient(160deg, rgba(20, 46, 38, 0.5), rgba(13, 31, 26, 0.46)); border: 1px solid rgba(194, 163, 90, 0.2); border-radius: 16px; padding: 14px 20px; }
@@ -37,7 +37,7 @@
 .dl-page .br-kpis { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 .dl-page .br-kpi { flex: 1; min-width: 120px; background: linear-gradient(160deg, rgba(20, 46, 38, 0.5), rgba(13, 31, 26, 0.46)); border: 1px solid rgba(194, 163, 90, 0.2); border-radius: 14px; padding: 13px 16px; }
 .dl-page .br-kpi .v { font-family: var(--display); font-variant-numeric: tabular-nums; font-size: 25px; font-weight: 600; color: #fff; line-height: 1; }
-.dl-page .br-kpi .k { font-size: 11px; color: var(--mist); opacity: .7; margin-top: 4px; }
+.dl-page .br-kpi .k { font-size: 13px; color: var(--mist); opacity: .7; margin-top: 4px; }
 
 /* ── thinking indicator (brain.css) ── */
 .dl-page .br-thinking { display: inline-flex; align-items: center; gap: 8px; color: var(--gold-soft); font-size: 13px; font-weight: 700; }
@@ -53,7 +53,7 @@
 /* ── causal stage (causal.html inline <style>) ── */
 .dl-page .cg-stage { background: linear-gradient(160deg, rgba(13, 31, 26, 0.5), rgba(8, 18, 14, 0.55)); border: 1px solid rgba(194, 163, 90, 0.2); border-radius: 18px; overflow: hidden; position: relative; }
 .dl-page #cg { width: 100%; height: 440px; display: block; }
-.dl-page .cg-hint { position: absolute; top: 14px; inset-inline-start: 16px; font-size: 12px; color: var(--mist); opacity: .6; }
+.dl-page .cg-hint { position: absolute; top: 14px; inset-inline-start: 16px; font-size: 13px; color: var(--mist); opacity: .6; }
 .dl-page .cg-node { cursor: pointer; }
 .dl-page .cg-readout { position: absolute; bottom: 14px; inset-inline-start: 16px; right: 16px; background: rgba(13, 31, 26, 0.8); border: 1px solid rgba(194, 163, 90, 0.25); border-radius: 12px; padding: 12px 16px; font-size: 13px; color: var(--mist); opacity: 0; transition: opacity .3s; }
 .dl-page .cg-readout.show { opacity: 1; }

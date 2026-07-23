@@ -35,7 +35,7 @@ export default function Error({
           تعذّر عرض هذه الإشارة الآن. حاول مجدداً.
         </p>
         {error.digest ? (
-          <p className="mt-2 font-mono text-[10px]" style={{ color: "var(--ink-muted)" }}>
+          <p className="mt-2 font-mono text-[12px]" style={{ color: "var(--ink-muted)" }}>
             مرجع الخطأ: {error.digest}
           </p>
         ) : null}

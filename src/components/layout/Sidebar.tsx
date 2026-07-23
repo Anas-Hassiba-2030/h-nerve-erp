@@ -313,7 +313,7 @@ export function Sidebar({
               ) : null
             ) : (
               <div
-                className="flex items-center gap-2 px-3 pb-1 pt-2 text-[10px] font-extrabold uppercase tracking-[0.2em]"
+                className="flex items-center gap-2 px-3 pb-1 pt-2 text-[12px] font-extrabold uppercase tracking-[0.2em]"
                 style={{ color: "var(--text-muted)" }}
               >
                 <span className="block h-px flex-1" style={{ background: "var(--border)" }} />
@@ -365,7 +365,7 @@ export function Sidebar({
                       <span className="flex-1 truncate text-start">{item.label}</span>
                       {item.hint ? (
                         <span
-                          className="rounded-md px-1.5 py-0.5 text-[9px] font-black"
+                          className="rounded-md px-1.5 py-0.5 text-[12px] font-black"
                           style={{
                             background: "var(--brand)",
                             color: "white",
@@ -426,7 +426,7 @@ export function Sidebar({
       <div className={cn("pb-2", c ? "px-2" : "px-3")}>
         <div
           className={cn(
-            "flex items-center rounded-xl text-[11px] anim-fade-up",
+            "flex items-center rounded-xl text-[13px] anim-fade-up",
             c ? "justify-center p-2" : "gap-2 px-3 py-2",
           )}
           style={{
@@ -486,7 +486,7 @@ export function Sidebar({
                 <div className="truncate text-sm font-extrabold" style={{ color: "var(--text)" }}>
                   {user.name}
                 </div>
-                <div className="flex items-center gap-1 truncate text-[10px]" style={{ color: "var(--text-muted)" }}>
+                <div className="flex items-center gap-1 truncate text-[12px]" style={{ color: "var(--text-muted)" }}>
                   <span>{ar ? rank.ar : rank.en}</span>
                   <span>·</span>
                   <span className="font-mono">{user.xp ?? 0} XP</span>
@@ -530,7 +530,7 @@ function SidebarToggle({ collapsed, ar }: { collapsed: boolean; ar: boolean }) {
       <input type="hidden" name="collapsed" value={collapsed ? "0" : "1"} />
       <button
         type="submit"
-        className="sidebar-toggle-btn flex w-full items-center justify-center gap-2 px-3 py-2.5 text-[11px] font-bold transition-colors"
+        className="sidebar-toggle-btn flex w-full items-center justify-center gap-2 px-3 py-2.5 text-[13px] font-bold transition-colors"
         style={{ color: "var(--text-muted)" }}
         title={tip}
         aria-label={tip}

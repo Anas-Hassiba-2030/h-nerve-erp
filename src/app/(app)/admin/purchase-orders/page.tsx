@@ -159,7 +159,7 @@ export default async function PurchaseOrdersPage(
 
       <div className="panel reveal mt-3 flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
+          <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
             {ar ? "الحالة" : "Status"}
           </span>
           <Link href={hrefWith("status", "")} className={statusF ? "badge-slate" : "badge-emerald"}>
@@ -173,7 +173,7 @@ export default async function PurchaseOrdersPage(
         </div>
         {suppliers.length > 0 ? (
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
+            <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
               {ar ? "المورّد" : "Supplier"}
             </span>
             <Link href={hrefWith("supplier", "")} className={supplierF ? "badge-slate" : "badge-emerald"}>
@@ -221,7 +221,7 @@ export default async function PurchaseOrdersPage(
                   </span>
                   <span className="badge-slate">{po.supplierRef?.name ?? "—"}</span>
                   <span className={orderStatusBadge(po.status)}>{oLabel(po.status)}</span>
-                  <span className="ms-auto flex flex-wrap items-center gap-2 text-[11px]">
+                  <span className="ms-auto flex flex-wrap items-center gap-2 text-[13px]">
                     <span style={{ color: "var(--ink-muted)" }}>
                       {ar ? "بنود" : "lines"}{" "}
                       <b style={{ color: "var(--ink)" }}>{formatNumber(linesCount)}</b>
@@ -240,7 +240,7 @@ export default async function PurchaseOrdersPage(
                     this PO was drafted from an approved SupplyForecast. */}
                 {po.sourceForecast ? (
                   <div
-                    className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-[11px]"
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-[13px]"
                     style={{ borderTop: "1px solid var(--line)", background: "var(--brand-soft)" }}
                   >
                     <span className="font-bold uppercase tracking-widest" style={{ color: "var(--brand)" }}>
@@ -288,7 +288,7 @@ export default async function PurchaseOrdersPage(
                 ) : null}
 
                 <div className="flex flex-col gap-3 px-4 py-3" style={{ borderTop: "1px solid var(--line)" }}>
-                  <div className="flex flex-wrap items-center gap-3 text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                  <div className="flex flex-wrap items-center gap-3 text-[13px]" style={{ color: "var(--ink-muted)" }}>
                     <span className="font-bold" style={{ color: "var(--ink)" }}>
                       {po.supplierRef?.name ?? "—"}
                     </span>

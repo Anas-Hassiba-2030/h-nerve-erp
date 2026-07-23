@@ -151,7 +151,7 @@ export default async function BrainPage(props: { searchParams: Promise<SP> }) {
       <div className="panel reveal mt-3">
         <form
           method="GET"
-          className="flex flex-wrap items-end gap-2 text-[11px] font-bold"
+          className="flex flex-wrap items-end gap-2 text-[13px] font-bold"
         >
           <label className="flex flex-col gap-1">
             {ar ? "النوع" : "Type"}
@@ -216,7 +216,7 @@ export default async function BrainPage(props: { searchParams: Promise<SP> }) {
           {grouped.map((g) => (
             <div key={g.sev} className="flex flex-col gap-2">
               <div
-                className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest"
+                className="flex items-center gap-2 text-[13px] font-extrabold uppercase tracking-widest"
                 style={{ color: "var(--ink-muted)" }}
               >
                 <span className={SEV_BADGE[g.sev]}>{sevLabel(g.sev)}</span>
@@ -243,7 +243,7 @@ export default async function BrainPage(props: { searchParams: Promise<SP> }) {
                         {i.title}
                       </span>
                       <span
-                        className="ms-auto font-mono text-[10px]"
+                        className="ms-auto font-mono text-[12px]"
                         style={{ color: "var(--ink-muted)" }}
                       >
                         {formatDateTime(i.createdAt, ar ? "ar" : "en")}
@@ -254,13 +254,13 @@ export default async function BrainPage(props: { searchParams: Promise<SP> }) {
                     </p>
                     <details>
                       <summary
-                        className="cursor-pointer text-[10px] font-bold uppercase tracking-widest"
+                        className="cursor-pointer text-[12px] font-bold uppercase tracking-widest"
                         style={{ color: "var(--ink-muted)", listStyle: "none" }}
                       >
                         {ar ? "تفاصيل" : "Details"}
                       </summary>
                       <pre
-                        className="mt-1 overflow-x-auto rounded p-2 text-[11px]"
+                        className="mt-1 overflow-x-auto rounded p-2 text-[13px]"
                         style={{
                           background: "var(--surface-2, rgba(0,0,0,0.04))",
                           color: "var(--ink-muted)",

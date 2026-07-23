@@ -183,7 +183,7 @@ export function QuickAddFAB({ locale }: { locale: "ar" | "en" }) {
                 {ar ? "إنشاء سريع" : "Quick add"}
               </div>
               <div
-                className="text-[9.5px]"
+                className="text-[12px]"
                 style={{ color: "var(--text-muted)" }}
               >
                 {ar
@@ -222,7 +222,7 @@ export function QuickAddFAB({ locale }: { locale: "ar" | "en" }) {
           <div className="max-h-[60vh] overflow-y-auto py-1">
             {filtered.length === 0 ? (
               <div
-                className="py-6 text-center text-[11px]"
+                className="py-6 text-center text-[13px]"
                 style={{ color: "var(--text-muted)" }}
               >
                 {ar ? "لا نتائج" : "No matches"}
@@ -255,7 +255,7 @@ export function QuickAddFAB({ locale }: { locale: "ar" | "en" }) {
                         {ar ? it.ar : it.en}
                       </div>
                       <div
-                        className="text-[10px]"
+                        className="text-[12px]"
                         style={{ color: "var(--text-muted)" }}
                       >
                         {ar ? it.hint_ar : it.hint_en}
@@ -263,7 +263,7 @@ export function QuickAddFAB({ locale }: { locale: "ar" | "en" }) {
                     </div>
                     {isActive ? (
                       <span
-                        className="rounded-md px-1.5 py-0.5 font-mono text-[9px] font-extrabold"
+                        className="rounded-md px-1.5 py-0.5 font-mono text-[12px] font-extrabold"
                         style={{
                           background: "var(--brand)",
                           color: "white",
@@ -280,7 +280,7 @@ export function QuickAddFAB({ locale }: { locale: "ar" | "en" }) {
 
           {/* Footer hint */}
           <div
-            className="flex items-center justify-between px-3 py-2 text-[9.5px]"
+            className="flex items-center justify-between px-3 py-2 text-[12px]"
             style={{
               borderTop: "1px solid var(--border)",
               background: "var(--brand-soft)",

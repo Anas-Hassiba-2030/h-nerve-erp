@@ -37,13 +37,13 @@ export function CompanyCover({
             <div className="flex flex-col items-center leading-none">
               <span className="text-3xl font-black">{brand.emblem}</span>
               {brand.emblemSymbol ? (
-                <span className="text-[11px] opacity-80">{brand.emblemSymbol}</span>
+                <span className="text-[13px] opacity-80">{brand.emblemSymbol}</span>
               ) : null}
             </div>
           </div>
           <div className="min-w-0">
             {eyebrow ? (
-              <div className="mb-1 inline-flex items-center gap-2 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold tracking-widest backdrop-blur">
+              <div className="mb-1 inline-flex items-center gap-2 rounded-full bg-white/15 px-2.5 py-1 text-[12px] font-bold tracking-widest backdrop-blur">
                 {eyebrow}
               </div>
             ) : null}
@@ -66,7 +66,7 @@ export function CompanyCover({
                 key={m.label}
                 className="rounded-xl bg-white/12 px-3 py-2 backdrop-blur ring-1 ring-white/20"
               >
-                <div className="text-[10px] uppercase tracking-widest opacity-75">{m.label}</div>
+                <div className="text-[12px] uppercase tracking-widest opacity-75">{m.label}</div>
                 <div className="mt-0.5 text-base font-extrabold">{m.value}</div>
               </div>
             ))}

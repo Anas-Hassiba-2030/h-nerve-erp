@@ -218,7 +218,7 @@ export default async function EducationDetailPage(
                       {i + 1}
                     </div>
                     <div
-                      className="mt-2 text-center text-[11px] font-semibold"
+                      className="mt-2 text-center text-[13px] font-semibold"
                       style={{ color: reached ? "var(--ink)" : "var(--ink-muted)" }}
                     >
                       {loc(STATUS_AR, STATUS_EN, locale, stage)}

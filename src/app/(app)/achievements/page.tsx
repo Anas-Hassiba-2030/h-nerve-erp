@@ -193,7 +193,7 @@ export default async function AchievementsPage() {
                   }}
                 >
                   {isCurrent ? (
-                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2 py-0.5 text-[9px] font-bold" style={{ background: "var(--gold)", color: "#1a0e02" }}>
+                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2 py-0.5 text-[12px] font-bold" style={{ background: "var(--gold)", color: "#1a0e02" }}>
                       {ar ? "أنت هنا" : "YOU"}
                     </span>
                   ) : null}
@@ -212,7 +212,7 @@ export default async function AchievementsPage() {
                   <div className="mt-2 text-base font-semibold" style={{ color: "var(--ink)" }}>
                     {ar ? r.ar : r.en}
                   </div>
-                  <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                  <div className="text-[13px]" style={{ color: "var(--ink-muted)" }}>
                     {formatNumber(r.minXp)} XP · +{r.bonusPercent}٪
                   </div>
                 </div>
@@ -251,7 +251,7 @@ export default async function AchievementsPage() {
                     >
                       {ar ? TIER_LABEL[tier].ar : TIER_LABEL[tier].en}
                     </div>
-                    <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                    <div className="text-[13px]" style={{ color: "var(--ink-muted)" }}>
                       {tierEarned} / {items.length}{" "}
                       {ar ? "مفتوح" : "earned"}
                     </div>
@@ -338,13 +338,13 @@ export default async function AchievementsPage() {
                           {ar ? a.name : a.nameEn}
                         </h3>
                         <p
-                          className="relative mt-1 text-[11.5px] leading-relaxed"
+                          className="relative mt-1 text-[13px] leading-relaxed"
                           style={{ color: visual.textOn, opacity: 0.85 }}
                         >
                           {a.description}
                         </p>
 
-                        <div className="relative mt-3 flex items-center gap-1.5 text-[10.5px] font-bold">
+                        <div className="relative mt-3 flex items-center gap-1.5 text-[12px] font-bold">
                           {earned && earnedAt ? (
                             <span
                               className="rounded-md px-1.5 py-0.5"
@@ -428,7 +428,7 @@ export default async function AchievementsPage() {
                           {u.name}
                           {isMe ? (
                             <span
-                              className="ms-1.5 text-[10px] font-bold"
+                              className="ms-1.5 text-[12px] font-bold"
                               style={{ color: "var(--gold)" }}
                             >
                               ({ar ? "أنت" : "you"})
@@ -437,7 +437,7 @@ export default async function AchievementsPage() {
                         </div>
                         {u.company?.name ? (
                           <div
-                            className="text-[11px]"
+                            className="text-[13px]"
                             style={{ color: "var(--ink-muted)" }}
                           >
                             {u.company.name}
@@ -453,14 +453,14 @@ export default async function AchievementsPage() {
                           {formatNumber(u.xp)}
                         </span>
                         <span
-                          className="text-[10px] font-bold"
+                          className="text-[12px] font-bold"
                           style={{ color: "var(--ink-muted)" }}
                         >
                           XP
                         </span>
                       </div>
                       <div
-                        className="relative mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
+                        className="relative mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[12px] font-bold"
                         style={{
                           background: "var(--cream)",
                           color: "var(--gold)",
@@ -519,7 +519,7 @@ export default async function AchievementsPage() {
                           {u.name}
                           {isMe ? (
                             <span
-                              className="ms-1.5 text-[10px] font-bold"
+                              className="ms-1.5 text-[12px] font-bold"
                               style={{ color: "var(--gold)" }}
                             >
                               ({ar ? "أنت" : "you"})
@@ -528,7 +528,7 @@ export default async function AchievementsPage() {
                         </div>
                         {u.company?.name ? (
                           <div
-                            className="truncate text-[11px]"
+                            className="truncate text-[13px]"
                             style={{ color: "var(--ink-muted)" }}
                           >
                             {u.company.name}
@@ -542,14 +542,14 @@ export default async function AchievementsPage() {
                       >
                         {formatNumber(u.xp)}{" "}
                         <span
-                          className="text-[10px] font-bold"
+                          className="text-[12px] font-bold"
                           style={{ color: "var(--ink-muted)" }}
                         >
                           XP
                         </span>
                       </span>
                       <span
-                        className="inline-flex items-center gap-1 text-[11px] font-bold"
+                        className="inline-flex items-center gap-1 text-[13px] font-bold"
                         style={{ color: "var(--ink-muted)" }}
                       >
                         <Trophy className="h-3 w-3" />

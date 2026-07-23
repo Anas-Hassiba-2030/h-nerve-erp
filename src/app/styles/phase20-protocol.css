@@ -58,14 +58,14 @@
 }
 .dev-rail-title {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.28em;
   color: var(--dev-ink);
   font-weight: 700;
 }
 .dev-rail-version {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.04em;
   color: var(--dev-ink-3);
   font-variant-numeric: tabular-nums;
@@ -77,7 +77,7 @@
 }
 .dev-rail-link {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--dev-ink-2);
@@ -104,7 +104,7 @@
 .dev-hero-eyebrow {
   margin: 0 0 20px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.28em;
   color: var(--dev-accent);
   font-weight: 700;
@@ -157,7 +157,7 @@
   align-items: baseline;
   gap: 10px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.06em;
   color: var(--dev-ink-3);
   font-variant-numeric: tabular-nums;
@@ -187,7 +187,7 @@
 }
 .dev-pillar-n {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.28em;
   color: var(--dev-accent);
   font-weight: 700;
@@ -232,7 +232,7 @@
   padding: 9px 14px;
   border-bottom: 1px solid #2a2a2a;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--dev-mono-ink);
   letter-spacing: 0.04em;
 }
@@ -245,7 +245,7 @@
   margin: 0;
   padding: 14px 18px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.55;
   color: var(--dev-mono-ink);
   overflow-x: auto;
@@ -260,7 +260,7 @@
 .dev-cta-eyebrow {
   margin: 0 0 14px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.28em;
   color: var(--dev-accent);
   font-weight: 700;
@@ -320,7 +320,7 @@
 .dev-page-eyebrow {
   margin: 0 0 12px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.28em;
   color: var(--dev-accent);
   font-weight: 700;
@@ -351,7 +351,7 @@
 .dev-doc-eyebrow {
   margin: 0 0 16px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.28em;
   color: var(--dev-accent);
   font-weight: 700;
@@ -468,7 +468,7 @@
   inset-inline-start: 0;
   top: 14px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--dev-accent);
   letter-spacing: 0.04em;
   font-weight: 700;
@@ -493,7 +493,7 @@
 }
 .dev-doc-state-mark {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.18em;
   color: var(--dev-accent);
   font-weight: 700;
@@ -542,7 +542,7 @@
 .dev-orbit-sun-mark {
   fill: var(--dev-paper);
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
@@ -566,7 +566,7 @@
 }
 .dev-orbit-planet-label {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 7px;
+  font-size: 12px;
   fill: var(--dev-ink-2);
   letter-spacing: 0.04em;
   /* Counter-rotate so labels stay readable as the orbit spins */
@@ -590,7 +590,7 @@
   background: var(--dev-paper-2);
   border: 1px solid var(--dev-rule);
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.2em;
   color: var(--dev-ink-3);
   text-transform: uppercase;
@@ -627,7 +627,7 @@
 .dev-market-row:hover { background: var(--dev-paper); }
 .dev-market-rank {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--dev-ink-3);
   letter-spacing: 0.04em;
@@ -642,7 +642,7 @@
   white-space: nowrap;
 }
 .dev-market-tag {
-  font-size: 11.5px;
+  font-size: 13px;
   color: var(--dev-ink-3);
   margin-top: 2px;
   overflow: hidden;
@@ -652,7 +652,7 @@
 .dev-market-pack,
 .dev-market-author {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.04em;
   color: var(--dev-ink-2);
 }
@@ -662,13 +662,13 @@
   gap: 4px;
   justify-content: flex-end;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11.5px;
+  font-size: 13px;
   color: var(--dev-ink);
   font-variant-numeric: tabular-nums;
 }
 .dev-market-health {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   color: #fff;
   padding: 2px 6px;
@@ -710,7 +710,7 @@
   padding: 12px 16px;
   background: var(--dev-paper-2);
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   color: var(--dev-ink-3);
   font-weight: 700;
@@ -733,13 +733,13 @@
   padding: 10px 16px;
   border-top: 1px solid var(--dev-rule);
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11.5px;
+  font-size: 13px;
   cursor: default;
   transition: background 140ms ease;
 }
 .dev-explorer-row:hover { background: var(--dev-paper); }
 .dev-explorer-method {
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.06em;
   color: #fff;
   background: var(--dev-ink);
@@ -760,7 +760,7 @@
 .dev-explorer-summary {
   color: var(--dev-ink-3);
   font-family: "Inter Tight", "Inter", system-ui, sans-serif;
-  font-size: 12px;
+  font-size: 13px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -781,7 +781,7 @@
 }
 .dev-explorer-panel-mark {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   color: var(--dev-mono-acc);
   font-weight: 700;
@@ -790,14 +790,14 @@
 }
 .dev-explorer-panel-path {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11.5px;
+  font-size: 13px;
   color: var(--dev-mono-ink);
 }
 .dev-explorer-pre {
   margin: 0;
   padding: 14px 18px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11.5px;
+  font-size: 13px;
   line-height: 1.55;
   color: var(--dev-mono-ink);
   white-space: pre;
@@ -810,7 +810,7 @@
 }
 .dev-explorer-foot {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--dev-ink-3);
 }
 
@@ -825,7 +825,7 @@
   border-top: 1px solid var(--dev-rule);
   padding: 22px 28px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.04em;
   color: var(--dev-ink-3);
   display: flex;

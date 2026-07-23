@@ -89,7 +89,7 @@ export function TodayActivity({
             {ar ? "نشاط اليوم" : "Today's activity"}
           </h3>
           <p
-            className="text-[10.5px]"
+            className="text-[12px]"
             style={{ color: "var(--text-muted)" }}
           >
             {ar
@@ -105,7 +105,7 @@ export function TodayActivity({
 
       {/* 24-hour heat strip */}
       <div className="mb-3">
-        <div className="mb-1 flex items-center justify-between text-[10px] font-bold" style={{ color: "var(--text-muted)" }}>
+        <div className="mb-1 flex items-center justify-between text-[12px] font-bold" style={{ color: "var(--text-muted)" }}>
           <span>00:00</span>
           <span>{ar ? "نبض الساعات" : "Hourly pulse"}</span>
           <span>23:59</span>
@@ -145,7 +145,7 @@ export function TodayActivity({
       {/* Recent items list */}
       {items.length === 0 ? (
         <div
-          className="py-6 text-center text-[11px]"
+          className="py-6 text-center text-[13px]"
           style={{ color: "var(--text-muted)" }}
         >
           {ar ? "لا نشاط بعد اليوم" : "No activity yet today"}
@@ -169,14 +169,14 @@ export function TodayActivity({
                   </span>
                   <div className="min-w-0 flex-1">
                     <div
-                      className="line-clamp-1 text-[11.5px] font-bold"
+                      className="line-clamp-1 text-[13px] font-bold"
                       style={{ color: "var(--text)" }}
                     >
                       {ar ? it.summary : it.summaryEn ?? it.summary}
                     </div>
                     {it.actorName ? (
                       <div
-                        className="text-[9.5px]"
+                        className="text-[12px]"
                         style={{ color: "var(--text-muted)" }}
                       >
                         {it.actorName}
@@ -184,7 +184,7 @@ export function TodayActivity({
                     ) : null}
                   </div>
                   <span
-                    className="flex items-center gap-0.5 font-mono text-[10px] font-bold tabular-nums"
+                    className="flex items-center gap-0.5 font-mono text-[12px] font-bold tabular-nums"
                     style={{ color: "var(--text-muted)" }}
                   >
                     <Clock className="h-2.5 w-2.5" />

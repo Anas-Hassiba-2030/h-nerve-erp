@@ -233,7 +233,7 @@ export function OnboardingTour({ locale = "en" }: { locale?: "ar" | "en" }) {
               {ar ? "السابق" : "Back"}
             </button>
 
-            <button onClick={close} className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+            <button onClick={close} className="text-[13px]" style={{ color: "var(--text-muted)" }}>
               {ar ? "تخطي الجولة" : "Skip tour"}
             </button>
 

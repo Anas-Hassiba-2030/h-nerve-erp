@@ -71,7 +71,7 @@ export function UpcomingCalendar({
   return (
     <div>
       {/* Day-of-week header — start with current day's day-of-week */}
-      <div className="mb-1 grid grid-cols-7 gap-1 text-[9px] font-bold uppercase tracking-widest"
+      <div className="mb-1 grid grid-cols-7 gap-1 text-[12px] font-bold uppercase tracking-widest"
            style={{ color: "var(--text-muted)" }}>
         {Array.from({ length: 7 }).map((_, i) => {
           const dow = (today.getDay() + i) % 7;
@@ -95,7 +95,7 @@ export function UpcomingCalendar({
           return (
             <div
               key={i}
-              className="relative flex aspect-square flex-col items-center justify-center rounded-md text-[10px] transition"
+              className="relative flex aspect-square flex-col items-center justify-center rounded-md text-[12px] transition"
               style={{
                 background: isToday ? "var(--brand-soft)" : "transparent",
                 border: `1px solid ${isToday ? "color-mix(in srgb, var(--brand) 45%, transparent)" : "var(--border)"}`,
@@ -106,9 +106,9 @@ export function UpcomingCalendar({
               title={d.events.map((e) => e.title).join("\n")}
             >
               {isFirstOfMonth ? (
-                <div className="text-[8px] font-bold opacity-60">{monthLabel}</div>
+                <div className="text-[12px] font-bold opacity-60">{monthLabel}</div>
               ) : null}
-              <div className={`font-extrabold tabular-nums ${isToday ? "text-[12px]" : "text-[11px]"}`}>
+              <div className={`font-extrabold tabular-nums ${isToday ? "text-[12px]" : "text-[13px]"}`}>
                 {dayNum}
               </div>
               {/* Event dots */}
@@ -132,7 +132,7 @@ export function UpcomingCalendar({
       </div>
 
       {/* Legend */}
-      <div className="mt-2 flex flex-wrap gap-2 text-[9px]" style={{ color: "var(--text-muted)" }}>
+      <div className="mt-2 flex flex-wrap gap-2 text-[12px]" style={{ color: "var(--text-muted)" }}>
         {Object.entries(kindCounts).map(([kind, count]) => (
           <span key={kind} className="inline-flex items-center gap-1">
             <span
@@ -165,7 +165,7 @@ export function UpcomingCalendar({
                 <Link
                   key={e.id}
                   href={e.href}
-                  className="flex items-center gap-2 rounded-md px-1.5 py-1 text-[11px] transition hover:bg-[var(--brand-soft)]"
+                  className="flex items-center gap-2 rounded-md px-1.5 py-1 text-[13px] transition hover:bg-[var(--brand-soft)]"
                 >
                   <span
                     className="block h-1.5 w-1.5 shrink-0 rounded-full"
@@ -174,7 +174,7 @@ export function UpcomingCalendar({
                   <span className="line-clamp-1 flex-1 font-bold" style={{ color: "var(--text)" }}>
                     {e.title}
                   </span>
-                  <span className="shrink-0 font-mono text-[9px]" style={{ color: "var(--text-muted)" }}>
+                  <span className="shrink-0 font-mono text-[12px]" style={{ color: "var(--text-muted)" }}>
                     {when}
                   </span>
                 </Link>

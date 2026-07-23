@@ -111,7 +111,7 @@ html[lang="en"] body {
 .h-display-sm { font-size: clamp(22px, 2vw, 30px); line-height: 1.15; letter-spacing: -0.01em; }
 .eyebrow {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px; font-weight: 500; line-height: 1;
+  font-size: 13px; font-weight: 500; line-height: 1;
   text-transform: uppercase; letter-spacing: 0.16em;
   color: color-mix(in srgb, var(--text) 70%, transparent);
 }
@@ -261,7 +261,7 @@ html[lang="en"] body {
     border-color: color-mix(in srgb, var(--brand) 35%, transparent);
   }
 
-  .btn-sm { @apply px-2.5 py-1 text-[11px] rounded-md; }
+  .btn-sm { @apply px-2.5 py-1 text-[13px] rounded-md; }
   .btn-lg { @apply px-5 py-2.5 text-sm; }
 
   /* Icon-only round button */
@@ -309,7 +309,7 @@ html[lang="en"] body {
   .kpi {
     @apply card card-pad relative overflow-hidden card-hover;
   }
-  .kpi-label { @apply text-[11px] font-bold uppercase tracking-widest; color: var(--text-muted); }
+  .kpi-label { @apply text-[13px] font-bold uppercase tracking-widest; color: var(--text-muted); }
   .kpi-value { @apply mt-1 text-3xl font-black; color: var(--text); letter-spacing: -0.02em; animation: count-up .55s ease both; }
   .kpi-delta-up { @apply mt-1 inline-flex items-center gap-1 text-xs font-bold; color: #0a8e54; }
   .kpi-delta-down { @apply mt-1 inline-flex items-center gap-1 text-xs font-bold; color: #c0392b; }
@@ -325,7 +325,7 @@ html[lang="en"] body {
   .table-scroll { overflow-x: auto; }
   .table { @apply min-w-full text-sm; }
   .table thead { background: color-mix(in srgb, var(--brand) 4%, var(--surface-elevated)); color: var(--text-muted); }
-  .table th { @apply px-4 py-3 text-[11px] font-bold uppercase tracking-wider; }
+  .table th { @apply px-4 py-3 text-[13px] font-bold uppercase tracking-wider; }
   html[dir="rtl"] .table th, html[dir="rtl"] .table td { text-align: right; }
   html[dir="ltr"] .table th, html[dir="ltr"] .table td { text-align: left; }
   .table td { @apply px-4 py-3 align-middle; color: var(--text); border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent); }
@@ -333,7 +333,7 @@ html[lang="en"] body {
   .table tbody tr:hover { background: color-mix(in srgb, var(--brand) 4%, transparent); }
 
   /* ---------- Badges ---------- */
-  .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold; }
+  .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[13px] font-bold; }
   .badge-emerald { @apply badge; background: color-mix(in srgb, #10b981 14%, transparent); color: #0a8e54; }
   .badge-blue   { @apply badge; background: rgba(59,130,246,.12); color: #1c5fbe; }
   .badge-amber  { @apply badge; background: rgba(245,158,11,.14); color: #92400e; }
@@ -436,7 +436,7 @@ html[lang="en"] body {
   .pill {
     padding: 4px 12px;
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     color: var(--text-muted);
     transition: all .25s ease;
@@ -681,7 +681,7 @@ html[dir="rtl"] .toast-progress { transform-origin: right center; }
   gap: 4px;
   padding: 5px 10px;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--brand-deep);
   background: var(--brand-soft);
@@ -728,7 +728,7 @@ html[dir="rtl"] .toast-progress { transform-origin: right center; }
   gap: 6px;
   padding: 5px 10px;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   background: var(--text);
   color: var(--surface-elevated);
@@ -751,7 +751,7 @@ html[dir="rtl"] .sidebar-link:focus-visible .sidebar-tooltip {
   border-radius: 5px;
   background: var(--accent);
   color: #1a0e02;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 900;
 }
 
@@ -816,7 +816,7 @@ html[dir="rtl"] .sidebar-drawer-panel { --drawer-from: -100%; }
   margin-inline-start: auto;
   border-radius: 5px;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.04em;
   background: color-mix(in srgb, var(--text-muted) 10%, transparent);
@@ -916,7 +916,7 @@ html[dir="rtl"] .sidebar-drawer-panel { --drawer-from: -100%; }
   align-items: center;
   gap: 5px;
   margin-top: 5px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #dc2626;
   animation: form-error-rise .25s cubic-bezier(.21,.92,.32,1) both;

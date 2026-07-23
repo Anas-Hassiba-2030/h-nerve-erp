@@ -22,7 +22,7 @@
 .dl-page .co-tile .co-nm { font-size: 15px; font-weight: 700; color: var(--ink); }
 
 /* ── category tag (ops.css) ── */
-.dl-page .ops-tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 11px; border-radius: 999px; }
+.dl-page .ops-tag { display: inline-block; font-size: 13px; font-weight: 700; padding: 3px 11px; border-radius: 999px; }
 .dl-page .ops-tag.ok { color: #3c7a5c; background: rgba(126,155,134,.2); }
 .dl-page .ops-tag.warn { color: #8a6a1f; background: rgba(194,163,90,.2); }
 .dl-page .ops-tag.crit { color: #9a5648; background: rgba(168,106,92,.18); }

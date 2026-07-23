@@ -57,7 +57,7 @@
    the bare element the same daylight treatment, scoped to the overview panel */
 .dl-page .ops-panel table { width: 100%; border-collapse: collapse; }
 .dl-page .ops-panel th, .dl-page .ops-panel td { text-align: start; padding: 13px 12px; font-size: 14px; border-bottom: 1px solid var(--line); }
-.dl-page .ops-panel th { font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--ink-muted); text-transform: none; }
+.dl-page .ops-panel th { font-size: 13px; font-weight: 700; letter-spacing: .04em; color: var(--ink-muted); text-transform: none; }
 .dl-page .ops-panel td { color: var(--ink); }
 .dl-page .ops-panel td.num, .dl-page .ops-panel th.num { text-align: end; font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
 .dl-page .ops-panel tbody tr { transition: background .25s; }
@@ -65,17 +65,17 @@
 .dl-page .ops-panel tr:last-child td { border-bottom: 0; }
 
 /* ── batch drawer: eyebrow / heading / sub / section label (ops.css) ──── */
-.dl-page .dr-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .1em; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; }
+.dl-page .dr-eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .1em; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; }
 .dl-page .dr-title { font-family: var(--dl-display); font-size: 26px; font-weight: 600; color: var(--emerald); margin-bottom: 4px; }
 .dl-page .dr-sub { font-size: 13px; color: var(--ink-muted); margin-bottom: 18px; }
-.dl-page .dr-sec { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--gold); text-transform: uppercase; margin: 18px 0 10px; }
+.dl-page .dr-sec { font-size: 13px; font-weight: 700; letter-spacing: .08em; color: var(--gold); text-transform: uppercase; margin: 18px 0 10px; }
 .dl-page .dr-msg { display: block; margin-top: 18px; text-align: center; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--emerald-soft), var(--emerald)); border-radius: 12px; padding: 12px; text-decoration: none; }
 
 /* quality gauge (ops.css .gauge) */
 .dl-page .gauge { text-align: center; }
 .dl-page .gauge svg { transform: rotate(-90deg); }
 .dl-page .gauge .gv { font-family: var(--dl-display); font-variant-numeric: tabular-nums; font-size: 18px; font-weight: 600; color: var(--emerald); margin-top: -34px; display: block; position: relative; }
-.dl-page .gauge .gl { font-size: 11px; color: var(--ink-muted); margin-top: 14px; }
+.dl-page .gauge .gl { font-size: 13px; color: var(--ink-muted); margin-top: 14px; }
 
 /* production bars (_section.css .bars) */
 .dl-page .bars { display: flex; align-items: flex-end; gap: 8px; height: 170px; padding-top: 10px; }

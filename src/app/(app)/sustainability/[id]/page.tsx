@@ -103,7 +103,7 @@ function ScoreGauge({
           {Math.round(clamped)}
         </div>
         <div
-          className="text-[10px] font-bold uppercase tracking-widest"
+          className="text-[12px] font-bold uppercase tracking-widest"
           style={{ color: "var(--ink-muted)" }}
         >
           {en ? "out of 100" : "من 100"}
@@ -198,7 +198,7 @@ export default async function SustainabilityDetailPage(
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <span
-                  className="rounded-full px-2 py-0.5 text-[10px] font-bold"
+                  className="rounded-full px-2 py-0.5 text-[12px] font-bold"
                   style={{
                     background: "rgba(255,255,255,.2)",
                     border: "1px solid rgba(255,255,255,.3)",
@@ -208,7 +208,7 @@ export default async function SustainabilityDetailPage(
                 </span>
                 <Link
                   href={`/companies/${score.company.id}`}
-                  className="rounded-full px-2 py-0.5 text-[10px] font-bold transition hover:bg-white/30"
+                  className="rounded-full px-2 py-0.5 text-[12px] font-bold transition hover:bg-white/30"
                   style={{
                     background: "rgba(255,255,255,.2)",
                     border: "1px solid rgba(255,255,255,.3)",
@@ -312,7 +312,7 @@ export default async function SustainabilityDetailPage(
                         {en ? row.labelEn : row.label}
                       </div>
                       <div
-                        className="text-[10px] font-bold uppercase tracking-widest"
+                        className="text-[12px] font-bold uppercase tracking-widest"
                         style={{ color: "var(--ink-muted)" }}
                         dir="ltr"
                       >
@@ -346,7 +346,7 @@ export default async function SustainabilityDetailPage(
                 </div>
                 {d ? (
                   <div
-                    className="mt-2 text-[11px] font-bold"
+                    className="mt-2 text-[13px] font-bold"
                     style={{ color: d.up ? "#0a8e54" : "#c0392b" }}
                   >
                     {d.up ? "↑" : "↓"} {d.value}{" "}

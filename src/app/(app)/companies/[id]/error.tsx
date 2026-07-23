@@ -35,7 +35,7 @@ export default function Error({
           حدث خطأ غير متوقع أثناء جلب بيانات هذه الشركة. الفريق التقني تلقّى الإشعار — يمكنك إعادة المحاولة.
         </p>
         {error.digest ? (
-          <p className="mt-2 font-mono text-[10px]" style={{ color: "var(--ink-muted)" }}>
+          <p className="mt-2 font-mono text-[12px]" style={{ color: "var(--ink-muted)" }}>
             مرجع الخطأ: {error.digest}
           </p>
         ) : null}

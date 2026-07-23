@@ -30,7 +30,7 @@
 /* ── status tags (warn + crit complete the set daylight.css already has) ── */
 .dl-page .tag.warn { color: #8a6a1f; background: rgba(194,163,90,.2); }
 .dl-page .tag.crit { color: #9a5648; background: rgba(168,106,92,.16); }
-.dl-page .ops-tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 11px; border-radius: 999px; }
+.dl-page .ops-tag { display: inline-block; font-size: 13px; font-weight: 700; padding: 3px 11px; border-radius: 999px; }
 .dl-page .ops-tag.ok { color: #3c7a5c; background: rgba(126,155,134,.2); }
 .dl-page .ops-tag.warn { color: #8a6a1f; background: rgba(194,163,90,.2); }
 .dl-page .ops-tag.crit { color: #9a5648; background: rgba(168,106,92,.18); }
@@ -42,7 +42,7 @@
 .dl-page .stage .dot { width: 20px; height: 20px; border-radius: 50%; background: var(--line); border: 2px solid var(--line); transition: all .4s cubic-bezier(.22,1,.36,1); z-index: 2; }
 .dl-page .stage.done .dot { background: var(--emerald); border-color: var(--emerald); }
 .dl-page .stage.active .dot { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 0 4px rgba(194,163,90,.25); }
-.dl-page .stage .sl { font-size: 10.5px; color: var(--ink-muted); }
+.dl-page .stage .sl { font-size: 12px; color: var(--ink-muted); }
 .dl-page .stage.active .sl, .dl-page .stage.done .sl { color: var(--ink); font-weight: 700; }
 .dl-page .stage:not(:last-child)::after { content: ""; position: absolute; top: 9px; inset-inline-start: 50%; width: 100%; height: 2px; background: var(--line); z-index: 1; }
 .dl-page .stage.done:not(:last-child)::after { background: var(--emerald); }
@@ -53,7 +53,7 @@
 .dl-page .co-tile:hover { transform: translateY(-3px); border-color: var(--gold); box-shadow: 0 16px 40px -22px rgba(31,77,63,.4); }
 .dl-page .co-tile .co-logo { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; font-family: var(--dl-display); font-size: 20px; font-weight: 600; color: #fff; background: linear-gradient(140deg, var(--emerald-soft), var(--emerald)); margin-bottom: 12px; }
 .dl-page .co-tile .co-nm { font-size: 15px; font-weight: 700; color: var(--ink); }
-.dl-page .co-tile .co-sec { font-size: 11.5px; color: var(--gold); margin-top: 2px; }
-.dl-page .co-tile .co-meta { display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+.dl-page .co-tile .co-sec { font-size: 13px; color: var(--gold); margin-top: 2px; }
+.dl-page .co-tile .co-meta { display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
 
 @media (prefers-reduced-motion: reduce) { .dl-page .ops-panel, .dl-page .stage .dot { animation: none !important; transition: none !important; } }

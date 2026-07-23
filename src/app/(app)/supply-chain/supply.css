@@ -7,14 +7,14 @@
 .dl-page #sankey { width: 100%; height: 260px; }
 .dl-page .sk-band { transition: opacity .25s, stroke-width .25s; cursor: pointer; }
 .dl-page .sk-node rect { rx: 5; }
-.dl-page .sk-label { font-family: var(--ui); font-size: 12px; font-weight: 700; fill: var(--ink); }
-.dl-page .sk-vol { position: absolute; background: rgba(20,46,38,.95); color: #fff; font-size: 12px; padding: 6px 11px; border-radius: 8px; pointer-events: none; opacity: 0; transition: opacity .2s; z-index: 10; white-space: nowrap; }
+.dl-page .sk-label { font-family: var(--ui); font-size: 13px; font-weight: 700; fill: var(--ink); }
+.dl-page .sk-vol { position: absolute; background: rgba(20,46,38,.95); color: #fff; font-size: 13px; padding: 6px 11px; border-radius: 8px; pointer-events: none; opacity: 0; transition: opacity .2s; z-index: 10; white-space: nowrap; }
 
 .dl-page .fc-card { background: var(--cream); border: 1px solid var(--line); border-radius: 14px; padding: 0; margin-bottom: 10px; overflow: hidden; transition: border-color .25s; }
 .dl-page .fc-head { display: flex; align-items: center; gap: 14px; padding: 15px 18px; cursor: pointer; }
 .dl-page .fc-ring { position: relative; width: 46px; height: 46px; flex: 0 0 46px; }
 .dl-page .fc-ring svg { transform: rotate(-90deg); }
-.dl-page .fc-ring .v { position: absolute; inset: 0; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: var(--emerald); font-variant-numeric: tabular-nums; }
+.dl-page .fc-ring .v { position: absolute; inset: 0; display: grid; place-items: center; font-size: 13px; font-weight: 700; color: var(--emerald); font-variant-numeric: tabular-nums; }
 .dl-page .fc-body { flex: 1; min-width: 0; }
 .dl-page .fc-title { font-size: 14px; font-weight: 700; color: var(--ink); }
 .dl-page .fc-meta { display: flex; align-items: center; gap: 10px; margin-top: 5px; font-size: 13px; color: #5a5347; }
@@ -31,13 +31,13 @@
 .dl-page .fc-card.pulse-no { animation: pno .5s; }
 @keyframes pok { 0% { box-shadow: 0 0 0 0 rgba(126,155,134,.5); } 100% { box-shadow: 0 0 0 14px rgba(126,155,134,0); } }
 @keyframes pno { 0% { box-shadow: 0 0 0 0 rgba(168,106,92,.5); } 100% { box-shadow: 0 0 0 14px rgba(168,106,92,0); } }
-.dl-page .fc-status { font-size: 11px; font-weight: 700; padding: 4px 11px; border-radius: 999px; }
+.dl-page .fc-status { font-size: 13px; font-weight: 700; padding: 4px 11px; border-radius: 999px; }
 .dl-page .fc-status.ok { color: #3c7a5c; background: rgba(126,155,134,.2); }
 .dl-page .fc-status.no { color: #9a5648; background: rgba(168,106,92,.18); }
 .dl-page .fc-explain { max-height: 0; overflow: hidden; transition: max-height .4s cubic-bezier(.22,1,.36,1); background: rgba(46,107,87,.06); border-top: 1px solid transparent; }
 .dl-page .fc-card.open .fc-explain { max-height: 200px; border-top-color: var(--line); }
 .dl-page .fc-explain-in { padding: 17px 20px; font-size: 15px; line-height: 1.75; color: #241f18; }
-.dl-page .fc-explain-in .eb { font-size: 11.5px; font-weight: 700; letter-spacing: .1em; color: #8a6a1f; text-transform: uppercase; margin-bottom: 9px; }
+.dl-page .fc-explain-in .eb { font-size: 13px; font-weight: 700; letter-spacing: .1em; color: #8a6a1f; text-transform: uppercase; margin-bottom: 9px; }
 .dl-page .fc-explain-in b { color: var(--emerald); font-weight: 700; }
 .dl-page .fc-card.open .fc-explain { max-height: 260px; border-top-color: var(--line); }
 @media (prefers-reduced-motion: reduce) { .dl-page .fc-card.pulse-ok, .dl-page .fc-card.pulse-no { animation: none; } .dl-page .fc-explain { transition: none; } }

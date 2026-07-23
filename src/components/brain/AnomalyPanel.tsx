@@ -47,7 +47,7 @@ export function AnomalyPanel({
         <div className="text-[12px] font-extrabold" style={{ color: "var(--text)" }}>
           {ar ? "كل المؤشرات طبيعية" : "All metrics normal"}
         </div>
-        <div className="text-[10.5px]" style={{ color: "var(--text-muted)" }}>
+        <div className="text-[12px]" style={{ color: "var(--text-muted)" }}>
           {emptyMessage ? (ar ? emptyMessage.ar : emptyMessage.en) : (ar ? "لا شذوذات تستحق الذكر" : "No anomalies detected")}
         </div>
       </div>
@@ -87,7 +87,7 @@ export function AnomalyPanel({
                     {t.headline}
                   </span>
                   <span
-                    className="rounded-full px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest"
+                    className="rounded-full px-1.5 py-0.5 text-[12px] font-black uppercase tracking-widest"
                     style={{
                       background: `color-mix(in srgb, ${color} 14%, transparent)`,
                       color: color,
@@ -97,14 +97,14 @@ export function AnomalyPanel({
                   </span>
                   {a.deviationPct !== 0 ? (
                     <span
-                      className="font-mono text-[10.5px] font-bold"
+                      className="font-mono text-[12px] font-bold"
                       style={{ color: a.deviationPct > 0 ? "#0a8e54" : "#dc2626" }}
                     >
                       {a.deviationPct > 0 ? "+" : ""}{a.deviationPct.toFixed(0)}%
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-1 text-[11px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                <p className="mt-1 text-[13px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
                   {t.explanation}
                 </p>
               </div>

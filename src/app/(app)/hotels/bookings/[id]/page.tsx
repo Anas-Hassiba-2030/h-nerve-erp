@@ -154,7 +154,7 @@ export default async function BookingDetailPage(
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <span
-                  className="rounded-full px-2 py-0.5 font-mono text-[11px]"
+                  className="rounded-full px-2 py-0.5 font-mono text-[13px]"
                   style={{
                     background: "rgba(255,255,255,.2)",
                     border: "1px solid rgba(255,255,255,.3)",
@@ -165,7 +165,7 @@ export default async function BookingDetailPage(
                 <StatusBadge status={booking.status} />
                 <Link
                   href={`/hotels/${booking.hotel.id}`}
-                  className="rounded-full px-2 py-0.5 text-[10px] font-bold transition hover:bg-white/30"
+                  className="rounded-full px-2 py-0.5 text-[12px] font-bold transition hover:bg-white/30"
                   style={{
                     background: "rgba(255,255,255,.2)",
                     border: "1px solid rgba(255,255,255,.3)",
@@ -178,7 +178,7 @@ export default async function BookingDetailPage(
               <h2 className="mt-1 text-3xl font-bold md:text-4xl">
                 {booking.guestName}
               </h2>
-              <div className="mt-1 flex flex-wrap gap-2 text-[11px]">
+              <div className="mt-1 flex flex-wrap gap-2 text-[13px]">
                 <span
                   className="flex items-center gap-1.5 rounded-full px-3 py-1 font-bold"
                   style={{
@@ -215,7 +215,7 @@ export default async function BookingDetailPage(
 
             {/* Revenue block */}
             <div className="text-end">
-              <div className="text-[10px] font-bold uppercase tracking-[0.22em] opacity-90">
+              <div className="text-[12px] font-bold uppercase tracking-[0.22em] opacity-90">
                 {en ? "Booking revenue" : "إيراد الحجز"}
               </div>
               <div
@@ -227,7 +227,7 @@ export default async function BookingDetailPage(
               >
                 {formatMoney(booking.revenue)}
               </div>
-              <div className="text-[11px] opacity-90">
+              <div className="text-[13px] opacity-90">
                 {formatNumber(nights)} {en ? "nights" : "ليلة"}
               </div>
             </div>
@@ -250,13 +250,13 @@ export default async function BookingDetailPage(
         >
           <div className="mb-3 flex items-center justify-between gap-4">
             <div>
-              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
+              <div className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
                 {en ? "Check-in" : "وصول"}
               </div>
               <div className="text-base font-bold" style={{ color: "var(--ink)" }}>
                 {formatShortDate(booking.checkIn)}
               </div>
-              <div className="text-[10px]" style={{ color: "var(--ink-muted)" }}>
+              <div className="text-[12px]" style={{ color: "var(--ink-muted)" }}>
                 {formatDateTime(booking.checkIn)}
               </div>
             </div>
@@ -271,18 +271,18 @@ export default async function BookingDetailPage(
               </div>
             </div>
             <div className="text-end">
-              <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
+              <div className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
                 {en ? "Check-out" : "مغادرة"}
               </div>
               <div className="text-base font-bold" style={{ color: "var(--ink)" }}>
                 {formatShortDate(booking.checkOut)}
               </div>
-              <div className="text-[10px]" style={{ color: "var(--ink-muted)" }}>
+              <div className="text-[12px]" style={{ color: "var(--ink-muted)" }}>
                 {formatDateTime(booking.checkOut)}
               </div>
             </div>
           </div>
-          <div className="text-center text-[11px]" style={{ color: "var(--ink-muted)" }}>
+          <div className="text-center text-[13px]" style={{ color: "var(--ink-muted)" }}>
             {formatNumber(nights)} {en ? "nights" : "ليلة"} •{" "}
             {formatNumber(booking.rooms)} {en ? "rooms" : "غرفة"} •{" "}
             {formatNumber(booking.guests)} {en ? "guests" : "ضيف"}
@@ -326,7 +326,7 @@ export default async function BookingDetailPage(
                           </span>
                           <StatusBadge status={b.status} />
                         </div>
-                        <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                        <div className="text-[13px]" style={{ color: "var(--ink-muted)" }}>
                           {en ? (b.hotel.nameEn ?? b.hotel.name) : b.hotel.name} •{" "}
                           {formatShortDate(b.checkIn)} → {formatShortDate(b.checkOut)}
                         </div>
@@ -355,7 +355,7 @@ export default async function BookingDetailPage(
                 <div className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
                   {en ? (booking.hotel.nameEn ?? booking.hotel.name) : booking.hotel.name}
                 </div>
-                <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                <div className="text-[13px]" style={{ color: "var(--ink-muted)" }}>
                   {booking.hotel.city} •{" "}
                   {(en ? COUNTRY_NAMES_EN : COUNTRY_NAMES)[booking.hotel.country] ?? booking.hotel.country}{" "}
                   • {loc(TIERS_AR, TIERS_EN, locale, booking.hotel.tier)} •{" "}

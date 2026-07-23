@@ -219,7 +219,7 @@ export default async function DairyDetailPage(
               }}
             />
           </div>
-          <div className="mt-1 text-[10px]" style={{ color: "var(--ink-muted)" }}>
+          <div className="mt-1 text-[12px]" style={{ color: "var(--ink-muted)" }}>
             {Math.round(lifePct * 100)}{en ? "% of period elapsed" : "٪ من الفترة منقضية"}
           </div>
         </DaylightPanel>
@@ -230,7 +230,7 @@ export default async function DairyDetailPage(
             {/* Sibling batches */}
             <DaylightPanel
               title={en ? "Previous batches of the same product" : "دفعات سابقة لنفس المنتج"}
-              aside={<Link href="/dairy" className="text-[11px] font-bold" style={{ color: "var(--gold)" }}>{en ? "View all ←" : "عرض الكل ←"}</Link>}
+              aside={<Link href="/dairy" className="text-[13px] font-bold" style={{ color: "var(--gold)" }}>{en ? "View all ←" : "عرض الكل ←"}</Link>}
             >
               {siblings.length === 0 ? (
                 <p className="text-xs" style={{ color: "var(--ink-muted)" }}>
@@ -259,7 +259,7 @@ export default async function DairyDetailPage(
                           </span>
                           <StatusBadge status={s.status} />
                         </div>
-                        <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                        <div className="text-[13px]" style={{ color: "var(--ink-muted)" }}>
                           {formatShortDate(s.productionDate)} →{" "}
                           {formatShortDate(s.expiryDate)}
                         </div>

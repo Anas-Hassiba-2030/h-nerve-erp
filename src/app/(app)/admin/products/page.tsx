@@ -68,7 +68,7 @@ function Pills({
   return values.length === 0 ? null : (
     <div className="flex flex-wrap items-center gap-1.5">
       <span
-        className="text-[10px] font-bold uppercase tracking-widest"
+        className="text-[12px] font-bold uppercase tracking-widest"
         style={{ color: "var(--ink-muted)" }}
       >
         {label}
@@ -280,7 +280,7 @@ export default async function ProductsAdminPage(
                 <span className="truncate text-sm" style={{ color: "var(--ink)" }}>
                   {p.name}
                 </span>
-                <span className="ms-auto flex flex-wrap items-center gap-2 text-[11px]">
+                <span className="ms-auto flex flex-wrap items-center gap-2 text-[13px]">
                   <span
                     className={
                       p.quantity < (p.reorderPoint ?? LOW_STOCK) / 2
@@ -320,7 +320,7 @@ export default async function ProductsAdminPage(
                 style={{ borderTop: "1px solid var(--line)" }}
               >
                 <div
-                  className="px-3 py-2 text-[11px] font-bold uppercase tracking-widest"
+                  className="px-3 py-2 text-[13px] font-bold uppercase tracking-widest"
                   style={{ color: "var(--ink-muted)" }}
                 >
                   {ar ? "سجل الاستيراد لهذا المنتج" : "Import history for this product"}
@@ -380,7 +380,7 @@ export default async function ProductsAdminPage(
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div
-                    className="text-[11px] font-bold uppercase tracking-widest"
+                    className="text-[13px] font-bold uppercase tracking-widest"
                     style={{ color: "var(--ink-muted)" }}
                   >
                     {ar ? "سجل الحركات" : "Movement history"}

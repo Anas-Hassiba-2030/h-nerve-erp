@@ -135,10 +135,10 @@ export default async function CropDetailPage(
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <StatusBadge status={crop.status} />
-              <Link href={`/farms/${crop.farm.id}`} className="text-[11px] font-bold hover:underline" style={{ color: "var(--gold)" }}>
+              <Link href={`/farms/${crop.farm.id}`} className="text-[13px] font-bold hover:underline" style={{ color: "var(--gold)" }}>
                 <Tractor className="me-1 inline h-3 w-3" />{farmName}
               </Link>
-              <Link href={`/companies/${crop.farm.company.id}`} className="text-[11px] font-bold hover:underline" style={{ color: "var(--ink-muted)" }}>
+              <Link href={`/companies/${crop.farm.company.id}`} className="text-[13px] font-bold hover:underline" style={{ color: "var(--ink-muted)" }}>
                 {crop.farm.company.name}
               </Link>
             </div>
@@ -186,12 +186,12 @@ export default async function CropDetailPage(
       >
         <div className="mb-2 flex items-center justify-between text-xs">
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>{en ? "Planted" : "زُرع"}</div>
+            <div className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>{en ? "Planted" : "زُرع"}</div>
             <div className="font-bold" style={{ color: "var(--ink)" }}>{formatShortDate(crop.plantedAt)}</div>
           </div>
           <ArrowRight className="h-4 w-4" style={{ color: "var(--ink-muted)" }} />
           <div className="text-end">
-            <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>{en ? "Expected harvest" : "حصاد متوقع"}</div>
+            <div className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>{en ? "Expected harvest" : "حصاد متوقع"}</div>
             <div className="font-bold" style={{ color: "var(--ink)" }}>{formatShortDate(crop.expectedHarvest)}</div>
           </div>
         </div>
@@ -210,14 +210,14 @@ export default async function CropDetailPage(
             return (
               <div className="space-y-3">
                 <div>
-                  <div className="mb-1 flex items-center justify-between text-[11px] font-bold" style={{ color: "var(--ink-muted)" }}>
+                  <div className="mb-1 flex items-center justify-between text-[13px] font-bold" style={{ color: "var(--ink-muted)" }}>
                     <span>{en ? "Expected" : "متوقع"}</span>
                     <span className="font-mono" style={{ color: "var(--ink)" }}>{formatNumber(crop.expectedYieldKg)} {en ? "kg" : "كغم"}</span>
                   </div>
                   <div className="dl-bar"><i style={{ width: `${expectedPct}%`, opacity: 0.55 }} /></div>
                 </div>
                 <div>
-                  <div className="mb-1 flex items-center justify-between text-[11px] font-bold" style={{ color: "var(--ink-muted)" }}>
+                  <div className="mb-1 flex items-center justify-between text-[13px] font-bold" style={{ color: "var(--ink-muted)" }}>
                     <span>{en ? "Actual" : "فعلي"}</span>
                     <span className="font-mono" style={{ color: (yieldDelta ?? 0) >= 0 ? "#0a8e54" : "#c0392b" }}>{formatNumber(crop.actualYieldKg)} {en ? "kg" : "كغم"}</span>
                   </div>
@@ -258,7 +258,7 @@ export default async function CropDetailPage(
                         <span className="truncate text-sm font-bold" style={{ color: "var(--ink)" }}>{c.name}</span>
                         <StatusBadge status={c.status} />
                       </div>
-                      <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                      <div className="text-[13px]" style={{ color: "var(--ink-muted)" }}>
                         {en ? "Expected harvest " : "حصاد متوقع "}{formatShortDate(c.expectedHarvest)}
                       </div>
                     </Link>
@@ -278,7 +278,7 @@ export default async function CropDetailPage(
                   <li key={c.id} className="flex items-center justify-between gap-3 py-2.5">
                     <Link href={`/farms/crops/${c.id}`} className="min-w-0 flex-1 hover:underline">
                       <div className="truncate text-sm font-bold" style={{ color: "var(--ink)" }}>{c.farm.name}</div>
-                      <div className="text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                      <div className="text-[13px]" style={{ color: "var(--ink-muted)" }}>
                         {formatShortDate(c.plantedAt)} → {formatShortDate(c.expectedHarvest)}
                       </div>
                     </Link>

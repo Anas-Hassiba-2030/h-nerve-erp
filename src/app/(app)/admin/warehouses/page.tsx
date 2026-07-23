@@ -168,7 +168,7 @@ export default async function WarehousesPage(
                       {w.address}
                     </span>
                   ) : null}
-                  <span className="ms-auto flex flex-wrap items-center gap-2 text-[11px]">
+                  <span className="ms-auto flex flex-wrap items-center gap-2 text-[13px]">
                     <span className="badge-slate">{tLabel(w.type)}</span>
                     <span
                       className={w.active ? "badge-emerald" : "badge-slate"}
@@ -203,7 +203,7 @@ export default async function WarehousesPage(
 
                   <div>
                     <div
-                      className="mb-1 text-[10px] font-bold uppercase tracking-widest"
+                      className="mb-1 text-[12px] font-bold uppercase tracking-widest"
                       style={{ color: "var(--ink-muted)" }}
                     >
                       {ar ? "المنتجات في هذا المستودع" : "Products at this warehouse"}

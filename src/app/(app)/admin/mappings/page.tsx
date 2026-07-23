@@ -154,7 +154,7 @@ export default async function MappingsAdminPage() {
               <div key={m.id}>
                 {showTenantHeader ? (
                   <div
-                    className="px-1 pb-1 pt-2 text-[10px] font-bold uppercase tracking-widest"
+                    className="px-1 pb-1 pt-2 text-[12px] font-bold uppercase tracking-widest"
                     style={{ color: "var(--ink-muted)" }}
                   >
                     {ar ? "المستأجر" : "Tenant"}: {m.tenantId}
@@ -181,7 +181,7 @@ export default async function MappingsAdminPage() {
                         {m.description}
                       </span>
                     ) : null}
-                    <span className="ms-auto flex flex-wrap items-center gap-2 text-[11px]">
+                    <span className="ms-auto flex flex-wrap items-center gap-2 text-[13px]">
                       <span className="badge-blue">
                         {formatNumber(fieldCount)} {ar ? "حقل" : "fields"}
                       </span>
@@ -227,7 +227,7 @@ export default async function MappingsAdminPage() {
                           ))}
                           {Object.entries(defaults).map(([k, v]) => (
                             <tr key={`d-${k}`} style={{ borderTop: "1px solid var(--line)" }}>
-                              <td className="px-3 py-2 text-[10px] font-bold uppercase" style={{ color: "var(--ink-muted)" }}>
+                              <td className="px-3 py-2 text-[12px] font-bold uppercase" style={{ color: "var(--ink-muted)" }}>
                                 {ar ? "افتراضي" : "default"}
                               </td>
                               <td className="px-3 py-2" style={{ color: "var(--ink-muted)" }}>→</td>

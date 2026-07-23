@@ -69,11 +69,11 @@ export function NewSOForm({
       >
         <input type="hidden" name="linesJson" value={JSON.stringify(clean)} />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <label className="flex flex-col gap-1 text-[11px] font-bold">
+          <label className="flex flex-col gap-1 text-[13px] font-bold">
             {ar ? "المستأجر" : "Tenant"}
             <input name="tenantId" defaultValue={tenantDefault} required className="input text-xs" />
           </label>
-          <label className="flex flex-col gap-1 text-[11px] font-bold">
+          <label className="flex flex-col gap-1 text-[13px] font-bold">
             {ar ? "العميل" : "Customer"}
             {customers.length > 0 ? (
               <select name="customerId" required defaultValue="" className="input text-xs">
@@ -98,11 +98,11 @@ export function NewSOForm({
               />
             )}
           </label>
-          <label className="flex flex-col gap-1 text-[11px] font-bold">
+          <label className="flex flex-col gap-1 text-[13px] font-bold">
             {ar ? "مطلوب بحلول" : "Required by"}
             <input type="date" name="requiredBy" className="input text-xs" />
           </label>
-          <label className="flex flex-col gap-1 text-[11px] font-bold">
+          <label className="flex flex-col gap-1 text-[13px] font-bold">
             {ar ? "ملاحظة" : "Note"}
             <input name="note" className="input text-xs" />
           </label>
@@ -113,7 +113,7 @@ export function NewSOForm({
             const sel = products.find((p) => p.id === l.productId);
             return (
               <div key={i} className="flex flex-wrap items-end gap-2">
-                <label className="flex flex-1 flex-col gap-1 text-[11px] font-bold">
+                <label className="flex flex-1 flex-col gap-1 text-[13px] font-bold">
                   {ar ? "المنتج" : "Product"}
                   <select
                     value={l.productId}
@@ -128,7 +128,7 @@ export function NewSOForm({
                     ))}
                   </select>
                 </label>
-                <label className="flex flex-col gap-1 text-[11px] font-bold">
+                <label className="flex flex-col gap-1 text-[13px] font-bold">
                   {ar ? "الكمية" : "Qty"}
                   <input
                     type="number"
@@ -139,7 +139,7 @@ export function NewSOForm({
                     className="input w-24 text-xs"
                   />
                 </label>
-                <label className="flex flex-col gap-1 text-[11px] font-bold">
+                <label className="flex flex-col gap-1 text-[13px] font-bold">
                   {ar ? "سعر الوحدة" : "Unit price"}
                   <input
                     type="number"

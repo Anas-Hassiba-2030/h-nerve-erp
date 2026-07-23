@@ -27,19 +27,19 @@ export function NewAccountForm({
         className="grid gap-3 px-4 pb-4 sm:grid-cols-2 lg:grid-cols-5"
         style={{ borderTop: "1px solid var(--border)" }}
       >
-        <label className="flex flex-col gap-1 text-[11px] font-bold">
+        <label className="flex flex-col gap-1 text-[13px] font-bold">
           {ar ? "المستأجر" : "Tenant"}
           <input name="tenantId" defaultValue={tenantDefault} required className="input text-xs" />
         </label>
-        <label className="flex flex-col gap-1 text-[11px] font-bold">
+        <label className="flex flex-col gap-1 text-[13px] font-bold">
           {ar ? "الرمز" : "Code"}
           <input name="code" required placeholder="6001" className="input text-xs" />
         </label>
-        <label className="flex flex-col gap-1 text-[11px] font-bold">
+        <label className="flex flex-col gap-1 text-[13px] font-bold">
           {ar ? "الاسم" : "Name"}
           <input name="name" required className="input text-xs" />
         </label>
-        <label className="flex flex-col gap-1 text-[11px] font-bold">
+        <label className="flex flex-col gap-1 text-[13px] font-bold">
           {ar ? "النوع" : "Type"}
           <select name="type" required defaultValue="EXPENSE" className="input text-xs">
             {["ASSET", "LIABILITY", "EQUITY", "REVENUE", "EXPENSE", "COGS"].map((t) => (
@@ -47,7 +47,7 @@ export function NewAccountForm({
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-[11px] font-bold">
+        <label className="flex flex-col gap-1 text-[13px] font-bold">
           {ar ? "الوصف" : "Description"}
           <input name="description" className="input text-xs" />
         </label>

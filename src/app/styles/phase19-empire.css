@@ -49,7 +49,7 @@
   gap: 8px;
   padding-bottom: 14px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--emp-accent);
@@ -97,7 +97,7 @@
 }
 .emp-stat-label {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 9.5px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--emp-ink-3);
@@ -188,7 +188,7 @@
   align-items: center;
   gap: 6px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.04em;
   color: var(--emp-ink-3);
   text-transform: uppercase;
@@ -196,7 +196,7 @@
 .emp-tile-meta-sep { color: var(--emp-rule-strong); }
 .emp-tile-tag {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   font-weight: 700;
   padding: 2px 6px;
@@ -246,7 +246,7 @@
 }
 .emp-tile-iq-delta {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.04em;
   padding: 2px 6px;
   border: 1px solid currentColor;
@@ -257,7 +257,7 @@
 .emp-tile-iq-delta[data-dir="flat"] { color: var(--emp-ink-3); }
 .emp-tile-iq-label {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 9.5px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--emp-ink-3);
@@ -308,7 +308,7 @@
 }
 .emp-foot-stat-label {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--emp-ink-3);
@@ -357,7 +357,7 @@
 .emp-tile-hover-eyebrow {
   margin: 0;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--emp-accent-soft);
@@ -374,7 +374,7 @@
 .emp-tile-hover-meta {
   margin: 0;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.04em;
   color: var(--emp-rule-strong);
   font-variant-numeric: tabular-nums;
@@ -383,7 +383,7 @@
 .emp-foot {
   max-width: 1240px;
   margin: 24px auto 0;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.005em;
   color: var(--emp-ink-3);
   font-style: italic;
@@ -409,7 +409,7 @@
 .emp-strip-eyebrow {
   display: block;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--emp-ink-3);
@@ -451,7 +451,7 @@
 .emp-strip-delta[data-dir="down"] { color: var(--emp-down); }
 .emp-strip-delta[data-dir="flat"] { color: var(--emp-ink-3); }
 .emp-strip-prev {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--emp-ink-3);
 }
 
@@ -490,12 +490,12 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--emp-ink-2);
 }
 .emp-sector-count {
-  font-size: 10px;
+  font-size: 12px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
   letter-spacing: 0.06em;
   color: var(--emp-ink-3);
@@ -519,7 +519,7 @@
   font-weight: 600;
 }
 .emp-sector-kpi-label {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--emp-ink-3);
   letter-spacing: 0.02em;
 }
@@ -552,18 +552,18 @@
   margin-bottom: 12px;
 }
 .emp-panel-title {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--emp-ink-2);
 }
 .emp-panel-meta {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--emp-ink-3);
 }
 .emp-panel-empty {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--emp-ink-3);
   font-style: italic;
   padding: 8px 0;
@@ -592,7 +592,7 @@
   -webkit-box-orient: vertical;
 }
 .emp-feed-sub {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--emp-ink-3);
   display: inline-flex;
   align-items: center;
@@ -623,7 +623,7 @@
 }
 .emp-driver-arrow { color: var(--emp-accent); flex: none; }
 .emp-driver-rationale {
-  font-size: 11.5px;
+  font-size: 13px;
   line-height: 1.45;
   color: var(--emp-ink-3);
   margin: 0;
@@ -633,7 +633,7 @@
   align-items: center;
   gap: 10px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
 }
 .emp-driver-weight[data-dir="up"]   { color: var(--emp-up); }
 .emp-driver-weight[data-dir="down"] { color: var(--emp-down); }
@@ -648,7 +648,7 @@
   gap: 10px;
 }
 .emp-activity-scope {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--emp-ink-2);
   white-space: nowrap;
   overflow: hidden;
@@ -670,7 +670,7 @@
 }
 .emp-activity-num {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--emp-ink);
 }
 

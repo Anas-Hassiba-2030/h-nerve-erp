@@ -9,7 +9,7 @@ export function BrainStatusBadge({ className }: { className?: string }) {
     return (
       <span
         title={`AI engine live · ${cfg.model}`}
-        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest ring-1 bg-emerald-50 text-emerald-700 ring-emerald-200 ${className ?? ""}`}
+        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-widest ring-1 bg-emerald-50 text-emerald-700 ring-emerald-200 ${className ?? ""}`}
       >
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
         LIVE
@@ -18,7 +18,7 @@ export function BrainStatusBadge({ className }: { className?: string }) {
   }
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest ring-1 bg-amber-50 text-amber-700 ring-amber-200 ${className ?? ""}`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-widest ring-1 bg-amber-50 text-amber-700 ring-amber-200 ${className ?? ""}`}
     >
       <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
       STUB MODE

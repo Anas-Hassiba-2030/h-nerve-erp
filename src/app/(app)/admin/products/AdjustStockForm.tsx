@@ -57,7 +57,7 @@ export function AdjustStockForm({
     >
       <input type="hidden" name="productId" value={productId} />
 
-      <label className="flex flex-col gap-1 text-[11px] font-bold">
+      <label className="flex flex-col gap-1 text-[13px] font-bold">
         {ar ? "التغيّر (± وحدات)" : "Delta (± units)"}
         <input
           type="number"
@@ -79,7 +79,7 @@ export function AdjustStockForm({
         ) : null}
       </label>
 
-      <label className="flex flex-1 flex-col gap-1 text-[11px] font-bold">
+      <label className="flex flex-1 flex-col gap-1 text-[13px] font-bold">
         {ar ? "السبب" : "Reason"}
         <input
           type="text"

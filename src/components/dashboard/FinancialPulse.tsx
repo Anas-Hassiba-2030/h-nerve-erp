@@ -87,7 +87,7 @@ export function FinancialPulse({
           );
         })}
       </div>
-      <div className="mt-1 flex justify-between text-[8.5px]" style={{ color: "var(--text-muted)" }}>
+      <div className="mt-1 flex justify-between text-[12px]" style={{ color: "var(--text-muted)" }}>
         {monthLabels.map((l, i) =>
           i === 0 || i === monthLabels.length - 1 || i === Math.floor(monthLabels.length / 2) ? (
             <span key={i} className="font-mono">{l}</span>
@@ -98,7 +98,7 @@ export function FinancialPulse({
       </div>
 
       {/* MoM indicator */}
-      <div className="mt-2 flex items-center justify-between text-[10.5px]">
+      <div className="mt-2 flex items-center justify-between text-[12px]">
         <span className="flex items-center gap-1.5" style={{ color: "var(--text-muted)" }}>
           <Wallet className="h-3 w-3" />
           {ar ? "مقارنة بالشهر السابق" : "Month over month"}
@@ -142,12 +142,12 @@ function Stat({
         border: `1px solid color-mix(in srgb, ${color} 14%, var(--border))`,
       }}
     >
-      <div className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+      <div className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
         {label}
       </div>
       <div className="mt-0.5 flex items-center gap-1.5 text-[12.5px] font-black tabular-nums" style={{ color: "var(--text)" }}>
         {value}
-        {extra ? <span className="text-[10.5px] font-bold">{extra}</span> : null}
+        {extra ? <span className="text-[12px] font-bold">{extra}</span> : null}
       </div>
     </div>
   );

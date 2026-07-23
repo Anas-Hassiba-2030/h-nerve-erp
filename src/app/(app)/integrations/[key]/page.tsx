@@ -115,7 +115,7 @@ export default async function IntegrationDetail(
           {provider.glyph}
         </div>
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--ink-muted)" }}>
+          <div className="text-[12px] font-semibold uppercase tracking-wider" style={{ color: "var(--ink-muted)" }}>
             {ar ? cat.ar : cat.en.toUpperCase()}
             {integration?.account ? (
               <>
@@ -160,7 +160,7 @@ export default async function IntegrationDetail(
           // Phase NS-4 — API-key providers use a dedicated form +
           // server-side validation (real HTTP call to provider).
           (<span
-            className="text-[10px] font-semibold uppercase tracking-wider"
+            className="text-[12px] font-semibold uppercase tracking-wider"
             style={{ color: "var(--ink-muted)" }}
           >
             {ar ? "أدخل المفتاح أدناه" : "Paste your API key below"}

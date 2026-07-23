@@ -110,7 +110,7 @@ export default async function JournalPage(props: { searchParams: Promise<SP> }) 
       <div className="panel reveal mt-3 flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
+            <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
               {ar ? "الفترة" : "Period"}
             </span>
             {periods.length === 0 ? (
@@ -143,7 +143,7 @@ export default async function JournalPage(props: { searchParams: Promise<SP> }) 
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
+          <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-muted)" }}>
             {ar ? "المرجع" : "Reference"}
           </span>
           {[
@@ -187,7 +187,7 @@ export default async function JournalPage(props: { searchParams: Promise<SP> }) 
                   style={{ listStyle: "none" }}
                 >
                   <ArrowRight className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--ink-muted)" }} aria-hidden />
-                  <span className="font-mono text-[11px]" style={{ color: "var(--ink-muted)" }}>
+                  <span className="font-mono text-[13px]" style={{ color: "var(--ink-muted)" }}>
                     {formatDateTime(e.postedAt ?? e.createdAt, ar ? "ar" : "en")}
                   </span>
                   <span className="text-sm font-bold" style={{ color: "var(--ink)" }}>
@@ -203,7 +203,7 @@ export default async function JournalPage(props: { searchParams: Promise<SP> }) 
                   {e.reversesId ? (
                     <span className="badge-amber">{ar ? "عكسي" : "reversal"}</span>
                   ) : null}
-                  <span className="ms-auto flex flex-wrap items-center gap-2 text-[11px]">
+                  <span className="ms-auto flex flex-wrap items-center gap-2 text-[13px]">
                     <span style={{ color: "var(--ink-muted)" }}>
                       {ar ? "بنود" : "lines"} <b style={{ color: "var(--ink)" }}>{e.lines.length}</b>
                     </span>

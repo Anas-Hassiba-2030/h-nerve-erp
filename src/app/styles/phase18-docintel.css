@@ -38,7 +38,7 @@
 }
 .di-drop-eyebrow {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--heri-copper, #b3733e);
@@ -61,7 +61,7 @@
 .di-drop-hint {
   margin: 0;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.08em;
   color: var(--heri-ink-3, #6b6552);
 }
@@ -124,7 +124,7 @@
 }
 .di-reading-eyebrow {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--heri-copper, #b3733e);
@@ -184,7 +184,7 @@
   align-items: center;
   gap: 8px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--heri-copper, #b3733e);
@@ -215,7 +215,7 @@
 }
 .di-modal-eyebrow {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--heri-ink-3, #6b6552);
@@ -281,7 +281,7 @@
 }
 .di-modal-field dt {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--heri-ink-3, #6b6552);
@@ -394,7 +394,7 @@
 }
 .di-clause-page {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.06em;
   color: var(--heri-ink-3, #6b6552);
   font-variant-numeric: tabular-nums;
@@ -460,7 +460,7 @@
 }
 .di-detail-eyebrow {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--heri-ink-3, #6b6552);

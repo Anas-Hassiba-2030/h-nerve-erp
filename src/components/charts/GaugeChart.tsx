@@ -62,12 +62,12 @@ export function GaugeChart({
           <span className="text-base opacity-60">/100</span>
         </div>
         {label ? (
-          <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+          <div className="text-[12px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
             {label}
           </div>
         ) : null}
         {sublabel ? (
-          <div className="mt-0.5 text-[11px]" style={{ color: "var(--text-muted)" }}>
+          <div className="mt-0.5 text-[13px]" style={{ color: "var(--text-muted)" }}>
             {sublabel}
           </div>
         ) : null}

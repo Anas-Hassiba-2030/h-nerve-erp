@@ -39,14 +39,14 @@
   background: linear-gradient(140deg, var(--emerald-soft), var(--emerald)); margin-bottom: 12px;
 }
 .dl-page .co-tile .co-nm { font-size: 15px; font-weight: 700; color: var(--ink); }
-.dl-page .co-tile .co-sec { font-size: 11.5px; color: var(--gold); margin-top: 2px; }
+.dl-page .co-tile .co-sec { font-size: 13px; color: var(--gold); margin-top: 2px; }
 .dl-page .co-tile .co-meta {
   display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; padding-top: 12px;
-  border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-muted); font-variant-numeric: tabular-nums;
+  border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-muted); font-variant-numeric: tabular-nums;
 }
 
 /* status pill — copied 1:1 from ops.css .ops-tag */
-.dl-page .ops-tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 11px; border-radius: 999px; }
+.dl-page .ops-tag { display: inline-block; font-size: 13px; font-weight: 700; padding: 3px 11px; border-radius: 999px; }
 .dl-page .ops-tag.ok { color: #3c7a5c; background: rgba(126, 155, 134, .2); }
 .dl-page .ops-tag.warn { color: #8a6a1f; background: rgba(194, 163, 90, .2); }
 .dl-page .ops-tag.crit { color: #9a5648; background: rgba(168, 106, 92, .18); }

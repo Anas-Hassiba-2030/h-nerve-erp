@@ -53,7 +53,7 @@ export function MappingTester({
       style={{ borderTop: "1px solid var(--border)", paddingTop: "0.75rem" }}
     >
       <div
-        className="text-[10px] font-bold uppercase tracking-widest"
+        className="text-[12px] font-bold uppercase tracking-widest"
         style={{ color: "var(--text-muted)" }}
       >
         {ar ? "اختبار الخريطة" : "Test mapping"}

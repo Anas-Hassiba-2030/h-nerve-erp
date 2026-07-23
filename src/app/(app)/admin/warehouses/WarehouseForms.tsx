@@ -25,7 +25,7 @@ type W = {
 function Fields({ w, ar }: { w?: W; ar: boolean }) {
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      <label className="flex flex-col gap-1 text-[11px] font-bold">
+      <label className="flex flex-col gap-1 text-[13px] font-bold">
         {ar ? "الاسم" : "Name"}
         <input
           name="name"
@@ -34,7 +34,7 @@ function Fields({ w, ar }: { w?: W; ar: boolean }) {
           className="input text-xs"
         />
       </label>
-      <label className="flex flex-col gap-1 text-[11px] font-bold">
+      <label className="flex flex-col gap-1 text-[13px] font-bold">
         {ar ? "النوع" : "Type"}
         <select
           name="type"
@@ -48,7 +48,7 @@ function Fields({ w, ar }: { w?: W; ar: boolean }) {
           ))}
         </select>
       </label>
-      <label className="flex flex-col gap-1 text-[11px] font-bold">
+      <label className="flex flex-col gap-1 text-[13px] font-bold">
         {ar ? "نشط" : "Active"}
         <select
           name="active"
@@ -59,7 +59,7 @@ function Fields({ w, ar }: { w?: W; ar: boolean }) {
           <option value="false">{ar ? "لا" : "No"}</option>
         </select>
       </label>
-      <label className="flex flex-col gap-1 text-[11px] font-bold sm:col-span-2 lg:col-span-1">
+      <label className="flex flex-col gap-1 text-[13px] font-bold sm:col-span-2 lg:col-span-1">
         {ar ? "العنوان" : "Address"}
         <input
           name="address"
@@ -93,7 +93,7 @@ export function NewWarehouseForm({
         style={{ borderTop: "1px solid var(--border)" }}
       >
         <div className="grid gap-3 sm:grid-cols-2">
-          <label className="flex flex-col gap-1 text-[11px] font-bold">
+          <label className="flex flex-col gap-1 text-[13px] font-bold">
             {ar ? "المستأجر" : "Tenant"}
             <input
               name="tenantId"
@@ -102,7 +102,7 @@ export function NewWarehouseForm({
               className="input text-xs"
             />
           </label>
-          <label className="flex flex-col gap-1 text-[11px] font-bold">
+          <label className="flex flex-col gap-1 text-[13px] font-bold">
             {ar ? "الرمز" : "Code"}
             <input
               name="code"

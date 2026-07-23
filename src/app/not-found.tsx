@@ -95,7 +95,7 @@ export default async function NotFound() {
         </div>
 
         <div
-          className="mb-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.2em]"
+          className="mb-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[13px] font-extrabold uppercase tracking-[0.2em]"
           style={{
             background: "var(--brand-soft)",
             color: "var(--brand-deep)",
@@ -169,7 +169,7 @@ export default async function NotFound() {
                     {s.label}
                   </div>
                   <div
-                    className="truncate text-[11px]"
+                    className="truncate text-[13px]"
                     style={{ color: "var(--text-muted)" }}
                   >
                     {s.hint}

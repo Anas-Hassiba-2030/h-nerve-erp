@@ -20,7 +20,7 @@ export function ShareToCouncilButton({
   ar: boolean;
   size?: "sm" | "md";
 }) {
-  const px = size === "md" ? "px-3 py-1.5 text-[12px]" : "px-2 py-1 text-[11px]";
+  const px = size === "md" ? "px-3 py-1.5 text-[12px]" : "px-2 py-1 text-[13px]";
   return (
     <form
       action={shareInsightToCouncil}

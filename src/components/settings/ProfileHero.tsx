@@ -129,7 +129,7 @@ export function ProfileHero({
             {/* Bonus chip */}
             {bonusPercent > 0 ? (
               <span
-                className="absolute -bottom-2 -end-2 inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[9px] font-black ring-2 hn-anim-success"
+                className="absolute -bottom-2 -end-2 inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[12px] font-black ring-2 hn-anim-success"
                 style={{
                   background: brandAccent,
                   color: "#1a0e02",
@@ -145,7 +145,7 @@ export function ProfileHero({
 
           <div className="min-w-0">
             <div
-              className="text-[10px] font-extrabold uppercase tracking-[0.22em] opacity-80 hn-anim-fall"
+              className="text-[12px] font-extrabold uppercase tracking-[0.22em] opacity-80 hn-anim-fall"
               style={{ animationDelay: "0.05s" }}
             >
               {ar ? "ملفك في النظام العصبي" : "Your H-Nerve profile"}
@@ -157,7 +157,7 @@ export function ProfileHero({
               {name}
             </h1>
             <div
-              className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11.5px] font-bold opacity-90 hn-anim-rise"
+              className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[13px] font-bold opacity-90 hn-anim-rise"
               style={{ animationDelay: "0.2s" }}
             >
               <span>{title ?? role}</span>
@@ -169,7 +169,7 @@ export function ProfileHero({
               style={{ animationDelay: "0.28s" }}
             >
               <span
-                className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10.5px] font-extrabold ring-1"
+                className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-extrabold ring-1"
                 style={{
                   background: "rgba(255,255,255,0.18)",
                   borderColor: "rgba(255,255,255,0.32)",
@@ -180,7 +180,7 @@ export function ProfileHero({
                 {ar ? r.ar : r.en}
               </span>
               <span
-                className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-mono text-[10.5px] font-extrabold ring-1"
+                className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-mono text-[12px] font-extrabold ring-1"
                 style={{
                   background: "rgba(255,255,255,0.18)",
                   borderColor: "rgba(255,255,255,0.32)",
@@ -189,7 +189,7 @@ export function ProfileHero({
                 {xp.toLocaleString("en-US")} XP
               </span>
               <span
-                className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-mono text-[10.5px] font-extrabold ring-1"
+                className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-mono text-[12px] font-extrabold ring-1"
                 style={{
                   background: "rgba(255,255,255,0.18)",
                   borderColor: "rgba(255,255,255,0.32)",
@@ -206,7 +206,7 @@ export function ProfileHero({
           className="min-w-[260px] flex-1 hn-anim-slide-r"
           style={{ animationDelay: "0.35s" }}
         >
-          <div className="mb-1.5 flex items-baseline justify-between text-[10.5px] font-extrabold opacity-90">
+          <div className="mb-1.5 flex items-baseline justify-between text-[12px] font-extrabold opacity-90">
             <span className="uppercase tracking-[0.16em]">
               {next ? (ar ? `إلى ${next.ar}` : `To ${next.en}`) : (ar ? "أعلى رتبة" : "Top rank")}
             </span>
@@ -234,7 +234,7 @@ export function ProfileHero({
               }}
             />
           </div>
-          <div className="mt-2 flex justify-between text-[9.5px] font-bold opacity-75">
+          <div className="mt-2 flex justify-between text-[12px] font-bold opacity-75">
             {RANKS.map((rk) => (
               <span
                 key={rk.id}
@@ -251,7 +251,7 @@ export function ProfileHero({
             ))}
           </div>
           <p
-            className="mt-3 text-[10.5px] font-bold leading-snug opacity-90 hn-anim-fade"
+            className="mt-3 text-[12px] font-bold leading-snug opacity-90 hn-anim-fade"
             style={{ animationDelay: "0.55s" }}
           >
             {ar ? r.description : r.descriptionEn}

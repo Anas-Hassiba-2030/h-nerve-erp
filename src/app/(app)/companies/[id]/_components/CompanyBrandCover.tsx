@@ -46,7 +46,7 @@ export function CompanyBrandCover({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.22em] opacity-80">
+              <span className="text-[13px] font-semibold uppercase tracking-[0.22em] opacity-80">
                 #{company.code}
               </span>
               <SectorPill sector={company.sector} />
@@ -63,7 +63,7 @@ export function CompanyBrandCover({
         </div>
 
         {/* Quick facts */}
-        <div className="flex flex-wrap gap-2 text-[11px]">
+        <div className="flex flex-wrap gap-2 text-[13px]">
           <span
             className="flex items-center gap-1.5 rounded-full px-3 py-1 font-bold"
             style={{ background: "rgba(255,255,255,.15)", border: "1px solid rgba(255,255,255,.25)" }}

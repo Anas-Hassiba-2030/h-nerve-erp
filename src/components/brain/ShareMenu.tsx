@@ -112,7 +112,7 @@ export function ShareMenu({
         ref={triggerRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-mono font-extrabold uppercase tracking-[0.16em] transition"
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[13px] font-mono font-extrabold uppercase tracking-[0.16em] transition"
         style={{
           border: panelBorder,
           color: dark ? "#dcc38a" : ink,

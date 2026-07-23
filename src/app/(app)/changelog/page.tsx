@@ -115,7 +115,7 @@ export default async function ChangelogPage(
               >
                 <span>{ar ? p.ar : p.en}</span>
                 <span
-                  className="ms-1 inline-flex items-center justify-center rounded-full px-1.5 text-[10px] font-mono font-bold"
+                  className="ms-1 inline-flex items-center justify-center rounded-full px-1.5 text-[12px] font-mono font-bold"
                   style={{
                     minWidth: 18,
                     background: active
@@ -130,7 +130,7 @@ export default async function ChangelogPage(
             );
           })}
           <span
-            className="ms-auto inline-flex items-center gap-1.5 text-[11px] font-bold"
+            className="ms-auto inline-flex items-center gap-1.5 text-[13px] font-bold"
             style={{ color: "var(--ink-muted)" }}
           >
             <GitBranch className="h-3.5 w-3.5" />
@@ -186,7 +186,7 @@ export default async function ChangelogPage(
                     {/* Top meta row */}
                     <header className="flex flex-wrap items-center gap-2">
                       <span
-                        className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[11px] font-bold"
+                        className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[13px] font-bold"
                         style={{
                           background: "var(--cream)",
                           color: "var(--brand-deep)",
@@ -196,7 +196,7 @@ export default async function ChangelogPage(
                         {entry.date}
                       </span>
                       <span
-                        className="rounded-md px-2 py-0.5 font-mono text-[11px] font-bold"
+                        className="rounded-md px-2 py-0.5 font-mono text-[13px] font-bold"
                         style={{
                           background: "var(--ink)",
                           color: "var(--cream)",

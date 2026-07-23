@@ -20,8 +20,9 @@ type Locale = "ar" | "en";
 const BASE_R = 116; // orbit radius for ≤9 nodes (unchanged from the original)
 
 function radiusFor(n: number): number {
-  // Space nodes so adjacent pills clear an ~80px chord; floor at BASE_R.
-  return n <= 1 ? BASE_R : Math.max(BASE_R, Math.round(40 / Math.sin(Math.PI / n)));
+  // Space nodes so adjacent pills clear an ~108px chord; floor at BASE_R.
+  // (Was 80px — the 14px label bump of 2026-07-23 needs the wider chord.)
+  return n <= 1 ? BASE_R : Math.max(BASE_R, Math.round(54 / Math.sin(Math.PI / n)));
 }
 
 // Decorative rings stay proportional to the live radius so they always frame

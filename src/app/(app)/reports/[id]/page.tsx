@@ -143,13 +143,13 @@ export default async function CompanyReportPage(
         >
           <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/80">
+              <div className="text-[13px] font-bold uppercase tracking-[0.2em] text-white/80">
                 H-NERVE ERP · {ar ? "تقرير تنفيذي رسمي" : "Official Executive Report"}
               </div>
               <h1 className="mt-1 text-2xl font-bold">
                 {ar ? company.name : company.nameEn}
               </h1>
-              <div className="mt-1 text-[11px] text-white/80">
+              <div className="mt-1 text-[13px] text-white/80">
                 {brand.motto}
               </div>
             </div>
@@ -160,7 +160,7 @@ export default async function CompanyReportPage(
               {brand.emblem}
             </span>
           </div>
-          <div className="mt-4 flex flex-wrap gap-3 text-[11px] font-bold">
+          <div className="mt-4 flex flex-wrap gap-3 text-[13px] font-bold">
             <span className="rounded-md bg-white/20 px-2 py-1">
               {ar ? "رمز" : "Code"}: {company.code}
             </span>
@@ -195,7 +195,7 @@ export default async function CompanyReportPage(
             <h2 className="text-sm font-semibold" style={{ color: "#0f172a" }}>
               {ar ? "النبض المالي — آخر ١٢ شهر" : "Financial pulse — last 12 months"}
             </h2>
-            <div className="flex items-center gap-3 text-[10px] font-bold" style={{ color: "#64748b" }}>
+            <div className="flex items-center gap-3 text-[12px] font-bold" style={{ color: "#64748b" }}>
               <span className="flex items-center gap-1">
                 <span className="h-2 w-2 rounded-sm" style={{ background: brand.accent }} />
                 {ar ? "إيراد" : "Revenue"}
@@ -322,7 +322,7 @@ export default async function CompanyReportPage(
               {ar ? "أعلى الإيرادات" : "Top revenue"}
             </h2>
             {topRevenue.length === 0 ? (
-              <p className="text-[11px]" style={{ color: "#94a3b8" }}>
+              <p className="text-[13px]" style={{ color: "#94a3b8" }}>
                 {ar ? "لا توجد معاملات." : "No transactions."}
               </p>
             ) : (
@@ -330,7 +330,7 @@ export default async function CompanyReportPage(
                 {topRevenue.map((t) => (
                   <li
                     key={t.id}
-                    className="flex items-center justify-between gap-2 text-[11px]"
+                    className="flex items-center justify-between gap-2 text-[13px]"
                   >
                     <div className="min-w-0">
                       <div
@@ -339,7 +339,7 @@ export default async function CompanyReportPage(
                       >
                         {t.description || t.category}
                       </div>
-                      <div className="text-[10px]" style={{ color: "#94a3b8" }}>
+                      <div className="text-[12px]" style={{ color: "#94a3b8" }}>
                         {t.reference} · {formatDate(t.occurredAt, locale === "ar" ? "ar" : "en")}
                       </div>
                     </div>
@@ -368,7 +368,7 @@ export default async function CompanyReportPage(
                     {latestEsg.overall.toFixed(1)}
                   </span>
                   <span
-                    className="text-[11px] font-bold"
+                    className="text-[13px] font-bold"
                     style={{ color: "#94a3b8" }}
                   >
                     /100 · {latestEsg.period} {latestEsg.year}
@@ -391,7 +391,7 @@ export default async function CompanyReportPage(
                 />
               </div>
             ) : (
-              <p className="text-[11px]" style={{ color: "#94a3b8" }}>
+              <p className="text-[13px]" style={{ color: "#94a3b8" }}>
                 {ar ? "لا توجد بيانات ESG بعد." : "No ESG data yet."}
               </p>
             )}
@@ -401,7 +401,7 @@ export default async function CompanyReportPage(
         {/* SIGNATURE FOOTER */}
         <footer className="px-6 py-4">
           <div
-            className="flex items-center justify-between text-[10px]"
+            className="flex items-center justify-between text-[12px]"
             style={{ color: "#94a3b8" }}
           >
             <div>
@@ -442,7 +442,7 @@ function KPI({ label, value, accent }: { label: string; value: string; accent: s
       style={{ borderColor: "#e4dccb" }}
     >
       <div
-        className="text-[10px] font-bold uppercase tracking-wider"
+        className="text-[12px] font-bold uppercase tracking-wider"
         style={{ color: "#94a3b8" }}
       >
         {label}
@@ -467,7 +467,7 @@ function Stat({ label, value }: { label: string; value: string }) {
       }}
     >
       <div
-        className="text-[10px] font-bold uppercase tracking-wider"
+        className="text-[12px] font-bold uppercase tracking-wider"
         style={{ color: "#94a3b8" }}
       >
         {label}
@@ -487,7 +487,7 @@ function EsgBar({
 }: { label: string; value: number; accent: string }) {
   const pct = Math.max(0, Math.min(100, value));
   return (
-    <div className="text-[11px]">
+    <div className="text-[13px]">
       <div className="mb-0.5 flex items-center justify-between">
         <span style={{ color: "#64748b" }}>{label}</span>
         <span className="font-mono font-bold tabular-nums" style={{ color: "#0f172a" }}>

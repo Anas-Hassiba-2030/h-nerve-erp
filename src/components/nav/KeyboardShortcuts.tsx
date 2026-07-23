@@ -104,7 +104,7 @@ export function KeyboardShortcuts({ locale = "en" }: { locale?: "ar" | "en" }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="hidden items-center gap-1.5 rounded-lg px-2 py-1 text-[10px] font-bold transition hover:bg-[var(--brand-soft)] md:inline-flex"
+        className="hidden items-center gap-1.5 rounded-lg px-2 py-1 text-[12px] font-bold transition hover:bg-[var(--brand-soft)] md:inline-flex"
         style={{ color: "var(--text-muted)" }}
         title={ar ? "اختصارات لوحة المفاتيح (?)" : "Keyboard shortcuts (?)"}
         aria-label="Keyboard shortcuts"
@@ -147,7 +147,7 @@ export function KeyboardShortcuts({ locale = "en" }: { locale?: "ar" | "en" }) {
                 <div className="text-[14px] font-extrabold" style={{ color: "var(--text)" }}>
                   {ar ? "اختصارات لوحة المفاتيح" : "Keyboard shortcuts"}
                 </div>
-                <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                <div className="text-[13px]" style={{ color: "var(--text-muted)" }}>
                   {ar ? "تنقّل أسرع، إنجاز أكثر" : "Navigate faster, do more"}
                 </div>
               </div>
@@ -165,7 +165,7 @@ export function KeyboardShortcuts({ locale = "en" }: { locale?: "ar" | "en" }) {
             {Object.entries(grouped).map(([groupName, shortcuts]) => (
               <div key={groupName}>
                 <div
-                  className="mb-2 text-[10px] font-extrabold uppercase tracking-[0.2em]"
+                  className="mb-2 text-[12px] font-extrabold uppercase tracking-[0.2em]"
                   style={{ color: "var(--text-muted)" }}
                 >
                   {groupName}
@@ -184,7 +184,7 @@ export function KeyboardShortcuts({ locale = "en" }: { locale?: "ar" | "en" }) {
                         {s.keys.map((k, ki) => (
                           <span key={ki} className="flex items-center gap-1">
                             <kbd
-                              className="rounded-md border px-1.5 py-0.5 font-mono text-[10px] font-bold"
+                              className="rounded-md border px-1.5 py-0.5 font-mono text-[12px] font-bold"
                               style={{
                                 background: "var(--surface)",
                                 borderColor: "var(--border)",
@@ -195,7 +195,7 @@ export function KeyboardShortcuts({ locale = "en" }: { locale?: "ar" | "en" }) {
                               {k}
                             </kbd>
                             {ki < s.keys.length - 1 ? (
-                              <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>+</span>
+                              <span className="text-[12px]" style={{ color: "var(--text-muted)" }}>+</span>
                             ) : null}
                           </span>
                         ))}
@@ -208,7 +208,7 @@ export function KeyboardShortcuts({ locale = "en" }: { locale?: "ar" | "en" }) {
           </div>
 
           <div
-            className="flex items-center justify-between gap-3 px-5 py-3 text-[11px]"
+            className="flex items-center justify-between gap-3 px-5 py-3 text-[13px]"
             style={{ borderTop: "1px solid var(--border)", color: "var(--text-muted)" }}
           >
             <span>

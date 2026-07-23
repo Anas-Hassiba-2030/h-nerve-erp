@@ -25,6 +25,9 @@ const RULES: { test: RegExp; ambient: Ambient; living?: Living }[] = [
   { test: /^\/(admin\/empire|admin\/tenants|companies|dashboard|compare)\b/, ambient: "holding" },
   // money surfaces + audit trail (reference: data-ambient="finance")
   { test: /^\/(finance|markets|analytics|reports|sustainability|projects|audit-360)\b/, ambient: "finance" },
+  // front-office ERP surfaces (Sales / Purchasing & Production / expanded
+  // Finance — ERP split 2026-07-23): same money-daylight register
+  { test: /^\/(invoices|estimates|pos|e-invoicing|purchase-invoices|purchase-payments|treasuries|payments|statements|customers|suppliers|assets|manufacturing|maintenance|crm)\b/, ambient: "finance" },
   // the Brain runs in the cosmic-night register
   { test: /^\/brain/, ambient: "cosmic", living: "night" },
   // intel + signal surfaces (cosmic night per reference)

@@ -70,11 +70,11 @@ export function NewPOForm({
       >
         <input type="hidden" name="linesJson" value={JSON.stringify(clean)} />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <label className="flex flex-col gap-1 text-[11px] font-bold">
+          <label className="flex flex-col gap-1 text-[13px] font-bold">
             {ar ? "المستأجر" : "Tenant"}
             <input name="tenantId" defaultValue={tenantDefault} required className="input text-xs" />
           </label>
-          <label className="flex flex-col gap-1 text-[11px] font-bold">
+          <label className="flex flex-col gap-1 text-[13px] font-bold">
             {ar ? "المورّد" : "Supplier"}
             {suppliers.length > 0 ? (
               <select name="supplierId" required defaultValue="" className="input text-xs">
@@ -98,11 +98,11 @@ export function NewPOForm({
               />
             )}
           </label>
-          <label className="flex flex-col gap-1 text-[11px] font-bold">
+          <label className="flex flex-col gap-1 text-[13px] font-bold">
             {ar ? "متوقع في" : "Expected at"}
             <input type="date" name="expectedAt" className="input text-xs" />
           </label>
-          <label className="flex flex-col gap-1 text-[11px] font-bold">
+          <label className="flex flex-col gap-1 text-[13px] font-bold">
             {ar ? "ملاحظة" : "Note"}
             <input name="note" className="input text-xs" />
           </label>
@@ -111,7 +111,7 @@ export function NewPOForm({
         <div className="flex flex-col gap-2">
           {lines.map((l, i) => (
             <div key={i} className="flex flex-wrap items-end gap-2">
-              <label className="flex flex-1 flex-col gap-1 text-[11px] font-bold">
+              <label className="flex flex-1 flex-col gap-1 text-[13px] font-bold">
                 {ar ? "المنتج" : "Product"}
                 <select
                   value={l.productId}
@@ -126,7 +126,7 @@ export function NewPOForm({
                   ))}
                 </select>
               </label>
-              <label className="flex flex-col gap-1 text-[11px] font-bold">
+              <label className="flex flex-col gap-1 text-[13px] font-bold">
                 {ar ? "الكمية" : "Qty"}
                 <input
                   type="number"
@@ -137,7 +137,7 @@ export function NewPOForm({
                   className="input w-24 text-xs"
                 />
               </label>
-              <label className="flex flex-col gap-1 text-[11px] font-bold">
+              <label className="flex flex-col gap-1 text-[13px] font-bold">
                 {ar ? "تكلفة الوحدة" : "Unit cost"}
                 <input
                   type="number"

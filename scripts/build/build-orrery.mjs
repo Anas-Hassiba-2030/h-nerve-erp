@@ -19,6 +19,7 @@
 import { readFileSync, writeFileSync, copyFileSync, mkdirSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const REF_DIR = join(ROOT, "docs/design/orrery");
@@ -111,6 +112,20 @@ window.addEventListener("message", function(e){
 </body></html>
 `;
 writeFileSync(join(OUT, "index.html"), doc);
+
+// 6) version manifest — a content hash of the served doc, imported at BUILD
+// time by src/app/orrery/page.tsx (JSON import, not runtime fs — Cloudflare
+// Workers has no filesystem access to the source tree) and appended to the
+// iframe src as ?v=<hash>. Without this the URL never changes between
+// deploys, so any HTTP/edge cache (or a browser bfcache restore of /orrery)
+// can keep serving a stale hub indefinitely even after the server-side file
+// is correct — a real recurrence: two separate taxonomy-split deploys were
+// both verified correct via curl/headless-browser, yet a real browser kept
+// showing the pre-split 13-anchor layout. A hash-versioned URL is immune to
+// that regardless of root cause.
+const hash = createHash("sha256").update(doc).digest("hex").slice(0, 10);
+writeFileSync(join(OUT, "version.json"), JSON.stringify({ v: hash }) + "\n");
+
 console.log(
-  `built public/hub/index.html (${doc.length} chars) · ${styles.length} style blocks · ${fonts} fonts · gsap ✓`,
+  `built public/hub/index.html (${doc.length} chars) · ${styles.length} style blocks · ${fonts} fonts · gsap ✓ · v=${hash}`,
 );

@@ -5,6 +5,10 @@ import { getLocale } from "@/lib/i18n/i18n.server";
 import { brainIqAt } from "@/lib/utils/timemachine";
 import { OrreryFrame, type OrreryIdentity } from "@/components/orrery/OrreryFrame";
 import { OrreryFabs } from "@/components/orrery/OrreryFabs";
+// Build-time JSON import (NOT runtime fs — Workers has no source-tree
+// filesystem access). Resolved to a literal string at Next build time by the
+// bundler, so this stays a static asset, not a request-time file read.
+import hubVersion from "../../../public/hub/version.json";
 // The FAB rail + panels live in the (app) layout; the Orrery hub is outside it,
 // so we pull in living.css here for the .hn-fab* styles and overlay the rail.
 import "../(app)/living.css";
@@ -71,7 +75,7 @@ export default async function OrreryPage() {
   return (
     <>
       <div className="orrery-host">
-        <OrreryFrame identity={identity} />
+        <OrreryFrame identity={identity} hubVersion={hubVersion.v} />
       </div>
       <div className="orrery-fab-layer">
         <OrreryFabs locale={locale} />

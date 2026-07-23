@@ -71,7 +71,7 @@ export function CausalStudio({ nodes, edges, ar, rebuildSlot }: Props) {
           <div
             style={{
               fontFamily: "'JetBrains Mono',ui-monospace,monospace",
-              fontSize: 9.5,
+              fontSize: 12,
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: "#c69345",
@@ -84,7 +84,7 @@ export function CausalStudio({ nodes, edges, ar, rebuildSlot }: Props) {
           <label
             style={{
               display: "block",
-              fontSize: 10,
+              fontSize: 12,
               color: "rgba(245,239,230,0.6)",
               marginBottom: 5,
               fontFamily: "'JetBrains Mono',ui-monospace,monospace",
@@ -102,7 +102,7 @@ export function CausalStudio({ nodes, edges, ar, rebuildSlot }: Props) {
               color: "#fafaf7",
               border: "1px solid rgba(245,239,230,0.2)",
               padding: "6px 8px",
-              fontSize: 11.5,
+              fontSize: 12,
               fontFamily: "'JetBrains Mono',ui-monospace,monospace",
               marginBottom: 12,
             }}
@@ -121,7 +121,7 @@ export function CausalStudio({ nodes, edges, ar, rebuildSlot }: Props) {
           >
             <span
               style={{
-                fontSize: 10,
+                fontSize: 12,
                 color: "rgba(245,239,230,0.6)",
                 fontFamily: "'JetBrains Mono',ui-monospace,monospace",
                 letterSpacing: "0.06em",
@@ -161,7 +161,7 @@ export function CausalStudio({ nodes, edges, ar, rebuildSlot }: Props) {
               }}
               style={{
                 marginTop: 10,
-                fontSize: 9.5,
+                fontSize: 12,
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 color: "rgba(245,239,230,0.6)",
@@ -178,7 +178,7 @@ export function CausalStudio({ nodes, edges, ar, rebuildSlot }: Props) {
             <p
               style={{
                 marginTop: 10,
-                fontSize: 10,
+                fontSize: 12,
                 lineHeight: 1.5,
                 color: "rgba(245,239,230,0.45)",
               }}
@@ -193,7 +193,7 @@ export function CausalStudio({ nodes, edges, ar, rebuildSlot }: Props) {
             <div style={{ marginTop: 13, borderTop: "1px solid rgba(245,239,230,0.12)", paddingTop: 11 }}>
               <div
                 style={{
-                  fontSize: 9,
+                  fontSize: 12,
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                   color: "rgba(245,239,230,0.5)",
@@ -215,7 +215,7 @@ export function CausalStudio({ nodes, edges, ar, rebuildSlot }: Props) {
                       }}
                       title={p.node.label}
                       style={{
-                        fontSize: 10,
+                        fontSize: 12,
                         fontFamily: "'JetBrains Mono',ui-monospace,monospace",
                         letterSpacing: "0.04em",
                         color: active ? "#0e0e10" : "rgba(245,239,230,0.85)",
@@ -292,7 +292,7 @@ export function CausalStudio({ nodes, edges, ar, rebuildSlot }: Props) {
             </p>
           ) : null}
           {rows.length === 0 ? (
-            <p style={{ fontSize: 11.5, color: "var(--heri-ink-3)", lineHeight: 1.55 }}>
+            <p style={{ fontSize: 12, color: "var(--heri-ink-3)", lineHeight: 1.55 }}>
               {ar
                 ? "لا أثر بعد. اختر عقدة وحرّك الشريط."
                 : "No impact yet. Pick a node and move the slider."}
@@ -337,14 +337,14 @@ export function CausalStudio({ nodes, edges, ar, rebuildSlot }: Props) {
                     {pm ? (
                       <div
                         className="heri-number-mono"
-                        style={{ fontSize: 10.5, color: "var(--heri-ink-2)", marginTop: 2 }}
+                        style={{ fontSize: 12, color: "var(--heri-ink-2)", marginTop: 2 }}
                       >
                         {fmt(pm.value)} → {fmt(pm.value * (1 + r.projectedDelta))} {pm.unit}
                       </div>
                     ) : null}
                     <div
                       style={{
-                        fontSize: 9.5,
+                        fontSize: 12,
                         color: "var(--heri-ink-3)",
                         marginTop: 2,
                         letterSpacing: "0.04em",
@@ -380,7 +380,7 @@ export function CausalStudio({ nodes, edges, ar, rebuildSlot }: Props) {
                   <span style={{ color: "var(--heri-ink-2)" }}>{kind}</span>
                   <span
                     className="heri-number-mono"
-                    style={{ fontSize: 11, fontWeight: 600, color: "var(--heri-ink)" }}
+                    style={{ fontSize: 12, fontWeight: 600, color: "var(--heri-ink)" }}
                   >
                     {count}
                   </span>
@@ -395,7 +395,7 @@ export function CausalStudio({ nodes, edges, ar, rebuildSlot }: Props) {
           eyebrow={ar ? "دليل" : "Guide"}
           title={ar ? "كيف تقرأ هذا" : "How to read this"}
         >
-          <ul className="space-y-2.5" style={{ fontSize: 11.5, color: "var(--heri-ink-2)", lineHeight: 1.5 }}>
+          <ul className="space-y-2.5" style={{ fontSize: 12, color: "var(--heri-ink-2)", lineHeight: 1.5 }}>
             <Explain
               term={ar ? "العقدة" : "Node"}
               body={
@@ -450,7 +450,7 @@ export function CausalStudio({ nodes, edges, ar, rebuildSlot }: Props) {
           }
         >
           {rebuildSlot}
-          <p style={{ marginTop: 10, fontSize: 11, color: "var(--heri-ink-3)", lineHeight: 1.5 }}>
+          <p style={{ marginTop: 10, fontSize: 12, color: "var(--heri-ink-3)", lineHeight: 1.5 }}>
             {ar
               ? "آمن للتشغيل في أي وقت. لا يكسر الحواف المُتعلَّمة."
               : "Safe to run anytime. Doesn't clobber learned edges."}
@@ -500,7 +500,7 @@ function Panel({
         {title}
       </div>
       {aside ? (
-        <p style={{ fontSize: 11, color: "var(--heri-ink-3)", lineHeight: 1.5, marginBottom: 11 }}>
+        <p style={{ fontSize: 12, color: "var(--heri-ink-3)", lineHeight: 1.5, marginBottom: 11 }}>
           {aside}
         </p>
       ) : null}
@@ -552,7 +552,7 @@ function InspectList({
         {heading}
       </div>
       {rows.length === 0 ? (
-        <p style={{ fontSize: 11, color: "var(--heri-ink-3)", lineHeight: 1.5 }}>{empty}</p>
+        <p style={{ fontSize: 12, color: "var(--heri-ink-3)", lineHeight: 1.5 }}>{empty}</p>
       ) : (
         <ul className="space-y-2">
           {rows.slice(0, 6).map(({ node, edge }, i) => {
@@ -586,7 +586,7 @@ function InspectList({
                 <span
                   className="heri-number-mono"
                   style={{
-                    fontSize: 10.5,
+                    fontSize: 12,
                     color: causal ? "var(--heri-ochre-2)" : "var(--heri-ink-3)",
                     fontVariantNumeric: "tabular-nums",
                     flex: "none",
@@ -599,7 +599,7 @@ function InspectList({
             );
           })}
           {rows.length > 6 ? (
-            <li style={{ fontSize: 10, color: "var(--heri-ink-3)" }}>
+            <li style={{ fontSize: 12, color: "var(--heri-ink-3)" }}>
               +{rows.length - 6} {ar ? "أخرى" : "more"}
             </li>
           ) : null}

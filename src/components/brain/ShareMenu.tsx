@@ -150,7 +150,7 @@ export function ShareMenu({
           }}
         >
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-            <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", color: subInk }}>
+            <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: ".14em", textTransform: "uppercase", color: subInk }}>
               {ar ? "مشاركة" : "Share"}
             </span>
             <button type="button" onClick={() => setOpen(false)} style={{ color: subInk, lineHeight: 0 }} aria-label="close">
@@ -181,7 +181,7 @@ export function ShareMenu({
             <input type="hidden" name="body" value={body} />
             {refType ? <input type="hidden" name="refType" value={refType} /> : null}
             {refId ? <input type="hidden" name="refId" value={refId} /> : null}
-            <span style={{ fontSize: 11, fontWeight: 700, color: subInk, paddingInlineStart: 4 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: subInk, paddingInlineStart: 4 }}>
               {ar ? "إلى زميل" : "To a colleague"}
             </span>
             <select

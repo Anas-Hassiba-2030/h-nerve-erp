@@ -70,7 +70,7 @@ export default async function IntegrationDetail(
           className="inline-flex items-center gap-2"
           style={{
             fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-            fontSize: 11,
+            fontSize: 12,
             letterSpacing: "0.16em",
             textTransform: "uppercase",
             color: "var(--gold)",
@@ -231,7 +231,7 @@ export default async function IntegrationDetail(
               <span
                 style={{
                   fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-                  fontSize: 10,
+                  fontSize: 12,
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   color: "var(--ink-muted)",
@@ -259,7 +259,7 @@ export default async function IntegrationDetail(
               <span
                 style={{
                   fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-                  fontSize: 10,
+                  fontSize: 12,
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   color: "var(--ink-muted)",
@@ -292,7 +292,7 @@ export default async function IntegrationDetail(
             </button>
             <p
               style={{
-                fontSize: 11,
+                fontSize: 12,
                 color: "var(--ink-muted)",
                 margin: 0,
                 lineHeight: 1.5,
@@ -322,7 +322,7 @@ export default async function IntegrationDetail(
                 <span
                   style={{
                     fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-                    fontSize: 10,
+                    fontSize: 12,
                     letterSpacing: "0.18em",
                     textTransform: "uppercase",
                     color: "var(--ink-muted)",
@@ -394,7 +394,7 @@ export default async function IntegrationDetail(
                 <span
                   className="font-mono"
                   style={{
-                    fontSize: 10,
+                    fontSize: 12,
                     letterSpacing: "0.08em",
                     color: "var(--ink-muted)",
                   }}
@@ -410,7 +410,7 @@ export default async function IntegrationDetail(
                 <span
                   style={{
                     fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-                    fontSize: 10,
+                    fontSize: 12,
                     letterSpacing: "0.18em",
                     textTransform: "uppercase",
                     color:
@@ -429,7 +429,7 @@ export default async function IntegrationDetail(
                 {log.ms != null ? (
                   <span
                     className="font-mono"
-                    style={{ fontSize: 10, color: "var(--ink-muted)", letterSpacing: "0.06em" }}
+                    style={{ fontSize: 12, color: "var(--ink-muted)", letterSpacing: "0.06em" }}
                   >
                     {log.ms}ms
                   </span>

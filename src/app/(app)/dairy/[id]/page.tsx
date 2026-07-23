@@ -105,7 +105,7 @@ export default async function DairyDetailPage(
                 <Milk className="h-8 w-8" strokeWidth={1.5} style={{ color: "var(--gold)" }} />
               </div>
               <div className="min-w-0">
-                <div className="mb-1.5 flex items-center gap-2" style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
+                <div className="mb-1.5 flex items-center gap-2" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
                   <span>{en ? "Grade" : "درجة"} {batch.qualityGrade}</span>
                   <span style={{ color: "var(--line)" }}>·</span>
                   <StatusBadge status={batch.status} />
@@ -188,7 +188,7 @@ export default async function DairyDetailPage(
         >
           <div className="mb-2 flex items-center justify-between text-xs">
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>{en ? "Produced" : "إنتاج"}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>{en ? "Produced" : "إنتاج"}</div>
               <div className="mt-0.5 font-bold" style={{ color: "var(--ink)" }}>
                 {formatShortDate(batch.productionDate)}
               </div>
@@ -199,7 +199,7 @@ export default async function DairyDetailPage(
               strokeWidth={1.5}
             />
             <div className="text-end">
-              <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>{en ? "Expires" : "صلاحية"}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>{en ? "Expires" : "صلاحية"}</div>
               <div className="mt-0.5 font-bold" style={{ color: "var(--ink)" }}>
                 {formatShortDate(batch.expiryDate)}
               </div>

@@ -62,7 +62,7 @@ export default async function SustainabilityPage() {
                 <div className="flex items-center justify-between gap-4 flex-wrap">
                   <div>
                     <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--ink)" }}>{ar ? score.company.name : score.company.nameEn}</h3>
-                    <div style={{ fontSize: 11, color: "var(--ink-muted)" }}>{score.period} {score.year}</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-muted)" }}>{score.period} {score.year}</div>
                   </div>
                   <div className="flex items-center gap-4">
                     <ScoreChip label={ar ? "كربون" : "Carbon"} value={score.carbonTons} />
@@ -70,7 +70,7 @@ export default async function SustainabilityPage() {
                     <ScoreChip label={ar ? "متجددة" : "Renewable"} value={score.renewablePct} />
                     <div className="text-center">
                       <div style={{ fontSize: 24, fontWeight: 700, color: "var(--emerald)" }}>{score.overall}</div>
-                      <div style={{ fontSize: 10, textTransform: "uppercase", color: "var(--ink-muted)" }}>ESG</div>
+                      <div style={{ fontSize: 12, textTransform: "uppercase", color: "var(--ink-muted)" }}>ESG</div>
                     </div>
                   </div>
                 </div>
@@ -87,7 +87,7 @@ function ScoreChip({ label, value }: { label: string; value: number }) {
   return (
     <div className="text-center">
       <div style={{ fontSize: 16, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: "var(--ink)" }}>{value}</div>
-      <div style={{ fontSize: 10, textTransform: "uppercase", color: "var(--ink-muted)" }}>{label}</div>
+      <div style={{ fontSize: 12, textTransform: "uppercase", color: "var(--ink-muted)" }}>{label}</div>
     </div>
   );
 }

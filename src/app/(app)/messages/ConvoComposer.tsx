@@ -90,7 +90,7 @@ export function ConvoComposer({
       </div>
 
       {error ? (
-        <div role="alert" style={{ color: "#cf9384", fontSize: 11.5, marginBottom: 8 }}>
+        <div role="alert" style={{ color: "#cf9384", fontSize: 12, marginBottom: 8 }}>
           {error}
         </div>
       ) : null}

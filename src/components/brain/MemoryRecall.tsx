@@ -43,7 +43,7 @@ export async function MemoryRecall({
         className="mb-3 inline-flex items-center gap-2"
         style={{
           fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-          fontSize: 10,
+          fontSize: 12,
           letterSpacing: "0.18em",
           textTransform: "uppercase",
           color: "var(--heri-copper)",

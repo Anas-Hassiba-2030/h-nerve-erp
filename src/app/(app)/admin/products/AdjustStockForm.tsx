@@ -71,7 +71,7 @@ export function AdjustStockForm({
           aria-invalid={deltaInvalid ? "true" : undefined}
         />
         {deltaInvalid ? (
-          <span style={{ color: "#c54242", fontSize: 10.5 }}>
+          <span style={{ color: "#c54242", fontSize: 12 }}>
             {ar
               ? "أدخل عدداً صحيحاً غير صفري"
               : "Non-zero whole number"}

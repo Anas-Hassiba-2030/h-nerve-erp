@@ -77,7 +77,7 @@ export function UserActivityColumn({
                     </span>
                     <span
                       className={`tag ${t.kind === "SIDE" ? "gold" : "ok"}`}
-                      style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}
+                      style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const }}
                     >
                       {t.kind === "SIDE"
                         ? en
@@ -114,7 +114,7 @@ export function UserActivityColumn({
       {insights.length > 0 ? (
         <DaylightPanel
           title={en ? "Published Signals" : "إشارات منشورة"}
-          aside={<Link href="/insights" style={{ fontSize: 11, color: "var(--gold)", textDecoration: "none" }}>{en ? "View all ←" : "عرض الكل ←"}</Link>}
+          aside={<Link href="/insights" style={{ fontSize: 12, color: "var(--gold)", textDecoration: "none" }}>{en ? "View all ←" : "عرض الكل ←"}</Link>}
         >
           <ul style={{ borderTop: "1px solid var(--line)" }}>
             {insights.map((ins) => (

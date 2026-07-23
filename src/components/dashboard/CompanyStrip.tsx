@@ -136,7 +136,7 @@ export function CompanyStrip({
                 </div>
                 <div
                   className="heri-eyebrow heri-eyebrow-ink mt-1"
-                  style={{ fontSize: 9.5, letterSpacing: "0.16em" }}
+                  style={{ fontSize: 12, letterSpacing: "0.16em" }}
                 >
                   {c.code}
                 </div>
@@ -152,7 +152,7 @@ export function CompanyStrip({
             {/* MIDDLE — revenue + sparkline */}
             <div className="ms-2 mt-3 flex items-end justify-between gap-3">
               <div className="min-w-0">
-                <div className="heri-eyebrow heri-eyebrow-ink" style={{ fontSize: 9.5 }}>
+                <div className="heri-eyebrow heri-eyebrow-ink" style={{ fontSize: 12 }}>
                   {ar ? "إيراد" : "Revenue"}
                 </div>
                 <div
@@ -182,7 +182,7 @@ export function CompanyStrip({
               <div className="min-w-0">
                 <div
                   className="heri-eyebrow heri-eyebrow-ink truncate"
-                  style={{ fontSize: 9 }}
+                  style={{ fontSize: 12 }}
                   title={c.ops.label}
                 >
                   {c.ops.label}
@@ -213,7 +213,7 @@ export function CompanyStrip({
             {/* HOVER REVEAL — open profile cue */}
             <div
               className="ms-2 mt-3 flex items-center justify-between heri-eyebrow opacity-0 transition group-hover:opacity-100"
-              style={{ color: accent, fontSize: 10 }}
+              style={{ color: accent, fontSize: 12 }}
             >
               <span>{ar ? "ادخل مساحة العمل" : "Open workspace"}</span>
               <ChevronLeft className="h-3 w-3 rtl:rotate-180" />

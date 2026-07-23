@@ -122,7 +122,7 @@ export function SectorStrip({
                   >
                     {ar ? g.name : g.nameEn}
                   </div>
-                  <div className="heri-eyebrow heri-eyebrow-ink mt-1" style={{ fontSize: 9.5, letterSpacing: "0.16em" }}>
+                  <div className="heri-eyebrow heri-eyebrow-ink mt-1" style={{ fontSize: 12, letterSpacing: "0.16em" }}>
                     {unitWord}
                   </div>
                 </div>
@@ -134,7 +134,7 @@ export function SectorStrip({
               {/* MIDDLE — aggregated revenue + sparkline */}
               <div className="ms-2 mt-3 flex items-end justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="heri-eyebrow heri-eyebrow-ink" style={{ fontSize: 9.5 }}>
+                  <div className="heri-eyebrow heri-eyebrow-ink" style={{ fontSize: 12 }}>
                     {ar ? "إيراد" : "Revenue"}
                   </div>
                   <div className="heri-number mt-1.5 truncate" style={{ fontSize: 18, fontWeight: 500, color: "var(--heri-ink)" }}>
@@ -149,7 +149,7 @@ export function SectorStrip({
               {/* BOTTOM — ops metric + health pill */}
               <div className="ms-2 mt-3 flex items-end justify-between gap-2">
                 <div className="min-w-0">
-                  <div className="heri-eyebrow heri-eyebrow-ink truncate" style={{ fontSize: 9 }} title={g.ops.label}>
+                  <div className="heri-eyebrow heri-eyebrow-ink truncate" style={{ fontSize: 12 }} title={g.ops.label}>
                     {g.ops.label}
                   </div>
                   <div
@@ -171,7 +171,7 @@ export function SectorStrip({
               {/* DRILL CUE */}
               <div
                 className="ms-2 mt-3 flex items-center justify-between heri-eyebrow transition"
-                style={{ color: accent, fontSize: 10, opacity: isOpen ? 1 : 0.65 }}
+                style={{ color: accent, fontSize: 12, opacity: isOpen ? 1 : 0.65 }}
               >
                 <span>{isOpen ? (ar ? "إخفاء الوحدات" : "Hide units") : (ar ? "عرض الوحدات" : "View units")}</span>
                 <ChevronDown className="h-3 w-3 transition" style={{ transform: isOpen ? "rotate(180deg)" : "none" }} />
@@ -187,7 +187,7 @@ export function SectorStrip({
           className="grid gap-2"
           style={{ borderTop: "1px solid var(--heri-rule)", paddingTop: 12 }}
         >
-          <div className="heri-eyebrow heri-eyebrow-ink" style={{ fontSize: 10, letterSpacing: "0.16em" }}>
+          <div className="heri-eyebrow heri-eyebrow-ink" style={{ fontSize: 12, letterSpacing: "0.16em" }}>
             {ar ? `وحدات ${open.name}` : `${open.nameEn} units`}
           </div>
           <CompanyStrip items={open.units} locale={locale} />

@@ -98,7 +98,7 @@ export default async function IntegrationsHubPage() {
                     {ar ? "أخطاء" : "errors"} {num(errors, ar)}
                   </span>
                 </div>
-                <div style={{ fontSize: 11, color: "var(--ink-muted)", marginTop: 6 }}>
+                <div style={{ fontSize: 12, color: "var(--ink-muted)", marginTop: 6 }}>
                   {ar ? "آخر نشاط: " : "Last activity: "}
                   {on ? relLabel(last, ar) : "—"}
                 </div>
@@ -116,7 +116,7 @@ export default async function IntegrationsHubPage() {
                         borderRadius: 9,
                         padding: "7px 10px",
                         fontFamily: "var(--font-mono, monospace)",
-                        fontSize: 11,
+                        fontSize: 12,
                         outline: "none",
                       }}
                     />

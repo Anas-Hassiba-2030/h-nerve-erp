@@ -72,7 +72,7 @@ export default async function DocumentDetail(props: { params: Promise<{ id: stri
           className="inline-flex items-center gap-2"
           style={{
             fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-            fontSize: 11,
+            fontSize: 12,
             letterSpacing: "0.16em",
             textTransform: "uppercase" as const,
             color: "var(--gold)",
@@ -122,7 +122,7 @@ export default async function DocumentDetail(props: { params: Promise<{ id: stri
             style={{ background: "var(--cream)", border: "1px solid var(--line)", borderRadius: 8 }}
           >
             <span
-              style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}
+              style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}
             >
               {doc.matchedSupplierName ? (ar ? "مورّد" : "Supplier") : (ar ? "عميل" : "Customer")}
             </span>
@@ -133,7 +133,7 @@ export default async function DocumentDetail(props: { params: Promise<{ id: stri
               <span
                 style={{
                   fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-                  fontSize: 10,
+                  fontSize: 12,
                   letterSpacing: "0.08em",
                   color: "var(--gold)",
                   fontVariantNumeric: "tabular-nums",
@@ -164,7 +164,7 @@ export default async function DocumentDetail(props: { params: Promise<{ id: stri
                 }}
               >
                 <dt
-                  style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)", marginBottom: 2 }}
+                  style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)", marginBottom: 2 }}
                 >
                   {prettyKey(k, ar)}
                 </dt>

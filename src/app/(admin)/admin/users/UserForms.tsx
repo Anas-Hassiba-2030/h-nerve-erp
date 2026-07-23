@@ -182,7 +182,7 @@ function PasswordFieldWithGenerator({
             display: "block",
             marginTop: 4,
             color: "var(--admin-text-muted)",
-            fontSize: 11,
+            fontSize: 12,
             fontFamily: "JetBrains Mono, ui-monospace, monospace",
           }}
         >

@@ -81,7 +81,7 @@ export default async function SelfTuningReportDetail(
             style={{
               fontFamily:
                 "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-              fontSize: 11,
+              fontSize: 12,
               letterSpacing: "0.16em",
               textTransform: "uppercase",
               color: "var(--gold)",
@@ -91,7 +91,7 @@ export default async function SelfTuningReportDetail(
             <ArrowLeft className="h-3 w-3 rtl:rotate-180" strokeWidth={1.5} />
             {ar ? "كل التقارير" : "All reports"}
           </Link>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 999, fontSize: 11.5, fontWeight: 600, color: "var(--ink-muted)", background: "rgba(100,90,80,.1)" }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 999, fontSize: 12, fontWeight: 600, color: "var(--ink-muted)", background: "rgba(100,90,80,.1)" }}>
             {statusLabel}
           </span>
         </div>
@@ -110,7 +110,7 @@ export default async function SelfTuningReportDetail(
             <div className="text-center" style={{ color: "var(--ink-muted)" }}>
               <div
                 style={{
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: 700,
                   textTransform: "uppercase",
                   letterSpacing: ".1em",
@@ -178,7 +178,7 @@ export default async function SelfTuningReportDetail(
             <div
               className="ms-2"
               style={{
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: 700,
                 textTransform: "uppercase",
                 letterSpacing: ".1em",
@@ -213,7 +213,7 @@ export default async function SelfTuningReportDetail(
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 8,
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: 700,
                 textTransform: "uppercase",
                 letterSpacing: ".1em",
@@ -251,7 +251,7 @@ export default async function SelfTuningReportDetail(
                     style={{
                       fontFamily:
                         "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-                      fontSize: 10,
+                      fontSize: 12,
                       letterSpacing: "0.18em",
                       color: "var(--gold)",
                       marginInlineEnd: 10,
@@ -274,7 +274,7 @@ export default async function SelfTuningReportDetail(
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: 700,
               textTransform: "uppercase",
               letterSpacing: ".1em",
@@ -363,7 +363,7 @@ function IQBlock({
     <div className="text-center">
       <div
         style={{
-          fontSize: 10,
+          fontSize: 12,
           fontWeight: 700,
           textTransform: "uppercase",
           letterSpacing: ".1em",

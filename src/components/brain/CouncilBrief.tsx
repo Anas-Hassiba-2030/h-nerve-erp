@@ -106,7 +106,7 @@ export function CouncilBrief({
     display: "flex",
     alignItems: "center",
     gap: 7,
-    fontSize: 10.5,
+    fontSize: 12,
     fontWeight: 700,
     letterSpacing: ".12em",
     textTransform: "uppercase",
@@ -169,7 +169,7 @@ export function CouncilBrief({
         </div>
 
         {/* Units */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8, fontSize: 10.5, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "rgba(246,241,231,.5)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8, fontSize: 12, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "rgba(246,241,231,.5)" }}>
           <Building2 className="h-3 w-3" strokeWidth={1.5} />
           {ar ? "الوحدات" : "Units"}
         </div>
@@ -186,7 +186,7 @@ export function CouncilBrief({
         </div>
 
         {/* Aspects (lenses) */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8, fontSize: 10.5, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "rgba(246,241,231,.5)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8, fontSize: 12, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "rgba(246,241,231,.5)" }}>
           <Sparkles className="h-3 w-3" strokeWidth={1.5} />
           {ar ? "الجوانب" : "Aspects"}
         </div>
@@ -247,7 +247,7 @@ export function CouncilBrief({
             display: "inline-flex",
             alignItems: "center",
             gap: 7,
-            fontSize: 10.5,
+            fontSize: 12,
             fontWeight: 700,
             letterSpacing: ".1em",
             textTransform: "uppercase",
@@ -262,7 +262,7 @@ export function CouncilBrief({
         {runningCount > 0 ? (
           <span
             style={{
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: 700,
               letterSpacing: ".06em",
               padding: "3px 11px",

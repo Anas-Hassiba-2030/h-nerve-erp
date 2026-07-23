@@ -105,7 +105,7 @@ export default async function GenesisPage(
   } as const;
   const eyebrow = {
     fontFamily: "'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace",
-    fontSize: 10.5,
+    fontSize: 12,
     letterSpacing: "0.18em",
     textTransform: "uppercase" as const,
     marginBottom: 12,
@@ -289,7 +289,7 @@ export default async function GenesisPage(
             <span style={{ color: "var(--admin-text-muted)" }}>{role}</span>
           </div>
         ))}
-        <div style={{ marginTop: 10, fontSize: 11.5, color: "var(--admin-text-muted)", fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}>
+        <div style={{ marginTop: 10, fontSize: 12, color: "var(--admin-text-muted)", fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}>
           {ar ? "كلمة المرور لجميع الحسابات:" : "Password for all accounts:"}{" "}
           <span style={{ color: "var(--admin-text)" }}>admin123</span>
         </div>

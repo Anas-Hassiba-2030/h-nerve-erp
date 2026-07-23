@@ -103,7 +103,7 @@ export default async function MyProfilePage() {
               padding: "14px 16px",
             }}
           >
-            <div style={{ fontSize: 10.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>
+            <div style={{ fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>
               {f.label}
             </div>
             <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }} dir={f.label.includes("Email") || f.label.includes("البريد") ? "ltr" : undefined}>

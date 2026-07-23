@@ -156,7 +156,7 @@ export function WorkspaceFinancials({
                 ) : null}
                 <span
                   className="heri-number-mono"
-                  style={{ fontSize: 10.5, color: "var(--heri-ink-3)" }}
+                  style={{ fontSize: 12, color: "var(--heri-ink-3)" }}
                 >
                   {c.hint}
                 </span>
@@ -229,7 +229,7 @@ export function WorkspaceFinancials({
                 <span
                   className="heri-number-mono truncate"
                   style={{
-                    fontSize: 8.5,
+                    fontSize: 12,
                     color: "var(--heri-ink-3)",
                     maxWidth: "100%",
                   }}
@@ -249,7 +249,7 @@ function Legend({ color, label }: { color: string; label: string }) {
   return (
     <span
       className="inline-flex items-center gap-1.5"
-      style={{ fontSize: 11, color: "var(--heri-ink-2)" }}
+      style={{ fontSize: 12, color: "var(--heri-ink-2)" }}
     >
       <span
         className="inline-block h-2 w-2 rounded-full"

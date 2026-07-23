@@ -123,7 +123,7 @@ export default async function UsersPage() {
           <span className="tinfo">
             <span className="tn">{u.name}</span>
             <span className="tr">{u.title ?? role}</span>
-            {sector ? <span className="tr" style={{ opacity: 0.55, fontSize: "9.5px" }}>{sector}</span> : null}
+            {sector ? <span className="tr" style={{ opacity: 0.55, fontSize: "12px" }}>{sector}</span> : null}
           </span>
           <span className="tbadge">{RANK_GLYPH[u.rank] ?? "♟"}</span>
           {canEdit ? (

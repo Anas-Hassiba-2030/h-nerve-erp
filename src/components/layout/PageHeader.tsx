@@ -145,7 +145,7 @@ export async function PageHeader({
                 className="mb-2 flex flex-wrap items-center gap-1"
                 style={{
                   fontFamily: "'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace",
-                  fontSize: 10.5,
+                  fontSize: 12,
                   color: "var(--heri-ink-3)",
                   letterSpacing: "0.06em",
                 }}

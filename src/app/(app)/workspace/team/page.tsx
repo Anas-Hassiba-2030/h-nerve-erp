@@ -92,7 +92,7 @@ export default async function WorkspaceTeamPage() {
                     {u.xp ? ` · ${formatNumber(u.xp)} XP` : ""}
                   </div>
                 </div>
-                <span className={`tag ${ROLE_TONE[u.role] === "critical" || ROLE_TONE[u.role] === "warn" ? "gold" : "ok"}`} style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}>
+                <span className={`tag ${ROLE_TONE[u.role] === "critical" || ROLE_TONE[u.role] === "warn" ? "gold" : "ok"}`} style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const }}>
                   {u.role}
                 </span>
               </li>

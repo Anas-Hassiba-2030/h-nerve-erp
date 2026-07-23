@@ -23,7 +23,7 @@ function StagePill({ stage, ar }: { stage: string; ar: boolean }) {
   };
   const lbl = LABEL[stage] ?? { ar: stage, en: stage };
   return (
-    <span style={{ fontSize: 11, fontWeight: 600, color: STAGE_COLOR[stage] ?? "var(--ink-muted)", letterSpacing: "0.06em" }}>
+    <span style={{ fontSize: 12, fontWeight: 600, color: STAGE_COLOR[stage] ?? "var(--ink-muted)", letterSpacing: "0.06em" }}>
       {ar ? lbl.ar : lbl.en}
     </span>
   );

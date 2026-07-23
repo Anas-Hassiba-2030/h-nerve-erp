@@ -17,12 +17,27 @@ type Locale = "ar" | "en";
 // so the five-group view stays pixel-identical to before — only crowded child
 // blooms expand. Only the geometry changes here; the pop/spin/bloom animation
 // is untouched.
-const BASE_R = 116; // orbit radius for ≤9 nodes (unchanged from the original)
+const BASE_R = 116; // orbit radius for ≤9 short-label nodes (unchanged from the original)
 
-function radiusFor(n: number): number {
-  // Space nodes so adjacent pills clear an ~108px chord; floor at BASE_R.
-  // (Was 80px — the 14px label bump of 2026-07-23 needs the wider chord.)
-  return n <= 1 ? BASE_R : Math.max(BASE_R, Math.round(54 / Math.sin(Math.PI / n)));
+// Bug (2026-07-23, post-ERP-split): the 7-node group ring sized itself off a
+// FIXED chord (54px), which only accounts for the gold dot, not the pill text
+// under it. "Purchasing & Production" (24 chars, 14px/700 pill) renders ~230px
+// wide — nearly double the 108px chord the old formula guaranteed — so its
+// label physically overlapped the "Sales" node next to it. Radius must now
+// scale with the WIDEST label in the current node set, not just the count.
+const LABEL_CHAR_PX = 8.4; // avg glyph width, 14px/700 system-ui pill text
+const LABEL_PAD_PX = 26; // .mo-orbit-lbl padding: 13px * 2
+const LABEL_MAX_PX = 150; // .mo-orbit-lbl max-width — long labels wrap instead of growing the ring forever
+const NODE_GAP_PX = 22; // minimum clear gap between adjacent pill edges
+
+function radiusFor(n: number, labels: string[]): number {
+  if (n <= 1) return BASE_R;
+  const maxLabelWidth = Math.max(
+    0,
+    ...labels.map((l) => Math.min(LABEL_MAX_PX, l.length * LABEL_CHAR_PX + LABEL_PAD_PX)),
+  );
+  const neededChord = maxLabelWidth + NODE_GAP_PX;
+  return Math.max(BASE_R, Math.round(neededChord / (2 * Math.sin(Math.PI / n))));
 }
 
 // Decorative rings stay proportional to the live radius so they always frame
@@ -77,10 +92,14 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
     router.push(route);
   };
 
-  // Layout scales with the node count: more nodes → wider ring + panel, so
-  // the rings always frame the labels and the pills never collide.
+  // Layout scales with the node count AND the widest label in the current
+  // set: more/longer nodes → wider ring + panel, so the rings always frame
+  // the labels and the pills never collide.
   const count = activeGroup ? activeGroup.children.length : ORRERY_GROUPS.length;
-  const R = radiusFor(count);
+  const labels = activeGroup
+    ? activeGroup.children.map((c) => (locale === "ar" ? c.label : c.labelEn))
+    : ORRERY_GROUPS.map((g) => (locale === "ar" ? g.nameAr : g.nameEn));
+  const R = radiusFor(count, labels);
   const SIZE = Math.max(360, Math.round(2 * (R + 60)));
   const CTR = SIZE / 2;
   const rings = ringSizes(R);

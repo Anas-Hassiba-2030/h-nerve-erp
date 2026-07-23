@@ -79,7 +79,7 @@ export function LearningPatterns({ ar }: { ar: boolean }) {
           <span
             style={{
               fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-              fontSize: 10,
+              fontSize: 12,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               color: "var(--heri-ink-3)",

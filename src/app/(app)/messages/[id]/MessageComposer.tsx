@@ -127,7 +127,7 @@ export function MessageComposer({
             }}
           />
           <span
-            style={{ fontSize: 11, color: "var(--ink-muted)" }}
+            style={{ fontSize: 12, color: "var(--ink-muted)" }}
           >
             {ar ? "صورة جاهزة للإرسال" : "Image ready"}
           </span>
@@ -153,7 +153,7 @@ export function MessageComposer({
           role="alert"
           style={{
             color: "#b91c1c",
-            fontSize: 11.5,
+            fontSize: 12,
             fontWeight: 500,
           }}
         >

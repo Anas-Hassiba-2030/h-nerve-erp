@@ -100,7 +100,7 @@ export default async function PlanDetailPage(
           className="inline-flex items-center gap-2"
           style={{
             fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-            fontSize: 11,
+            fontSize: 12,
             letterSpacing: "0.16em",
             textTransform: "uppercase" as const,
             color: "var(--gold)",
@@ -121,7 +121,7 @@ export default async function PlanDetailPage(
             <button
               type="submit"
               className="dl-btn dl-btn-secondary"
-              style={{ padding: "6px 12px", fontSize: 11 }}
+              style={{ padding: "6px 12px", fontSize: 12 }}
             >
               {ar ? "حذف" : "Delete"}
             </button>
@@ -132,7 +132,7 @@ export default async function PlanDetailPage(
       {/* Hero plinth: goal + rationale */}
       <div className="panel reveal">
         <div className="px-6 py-7 md:px-9 md:py-9">
-          <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
             {ar ? "الهدف" : "Goal"}
           </div>
           <h2
@@ -168,7 +168,7 @@ export default async function PlanDetailPage(
               <Link
                 href={`/brain/council/${sourceCouncilSession.id}`}
                 className="inline-flex items-center gap-2 transition"
-                style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--gold)", textDecoration: "none" }}
+                style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--gold)", textDecoration: "none" }}
               >
                 <MessagesSquare className="h-3 w-3" strokeWidth={1.5} />
                 {ar ? "من جلسة المجلس →" : "Source: council session →"}
@@ -180,7 +180,7 @@ export default async function PlanDetailPage(
               <Link
                 href={`/insights`}
                 className="inline-flex items-center gap-2 transition"
-                style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--gold)", textDecoration: "none" }}
+                style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--gold)", textDecoration: "none" }}
               >
                 <Sparkles className="h-3 w-3" strokeWidth={1.5} />
                 {ar ? "من إشارة:" : "Source: insight —"} {sourceInsight.title}
@@ -226,7 +226,7 @@ export default async function PlanDetailPage(
             className="px-6 py-5 md:px-9 grid grid-cols-[auto_1fr_auto] gap-4 items-center"
             style={{ borderTop: "1px solid var(--line)" }}
           >
-            <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
+            <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
               {ar ? "التقدّم" : "Progress"}
             </span>
             <div
@@ -262,7 +262,7 @@ export default async function PlanDetailPage(
 
       {/* Step Gantt */}
       <section>
-        <div className="mb-3 inline-flex items-center gap-2" style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
+        <div className="mb-3 inline-flex items-center gap-2" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
           <span
             aria-hidden
             style={{
@@ -292,7 +292,7 @@ export default async function PlanDetailPage(
         >
           <div
             className="inline-flex items-center gap-2"
-            style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--brick)" }}
+            style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--brick)" }}
           >
             <ShieldAlert className="h-3 w-3" strokeWidth={1.5} />
             {ar ? "شرط التراجع" : "Rollback condition"}
@@ -319,7 +319,7 @@ export default async function PlanDetailPage(
           className="panel reveal grid gap-4 md:grid-cols-[1fr_auto] md:items-center"
         >
           <div>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
+            <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
               {ar ? "حالة الخطة" : "Plan status"}
             </div>
             <p
@@ -356,7 +356,7 @@ export default async function PlanDetailPage(
         <div
           className="panel reveal grid gap-4 md:grid-cols-[1fr_auto] md:items-center"
         >
-          <div className="inline-flex items-center gap-2" style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
+          <div className="inline-flex items-center gap-2" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
             <AlertTriangle className="h-3 w-3" strokeWidth={1.5} />
             {ar
               ? "الخطة نشطة — أكمل الخطوات أعلاه."
@@ -398,7 +398,7 @@ function TargetTile({
         borderInlineStart: divider ? "1px solid var(--line)" : undefined,
       }}
     >
-      <div className="inline-flex items-center gap-2" style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
+      <div className="inline-flex items-center gap-2" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
         {icon}
         {eyebrow}
       </div>

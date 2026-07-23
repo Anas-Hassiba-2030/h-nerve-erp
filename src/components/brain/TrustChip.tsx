@@ -25,7 +25,7 @@ const BASE: CSSProperties = {
   gap: 4,
   padding: "1px 6px",
   borderRadius: 999,
-  fontSize: 10.5,
+  fontSize: 12,
   fontWeight: 700,
   lineHeight: 1.2,
   fontVariantNumeric: "tabular-nums",
@@ -54,7 +54,7 @@ export function TrustChip({
       title={`${label} ${pct}%`}
       style={{ ...BASE, background: t.bg, color: t.fg, border: `1px solid ${t.border}` }}
     >
-      <span aria-hidden style={{ fontSize: 11, lineHeight: 1 }}>{t.glyph}</span>
+      <span aria-hidden style={{ fontSize: 12, lineHeight: 1 }}>{t.glyph}</span>
       {showLabel ? <span>{label}</span> : null}
       <span style={{ opacity: 0.75 }}>{pct}%</span>
     </span>

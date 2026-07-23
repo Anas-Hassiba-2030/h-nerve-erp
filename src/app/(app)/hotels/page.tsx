@@ -281,7 +281,7 @@ export default async function HotelsPage() {
             <tr><td colSpan={9} style={{ textAlign: "center", padding: "40px 20px", color: "var(--ink-muted)", fontSize: 13 }}>{ar ? "لا حجوزات بعد" : "No bookings yet"}</td></tr>
           ) : recentBookings.map((b) => (
             <tr key={b.id}>
-              <td style={{ fontFamily: "monospace", fontSize: 11, color: "var(--ink-muted)" }}>{b.reference}</td>
+              <td style={{ fontFamily: "monospace", fontSize: 12, color: "var(--ink-muted)" }}>{b.reference}</td>
               <td style={{ fontWeight: 700, color: "var(--ink)" }}>{b.guestName}</td>
               <td>{ar ? b.hotel.name : (b.hotel.nameEn ?? b.hotel.name)}</td>
               <td className="num" style={{ fontSize: 12 }}>{formatShortDate(b.checkIn, lc)}</td>

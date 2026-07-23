@@ -74,7 +74,7 @@ export function IQTrend({
             textAnchor="end"
             style={{
               fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-              fontSize: 9.5,
+              fontSize: 12,
               letterSpacing: "0.06em",
               fill: "var(--heri-ink-3)",
               fontVariantNumeric: "tabular-nums",
@@ -156,7 +156,7 @@ export function IQTrend({
           textAnchor="middle"
           style={{
             fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-            fontSize: 9,
+            fontSize: 12,
             letterSpacing: "0.08em",
             fill: "var(--heri-ink-3)",
             textTransform: "uppercase",

@@ -324,7 +324,7 @@ function ForecastCard({ forecast: f, ar, lc }: { forecast: any; ar: boolean; lc:
               <form key={s} action={act}>
                 <input type="hidden" name="id" value={f.id} />
                 <input type="hidden" name="status" value={s} />
-                <button type="submit" className="dl-btn dl-btn-secondary" style={{ padding: "5px 12px", fontSize: 11.5 }}>
+                <button type="submit" className="dl-btn dl-btn-secondary" style={{ padding: "5px 12px", fontSize: 12 }}>
                   {ar ? STATUS_LABEL[s].ar : STATUS_LABEL[s].en}
                 </button>
               </form>

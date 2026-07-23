@@ -228,7 +228,7 @@ function PatternRow({ pattern, ar }: { pattern: any; ar: boolean }) {
       {/* Forget */}
       <form action={unlearnPattern}>
         <input type="hidden" name="id" value={pattern.id} />
-        <button type="submit" className="br-btn br-btn-ghost" style={{ fontSize: 11, padding: "6px 12px" }} title={ar ? "نسيان هذا النمط" : "Forget this pattern"}>
+        <button type="submit" className="br-btn br-btn-ghost" style={{ fontSize: 12, padding: "6px 12px" }} title={ar ? "نسيان هذا النمط" : "Forget this pattern"}>
           {ar ? "ينسى" : "Forget"}
         </button>
       </form>
@@ -236,7 +236,7 @@ function PatternRow({ pattern, ar }: { pattern: any; ar: boolean }) {
       {/* Delete */}
       <form action={deletePattern}>
         <input type="hidden" name="id" value={pattern.id} />
-        <button type="submit" className="br-btn danger" style={{ fontSize: 11, padding: "6px 12px" }} title={ar ? "حذف نهائي" : "Delete"}>
+        <button type="submit" className="br-btn danger" style={{ fontSize: 12, padding: "6px 12px" }} title={ar ? "حذف نهائي" : "Delete"}>
           <Trash2 className="h-3 w-3" strokeWidth={1.5} />
         </button>
       </form>
@@ -319,10 +319,10 @@ function FeedbackEventRow({ event, ar }: { event: any; ar: boolean }) {
           {moduleLabel ? <span style={{ fontWeight: 400, opacity: 0.65, marginInlineStart: 8 }}>{moduleLabel}</span> : null}
         </div>
         {event.category ? (
-          <div className="ts" style={{ fontSize: 11 }}>{event.category}</div>
+          <div className="ts" style={{ fontSize: 12 }}>{event.category}</div>
         ) : null}
       </div>
-      <span style={{ fontSize: 11, color: "var(--mist)", opacity: 0.55, flexShrink: 0, whiteSpace: "nowrap" }}>
+      <span style={{ fontSize: 12, color: "var(--mist)", opacity: 0.55, flexShrink: 0, whiteSpace: "nowrap" }}>
         {ageLabel}
       </span>
     </div>

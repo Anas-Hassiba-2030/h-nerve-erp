@@ -126,7 +126,7 @@ function StepTile({
       <div className="ms-2 flex flex-col items-center gap-2 pt-0.5">
         <span
           className="heri-eyebrow heri-eyebrow-ink"
-          style={{ fontSize: 9.5, letterSpacing: "0.18em" }}
+          style={{ fontSize: 12, letterSpacing: "0.18em" }}
         >
           {ar ? `خطوة ${pad2(step.orderIndex + 1)}` : `STEP ${pad2(step.orderIndex + 1)}`}
         </span>
@@ -155,7 +155,7 @@ function StepTile({
           className="mt-2.5 flex flex-wrap items-center gap-2"
           style={{
             fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-            fontSize: 10,
+            fontSize: 12,
             letterSpacing: "0.1em",
             textTransform: "uppercase",
             color: "var(--heri-ink-3)",
@@ -217,7 +217,7 @@ function StepTile({
             <button
               type="submit"
               className="heri-btn heri-btn-ghost"
-              style={{ padding: "6px 10px", fontSize: 11 }}
+              style={{ padding: "6px 10px", fontSize: 12 }}
             >
               <CheckCircle2 className="h-3 w-3" strokeWidth={1.5} />
               {ar ? "أُنجزت" : "Mark done"}
@@ -231,7 +231,7 @@ function StepTile({
             <button
               type="submit"
               className="heri-btn heri-btn-ghost"
-              style={{ padding: "6px 10px", fontSize: 11 }}
+              style={{ padding: "6px 10px", fontSize: 12 }}
               title={ar ? "تعليم كمُعطّلة" : "Mark blocked"}
             >
               <AlertOctagon className="h-3 w-3" strokeWidth={1.5} />

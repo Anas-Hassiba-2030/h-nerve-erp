@@ -137,7 +137,7 @@ export default async function PermissionsPreview(
                           padding: "2px 10px",
                           cursor: "pointer",
                           fontFamily: "JetBrains Mono, ui-monospace, monospace",
-                          fontSize: 11,
+                          fontSize: 12,
                           letterSpacing: "0.18em",
                           textTransform: "uppercase",
                           opacity: overridden ? 1 : 0.7,

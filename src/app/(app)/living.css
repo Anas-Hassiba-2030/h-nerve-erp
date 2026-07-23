@@ -314,7 +314,8 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 .mo-orbit-lbl{
   font-size:14px; font-weight:700; color:#f4f8f4;
   background:rgba(8,18,14,.94); border:1px solid rgba(194,163,90,.45);
-  padding:5px 13px; border-radius:999px; white-space:nowrap;
+  padding:5px 13px; border-radius:16px; max-width:150px; text-align:center;
+  white-space:normal; line-height:1.25;
   transition:background .14s, color .14s, border-color .14s;
 }
 .mo-orbit-node:hover .mo-orbit-lbl{ background:#C2A35A; color:#0b1a15; border-color:#C2A35A; }

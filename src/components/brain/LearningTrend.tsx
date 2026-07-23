@@ -67,7 +67,7 @@ export function LearningTrend({ ar, weeks = 12 }: { ar: boolean; weeks?: number 
         <span
           style={{
             fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-            fontSize: 10,
+            fontSize: 12,
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             color: "var(--heri-ink-3)",
@@ -103,7 +103,7 @@ export function LearningTrend({ ar, weeks = 12 }: { ar: boolean; weeks?: number 
                 </defs>
                 <XAxis
                   dataKey="week"
-                  tick={{ fontSize: 9, fill: "var(--heri-ink-3)" }}
+                  tick={{ fontSize: 12, fill: "var(--heri-ink-3)" }}
                   tickFormatter={(w: string) => w.slice(5)}
                   interval="preserveStartEnd"
                   tickLine={false}
@@ -112,7 +112,7 @@ export function LearningTrend({ ar, weeks = 12 }: { ar: boolean; weeks?: number 
                 <YAxis
                   allowDecimals={false}
                   width={28}
-                  tick={{ fontSize: 9, fill: "var(--heri-ink-3)" }}
+                  tick={{ fontSize: 12, fill: "var(--heri-ink-3)" }}
                   tickLine={false}
                   axisLine={false}
                 />
@@ -163,7 +163,7 @@ function TrendTooltip({
         background: "var(--heri-ink)",
         color: "var(--heri-cream)",
         padding: "8px 10px",
-        fontSize: 11,
+        fontSize: 12,
         lineHeight: 1.5,
         border: "1px solid var(--heri-ink)",
       }}
@@ -186,7 +186,7 @@ function Legend({ ar, total }: { ar: boolean; total: number }) {
   return (
     <div
       className="flex items-center gap-4 pt-2 mt-1"
-      style={{ borderTop: "1px solid var(--heri-rule)", fontSize: 11, color: "var(--heri-ink-2)" }}
+      style={{ borderTop: "1px solid var(--heri-rule)", fontSize: 12, color: "var(--heri-ink-2)" }}
     >
       <Swatch color="var(--heri-ochre)" label={ar ? "مقبول" : "Accepted"} />
       <Swatch color="var(--heri-terracotta)" label={ar ? "مرفوض" : "Rejected"} />
@@ -194,7 +194,7 @@ function Legend({ ar, total }: { ar: boolean; total: number }) {
       <span
         style={{
           fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-          fontSize: 10,
+          fontSize: 12,
           color: "var(--heri-ink-3)",
           fontVariantNumeric: "tabular-nums",
         }}

@@ -122,18 +122,18 @@ export default async function ComparePage(props: { searchParams: Promise<{ a?: s
             <div style={{ fontFamily: "var(--dl-display)", fontSize: 20, fontWeight: 600, color: "var(--emerald)", marginBottom: 4 }}>
               {ar ? "منحنى الإيراد · ١٢ شهراً" : "Revenue curve · 12 months"}
             </div>
-            <div style={{ fontSize: 11.5, color: "var(--ink-muted)", marginBottom: 16 }}>
+            <div style={{ fontSize: 12, color: "var(--ink-muted)", marginBottom: 16 }}>
               {ar
                 ? `الأخضر = ${A.name} · الذهبي = ${B.name}`
                 : `Green = ${A.nameEn} · Gold = ${B.nameEn}`}
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <div className="mb-1 flex items-center gap-2" style={{ fontSize: 11, fontWeight: 700 }}><span style={{ display: "block", height: 8, width: 16, borderRadius: 999, background: "var(--emerald)" }} /><span style={{ color: "var(--ink)" }}>{ar ? A.name : A.nameEn}</span></div>
+                <div className="mb-1 flex items-center gap-2" style={{ fontSize: 12, fontWeight: 700 }}><span style={{ display: "block", height: 8, width: 16, borderRadius: 999, background: "var(--emerald)" }} /><span style={{ color: "var(--ink)" }}>{ar ? A.name : A.nameEn}</span></div>
                 <AreaLineChart data={dA.trend} height={160} color="var(--emerald)" formatY={(v) => formatMoney(v)} />
               </div>
               <div>
-                <div className="mb-1 flex items-center gap-2" style={{ fontSize: 11, fontWeight: 700 }}><span style={{ display: "block", height: 8, width: 16, borderRadius: 999, background: "var(--gold)" }} /><span style={{ color: "var(--ink)" }}>{ar ? B.name : B.nameEn}</span></div>
+                <div className="mb-1 flex items-center gap-2" style={{ fontSize: 12, fontWeight: 700 }}><span style={{ display: "block", height: 8, width: 16, borderRadius: 999, background: "var(--gold)" }} /><span style={{ color: "var(--ink)" }}>{ar ? B.name : B.nameEn}</span></div>
                 <AreaLineChart data={dB.trend} height={160} color="var(--gold)" formatY={(v) => formatMoney(v)} />
               </div>
             </div>

@@ -74,17 +74,17 @@ export default async function ReportsIndexPage() {
                   </div>
                 </div>
                 <div className="space-y-2 p-4">
-                  <div className="flex items-center justify-between" style={{ fontSize: 11 }}>
+                  <div className="flex items-center justify-between" style={{ fontSize: 12 }}>
                     <span style={{ color: "var(--ink-muted)" }}>{ar ? "إيراد ١٢ شهر" : "12-mo revenue"}</span>
                     <span style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>{formatMoney(rev)}</span>
                   </div>
                   {esgScore !== undefined ? (
-                    <div className="flex items-center justify-between" style={{ fontSize: 11 }}>
+                    <div className="flex items-center justify-between" style={{ fontSize: 12 }}>
                       <span style={{ color: "var(--ink-muted)" }}>ESG</span>
                       <span style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: "var(--gold)" }}>{esgScore.toFixed(1)}/100</span>
                     </div>
                   ) : null}
-                  <div className="flex items-center justify-between" style={{ borderRadius: 10, padding: "6px 8px", fontSize: 11, fontWeight: 700, background: "var(--ivory)", color: "var(--gold-soft, #8a6a1f)" }}>
+                  <div className="flex items-center justify-between" style={{ borderRadius: 10, padding: "6px 8px", fontSize: 12, fontWeight: 700, background: "var(--ivory)", color: "var(--gold-soft, #8a6a1f)" }}>
                     <span className="flex items-center gap-1.5" style={{ color: "var(--emerald)" }}><Printer className="h-3 w-3" />{ar ? "افتح التقرير الرسمي" : "Open formal report"}</span>
                     <ArrowRight className="h-3 w-3 rtl:rotate-180" style={{ color: "var(--emerald)" }} />
                   </div>

@@ -261,7 +261,7 @@ html[lang="en"] body {
     border-color: color-mix(in srgb, var(--brand) 35%, transparent);
   }
 
-  .btn-sm { @apply px-2.5 py-1 text-[11px] rounded-md; }
+  .btn-sm { @apply px-2.5 py-1 text-[13px] rounded-md; }
   .btn-lg { @apply px-5 py-2.5 text-sm; }
 
   /* Icon-only round button */
@@ -309,7 +309,7 @@ html[lang="en"] body {
   .kpi {
     @apply card card-pad relative overflow-hidden card-hover;
   }
-  .kpi-label { @apply text-[11px] font-bold uppercase tracking-widest; color: var(--text-muted); }
+  .kpi-label { @apply text-[13px] font-bold uppercase tracking-widest; color: var(--text-muted); }
   .kpi-value { @apply mt-1 text-3xl font-black; color: var(--text); letter-spacing: -0.02em; animation: count-up .55s ease both; }
   .kpi-delta-up { @apply mt-1 inline-flex items-center gap-1 text-xs font-bold; color: #0a8e54; }
   .kpi-delta-down { @apply mt-1 inline-flex items-center gap-1 text-xs font-bold; color: #c0392b; }
@@ -325,7 +325,7 @@ html[lang="en"] body {
   .table-scroll { overflow-x: auto; }
   .table { @apply min-w-full text-sm; }
   .table thead { background: color-mix(in srgb, var(--brand) 4%, var(--surface-elevated)); color: var(--text-muted); }
-  .table th { @apply px-4 py-3 text-[11px] font-bold uppercase tracking-wider; }
+  .table th { @apply px-4 py-3 text-[13px] font-bold uppercase tracking-wider; }
   html[dir="rtl"] .table th, html[dir="rtl"] .table td { text-align: right; }
   html[dir="ltr"] .table th, html[dir="ltr"] .table td { text-align: left; }
   .table td { @apply px-4 py-3 align-middle; color: var(--text); border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent); }
@@ -333,7 +333,7 @@ html[lang="en"] body {
   .table tbody tr:hover { background: color-mix(in srgb, var(--brand) 4%, transparent); }
 
   /* ---------- Badges ---------- */
-  .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold; }
+  .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[13px] font-bold; }
   .badge-emerald { @apply badge; background: color-mix(in srgb, #10b981 14%, transparent); color: #0a8e54; }
   .badge-blue   { @apply badge; background: rgba(59,130,246,.12); color: #1c5fbe; }
   .badge-amber  { @apply badge; background: rgba(245,158,11,.14); color: #92400e; }

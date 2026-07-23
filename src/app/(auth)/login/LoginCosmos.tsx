@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
 import { loginAction, type LoginState } from "./actions";
 import { setLocale } from "@/app/actions/preferences";
 
@@ -76,7 +76,7 @@ export function LoginCosmos({
   const misfireRef = useRef<((x: number, y: number) => void) | null>(null);
   const interactedRef = useRef(false);
 
-  const [state, formAction] = useFormState<LoginState, FormData>(loginAction, {
+  const [state, formAction] = useActionState<LoginState, FormData>(loginAction, {
     ok: false,
     error: initialError || undefined,
     email: initialEmail,

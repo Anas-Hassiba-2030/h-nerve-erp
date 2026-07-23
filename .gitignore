@@ -91,3 +91,4 @@ graphify-out/
 /e2e/.auth/
 /playwright-report/
 /test-results/
+/prisma/schema/e2e.db

@@ -1,0 +1,17 @@
+# Cloudflare Workers static-asset headers.
+#
+# WHY THIS FILE EXISTS: on Cloudflare Workers the static-assets layer answers
+# BEFORE the Worker runs (same mechanism that once shadowed /orrery — see
+# CLAUDE.md), so headers() in next.config.mjs and the middleware CSP never
+# reach asset-served documents. Live probing (scripts/verify/security-check.mjs)
+# showed /hub/index.html shipping with NO CSP and NO frame protection in
+# production. This file is Cloudflare's native way to header static assets.
+#
+# Keep the /hub policy in lockstep with `hubCsp` in next.config.mjs (that copy
+# covers local `next dev`/`next start`; this copy covers the live Worker).
+
+/hub/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

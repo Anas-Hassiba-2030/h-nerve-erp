@@ -135,7 +135,7 @@ export default async function MessagesPage({
     activeThread?.title ?? activeOther?.name ?? (ar ? "محادثة" : "Conversation");
 
   return (
-    <div className="dl-page" dir={ar ? "rtl" : "ltr"}>
+    <div className="dl-page ms-scope" dir={ar ? "rtl" : "ltr"}>
       <div className="ms-wrap">
         <div className="ms-ribbon">
           <div className="ms-title-box">

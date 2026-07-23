@@ -44,6 +44,35 @@ jobs:
           DATABASE_URL: file:./ci.db
           NEXT_TELEMETRY_DISABLED: "1"
 
+  # Browser-level regression gate — the class of bug unit tests can't see
+  # (dead buttons, auth loops, role lockouts, crashed pages). Builds the
+  # prod-shaped output (`next build --webpack` + `next start`, mirroring the
+  # Cloudflare builder) and drives real Chromium through login, logout,
+  # navigation, and permission enforcement against a seeded throwaway SQLite.
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Build (prod-shaped server for the e2e run)
+        run: npx next build --webpack
+        env:
+          DATABASE_URL: file:./e2e.db
+          NEXT_TELEMETRY_DISABLED: "1"
+      - name: E2E tests
+        run: npm run e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
   # A pasted key must never land on a branch undetected (RUNBOOK §1 makes
   # rotation manual — this makes detection automatic). Full history is scanned
   # (fetch-depth: 0) so a secret buried in an earlier commit of the PR fails

@@ -84,3 +84,10 @@ graphify-out/
 # root-level local dev SQLite (app reads DATABASE_URL=file:./dev.db)
 /dev.db
 /dev.db-journal
+
+# Playwright e2e artifacts + throwaway e2e database
+/e2e.db
+/e2e.db-journal
+/e2e/.auth/
+/playwright-report/
+/test-results/

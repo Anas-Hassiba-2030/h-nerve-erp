@@ -15,6 +15,8 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
+    "e2e": "tsx --tsconfig tsconfig.scripts.json e2e/global-setup.ts && playwright test",
+    "e2e:ui": "tsx --tsconfig tsconfig.scripts.json e2e/global-setup.ts && playwright test --ui",
     "typecheck": "tsc --noEmit",
     "db:push": "node scripts/ops/guard-not-prod.js && prisma db push",
     "db:seed": "node scripts/ops/guard-not-prod.js && tsx --tsconfig tsconfig.scripts.json scripts/seed/seed.ts",
@@ -53,6 +55,7 @@
   },
   "devDependencies": {
     "@opennextjs/cloudflare": "^1.20.1",
+    "@playwright/test": "^1.61.1",
     "@types/bcryptjs": "2.4.6",
     "@types/node": "20.17.6",
     "@types/react": "19.2.2",

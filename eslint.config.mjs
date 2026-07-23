@@ -2,10 +2,16 @@
 // the `next lint` command, so we run ESLint directly against this config.
 // eslint-config-next ships its rules as a flat-config array.
 import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import reactHooks from "eslint-plugin-react-hooks";
 
 export default [
   ...nextCoreWebVitals,
   {
+    // Flat config resolves a "react-hooks/…" rule only if the plugin is
+    // registered in scope; eslint-config-next v16 stopped exporting it under
+    // that key, which made every `npm run lint` die with "could not find
+    // plugin react-hooks". Register it explicitly.
+    plugins: { "react-hooks": reactHooks },
     rules: {
       "react/no-unescaped-entities": "off",
       "@next/next/no-img-element": "off",
@@ -27,6 +33,11 @@ export default [
   {
     ignores: [
       ".next/**",
+      // Cloudflare/OpenNext BUILD OUTPUT — bundled multi-thousand-line
+      // .mjs handlers. Linting it produced every "error" in the repo and
+      // blew the V8 heap (the react-compiler rules against a 14k-line
+      // bundle). Never lint build artifacts.
+      ".open-next/**",
       "node_modules/**",
       "graphify-out/**",
       "prisma/generated/**",

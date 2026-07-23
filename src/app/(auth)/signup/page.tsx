@@ -15,6 +15,12 @@ export default async function SignupPage(
   const searchParams = await props.searchParams;
   const user = await getCurrentUser();
   if (user) redirect("/dashboard");
+  // Mirrors signupOpen() in ./actions.ts — self-registration is closed in
+  // production (real operational data; admins are provisioned by seed).
+  const signupClosed =
+    process.env.NODE_ENV === "production" &&
+    process.env.H_NERVE_OPEN_SIGNUP !== "true";
+  if (signupClosed) redirect("/login");
   const locale = await getLocale();
   const m = await getMessages(locale);
 

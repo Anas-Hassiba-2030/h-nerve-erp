@@ -26,6 +26,9 @@ import { applyWorkspaceScope } from "@/lib/tenancy/workspaceScope";
 // of `$use`. We cast the extended client back to `PrismaClient` so the export
 // type is unchanged and none of the ~628 existing call sites need edits.
 
+// Webpack-only global (see sqliteFileClient) — undefined under Turbopack/Node.
+declare const __non_webpack_require__: NodeRequire | undefined;
+
 const globalForPrisma = globalThis as unknown as {
   prismaScoped: PrismaClient | undefined;
   prismaRaw: PrismaClient | undefined;
@@ -73,7 +76,17 @@ function sqliteFileClient(url: string): PrismaClient {
   // root in every context this branch runs in (dev server, seeds, scripts —
   // same fix already proven in scripts/_prisma.ts), so it's the only base
   // that's reliable here.
-  const nodeRequire = createRequire(`${process.cwd()}/`);
+  // Webpack production builds (`next build --webpack`, used by CI's
+  // prod-shaped e2e server) compile the `createRequire` import to
+  // `(void 0)` — the call then throws "(void 0) is not a function" on the
+  // first DB touch (login 500s). `__non_webpack_require__` is webpack's
+  // own escape hatch: a real Node require it never rewrites. Turbopack dev
+  // doesn't define it, so fall back to createRequire there (proven path).
+  // Workerd never executes this branch at all (D1 above).
+  const nodeRequire: NodeRequire =
+    typeof __non_webpack_require__ === "function"
+      ? __non_webpack_require__
+      : createRequire(`${process.cwd()}/`);
   const { PrismaLibSQL } = nodeRequire(
     "@prisma/adapter-libsql",
   ) as typeof import("@prisma/adapter-libsql");

@@ -14,7 +14,7 @@ export type OrreryIdentity = {
   iq?: string;
 };
 
-export function OrreryFrame({ identity }: { identity: OrreryIdentity }) {
+export function OrreryFrame({ identity, hubVersion }: { identity: OrreryIdentity; hubVersion: string }) {
   const frameRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
@@ -71,7 +71,11 @@ export function OrreryFrame({ identity }: { identity: OrreryIdentity }) {
       // /hub, NOT /orrery: on Cloudflare Workers the assets layer would serve a
       // public/orrery/index.html at /orrery BEFORE the Worker runs, shadowing
       // this very route — the asset dir must never share a path with a route.
-      src="/hub/index.html"
+      // ?v=<content-hash>: a stale browser/edge cache once kept serving a
+      // pre-taxonomy-split hub for days after two verified-correct server
+      // deploys. The hash busts any cache the moment public/hub/index.html
+      // actually changes — see scripts/build/build-orrery.mjs.
+      src={`/hub/index.html?v=${hubVersion}`}
       title="H-Nerve · Orrery"
       onLoad={pushIdentity}
       style={{

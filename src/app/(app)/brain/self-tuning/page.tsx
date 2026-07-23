@@ -102,7 +102,7 @@ function ReportRow({ report, ar }: { report: any; ar: boolean }) {
       />
       <div className="ms-2 grid gap-3 md:grid-cols-[1fr_auto_auto] md:items-center">
         <div className="min-w-0">
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, flexWrap: "wrap", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--ink-muted)" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, flexWrap: "wrap", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--ink-muted)" }}>
             <span style={{ fontVariantNumeric: "tabular-nums" }}>
               {new Intl.DateTimeFormat(ar ? "ar-JO-u-nu-latn" : "en-US", {
                 day: "numeric",
@@ -142,7 +142,7 @@ function ReportRow({ report, ar }: { report: any; ar: boolean }) {
         >
           <div
             style={{
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: 700,
               textTransform: "uppercase",
               letterSpacing: ".1em",
@@ -164,7 +164,7 @@ function ReportRow({ report, ar }: { report: any; ar: boolean }) {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 999, fontSize: 11.5, fontWeight: 600, color: "var(--ink-muted)", background: "rgba(100,90,80,.1)" }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 999, fontSize: 12, fontWeight: 600, color: "var(--ink-muted)", background: "rgba(100,90,80,.1)" }}>
             {label}
           </span>
           <ChevronLeft

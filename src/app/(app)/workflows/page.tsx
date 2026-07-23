@@ -100,7 +100,7 @@ export default async function WorkflowsPage() {
               <span className="pi action">▶</span>
               {ar ? "إجراء" : "Action"}
             </div>
-            <div style={{ fontSize: 11, color: "var(--mist)", opacity: 0.5, marginTop: 10, lineHeight: 1.5 }}>
+            <div style={{ fontSize: 12, color: "var(--mist)", opacity: 0.5, marginTop: 10, lineHeight: 1.5 }}>
               {ar
                 ? "افتح الاستوديو لإضافة العقد وترتيبها."
                 : "Open the studio to add and arrange nodes."}

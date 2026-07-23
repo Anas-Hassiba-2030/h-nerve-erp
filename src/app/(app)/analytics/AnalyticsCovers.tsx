@@ -77,7 +77,7 @@ export function AnalyticsCovers({
               <div className="cv">{co.rev}</div>
               <div
                 style={{
-                  fontSize: 11,
+                  fontSize: 12,
                   color: co.growth >= 0 ? "var(--sage)" : "#9a5648",
                   marginTop: 3,
                 }}

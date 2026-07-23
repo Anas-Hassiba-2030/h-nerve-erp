@@ -366,7 +366,7 @@ export default async function WorkspaceCommandPage() {
                         </span>
                       ) : null}
                     </div>
-                    <div style={{ fontSize: 11.5, color: "var(--ink-muted)", marginTop: 2 }}>
+                    <div style={{ fontSize: 12, color: "var(--ink-muted)", marginTop: 2 }}>
                       {ar ? "تسليم متوقع: " : "Expected delivery: "}
                       {po.expectedAt ? formatDate(po.expectedAt, ar ? "ar" : "en") : (ar ? "غير محدّد" : "unset")}
                     </div>

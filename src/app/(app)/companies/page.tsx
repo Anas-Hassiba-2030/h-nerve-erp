@@ -77,7 +77,7 @@ export default async function CompaniesPage() {
                     <div className="flex h-12 w-12 items-center justify-center text-white" style={{ background: brand.gradient, borderRadius: 12 }}><Icon className="h-6 w-6" /></div>
                     <div>
                       <h3 style={{ fontWeight: 700, color: "var(--ink)" }}>{ar ? c.name : c.nameEn}</h3>
-                      <div style={{ fontSize: 11, color: "var(--ink-muted)" }}>{ar ? c.nameEn : c.name}</div>
+                      <div style={{ fontSize: 12, color: "var(--ink-muted)" }}>{ar ? c.nameEn : c.name}</div>
                     </div>
                   </div>
                   <ArrowUpRight className="h-4 w-4" style={{ color: "var(--ink-muted)" }} />
@@ -103,7 +103,7 @@ export default async function CompaniesPage() {
 function CStat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--ink-muted)" }}>{label}</div>
+      <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--ink-muted)" }}>{label}</div>
       <div style={{ fontSize: 13, fontWeight: 700, fontFamily: "monospace", color: "var(--ink)" }}>{value}</div>
     </div>
   );

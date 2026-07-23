@@ -39,7 +39,7 @@ export function LiveTicker({ items }: { items: TickerItem[] }) {
             style={{
               fontFamily:
                 "'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace",
-              fontSize: 11,
+              fontSize: 12,
               letterSpacing: "0.06em",
               fontVariantNumeric: "tabular-nums",
               paddingInlineEnd: 18,
@@ -53,7 +53,7 @@ export function LiveTicker({ items }: { items: TickerItem[] }) {
                 color: "var(--heri-ink-3)",
                 textTransform: "uppercase",
                 letterSpacing: "0.14em",
-                fontSize: 10,
+                fontSize: 12,
                 fontWeight: 500,
               }}
             >
@@ -75,7 +75,7 @@ export function LiveTicker({ items }: { items: TickerItem[] }) {
               style={{
                 color: "var(--heri-rule-strong)",
                 marginInlineStart: 12,
-                fontSize: 9,
+                fontSize: 12,
               }}
             >
               ◆

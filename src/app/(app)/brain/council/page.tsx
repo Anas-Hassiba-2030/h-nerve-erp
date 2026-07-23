@@ -116,7 +116,7 @@ function SessionRow({ s, ar }: { s: SessionRowData; ar: boolean }) {
                 flexWrap: "wrap",
                 alignItems: "center",
                 gap: 8,
-                fontSize: 11,
+                fontSize: 12,
                 letterSpacing: ".04em",
                 color: "var(--ink-muted)",
                 fontVariantNumeric: "tabular-nums",
@@ -352,7 +352,7 @@ export default async function BrainCouncilIndex() {
                 >
                   <span
                     style={{
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: 600,
                       letterSpacing: ".04em",
                       color: "var(--ink-muted)",

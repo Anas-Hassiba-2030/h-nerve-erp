@@ -211,7 +211,7 @@ function Guarantee({
         {icon}
       </div>
       <div className="rt">
-        <div className="tt" style={{ color: "var(--gold-soft)", textTransform: "uppercase", letterSpacing: ".1em", fontSize: 11 }}>
+        <div className="tt" style={{ color: "var(--gold-soft)", textTransform: "uppercase", letterSpacing: ".1em", fontSize: 12 }}>
           {title}
         </div>
         <div className="ts">{body}</div>
@@ -223,7 +223,7 @@ function Guarantee({
 function FederationContract({ ar }: { ar: boolean }) {
   return (
     <div className="br-panel">
-      <div style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".14em", color: "var(--gold-soft)" }}>
+      <div style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".14em", color: "var(--gold-soft)" }}>
         <ShieldCheck className="h-3 w-3" strokeWidth={1.5} />
         {ar ? "العقد" : "The contract"}
       </div>
@@ -261,7 +261,7 @@ function FederationContract({ ar }: { ar: boolean }) {
             {ar ? "الانضمام للفيدرالية" : "I agree — join the federation"}
           </button>
         </form>
-        <span style={{ display: "inline-flex", alignItems: "center", fontSize: 11, letterSpacing: ".06em", color: "var(--mist)", opacity: 0.6 }}>
+        <span style={{ display: "inline-flex", alignItems: "center", fontSize: 12, letterSpacing: ".06em", color: "var(--mist)", opacity: 0.6 }}>
           {ar ? "يمكنك الإلغاء في أي وقت" : "You can opt out at any time"}
         </span>
       </div>
@@ -273,7 +273,7 @@ function ContractTerm({ n, title, body }: { n: string; title: string; body: stri
   return (
     <div className="br-row">
       <div className="rt">
-        <div className="ts" style={{ color: "var(--gold-soft)", letterSpacing: ".22em", fontWeight: 700, fontSize: 10, textTransform: "uppercase" }}>
+        <div className="ts" style={{ color: "var(--gold-soft)", letterSpacing: ".22em", fontWeight: 700, fontSize: 12, textTransform: "uppercase" }}>
           TERM · {n}
         </div>
         <div className="tt" style={{ fontFamily: "var(--display)", fontSize: 17 }}>{title}</div>
@@ -299,7 +299,7 @@ function BenchmarkRow({ pattern, ar }: { pattern: any; ar: boolean }) {
   return (
     <div className="br-row" style={{ alignItems: "flex-start" }}>
       <div className="rt">
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".12em", color: "var(--gold-soft)" }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".12em", color: "var(--gold-soft)" }}>
           <Globe2 className="h-3 w-3" strokeWidth={1.5} />
           {ar ? "نظراء — اتحادي" : "PEERS · FEDERATED"}
           {tierLine ? <span style={{ opacity: 0.7 }}> · {tierLine}</span> : null}

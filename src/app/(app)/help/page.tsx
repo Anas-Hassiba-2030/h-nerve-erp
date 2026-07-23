@@ -222,7 +222,7 @@ export default async function HelpPage() {
                 }}
               >
                 <span>{ar ? f.q_ar : f.q_en}</span>
-                <span style={{ fontSize: 11, color: "var(--ink-muted)" }}>
+                <span style={{ fontSize: 12, color: "var(--ink-muted)" }}>
                   ▾
                 </span>
               </summary>

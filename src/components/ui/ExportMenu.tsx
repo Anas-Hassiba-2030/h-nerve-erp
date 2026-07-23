@@ -182,7 +182,7 @@ export function ExportMenu({
                   <div
                     className="font-mono"
                     style={{
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: 800,
                       letterSpacing: "0.22em",
                       textTransform: "uppercase",
@@ -194,7 +194,7 @@ export function ExportMenu({
                   <div
                     style={{
                       marginTop: 2,
-                      fontSize: 11,
+                      fontSize: 12,
                       color: "rgba(255,255,255,0.78)",
                       lineHeight: 1.35,
                     }}
@@ -256,7 +256,7 @@ export function ExportMenu({
                           <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a" }}>
                             {ar ? it.labelAr : it.labelEn}
                           </div>
-                          <div style={{ fontSize: 11, color: "#5e5448", marginTop: 1 }}>
+                          <div style={{ fontSize: 12, color: "#5e5448", marginTop: 1 }}>
                             {ar ? it.descAr : it.descEn}
                           </div>
                         </div>

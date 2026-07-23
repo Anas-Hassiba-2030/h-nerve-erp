@@ -169,7 +169,7 @@ export default async function FinanceDetailPage(
                     gap: 5,
                     padding: "3px 10px",
                     borderRadius: 999,
-                    fontSize: 11.5,
+                    fontSize: 12,
                     fontWeight: 600,
                     color: accent,
                     border: "1px solid var(--line)",
@@ -185,7 +185,7 @@ export default async function FinanceDetailPage(
                     gap: 5,
                     padding: "3px 10px",
                     borderRadius: 999,
-                    fontSize: 11.5,
+                    fontSize: 12,
                     fontWeight: 600,
                     color: "var(--gold)",
                     border: "1px solid var(--line)",
@@ -197,7 +197,7 @@ export default async function FinanceDetailPage(
                 <span
                   className="font-mono"
                   style={{
-                    fontSize: 11,
+                    fontSize: 12,
                     color: "var(--ink-muted)",
                     border: "1px solid var(--line)",
                     padding: "3px 8px",
@@ -222,7 +222,7 @@ export default async function FinanceDetailPage(
               <p className="mt-1" style={{ fontSize: 12.5, color: "var(--ink-muted)" }}>
                 {tx.category}
               </p>
-              <div className="mt-3 flex flex-wrap gap-3 font-mono" style={{ fontSize: 11.5, color: "var(--ink-muted)" }}>
+              <div className="mt-3 flex flex-wrap gap-3 font-mono" style={{ fontSize: 12, color: "var(--ink-muted)" }}>
                 <span className="inline-flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: "var(--gold)" }} />
                   {formatDateTime(tx.occurredAt)}
@@ -231,7 +231,7 @@ export default async function FinanceDetailPage(
             </div>
 
             <div className="text-end">
-              <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>{en ? "Amount" : "المبلغ"}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>{en ? "Amount" : "المبلغ"}</div>
               <div
                 className="mt-1 font-mono"
                 style={{
@@ -245,7 +245,7 @@ export default async function FinanceDetailPage(
                 {sign}
                 {formatMoney(tx.amount, tx.currency)}
               </div>
-              <div className="mt-1.5 font-mono" style={{ fontSize: 10.5, color: "var(--ink-muted)" }} dir="ltr">
+              <div className="mt-1.5 font-mono" style={{ fontSize: 12, color: "var(--ink-muted)" }} dir="ltr">
                 {tx.currency}
               </div>
             </div>
@@ -299,7 +299,7 @@ export default async function FinanceDetailPage(
                     {tx.category}
                   </span>
                 }
-                aside={<span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>{en ? "Same category" : "حركات بنفس التصنيف"}</span>}
+                aside={<span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>{en ? "Same category" : "حركات بنفس التصنيف"}</span>}
               >
                 <ul className="divide-y" style={{ borderColor: "var(--line)" }}>
                   {siblingsCategory.map((s) => {
@@ -316,7 +316,7 @@ export default async function FinanceDetailPage(
                           <div className="truncate font-semibold" style={{ color: "var(--ink)", fontSize: 13 }}>
                             {s.description ?? s.category}
                           </div>
-                          <div className="font-mono mt-0.5" style={{ fontSize: 10.5, color: "var(--ink-muted)" }}>
+                          <div className="font-mono mt-0.5" style={{ fontSize: 12, color: "var(--ink-muted)" }}>
                             {s.reference} • {s.company.code} • {formatShortDate(s.occurredAt)}
                           </div>
                         </Link>
@@ -347,7 +347,7 @@ export default async function FinanceDetailPage(
                   </span>
                 }
                 aside={
-                  <Link href={`/companies/${tx.company.id}`} style={{ color: "var(--gold)", textDecoration: "none", fontSize: 11.5 }}>
+                  <Link href={`/companies/${tx.company.id}`} style={{ color: "var(--gold)", textDecoration: "none", fontSize: 12 }}>
                     {en ? "Company profile →" : "ملف الشركة ←"}
                   </Link>
                 }
@@ -367,7 +367,7 @@ export default async function FinanceDetailPage(
                           <div className="truncate font-semibold" style={{ color: "var(--ink)", fontSize: 13 }}>
                             {s.description ?? s.category}
                           </div>
-                          <div className="font-mono mt-0.5" style={{ fontSize: 10.5, color: "var(--ink-muted)" }}>
+                          <div className="font-mono mt-0.5" style={{ fontSize: 12, color: "var(--ink-muted)" }}>
                             {s.reference} • {en ? (KIND_EN[s.kind] ?? s.kind) : (KIND_AR[s.kind] ?? s.kind)} • {formatShortDate(s.occurredAt)}
                           </div>
                         </Link>
@@ -399,7 +399,7 @@ export default async function FinanceDetailPage(
                     {en ? "User" : "المستخدم"}
                   </span>
                 }
-                aside={<span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>{en ? "Logged by" : "من سجّل"}</span>}
+                aside={<span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>{en ? "Logged by" : "من سجّل"}</span>}
               >
                 <Link
                   href={`/users/${tx.createdBy.id}`}
@@ -414,7 +414,7 @@ export default async function FinanceDetailPage(
                   <div className="font-semibold" style={{ color: "var(--ink)", fontSize: 13 }}>
                     {tx.createdBy.name}
                   </div>
-                  <div className="font-mono mt-0.5" style={{ fontSize: 10.5, color: "var(--ink-muted)" }}>
+                  <div className="font-mono mt-0.5" style={{ fontSize: 12, color: "var(--ink-muted)" }}>
                     {tx.createdBy.role} · {formatNumber(tx.createdBy.xp)} XP
                   </div>
                 </Link>

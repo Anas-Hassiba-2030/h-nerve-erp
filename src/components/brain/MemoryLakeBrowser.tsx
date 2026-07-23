@@ -202,7 +202,7 @@ function Chip({
       <span
         style={{
           fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-          fontSize: 10,
+          fontSize: 12,
           letterSpacing: "0.06em",
           opacity: 0.7,
           fontVariantNumeric: "tabular-nums",

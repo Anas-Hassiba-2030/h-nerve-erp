@@ -76,7 +76,7 @@ export function HeritageQuickLink({
           <div
             className="truncate heri-number-mono"
             style={{
-              fontSize: 10.5,
+              fontSize: 12,
               color: "var(--heri-ink-3)",
               marginTop: 3,
             }}

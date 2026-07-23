@@ -88,7 +88,7 @@ export async function UserSidebar({
                   </span>
                   <span
                     className={`tag ${TIER_TONE[e.achievement.tier] ?? "ok"}`}
-                    style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}
+                    style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const }}
                   >
                     {e.achievement.tier}
                   </span>

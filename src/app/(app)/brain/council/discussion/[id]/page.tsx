@@ -68,12 +68,12 @@ export default async function DiscussionPage(
         aside={fmt.format(d.createdAt)}
       >
         <div className="flex items-center justify-between mb-3">
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 999, fontSize: 11.5, fontWeight: 600, color: "var(--ink-muted)", background: "rgba(100,90,80,.1)" }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 999, fontSize: 12, fontWeight: 600, color: "var(--ink-muted)", background: "rgba(100,90,80,.1)" }}>
             {d.status === "OPEN" ? (ar ? "مفتوح" : "OPEN") : ar ? "مغلق" : "CLOSED"}
           </span>
           <Link
             href="/brain/council"
-            style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--ink-muted)", textDecoration: "none" }}
+            style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".1em", color: "var(--ink-muted)", textDecoration: "none" }}
           >
             <ChevronLeft className="h-3 w-3 inline rtl:rotate-180" />
             {ar ? "كل المجلس" : "Back to Council"}
@@ -132,7 +132,7 @@ export default async function DiscussionPage(
                       background: "var(--emerald)",
                       color: "var(--cream)",
                       fontWeight: 700,
-                      fontSize: 11,
+                      fontSize: 12,
                       flexShrink: 0,
                     }}
                   >
@@ -158,7 +158,7 @@ export default async function DiscussionPage(
                       </span>
                       <span
                         style={{
-                          fontSize: 10,
+                          fontSize: 12,
                           fontWeight: 700,
                           textTransform: "uppercase",
                           letterSpacing: ".1em",

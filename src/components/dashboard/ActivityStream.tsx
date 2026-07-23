@@ -103,7 +103,7 @@ export function ActivityStream({
                 </div>
                 <div
                   className="line-clamp-1 mt-0.5"
-                  style={{ fontSize: 11, color: "var(--heri-ink-3)", lineHeight: 1.35 }}
+                  style={{ fontSize: 12, color: "var(--heri-ink-3)", lineHeight: 1.35 }}
                 >
                   {it.sub}
                 </div>
@@ -112,7 +112,7 @@ export function ActivityStream({
                 className="shrink-0 mt-0.5"
                 style={{
                   fontFamily: "'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace",
-                  fontSize: 9.5,
+                  fontSize: 12,
                   letterSpacing: "0.06em",
                   color: "var(--heri-ink-3)",
                   textTransform: "uppercase",

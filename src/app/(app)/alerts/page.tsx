@@ -108,11 +108,11 @@ export default async function AlertsPage() {
                       </summary>
                       <form action={updateRule} style={{ display: "flex", gap: 10, alignItems: "end", flexWrap: "wrap", marginTop: 8 }}>
                         <input type="hidden" name="id" value={r.id} />
-                        <label style={{ display: "grid", gap: 2, fontSize: 11 }}>
+                        <label style={{ display: "grid", gap: 2, fontSize: 12 }}>
                           {ar ? "العتبة" : "Threshold"}
                           <input name="threshold" type="number" step="0.01" defaultValue={r.threshold} className="input" style={{ width: 110 }} />
                         </label>
-                        <label style={{ display: "grid", gap: 2, fontSize: 11 }}>
+                        <label style={{ display: "grid", gap: 2, fontSize: 12 }}>
                           {ar ? "الشدّة" : "Severity"}
                           <select name="severity" defaultValue={r.severity} className="input" style={{ width: 140 }}>
                             <option value="INFO">INFO</option>
@@ -121,7 +121,7 @@ export default async function AlertsPage() {
                             <option value="OPPORTUNITY">OPPORTUNITY</option>
                           </select>
                         </label>
-                        <label style={{ display: "grid", gap: 2, fontSize: 11 }}>
+                        <label style={{ display: "grid", gap: 2, fontSize: 12 }}>
                           {ar ? "تهدئة (ساعات)" : "Cooldown (h)"}
                           <input name="cooldownHours" type="number" min="0" defaultValue={r.cooldownHours} className="input" style={{ width: 110 }} />
                         </label>

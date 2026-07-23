@@ -22,7 +22,7 @@ export function UpcomingTasksPanel({
         me ? (
           <span className="inline-flex items-center gap-2">
             <RankBadge rank={(me.rank ?? "PAWN") as any} size="sm" showLabel={false} />
-            <span style={{ fontSize: 11, letterSpacing: "0.04em", fontVariantNumeric: "tabular-nums" }}>
+            <span style={{ fontSize: 12, letterSpacing: "0.04em", fontVariantNumeric: "tabular-nums" }}>
               {ar ? `${myRank.ar} · ${formatNumber(me.xp)} XP` : `${myRank.en} · ${formatNumber(me.xp)} XP`}
             </span>
           </span>
@@ -61,7 +61,7 @@ export function UpcomingTasksPanel({
                     </div>
                     <div
                       className="mt-0.5"
-                      style={{ fontSize: 10.5, color: "var(--ink-muted)" }}
+                      style={{ fontSize: 12, color: "var(--ink-muted)" }}
                     >
                       {t.kind === "SIDE" ? "⚡ " : ""}+{Math.round(t.points * (t.kind === "SIDE" ? 1.5 : 1))} XP
                     </div>

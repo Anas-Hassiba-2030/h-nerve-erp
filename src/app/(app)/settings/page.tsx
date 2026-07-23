@@ -308,7 +308,7 @@ export default async function SettingsPage(
                     >
                       <span>
                         <span style={{ fontSize: 13.5, color: "var(--ink)", display: "block" }}>{title}</span>
-                        <span style={{ fontSize: 11, color: "var(--ink-muted)" }}>{dir}</span>
+                        <span style={{ fontSize: 12, color: "var(--ink-muted)" }}>{dir}</span>
                       </span>
                       <span className={`ops-tag ${active ? "ok" : "info"}`}>
                         {active ? (ar ? "نشط" : "Active") : ar ? "اختيار" : "Pick"}

@@ -130,7 +130,7 @@ export default async function EducationDetailPage(
                   {program.nameEn}
                 </p>
               ) : null}
-              <div className="mt-3 flex flex-wrap gap-3" style={{ fontSize: 11.5, color: "var(--ink-muted)" }}>
+              <div className="mt-3 flex flex-wrap gap-3" style={{ fontSize: 12, color: "var(--ink-muted)" }}>
                 <span className="inline-flex items-center gap-1.5">
                   <Users2 className="h-3.5 w-3.5" strokeWidth={1.5} style={{ color: "var(--gold)" }} />
                   {program.founder}
@@ -181,7 +181,7 @@ export default async function EducationDetailPage(
         <DaylightPanel
           title={en ? "Startup Journey" : "مسيرة المشروع"}
           aside={
-            <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
+            <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>
               {en ? "Journey" : "المسيرة"}
             </span>
           }
@@ -262,7 +262,7 @@ export default async function EducationDetailPage(
                   </span>
                 }
                 aside={
-                  <Link href="/education" style={{ color: "var(--gold)", textDecoration: "none", fontSize: 11.5 }}>
+                  <Link href="/education" style={{ color: "var(--gold)", textDecoration: "none", fontSize: 12 }}>
                     {en ? "All Programs ←" : "كل البرامج ←"}
                   </Link>
                 }
@@ -285,7 +285,7 @@ export default async function EducationDetailPage(
                             {loc(VERTICALS_AR, VERTICALS_EN, locale, r.vertical)}
                           </span>
                         </div>
-                        <div className="mt-0.5 font-mono" style={{ fontSize: 10.5, color: "var(--ink-muted)" }}>
+                        <div className="mt-0.5 font-mono" style={{ fontSize: 12, color: "var(--ink-muted)" }}>
                           {r.founder} • {en ? "Cohort" : "فوج"} {r.cohort} • {formatNumber(r.teamSize)} {en ? "members" : "فرد"}
                         </div>
                       </Link>

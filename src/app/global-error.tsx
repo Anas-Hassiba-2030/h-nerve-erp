@@ -59,7 +59,7 @@ export default function GlobalError({
           >
             <div
               style={{
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: 800,
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
@@ -138,7 +138,7 @@ export default function GlobalError({
                   borderRadius: 8,
                   background: "rgba(91,111,106,0.08)",
                   fontFamily: "ui-monospace, SF Mono, Menlo, monospace",
-                  fontSize: 11,
+                  fontSize: 12,
                   color: muted,
                   wordBreak: "break-all",
                 }}

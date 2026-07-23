@@ -97,7 +97,7 @@ export default async function EmployeesPage() {
                     </div>
                     <div className="mt-3 flex items-center justify-between gap-2">
                       <span className="tag gold"><RoleIcon className="h-3 w-3" />{meta[lc]}</span>
-                      <a href={`mailto:${u.email}`} className="inline-flex min-w-0 items-center gap-1.5" style={{ fontSize: 11.5, fontWeight: 600, color: "var(--emerald)" }} title={u.email}>
+                      <a href={`mailto:${u.email}`} className="inline-flex min-w-0 items-center gap-1.5" style={{ fontSize: 12, fontWeight: 600, color: "var(--emerald)" }} title={u.email}>
                         <Mail className="h-3.5 w-3.5 flex-none" />
                         <span className="truncate">{u.email}</span>
                       </a>

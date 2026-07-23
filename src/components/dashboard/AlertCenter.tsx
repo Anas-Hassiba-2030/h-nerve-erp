@@ -65,7 +65,7 @@ export function AlertCenter({
         <div
           style={{
             fontFamily: "'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace",
-            fontSize: 10,
+            fontSize: 12,
             color: "var(--heri-ink-3)",
             letterSpacing: "0.08em",
             textTransform: "uppercase",
@@ -127,7 +127,7 @@ export function AlertCenter({
                 </div>
                 <div
                   className="line-clamp-1 mt-0.5"
-                  style={{ fontSize: 10.5, color: "var(--heri-ink-3)", lineHeight: 1.4 }}
+                  style={{ fontSize: 12, color: "var(--heri-ink-3)", lineHeight: 1.4 }}
                 >
                   {it.sub}
                   {it.time ? (

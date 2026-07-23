@@ -145,7 +145,7 @@ export default async function HotelDetailPage(
               <HotelIcon className="h-8 w-8" strokeWidth={1.5} style={{ color: "var(--gold)" }} />
             </div>
             <div className="min-w-0">
-              <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)", marginBottom: 6 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)", marginBottom: 6 }}>
                 {loc(TIERS_AR, TIERS_EN, locale, hotel.tier)} · {"★".repeat(hotel.starRating)}
               </div>
               <h2

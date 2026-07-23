@@ -69,7 +69,7 @@ export default async function ProjectsPage() {
                 <h3 className="mt-2" style={{ fontSize: 15, fontWeight: 700, color: "var(--ink)" }}>{p.title}</h3>
                 {p.description ? <p className="mt-1" style={{ fontSize: 13, lineHeight: 1.6, color: "var(--ink-muted)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{p.description}</p> : null}
                 <div className="mt-3">
-                  <div className="mb-1 flex items-center justify-between" style={{ fontSize: 11, color: "var(--ink-muted)" }}>
+                  <div className="mb-1 flex items-center justify-between" style={{ fontSize: 12, color: "var(--ink-muted)" }}>
                     <span>{ar ? "التقدم" : "Progress"}</span><span style={{ fontFamily: "monospace" }}>{p.progressPct.toFixed(0)}%</span>
                   </div>
                   <div className="dl-bar"><i style={{ width: `${p.progressPct}%` }} /></div>

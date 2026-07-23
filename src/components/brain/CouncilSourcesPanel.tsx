@@ -46,7 +46,7 @@ export function CouncilSourcesPanel({ sources, ar }: { sources: CouncilSources; 
     display: "flex",
     alignItems: "center",
     gap: 8,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: 700,
     letterSpacing: ".11em",
     textTransform: "uppercase",
@@ -106,7 +106,7 @@ export function CouncilSourcesPanel({ sources, ar }: { sources: CouncilSources; 
               {sources.documents.map((d, i) => (
                 <div key={i} style={{ fontSize: 13.5, lineHeight: 1.6 }}>
                   <span style={{ color: "#f6f1e7", fontWeight: 600 }}>{d.title}</span>
-                  <span style={{ color: "var(--gold-soft)", fontSize: 10.5, marginInlineStart: 8, textTransform: "uppercase", letterSpacing: ".06em" }}>
+                  <span style={{ color: "var(--gold-soft)", fontSize: 12, marginInlineStart: 8, textTransform: "uppercase", letterSpacing: ".06em" }}>
                     {d.kind}
                   </span>
                 </div>
@@ -145,7 +145,7 @@ export function CouncilSourcesPanel({ sources, ar }: { sources: CouncilSources; 
         ) : null}
       </div>
 
-      <div style={{ textAlign: "center", marginTop: 14, fontSize: 11, color: "rgba(246,241,231,.5)" }}>
+      <div style={{ textAlign: "center", marginTop: 14, fontSize: 12, color: "rgba(246,241,231,.5)" }}>
         {sources.engine === "live"
           ? (ar ? "محرّك حيّ · Claude — كل صوت استند إلى هذه الأدلة" : "Live engine · Claude — every voice argued from this evidence")
           : (ar ? "محرّك تحليلي محلي" : "On-device reasoning")}

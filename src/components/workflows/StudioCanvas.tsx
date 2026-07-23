@@ -249,7 +249,7 @@ export function StudioCanvas({
                   style={{
                     fontFamily:
                       "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-                    fontSize: 10,
+                    fontSize: 12,
                     letterSpacing: "0.22em",
                     textTransform: "uppercase",
                   }}
@@ -413,7 +413,7 @@ export function StudioCanvas({
                     style={{
                       fontFamily:
                         "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-                      fontSize: 9,
+                      fontSize: 12,
                       letterSpacing: "0.2em",
                       textTransform: "uppercase",
                     }}
@@ -445,7 +445,7 @@ export function StudioCanvas({
                     style={{
                       fontFamily:
                         "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-                      fontSize: 10.5,
+                      fontSize: 12,
                       letterSpacing: "0.04em",
                     }}
                   >

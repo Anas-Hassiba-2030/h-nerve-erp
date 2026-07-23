@@ -101,7 +101,7 @@ export default async function InsightDetailPage(
         <Link
           href="/insights"
           style={{
-            fontSize: 11,
+            fontSize: 12,
             letterSpacing: "0.16em",
             textTransform: "uppercase",
             color: "var(--gold)",
@@ -150,10 +150,10 @@ export default async function InsightDetailPage(
           </div>
           <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
-              <span className={`tag ${pillTone === "success" ? "ok" : pillTone === "info" ? "ok" : "gold"}`} style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}>
+              <span className={`tag ${pillTone === "success" ? "ok" : pillTone === "info" ? "ok" : "gold"}`} style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const }}>
                 {severityAr(insight.severity)}
               </span>
-              <span className="tag ok" style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}>
+              <span className="tag ok" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const }}>
                 {MODULE_AR[insight.module] ?? insight.module}
               </span>
               <StatusBadge status={insight.status} />
@@ -178,7 +178,7 @@ export default async function InsightDetailPage(
                 alignItems: "center",
                 gap: 12,
                 fontFamily: "monospace",
-                fontSize: 11,
+                fontSize: 12,
                 color: "var(--ink-muted)",
               }}
             >
@@ -219,7 +219,7 @@ export default async function InsightDetailPage(
           {related.length > 0 ? (
             <DaylightPanel
               title={`إشارات أخرى من ${MODULE_AR[insight.module] ?? insight.module}`}
-              aside={<Link href="/insights" style={{ fontSize: 11, color: "var(--gold)", textDecoration: "none" }}>كل الإشارات ←</Link>}
+              aside={<Link href="/insights" style={{ fontSize: 12, color: "var(--gold)", textDecoration: "none" }}>كل الإشارات ←</Link>}
             >
               <ul style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {related.map((r) => {
@@ -243,7 +243,7 @@ export default async function InsightDetailPage(
                           style={{ position: "absolute", top: 0, bottom: 0, insetInlineStart: 0, width: 2, background: rRail }}
                         />
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <span className={`tag ${rPill === "success" ? "ok" : rPill === "info" ? "ok" : "gold"}`} style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}>
+                          <span className={`tag ${rPill === "success" ? "ok" : rPill === "info" ? "ok" : "gold"}`} style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const }}>
                             {severityAr(r.severity)}
                           </span>
                           <span
@@ -260,7 +260,7 @@ export default async function InsightDetailPage(
                         <div
                           style={{
                             fontFamily: "monospace",
-                            fontSize: 10,
+                            fontSize: 12,
                             color: "var(--ink-muted)",
                             marginTop: 4,
                           }}
@@ -305,7 +305,7 @@ export default async function InsightDetailPage(
                   <div
                     style={{
                       color: "var(--ink-muted)",
-                      fontSize: 11,
+                      fontSize: 12,
                       fontFamily: "monospace",
                       marginTop: 2,
                     }}

@@ -109,13 +109,13 @@ export default async function AnalyticsCompanyPage(props: { params: Promise<{ id
       <DaylightPanel title={ar ? "اتجاه الإيرادات والمصاريف (شهرياً)" : "Revenue vs expenses trend (monthly)"} aside={ar ? "آخر 12 شهر" : "Last 12 months"}>
         <div style={{ display: "grid", gap: 24, gridTemplateColumns: "1fr 1fr" }}>
           <div>
-            <div style={{ marginBottom: 4, fontSize: 11, fontWeight: 700, color: "var(--ink-muted)" }}>
+            <div style={{ marginBottom: 4, fontSize: 12, fontWeight: 700, color: "var(--ink-muted)" }}>
               {ar ? "إيرادات" : "Revenue"}
             </div>
             <Sparkline data={revenueTrend} width={420} height={120} positive />
           </div>
           <div>
-            <div style={{ marginBottom: 4, fontSize: 11, fontWeight: 700, color: "var(--ink-muted)" }}>
+            <div style={{ marginBottom: 4, fontSize: 12, fontWeight: 700, color: "var(--ink-muted)" }}>
               {ar ? "مصاريف" : "Expenses"}
             </div>
             <Sparkline data={expenseTrend} width={420} height={120} positive={false} />
@@ -147,7 +147,7 @@ export default async function AnalyticsCompanyPage(props: { params: Promise<{ id
           {lastEsg ? (
             <>
               <div style={{ fontSize: 30, fontWeight: 700, color: "var(--gold)" }}>{lastEsg.overall.toFixed(1)}</div>
-              <div style={{ fontSize: 11, color: "var(--ink-muted)" }}>{lastEsg.year} · {lastEsg.period}</div>
+              <div style={{ fontSize: 12, color: "var(--ink-muted)" }}>{lastEsg.year} · {lastEsg.period}</div>
               <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
                 <Bar label={ar ? "بيئي" : "Environmental"} val={lastEsg.environmentalScore} />
                 <Bar label={ar ? "اجتماعي" : "Social"} val={lastEsg.socialScore} />
@@ -177,9 +177,9 @@ export default async function AnalyticsCompanyPage(props: { params: Promise<{ id
                     <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{p.title}</div>
                     <div style={{ fontSize: 12, color: "var(--ink-muted)" }}>{p.description}</div>
                   </div>
-                  <span className="tag ok" style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}>{p.stage}</span>
+                  <span className="tag ok" style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const }}>{p.stage}</span>
                 </div>
-                <div style={{ marginTop: 8, display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 11, color: "var(--ink-muted)" }}>
+                <div style={{ marginTop: 8, display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 12, color: "var(--ink-muted)" }}>
                   <span>{p.startQuarter} → {p.targetQuarter}</span>
                   <span style={{ fontFamily: "monospace" }}>{formatMoney(p.budgetJod)}</span>
                 </div>
@@ -196,7 +196,7 @@ export default async function AnalyticsCompanyPage(props: { params: Promise<{ id
 function Bar({ label, val }: { label: string; val: number }) {
   return (
     <div>
-      <div style={{ marginBottom: 4, display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 11 }}>
+      <div style={{ marginBottom: 4, display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 12 }}>
         <span style={{ color: "var(--ink-muted)" }}>{label}</span>
         <span style={{ fontFamily: "monospace" }}>{val.toFixed(1)}</span>
       </div>

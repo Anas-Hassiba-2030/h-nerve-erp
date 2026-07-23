@@ -85,7 +85,7 @@ export default async function WorkspacePipelinePage() {
                         </span>
                       </div>
                       <div className="ws-board-card-foot">
-                        <span className={`tag ${p.priority === "HIGH" ? "gold" : p.priority === "MEDIUM" ? "gold" : "ok"}`} style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase" as const }}>
+                        <span className={`tag ${p.priority === "HIGH" ? "gold" : p.priority === "MEDIUM" ? "gold" : "ok"}`} style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const }}>
                           {p.priority}
                         </span>
                         <span className="ws-mono">{formatMoney(p.budgetJod)}</span>

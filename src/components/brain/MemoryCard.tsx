@@ -107,7 +107,7 @@ export function MemoryCard({ memory, similarity, ar, compact = false }: MemoryCa
           className="ms-1.5 inline-flex items-center gap-2"
           style={{
             fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-            fontSize: 9.5,
+            fontSize: 12,
             letterSpacing: "0.2em",
             textTransform: "uppercase",
             color: "color-mix(in srgb, var(--heri-cream) 65%, transparent)",
@@ -215,7 +215,7 @@ export function MemoryCard({ memory, similarity, ar, compact = false }: MemoryCa
             key={tag}
             style={{
               fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-              fontSize: 9.5,
+              fontSize: 12,
               letterSpacing: "0.1em",
               textTransform: "uppercase",
               color: "var(--heri-ink-3)",
@@ -239,7 +239,7 @@ export function MemoryCard({ memory, similarity, ar, compact = false }: MemoryCa
           <span
             style={{
               fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-              fontSize: 9.5,
+              fontSize: 12,
               letterSpacing: "0.1em",
               textTransform: "uppercase",
               color: "var(--heri-copper)",

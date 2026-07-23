@@ -298,7 +298,7 @@ export default async function MarketDetailPage(
           <DaylightPanel
             title={en ? "Price Movement" : "الحركة السعرية"}
             aside={
-              <span style={{ display: "flex", gap: 12, fontSize: 11, color: "var(--ink-muted)" }}>
+              <span style={{ display: "flex", gap: 12, fontSize: 12, color: "var(--ink-muted)" }}>
                 <span>{en ? "High:" : "أعلى:"} <strong style={{ color: "var(--ink)", fontFamily: "monospace" }}>{high.toFixed(2)}</strong></span>
                 <span>{en ? "Low:" : "أدنى:"} <strong style={{ color: "var(--ink)", fontFamily: "monospace" }}>{low.toFixed(2)}</strong></span>
                 <span>{en ? "Range:" : "مدى:"} <strong style={{ color: trendColor, fontFamily: "monospace" }}>{sessionRange.toFixed(2)}</strong></span>
@@ -323,7 +323,7 @@ export default async function MarketDetailPage(
           {peers.length > 0 ? (
             <DaylightPanel
               title={`${en ? "Other listings on" : "أسهم أخرى من"} ${exchangeLabel}`}
-              aside={<Link href="/markets" style={{ fontSize: 11, color: "var(--gold)", textDecoration: "none" }}>{en ? "All markets ←" : "كل الأسواق ←"}</Link>}
+              aside={<Link href="/markets" style={{ fontSize: 12, color: "var(--gold)", textDecoration: "none" }}>{en ? "All markets ←" : "كل الأسواق ←"}</Link>}
             >
               <ul style={{ borderTop: "1px solid var(--line)" }}>
                 {peers.map((p, i) => {

@@ -125,7 +125,7 @@ export function GraphCanvas({
         style={{
           color: "rgba(245,239,230,0.75)",
           fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-          fontSize: 10.5,
+          fontSize: 12,
           letterSpacing: "0.18em",
           textTransform: "uppercase",
           borderBottom: "1px solid rgba(255,255,255,0.08)",
@@ -359,7 +359,7 @@ export function GraphCanvas({
                     style={{
                       fill: isSel || isHov ? "#fafaf7" : "rgba(245,239,230,0.78)",
                       fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-                      fontSize: 10,
+                      fontSize: 12,
                       letterSpacing: "0.06em",
                       pointerEvents: "none",
                       userSelect: "none",
@@ -378,7 +378,7 @@ export function GraphCanvas({
                     style={{
                       fill: simFill(simDelta),
                       fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-                      fontSize: 10.5,
+                      fontSize: 12,
                       fontWeight: 700,
                       letterSpacing: "0.04em",
                       pointerEvents: "none",
@@ -400,7 +400,7 @@ export function GraphCanvas({
         style={{
           color: "rgba(245,239,230,0.7)",
           fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-          fontSize: 9.5,
+          fontSize: 12,
           letterSpacing: "0.12em",
           textTransform: "uppercase",
         }}
@@ -429,7 +429,7 @@ export function GraphCanvas({
         style={{
           color: "rgba(245,239,230,0.5)",
           fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
-          fontSize: 9.5,
+          fontSize: 12,
           letterSpacing: "0.16em",
           textTransform: "uppercase",
           background: "rgba(14,14,16,0.6)",

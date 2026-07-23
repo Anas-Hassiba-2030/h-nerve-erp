@@ -131,10 +131,10 @@ export default async function DashboardPage(
         }}
       >
         <div className="flex items-center gap-3">
-          <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>{ar ? "الفترة" : "Period"}</span>
+          <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)" }}>{ar ? "الفترة" : "Period"}</span>
           <PeriodSelector current={period} locale={lc} />
         </div>
-        <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)", fontVariantNumeric: "tabular-nums" }}>
+        <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: ".1em", color: "var(--ink-muted)", fontVariantNumeric: "tabular-nums" }}>
           ESG · {latestEsg.toFixed(1)} / 100
         </span>
       </div>
@@ -245,7 +245,7 @@ export default async function DashboardPage(
                 {ar ? p.label : p.labelEn ?? p.label}
                 <span
                   style={{
-                    fontSize: 9.5,
+                    fontSize: 12,
                     letterSpacing: "0.1em",
                     textTransform: "uppercase" as const,
                     color: "var(--ink-muted)",
@@ -265,7 +265,7 @@ export default async function DashboardPage(
                   color: "var(--ink-muted)",
                   background: "transparent",
                   border: "1px solid var(--line)",
-                  fontSize: 11,
+                  fontSize: 12,
                   textDecoration: "none",
                   borderRadius: 999,
                 }}

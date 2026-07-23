@@ -145,7 +145,7 @@ export function DairyTabs({
                         <button
                           type="button"
                           onClick={() => setOpenId(b.id)}
-                          style={{ font: "inherit", fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "var(--emerald)", cursor: "pointer", background: "none", border: 0, padding: 0 }}
+                          style={{ font: "inherit", fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: "var(--emerald)", cursor: "pointer", background: "none", border: 0, padding: 0 }}
                         >
                           {b.batchNumber}
                         </button>

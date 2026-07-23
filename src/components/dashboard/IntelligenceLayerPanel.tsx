@@ -73,14 +73,14 @@ export function IntelligenceLayerPanel({
                   {ar ? f.productLabel : (f.productLabelEn || f.productLabel)}
                 </div>
                 <span
-                  style={{ fontSize: 11, fontWeight: 600, color: "var(--gold)", fontVariantNumeric: "tabular-nums" }}
+                  style={{ fontSize: 12, fontWeight: 600, color: "var(--gold)", fontVariantNumeric: "tabular-nums" }}
                 >
                   {formatNumber(f.predictedDemand)} {localizeUnit(f.unit, ar)}
                 </span>
               </div>
               <div
                 className="mt-1 flex items-center gap-1.5"
-                style={{ fontSize: 10.5, color: "var(--ink-muted)" }}
+                style={{ fontSize: 12, color: "var(--ink-muted)" }}
               >
                 <span className="truncate">{ar ? f.source.name : (f.source.nameEn || f.source.name)}</span>
                 <span style={{ color: "var(--line)" }}>→</span>

@@ -42,7 +42,7 @@ export function HeriKpi({
           style={{
             fontFamily: "'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace",
             fontVariantNumeric: "tabular-nums",
-            fontSize: 11,
+            fontSize: 12,
             letterSpacing: "0.04em",
             color: "var(--heri-ink-3)",
             marginTop: 8,

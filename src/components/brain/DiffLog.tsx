@@ -79,7 +79,7 @@ export function DiffLog({
           color: "#c69345",
           letterSpacing: "0.22em",
           textTransform: "uppercase",
-          fontSize: 10,
+          fontSize: 12,
           borderBottom: "1px solid rgba(245,239,230,0.1)",
           marginBottom: 12,
         }}
@@ -179,7 +179,7 @@ export function DiffLog({
               color: "rgba(245,239,230,0.55)",
               letterSpacing: "0.16em",
               textTransform: "uppercase",
-              fontSize: 10,
+              fontSize: 12,
               fontVariantNumeric: "tabular-nums",
             }}
           >

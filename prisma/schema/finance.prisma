@@ -398,6 +398,11 @@ model Invoice {
   issueDate     DateTime @default(now())
   dueDate       DateTime?
   currency      String   @default("JOD")
+  // JOD value of 1 unit of `currency`, stamped from ExchangeRate at issue
+  // time (1 when currency is already JOD). The AR/Revenue journal posts
+  // total * fxRate, not the face-value total. lib/finance/fx.ts's period-end
+  // revaluation re-reads this against the current rate and advances it.
+  fxRate        Decimal  @default(1)
   subtotal      Decimal  @default(0)
   taxTotal      Decimal  @default(0)
   total         Decimal  @default(0)

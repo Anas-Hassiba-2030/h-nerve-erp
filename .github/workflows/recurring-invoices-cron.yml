@@ -1,0 +1,47 @@
+# Daily recurring-invoice run (docs/HOURANI-ERP-GAPS.md #11 ⚪).
+#
+# Same precedent as brain-cron.yml: no platform-native cron on Cloudflare
+# Workers, so the scheduler lives here. Fires GET /api/cron/recurring-invoices
+# with the bearer secret; the route runs runDueRecurringInvoices for every
+# ACTIVE tenant. Until this workflow existed, recurring invoices only posted
+# via the manual "Run due now" button on /admin/recurring-invoices.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   APP_URL      production base URL, no trailing slash
+#   CRON_SECRET  must equal the CRON_SECRET set on the Cloudflare Worker
+name: Recurring invoices daily run
+
+on:
+  schedule:
+    # Daily 03:00 UTC — well after any tenant's local midnight rollover.
+    - cron: "0 3 * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: recurring-invoices-cron
+  cancel-in-progress: false
+
+jobs:
+  fire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Fire /api/cron/recurring-invoices
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "::error::APP_URL and CRON_SECRET repository secrets must be set."
+            exit 1
+          fi
+          code=$(curl -sS --max-time 300 -o /tmp/cron.json -w "%{http_code}" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$APP_URL/api/cron/recurring-invoices")
+          echo "HTTP $code"
+          cat /tmp/cron.json || true
+          echo
+          if [ "$code" != "200" ]; then
+            echo "::error::Recurring-invoices cron returned HTTP $code (expected 200)."
+            exit 1
+          fi

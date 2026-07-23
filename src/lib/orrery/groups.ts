@@ -82,6 +82,25 @@ export const ORRERY_GROUPS: OrreryGroup[] = [
       { label: "الاستدامة", labelEn: "Sustainability", route: "/sustainability" },
       { label: "المشاريع", labelEn: "Projects", route: "/projects" },
       { label: "العلاقات", labelEn: "CRM", route: "/crm" },
+      // Front-office sales/purchasing/treasury surfaces (docs/HOURANI-ERP-GAPS.md
+      // Phase 27 "Sales & Invoicing"/"Purchasing"/"Treasury" tiles on /admin) —
+      // these are real, reachable routes but were never added here, so
+      // ConstellationRail's detectOrreryGroup() returned null on all of them:
+      // no rail nav, no back-link, no breadcrumb header (owner-reported gap).
+      { label: "الفواتير", labelEn: "Invoices", route: "/invoices" },
+      { label: "عروض الأسعار", labelEn: "Estimates", route: "/estimates" },
+      { label: "نقطة البيع", labelEn: "Point of Sale", route: "/pos" },
+      { label: "الفوترة الإلكترونية", labelEn: "E-Invoicing", route: "/e-invoicing" },
+      { label: "فواتير المشتريات", labelEn: "Purchase Invoices", route: "/purchase-invoices" },
+      { label: "دفعات الموردين", labelEn: "Supplier Payments", route: "/purchase-payments" },
+      { label: "الخزائن", labelEn: "Treasuries", route: "/treasuries" },
+      { label: "دفعات العملاء", labelEn: "Payments", route: "/payments" },
+      { label: "القوائم المالية", labelEn: "Statements", route: "/statements" },
+      { label: "العملاء", labelEn: "Customers", route: "/customers" },
+      { label: "الموردون", labelEn: "Suppliers", route: "/suppliers" },
+      { label: "الأصول الثابتة", labelEn: "Fixed Assets", route: "/assets" },
+      { label: "التصنيع", labelEn: "Manufacturing", route: "/manufacturing" },
+      { label: "الصيانة", labelEn: "Maintenance", route: "/maintenance" },
     ],
   },
   {
@@ -96,6 +115,13 @@ export const ORRERY_GROUPS: OrreryGroup[] = [
       { label: "الموظفون", labelEn: "Employees", route: "/employees" },
       { label: "الإنجازات", labelEn: "Achievements", route: "/achievements" },
       { label: "المستخدمون", labelEn: "Users", route: "/users" },
+      // /hr/* is the newer HR console family (docs/HOURANI-ERP-GAPS.md), a
+      // separate route tree from the legacy /employees page above — same
+      // missing-rail gap as the finance additions above.
+      { label: "سجل الموظفين", labelEn: "HR — Employees", route: "/hr/employees" },
+      { label: "طلبات الإجازة", labelEn: "Leave", route: "/hr/leave" },
+      { label: "مسير الرواتب", labelEn: "Payroll", route: "/hr/payroll" },
+      { label: "الحضور والورديات", labelEn: "Attendance & Shifts", route: "/hr/attendance" },
     ],
   },
   {

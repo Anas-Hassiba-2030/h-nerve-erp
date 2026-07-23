@@ -84,7 +84,7 @@ still works unchanged), with one carve-out: `@/prisma/*` maps to the root
 `prisma/` folder (seeds are imported by genesis/seed routes). `prisma/`,
 `scripts/`, `docs/`, `public/` stay at the repo root, as do all
 framework-mandated config files (`package.json`, `next.config.mjs`,
-`tsconfig.json`, `.env*`, `railway.toml`, …) — those cannot move.
+`tsconfig.json`, `.env*`, `wrangler.jsonc`, …) — those cannot move.
 
 ### Route groups
 
@@ -222,7 +222,8 @@ here so it never has to be re-learned.
   `npm run lint` must all pass; for changes that touch many files, also confirm
   `next build`. Never merge red.
 - **PRs only — never push to `main` directly.** Branch, open a PR (draft is fine), let
-  CI go green, then merge. `main` is the Railway production trunk; treat it as sacred.
+  CI go green, then merge. `main` is the production trunk (deployed to the
+  Cloudflare Worker via the manual `cloudflare-deploy.yml` workflow); treat it as sacred.
 - **Always start from `origin/main`.** Before any reorg/refactor, fetch and fast-forward.
   A stale local checkout silently re-does or conflicts with work already merged (this has
   bitten us — see the lib reorg #162 landing while a local copy still showed flat files).
@@ -240,7 +241,7 @@ here so it never has to be re-learned.
 - Demo admin: `admin@hourani.jo` / `admin123`
 - Owner (always ADMIN, auto-promoted): `anashasiba91@gmail.com` / `SEED_ADMIN_PASSWORD` (else `admin123`)
 
-The deploy bootstrap (`railway.toml` preDeploy) guarantees these on every deploy via `scripts/seed/`: `seed-if-empty.ts` (seed empty DB), `ensure-admins.ts` (admins can always sign in), `ensure-demo-docs.ts` (top up demo documents). See `lib/auth/owner.ts`.
+The seed scripts under `scripts/seed/` guarantee these: `seed-if-empty.ts` (seed empty DB), `ensure-admins.ts` (admins can always sign in), `ensure-demo-docs.ts` (top up demo documents). See `lib/auth/owner.ts`. (Railway and its `railway.toml` preDeploy hook are retired — production is the Cloudflare Worker; run the seeds against D1 manually when needed.)
 
 ## graphify
 

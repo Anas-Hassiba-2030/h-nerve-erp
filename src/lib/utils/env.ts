@@ -17,6 +17,7 @@ const REQUIRED = {
 // ─── Optional with defaults ─────────────────────────────────────────────────
 const OPTIONAL = {
   ANTHROPIC_API_KEY:  { desc: "Claude API key — brain runs in stub mode if absent" },
+  OPENROUTER_API_KEY: { desc: "OpenRouter gateway key — brain fallback provider when no Anthropic key" },
   LLM_API_KEY:        { desc: "Alias for ANTHROPIC_API_KEY" },
   SESSION_SECRET:     { desc: "iron-session cookie secret (32+ chars recommended)" },
   SEED_ADMIN_PASSWORD:{ desc: "One-time seed endpoint password" },
@@ -53,7 +54,11 @@ export function checkEnv(): EnvReport {
 
 /** True if an LLM API key is present (brain can make live calls). */
 export function hasLLMKey(): boolean {
-  return !!(process.env.ANTHROPIC_API_KEY ?? process.env.LLM_API_KEY);
+  return !!(
+    process.env.ANTHROPIC_API_KEY ??
+    process.env.OPENROUTER_API_KEY ??
+    process.env.LLM_API_KEY
+  );
 }
 
 /** The public app URL, defaulting to localhost for dev. */

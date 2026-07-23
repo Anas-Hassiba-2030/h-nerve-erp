@@ -7,18 +7,23 @@ import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import { llmConfig, callLlm, extractJson } from "./llm";
 
 const KEY = "ANTHROPIC_API_KEY";
+const OR_KEY = "OPENROUTER_API_KEY";
 const MODEL = "ANTHROPIC_MODEL";
 let savedKey: string | undefined;
+let savedOrKey: string | undefined;
 let savedModel: string | undefined;
 
 beforeEach(() => {
   savedKey = process.env[KEY];
+  savedOrKey = process.env[OR_KEY];
   savedModel = process.env[MODEL];
   delete process.env[KEY];
+  delete process.env[OR_KEY];
   delete process.env[MODEL];
 });
 afterEach(() => {
   savedKey === undefined ? delete process.env[KEY] : (process.env[KEY] = savedKey);
+  savedOrKey === undefined ? delete process.env[OR_KEY] : (process.env[OR_KEY] = savedOrKey);
   savedModel === undefined ? delete process.env[MODEL] : (process.env[MODEL] = savedModel);
   vi.useRealTimers();
 });

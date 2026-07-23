@@ -50,7 +50,7 @@ export async function GET() {
 
   // ── Brain capability ──────────────────────────────────────────────────────
   const hasLLMKey =
-    !!(process.env.ANTHROPIC_API_KEY ?? process.env.LLM_API_KEY);
+    !!(process.env.ANTHROPIC_API_KEY ?? process.env.OPENROUTER_API_KEY ?? process.env.LLM_API_KEY);
   if (!hasLLMKey) {
     warnings.push("brain_disabled_no_api_key");
   }

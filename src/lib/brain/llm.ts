@@ -1,9 +1,12 @@
-// llm.ts — Anthropic Claude client with deterministic stub fallback.
+// llm.ts — LLM client with deterministic stub fallback.
 //
-// In production, set ANTHROPIC_API_KEY in `.env` and the brain calls the
-// real model. If the key is missing, the stub mode returns
-// editorial-quality canned responses so the UI ships and demos cleanly
-// in any environment.
+// Provider precedence:
+//   1. ANTHROPIC_API_KEY  → direct Anthropic Messages API (preferred).
+//   2. OPENROUTER_API_KEY → OpenRouter's OpenAI-compatible chat/completions
+//      API, translated to/from the Anthropic content-block shapes the rest
+//      of the brain speaks. Same models (anthropic/* slugs), one gateway key.
+//   3. Neither            → stub mode: editorial-quality canned responses so
+//      the UI ships and demos cleanly in any environment.
 //
 // Phase 3 of docs/PHASES-INTELLIGENCE.md.
 
@@ -12,6 +15,12 @@ import { toPyLiteral } from "./serialize";
 
 const DEFAULT_MODEL = "claude-sonnet-4-6";
 const ANTHROPIC_VERSION = "2023-06-01";
+const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+// OpenRouter slugs for the same Anthropic models the direct path uses.
+const DEFAULT_OPENROUTER_MODEL = "anthropic/claude-sonnet-4.5";
+const OPENROUTER_FAST_MODEL = "anthropic/claude-haiku-4.5";
+
+export type LlmProvider = "anthropic" | "openrouter";
 
 export type LlmRequest = {
   system: string;
@@ -40,11 +49,34 @@ export type LlmResponse = {
 export type StubGenerator = (req: LlmRequest) => string;
 
 /** Single global config for the whole brain. */
-export function llmConfig() {
-  const key = process.env.ANTHROPIC_API_KEY?.trim();
+export function llmConfig(): {
+  provider: LlmProvider;
+  enabled: boolean;
+  apiKey: string | null;
+  model: string;
+} {
+  const anthropicKey = process.env.ANTHROPIC_API_KEY?.trim();
+  if (anthropicKey) {
+    return {
+      provider: "anthropic",
+      enabled: true,
+      apiKey: anthropicKey,
+      model: process.env.ANTHROPIC_MODEL?.trim() || DEFAULT_MODEL,
+    };
+  }
+  const openrouterKey = process.env.OPENROUTER_API_KEY?.trim();
+  if (openrouterKey) {
+    return {
+      provider: "openrouter",
+      enabled: true,
+      apiKey: openrouterKey,
+      model: process.env.OPENROUTER_MODEL?.trim() || DEFAULT_OPENROUTER_MODEL,
+    };
+  }
   return {
-    enabled: Boolean(key),
-    apiKey: key ?? null,
+    provider: "anthropic",
+    enabled: false,
+    apiKey: null,
     model: process.env.ANTHROPIC_MODEL?.trim() || DEFAULT_MODEL,
   };
 }
@@ -54,7 +86,11 @@ export function llmConfig() {
 // latency when the brain runs LIVE (no effect in stub mode). Override with
 // BRAIN_COUNCIL_MODEL (e.g. set it to the Sonnet id to restore prior behaviour).
 export function councilModel(): string {
-  return process.env.BRAIN_COUNCIL_MODEL?.trim() || "claude-haiku-4-5-20251001";
+  const override = process.env.BRAIN_COUNCIL_MODEL?.trim();
+  if (override) return override;
+  return llmConfig().provider === "openrouter"
+    ? OPENROUTER_FAST_MODEL
+    : "claude-haiku-4-5-20251001";
 }
 
 // The Planner emits one compact, schema-shaped JSON plan (goal + 3-6 steps).
@@ -65,7 +101,11 @@ export function councilModel(): string {
 // credible stub plan — instant either way. Override with BRAIN_PLANNER_MODEL
 // (e.g. the Sonnet id) to restore the prior, slower behaviour.
 export function plannerModel(): string {
-  return process.env.BRAIN_PLANNER_MODEL?.trim() || "claude-haiku-4-5-20251001";
+  const override = process.env.BRAIN_PLANNER_MODEL?.trim();
+  if (override) return override;
+  return llmConfig().provider === "openrouter"
+    ? OPENROUTER_FAST_MODEL
+    : "claude-haiku-4-5-20251001";
 }
 
 // Phase D — runaway cost guard. A single process makes at most
@@ -121,29 +161,46 @@ export async function callLlm(req: LlmRequest, stub: StubGenerator): Promise<Llm
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const body = {
-      model: req.model || cfg.model,
-      max_tokens: req.maxTokens ?? 700,
-      temperature: req.temperature ?? 0.7,
-      system: req.system,
-      messages: [
-        { role: "user", content: serializeUser(req.user, req.context) },
-      ],
-    };
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": cfg.apiKey,
-        "anthropic-version": ANTHROPIC_VERSION,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(body),
-      signal: controller.signal,
-    });
+    const model = req.model || cfg.model;
+    const userContent = serializeUser(req.user, req.context);
+    let res: Response;
+    if (cfg.provider === "openrouter") {
+      res = await fetch(OPENROUTER_URL, {
+        method: "POST",
+        headers: openrouterHeaders(cfg.apiKey),
+        body: JSON.stringify({
+          model,
+          max_tokens: req.maxTokens ?? 700,
+          temperature: req.temperature ?? 0.7,
+          messages: [
+            { role: "system", content: req.system },
+            { role: "user", content: userContent },
+          ],
+        }),
+        signal: controller.signal,
+      });
+    } else {
+      res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": cfg.apiKey,
+          "anthropic-version": ANTHROPIC_VERSION,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: req.maxTokens ?? 700,
+          temperature: req.temperature ?? 0.7,
+          system: req.system,
+          messages: [{ role: "user", content: userContent }],
+        }),
+        signal: controller.signal,
+      });
+    }
 
     if (!res.ok) {
       const errorText = await res.text();
-      log.error("brain.llm: Anthropic API error", { status: res.status, body: errorText.slice(0, 400) });
+      log.error("brain.llm: LLM API error", { provider: cfg.provider, status: res.status, body: errorText.slice(0, 400) });
       return {
         text: stub(req),
         isStub: true,
@@ -153,13 +210,17 @@ export async function callLlm(req: LlmRequest, stub: StubGenerator): Promise<Llm
 
     const json: any = await res.json();
     const text =
-      Array.isArray(json?.content)
-        ? json.content
-            .filter((c: any) => c?.type === "text" && typeof c.text === "string")
-            .map((c: any) => c.text)
-            .join("\n")
-            .trim()
-        : "";
+      cfg.provider === "openrouter"
+        ? (typeof json?.choices?.[0]?.message?.content === "string"
+            ? json.choices[0].message.content.trim()
+            : "")
+        : Array.isArray(json?.content)
+          ? json.content
+              .filter((c: any) => c?.type === "text" && typeof c.text === "string")
+              .map((c: any) => c.text)
+              .join("\n")
+              .trim()
+          : "";
 
     return {
       text: text || stub(req),
@@ -256,29 +317,55 @@ export async function callLlmWithTools(args: {
   const timeoutMs = Number(process.env.BRAIN_LLM_TIMEOUT_MS) || 20_000;
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": cfg.apiKey,
-        "anthropic-version": ANTHROPIC_VERSION,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: cfg.model,
-        max_tokens: args.maxTokens ?? 700,
-        temperature: args.temperature ?? 0.4,
-        system: args.system,
-        messages: args.messages,
-        tools: args.tools,
-      }),
-      signal: controller.signal,
-    });
+    let res: Response;
+    if (cfg.provider === "openrouter") {
+      res = await fetch(OPENROUTER_URL, {
+        method: "POST",
+        headers: openrouterHeaders(cfg.apiKey),
+        body: JSON.stringify({
+          model: cfg.model,
+          max_tokens: args.maxTokens ?? 700,
+          temperature: args.temperature ?? 0.4,
+          messages: [
+            { role: "system", content: args.system },
+            ...anthropicMessagesToOpenAi(args.messages),
+          ],
+          tools: args.tools.map((t) => ({
+            type: "function",
+            function: { name: t.name, description: t.description, parameters: t.input_schema },
+          })),
+        }),
+        signal: controller.signal,
+      });
+    } else {
+      res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": cfg.apiKey,
+          "anthropic-version": ANTHROPIC_VERSION,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          model: cfg.model,
+          max_tokens: args.maxTokens ?? 700,
+          temperature: args.temperature ?? 0.4,
+          system: args.system,
+          messages: args.messages,
+          tools: args.tools,
+        }),
+        signal: controller.signal,
+      });
+    }
     if (!res.ok) {
       const errorText = await res.text();
-      log.error("brain.llm: tool-use API error", { status: res.status, body: errorText.slice(0, 400) });
+      log.error("brain.llm: tool-use API error", { provider: cfg.provider, status: res.status, body: errorText.slice(0, 400) });
       return { content: [], stopReason: "stub", isStub: true, ms: Date.now() - t0 };
     }
     const json: any = await res.json();
+    if (cfg.provider === "openrouter") {
+      const translated = openAiChoiceToAnthropic(json);
+      return { ...translated, isStub: false, model: cfg.model, ms: Date.now() - t0 };
+    }
     return {
       content: Array.isArray(json?.content) ? json.content : [],
       stopReason: json?.stop_reason ?? null,
@@ -292,4 +379,99 @@ export async function callLlmWithTools(args: {
   } finally {
     clearTimeout(timer);
   }
+}
+
+// ── OpenRouter translation layer ───────────────────────────────────────────
+// The brain speaks Anthropic content blocks end-to-end (orchestrator builds
+// tool_result messages, filters tool_use blocks, checks stop_reason ===
+// "tool_use"). OpenRouter speaks OpenAI chat/completions. These helpers keep
+// the translation in ONE place so every caller stays provider-agnostic.
+
+function openrouterHeaders(apiKey: string): Record<string, string> {
+  return {
+    authorization: `Bearer ${apiKey}`,
+    "content-type": "application/json",
+    // Attribution headers OpenRouter recommends; harmless elsewhere.
+    "http-referer": process.env.NEXT_PUBLIC_APP_URL || "https://h-nerve-erp.anashasiba91.workers.dev",
+    "x-title": "H-Nerve ERP Brain",
+  };
+}
+
+/** Anthropic-shaped message history → OpenAI chat messages. */
+export function anthropicMessagesToOpenAi(messages: AnthropicMessage[]): any[] {
+  const out: any[] = [];
+  for (const m of messages) {
+    if (typeof m.content === "string") {
+      out.push({ role: m.role, content: m.content });
+      continue;
+    }
+    const blocks = Array.isArray(m.content) ? (m.content as any[]) : [];
+    if (m.role === "assistant") {
+      const text = blocks
+        .filter((b) => b?.type === "text" && typeof b.text === "string")
+        .map((b) => b.text)
+        .join("\n");
+      const toolCalls = blocks
+        .filter((b) => b?.type === "tool_use")
+        .map((b) => ({
+          id: String(b.id ?? ""),
+          type: "function",
+          function: { name: String(b.name ?? ""), arguments: JSON.stringify(b.input ?? {}) },
+        }));
+      out.push({
+        role: "assistant",
+        content: text || null,
+        ...(toolCalls.length > 0 ? { tool_calls: toolCalls } : {}),
+      });
+    } else {
+      // user turn: tool_result blocks each become a role:"tool" message;
+      // plain text blocks join into one user message.
+      const toolResults = blocks.filter((b) => b?.type === "tool_result");
+      for (const r of toolResults) {
+        out.push({
+          role: "tool",
+          tool_call_id: String(r.tool_use_id ?? ""),
+          content: typeof r.content === "string" ? r.content : JSON.stringify(r.content ?? ""),
+        });
+      }
+      const text = blocks
+        .filter((b) => b?.type === "text" && typeof b.text === "string")
+        .map((b) => b.text)
+        .join("\n");
+      if (text) out.push({ role: "user", content: text });
+    }
+  }
+  return out;
+}
+
+/** OpenAI chat/completions response → Anthropic content blocks + stop_reason. */
+export function openAiChoiceToAnthropic(json: any): { content: any[]; stopReason: string | null } {
+  const choice = json?.choices?.[0];
+  const msg = choice?.message;
+  const content: any[] = [];
+  if (typeof msg?.content === "string" && msg.content.trim()) {
+    content.push({ type: "text", text: msg.content });
+  }
+  const toolCalls = Array.isArray(msg?.tool_calls) ? msg.tool_calls : [];
+  for (const tc of toolCalls) {
+    let input: unknown = {};
+    try {
+      input = JSON.parse(tc?.function?.arguments ?? "{}");
+    } catch {
+      input = {};
+    }
+    content.push({
+      type: "tool_use",
+      id: String(tc?.id ?? ""),
+      name: String(tc?.function?.name ?? ""),
+      input,
+    });
+  }
+  const finish = choice?.finish_reason ?? null;
+  const stopReason =
+    finish === "tool_calls" ? "tool_use"
+    : finish === "length" ? "max_tokens"
+    : finish === "stop" ? "end_turn"
+    : finish;
+  return { content, stopReason };
 }

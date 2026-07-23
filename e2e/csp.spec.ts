@@ -1,6 +1,9 @@
-// Strict-CSP contract. Meaningful against the prod-shaped server (CI runs
-// `next start`; the middleware only arms the nonce CSP in production) —
-// on the local dev server the header is absent and these tests skip.
+// Strict-CSP contract. The middleware only arms the nonce CSP in
+// production, and this suite's server is `next dev` (a prod-node
+// `next start` can't run the Cloudflare-runtime Prisma client) — so these
+// tests SKIP in the normal local/CI run and exist for prod-shaped servers:
+// point PLAYWRIGHT at one (or run the checks against the live Workers
+// deployment, where this policy was click-verified on 2026-07-23).
 
 import { test, expect } from "@playwright/test";
 

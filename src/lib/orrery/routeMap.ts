@@ -89,6 +89,16 @@ const NAME_MAP: Record<string, string> = {
   "دفعات الموردين": "/purchase-payments",
   "التصنيع": "/manufacturing",
   "الصيانة": "/maintenance",
+  // Team/HR gap (2026-07-23): the hub's "team" kids array had drifted to 6
+  // entries while the React rail (groups.ts) carries 11 — Users + the 4 HR
+  // console pages were never registered, so those pills 404'd through the
+  // /dashboard fallback. Added alongside the hub GROUPS.team kids below.
+  "المستخدمون": "/users",
+  "سجل الموظفين": "/hr/employees",
+  "طلبات الإجازة": "/hr/leave",
+  "مسير الرواتب": "/hr/payroll",
+  "الحضور والورديات": "/hr/attendance",
+  "الثقة": "/brain/trust",
   "الإنجازات": "/achievements",
   "الفريق": "/users",
   "الإدارة ERP": "/admin",

@@ -33,7 +33,7 @@ const RULES: { test: RegExp; ambient: Ambient; living?: Living }[] = [
   // intel + signal surfaces (cosmic night per reference)
   { test: /^\/(insights|alerts|plans|documents|digest|narrate)\b/, ambient: "cosmic", living: "night" },
   // team comms (cosmic night per reference)
-  { test: /^\/(messages|tasks|inbox|employees|users)\b/, ambient: "cosmic", living: "night" },
+  { test: /^\/(messages|tasks|inbox|employees|users|hr)\b/, ambient: "cosmic", living: "night" },
   // workflow studio (cosmic night per reference)
   { test: /^\/workflows/, ambient: "cosmic", living: "night" },
 ];

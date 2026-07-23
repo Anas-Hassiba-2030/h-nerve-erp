@@ -1272,10 +1272,10 @@ const GROUPS = [
   // so the group's businesses live with the board that governs them — one anchor
   // instead of two near-duplicates. Sector kids appended below.
   { id:"overview", name:"لوحة المجموعة", en:"Group Board", amb:"finance", kids:[
-     ["لوحة المجموعة","ui_kits/dashboard/index.html"],["الشركات"],
+     ["لوحة المجموعة","ui_kits/dashboard/index.html"],["الشركات"],["مساحة العمل"],
      ["أرينا","sections/arena.html"],["المها","sections/maha.html"],["لوران","sections/loran.html"],["الحاضنة","sections/ahliyya.html"],["سلسلة التوريد","sections/supply.html"] ]},
   { id:"intel", name:"العقل", en:"The Brain", amb:"cosmic", kids:[
-     ["مركز الدماغ","sections/brain.html"],["الرؤى","sections/insights.html"],["التنبيهات","sections/alerts.html"],["الخطط","sections/plans.html"],["المستندات","sections/documents.html"],["الرسم السببي","sections/causal.html"],["ماذا لو","sections/whatif.html"],["المجلس","sections/council.html"],["بحيرة الذاكرة","sections/memory.html"],["التعلّم","sections/learning.html"],["المعايير","sections/benchmarks.html"],["ذكاء الدماغ","sections/brainiq.html"],["الراوي","sections/narrate.html"] ]},
+     ["مركز الدماغ","sections/brain.html"],["الرؤى","sections/insights.html"],["التنبيهات","sections/alerts.html"],["الخطط","sections/plans.html"],["المستندات","sections/documents.html"],["الرسم السببي","sections/causal.html"],["ماذا لو","sections/whatif.html"],["المجلس","sections/council.html"],["بحيرة الذاكرة","sections/memory.html"],["التعلّم","sections/learning.html"],["المعايير","sections/benchmarks.html"],["ذكاء الدماغ","sections/brainiq.html"],["الراوي","sections/narrate.html"],["الثقة"] ]},
   // ERP taxonomy split (2026-07-23, owner-directed): finance had absorbed every
   // front-office surface — 22 pills in one bloom. Split into Finance (ledger/
   // treasury/reporting), Sales (order-to-cash), and Purchasing & Production
@@ -1288,7 +1288,8 @@ const GROUPS = [
   { id:"ops", name:"المشتريات والإنتاج", en:"Purchasing & Production", amb:"finance", kids:[
      ["الموردون"],["فواتير المشتريات"],["دفعات الموردين"],["التصنيع"],["الصيانة"],["المشاريع المستقبلية"] ]},
   { id:"team", name:"الفريق", en:"Team", amb:"university", kids:[
-     ["الرسائل","sections/messages.html"],["المهام","sections/tasks.html"],["صندوق الوارد","sections/inbox.html"],["الموجز","sections/digest.html"],["الإنجازات","sections/achievements.html"],["الموظفون","sections/employees.html"] ]},
+     ["الرسائل","sections/messages.html"],["المهام","sections/tasks.html"],["صندوق الوارد","sections/inbox.html"],["الموجز","sections/digest.html"],["الموظفون","sections/employees.html"],["الإنجازات","sections/achievements.html"],
+     ["المستخدمون"],["سجل الموظفين"],["طلبات الإجازة"],["مسير الرواتب"],["الحضور والورديات"] ]},
   // IA split (PR #288, approved 2026-07-10): System mirrors src/lib/orrery/groups.ts
   // 1:1 — personal utilities (Search/Pinned/Trash/Settings/Help) moved to the
   // header UserMenu; Tenants/Empire fan out from Mission Control; Workspace
@@ -1299,12 +1300,12 @@ const GROUPS = [
 ];
 // English child labels (parallel to kids order) — for the AR/EN toggle
 const KIDS_EN = {
-  overview:["Group Board","Companies","Arena","Maha","Loran","Incubator","Supply Chain"],
-  intel:["Brain Hub","Insights","Alerts","Plans","Documents","Causal Graph","What-if","Council","Memory Lake","Learning","Benchmarks","Brain IQ","Narrate"],
+  overview:["Group Board","Companies","Workspace","Arena","Maha","Loran","Incubator","Supply Chain"],
+  intel:["Brain Hub","Insights","Alerts","Plans","Documents","Causal Graph","What-if","Council","Memory Lake","Learning","Benchmarks","Brain IQ","Narrate","Trust"],
   finance:["Financial Hub","Statements","Reports","Treasuries","Fixed Assets","Analytics","Compare","Markets","Sustainability"],
   sales:["CRM","Customers","Estimates","Invoices","Payments","Point of Sale","E-Invoicing"],
   ops:["Suppliers","Purchase Invoices","Supplier Payments","Manufacturing","Maintenance","Projects"],
-  team:["Messages","Tasks","Inbox","Digest","Achievements","Staff"],
+  team:["Messages","Tasks","Inbox","Digest","Employees","Achievements","Users","HR — Employees","Leave","Payroll","Attendance & Shifts"],
   system:["Mission Control","The Core","Workflows","Integrations","Audit 360","Activity"],
 };
 const ANCHORS = GROUPS.map(g=>({

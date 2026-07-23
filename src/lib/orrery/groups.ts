@@ -67,6 +67,10 @@ export const ORRERY_GROUPS: OrreryGroup[] = [
       { label: "المخرجات", labelEn: "Narrate", route: "/brain/narrate" },
       { label: "الثقة", labelEn: "Trust", route: "/brain/trust" },
       { label: "ذكاء الدماغ", labelEn: "IQ", route: "/brain/iq" },
+      // Orphaned route (2026-07-23, found by a hub↔rail route-set audit): the
+      // hub's "intel" kids had /brain/benchmarks all along; the React rail
+      // never did. Registered here so both surfaces expose the same 14 pages.
+      { label: "المعايير", labelEn: "Benchmarks", route: "/brain/benchmarks" },
     ],
   },
   // ERP taxonomy split (2026-07-23, owner-directed): the finance group had

@@ -1,11 +1,4 @@
-import { LocaleSwitch } from "@/components/nav/LocaleSwitch";
-import { ThemeSwitch } from "@/components/nav/ThemeSwitch";
-import { getLocale } from "@/lib/i18n/i18n.server";
-import { getTheme } from "@/lib/theme/theme.server";
-
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
-  const locale = await getLocale();
-  const theme = await getTheme();
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10"
           style={{ background: "var(--surface)" }}>
@@ -46,12 +39,10 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
         }}
       />
 
-      {/* Top-right controls (theme/locale) */}
-      <div className="absolute end-4 top-4 z-20 flex items-center gap-2">
-        <LocaleSwitch current={locale} />
-        <ThemeSwitch current={theme.id} locale={locale} />
-      </div>
-
+      {/* No layout-level theme/locale pills here: the login page (LoginCosmos)
+          renders its own designed toggles in the same corner — a second set
+          from the layout stacked on top of them (the "two buttons above each
+          other" bug). Auth pages own their corner chrome. */}
       <div className="relative z-10 w-full max-w-md">{children}</div>
     </main>
   );

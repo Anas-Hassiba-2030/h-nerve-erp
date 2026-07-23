@@ -13,7 +13,7 @@ import {
   ShoppingCart, ShoppingBag, Users, UserSquare, BookOpen, Library,
   BrainCircuit, FileText, GitBranch, ReceiptText, CreditCard, Landmark,
   Banknote, Scale, Building2, Factory, CalendarDays, CalendarRange, Wallet, PackageSearch,
-  Handshake, Hourglass, ClipboardCheck, Wrench, CalendarClock, Ship, Briefcase, Target, Repeat,
+  Handshake, Hourglass, ClipboardCheck, Wrench, CalendarClock, Ship, Briefcase, Target, Repeat, DollarSign,
 } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -58,6 +58,7 @@ const CONSOLES: Console[] = [
   { href: "/admin/projects", ar: "محاسبة المشاريع", en: "Project Accounting", icon: Briefcase, group: "treasury", desc_ar: "ميزانية مقابل فعلي من الساعات المسجّلة والمصاريف.", desc_en: "Budget vs. actual from logged hours and expenses." },
   { href: "/admin/budgets", ar: "الموازنة", en: "Budgeting", icon: Target, group: "treasury", desc_ar: "ميزانية سنوية لكل حساب — تظهر في قائمة الدخل.", desc_en: "Annual budget per account — shown on the income statement." },
   { href: "/admin/recurring-invoices", ar: "الفواتير الدورية", en: "Recurring Invoices", icon: Repeat, group: "treasury", desc_ar: "رسوم شهرية ثابتة تُصدر فاتورة تلقائياً عند الاستحقاق.", desc_en: "Fixed monthly fees that post a real invoice when due." },
+  { href: "/admin/fx", ar: "أسعار الصرف", en: "Exchange Rates", icon: DollarSign, group: "treasury", desc_ar: "أسعار صرف وإعادة تقييم الفواتير الأجنبية دورياً.", desc_en: "Exchange rates + period-end revaluation of foreign-currency invoices." },
   { href: "/admin/journal",ar: "القيود",           en: "Journal",         icon: BookOpen,    group: "treasury",     desc_ar: "قيود اليومية المحاسبية مزدوجة القيد.",          desc_en: "Double-entry accounting journal." },
   { href: "/admin/accounts",ar: "الحسابات",        en: "Accounts",        icon: Library,     group: "treasury",     desc_ar: "شجرة الحسابات ودفتر الأستاذ العام.",            desc_en: "Chart of accounts and general ledger." },
   // ── Parties ──

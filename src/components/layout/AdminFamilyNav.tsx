@@ -34,6 +34,7 @@ import {
   Briefcase,
   Target,
   Repeat,
+  DollarSign,
 } from "lucide-react";
 
 type Item = {
@@ -70,6 +71,7 @@ const FAMILY: Item[] = [
   { href: "/admin/projects",        ar: "محاسبة المشاريع", en: "Project Accounting", icon: Briefcase, group: "books" },
   { href: "/admin/budgets",         ar: "الموازنة", en: "Budgeting", icon: Target, group: "books" },
   { href: "/admin/recurring-invoices", ar: "الفواتير الدورية", en: "Recurring Invoices", icon: Repeat, group: "books" },
+  { href: "/admin/fx",              ar: "أسعار الصرف", en: "Exchange Rates", icon: DollarSign, group: "books" },
 ];
 
 const GROUP_LABELS: Record<GroupId, { ar: string; en: string }> = {

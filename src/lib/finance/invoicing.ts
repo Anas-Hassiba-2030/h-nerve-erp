@@ -8,6 +8,7 @@
 import { z } from "zod";
 import type { prisma as prismaType } from "@/lib/db/db";
 import { createPostedJournalEntry } from "./accounting";
+import { getRateForCurrency } from "./fx";
 
 export const lineInputSchema = z.object({
   productId: z.string().trim().optional().or(z.literal("")),
@@ -112,12 +113,15 @@ export async function postInvoiceFromComputed(
   },
 ) {
   const { tenantId, customerId, currency, note, computed } = args;
+  const issueDate = args.issueDate ?? new Date();
   const invoiceNumber = await nextDocNumber(tx, tenantId, "INVOICE", "INV-");
-  const [arAccount, revenueAccount, period] = await Promise.all([
+  const [arAccount, revenueAccount, period, fxRate] = await Promise.all([
     ensureLedgerAccount(tx, tenantId, "1100", "Accounts Receivable", "ASSET"),
     ensureLedgerAccount(tx, tenantId, "4000", "Sales Revenue", "REVENUE"),
     ensureOpenPeriod(tx, tenantId),
+    getRateForCurrency(tx, tenantId, currency, issueDate),
   ]);
+  const jodTotal = Math.round(computed.total * fxRate * 100) / 100;
 
   const journalEntry = await createPostedJournalEntry(tx, {
     tenantId,
@@ -126,8 +130,8 @@ export async function postInvoiceFromComputed(
     reference: invoiceNumber,
     lines: {
       create: [
-        { accountId: arAccount.id, debit: computed.total, credit: 0, memo: invoiceNumber },
-        { accountId: revenueAccount.id, debit: 0, credit: computed.total, memo: invoiceNumber },
+        { accountId: arAccount.id, debit: jodTotal, credit: 0, memo: invoiceNumber },
+        { accountId: revenueAccount.id, debit: 0, credit: jodTotal, memo: invoiceNumber },
       ],
     },
   });
@@ -138,9 +142,10 @@ export async function postInvoiceFromComputed(
       invoiceNumber,
       customerId,
       status: "UNPAID",
-      issueDate: args.issueDate ?? new Date(),
+      issueDate,
       dueDate: args.dueDate ?? null,
       currency,
+      fxRate,
       subtotal: computed.subtotal,
       taxTotal: computed.taxTotal,
       total: computed.total,

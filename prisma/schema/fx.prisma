@@ -1,0 +1,17 @@
+// ExchangeRate — docs/HOURANI-ERP-GAPS.md #4 🔴 (Multi-currency + FX
+// revaluation). One row per (tenant, foreign currency, effective date).
+// rate = JOD value of 1 unit of `currency` (JOD itself is never stored —
+// it is always rate 1 by definition). lib/finance/fx.ts reads the latest
+// row with asOf <= a given date as "the rate in effect" for both
+// transaction-time stamping and period-end revaluation.
+model ExchangeRate {
+  id        String   @id @default(cuid())
+  tenantId  String
+  currency  String
+  rate      Decimal
+  asOf      DateTime
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, currency, asOf])
+  @@index([tenantId, currency, asOf])
+}

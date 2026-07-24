@@ -116,13 +116,13 @@
 .admin-rail-name {
   font-family: "Inter Tight", "Inter", sans-serif;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 15.5px;
   letter-spacing: -0.01em;
   color: var(--admin-text);
 }
 .admin-rail-tag {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--admin-cyan);
@@ -139,7 +139,7 @@
   align-items: center;
   gap: 8px;
   padding: 7px 14px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--admin-text);
   text-decoration: none;
@@ -158,7 +158,7 @@
   gap: 7px;
   padding: 6px 12px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 0.04em;
   color: var(--admin-text);
   text-decoration: none;
@@ -166,7 +166,7 @@
   border-radius: 6px;
 }
 .admin-rail-exit:hover { color: var(--admin-cyan); border-color: var(--admin-cyan-dim); }
-.admin-rail-exits { display: inline-flex; gap: 8px; justify-self: end; align-items: center; }
+.admin-rail-exits { display: inline-flex; gap: 14px; justify-self: end; align-items: center; }
 /* Explicit "↺ Orbit" return pill — teal-accented so it reads as the primary
    way out of the admin console (the brand tile alone looked like a logo). */
 .admin-orbit-pill {
@@ -174,7 +174,7 @@
   align-items: center;
   gap: 7px;
   padding: 7px 15px;
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 700;
   border-radius: 999px;
   text-decoration: none;
@@ -191,7 +191,7 @@
 /* tiny context label so the two buttons clearly read as "ways out of admin" */
 .admin-rail-exits-label {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--admin-text-muted);
@@ -224,14 +224,16 @@
 }
 .admin-eyebrow {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--admin-cyan);
 }
 .admin-h1 {
   font-family: "Inter Tight", "Inter", sans-serif;
-  font-size: clamp(28px, 3.4vw, 42px);
+  /* Bumped (owner 2026-07-24: "Mission Control header is small") — big-type
+     floor to match the operator sections' 46px h1. */
+  font-size: clamp(38px, 4vw, 52px);
   font-weight: 600;
   letter-spacing: -0.025em;
   line-height: 1.1;
@@ -248,7 +250,7 @@
   color: var(--admin-text);
 }
 .admin-sub {
-  font-size: 14px;
+  font-size: 15.5px;
   line-height: 1.55;
   color: var(--admin-text-muted);
   max-width: 60ch;
@@ -258,7 +260,7 @@
   align-items: center;
   gap: 8px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--admin-cyan);
@@ -271,7 +273,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: -0.005em;
   background: var(--admin-cyan);
@@ -289,7 +291,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 500;
   background: transparent;
   color: var(--admin-text-muted);
@@ -308,7 +310,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   background: transparent;
   color: var(--admin-rose);
@@ -338,7 +340,7 @@
 .admin-stat-label {
   display: block;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--admin-text-muted);
@@ -396,7 +398,7 @@
 }
 .admin-tenant-slug {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 13px;
+  font-size: 15px;
   opacity: 0.7;
   letter-spacing: 0.04em;
 }
@@ -404,23 +406,23 @@
   padding: 16px 20px;
   display: grid;
   gap: 10px;
-  font-size: 12.5px;
+  font-size: 15.5px;
 }
 .admin-tenant-row { display: flex; justify-content: space-between; align-items: center; }
 .admin-tenant-row-label {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--admin-text-muted);
 }
-.admin-tenant-row-value { font-size: 13px; color: var(--admin-text); }
+.admin-tenant-row-value { font-size: 15px; color: var(--admin-text); }
 .admin-tenant-status {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
 }
@@ -440,7 +442,7 @@
   align-items: center;
   gap: 6px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--admin-cyan);
@@ -467,14 +469,14 @@
 }
 .admin-fieldset-legend {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--admin-cyan);
   padding: 0 8px;
 }
 .admin-fieldset-hint {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--admin-text-muted);
   margin: 0 0 14px;
   max-width: 60ch;
@@ -484,7 +486,7 @@
 
 .admin-field { display: grid; gap: 6px; margin-top: 14px; }
 .admin-label {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -496,7 +498,7 @@
   color: var(--admin-text);
   padding: 10px 12px;
   font-family: inherit;
-  font-size: 13.5px;
+  font-size: 15px;
   letter-spacing: -0.005em;
   transition: border-color 180ms;
 }
@@ -518,13 +520,13 @@
   align-items: center;
   padding: 0 14px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 13px;
+  font-size: 15px;
   color: var(--admin-text-muted);
   background: var(--admin-bg-3);
   border-inline-start: 1px solid var(--admin-rule);
 }
 .admin-hint {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--admin-text-faint);
 }
 
@@ -537,7 +539,7 @@
 .admin-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12.5px;
+  font-size: 15.5px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
 }
 .admin-table thead th {
@@ -554,7 +556,7 @@
 .admin-table thead th > span { display: block; }
 .admin-table-type {
   margin-top: 2px;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -598,13 +600,13 @@
   display: grid;
   gap: 2px;
   align-content: start;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--admin-text);
 }
 .admin-record-row dd {
   margin: 0;
-  font-size: 13px;
+  font-size: 15px;
   color: var(--admin-text-muted);
   word-break: break-word;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
@@ -650,9 +652,9 @@
   border: 1px solid var(--admin-rule-strong);
 }
 .admin-theme-text { display: grid; gap: 2px; }
-.admin-theme-name { font-size: 14px; font-weight: 600; }
+.admin-theme-name { font-size: 15.5px; font-weight: 600; }
 .admin-theme-desc {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--admin-text-muted);
   max-width: 60ch;
   line-height: 1.4;
@@ -681,7 +683,7 @@
   background: var(--admin-bg-3);
 }
 .admin-pack-check { accent-color: var(--admin-cyan); }
-.admin-pack-name { font-size: 13px; }
+.admin-pack-name { font-size: 15px; }
 
 .admin-form-foot {
   display: flex;
@@ -708,7 +710,7 @@
   insetInline-start: 0;
   inset-inline-start: 0;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--admin-cyan);
@@ -751,7 +753,7 @@
 }
 .admin-check-num {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 0.18em;
   color: var(--admin-text-faint);
   font-variant-numeric: tabular-nums;
@@ -769,10 +771,10 @@
   to { transform: rotate(360deg); }
 }
 .admin-check-fail { color: var(--admin-rose); font-weight: 700; }
-.admin-check-label { font-size: 14px; color: var(--admin-text); font-weight: 500; }
+.admin-check-label { font-size: 15.5px; color: var(--admin-text); font-weight: 500; }
 .admin-check-meta {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--admin-text-muted);
@@ -781,7 +783,7 @@
 .admin-check-row[data-status="DONE"] .admin-check-meta { color: var(--admin-cyan); }
 .admin-provisioning-done {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--admin-cyan);
@@ -821,7 +823,7 @@
 .admin-hero-slug {
   display: block;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 13px;
+  font-size: 15px;
   opacity: 0.8;
   margin-top: 4px;
   letter-spacing: 0.04em;
@@ -831,7 +833,7 @@
   align-items: center;
   gap: 8px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
 }
@@ -849,7 +851,7 @@
 .admin-meta-label {
   display: block;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--admin-text-muted);
@@ -857,12 +859,12 @@
 .admin-meta-value {
   display: block;
   margin-top: 8px;
-  font-size: 14px;
+  font-size: 15.5px;
   color: var(--admin-text);
 }
 .admin-meta-value[data-mono="true"] {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12.5px;
+  font-size: 15.5px;
   letter-spacing: 0.04em;
 }
 .admin-tenant-emblem-large {
@@ -893,7 +895,7 @@
   align-items: center;
   gap: 8px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 13px;
+  font-size: 15px;
   color: var(--admin-text-muted);
   letter-spacing: 0.04em;
   padding: 8px 12px;
@@ -918,7 +920,7 @@
   gap: 18px;
 }
 .admin-section-head { display: grid; gap: 6px; }
-.admin-section-sub { font-size: 13px; color: var(--admin-text-muted); max-width: 65ch; }
+.admin-section-sub { font-size: 15px; color: var(--admin-text-muted); max-width: 65ch; }
 .admin-theme-preview-swatches {
   display: flex;
   gap: 0;
@@ -935,7 +937,7 @@
 }
 .admin-theme-preview-hex {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 0.06em;
   background: rgba(0,0,0,0.6);
   color: #fff;
@@ -959,10 +961,10 @@
   border-color: var(--admin-cyan-dim);
   background: var(--admin-bg-3);
 }
-.admin-pack-key { font-size: 13px; font-weight: 500; }
+.admin-pack-key { font-size: 15px; font-weight: 500; }
 .admin-pack-state {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 0.18em;
   color: var(--admin-text-muted);
 }
@@ -977,17 +979,17 @@
   padding: 12px 14px;
   background: var(--admin-bg);
   border: 1px solid var(--admin-rule);
-  font-size: 13px;
+  font-size: 15px;
 }
 .admin-trail-num {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 13px;
+  font-size: 15px;
   color: var(--admin-cyan);
   letter-spacing: 0.18em;
 }
 .admin-trail-meta {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--admin-text-muted);
@@ -998,7 +1000,7 @@
   align-items: center;
   gap: 6px;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 15px;
   color: var(--admin-text-faint);
 }
 
@@ -1038,7 +1040,7 @@
 }
 .admin-mono-sub {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -1185,7 +1187,7 @@
   right: 0;
   text-align: center;
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 0.3em;
   text-transform: uppercase;
   color: #c2a35a;
@@ -1252,7 +1254,7 @@
   height: 8px;
 }
 .mo-orbit-lbl {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: #eef3ee;
   background: rgba(8, 18, 14, 0.9);
@@ -1315,16 +1317,16 @@
 .admin-trail-meta,
 .admin-pack-state {
   font-family: "Inter Tight", "Inter", system-ui, sans-serif;
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 0.06em;
   font-weight: 600;
 }
 /* The page eyebrow + the stat labels lead each screen — a touch larger. */
-.admin-eyebrow { font-size: 13px; letter-spacing: 0.07em; }
+.admin-eyebrow { font-size: 15px; letter-spacing: 0.07em; }
 /* Wordmark sub-line ("ADMIN CONSOLE") was 7.5px — unreadable at a glance. */
 .admin-mono-sub {
   font-family: "Inter Tight", "Inter", system-ui, sans-serif;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 0.12em;
 }
 
@@ -1332,6 +1334,6 @@
    glance and across a room (projector). Bump the section titles, the KPI tile
    labels/values, and the module-card titles. */
 .admin-h2 { font-size: clamp(20px, 2.1vw, 26px); }
-.admin-stat-label { font-size: 13px; font-weight: 700; letter-spacing: 0.05em; }
+.admin-stat-label { font-size: 15px; font-weight: 700; letter-spacing: 0.05em; }
 .admin-stat-value { font-size: 34px; }
 .admin-tenant-name { font-size: 18px; }

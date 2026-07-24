@@ -166,7 +166,7 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
    on opposite corners and never collide. */
 .dl-topctl{
   position:fixed; top:14px; inset-inline-end:22px; z-index:70;
-  display:inline-flex; align-items:center; gap:10px;
+  display:inline-flex; align-items:center; gap:14px;
 }
 @media (max-width:640px){
   .dl-topctl{ top:10px; inset-inline-end:12px; gap:6px; }
@@ -376,7 +376,11 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
      read as cramped ("too close, not professional"). 460 = cluster width +
      ~26px clear gap. Symmetric so the centered pill row stays truly centered;
      the rail wraps to extra rows on narrow screens, which is expected. */
-  padding:11px 460px;
+  /* 560: at the owner's 50% browser zoom a CSS gap halves visually — the
+     previous 460 reserve left only ~26px CSS (≈13px seen) between the last
+     pill and the cluster, which still read as "touching". 560 ≈ 148px CSS
+     clear gap ≈ 74px seen at 50%. */
+  padding:11px 560px;
   background:linear-gradient(160deg,rgba(20,46,38,.4),rgba(13,31,26,.36));
   border:1px solid rgba(194,163,90,.2);
   border-radius:14px;
@@ -390,11 +394,15 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
   display:inline-flex; align-items:center; min-height:46px;
   padding:9px 20px; border-radius:12px;
   font-size:18px; font-weight:800; letter-spacing:.04em;
-  color:#fff; background:linear-gradient(135deg,#2E6B57,#1E4D3E);
+  /* GOLD, deliberately different from the emerald current-section pill —
+     owner request 2026-07-24: the group name and the active section were the
+     same green and read as two "current" pills. Gold = "you are in this
+     group", emerald = "this is the page you're on". */
+  color:#231c0e; background:linear-gradient(135deg,#DCC38A,#C2A35A);
   border:1px solid rgba(194,163,90,.45);
   margin-inline-end:10px;
 }
-.al-rail.light .rail-grp{ color:#fff; }
+.al-rail.light .rail-grp{ color:#231c0e; } /* ink on the gold pill, both modes */
 .al-rail .rail-toggle{
   /* Pinned to the START edge — the END corner belongs to the fixed
      .dl-topctl cluster, which would cover the toggle. */

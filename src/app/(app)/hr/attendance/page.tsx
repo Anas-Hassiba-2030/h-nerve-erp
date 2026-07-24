@@ -48,7 +48,7 @@ export default async function AttendancePage() {
       <div className="max-w-5xl mx-auto py-8 px-4 space-y-6">
         <div>
           <h1 className="text-xl font-bold">{ar ? "الحضور والورديات" : "Attendance & Shifts"}</h1>
-          <p style={{ fontSize: 13, color: "var(--ink-muted)" }}>
+          <p style={{ fontSize: 15.5, color: "var(--ink-muted)" }}>
             {ar
               ? "ساعات العمل الإضافي هنا تُغذّي مسير الرواتب تلقائياً."
               : "Overtime hours recorded here feed automatically into payroll."}

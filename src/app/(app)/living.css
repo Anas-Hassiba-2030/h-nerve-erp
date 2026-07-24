@@ -343,11 +343,17 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
      squeezed big groups into cramped multi-row wraps while the page margins
      sat empty. The rail now stretches edge to edge of the content column. */
   margin:0 0 16px; max-width:none; width:100%;
-  padding:11px 52px;
+  /* 300px symmetric side padding: the .dl-topctl corner cluster (Orbit pill +
+     mini-orrery + language toggle) is position:fixed at the top inline-end
+     (≈255px wide + 22px offset), z-70 — without this reserve the last pills
+     slide UNDERNEATH it (seen live 2026-07-24). Symmetric so the centered
+     pill row stays truly centered. */
+  padding:11px 300px;
   background:linear-gradient(160deg,rgba(20,46,38,.4),rgba(13,31,26,.36));
   border:1px solid rgba(194,163,90,.2);
   border-radius:14px;
 }
+@media (max-width:900px){ .al-rail{ padding:11px 18px; } }
 .al-rail.light{
   background:linear-gradient(160deg,rgba(254,252,247,.7),rgba(246,241,231,.7));
   border-color:#e4dccb;
@@ -362,16 +368,17 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 }
 .al-rail.light .rail-grp{ color:#fff; }
 .al-rail .rail-toggle{
-  /* Pinned to the end edge so the pill row itself can center. */
-  position:absolute; inset-inline-end:14px; top:50%; transform:translateY(-50%);
+  /* Pinned to the START edge — the END corner belongs to the fixed
+     .dl-topctl cluster, which would cover the toggle. */
+  position:absolute; inset-inline-start:14px; top:50%; transform:translateY(-50%);
   background:none; border:0; cursor:pointer;
   color:var(--gold-soft,#DCC38A); font-size:16px;
 }
 .al-rail.light .rail-toggle{ color:var(--emerald,#2E6B57); }
 .rail-item{
-  display:inline-flex; align-items:center; min-height:44px;
-  padding:9px 18px; border-radius:999px;
-  font-family:var(--ui,"Cairo",sans-serif); font-size:17px; font-weight:600;
+  display:inline-flex; align-items:center; min-height:42px;
+  padding:8px 15px; border-radius:999px;
+  font-family:var(--ui,"Cairo",sans-serif); font-size:16px; font-weight:600;
   cursor:pointer; text-decoration:none;
   color:var(--mist,#CDE0D6);
   background:rgba(13,31,26,.4); border:1px solid rgba(194,163,90,.18);
@@ -388,7 +395,7 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 .al-rail .rail-item.cur,
 .al-rail.light .rail-item.cur{
   background:linear-gradient(135deg,#2E6B57,#1E4D3E);
-  color:#fff; font-weight:800; font-size:18px;
+  color:#fff; font-weight:800; font-size:17px;
   border:2px solid var(--gold,#C2A35A);
   box-shadow:0 0 0 3px rgba(194,163,90,.25), 0 6px 18px -8px rgba(30,77,62,.7);
 }

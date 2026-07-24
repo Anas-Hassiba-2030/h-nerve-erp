@@ -275,9 +275,9 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 }
 
 .mo-orbit-head{
-  position:absolute; top:13px; left:0; right:0; text-align:center;
+  position:absolute; top:14px; left:0; right:0; text-align:center;
   font-family:"JetBrains Mono","IBM Plex Mono",ui-monospace,monospace;
-  font-size:13px; letter-spacing:.24em; text-transform:uppercase;
+  font-size:16px; letter-spacing:.24em; text-transform:uppercase;
   color:#DCC38A; font-weight:700; pointer-events:none;
 }
 
@@ -312,10 +312,12 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 }
 .mo-orbit-node.is-child .mo-orbit-dot{ width:8px; height:8px; }
 .mo-orbit-lbl{
-  font-size:14px; font-weight:700; color:#f4f8f4;
+  /* 18px (owner request 2026-07-24) — keep in sync with LABEL_CHAR_PX /
+     LABEL_PAD_PX / LABEL_MAX_PX in MiniOrrery.tsx. */
+  font-size:18px; font-weight:700; color:#f4f8f4;
   background:rgba(8,18,14,.94); border:1px solid rgba(194,163,90,.45);
-  padding:5px 13px; border-radius:16px; max-width:150px; text-align:center;
-  white-space:normal; line-height:1.25;
+  padding:7px 16px; border-radius:18px; max-width:200px; text-align:center;
+  white-space:normal; line-height:1.3;
   transition:background .14s, color .14s, border-color .14s;
 }
 .mo-orbit-node:hover .mo-orbit-lbl{ background:#C2A35A; color:#0b1a15; border-color:#C2A35A; }
@@ -359,9 +361,9 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
   border-color:#e4dccb;
 }
 .al-rail .rail-grp{
-  display:inline-flex; align-items:center; min-height:42px;
-  padding:8px 18px; border-radius:12px;
-  font-size:16px; font-weight:800; letter-spacing:.04em;
+  display:inline-flex; align-items:center; min-height:46px;
+  padding:9px 20px; border-radius:12px;
+  font-size:18px; font-weight:800; letter-spacing:.04em;
   color:#fff; background:linear-gradient(135deg,#2E6B57,#1E4D3E);
   border:1px solid rgba(194,163,90,.45);
   margin-inline-end:10px;
@@ -376,9 +378,9 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 }
 .al-rail.light .rail-toggle{ color:var(--emerald,#2E6B57); }
 .rail-item{
-  display:inline-flex; align-items:center; min-height:42px;
-  padding:8px 15px; border-radius:999px;
-  font-family:var(--ui,"Cairo",sans-serif); font-size:16px; font-weight:600;
+  display:inline-flex; align-items:center; min-height:46px;
+  padding:9px 17px; border-radius:999px;
+  font-family:var(--ui,"Cairo",sans-serif); font-size:18px; font-weight:600;
   cursor:pointer; text-decoration:none;
   color:var(--mist,#CDE0D6);
   background:rgba(13,31,26,.4); border:1px solid rgba(194,163,90,.18);
@@ -395,7 +397,7 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 .al-rail .rail-item.cur,
 .al-rail.light .rail-item.cur{
   background:linear-gradient(135deg,#2E6B57,#1E4D3E);
-  color:#fff; font-weight:800; font-size:17px;
+  color:#fff; font-weight:800; font-size:19px;
   border:2px solid var(--gold,#C2A35A);
   box-shadow:0 0 0 3px rgba(194,163,90,.25), 0 6px 18px -8px rgba(30,77,62,.7);
 }

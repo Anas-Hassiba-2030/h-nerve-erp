@@ -317,7 +317,7 @@ export function CausalGraph({ ar, nodes, edges, subtitle, rebuildSlot }: Props) 
             const count = nodes.length;
             const nodeR = count > 200 ? 4 : count > 80 ? 7 : 11;
             const showLabel = count <= 40;
-            const trunc = (s: string) => (s.length > 18 ? s.slice(0, 17) + "…" : s);
+            const trunc = (s: string) => (s.length > 16 ? s.slice(0, 15) + "…" : s);
             return nodes.map((n, i) => {
               const p = posById[n.id];
               const below = i % 2 === 0;
@@ -331,7 +331,7 @@ export function CausalGraph({ ar, nodes, edges, subtitle, rebuildSlot }: Props) 
                       dy={below ? nodeR + 16 : -(nodeR + 8)}
                       fill="#fff"
                       fontFamily="Cairo,sans-serif"
-                      fontSize={13}
+                      fontSize={15}
                       fontWeight={700}
                       style={{ paintOrder: "stroke", stroke: "rgba(10,24,19,.85)", strokeWidth: 4 }}
                     >

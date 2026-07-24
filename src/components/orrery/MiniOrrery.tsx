@@ -17,7 +17,10 @@ type Locale = "ar" | "en";
 // so the five-group view stays pixel-identical to before — only crowded child
 // blooms expand. Only the geometry changes here; the pop/spin/bloom animation
 // is untouched.
-const BASE_R = 116; // orbit radius for ≤9 short-label nodes (unchanged from the original)
+// Scaled up ~1.35× (owner request 2026-07-24: "make the orbit box bigger —
+// the letters are not readable"). Radius + glyph metrics move together with
+// the 18px .mo-orbit-lbl font in living.css.
+const BASE_R = 152; // orbit radius for ≤9 short-label nodes
 
 // Bug (2026-07-23, post-ERP-split): the 7-node group ring sized itself off a
 // FIXED chord (54px), which only accounts for the gold dot, not the pill text
@@ -25,10 +28,10 @@ const BASE_R = 116; // orbit radius for ≤9 short-label nodes (unchanged from t
 // wide — nearly double the 108px chord the old formula guaranteed — so its
 // label physically overlapped the "Sales" node next to it. Radius must now
 // scale with the WIDEST label in the current node set, not just the count.
-const LABEL_CHAR_PX = 8.4; // avg glyph width, 14px/700 system-ui pill text
-const LABEL_PAD_PX = 26; // .mo-orbit-lbl padding: 13px * 2
-const LABEL_MAX_PX = 150; // .mo-orbit-lbl max-width — long labels wrap instead of growing the ring forever
-const NODE_GAP_PX = 22; // minimum clear gap between adjacent pill edges
+const LABEL_CHAR_PX = 10.8; // avg glyph width, 18px/700 system-ui pill text
+const LABEL_PAD_PX = 32; // .mo-orbit-lbl padding: 16px * 2
+const LABEL_MAX_PX = 200; // .mo-orbit-lbl max-width — long labels wrap instead of growing the ring forever
+const NODE_GAP_PX = 24; // minimum clear gap between adjacent pill edges
 
 function radiusFor(n: number, labels: string[]): number {
   if (n <= 1) return BASE_R;

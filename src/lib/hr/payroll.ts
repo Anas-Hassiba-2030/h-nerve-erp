@@ -30,6 +30,10 @@ export function computeNetPay(baseSalary: number, allowances: number, deductions
  * periodMonth) unique on PayrollRun makes a re-run a no-op (checked by
  * the caller before invoking this, same pattern as fixed-asset
  * depreciation).
+ *
+ * Idempotent at the LEDGER level too: a run interrupted between posting the
+ * journal entry and creating the PayrollRun is resumed, not re-posted. See
+ * the orphan lookup below for why that matters on D1.
  */
 export async function runPayroll(
   tx: Tx,
@@ -86,18 +90,35 @@ export async function runPayroll(
   ]);
 
   const label = `Payroll ${year}-${String(month).padStart(2, "0")}`;
-  const journalEntry = await createPostedJournalEntry(tx, {
-    tenantId,
-    periodId: period.id,
-    description: label,
-    reference: label,
-    lines: {
-      create: [
-        { accountId: expenseAccount.id, debit: total, credit: 0, memo: label },
-        { accountId: treasury.ledgerAccountId, debit: 0, credit: total, memo: label },
-      ],
-    },
+
+  // D1 runs `$transaction` callbacks WITHOUT atomicity, so this function can
+  // be interrupted between posting the ledger entry and creating the
+  // PayrollRun below. The caller's "already ran this month" guard keys off
+  // PayrollRun — so after such an interruption the guard sees nothing, the
+  // operator retries, and salary expense is posted to the ledger A SECOND
+  // TIME. Real money, silently double-counted.
+  //
+  // Recover instead of re-posting: an existing POSTED entry carrying this
+  // run's reference IS the interrupted run's ledger half. Adopt it and finish
+  // the job. `reference` is exactly this label, and only payroll writes it.
+  const orphan = await tx.journalEntry.findFirst({
+    where: { tenantId, reference: label, status: "POSTED" },
   });
+
+  const journalEntry =
+    orphan ??
+    (await createPostedJournalEntry(tx, {
+      tenantId,
+      periodId: period.id,
+      description: label,
+      reference: label,
+      lines: {
+        create: [
+          { accountId: expenseAccount.id, debit: total, credit: 0, memo: label },
+          { accountId: treasury.ledgerAccountId, debit: 0, credit: total, memo: label },
+        ],
+      },
+    }));
 
   const payrollRun = await tx.payrollRun.create({
     data: {

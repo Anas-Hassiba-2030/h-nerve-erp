@@ -20,7 +20,7 @@
 .dl-page .co-wrap {
   position: relative;
   margin: 0 0 26px;
-  padding: 30px clamp(18px, 3vw, 34px) 36px;
+  padding: 22px clamp(18px, 3vw, 34px) 28px;
   border-radius: 22px;
   overflow: hidden;
   background:
@@ -98,13 +98,17 @@
   text-transform: uppercase;
   margin-bottom: 8px;
 }
+/* Compacted (2026-07-24): at 38px the question alone filled most of the
+   screen, pushing users to zoom the browser out — which shrank every other
+   font. A 30px cap + wider measure keeps the question prominent while the
+   whole page fits comfortably at 100% zoom. */
 .dl-page .co-question h2 {
   font-family: var(--dl-display);
-  font-size: clamp(24px, 3.2vw, 38px);
+  font-size: clamp(21px, 2.4vw, 30px);
   font-weight: 600;
   color: #fff;
-  line-height: 1.25;
-  max-width: 30ch;
+  line-height: 1.3;
+  max-width: 46ch;
   margin: 0 auto;
   text-wrap: balance;
 }
@@ -119,7 +123,7 @@
 @keyframes co-qpulse { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
 
 /* round table */
-.dl-page .co-table { position: relative; height: 300px; margin: 0 auto 8px; max-width: 680px; }
+.dl-page .co-table { position: relative; height: 260px; margin: 0 auto 8px; max-width: 680px; }
 .dl-page .co-table .ring-c {
   position: absolute;
   left: 50%;
@@ -233,17 +237,21 @@
   gap: 12px;
   min-height: 60px;
 }
+/* Debate boxes — restyled solid (2026-07-24): the old half-transparent glass
+   let the starfield bleed through the text and the tiles read as murky blobs.
+   Near-opaque panel, clearer border, more inner air. */
 .dl-page .dbt {
   display: flex;
-  gap: 14px;
+  gap: 16px;
   align-items: flex-start;
-  padding: 15px 18px;
+  padding: 18px 22px;
   border-radius: 16px;
   opacity: 0;
   transform: translateY(14px);
-  background: linear-gradient(160deg, rgba(20, 46, 38, .6), rgba(13, 31, 26, .55));
+  background: linear-gradient(160deg, rgba(23, 51, 42, .92), rgba(15, 34, 28, .94));
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(194, 163, 90, .18);
+  border: 1px solid rgba(194, 163, 90, .3);
+  box-shadow: 0 10px 26px -18px rgba(0, 0, 0, .7);
   position: relative;
   overflow: hidden;
 }
@@ -252,7 +260,7 @@
   transform: none;
   transition: opacity .5s cubic-bezier(.22, 1, .36, 1), transform .5s cubic-bezier(.22, 1, .36, 1);
 }
-.dl-page .dbt::before { content: ""; position: absolute; inset-inline-start: 0; top: 0; bottom: 0; width: 3px; }
+.dl-page .dbt::before { content: ""; position: absolute; inset-inline-start: 0; top: 0; bottom: 0; width: 4px; }
 .dl-page .dbt.support::before { background: var(--sage); }
 .dl-page .dbt.oppose::before { background: var(--brick); }
 .dl-page .dbt.qualify::before { background: var(--gold); }
@@ -272,7 +280,7 @@
   border: 1.5px solid rgba(194, 163, 90, .3);
 }
 .dl-page .dbt .dbody { flex: 1; min-width: 0; }
-.dl-page .dbt .dhead { display: flex; align-items: center; gap: 9px; margin-bottom: 5px; flex-wrap: wrap; }
+.dl-page .dbt .dhead { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; padding-bottom: 8px; border-bottom: 1px solid rgba(194, 163, 90, .14); flex-wrap: wrap; }
 .dl-page .dbt .dnm { font-size: 13.5px; font-weight: 700; color: #fff; }
 .dl-page .dbt .dro { font-size: 12px; color: rgba(246, 241, 231, .58); }
 .dl-page .dbt .stance { font-size: 12px; font-weight: 700; letter-spacing: .04em; padding: 2px 9px; border-radius: 999px; }

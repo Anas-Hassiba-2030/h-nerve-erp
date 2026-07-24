@@ -113,7 +113,9 @@ body:has(.dl-page[data-section="brain"]) .flex.min-h-screen.flex-1.flex-col.nerv
 /* council mini */
 .dl-page .council-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 @media (max-width: 760px) { .dl-page .council-row { grid-template-columns: 1fr; } }
-.dl-page .adv { background: rgba(13, 31, 26, .5); border: 1px solid rgba(194, 163, 90, .16); border-radius: 14px; padding: 16px 18px; position: relative; }
+/* Solid advisor cards (2026-07-24): match the debate tiles — near-opaque so
+   the cosmic backdrop never bleeds through the text. */
+.dl-page .adv { background: linear-gradient(160deg, rgba(23, 51, 42, .92), rgba(15, 34, 28, .94)); border: 1px solid rgba(194, 163, 90, .28); border-radius: 14px; padding: 18px 20px; position: relative; box-shadow: 0 10px 26px -18px rgba(0, 0, 0, .7); }
 .dl-page .adv::before { content: ""; position: absolute; inset-inline-start: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 999px; }
 .dl-page .adv.s::before { background: var(--sage); } .dl-page .adv.o::before { background: var(--brick); } .dl-page .adv.q::before { background: var(--gold); }
 .dl-page .adv-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }

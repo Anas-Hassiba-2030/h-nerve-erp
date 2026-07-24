@@ -92,6 +92,14 @@
 .dl-page.dl-page .lever-val .unit { font-size: 14px; }
 .dl-page.dl-page .wi-kpi .v .u { font-size: 14px; }
 
+/* ── contrast floor (2026-07-24) ──
+   The night registers painted panels at 40–55% opacity; the starfield bled
+   through and text read as "blurred". Near-opaque surfaces, same palette. */
+.dl-page.dl-page .br-panel { background: linear-gradient(160deg, rgba(20, 46, 38, .88), rgba(13, 31, 26, .9)); border-color: rgba(194, 163, 90, .28); }
+.dl-page.dl-page .br-kpi { background: linear-gradient(160deg, rgba(23, 51, 42, .9), rgba(15, 34, 28, .92)); border-color: rgba(194, 163, 90, .28); }
+.dl-page.dl-page .br-intro { background: linear-gradient(160deg, rgba(23, 51, 42, .88), rgba(15, 34, 28, .9)); border-color: rgba(194, 163, 90, .26); }
+.dl-page.dl-page .tr-row { background: linear-gradient(160deg, rgba(23, 51, 42, .9), rgba(15, 34, 28, .92)); border-color: rgba(194, 163, 90, .26); }
+
 /* ── insights plan steps (plan-*) ── */
 .dl-page.dl-page .plan-step .pt { font-size: 15.5px; line-height: 1.6; }
 .dl-page.dl-page .plan-step .pa { font-size: 14px; }

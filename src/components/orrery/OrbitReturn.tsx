@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { LocaleSwitch } from "@/components/nav/LocaleSwitch";
+import { TextScale } from "@/components/nav/TextScale";
 import { UserMenu } from "@/components/nav/UserMenu";
 import type { Locale } from "@/lib/i18n/i18n";
 import { MiniOrrery } from "./MiniOrrery";
@@ -26,6 +27,7 @@ export function OrbitReturn({ locale, userName }: { locale: Locale; userName?: s
         <span className="orbit-return__label">{label}</span>
       </Link>
       <MiniOrrery locale={locale} />
+      <TextScale locale={locale} />
       <div className="dl-langwrap">
         <LocaleSwitch current={locale} />
       </div>

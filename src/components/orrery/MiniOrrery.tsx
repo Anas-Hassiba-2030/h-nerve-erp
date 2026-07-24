@@ -17,10 +17,14 @@ type Locale = "ar" | "en";
 // so the five-group view stays pixel-identical to before — only crowded child
 // blooms expand. Only the geometry changes here; the pop/spin/bloom animation
 // is untouched.
-// Scaled up ~1.35× (owner request 2026-07-24: "make the orbit box bigger —
-// the letters are not readable"). Radius + glyph metrics move together with
-// the 18px .mo-orbit-lbl font in living.css.
-const BASE_R = 152; // orbit radius for ≤9 short-label nodes
+// The popup is position:fixed at top-right, so it MUST fit the space it has —
+// a big group (Intelligence has 14 children) would otherwise compute a
+// ~500px radius → ~1100px box that covers the whole page. SIZE is hard-capped
+// to the viewport below; when capped, labels are allowed to wrap. Orbit labels
+// are navigation chrome, NOT page content — kept legible (15px) but deliberately
+// not scaled to the big body-text sizes, which is what blew the ring up before.
+const BASE_R = 132; // orbit radius for ≤9 short-label nodes
+const SIZE_CAP = 640; // hard ceiling on the popup square, before viewport clamp
 
 // Bug (2026-07-23, post-ERP-split): the 7-node group ring sized itself off a
 // FIXED chord (54px), which only accounts for the gold dot, not the pill text
@@ -28,10 +32,10 @@ const BASE_R = 152; // orbit radius for ≤9 short-label nodes
 // wide — nearly double the 108px chord the old formula guaranteed — so its
 // label physically overlapped the "Sales" node next to it. Radius must now
 // scale with the WIDEST label in the current node set, not just the count.
-const LABEL_CHAR_PX = 10.8; // avg glyph width, 18px/700 system-ui pill text
-const LABEL_PAD_PX = 32; // .mo-orbit-lbl padding: 16px * 2
-const LABEL_MAX_PX = 200; // .mo-orbit-lbl max-width — long labels wrap instead of growing the ring forever
-const NODE_GAP_PX = 24; // minimum clear gap between adjacent pill edges
+const LABEL_CHAR_PX = 9; // avg glyph width, 15px/700 system-ui pill text
+const LABEL_PAD_PX = 26; // .mo-orbit-lbl padding: 13px * 2
+const LABEL_MAX_PX = 150; // .mo-orbit-lbl max-width — long labels wrap instead of growing the ring forever
+const NODE_GAP_PX = 20; // minimum clear gap between adjacent pill edges
 
 function radiusFor(n: number, labels: string[]): number {
   if (n <= 1) return BASE_R;
@@ -59,6 +63,19 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [activeGroup, setActiveGroup] = useState<OrreryGroup | null>(null);
+  // The popup is fixed at top:56 / inset-end:18 — it must fit what the viewport
+  // leaves. Without this a 14-node group blooms to ~1100px and covers the page.
+  const [vw, setVw] = useState(1280);
+  const [vh, setVh] = useState(800);
+  useEffect(() => {
+    const measure = () => {
+      setVw(window.innerWidth);
+      setVh(window.innerHeight);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
 
   const openMenu = useCallback(() => {
     // Reopening from inside a section drops you back INTO that section's branch
@@ -102,8 +119,12 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
   const labels = activeGroup
     ? activeGroup.children.map((c) => (locale === "ar" ? c.label : c.labelEn))
     : ORRERY_GROUPS.map((g) => (locale === "ar" ? g.nameAr : g.nameEn));
-  const R = radiusFor(count, labels);
-  const SIZE = Math.max(360, Math.round(2 * (R + 60)));
+  // What the labels WANT, then clamp to the room the fixed popup actually has.
+  const wantR = radiusFor(count, labels);
+  const wantSize = 2 * (wantR + 60);
+  const roomSize = Math.min(SIZE_CAP, vw - 18 - 24, vh - 56 - 24);
+  const SIZE = Math.max(360, Math.round(Math.min(wantSize, roomSize)));
+  const R = SIZE / 2 - 60; // ring derived back from the (possibly capped) box
   const CTR = SIZE / 2;
   const rings = ringSizes(R);
 

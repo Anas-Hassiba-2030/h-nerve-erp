@@ -6,11 +6,15 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { log, scoped } from "@/lib/utils/logger";
 
+// The logger emits through console.* (NOT the process streams) so that
+// Cloudflare Workers Logs captures it in production — see logger.ts. Under
+// Node these still resolve to stdout/stderr, so the level→stream contract the
+// log filters depend on is unchanged.
 function captureOut() {
-  return vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+  return vi.spyOn(console, "log").mockImplementation(() => {});
 }
 function captureErr() {
-  return vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+  return vi.spyOn(console, "error").mockImplementation(() => {});
 }
 
 afterEach(() => vi.restoreAllMocks());

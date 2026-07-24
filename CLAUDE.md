@@ -198,6 +198,19 @@ Tailwind with H-Nerve brand classes in `app/globals.css` (`.btn`, `.btn-primary`
 - **All Prisma queries must go through `prisma` (the scoped client) unless they're explicitly cross-tenant.** `prismaUnscoped` is reserved for the Empire dashboard, the workspace switcher, the system-dump API, the brain engine running from cron, and the operator layout's banner lookups. Every `prismaUnscoped` call site must carry a `// CROSS-TENANT INTENT:` comment. New tenant-keyed models go in `TENANT_SCOPED_MODELS` (`lib/tenancy/workspaceScope.ts`); see `docs/ISOLATION.md` for the full checklist.
 - **Pick ONE design vocabulary per surface.** Operator UI = Heritage Modern. Admin = Sleek Operator. Theater = its own editorial register. Never mix.
 - **Every server action that calls AI / parallel DB queries MUST wrap those calls in try/catch + `flashToast`.** A thrown action revalidates the page to the same state with zero user feedback — from the user's perspective the button just "doesn't work." The pattern: `try { result = await expensiveOp(); } catch (e) { flashToast({ type: "info", entity: "info", id: "op", label: ... }); revalidatePath(...); return; }`. Apply this to: all LLM calls, all `Promise.all` fan-outs, and any external-service call inside an action.
+- **A swallowed error must still be reported.** `catch (e) { flashToast(...) }`
+  tells the USER something went wrong; it tells the OPERATOR nothing. Every such
+  catch on a mutation path also calls
+  `reportError("<surface>.<verb> failed", e, { tenantId, userId, … })`
+  (`lib/observability/report.ts`) — one redacted JSON line to Cloudflare Workers
+  Logs, plus an optional deduped push to `ERROR_WEBHOOK_URL`. It never throws, so
+  it is always safe to add. Skip it only for **expected** user errors (e.g. a
+  Prisma `P2002` duplicate that already has a precise message) — reporting those
+  buries real faults in noise. Uncaught errors are handled globally by
+  `src/instrumentation.ts` (`onRequestError`) and need no per-site call.
+- **Log through `lib/utils/logger`, never `process.stdout/stderr` directly.** The
+  logger emits via `console.*` because that is what Workers Logs captures; the
+  process streams silently discard output on Cloudflare.
 - **`flashToast` entity must be `SoftEntity | "info"`.** `SoftEntity = "task" | "project" | "insight" | "forecast"`. Values like `"plan"`, `"council"`, `"program"`, `"deleted"`, `"batch"` do NOT exist in the union and will cause TypeScript errors. Use `entity: "info"` for every non-soft-delete toast.
 - **Night/cosmic surfaces need their own CSS overrides.** `/brain/*` and `/insights` pages render on a dark emerald backdrop (`#0a1813`). The shared `daylight.css` uses cream/light colors that are invisible on dark backgrounds. Any buttons or text added to these pages must have section-specific overrides (see `app/(app)/brain/brain-section.css` for the pattern) — never rely on `daylight.css` defaults alone.
 - **`*Client.tsx` pattern for in-page tab switching.** When a server-rendered page needs client-side view switching (e.g. Tree/List tabs), create a `<PageName>Client.tsx` with `"use client"` + `useState`. Pass the already-rendered server `ReactNode` content for each tab as props — this keeps auth + data fetching on the server and avoids re-fetching. Example: `app/(app)/users/OrgTabsClient.tsx`.

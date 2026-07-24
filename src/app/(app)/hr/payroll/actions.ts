@@ -13,6 +13,7 @@ import { requireUser } from "@/lib/auth/session";
 import { activeTenantSlug } from "@/lib/tenancy/tenancy";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { flashToast } from "@/lib/utils/toast";
+import { reportError } from "@/lib/observability/report";
 import { runPayroll } from "@/lib/hr/payroll";
 
 async function gate() {
@@ -24,7 +25,7 @@ async function gate() {
 }
 
 export async function runPayrollAction(formData: FormData): Promise<void> {
-  await gate();
+  const user = await gate();
   const ar = (await getLocale()) === "ar";
   const tenantId = await activeTenantSlug();
   if (!tenantId) {
@@ -66,7 +67,10 @@ export async function runPayrollAction(formData: FormData): Promise<void> {
           ? `تم صرف رواتب ${result.employeeCount} موظف بإجمالي ${result.total.toFixed(2)}`
           : `Paid ${result.employeeCount} employee(s), total ${result.total.toFixed(2)}`,
     });
-  } catch {
+  } catch (err) {
+    // Payroll writes many rows and is not atomic on D1 — a failure here can
+    // leave a partial run behind, so it must always be visible to an operator.
+    reportError("payroll.run failed", err, { tenantId, year, month, treasuryId, userId: user.id });
     await flashToast({ type: "info", entity: "info", label: ar ? "تعذر تشغيل الرواتب" : "Could not run payroll" });
     return;
   }

@@ -1,7 +1,8 @@
-// lib/logger.ts — Phase 24 (Railway Infrastructure Maximization).
+// lib/logger.ts — structured logging.
 //
-// Thin structured-logging wrapper that emits JSON-line entries Railway's log
-// aggregator can parse, filter, and alert on.
+// Thin structured-logging wrapper that emits JSON-line entries a log
+// aggregator can parse, filter, and alert on. Production is the Cloudflare
+// Worker, whose Workers Logs viewer captures `console.*`.
 //
 // Format (one JSON line per call, no pretty-print):
 //   { "ts": "<ISO>", "level": "info|warn|error|debug", "msg": "...", ...fields }
@@ -27,14 +28,27 @@ function emit(level: Level, msg: string, fields?: Fields): void {
     msg,
     ...fields,
   };
-  const line = JSON.stringify(entry);
+  let line: string;
+  try {
+    line = JSON.stringify(entry);
+  } catch {
+    // A field with a circular reference must not turn a log call into a
+    // crash — drop the fields, keep the event.
+    line = JSON.stringify({ ts: entry.ts, level, msg, note: "fields dropped (non-serializable)" });
+  }
 
-  // Railway captures stdout and stderr separately.
-  // Route warn/error to stderr so alerts can filter on stream.
+  // console.*, NOT process.stdout/stderr.
+  //
+  // This used to write to the process streams directly, which was correct on
+  // Railway (a Node process) and silently WRONG on Cloudflare Workers, where
+  // Workers Logs captures console output. Every warn/error the app emitted in
+  // production went nowhere — which is precisely why a broken route could only
+  // be discovered by a human hitting it. console.error still lands on stderr
+  // under Node, so the stream split the log filters rely on is preserved.
   if (level === "error" || level === "warn") {
-    process.stderr.write(line + "\n");
+    console.error(line);
   } else if (IS_PROD || level !== "debug") {
-    process.stdout.write(line + "\n");
+    console.log(line);
   }
 }
 

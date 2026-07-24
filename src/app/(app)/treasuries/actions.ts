@@ -12,6 +12,7 @@ import { requireUser } from "@/lib/auth/session";
 import { activeTenantSlug } from "@/lib/tenancy/tenancy";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { flashToast } from "@/lib/utils/toast";
+import { reportError } from "@/lib/observability/report";
 import { ensureLedgerAccount } from "@/lib/finance/invoicing";
 
 async function gate() {
@@ -23,7 +24,7 @@ async function gate() {
 }
 
 export async function createTreasury(formData: FormData): Promise<void> {
-  await gate();
+  const user = await gate();
   const ar = (await getLocale()) === "ar";
   const tenantId = await activeTenantSlug();
   if (!tenantId) {
@@ -63,6 +64,12 @@ export async function createTreasury(formData: FormData): Promise<void> {
     });
   } catch (err) {
     const code = (err as { code?: string })?.code;
+    // P2002 is a unique-constraint hit: the operator reused an account code.
+    // That is expected user error with a clear message below, not an incident
+    // — reporting it would bury real faults in noise.
+    if (code !== "P2002") {
+      reportError("treasury.create failed", err, { tenantId, accountCode, userId: user.id });
+    }
     await flashToast({
       type: "info",
       entity: "info",

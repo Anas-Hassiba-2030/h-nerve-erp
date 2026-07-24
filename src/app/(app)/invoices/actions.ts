@@ -13,6 +13,7 @@ import { requireUser } from "@/lib/auth/session";
 import { activeTenantSlug } from "@/lib/tenancy/tenancy";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { flashToast } from "@/lib/utils/toast";
+import { reportError } from "@/lib/observability/report";
 import { lineInputSchema, computeLineTotals, postInvoiceFromComputed } from "@/lib/finance/invoicing";
 
 const invoiceSchema = z.object({
@@ -25,7 +26,7 @@ const invoiceSchema = z.object({
 });
 
 export async function createInvoice(formData: FormData): Promise<void> {
-  await requireUser();
+  const user = await requireUser();
   const ar = (await getLocale()) === "ar";
   const tenantId = await activeTenantSlug();
   if (!tenantId) {
@@ -78,6 +79,7 @@ export async function createInvoice(formData: FormData): Promise<void> {
       });
     });
   } catch (err) {
+    reportError("invoice.create failed", err, { tenantId, userId: user.id });
     await flashToast({
       type: "info",
       entity: "info",
@@ -106,7 +108,8 @@ export async function deleteInvoice(formData: FormData): Promise<void> {
       where: { id },
       data: { deletedAt: new Date() },
     });
-  } catch {
+  } catch (err) {
+    reportError("invoice.delete failed", err, { invoiceId: id, userId: user.id });
     await flashToast({
       type: "info",
       entity: "info",

@@ -322,6 +322,12 @@ html[lang="en"] body {
     box-shadow: var(--shadow-soft);
     overflow: hidden;
   }
+  /* Readability floor (owner request 2026-07-24): many pages compose their
+     table as `w-full text-sm` (14px) inside .table-wrap — too small to read.
+     Two classes + element beats the utility, so every wrapped table lands at
+     17px without touching each page. */
+  .table-wrap table { font-size: 17px; }
+  .table-wrap table th { font-size: 15px; }
   .table-scroll { overflow-x: auto; }
   .table { @apply min-w-full text-sm; }
   .table thead { background: color-mix(in srgb, var(--brand) 4%, var(--surface-elevated)); color: var(--text-muted); }

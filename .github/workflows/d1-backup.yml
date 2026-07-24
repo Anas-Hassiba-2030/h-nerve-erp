@@ -9,8 +9,19 @@
 # restored is a guess, so the schedule proves restorability daily rather than
 # discovering the dump is unusable during an actual outage.
 #
-# This workflow only READS production. `wrangler d1 export` issues a dump and
-# nothing else — it cannot migrate, mutate, or delete.
+# ⚠️ NOT a zero-impact operation. `wrangler d1 export` mutates nothing, but
+# Cloudflare warns the database "will be unavailable to serve queries" while
+# the export runs. Wrangler auto-accepts that prompt in CI. The window is
+# short at this data size (well under a megabyte), which is why the schedule
+# sits at 02:30 UTC — 05:30 in Jordan, the quietest hour for this tenant. If
+# the database grows materially, re-check that assumption before trusting a
+# daily run against production.
+#
+# TOKEN PERMISSION: CLOUDFLARE_API_TOKEN needs **Account → D1 → Edit**. The
+# export endpoint creates an export JOB, so a read-only D1 scope is not
+# enough — it fails with `Authentication error [code: 10000]` even though the
+# token authenticates and lists the account fine (observed 2026-07-24, run
+# 30125859202). Deploy-only scopes do not cover this.
 
 name: D1 Backup
 

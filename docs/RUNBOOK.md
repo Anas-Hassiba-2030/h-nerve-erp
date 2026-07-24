@@ -57,11 +57,25 @@ export, kept as a build artifact, **drilled on every run**.
 
 ### 2.1 The automated daily backup
 
+**Prerequisite — token permission.** `CLOUDFLARE_API_TOKEN` must carry
+**Account → D1 → Edit**. The export endpoint creates an export *job*, so a
+read-only D1 scope is not enough: the run fails with
+`Authentication error [code: 10000]` even though the token authenticates and
+lists the account correctly. Grant it at
+<https://dash.cloudflare.com/profile/api-tokens>, then re-run.
+
+> ⚠️ **The export is not zero-impact.** It mutates nothing, but Cloudflare
+> warns the database **"will be unavailable to serve queries"** while it runs
+> (wrangler auto-accepts that prompt in CI). At the current data size the
+> window is very short, which is why the schedule sits at 02:30 UTC — 05:30 in
+> Jordan. **Re-check this before running it by hand during business hours**,
+> and re-evaluate the daily cadence if the database grows materially.
+
 `.github/workflows/d1-backup.yml` runs at **02:30 UTC daily** (outside Jordan
 business hours) and on manual dispatch:
 
-1. `wrangler d1 export` dumps production — a **read-only** operation; it cannot
-   migrate, mutate, or delete.
+1. `wrangler d1 export` dumps production — it cannot migrate, mutate, or
+   delete, but see the availability warning above.
 2. The dump is **drilled** (§2.3): topo-sorted, restored into a throwaway
    SQLite database, row counts compared. A dump that would not restore fails
    the workflow, so you find out on a quiet Tuesday instead of during an outage.

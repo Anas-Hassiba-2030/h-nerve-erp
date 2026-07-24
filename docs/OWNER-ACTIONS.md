@@ -82,6 +82,40 @@ automatically. A bad or expired key degrades quality; it never breaks the app.
 
 ---
 
+---
+
+## 3. 🟠 Grant the API token D1 export permission
+
+**Today:** the daily D1 backup workflow fails. `CLOUDFLARE_API_TOKEN`
+authenticates correctly — it lists the account as Super Administrator — but the
+export endpoint returns `Authentication error [code: 10000]` (observed
+2026-07-24, run
+[30125859202](https://github.com/Anas-Hassiba-2030/h-nerve-erp/actions/runs/30125859202)).
+
+`wrangler d1 export` creates an export **job**, so a read-only or deploy-only
+D1 scope is not enough.
+
+**Do this:** open <https://dash.cloudflare.com/profile/api-tokens>, edit the
+token used for `CLOUDFLARE_API_TOKEN`, and add **Account → D1 → Edit**. Then:
+
+```bash
+gh workflow run d1-backup.yml
+```
+
+**Verify:** the run goes green and the artifact `d1-backup-<run-id>` appears
+with a non-trivial size. The "Drill the restore" step proves the dump is
+actually restorable.
+
+Until this is granted, **production has no automated backup.** The scripts and
+the drill are proven (74 tables / 1534 rows against the dev database); only the
+remote export is blocked.
+
+> ⚠️ The export makes the database briefly **unavailable to serve queries**.
+> It's scheduled for 02:30 UTC (05:30 Jordan) for that reason. Avoid running it
+> by hand during business hours.
+
+---
+
 ## Never do this
 
 - **Do not put either key in a tracked file** — not `.env.example`, not
@@ -100,7 +134,7 @@ automatically. A bad or expired key degrades quality; it never breaks the app.
 | #1 Anthropic key | **you** | this doc |
 | #2 Multi-row write atomicity | Claude | PR — `$transaction` triage |
 | #3 Error monitoring / alerting | Claude | PR — `src/lib/observability/` |
-| #4 D1 backup + restore drill | Claude | PR — `scripts/ops/` + workflow |
+| #4 D1 backup + restore drill | Claude, **blocked on you** | scripts shipped + drilled; remote export needs §3 |
 | #5 Embedding key | **you** | this doc |
 | #6 Cold-start latency | Claude | measured, not guessed |
 | #7 E2E coverage of mutations | Claude | PR — `e2e/` specs |

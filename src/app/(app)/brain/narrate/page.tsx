@@ -50,7 +50,7 @@ export default async function NarratePage() {
               <span className="tick" />
               {ar ? "الدماغ السردي" : "Narrative brain"}
             </span>
-            <h1>{ar ? "المخرجات" : "Narrate"}</h1>
+            <h1>{ar ? "الملخصات التنفيذية" : "Executive Briefings"}</h1>
           </div>
           <div className="br-intro">
             {ar

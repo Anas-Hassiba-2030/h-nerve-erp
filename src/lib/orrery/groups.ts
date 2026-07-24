@@ -50,27 +50,29 @@ export const ORRERY_GROUPS: OrreryGroup[] = [
     ],
   },
   {
+    // Professional ERP naming pass (2026-07-24, owner-directed): the poetic
+    // brain names (Narrate, What-If, IQ, Memory Lake…) confused operators.
+    // Every section now carries the standard BI/ERP term it corresponds to;
+    // routes are unchanged. Keep hub GROUPS/KIDS_EN + Sidebar + page <h1>s in
+    // lockstep with this list.
     id: "intel",
-    nameAr: "العقل",
-    nameEn: "The Brain",
+    nameAr: "الذكاء",
+    nameEn: "Intelligence",
     children: [
-      { label: "الدماغ", labelEn: "Brain", route: "/brain" },
-      { label: "الرؤى", labelEn: "Insights", route: "/insights" },
+      { label: "مركز الذكاء", labelEn: "Intelligence Hub", route: "/brain" },
+      { label: "رؤى الأعمال", labelEn: "Business Insights", route: "/insights" },
       { label: "التنبيهات", labelEn: "Alerts", route: "/alerts" },
-      { label: "الخطط", labelEn: "Plans", route: "/plans" },
+      { label: "خطط العمل", labelEn: "Action Plans", route: "/plans" },
       { label: "الوثائق", labelEn: "Documents", route: "/documents" },
-      { label: "الرسم السببي", labelEn: "Graph", route: "/brain/graph" },
-      { label: "ماذا لو", labelEn: "What-If", route: "/brain/scenarios" },
-      { label: "المجلس", labelEn: "Council", route: "/brain/council" },
-      { label: "الذاكرة", labelEn: "Memory", route: "/brain/memory" },
-      { label: "التعلّم", labelEn: "Learning", route: "/brain/learning" },
-      { label: "المخرجات", labelEn: "Narrate", route: "/brain/narrate" },
-      { label: "الثقة", labelEn: "Trust", route: "/brain/trust" },
-      { label: "ذكاء الدماغ", labelEn: "IQ", route: "/brain/iq" },
-      // Orphaned route (2026-07-23, found by a hub↔rail route-set audit): the
-      // hub's "intel" kids had /brain/benchmarks all along; the React rail
-      // never did. Registered here so both surfaces expose the same 14 pages.
-      { label: "المعايير", labelEn: "Benchmarks", route: "/brain/benchmarks" },
+      { label: "تحليل التأثير", labelEn: "Impact Analysis", route: "/brain/graph" },
+      { label: "تخطيط السيناريوهات", labelEn: "Scenario Planning", route: "/brain/scenarios" },
+      { label: "المجلس الاستشاري", labelEn: "Advisory Council", route: "/brain/council" },
+      { label: "ذاكرة القرارات", labelEn: "Decision Memory", route: "/brain/memory" },
+      { label: "التعلّم المستمر", labelEn: "Learning", route: "/brain/learning" },
+      { label: "الملخصات التنفيذية", labelEn: "Executive Briefings", route: "/brain/narrate" },
+      { label: "التحقق من البيانات", labelEn: "Data Verification", route: "/brain/trust" },
+      { label: "مؤشر الذكاء", labelEn: "Intelligence Score", route: "/brain/iq" },
+      { label: "مقارنات القطاع", labelEn: "Industry Benchmarks", route: "/brain/benchmarks" },
     ],
   },
   // ERP taxonomy split (2026-07-23, owner-directed): the finance group had

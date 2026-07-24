@@ -19,6 +19,8 @@ type Props = {
   ar: boolean;
   nodes: CGNode[];
   edges: CGEdge[];
+  /** Optional note under the hint — e.g. "showing top N of M entities". */
+  subtitle?: string;
   /** Server-action rebuild form, rendered as the primary control. */
   rebuildSlot: React.ReactNode;
 };
@@ -63,7 +65,7 @@ function layout(nodes: CGNode[]): Record<string, { x: number; y: number; label: 
   return pos;
 }
 
-export function CausalGraph({ ar, nodes, edges, rebuildSlot }: Props) {
+export function CausalGraph({ ar, nodes, edges, subtitle, rebuildSlot }: Props) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const toastRef = useRef<HTMLDivElement | null>(null);
   const [thinking, setThinking] = useState(false);
@@ -275,7 +277,10 @@ export function CausalGraph({ ar, nodes, edges, rebuildSlot }: Props) {
       </div>
 
       <div className="cg-stage">
-        <span className="cg-hint">{ar ? "انقر عقدة لتتبّع الأثر" : "Click a node to trace the effect"}</span>
+        <span className="cg-hint">
+          {ar ? "انقر عقدة لتتبّع الأثر" : "Click a node to trace the effect"}
+          {subtitle ? <span className="cg-sub">{subtitle}</span> : null}
+        </span>
         <svg id="cg" ref={svgRef} viewBox="0 0 800 440">
           {(() => {
             const ec = validEdges.length;
@@ -303,23 +308,37 @@ export function CausalGraph({ ar, nodes, edges, rebuildSlot }: Props) {
             });
           })()}
           {(() => {
+            // Readable-hub rendering (2026-07-24): the old design put the full
+            // label INSIDE a 26px circle — real entity names overflowed and,
+            // with hundreds of nodes, the whole stage collapsed into a
+            // hairball. Now: a compact dot with the (truncated) name lettered
+            // beside it, alternating above/below the ring so neighbouring
+            // labels don't collide. Full name stays available as a tooltip.
             const count = nodes.length;
-            const nodeR = count > 200 ? 4 : count > 80 ? 7 : count > 30 ? 14 : 26;
-            const showLabel = count <= 30;
-            const labelSize = count > 80 ? 9 : count > 30 ? 10 : 13;
-            return nodes.map((n) => {
+            const nodeR = count > 200 ? 4 : count > 80 ? 7 : 11;
+            const showLabel = count <= 40;
+            const trunc = (s: string) => (s.length > 18 ? s.slice(0, 17) + "…" : s);
+            return nodes.map((n, i) => {
               const p = posById[n.id];
+              const below = i % 2 === 0;
               return (
                 <g key={n.id} className="cg-node" data-node={n.id} transform={`translate(${p.x},${p.y})`}>
                   <circle r={nodeR} fill="rgba(31,77,63,.85)" stroke="#C2A35A" strokeWidth={1.5} />
-                  <circle className="cg-halo" r={nodeR + 2} fill="none" stroke="#DCC38A" strokeWidth={2} opacity={0} />
+                  <circle className="cg-halo" r={nodeR + 3} fill="none" stroke="#DCC38A" strokeWidth={2} opacity={0} />
                   {showLabel ? (
-                    <text textAnchor="middle" dy={5} fill="#fff" fontFamily="Cairo,sans-serif" fontSize={labelSize} fontWeight={700}>
-                      {n.label}
+                    <text
+                      textAnchor="middle"
+                      dy={below ? nodeR + 16 : -(nodeR + 8)}
+                      fill="#fff"
+                      fontFamily="Cairo,sans-serif"
+                      fontSize={13}
+                      fontWeight={700}
+                      style={{ paintOrder: "stroke", stroke: "rgba(10,24,19,.85)", strokeWidth: 4 }}
+                    >
+                      {trunc(n.label)}
                     </text>
-                  ) : (
-                    <title>{n.label}</title>
-                  )}
+                  ) : null}
+                  <title>{n.label}</title>
                 </g>
               );
             });

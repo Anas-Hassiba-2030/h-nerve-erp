@@ -62,7 +62,7 @@ export default async function BrainIQPage() {
               <span className="tick"></span>
               {ar ? "الذكاء التشغيلي" : "Operational intelligence"}
             </span>
-            <h1>{ar ? "ذكاء الدماغ" : "Brain IQ"}</h1>
+            <h1>{ar ? "مؤشر الذكاء" : "Intelligence Score"}</h1>
           </div>
           <div className="br-intro">
             {ar

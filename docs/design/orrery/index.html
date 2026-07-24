@@ -1247,8 +1247,11 @@ const GROUPS = [
   { id:"overview", name:"لوحة المجموعة", en:"Group Board", amb:"finance", kids:[
      ["لوحة المجموعة","ui_kits/dashboard/index.html"],["الشركات"],["مساحة العمل"],
      ["أرينا","sections/arena.html"],["المها","sections/maha.html"],["لوران","sections/loran.html"],["الحاضنة","sections/ahliyya.html"],["سلسلة التوريد","sections/supply.html"] ]},
-  { id:"intel", name:"العقل", en:"The Brain", amb:"cosmic", kids:[
-     ["مركز الدماغ","sections/brain.html"],["الرؤى","sections/insights.html"],["التنبيهات","sections/alerts.html"],["الخطط","sections/plans.html"],["المستندات","sections/documents.html"],["الرسم السببي","sections/causal.html"],["ماذا لو","sections/whatif.html"],["المجلس","sections/council.html"],["بحيرة الذاكرة","sections/memory.html"],["التعلّم","sections/learning.html"],["المعايير","sections/benchmarks.html"],["ذكاء الدماغ","sections/brainiq.html"],["الراوي","sections/narrate.html"],["الثقة"] ]},
+  // Professional ERP naming pass (2026-07-24, owner-directed): poetic brain
+  // names replaced with standard BI/ERP terms, mirroring src/lib/orrery/groups.ts
+  // 1:1. DATA-ONLY edit — the bloom/animation is untouched.
+  { id:"intel", name:"الذكاء", en:"Intelligence", amb:"cosmic", kids:[
+     ["مركز الذكاء","sections/brain.html"],["رؤى الأعمال","sections/insights.html"],["التنبيهات","sections/alerts.html"],["خطط العمل","sections/plans.html"],["الوثائق","sections/documents.html"],["تحليل التأثير","sections/causal.html"],["تخطيط السيناريوهات","sections/whatif.html"],["المجلس الاستشاري","sections/council.html"],["ذاكرة القرارات","sections/memory.html"],["التعلّم المستمر","sections/learning.html"],["مقارنات القطاع","sections/benchmarks.html"],["مؤشر الذكاء","sections/brainiq.html"],["الملخصات التنفيذية","sections/narrate.html"],["التحقق من البيانات"] ]},
   // ERP taxonomy split (2026-07-23, owner-directed): finance had absorbed every
   // front-office surface — 22 pills in one bloom. Split into Finance (ledger/
   // treasury/reporting), Sales (order-to-cash), and Purchasing & Production
@@ -1274,7 +1277,7 @@ const GROUPS = [
 // English child labels (parallel to kids order) — for the AR/EN toggle
 const KIDS_EN = {
   overview:["Group Board","Companies","Workspace","Arena","Maha","Loran","Incubator","Supply Chain"],
-  intel:["Brain Hub","Insights","Alerts","Plans","Documents","Causal Graph","What-if","Council","Memory Lake","Learning","Benchmarks","Brain IQ","Narrate","Trust"],
+  intel:["Intelligence Hub","Business Insights","Alerts","Action Plans","Documents","Impact Analysis","Scenario Planning","Advisory Council","Decision Memory","Learning","Industry Benchmarks","Intelligence Score","Executive Briefings","Data Verification"],
   finance:["Financial Hub","Statements","Reports","Treasuries","Fixed Assets","Analytics","Compare","Markets","Sustainability"],
   sales:["CRM","Customers","Estimates","Invoices","Payments","Point of Sale","E-Invoicing"],
   ops:["Suppliers","Purchase Invoices","Supplier Payments","Manufacturing","Maintenance","Projects"],
@@ -1319,7 +1322,9 @@ ANCHORS.forEach((a, i)=>{
   el.innerHTML = `<span class="star"></span><span class="pill">${a.name}</span>`;
   stage.appendChild(el);
   const b = { el, type:"anchor", data:a, angle0:(-90 + i*(360/ANCHORS.length))*Math.PI/180, dir:1,
-              omega: TAU/90, r:innerR, curR:innerR, rTarget:innerR, s:0, op:0, hovered:false, children:[] };
+              /* Slowed 2× (owner request 2026-07-24): TAU/90 → TAU/180 — calmer
+                 drift, easier to click a moving anchor. Animation itself untouched. */
+              omega: TAU/180, r:innerR, curR:innerR, rTarget:innerR, s:0, op:0, hovered:false, children:[] };
   bodies.push(b);
   a._body = b;
 
@@ -1333,7 +1338,7 @@ ANCHORS.forEach((a, i)=>{
     stage.appendChild(ce);
     const cb = { el:ce, type:"child", data:c, parent:b,
                  angle0: (j/a.children.length)*TAU - Math.PI/2,
-                 dir:-1, omega: TAU/110, r:outerR, curR:outerR, s:0, op:0, hovered:false };
+                 dir:-1, omega: TAU/220, r:outerR, curR:outerR, s:0, op:0, hovered:false };
     b.children.push(cb);
     bodies.push(cb);
   });

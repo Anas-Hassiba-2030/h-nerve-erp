@@ -196,7 +196,7 @@ export default async function BrainPage() {
         <div style={{ marginTop: 20, display: "flex", gap: 12, flexWrap: "wrap" }}>
           <Link className="dl-btn dl-btn-secondary" href="/brain/graph">{ar ? "افتح الرسم السببي" : "Open the causal graph"}</Link>
           <Link className="dl-btn dl-btn-secondary" href="/brain/iq">{ar ? "تفاصيل الذكاء" : "IQ details"}</Link>
-          <Link className="dl-btn dl-btn-secondary" href="/brain/memory">{ar ? "بحيرة الذاكرة" : "Memory lake"}</Link>
+          <Link className="dl-btn dl-btn-secondary" href="/brain/memory">{ar ? "ذاكرة القرارات" : "Decision Memory"}</Link>
           <Link className="dl-btn dl-btn-secondary" href="/brain/self-tuning">{ar ? "الضبط الذاتي" : "Self-tuning"}</Link>
         </div>
       </div>

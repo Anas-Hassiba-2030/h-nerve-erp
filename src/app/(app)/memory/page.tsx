@@ -28,7 +28,7 @@ export default async function MemoryPage() {
     <DaylightShell dir={ar ? "rtl" : "ltr"}>
       <DaylightHeader
         eyebrow={ar ? "الدماغ · استرجاع الذاكرة" : "Brain · Memory recall"}
-        title={ar ? "بحيرة الذاكرة" : "The memory lake"}
+        title={ar ? "ذاكرة القرارات" : "Decision Memory"}
         subtitle={
           ar
             ? "تُحمّل الذكريات مباشرةً من واجهة /api/memory. صفِّ حسب الوحدة، أو انسَ ما لم يعد مفيداً."

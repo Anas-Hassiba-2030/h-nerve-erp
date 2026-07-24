@@ -99,6 +99,9 @@ const NAME_MAP: Record<string, string> = {
   "مسير الرواتب": "/hr/payroll",
   "الحضور والورديات": "/hr/attendance",
   "الثقة": "/brain/trust",
+  // ERP naming pass (2026-07-24): Trust renamed Data Verification — the hub's
+  // trust kid has no static section page, so it arrives via ?s=<new name>.
+  "التحقق من البيانات": "/brain/trust",
   "الإنجازات": "/achievements",
   "الفريق": "/users",
   "الإدارة ERP": "/admin",

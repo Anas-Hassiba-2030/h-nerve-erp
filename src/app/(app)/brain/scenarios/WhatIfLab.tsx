@@ -499,7 +499,7 @@ export function WhatIfLab({ ar }: { ar: boolean }) {
       <div className="wi-ribbon">
         <div className="wi-title-box">
           <span className="eb"><span className="tick" />{ar ? "محاكاة سببية" : "Causal simulation"}</span>
-          <h1>{ar ? "ماذا لو" : "What if"}</h1>
+          <h1>{ar ? "تخطيط السيناريوهات" : "Scenario Planning"}</h1>
         </div>
         <div className="wi-note">
           <div className="eyebrow"><span className="pulse" />{ar ? "قراءة الدماغ" : "Brain reading"}</div>

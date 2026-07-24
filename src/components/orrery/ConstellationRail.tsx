@@ -27,6 +27,17 @@ export function ConstellationRail({ locale }: { locale: Locale }) {
 
   const groupLabel = locale === "ar" ? group.nameAr : group.nameEn;
 
+  // Most-specific match wins. A plain prefix test marked BOTH "/brain" and
+  // "/brain/council" as current on /brain/council — two highlighted pills,
+  // so the user couldn't tell which section they were in.
+  const matches = group.children.filter(
+    (c) => currentPath === c.route || currentPath.startsWith(c.route + "/"),
+  );
+  const current =
+    matches.length > 0
+      ? matches.reduce((a, b) => (b.route.length > a.route.length ? b : a))
+      : null;
+
   return (
     <nav
       id="al-rail"
@@ -38,9 +49,7 @@ export function ConstellationRail({ locale }: { locale: Locale }) {
 
       {group.children.map((child) => {
         const label = locale === "ar" ? child.label : child.labelEn;
-        const isCurrent =
-          currentPath === child.route ||
-          currentPath.startsWith(child.route + "/");
+        const isCurrent = child === current;
 
         if (collapsed && !isCurrent) return null;
 

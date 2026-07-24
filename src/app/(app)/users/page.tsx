@@ -26,6 +26,7 @@ const ROLE_EN: Record<string, string> = {
 type Member = {
   id: string;
   name: string;
+  email: string | null;
   title: string | null;
   role: string;
   rank: string;
@@ -58,41 +59,64 @@ export default async function UsersPage() {
   const silver = users.filter((u) => SILVER_PLUS.has(u.rank)).length;
   const totalXp = users.reduce((s, u) => s + (u.xp ?? 0), 0);
 
-  // ── org tree from reportsTo relations ──
+  // ── org tree: a REAL supervisor map, built from company + role ──
+  // The chart must answer "who is each person's supervisor and who leads the
+  // group?" — so parent selection follows the actual org signal each user
+  // already carries (their company + role tier), not an index-based guess:
+  //   Staff      → the MANAGER of their own company
+  //   Manager    → the EXECUTIVE (group CEO)
+  //   Executive  → the owner (top ADMIN)
+  //   other Admin→ the owner
+  // A real `reportsTo` edge overrides this, BUT only when it doesn't invert the
+  // hierarchy (a higher tier can never become a child of a lower one — that
+  // stale-edge inversion is what put the owner as a leaf under a staffer).
+  // Everything hangs off ONE root (the owner) so it's a single clean tree.
   const ids = new Set(users.map((u) => u.id));
-  const isRealEdge = (u: Member) =>
-    !!u.reportsToId && ids.has(u.reportsToId) && u.reportsToId !== u.id;
-  const hasRealEdges = users.some(isRealEdge);
+  const byId = new Map(users.map((u) => [u.id, u]));
+  const TIER: Record<string, number> = { ADMIN: 0, EXECUTIVE: 1, MANAGER: 2, STAFF: 3 };
+  const tierOf = (u: Member) => TIER[u.role] ?? 3;
 
-  // Resolve each user's parent. When nobody has a "reports to" set (the common
-  // seed case) every user would otherwise be a root → a flat wall, not an org
-  // chart ("doesn't look hierarchical"). Fall back to a synthesized hierarchy
-  // from role tiers (Admin → Executive → Manager → Staff), distributing each
-  // tier's people round-robin under the tier above so the chart looks real and
-  // balanced. Real reportsTo data, when present, always wins.
-  const ROLE_TIERS = ["ADMIN", "EXECUTIVE", "MANAGER", "STAFF"];
-  const parentOf = new Map<string, string | null>();
-  if (hasRealEdges) {
-    for (const u of users) parentOf.set(u.id, isRealEdge(u) ? u.reportsToId! : null);
-  } else {
-    const known = new Set(ROLE_TIERS);
-    const tiers = ROLE_TIERS.map((r) => users.filter((u) => u.role === r));
-    tiers[tiers.length - 1].push(...users.filter((u) => !known.has(u.role)));
-    const nonEmpty = tiers.filter((t) => t.length > 0);
-    if (nonEmpty.length <= 1) {
-      // Only one role tier present (e.g. an all-STAFF fresh tenant) — a role
-      // hierarchy can't be built, but still avoid the flat wall: make the first
-      // person the root and nest everyone else one level beneath them.
-      const flat = nonEmpty[0] ?? [];
-      flat.forEach((u, j) => parentOf.set(u.id, j === 0 ? null : flat[0].id));
-    } else {
-      nonEmpty.forEach((tier, i) => {
-        const parents = i === 0 ? null : nonEmpty[i - 1];
-        tier.forEach((u, j) =>
-          parentOf.set(u.id, parents ? parents[j % parents.length].id : null),
-        );
-      });
+  // Single root: the owner (ADMIN whose title marks them as owner), else the
+  // first ADMIN, else the single highest-ranked person.
+  const admins = users.filter((u) => u.role === "ADMIN");
+  const owner =
+    admins.find((u) => /مالك|owner/i.test(u.title ?? "")) ??
+    admins[0] ??
+    [...users].sort((a, b) => tierOf(a) - tierOf(b))[0];
+  const rootId = owner?.id ?? null;
+
+  // One manager per company (the company's leader), and the top executive.
+  const mgrByCompany = new Map<string, Member>();
+  for (const u of users) {
+    const co = u.company?.name;
+    if (u.role === "MANAGER" && co && !mgrByCompany.has(co)) mgrByCompany.set(co, u);
+  }
+  const topExec = users.find((u) => u.role === "EXECUTIVE") ?? null;
+
+  const validEdge = (u: Member) => {
+    if (!u.reportsToId || !ids.has(u.reportsToId) || u.reportsToId === u.id) return false;
+    const p = byId.get(u.reportsToId);
+    return !!p && tierOf(p) < tierOf(u); // parent must be strictly higher in the org
+  };
+
+  const synthParent = (u: Member): string | null => {
+    if (u.id === rootId) return null;
+    if (u.role === "STAFF") {
+      const co = u.company?.name;
+      const mgr = co ? mgrByCompany.get(co) : null;
+      if (mgr && mgr.id !== u.id) return mgr.id;
+      return topExec?.id ?? rootId;
     }
+    if (u.role === "MANAGER") return topExec?.id ?? rootId;
+    return rootId; // executives + any other admin report to the owner
+  };
+
+  // parent chains always move to a strictly higher tier (or the root), so the
+  // graph is a DAG rooted at the owner — no cycle is possible.
+  const parentOf = new Map<string, string | null>();
+  for (const u of users) {
+    if (u.id === rootId) { parentOf.set(u.id, null); continue; }
+    parentOf.set(u.id, validEdge(u) ? u.reportsToId! : synthParent(u));
   }
 
   const byParent = new Map<string | null, Member[]>();
@@ -123,7 +147,8 @@ export default async function UsersPage() {
           <span className="tinfo">
             <span className="tn">{u.name}</span>
             <span className="tr">{u.title ?? role}</span>
-            {sector ? <span className="tr" style={{ opacity: 0.55, fontSize: "12px" }}>{sector}</span> : null}
+            {sector ? <span className="tr tsector">{sector}</span> : null}
+            {u.email ? <span className="tr temail">{u.email}</span> : null}
           </span>
           <span className="tbadge">{RANK_GLYPH[u.rank] ?? "♟"}</span>
           {canEdit ? (

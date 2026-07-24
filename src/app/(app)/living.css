@@ -368,12 +368,15 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
      squeezed big groups into cramped multi-row wraps while the page margins
      sat empty. The rail now stretches edge to edge of the content column. */
   margin:0 0 16px; max-width:none; width:100%;
-  /* 360px symmetric side padding: the .dl-topctl corner cluster (Orbit pill +
-     mini-orrery + text-size control + language toggle + user menu) is
-     position:fixed at the top inline-end (≈345px wide + 22px offset), z-70 —
-     without this reserve the last pills slide UNDERNEATH it (seen live
-     2026-07-24). Symmetric so the centered pill row stays truly centered. */
-  padding:11px 360px;
+  /* 460px symmetric side padding: the .dl-topctl corner cluster (Orbit pill +
+     mini-orrery + text-size control + language toggle + user menu) measures
+     ≈412px wide + 22px offset and is position:fixed at the top inline-end,
+     z-70. Reproduced live at a 1920px content width: with only 360px reserve
+     the top-row pill ("Leave") overran the cluster's left edge by ~47px and
+     read as cramped ("too close, not professional"). 460 = cluster width +
+     ~26px clear gap. Symmetric so the centered pill row stays truly centered;
+     the rail wraps to extra rows on narrow screens, which is expected. */
+  padding:11px 460px;
   background:linear-gradient(160deg,rgba(20,46,38,.4),rgba(13,31,26,.36));
   border:1px solid rgba(194,163,90,.2);
   border-radius:14px;

@@ -167,6 +167,27 @@
 }
 .admin-rail-exit:hover { color: var(--admin-cyan); border-color: var(--admin-cyan-dim); }
 .admin-rail-exits { display: inline-flex; gap: 8px; justify-self: end; align-items: center; }
+/* Explicit "↺ Orbit" return pill — teal-accented so it reads as the primary
+   way out of the admin console (the brand tile alone looked like a logo). */
+.admin-orbit-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 15px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 999px;
+  text-decoration: none;
+  color: #fff;
+  border: 1px solid var(--admin-amber, #c2a35a);
+  background: linear-gradient(135deg, var(--admin-cyan-dim, #2e6b57), var(--admin-cyan, #1f4d3f));
+  white-space: nowrap;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.admin-orbit-pill:hover {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-amber, #c2a35a) 30%, transparent);
+  border-color: var(--admin-amber, #c2a35a);
+}
 /* tiny context label so the two buttons clearly read as "ways out of admin" */
 .admin-rail-exits-label {
   font-family: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;

@@ -24,6 +24,7 @@ import { prisma } from "@/lib/db/db";
 import { Settings, UsersRound, ShieldCheck, ScrollText, Sprout, Database } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { MiniOrrery } from "@/components/orrery/MiniOrrery";
+import { TextScale } from "@/components/nav/TextScale";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getCurrentUser();
@@ -80,11 +81,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               {ar ? "غرفة العمليات" : "Mission Control"}
             </Link>
           </nav>
-          {/* The same Orbit control every operator section carries — the
-              single, consistent way back into the app. Replaces the old
-              LEAVE ADMIN label + Orbit/Operator text links. */}
+          {/* The same Orbit controls every operator section carries — an
+              explicit labelled "↺ Orbit" return pill (the brand tile alone
+              read as a logo, not a way out), the mini-orbit, and the shared
+              text-size dial. Consistent exit on every admin screen. */}
           <div className="admin-rail-exits">
+            <Link href="/orrery" className="admin-orbit-pill" title={ar ? "العودة إلى المدار" : "Back to the Orbit hub"}>
+              <span aria-hidden>↺</span>
+              <span>{ar ? "المدار" : "Orbit"}</span>
+            </Link>
             <MiniOrrery locale={ar ? "ar" : "en"} />
+            <TextScale locale={ar ? "ar" : "en"} />
           </div>
         </div>
       </header>

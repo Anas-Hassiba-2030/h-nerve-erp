@@ -328,6 +328,19 @@ html[lang="en"] body {
      17px without touching each page. */
   .table-wrap table { font-size: 17px; }
   .table-wrap table th { font-size: 15px; }
+  /* App-wide Tailwind-utility floor (owner request 2026-07-24, round 6:
+     "the letters in the system are small — fix in ALL sections"): pages
+     across the app compose text with text-xs/text-sm (12/14px), which is
+     below the readability floor. Raising the utilities inside .dl-page
+     lifts every operator section at once — headings via text-xl too. */
+  .dl-page .text-xs { font-size: 13.5px; }
+  .dl-page .text-sm { font-size: 15.5px; }
+  .dl-page .text-lg { font-size: 20px; }
+  .dl-page .text-xl { font-size: 26px; }
+  /* Tables often carry text-sm themselves — keep the 17px table floor
+     winning over the 15.5px utility floor above (higher specificity). */
+  .dl-page .table-wrap table { font-size: 17px; }
+  .dl-page .table-wrap table th { font-size: 15px; }
   .table-scroll { overflow-x: auto; }
   .table { @apply min-w-full text-sm; }
   .table thead { background: color-mix(in srgb, var(--brand) 4%, var(--surface-elevated)); color: var(--text-muted); }

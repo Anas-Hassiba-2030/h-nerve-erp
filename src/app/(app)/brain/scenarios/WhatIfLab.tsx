@@ -586,6 +586,29 @@ export function WhatIfLab({ ar }: { ar: boolean }) {
             >
               {ar ? "↗ شارك مع المجلس" : "↗ Share to Council"}
             </button>
+            {/* Opens the corner brain-chat overlay with this scenario prefilled,
+                so "discuss it" is one click — no retyping the levers. */}
+            <button
+              type="button"
+              className="dl-btn"
+              style={{
+                background: "linear-gradient(135deg,#2E6B57,#1E4D3E)",
+                border: "1px solid rgba(220,195,138,.7)",
+                color: "#fff",
+                fontWeight: 800,
+              }}
+              onClick={() => {
+                const summary = (narrRef.current?.textContent ?? "").trim().slice(0, 600);
+                const prompt = ar
+                  ? `ناقش معي هذا السيناريو: ${summary}`
+                  : `Discuss this scenario with me: ${summary}`;
+                window.dispatchEvent(
+                  new CustomEvent("h-nerve:converse:open", { detail: { prompt } }),
+                );
+              }}
+            >
+              {ar ? "💬 ناقش مع العقل" : "💬 Discuss with the Brain"}
+            </button>
           </div>
           {/* Hidden carrier — onShareCouncil fills these from the LIVE scenario
               (lever positions + projected impacts), then posts to the action. */}

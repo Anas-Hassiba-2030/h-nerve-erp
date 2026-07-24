@@ -32,8 +32,13 @@ const RULES: { test: RegExp; ambient: Ambient; living?: Living }[] = [
   { test: /^\/brain/, ambient: "cosmic", living: "night" },
   // intel + signal surfaces (cosmic night per reference)
   { test: /^\/(insights|alerts|plans|documents|digest|narrate)\b/, ambient: "cosmic", living: "night" },
+  // HR consoles are DAYLIGHT-styled pages (.dl-page ink text, cream cards) —
+  // they were in the night group below, which painted the body dark and made
+  // every ink heading unreadable ("the font is dead" — /hr/attendance,
+  // 2026-07-24). Register must match the page's own styling.
+  { test: /^\/hr\b/, ambient: "holding" },
   // team comms (cosmic night per reference)
-  { test: /^\/(messages|tasks|inbox|employees|users|hr)\b/, ambient: "cosmic", living: "night" },
+  { test: /^\/(messages|tasks|inbox|employees|users)\b/, ambient: "cosmic", living: "night" },
   // workflow studio (cosmic night per reference)
   { test: /^\/workflows/, ambient: "cosmic", living: "night" },
 ];

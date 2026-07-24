@@ -201,8 +201,12 @@ export function useConversational({ locale = "ar" }: { locale?: "ar" | "en" }) {
         } catch {}
       }
     }
-    // Custom event for the CommandPalette "Ask the brain" entry.
-    function onAsk() {
+    // Custom event for the CommandPalette "Ask the brain" entry and for any
+    // in-page "Discuss with the Brain" button. detail.prompt (optional)
+    // prefills the question box so the user lands mid-conversation.
+    function onAsk(e: Event) {
+      const prompt = (e as CustomEvent<{ prompt?: string }>).detail?.prompt;
+      if (typeof prompt === "string" && prompt.trim()) setDraft(prompt.trim());
       setOpen(true);
     }
     window.addEventListener("keydown", onKey);

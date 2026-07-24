@@ -24,12 +24,94 @@ export interface OrreryChild {
   route: string;
 }
 
-export interface OrreryGroup {
+/**
+ * A named cluster inside a group.
+ *
+ * Only Intelligence has these, and only because it has 14 children — double
+ * the next-largest group. Fourteen flat pills overflowed the header rail into
+ * ragged rows and scattered the mini-orbit ring (owner, 2026-07-24: "the
+ * sections appear like that in the small orbit… the header sections are too
+ * much"). The constraint was explicit: keep every section IN Intelligence,
+ * don't shrink anything — organize it.
+ *
+ * So the 14 are clustered by the QUESTION each section answers, not by route:
+ * what's happening (الرؤى) → what to do (الإجراءات) → decide (القرار) → can I
+ * trust it (الثقة). That is also the order an operator moves through them.
+ */
+export interface OrrerySubgroup {
   id: string;
   nameAr: string;
   nameEn: string;
   children: OrreryChild[];
 }
+
+export interface OrreryGroup {
+  id: string;
+  nameAr: string;
+  nameEn: string;
+  /**
+   * Every section in the group, flat. Stays the canonical list — route
+   * matching (`detectOrreryGroup`), the collapse toggle, and any future
+   * consumer read this and need no knowledge of clustering.
+   */
+  children: OrreryChild[];
+  /** Optional presentation clustering. Absent on the six small groups. */
+  subgroups?: OrrerySubgroup[];
+}
+
+/**
+ * Intelligence's four clusters. `children` on the group below is DERIVED from
+ * this array, so the flat list and the clustered view can never drift apart —
+ * adding a section here is the single edit that ships it everywhere.
+ */
+const INTEL_SUBGROUPS: OrrerySubgroup[] = [
+  {
+    // What is happening — the read-only picture.
+    id: "insight",
+    nameAr: "الرؤى",
+    nameEn: "Insight",
+    children: [
+      { label: "مركز الذكاء", labelEn: "Intelligence Hub", route: "/brain" },
+      { label: "رؤى الأعمال", labelEn: "Business Insights", route: "/insights" },
+      { label: "الملخصات التنفيذية", labelEn: "Executive Briefings", route: "/brain/narrate" },
+      { label: "مقارنات القطاع", labelEn: "Industry Benchmarks", route: "/brain/benchmarks" },
+    ],
+  },
+  {
+    // What to do about it — the surfaces that demand an action.
+    id: "act",
+    nameAr: "الإجراءات",
+    nameEn: "Act",
+    children: [
+      { label: "التنبيهات", labelEn: "Alerts", route: "/alerts" },
+      { label: "خطط العمل", labelEn: "Action Plans", route: "/plans" },
+      { label: "الوثائق", labelEn: "Documents", route: "/documents" },
+    ],
+  },
+  {
+    // Weighing a decision before making it.
+    id: "decide",
+    nameAr: "القرار",
+    nameEn: "Decide",
+    children: [
+      { label: "تحليل التأثير", labelEn: "Impact Analysis", route: "/brain/graph" },
+      { label: "تخطيط السيناريوهات", labelEn: "Scenario Planning", route: "/brain/scenarios" },
+      { label: "المجلس الاستشاري", labelEn: "Advisory Council", route: "/brain/council" },
+      { label: "ذاكرة القرارات", labelEn: "Decision Memory", route: "/brain/memory" },
+    ],
+  },
+  {
+    // Whether the answer can be trusted, and whether it is getting better.
+    id: "trust",
+    nameAr: "الثقة",
+    nameEn: "Trust",
+    children: [
+      { label: "التحقق من البيانات", labelEn: "Data Verification", route: "/brain/trust" },
+      { label: "مؤشر الذكاء", labelEn: "Intelligence Score", route: "/brain/iq" },
+      { label: "التعلّم المستمر", labelEn: "Learning", route: "/brain/learning" },
+    ],
+  },
+];
 
 export const ORRERY_GROUPS: OrreryGroup[] = [
   {
@@ -58,22 +140,9 @@ export const ORRERY_GROUPS: OrreryGroup[] = [
     id: "intel",
     nameAr: "الذكاء",
     nameEn: "Intelligence",
-    children: [
-      { label: "مركز الذكاء", labelEn: "Intelligence Hub", route: "/brain" },
-      { label: "رؤى الأعمال", labelEn: "Business Insights", route: "/insights" },
-      { label: "التنبيهات", labelEn: "Alerts", route: "/alerts" },
-      { label: "خطط العمل", labelEn: "Action Plans", route: "/plans" },
-      { label: "الوثائق", labelEn: "Documents", route: "/documents" },
-      { label: "تحليل التأثير", labelEn: "Impact Analysis", route: "/brain/graph" },
-      { label: "تخطيط السيناريوهات", labelEn: "Scenario Planning", route: "/brain/scenarios" },
-      { label: "المجلس الاستشاري", labelEn: "Advisory Council", route: "/brain/council" },
-      { label: "ذاكرة القرارات", labelEn: "Decision Memory", route: "/brain/memory" },
-      { label: "التعلّم المستمر", labelEn: "Learning", route: "/brain/learning" },
-      { label: "الملخصات التنفيذية", labelEn: "Executive Briefings", route: "/brain/narrate" },
-      { label: "التحقق من البيانات", labelEn: "Data Verification", route: "/brain/trust" },
-      { label: "مؤشر الذكاء", labelEn: "Intelligence Score", route: "/brain/iq" },
-      { label: "مقارنات القطاع", labelEn: "Industry Benchmarks", route: "/brain/benchmarks" },
-    ],
+    // Derived — never hand-maintained. See INTEL_SUBGROUPS above.
+    children: INTEL_SUBGROUPS.flatMap((s) => s.children),
+    subgroups: INTEL_SUBGROUPS,
   },
   // ERP taxonomy split (2026-07-23, owner-directed): the finance group had
   // swallowed 22 children (every front-office surface from PR #346) — the rail
@@ -171,6 +240,27 @@ export const ORRERY_GROUPS: OrreryGroup[] = [
     ],
   },
 ];
+
+/** Return the cluster inside `group` that owns `currentPath`, or null. */
+export function detectOrrerySubgroup(
+  group: OrreryGroup | null,
+  currentPath: string,
+): OrrerySubgroup | null {
+  if (!group?.subgroups) return null;
+  const path = currentPath.split("?")[0].split("#")[0] || "/";
+  // Most-specific wins: "/brain" and "/brain/council" live in DIFFERENT
+  // clusters, so a plain prefix test would put you in Insight while you are
+  // looking at the Advisory Council.
+  let best: { sub: OrrerySubgroup; len: number } | null = null;
+  for (const sub of group.subgroups) {
+    for (const child of sub.children) {
+      if (path === child.route || path.startsWith(child.route + "/")) {
+        if (!best || child.route.length > best.len) best = { sub, len: child.route.length };
+      }
+    }
+  }
+  return best?.sub ?? null;
+}
 
 /** Return the group that owns `currentPath`, or null if no match. */
 export function detectOrreryGroup(currentPath: string): OrreryGroup | null {

@@ -92,3 +92,7 @@ graphify-out/
 /playwright-report/
 /test-results/
 /prisma/schema/e2e.db
+
+# Database dumps — real tenant data, never committed (scripts/ops/d1-backup.mjs)
+backups/
+*.sql.meta.json

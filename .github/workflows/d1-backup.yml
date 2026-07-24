@@ -1,0 +1,66 @@
+# Daily production D1 backup — gap #4 of the 100/100 readiness list.
+#
+# The dump is uploaded as a workflow ARTIFACT, never committed to the repo:
+# it contains real tenant data (live Hourani bookings, the finance ledger) and
+# would bloat history irreversibly.
+#
+# Every run also DRILLS the dump — topo-sorts it and restores it into a
+# throwaway SQLite database, verifying row counts match. A backup nobody has
+# restored is a guess, so the schedule proves restorability daily rather than
+# discovering the dump is unusable during an actual outage.
+#
+# This workflow only READS production. `wrangler d1 export` issues a dump and
+# nothing else — it cannot migrate, mutate, or delete.
+
+name: D1 Backup
+
+on:
+  schedule:
+    # 02:30 UTC daily — outside Jordan business hours (UTC+3).
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # node:sqlite (used by the restore drill) needs Node 22+.
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Export production D1
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node scripts/ops/d1-backup.mjs --out-dir backups
+
+      - name: Drill the restore
+        # Proves the dump is importable AND complete. Fails the run — and so
+        # notifies — if the backup would not actually bring the system back.
+        run: |
+          for dump in backups/*.sql; do
+            echo "::group::drill $dump"
+            node scripts/ops/d1-restore-drill.mjs "$dump"
+            echo "::endgroup::"
+          done
+
+      - name: Upload dump artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: d1-backup-${{ github.run_id }}
+          path: backups/
+          # 30 days of daily restore points. Raise if a longer window is
+          # needed; GitHub caps free-tier artifact storage.
+          retention-days: 30
+          if-no-files-found: error

@@ -1,4 +1,4 @@
-# RUNBOOK — Operations (Railway + Railway PostgreSQL)
+# RUNBOOK — Operations (Cloudflare Workers + D1)
 
 Operational procedures. Pairs with `docs/DEPLOYMENT.md` (one-time setup). This
 file is the "something is wrong / something must be rotated" reference.
@@ -45,57 +45,104 @@ Update local `.env` to match if you connect locally.
 
 ---
 
-## 2. Database backup / restore (Railway PostgreSQL)
+## 2. Database backup / restore (Cloudflare D1)
 
-### 2.1 Confirm automated backups are ON (do this once, re-check quarterly)
+> Production is **Cloudflare D1**, reached through the `DB` binding in
+> `wrangler.jsonc`. This section previously documented Railway PostgreSQL
+> snapshots — a service this project no longer uses. Following it would have
+> sent you to a dashboard for a database that does not exist.
 
-1. Railway dashboard → the **Postgres** service → **Backups** tab.
-2. Ensure **scheduled backups** are enabled with a **daily** cadence. On the
-   current plan Railway takes daily snapshots; verify the toggle is on and note
-   the **retention window** (how many days of snapshots are kept) shown there.
-3. If the toggle is off, enable it — backups are per-service and do **not**
-   inherit from other services.
+D1 has no managed snapshot UI to tick on, so backups are explicit: a scheduled
+export, kept as a build artifact, **drilled on every run**.
 
-> Checklist: `[ ] daily snapshots enabled · [ ] retention ≥ 7 days · [ ] last
-> snapshot < 24h old`. Re-verify after any plan change.
+### 2.1 The automated daily backup
 
-### 2.2 Point-in-time / snapshot restore (recovery)
+`.github/workflows/d1-backup.yml` runs at **02:30 UTC daily** (outside Jordan
+business hours) and on manual dispatch:
 
-Railway restore is **snapshot-based** (restore to the moment a snapshot was
-taken), not continuous WAL replay. To recover:
+1. `wrangler d1 export` dumps production — a **read-only** operation; it cannot
+   migrate, mutate, or delete.
+2. The dump is **drilled** (§2.3): topo-sorted, restored into a throwaway
+   SQLite database, row counts compared. A dump that would not restore fails
+   the workflow, so you find out on a quiet Tuesday instead of during an outage.
+3. The dump is uploaded as a workflow **artifact**, retained **30 days**.
 
-1. Postgres service → **Backups** → pick the snapshot just **before** the
-   incident → **Restore**. Railway restores into the service (or offer to spin a
-   new DB from it, depending on plan).
-2. **Verify before repointing:** if restored to a new instance, connect with
-   `psql "$NEW_URL"` and spot-check row counts on `User`, `Tenant`, `Company`,
-   `Transaction` before switching traffic.
-3. Update `DATABASE_URL` in the app service Variables to the restored instance
-   (only if it changed) → redeploy.
-4. For **finer than snapshot granularity**, layer the manual dump below — take
-   one before any risky migration/seed so you have a tighter recovery point.
+Dumps are **never committed** — they hold real tenant data (live bookings, the
+finance ledger) and would bloat history irreversibly. `backups/` is gitignored.
 
-### 2.3 Manual snapshot (belt-and-suspenders, before risky changes)
+Run it on demand:
 
 ```bash
-pg_dump "$DATABASE_URL" -Fc -f hnerve_$(date +%Y%m%d_%H%M).dump
+gh workflow run d1-backup.yml
 ```
-Locally, grab the URL from the Railway dashboard (Postgres → Connect) or
-`railway variables`.
 
-### 2.4 Restore a manual dump
+> Quarterly check: `[ ] last run < 24h old · [ ] drill step green · [ ] artifact
+> present and non-trivial in size`.
+
+### 2.2 Manual snapshot (before any risky change)
+
+Take one before a schema change, a bulk import, or a seed against production:
 
 ```bash
-pg_restore --clean --no-owner -d "$DATABASE_URL" hnerve_YYYYMMDD_HHMM.dump
+node scripts/ops/d1-backup.mjs
 ```
 
-- Migrations are forward-only via `prisma migrate deploy` (the railway.toml
-  preDeploy step). To undo a bad migration, restore the DB (2.2/2.4) — do **not**
-  hand-edit applied files under `prisma/migrations/`.
-- **Never** run `prisma db push --accept-data-loss` or `db:reset` against prod
-  (the `npm run build` script does `db push` — it's for build/codegen of the
-  client, but the `--accept-data-loss` flag means it must only ever run against
-  a disposable DB; Railway's preDeploy uses `migrate deploy`, which is safe).
+Needs `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`. Writes
+`backups/d1-<db>-<utc-stamp>.sql` plus a `.meta.json` sidecar recording table
+count, INSERT count, and per-table rows — so you can tell two dumps apart
+without opening them.
+
+Other sources:
+
+```bash
+node scripts/ops/d1-backup.mjs --local                      # wrangler's local D1 state
+node scripts/ops/d1-backup.mjs --from-sqlite prisma/dev.db  # the seeded dev database
+```
+
+### 2.3 Drill a dump (do this before you ever need it)
+
+```bash
+node scripts/ops/d1-restore-drill.mjs backups/d1-<db>-<stamp>.sql
+```
+
+Topo-sorts the dump, applies every statement to a throwaway SQLite database,
+then compares restored row counts against the dump's own INSERT counts.
+Exit 0 means the backup is genuinely restorable and complete.
+
+**It never touches production.** It reads a dump file and writes only to a temp
+directory it creates itself — no credentials, no remote connection.
+
+Last executed drill: **74 tables · 1534 rows · all counts matched** (against the
+seeded dev database, 2026-07-24).
+
+### 2.4 Restore into production (real recovery)
+
+⚠️ Destructive and outward-facing. Confirm the target and take a fresh dump of
+the current state first (§2.2), even if you believe it is corrupt — you may
+need to recover rows written after the backup you are restoring.
+
+1. **Drill the dump first** (§2.3). Never import an unverified dump into prod.
+2. Topo-sort it — D1 validates FK targets at CREATE TABLE time, so an
+   alphabetical dump aborts partway with `no such table`:
+   ```bash
+   node scripts/build/d1-sort-dump.mjs backup.sql sorted.sql
+   ```
+3. Import:
+   ```bash
+   npx wrangler d1 execute h-nerve-erp-db --remote --file sorted.sql
+   ```
+4. **Verify before announcing recovery:** spot-check row counts on `User`,
+   `Tenant`, `Company`, `Transaction`, `Booking` and log in as a real user.
+
+### 2.5 Standing rules
+
+- **Never** run `prisma db push --force-reset`, `db:reset`, or `db:fresh`
+  against production. `scripts/ops/guard-not-prod.js` guards the npm scripts;
+  it cannot guard a hand-typed command.
+- Schema changes ship as `prisma db push` locally + a fresh topo-sorted D1
+  import. `prisma/migrations/` is Postgres-era history, not the source of truth.
+- Never verify a feature by creating rows in production. Use the local dev
+  server with seeded credentials; keep production checks read-only.
 
 ---
 

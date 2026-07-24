@@ -2,7 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { ORRERY_GROUPS, detectOrreryGroup, type OrreryGroup } from "@/lib/orrery/groups";
+import {
+  ORRERY_GROUPS,
+  detectOrreryGroup,
+  type OrreryGroup,
+  type OrrerySubgroup,
+} from "@/lib/orrery/groups";
 
 type Locale = "ar" | "en";
 
@@ -63,6 +68,12 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [activeGroup, setActiveGroup] = useState<OrreryGroup | null>(null);
+  // Third bloom level, used ONLY by groups that declare clusters (today:
+  // Intelligence, 14 children). Blooming 14 pills into one ring is what made
+  // it read as scattered — clusters cap any ring at 7 nodes, so the orbit
+  // stays legible without shrinking a single label. The pop/spin/bloom
+  // animation is untouched; this only changes WHICH nodes a ring holds.
+  const [activeSub, setActiveSub] = useState<OrrerySubgroup | null>(null);
   // The popup is fixed at top:56 / inset-end:18 — it must fit what the viewport
   // leaves. Without this a 14-node group blooms to ~1100px and covers the page.
   const [vw, setVw] = useState(1280);
@@ -83,12 +94,16 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
     // 5-group root — so the mini-orbit is a real "retreat to my branch", not a
     // reset. detectOrreryGroup returns null off-branch, preserving root behaviour.
     setActiveGroup(detectOrreryGroup(pathname));
+    // Always open a clustered group at its CLUSTER ring, never pre-drilled
+    // into one cluster — the point is to show the four choices.
+    setActiveSub(null);
     setOpen(true);
   }, [pathname]);
 
   const closeMenu = useCallback(() => {
     setOpen(false);
     setActiveGroup(null);
+    setActiveSub(null);
   }, []);
 
   // ESC closes
@@ -101,9 +116,11 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
     return () => document.removeEventListener("keydown", handler);
   }, [open, closeMenu]);
 
-  // The core: steps back to the groups view, or closes when already there.
+  // The core: steps back ONE level each press — cluster → group → root →
+  // close. Never jumps straight out from a drilled-in ring.
   const onCore = () => {
-    if (activeGroup) setActiveGroup(null);
+    if (activeSub) setActiveSub(null);
+    else if (activeGroup) setActiveGroup(null);
     else closeMenu();
   };
 
@@ -115,10 +132,42 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
   // Layout scales with the node count AND the widest label in the current
   // set: more/longer nodes → wider ring + panel, so the rings always frame
   // the labels and the pills never collide.
-  const count = activeGroup ? activeGroup.children.length : ORRERY_GROUPS.length;
-  const labels = activeGroup
-    ? activeGroup.children.map((c) => (locale === "ar" ? c.label : c.labelEn))
-    : ORRERY_GROUPS.map((g) => (locale === "ar" ? g.nameAr : g.nameEn));
+  //
+  // Three possible rings, in drill order:
+  //   root        → the 7 groups
+  //   group       → its clusters if it has them, else its sections
+  //   cluster     → that cluster's sections
+  const ringItems: { key: string; label: string; onClick: () => void; child: boolean }[] =
+    activeSub
+      ? activeSub.children.map((c) => ({
+          key: c.route,
+          label: locale === "ar" ? c.label : c.labelEn,
+          onClick: () => onChild(c.route),
+          child: true,
+        }))
+      : activeGroup
+        ? activeGroup.subgroups
+          ? activeGroup.subgroups.map((s) => ({
+              key: s.id,
+              label: locale === "ar" ? s.nameAr : s.nameEn,
+              onClick: () => setActiveSub(s),
+              child: false,
+            }))
+          : activeGroup.children.map((c) => ({
+              key: c.route,
+              label: locale === "ar" ? c.label : c.labelEn,
+              onClick: () => onChild(c.route),
+              child: true,
+            }))
+        : ORRERY_GROUPS.map((g) => ({
+            key: g.id,
+            label: locale === "ar" ? g.nameAr : g.nameEn,
+            onClick: () => setActiveGroup(g),
+            child: false,
+          }));
+
+  const count = ringItems.length;
+  const labels = ringItems.map((n) => n.label);
   // What the labels WANT, then clamp to the room the fixed popup actually has.
   const wantR = radiusFor(count, labels);
   const wantSize = 2 * (wantR + 60);
@@ -128,21 +177,10 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
   const CTR = SIZE / 2;
   const rings = ringSizes(R);
 
-  const nodes = activeGroup
-    ? activeGroup.children.map((c, i) => ({
-        key: c.route,
-        label: locale === "ar" ? c.label : c.labelEn,
-        pos: radial(i, count, R, CTR),
-        onClick: () => onChild(c.route),
-        child: true,
-      }))
-    : ORRERY_GROUPS.map((g, i) => ({
-        key: g.id,
-        label: locale === "ar" ? g.nameAr : g.nameEn,
-        pos: radial(i, count, R, CTR),
-        onClick: () => setActiveGroup(g),
-        child: false,
-      }));
+  const nodes = ringItems.map((item, i) => ({
+    ...item,
+    pos: radial(i, count, R, CTR),
+  }));
 
   // In Arabic (RTL) the "back" chevron points the other way.
   const backChevron = locale === "ar" ? "›" : "‹";
@@ -189,21 +227,27 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
             style={{ width: rings.inner, height: rings.inner }}
           />
 
+          {/* Drilled into a cluster, the heading carries BOTH levels
+              ("الذكاء · القرار") so you never lose which group you are in. */}
           <span className="mo-orbit-head">
-            {activeGroup
-              ? locale === "ar"
-                ? activeGroup.nameAr
-                : activeGroup.nameEn
-              : locale === "ar"
-                ? "المدار"
-                : "Orbit"}
+            {activeSub && activeGroup
+              ? `${locale === "ar" ? activeGroup.nameAr : activeGroup.nameEn} · ${
+                  locale === "ar" ? activeSub.nameAr : activeSub.nameEn
+                }`
+              : activeGroup
+                ? locale === "ar"
+                  ? activeGroup.nameAr
+                  : activeGroup.nameEn
+                : locale === "ar"
+                  ? "المدار"
+                  : "Orbit"}
           </span>
 
           <button
             className="mo-orbit-core"
             onClick={onCore}
             aria-label={
-              activeGroup
+              activeGroup || activeSub
                 ? locale === "ar"
                   ? "رجوع"
                   : "Back"
@@ -212,7 +256,7 @@ export function MiniOrrery({ locale }: { locale: Locale }) {
                   : "Close"
             }
           >
-            {activeGroup ? backChevron : "⌗"}
+            {activeGroup || activeSub ? backChevron : "⌗"}
           </button>
 
           {nodes.map((nd, i) => (

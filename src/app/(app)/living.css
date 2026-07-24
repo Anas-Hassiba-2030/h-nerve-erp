@@ -432,6 +432,55 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 }
 .al-rail[data-collapsed="true"] .rail-item:not(.cur){ display:none; }
 
+/* ── Clustered rail (Intelligence only) ──────────────────────────────────
+   Intelligence carries 14 sections — double the next group — and laying
+   them flat wrapped the header into ragged rows (owner 2026-07-24: "the
+   header sections are too much… I don't want them small"). So the sections
+   are grouped into four named clusters and only the OPEN cluster expands.
+   Nothing shrank: .rail-item keeps its 18px/46px sizing untouched.
+
+   display:contents — the wrapper must NOT become a flex item. As a real box
+   each cluster was an unshrinkable unit, so the four of them stacked into
+   four rows (worse than the problem being fixed). With `contents` the chip
+   and its pills become direct children of the rail and flow/wrap exactly
+   like the flat groups do. */
+.rail-cluster{ display:contents; }
+.rail-chip{
+  display:inline-flex; align-items:center; gap:9px;
+  min-height:46px; padding:9px 16px; border-radius:12px;
+  font-family:var(--ui,"Cairo",sans-serif); font-size:17px; font-weight:700;
+  cursor:pointer; white-space:nowrap;
+  color:var(--mist,#CDE0D6);
+  background:rgba(13,31,26,.34);
+  /* Dashed edge = "a container of sections", visibly a different KIND of
+     control from the solid section pills beside it. */
+  border:1px dashed rgba(194,163,90,.45);
+  transition:all .2s;
+}
+.al-rail.light .rail-chip{ color:#4A443A; background:rgba(255,255,255,.5); border-color:#d9cfb8; }
+.rail-chip:hover{ border-color:var(--gold,#C2A35A); }
+/* Open — solid gold edge, tinted fill: the cluster whose sections are showing. */
+.al-rail .rail-chip.open,
+.al-rail.light .rail-chip.open{
+  border-style:solid; border-color:var(--gold,#C2A35A);
+  background:linear-gradient(135deg,rgba(220,195,138,.28),rgba(194,163,90,.18));
+  color:#231c0e;
+}
+.al-rail .rail-chip.open{ color:#F3E9CE; }
+/* Holds the current page — a gold dot, NOT another filled pill. The emerald
+   .cur pill must stay the only "you are here" marker in the rail. */
+.rail-chip.here::before{
+  content:""; width:8px; height:8px; border-radius:50%;
+  background:var(--gold,#C2A35A); box-shadow:0 0 0 3px rgba(194,163,90,.22);
+}
+.rail-chip-n{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:22px; height:22px; padding:0 6px; border-radius:999px;
+  font-size:13px; font-weight:800; font-variant-numeric:tabular-nums;
+  background:rgba(194,163,90,.22); color:inherit;
+}
+@media (max-width:900px){ .rail-cluster{ gap:10px; } .rail-chip{ font-size:15px; padding:8px 12px; } }
+
 @media print{ .al-rail{ display:none !important; } }
 
 /* ════════════════════════════════════════════════════════════════

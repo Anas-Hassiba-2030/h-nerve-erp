@@ -1,3 +1,4 @@
+import "./brain-readable.css";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { BrainBackLink } from "@/components/brain/BrainBackLink";
 

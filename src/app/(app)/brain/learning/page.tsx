@@ -63,7 +63,7 @@ export default async function BrainLearningPage() {
               <span className="tick" />
               {ar ? "الذكاء التشغيلي" : "Operational intelligence"}
             </span>
-            <h1>{ar ? "التعلّم" : "Learning"}</h1>
+            <h1>{ar ? "التعلّم المستمر" : "Continuous Learning"}</h1>
           </div>
           <div className="br-intro">
             {ar

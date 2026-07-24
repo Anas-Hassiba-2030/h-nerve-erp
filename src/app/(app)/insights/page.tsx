@@ -22,6 +22,9 @@ import {
 } from "./actions";
 import "../daylight.css";
 import "./insights.css";
+// Readability floor for the shared br-* night register (owner-directed
+// 2026-07-24) — same file the /brain layout loads.
+import "../brain/brain-readable.css";
 
 export const dynamic = "force-dynamic";
 

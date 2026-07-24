@@ -57,7 +57,7 @@ export default async function BrainBenchmarksPage() {
               <span className="tick" />
               {ar ? "الذكاء التشغيلي" : "Operational intelligence"}
             </span>
-            <h1>{ar ? "الفيدرالية" : "Federation"}</h1>
+            <h1>{ar ? "مقارنات القطاع" : "Industry Benchmarks"}</h1>
           </div>
           <div className="br-intro">
             {ar
@@ -211,7 +211,7 @@ function Guarantee({
         {icon}
       </div>
       <div className="rt">
-        <div className="tt" style={{ color: "var(--gold-soft)", textTransform: "uppercase", letterSpacing: ".1em", fontSize: 12 }}>
+        <div className="tt" style={{ color: "var(--gold-soft)", textTransform: "uppercase", letterSpacing: ".1em", fontSize: 13.5 }}>
           {title}
         </div>
         <div className="ts">{body}</div>
@@ -223,7 +223,7 @@ function Guarantee({
 function FederationContract({ ar }: { ar: boolean }) {
   return (
     <div className="br-panel">
-      <div style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".14em", color: "var(--gold-soft)" }}>
+      <div style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".14em", color: "var(--gold-soft)" }}>
         <ShieldCheck className="h-3 w-3" strokeWidth={1.5} />
         {ar ? "العقد" : "The contract"}
       </div>
@@ -242,7 +242,7 @@ function FederationContract({ ar }: { ar: boolean }) {
           ? "عبر الانضمام، تربح ذكاء جماعياً. ولا تخسر شيئاً يخصك."
           : "Join, and you gain a collective intelligence. You give up nothing of your own."}
       </h2>
-      <p style={{ fontSize: 14, lineHeight: 1.65, color: "var(--mist)", opacity: 0.82, marginTop: 16, maxWidth: "62ch" }}>
+      <p style={{ fontSize: 16, lineHeight: 1.7, color: "var(--mist)", opacity: 0.82, marginTop: 16, maxWidth: "62ch" }}>
         {ar
           ? "الاتحاد لا يرى بياناتك. لا يصل إلى عملائك. لا يقرأ أرقامك. كل ما يخرج من خادمك هو نتيجة مُجمَّعة عابرة لخمسة نظراء على الأقل، مع تشويش رياضي يضمن عدم القدرة على ربط أي نمط بمصدره. في المقابل، تستفيد من أنماط آلاف النظراء الذين يواجهون التحديات نفسها."
           : "The federation never sees your data. Never reaches into your customers. Never reads your numbers. The only thing that leaves your server is an aggregate that crosses at least five peers, mathematically perturbed so no pattern can be traced back. In return, you benefit from the patterns of dozens of peers solving the same problems you are."}
@@ -261,7 +261,7 @@ function FederationContract({ ar }: { ar: boolean }) {
             {ar ? "الانضمام للفيدرالية" : "I agree — join the federation"}
           </button>
         </form>
-        <span style={{ display: "inline-flex", alignItems: "center", fontSize: 12, letterSpacing: ".06em", color: "var(--mist)", opacity: 0.6 }}>
+        <span style={{ display: "inline-flex", alignItems: "center", fontSize: 13.5, letterSpacing: ".06em", color: "var(--mist)", opacity: 0.6 }}>
           {ar ? "يمكنك الإلغاء في أي وقت" : "You can opt out at any time"}
         </span>
       </div>
@@ -273,10 +273,10 @@ function ContractTerm({ n, title, body }: { n: string; title: string; body: stri
   return (
     <div className="br-row">
       <div className="rt">
-        <div className="ts" style={{ color: "var(--gold-soft)", letterSpacing: ".22em", fontWeight: 700, fontSize: 12, textTransform: "uppercase" }}>
+        <div className="ts" style={{ color: "var(--gold-soft)", letterSpacing: ".22em", fontWeight: 700, fontSize: 13.5, textTransform: "uppercase" }}>
           TERM · {n}
         </div>
-        <div className="tt" style={{ fontFamily: "var(--display)", fontSize: 17 }}>{title}</div>
+        <div className="tt" style={{ fontFamily: "var(--display)", fontSize: 20 }}>{title}</div>
         <div className="ts">{body}</div>
       </div>
     </div>
@@ -299,7 +299,7 @@ function BenchmarkRow({ pattern, ar }: { pattern: any; ar: boolean }) {
   return (
     <div className="br-row" style={{ alignItems: "flex-start" }}>
       <div className="rt">
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".12em", color: "var(--gold-soft)" }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".12em", color: "var(--gold-soft)" }}>
           <Globe2 className="h-3 w-3" strokeWidth={1.5} />
           {ar ? "نظراء — اتحادي" : "PEERS · FEDERATED"}
           {tierLine ? <span style={{ opacity: 0.7 }}> · {tierLine}</span> : null}

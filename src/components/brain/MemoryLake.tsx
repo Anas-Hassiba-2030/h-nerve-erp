@@ -207,7 +207,7 @@ export function MemoryLake({ ar, memories, domains, years, labels }: Props) {
             <span className="tick"></span>
             {ar ? "الذكاء التشغيلي" : "Operational intelligence"}
           </span>
-          <h1>{ar ? "بحيرة الذاكرة" : "Memory lake"}</h1>
+          <h1>{ar ? "ذاكرة القرارات" : "Decision Memory"}</h1>
         </div>
         <div className="ml-search">
           <span className="ic">⌕</span>

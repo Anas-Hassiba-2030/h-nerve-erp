@@ -74,7 +74,7 @@ export default async function BrainTrustPage() {
               <span className="tick" />
               {ar ? "ضمان الجودة" : "Quality assurance"}
             </span>
-            <h1>{ar ? "الثقة" : "Trust"}</h1>
+            <h1>{ar ? "التحقق من البيانات" : "Data Verification"}</h1>
           </div>
           <div className="br-intro">
             {ar

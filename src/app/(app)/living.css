@@ -335,12 +335,15 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
    ════════════════════════════════════════════════════════════════ */
 .al-rail{
   position:relative; z-index:30;
-  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  /* Centered (owner request 2026-07-24): the pills sit in the middle of the
+     rail instead of hugging the start edge — the current-section marker reads
+     from the center of the screen. */
+  display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;
   /* Full available width (owner request 2026-07-23): the old 1180px cap
      squeezed big groups into cramped multi-row wraps while the page margins
      sat empty. The rail now stretches edge to edge of the content column. */
   margin:0 0 16px; max-width:none; width:100%;
-  padding:11px 18px;
+  padding:11px 52px;
   background:linear-gradient(160deg,rgba(20,46,38,.4),rgba(13,31,26,.36));
   border:1px solid rgba(194,163,90,.2);
   border-radius:14px;
@@ -359,14 +362,16 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 }
 .al-rail.light .rail-grp{ color:#fff; }
 .al-rail .rail-toggle{
-  margin-inline-start:auto; background:none; border:0; cursor:pointer;
+  /* Pinned to the end edge so the pill row itself can center. */
+  position:absolute; inset-inline-end:14px; top:50%; transform:translateY(-50%);
+  background:none; border:0; cursor:pointer;
   color:var(--gold-soft,#DCC38A); font-size:16px;
 }
 .al-rail.light .rail-toggle{ color:var(--emerald,#2E6B57); }
 .rail-item{
-  display:inline-flex; align-items:center; min-height:42px;
+  display:inline-flex; align-items:center; min-height:44px;
   padding:9px 18px; border-radius:999px;
-  font-family:var(--ui,"Cairo",sans-serif); font-size:16px; font-weight:600;
+  font-family:var(--ui,"Cairo",sans-serif); font-size:17px; font-weight:600;
   cursor:pointer; text-decoration:none;
   color:var(--mist,#CDE0D6);
   background:rgba(13,31,26,.4); border:1px solid rgba(194,163,90,.18);
@@ -374,9 +379,18 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
 }
 .al-rail.light .rail-item{ color:#4A443A; background:#fff; border-color:#e4dccb; }
 .rail-item:hover{ border-color:var(--gold,#C2A35A); }
-.rail-item.cur{
-  background:linear-gradient(135deg,#DCC38A,#C2A35A);
-  color:#241b06; border-color:transparent; font-weight:700;
+/* Current section — unmistakable (owner request 2026-07-24: "so I can know
+   which section I am in"). Deep-emerald filled pill, white extra-bold text,
+   gold ring + soft glow; slightly larger than its neighbours.
+   NOTE the `.al-rail … .cur` selectors: the plain `.rail-item.cur` (2 classes)
+   LOSES to `.al-rail.light .rail-item` (3 classes) — that specificity gap was
+   the original "barely visible" active pill. */
+.al-rail .rail-item.cur,
+.al-rail.light .rail-item.cur{
+  background:linear-gradient(135deg,#2E6B57,#1E4D3E);
+  color:#fff; font-weight:800; font-size:18px;
+  border:2px solid var(--gold,#C2A35A);
+  box-shadow:0 0 0 3px rgba(194,163,90,.25), 0 6px 18px -8px rgba(30,77,62,.7);
 }
 .al-rail[data-collapsed="true"] .rail-item:not(.cur){ display:none; }
 

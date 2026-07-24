@@ -1,0 +1,101 @@
+/* ============================================================================
+   Brain night-register READABILITY FLOOR (2026-07-24, owner-directed).
+   ----------------------------------------------------------------------------
+   The user verdict on every /brain section: "the small font is everywhere …
+   put in mind that the people using the system are old people." The night
+   registers (trust/learning/benchmarks/causal/council/memory/what-if/iq) were
+   ported from a design export at 12–14px body sizes and a 760–1180px column.
+   This file raises every reading surface to a 15–17px floor and widens the
+   text columns, in ONE place, instead of patching ten css files.
+
+   HOW IT WINS: every selector is prefixed `.dl-page.dl-page` (double class =
+   +1 specificity) so it beats the per-page `.dl-page .x` rules regardless of
+   css import order.
+
+   SCOPE SAFETY (the messages.css lesson, PR #356): only brain-register class
+   names are targeted (br-*, tr-*, co-*, dbt, mod-*, adv, driver, brain-*,
+   mcard, ml-*, lever/wi-*, cg-*). NO generic daylight classes (.panel, .kpi,
+   .pill bare) — this stylesheet persists across client navigations, so a
+   generic selector here would restyle unrelated pages.
+
+   Imported by app/(app)/brain/layout.tsx (all /brain/*) and insights/page.tsx
+   (same br-* register).
+   ============================================================================ */
+
+/* ── shared ribbon / KPI / panel vocabulary (br-*) ── */
+.dl-page.dl-page .br-wrap { max-width: 1400px; }
+.dl-page.dl-page .br-title-box h1 { font-size: 40px; }
+.dl-page.dl-page .br-title-box .eb { font-size: 13.5px; }
+.dl-page.dl-page .br-intro { font-size: 16.5px; line-height: 1.65; opacity: .92; }
+.dl-page.dl-page .br-kpi .v { font-size: 32px; }
+.dl-page.dl-page .br-kpi .k { font-size: 15.5px; opacity: .85; }
+.dl-page.dl-page .br-panel h2 { font-size: 24px; }
+.dl-page.dl-page .br-panel .sub { font-size: 15.5px; opacity: .82; }
+.dl-page.dl-page .br-btn { font-size: 15.5px; padding: 11px 20px; }
+.dl-page.dl-page .br-row .rt .tt { font-size: 16.5px; line-height: 1.6; }
+.dl-page.dl-page .br-row .rt .ts { font-size: 15px; opacity: .82; }
+.dl-page.dl-page .br-chip { font-size: 13.5px; padding: 4px 12px; }
+.dl-page.dl-page .br-thinking { font-size: 15px; }
+.dl-page.dl-page .br-toast { font-size: 15px; }
+
+/* ── trust / narrate rows (tr-*) ── */
+.dl-page.dl-page .tr-row .tr-text { font-size: 16.5px; line-height: 1.7; }
+.dl-page.dl-page .tr-row .tr-meta { font-size: 14px; opacity: .8; }
+.dl-page.dl-page .tr-explain { font-size: 16px; line-height: 1.75; }
+.dl-page.dl-page .tr-explain code { font-size: 14.5px; }
+.dl-page.dl-page .tr-bar-label { font-size: 15px; }
+.dl-page.dl-page .tr-bar-count { font-size: 16px; }
+
+/* ── council (co-* / dbt / mod-*) ──
+   The debate column sat at 760px with 12.5–14px text while the page margins
+   stayed empty — the exact "I can barely read it, there is so much space left
+   and right" complaint. Widen the column and lift every voice to prose size. */
+.dl-page.dl-page .co-feed { max-width: 1020px; gap: 14px; }
+.dl-page.dl-page .co-mod { max-width: 1020px; }
+.dl-page.dl-page .co-intro { font-size: 16.5px; line-height: 1.65; }
+.dl-page.dl-page .dbt .dtext { font-size: 17px; line-height: 1.75; }
+.dl-page.dl-page .dbt .dnm { font-size: 16.5px; }
+.dl-page.dl-page .dbt .dro { font-size: 14px; }
+.dl-page.dl-page .dbt .stance { font-size: 13.5px; padding: 3px 11px; }
+.dl-page.dl-page .dbt .devid .pill { font-size: 15px; line-height: 1.65; }
+.dl-page.dl-page .seat .nm { font-size: 14.5px; }
+.dl-page.dl-page .seat .ro { font-size: 13px; }
+.dl-page.dl-page .co-center .ttl { font-size: 16px; }
+.dl-page.dl-page .co-center .ttl b { font-size: 14px; }
+.dl-page.dl-page .mod-body h3 { font-size: 22px; }
+.dl-page.dl-page .mod-body p { font-size: 16px; line-height: 1.65; }
+.dl-page.dl-page .mod-dissent { font-size: 16.5px; line-height: 1.65; }
+.dl-page.dl-page .ring-wrap .rtxt span { font-size: 13px; }
+
+/* ── brain landing (adv / driver / brain-*) ── */
+.dl-page.dl-page .adv-thesis { font-size: 16px; line-height: 1.65; opacity: .92; }
+.dl-page.dl-page .adv-name { font-size: 19px; }
+.dl-page.dl-page .adv-pos { font-size: 13px; }
+.dl-page.dl-page .brain-hero-txt p { font-size: 16.5px; max-width: 62ch; }
+.dl-page.dl-page .brain-stat .l { font-size: 15px; opacity: .85; }
+.dl-page.dl-page .driver-title { font-size: 16.5px; }
+.dl-page.dl-page .driver-sub { font-size: 15px; opacity: .85; }
+.dl-page.dl-page .n-panel-aside { font-size: 15px; opacity: .82; }
+
+/* ── memory lake (mcard / ml-*) ── */
+.dl-page.dl-page .mcard .dec { font-size: 15.5px; line-height: 1.65; }
+.dl-page.dl-page .mcard .date { font-size: 14px; }
+.dl-page.dl-page .mcard .badge { font-size: 14px; }
+.dl-page.dl-page .mcard .dom { font-size: 14.5px; }
+.dl-page.dl-page .ml-search .cnt { font-size: 14.5px; }
+.dl-page.dl-page .ml-fgroup .glbl { font-size: 13.5px; }
+.dl-page.dl-page .ml-fgroup .pill { font-size: 14.5px; }
+.dl-page.dl-page .ml-maint-btn { font-size: 14.5px; }
+
+/* ── what-if lab (lever / wi-*) ── */
+.dl-page.dl-page .lever-name { font-size: 15.5px; }
+.dl-page.dl-page .lever-val .unit { font-size: 14px; }
+.dl-page.dl-page .wi-kpi .v .u { font-size: 14px; }
+
+/* ── insights plan steps (plan-*) ── */
+.dl-page.dl-page .plan-step .pt { font-size: 15.5px; line-height: 1.6; }
+.dl-page.dl-page .plan-step .pa { font-size: 14px; }
+
+/* ── causal stage (cg-*) ── */
+.dl-page.dl-page .cg-hint { font-size: 15px; opacity: .75; }
+.dl-page.dl-page .cg-readout { font-size: 16px; line-height: 1.6; }

@@ -28,23 +28,41 @@ export default async function BrainGraphPage() {
 
   const { nodes, edges } = await causalGraph().loadAll();
 
-  // KPI strip — node/edge footprint + derived density & model confidence.
+  // KPI strip — node/edge footprint + derived averages & model confidence.
   const nodeCount = nodes.length;
   const edgeCount = edges.length;
-  const maxEdges = nodeCount > 1 ? nodeCount * (nodeCount - 1) : 1;
-  const density = nodeCount > 1 ? edgeCount / maxEdges : 0;
+  // "Network density" (edges / n·(n-1)) rendered as "0.00" for any real-sized
+  // graph — meaningless to an operator. Show the average number of links per
+  // entity instead: a number a human can actually reason about.
+  const avgLinks = nodeCount > 0 ? edgeCount / nodeCount : 0;
   const avgEdgeConfidence =
     edges.length > 0
       ? edges.reduce((a, e) => a + (e.confidence ?? 0), 0) / edges.length
       : 0;
+
+  // Focused view (2026-07-24, owner-directed): rendering all ~650 nodes in one
+  // SVG produced an unreadable hairball. Show the most-connected entities —
+  // the hubs that actually drive the group — with readable labels; the KPIs
+  // above still report the full graph.
+  const FOCUS = 24;
+  const degree = new Map<string, number>();
+  for (const e of edges) {
+    degree.set(e.from, (degree.get(e.from) ?? 0) + 1);
+    degree.set(e.to, (degree.get(e.to) ?? 0) + 1);
+  }
+  const focusNodes = [...nodes]
+    .sort((a, b) => (degree.get(b.id) ?? 0) - (degree.get(a.id) ?? 0))
+    .slice(0, FOCUS);
+  const focusIds = new Set(focusNodes.map((n) => n.id));
+  const focusEdges = edges.filter((e) => focusIds.has(e.from) && focusIds.has(e.to));
 
   const fmtNum = (n: number) => (ar ? toAr(n) : String(n));
   const fmtPct = (v: number) => {
     const s = `${Math.round(v * 100)}%`;
     return ar ? toAr(`${Math.round(v * 100)}`) + "٪" : s;
   };
-  const fmtDensity = (v: number) => {
-    const s = v.toFixed(2);
+  const fmtAvg = (v: number) => {
+    const s = v.toFixed(1);
     return ar ? toAr(s) : s;
   };
 
@@ -57,7 +75,7 @@ export default async function BrainGraphPage() {
               <span className="tick"></span>
               {ar ? "الذكاء التشغيلي" : "Operational intelligence"}
             </span>
-            <h1>{ar ? "الرسم السببي" : "Causal graph"}</h1>
+            <h1>{ar ? "تحليل التأثير" : "Impact Analysis"}</h1>
           </div>
           <div className="br-intro">
             {ar ? (
@@ -88,8 +106,8 @@ export default async function BrainGraphPage() {
                 <div className="k">{ar ? "الروابط" : "Edges"}</div>
               </div>
               <div className="br-kpi">
-                <div className="v">{fmtDensity(density)}</div>
-                <div className="k">{ar ? "كثافة الشبكة" : "Network density"}</div>
+                <div className="v">{fmtAvg(avgLinks)}</div>
+                <div className="k">{ar ? "متوسط الروابط لكل كيان" : "Avg links per entity"}</div>
               </div>
               <div className="br-kpi">
                 <div className="v">{fmtPct(avgEdgeConfidence)}</div>
@@ -99,8 +117,13 @@ export default async function BrainGraphPage() {
 
             <CausalGraph
               ar={ar}
-              nodes={nodes.map((n) => ({ id: n.id, label: n.label }))}
-              edges={edges.map((e) => ({ from: e.from, to: e.to }))}
+              nodes={focusNodes.map((n) => ({ id: n.id, label: n.label }))}
+              edges={focusEdges.map((e) => ({ from: e.from, to: e.to }))}
+              subtitle={
+                ar
+                  ? `لعرض أوضح: تُعرض أكثر ${toAr(focusNodes.length)} كيانات ارتباطاً من أصل ${toAr(nodeCount)}.`
+                  : `For clarity: showing the ${focusNodes.length} most-connected entities of ${nodeCount}.`
+              }
               rebuildSlot={<ConfirmRebuildForm ar={ar} />}
             />
           </>

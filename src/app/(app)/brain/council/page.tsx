@@ -252,7 +252,7 @@ export default async function BrainCouncilIndex() {
               <span className="tick" />
               {ar ? "الذكاء التشغيلي" : "Operational intelligence"}
             </span>
-            <h1>{ar ? "المجلس" : "Council"}</h1>
+            <h1>{ar ? "المجلس الاستشاري" : "Advisory Council"}</h1>
           </div>
           <div className="co-intro">
             {ar

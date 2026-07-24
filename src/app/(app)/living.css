@@ -360,32 +360,23 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
    ════════════════════════════════════════════════════════════════ */
 .al-rail{
   position:relative; z-index:30;
-  /* Centered (owner request 2026-07-24): the pills sit in the middle of the
-     rail instead of hugging the start edge — the current-section marker reads
-     from the center of the screen. */
-  display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;
-  /* Full available width (owner request 2026-07-23): the old 1180px cap
-     squeezed big groups into cramped multi-row wraps while the page margins
-     sat empty. The rail now stretches edge to edge of the content column. */
+  /* START-ALIGNED, full width (owner 2026-07-24 round 7): the centered
+     layout left a huge dead zone on the start side while the pills wrapped
+     into stacked middle rows ("use the left space — the sections are over
+     each other"). Pills now flow from the start edge across the whole rail
+     width; only the END side reserves room for the fixed corner cluster
+     (Orbit + mini-orbit + text-size + language + user ≈ 412px + 22px offset,
+     + clear gap). Start padding just clears the absolute collapse toggle.
+     Logical padding so RTL mirrors correctly. */
+  display:flex; align-items:center; justify-content:flex-start;
+  gap:12px 14px; flex-wrap:wrap; /* row-gap 12 / column-gap 14 — pills never touch */
   margin:0 0 16px; max-width:none; width:100%;
-  /* 460px symmetric side padding: the .dl-topctl corner cluster (Orbit pill +
-     mini-orrery + text-size control + language toggle + user menu) measures
-     ≈412px wide + 22px offset and is position:fixed at the top inline-end,
-     z-70. Reproduced live at a 1920px content width: with only 360px reserve
-     the top-row pill ("Leave") overran the cluster's left edge by ~47px and
-     read as cramped ("too close, not professional"). 460 = cluster width +
-     ~26px clear gap. Symmetric so the centered pill row stays truly centered;
-     the rail wraps to extra rows on narrow screens, which is expected. */
-  /* 560: at the owner's 50% browser zoom a CSS gap halves visually — the
-     previous 460 reserve left only ~26px CSS (≈13px seen) between the last
-     pill and the cluster, which still read as "touching". 560 ≈ 148px CSS
-     clear gap ≈ 74px seen at 50%. */
-  padding:11px 560px;
+  padding-block:12px; padding-inline:64px 500px;
   background:linear-gradient(160deg,rgba(20,46,38,.4),rgba(13,31,26,.36));
   border:1px solid rgba(194,163,90,.2);
   border-radius:14px;
 }
-@media (max-width:900px){ .al-rail{ padding:11px 18px; } }
+@media (max-width:900px){ .al-rail{ padding-block:11px; padding-inline:48px 18px; } }
 .al-rail.light{
   background:linear-gradient(160deg,rgba(254,252,247,.7),rgba(246,241,231,.7));
   border-color:#e4dccb;
@@ -400,7 +391,11 @@ html[data-living] .nerve-bg{ background-color:transparent; background-image:none
      group", emerald = "this is the page you're on". */
   color:#231c0e; background:linear-gradient(135deg,#DCC38A,#C2A35A);
   border:1px solid rgba(194,163,90,.45);
-  margin-inline-end:10px;
+  /* Clear separation from the first section pill — with the flex gap this
+     totals ~38px CSS (~19px seen at 50% zoom). The group label must never
+     read as glued to a section pill (owner round 7: the gold "Finance" and
+     green "Finance" pills were touching). */
+  margin-inline-end:24px;
 }
 .al-rail.light .rail-grp{ color:#231c0e; } /* ink on the gold pill, both modes */
 .al-rail .rail-toggle{

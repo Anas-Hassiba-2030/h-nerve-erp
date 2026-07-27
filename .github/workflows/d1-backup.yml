@@ -50,6 +50,27 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Preflight — one decisive signal about what this token CAN do, before
+      # the export (which uses a different, more-privileged endpoint) is
+      # attempted. `d1 execute --remote` hits the QUERY endpoint and needs only
+      # D1 read; `d1 export` hits the EXPORT endpoint and needs D1 edit. If the
+      # query below succeeds while export keeps failing with `code: 10000`, the
+      # token has read but not edit, and the read-based dumper is the right
+      # backup path. If the query ALSO 10000s, the token simply isn't the one
+      # that was granted the permission. continue-on-error so this never blocks
+      # the export attempt — its whole job is to add signal to the log.
+      - name: Preflight — can this token read D1?
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo "::group::d1 execute --remote (query endpoint — needs D1 read)"
+          npx wrangler d1 execute h-nerve-erp-db --remote --json \
+            --command "SELECT COUNT(*) AS tables FROM sqlite_master WHERE type='table'" \
+            && echo "QUERY_OK" || echo "QUERY_FAILED"
+          echo "::endgroup::"
+
       - name: Export production D1
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

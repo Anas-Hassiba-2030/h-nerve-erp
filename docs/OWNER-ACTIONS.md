@@ -82,33 +82,52 @@ automatically. A bad or expired key degrades quality; it never breaks the app.
 
 ---
 
----
+## 3. 🟠 Put a token WITH D1 access into the GitHub secret
 
-## 3. 🟠 Grant the API token D1 export permission
+**The precise problem (measured, not guessed).** The token stored in the
+`CLOUDFLARE_API_TOKEN` GitHub secret has **no D1 permission at all** on this
+account. It deploys the Worker fine — that's a different scope — but every D1
+call is rejected:
 
-**Today:** the daily D1 backup workflow fails. `CLOUDFLARE_API_TOKEN`
-authenticates correctly — it lists the account as Super Administrator — but the
-export endpoint returns `Authentication error [code: 10000]` (observed
-2026-07-24, run
-[30125859202](https://github.com/Anas-Hassiba-2030/h-nerve-erp/actions/runs/30125859202)).
+- query endpoint → `code 7403` *"not authorized to access this service"*
+- export endpoint → `code 10000` *authentication error*
 
-`wrangler d1 export` creates an export **job**, so a read-only or deploy-only
-D1 scope is not enough.
+Runs [30125859202](https://github.com/Anas-Hassiba-2030/h-nerve-erp/actions/runs/30125859202),
+[30296159132](https://github.com/Anas-Hassiba-2030/h-nerve-erp/actions/runs/30296159132),
+and [30296405497](https://github.com/Anas-Hassiba-2030/h-nerve-erp/actions/runs/30296405497)
+all show it — including one **after** a D1 Edit was granted. That signature
+means the permission you granted landed on a **different token** than the one CI
+uses. Re-editing that other token will not help; the secret has to hold a token
+that itself has D1 access.
 
-**Do this:** open <https://dash.cloudflare.com/profile/api-tokens>, edit the
-token used for `CLOUDFLARE_API_TOKEN`, and add **Account → D1 → Edit**. Then:
+**Do this — the reliable path (create fresh, replace the secret):**
 
-```bash
-gh workflow run d1-backup.yml
-```
+1. <https://dash.cloudflare.com/profile/api-tokens> → **Create Token** →
+   *Custom token*.
+2. Permissions (on the account that owns `h-nerve-erp-db`):
+   - **Account · D1 · Edit**
+   - **Account · Workers Scripts · Edit** (so this one token can also deploy,
+     if you want to use it for both)
+3. Account Resources → include the correct account. Create, copy the value.
+4. Put it into the GitHub secret (repo → Settings → Secrets and variables →
+   Actions → `CLOUDFLARE_API_TOKEN` → Update), **or** via CLI:
+   ```bash
+   gh secret set CLOUDFLARE_API_TOKEN
+   ```
+   Paste the value when prompted (it is never echoed).
+5. Trigger the backup:
+   ```bash
+   gh workflow run d1-backup.yml
+   ```
 
-**Verify:** the run goes green and the artifact `d1-backup-<run-id>` appears
-with a non-trivial size. The "Drill the restore" step proves the dump is
-actually restorable.
+**Verify:** the run's first step, **"Verify token can reach D1"**, now passes
+(it prints `✔ token can read D1`), the export runs, the drill goes green, and an
+artifact `d1-backup-<run-id>` appears. If the token is still wrong, that first
+step fails fast with this exact fix printed in the log — no raw API stack trace.
 
-Until this is granted, **production has no automated backup.** The scripts and
-the drill are proven (74 tables / 1534 rows against the dev database); only the
-remote export is blocked.
+Until then, **production has no automated backup.** The scripts and the drill
+are proven (74 tables / 1534 rows against the dev database); only the remote
+export is blocked, and only on this credential.
 
 > ⚠️ The export makes the database briefly **unavailable to serve queries**.
 > It's scheduled for 02:30 UTC (05:30 Jordan) for that reason. Avoid running it

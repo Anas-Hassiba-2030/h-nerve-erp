@@ -17,11 +17,16 @@
 # the database grows materially, re-check that assumption before trusting a
 # daily run against production.
 #
-# TOKEN PERMISSION: CLOUDFLARE_API_TOKEN needs **Account → D1 → Edit**. The
-# export endpoint creates an export JOB, so a read-only D1 scope is not
-# enough — it fails with `Authentication error [code: 10000]` even though the
-# token authenticates and lists the account fine (observed 2026-07-24, run
-# 30125859202). Deploy-only scopes do not cover this.
+# TOKEN PERMISSION: CLOUDFLARE_API_TOKEN needs **Account → D1 → Edit** on the
+# account that owns this database. The token this repo currently uses deploys
+# the Worker fine but has ZERO D1 access — the query endpoint returns
+# `code: 7403` ("not authorized to access this service") and export returns
+# `code: 10000` (runs 30125859202, 30296159132, 30296405497, across a claimed
+# permission grant). That signature means the granted D1 permission landed on a
+# DIFFERENT token than the one stored in the CLOUDFLARE_API_TOKEN secret — the
+# fix is to put a token WITH D1 Edit into the secret, not to re-edit a token
+# that isn't the one CI uses. The preflight below gates on exactly this and
+# fails fast with the remediation, so a doomed export never runs against prod.
 
 name: D1 Backup
 
@@ -50,26 +55,34 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Preflight — one decisive signal about what this token CAN do, before
-      # the export (which uses a different, more-privileged endpoint) is
-      # attempted. `d1 execute --remote` hits the QUERY endpoint and needs only
-      # D1 read; `d1 export` hits the EXPORT endpoint and needs D1 edit. If the
-      # query below succeeds while export keeps failing with `code: 10000`, the
-      # token has read but not edit, and the read-based dumper is the right
-      # backup path. If the query ALSO 10000s, the token simply isn't the one
-      # that was granted the permission. continue-on-error so this never blocks
-      # the export attempt — its whole job is to add signal to the log.
-      - name: Preflight — can this token read D1?
-        continue-on-error: true
+      # Permission gate. `d1 execute --remote` is the lightest possible D1 call:
+      # if the token can't run this SELECT, it certainly can't export, so we
+      # fail HERE with an actionable message rather than letting the export step
+      # print a raw Cloudflare API stack trace. This never touches or mutates
+      # the database — it reads one count. If it fails, the token in the
+      # CLOUDFLARE_API_TOKEN secret lacks D1 access on this account (see the
+      # header note and docs/OWNER-ACTIONS.md §3).
+      - name: Verify token can reach D1
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          echo "::group::d1 execute --remote (query endpoint — needs D1 read)"
-          npx wrangler d1 execute h-nerve-erp-db --remote --json \
-            --command "SELECT COUNT(*) AS tables FROM sqlite_master WHERE type='table'" \
-            && echo "QUERY_OK" || echo "QUERY_FAILED"
-          echo "::endgroup::"
+          if npx wrangler d1 execute h-nerve-erp-db --remote --json \
+               --command "SELECT COUNT(*) AS n FROM sqlite_master WHERE type='table'"; then
+            echo "✔ token can read D1 — proceeding to export"
+          else
+            echo ""
+            echo "✖ CLOUDFLARE_API_TOKEN cannot access D1 on this account."
+            echo "  The query endpoint returned an authorization error (code 7403/10000)."
+            echo "  This token deploys the Worker but has NO D1 permission."
+            echo ""
+            echo "  Fix (owner): create or edit a Cloudflare API token that has"
+            echo "  Account → D1 → Edit on the account owning h-nerve-erp-db, then"
+            echo "  update the CLOUDFLARE_API_TOKEN GitHub Actions secret with it."
+            echo "  https://dash.cloudflare.com/profile/api-tokens"
+            echo "  Details: docs/OWNER-ACTIONS.md §3"
+            exit 1
+          fi
 
       - name: Export production D1
         env:

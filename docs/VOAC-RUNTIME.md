@@ -143,8 +143,22 @@ hygiene — not training. Do not tell anyone the agents are self-improving yet.
 | `src/lib/voac/topology.ts` | the six patterns, selector, hop ceilings, cost estimate |
 | `src/lib/voac/budget.ts` | proposal ranking + hard daily cap + suppression reasons |
 | `src/lib/voac/roles.ts` | role registry, sector→roster, skill-doc binding |
+| `src/lib/voac/runStore.ts` | pure core: run validation, roll-up, status transitions, decision guards |
+| `src/lib/voac/runStore.live.ts` | thin DB twin — the only thing that writes rows |
 | `src/lib/voac/skills/*.md` | 6 skill documents (5 sectors + Group Broker) |
 | `scripts/build/build-voac-skills.mjs` | `.md` → runtime module |
+
+Four rules the run store enforces that are easy to get wrong quietly:
+
+- **A refused run is still a row** (`status: "REFUSED"`, reason in `error`), so
+  "the agent declined" is answerable from the ledger instead of invisible.
+- **Unscored steps are excluded from a run's mean score**, never counted as
+  zero — "nobody graded this" must not read as "this was terrible".
+- **A finished run never reopens.** Terminal is terminal; an audit trail that
+  can be rewritten is not one.
+- **A decision must name its owner** (`decidedById`), and an outcome can only
+  be attached to an ACCEPTED proposal — otherwise the one non-circular signal
+  in the system would be fabricated.
 
 **Not shipped, on purpose:** the LLM execution driver. Every pure, testable
 decision the VOAC makes now exists and is verified; wiring it to

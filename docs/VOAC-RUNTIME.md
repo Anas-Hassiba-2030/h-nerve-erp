@@ -155,23 +155,52 @@ driver rather than a rewrite.
 
 Also not shipped: any UI, and any migration against production D1.
 
-## 8. Before the next slice — the 20-minute test
+## 8. The ceiling test — RUN, and the result matters
 
 Both the Logician and the Expansionist landed on the same instruction:
-**compute the ceiling before building the flagship.** Pull dairy spoilage
-write-offs by SKU against hotel F&B dairy spend and get the annual JOD figure.
+**compute the ceiling before building the flagship.** It is now a script:
 
-Two failure modes this catches, cheaply:
+```bash
+npx tsx --tsconfig tsconfig.scripts.json scripts/ops/voac-ceiling.ts
+```
 
-1. If the number is small, the flagship cross-company demo dies on stage in
-   front of leadership, and the whole VOAC gets judged by its weakest showcase.
-2. **Three of the five hotels are in Bulgaria.** A Jordanian perishable batch
-   cannot serve them. The addressable version of this flow is smaller than the
-   org chart suggests, and it is better to know that before the pitch than
-   during it.
+**Result (local dev DB, 2026-08-03): the ceiling is NOT COMPUTABLE.** Not
+small — *unmeasurable*. Two inputs the flow depends on do not exist in the
+schema:
 
-The `group-broker` skill document already encodes both constraints as hard
-limits, but a document cannot substitute for the number.
+1. **`DairyBatch` has `quantityLiters` but no price or cost per litre.** Litres
+   cannot become dinars. Any JOD figure produced today would rest on an assumed
+   price — an invented number, presented to leadership as a finding.
+2. **Hotel-side dairy consumption is not modelled at all.** No hotel
+   `Transaction` carries a dairy category, and there is no F&B expense category
+   in the schema — `prisma/schema/finance.prisma` describes the F&B split as an
+   owner mapping decision on `CostCenter`, not a field.
+
+The supply side alone is real and visible (local seed: 14 batches past expiry,
+~37k L; 4 more within 7 days, ~5.9k L) — but a volume with no price and no
+counterpart demand is not a business case.
+
+**What this changes:** the near-expiry-dairy → hotel-F&B story must **not** be
+the headline of the Hourani pitch yet. It is the single most quotable thing in
+the design and the least defensible, which is the worst combination to walk
+into a boardroom with. The smallest instrumentation that turns it into a real
+number:
+
+- a price/cost per litre on `DairyBatch` (or a link to standard cost);
+- a dairy/F&B expense category or `CostCenter` on hotel transactions;
+- the hotels' purchasing cycle length — a weekly cycle against a 7-day shelf
+  life recovers nothing, however large the volume looks.
+
+Two further constraints hold regardless of instrumentation. **Three of the five
+hotels are in Bulgaria**; a Jordanian perishable batch cannot serve them, so the
+addressable estate is smaller than the org chart implies (the script computes
+this rather than assuming it). And the transfer-pricing rule must exist before
+the transaction does. The `group-broker` skill document encodes both as hard
+limits — but a document cannot substitute for the number.
+
+Re-run the script against the database holding **real** Hourani data before
+quoting any figure. A locally-seeded database proves the query works and proves
+nothing about the business.
 
 ## 9. Standing rules
 

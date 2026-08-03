@@ -147,8 +147,8 @@ UI surfaces for the brain (`app/(app)/brain/*`, `app/(theater)/theater/*`) lean 
 **`lib/` is organized one folder per pillar** — `ai/`, `alerts/`, `auth/`, `brain/`,
 `brand/`, `db/`, `design/`, `docintel/`, `empire/`, `export/`, `finance/`, `genesis/`,
 `i18n/`, `import/`, `integrations/`, `intelligence/`, `mobile/`, `orrery/`, `protocol/`,
-`realtime/`, `supply/`, `tenancy/`, `theater/`, `theme/`, `utils/`, `workflows/`,
-`workspace/`. There are **no loose files in `lib/` root** (B7/#162). When you add a
+`realtime/`, `supply/`, `tenancy/`, `theater/`, `theme/`, `utils/`, `voac/`,
+`workflows/`, `workspace/`. There are **no loose files in `lib/` root** (B7/#162). When you add a
 helper, it belongs inside the pillar folder it serves — never at the root. Imports use
 the `@/lib/<pillar>/<file>` path.
 

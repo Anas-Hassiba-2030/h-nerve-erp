@@ -86,6 +86,37 @@ export function BatchForm({
           />
         </Field>
 
+        {/* Deliberately blank by default, not pre-filled with a plausible
+            number: an un-entered price must stay empty so the group's
+            recovered-value figures can say "not priced" instead of "zero". */}
+        <Field
+          name="pricePerLiter"
+          label="سعر البيع للتر (د.أ)"
+          error={errs.pricePerLiter}
+        >
+          <input
+            type="number"
+            min={0}
+            step={0.05}
+            placeholder="اتركه فارغاً إذا لم يُحدَّد"
+            className="input"
+          />
+        </Field>
+
+        <Field
+          name="costPerLiter"
+          label="تكلفة الإنتاج للتر (د.أ)"
+          error={errs.costPerLiter}
+        >
+          <input
+            type="number"
+            min={0}
+            step={0.05}
+            placeholder="اتركه فارغاً إذا لم يُحدَّد"
+            className="input"
+          />
+        </Field>
+
         <Field name="fatContent" label="نسبة الدسم (٪)" error={errs.fatContent}>
           <input
             type="number"

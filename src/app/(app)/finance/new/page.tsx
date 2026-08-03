@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
 import { DaylightShell, DaylightHeader } from "@/components/orrery/daylight";
 import { prisma } from "@/lib/db/db";
+import { TRANSACTION_CATEGORIES } from "@/lib/finance/categories";
 import { createTransaction } from "../actions";
 import "../../daylight.css";
 
@@ -39,7 +40,26 @@ export default async function NewTransactionPage() {
             </div>
             <div>
               <label className="label" htmlFor="category">التصنيف</label>
-              <input id="category" name="category" required className="input" placeholder="حجوزات / رواتب / تسويق…" />
+              {/* A datalist, not a select: the canonical list is SUGGESTED so
+                  totals can actually aggregate (free text made "F&B", "f and b"
+                  and "أغذية ومشروبات" three different categories), but custom
+                  values still submit, so existing rows and unusual categories
+                  keep working. See src/lib/finance/categories.ts. */}
+              <input
+                id="category"
+                name="category"
+                required
+                list="txn-categories"
+                className="input"
+                placeholder="أغذية ومشروبات — ألبان / رواتب / تسويق…"
+              />
+              <datalist id="txn-categories">
+                {TRANSACTION_CATEGORIES.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.labelAr}
+                  </option>
+                ))}
+              </datalist>
             </div>
 
             <div>

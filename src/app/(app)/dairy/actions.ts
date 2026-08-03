@@ -21,6 +21,15 @@ const batchSchema = z.object({
   product: z.enum(["MILK", "LABNEH", "YOGURT", "CHEESE", "BUTTER", "CREAM"]),
   productAr: z.string().min(1, "الاسم التجاري مطلوب").max(120),
   quantityLiters: z.coerce.number().min(0).default(0),
+  // Optional, and left UNDEFINED when blank rather than coerced to 0 — an
+  // unpriced batch must stay visibly unpriced. A silent 0 would make the VOAC
+  // ceiling calculation report "nothing recoverable" for a batch whose price
+  // was merely not entered (docs/VOAC-RUNTIME.md §8).
+  // The empty-string branch comes FIRST so a blank field means "not priced".
+  // A stray "abc" falls through to the number branch, fails, and surfaces a
+  // field error — a mistyped price must not silently become "unpriced".
+  pricePerLiter: z.union([z.literal(""), z.coerce.number().min(0)]).optional(),
+  costPerLiter: z.union([z.literal(""), z.coerce.number().min(0)]).optional(),
   qualityGrade: z.enum(["A", "B", "C"]).default("A"),
   fatContent: z.coerce.number().min(0).max(100).default(3.5),
   productionDate: z.string().min(1, "تاريخ الإنتاج مطلوب"),
@@ -42,6 +51,8 @@ export async function createBatch(
     product: formData.get("product"),
     productAr: formData.get("productAr"),
     quantityLiters: formData.get("quantityLiters") ?? 0,
+    pricePerLiter: formData.get("pricePerLiter"),
+    costPerLiter: formData.get("costPerLiter"),
     qualityGrade: formData.get("qualityGrade") || "A",
     fatContent: formData.get("fatContent") ?? 3.5,
     productionDate: formData.get("productionDate"),
@@ -70,6 +81,11 @@ export async function createBatch(
         product: data.product,
         productAr: data.productAr,
         quantityLiters: data.quantityLiters,
+        // Blank submits as "" and must land as NULL, not 0 — "not priced" and
+        // "worth nothing" are different facts, and the VOAC ceiling report
+        // distinguishes them.
+        pricePerLiter: typeof data.pricePerLiter === "number" ? data.pricePerLiter : null,
+        costPerLiter: typeof data.costPerLiter === "number" ? data.costPerLiter : null,
         qualityGrade: data.qualityGrade,
         fatContent: data.fatContent,
         productionDate: new Date(data.productionDate),

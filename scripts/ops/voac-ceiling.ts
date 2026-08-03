@@ -19,6 +19,7 @@
 // Read-only. Runs against whatever DATABASE_URL points at; never writes.
 
 import { makePrismaClient } from "../_prisma";
+import { isFnbDairySpend } from "../../src/lib/finance/categories";
 
 /** Batches within this many days of expiry are "at risk". */
 const AT_RISK_DAYS = 7;
@@ -60,8 +61,8 @@ async function main() {
   const batches = await prisma.dairyBatch.findMany({
     where: { companyId: { in: dairyCos.map((c) => c.id) } },
     select: {
-      batchNumber: true, product: true, quantityLiters: true,
-      status: true, expiryDate: true, destination: true,
+      batchNumber: true, product: true, quantityLiters: true, status: true,
+      expiryDate: true, destination: true, pricePerLiter: true, costPerLiter: true,
     },
   });
 
@@ -78,55 +79,96 @@ async function main() {
   for (const b of batches) byStatus.set(b.status, (byStatus.get(b.status) ?? 0) + 1);
   console.log(`Status mix: ${[...byStatus].map(([k, v]) => `${k}=${v}`).join(", ") || "n/a"}`);
 
+  // Unpriced batches are counted and reported separately, never treated as
+  // zero — "not priced" and "worth nothing" are different facts.
+  const unpriced = batches.filter((b) => b.pricePerLiter == null);
+  console.log(`Unpriced batches (excluded from value): ${unpriced.length} of ${batches.length}`);
+
+  // --- Recoverable value ------------------------------------------------
+  // Recovery is the MARGIN, never the full price: the litre was already
+  // produced and paid for. Diverting it recovers (price − cost), and only for
+  // batches still inside their shelf life. Expired stock recovers nothing —
+  // it is a write-off, and the group-broker skill doc forbids proposing
+  // otherwise.
+  const recoverable = atRisk.reduce((sum, b) => {
+    if (b.pricePerLiter == null) return sum;
+    const margin = b.pricePerLiter - (b.costPerLiter ?? 0);
+    return sum + Math.max(0, margin) * b.quantityLiters;
+  }, 0);
+
+  const writtenOff = expired.reduce((sum, b) => {
+    if (b.costPerLiter == null) return sum;
+    return sum + b.costPerLiter * b.quantityLiters;
+  }, 0);
+
   // --- Demand side: what the hotels actually consume --------------------
-  const dairySpend = await prisma.transaction.aggregate({
-    where: { companyId: { in: domesticHotels.map((c) => c.id) }, category: "DAIRY" },
-    _sum: { amount: true },
-    _count: true,
+  const hotelTxns = await prisma.transaction.findMany({
+    where: { companyId: { in: domesticHotels.map((c) => c.id) } },
+    select: { category: true, amount: true, occurredAt: true },
   });
+  const dairyTxns = hotelTxns.filter((t) => isFnbDairySpend(t.category));
+  const dairySpendTotal = dairyTxns.reduce((s, t) => s + t.amount, 0);
+
+  // Annualise from whatever window the data actually covers, rather than
+  // assuming twelve months exist.
+  const dates = dairyTxns.map((t) => t.occurredAt.getTime());
+  const spanDays = dates.length > 1 ? (Math.max(...dates) - Math.min(...dates)) / 86_400_000 : 0;
+  const annualDairySpend = spanDays > 30 ? (dairySpendTotal / spanDays) * 365 : dairySpendTotal;
 
   console.log(`\n--- DEMAND SIDE ---`);
-  console.log(
-    `Hotel transactions categorised DAIRY: ${dairySpend._count}` +
-      ` totalling ${jod(dairySpend._sum.amount ?? 0)}`,
-  );
+  console.log(`Hotel transactions tagged as dairy/F&B: ${dairyTxns.length} of ${hotelTxns.length}`);
+  console.log(`Observed dairy spend: ${jod(dairySpendTotal)} over ${Math.round(spanDays)} days`);
+  console.log(`Annualised hotel dairy spend: ${jod(annualDairySpend)}`);
 
-  // --- The verdict, including what is missing ---------------------------
+  // --- The verdict --------------------------------------------------------
   const blockers: string[] = [];
-
   if (litersAtRisk + litersExpired === 0) {
-    blockers.push("No at-risk or expired dairy batches exist in this database — there is no supply side to recover.");
+    blockers.push("No at-risk or expired dairy batches exist — there is no supply side to recover.");
   }
-  if ((dairySpend._sum.amount ?? 0) === 0) {
+  if (dairyTxns.length === 0) {
     blockers.push(
-      "Hotel-side dairy consumption is not measurable: no hotel Transaction carries category \"DAIRY\". " +
-        "There is no F&B spend category in the schema at all (see the CostCenter comment in " +
-        "prisma/schema/finance.prisma — F&B is described as an owner mapping decision, not a modelled field).",
+      "Hotel-side dairy consumption is not measurable: no hotel Transaction resolves to a dairy/F&B " +
+        "category via src/lib/finance/categories.ts. Run scripts/seed/seed-dairy-pricing.ts, or tag the real rows.",
     );
   }
-  // DairyBatch carries volume but no price, so litres cannot become dinars.
-  blockers.push(
-    "DairyBatch has quantityLiters but NO price or cost per litre, so recovered value cannot be computed " +
-      "from the schema. A JOD figure today would require an assumed price — i.e. an invented number.",
-  );
+  if (unpriced.length === batches.length && batches.length > 0) {
+    blockers.push(
+      "Every batch is unpriced (pricePerLiter is null), so litres cannot become dinars. " +
+        "Enter prices, or run scripts/seed/seed-dairy-pricing.ts for demo figures.",
+    );
+  }
 
   console.log(`\n${"=".repeat(72)}`);
   if (blockers.length) {
-    console.log("CEILING: NOT COMPUTABLE FROM THE CURRENT SCHEMA");
+    console.log("CEILING: NOT COMPUTABLE");
     console.log("=".repeat(72));
     blockers.forEach((b, i) => console.log(`\n${i + 1}. ${b}`));
-    console.log(
-      `\nTO MAKE IT COMPUTABLE — the smallest instrumentation that yields a real number:` +
-        `\n  a) a price/cost per litre on DairyBatch (or a link to the product's standard cost);` +
-        `\n  b) a dairy/F&B expense category (or CostCenter) on hotel transactions;` +
-        `\n  c) the hotels' purchasing cycle length — a weekly cycle against a ${AT_RISK_DAYS}-day` +
-        `\n     shelf life recovers nothing, however large the volume looks.` +
-        `\n\nUntil (a) and (b) exist, the flagship cross-company flow cannot be quantified,` +
-        `\nand it should NOT be the headline of a pitch.`,
-    );
   } else {
-    console.log("CEILING: computable — see figures above.");
+    // The cycle test decides whether ANY of this is actually capturable.
+    const capturable = Math.min(recoverable, annualDairySpend);
+    console.log("CEILING: COMPUTED");
+    console.log("=".repeat(72));
+    console.log(`\n  Margin on at-risk stock (${AT_RISK_DAYS}-day window):  ${jod(recoverable)}`);
+    console.log(`  Already written off (expired × cost):     ${jod(writtenOff)}`);
+    console.log(`  Annualised hotel dairy demand:            ${jod(annualDairySpend)}`);
+    console.log(`\n  → CEILING, capped by demand:              ${jod(capturable)}`);
+    console.log(
+      `\n  Read this as an UPPER BOUND, not a forecast. It assumes every at-risk` +
+        `\n  litre finds a hotel buyer inside its remaining shelf life. The real` +
+        `\n  figure is lower by whatever the purchasing cycle costs you:` +
+        `\n  a weekly ordering cycle against a ${AT_RISK_DAYS}-day window captures a` +
+        `\n  fraction of this, and that fraction is the number worth pitching.`,
+    );
+    if (unpriced.length > 0) {
+      console.log(`\n  CAVEAT: ${unpriced.length} batch(es) are unpriced and excluded — the figure is incomplete.`);
+    }
+    if (foreignHotels.length > 0) {
+      console.log(
+        `  CAVEAT: ${foreignHotels.length} cross-border hotel(s) excluded — perishables cannot reach them.`,
+      );
+    }
   }
+
   console.log(`\nNOTE: run this against the database that holds REAL Hourani data.`);
   console.log(`A locally-seeded demo database produces a demo number, which proves the`);
   console.log(`query works and proves nothing about the business case.`);

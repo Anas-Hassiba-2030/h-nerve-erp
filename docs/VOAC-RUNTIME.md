@@ -147,6 +147,8 @@ hygiene — not training. Do not tell anyone the agents are self-improving yet.
 | `src/lib/voac/runStore.live.ts` | thin DB twin — the only thing that writes rows |
 | `src/lib/voac/skills/*.md` | 6 skill documents (5 sectors + Group Broker) |
 | `scripts/build/build-voac-skills.mjs` | `.md` → runtime module |
+| `scripts/build/build-voac-map.mjs` | generates `docs/architecture/voac.{html,json}` from the real source |
+| `src/lib/finance/categories.ts` | canonical transaction categories + alias normaliser |
 
 Four rules the run store enforces that are easy to get wrong quietly:
 
@@ -178,32 +180,46 @@ Both the Logician and the Expansionist landed on the same instruction:
 npx tsx --tsconfig tsconfig.scripts.json scripts/ops/voac-ceiling.ts
 ```
 
-**Result (local dev DB, 2026-08-03): the ceiling is NOT COMPUTABLE.** Not
-small — *unmeasurable*. Two inputs the flow depends on do not exist in the
-schema:
+**First run (2026-08-03): NOT COMPUTABLE.** Two required inputs did not exist —
+`DairyBatch` had litres but no price, and hotel-side dairy consumption was not
+modelled at all (`Transaction.category` was free text, so "F&B", "f and b" and
+"أغذية ومشروبات" were three different categories and nothing aggregated).
 
-1. **`DairyBatch` has `quantityLiters` but no price or cost per litre.** Litres
-   cannot become dinars. Any JOD figure produced today would rest on an assumed
-   price — an invented number, presented to leadership as a finding.
-2. **Hotel-side dairy consumption is not modelled at all.** No hotel
-   `Transaction` carries a dairy category, and there is no F&B expense category
-   in the schema — `prisma/schema/finance.prisma` describes the F&B split as an
-   owner mapping decision on `CostCenter`, not a field.
+**Both have since been instrumented** (same PR):
 
-The supply side alone is real and visible (local seed: 14 batches past expiry,
-~37k L; 4 more within 7 days, ~5.9k L) — but a volume with no price and no
-counterpart demand is not a business case.
+- `DairyBatch.pricePerLiter` + `costPerLiter` — **nullable on purpose**, so an
+  un-entered price stays visibly un-entered instead of silently reading as zero
+  recoverable value;
+- `src/lib/finance/categories.ts` — a canonical category list with an alias
+  normaliser, surfaced as a `<datalist>` on the finance form. Free text still
+  submits, so existing rows keep working, but totals can finally aggregate.
 
-**What this changes:** the near-expiry-dairy → hotel-F&B story must **not** be
-the headline of the Hourani pitch yet. It is the single most quotable thing in
-the design and the least defensible, which is the worst combination to walk
-into a boardroom with. The smallest instrumentation that turns it into a real
-number:
+**Second run — the ceiling computes:**
 
-- a price/cost per litre on `DairyBatch` (or a link to standard cost);
-- a dairy/F&B expense category or `CostCenter` on hotel transactions;
-- the hotels' purchasing cycle length — a weekly cycle against a 7-day shelf
-  life recovers nothing, however large the volume looks.
+| | JOD |
+|---|---|
+| Margin on at-risk stock (7-day window) | **7,640** |
+| Already written off (expired × cost) | **33,678** |
+| Annualised hotel dairy demand | 55,078 |
+| **Ceiling, capped by demand** | **7,640** |
+
+*(Local seeded data — representative, not Hourani's actuals. Re-run against real
+data before quoting anything.)*
+
+**Read the second row, not the first.** Recovery of near-expiry stock is capped
+around 7.6k; stock already written off is **4× larger**. That inverts the pitch:
+the money is in *preventing* the overproduction, not in *rerouting* its output —
+which is exactly what `dairy-yield-controller.md` already instructs ("prefer a
+proposal that prevents the next loss over one that recovers the current one;
+recovery is worth a fraction of the margin, prevention is worth all of it").
+
+Recovery is also the **margin**, never the full price — the litre was already
+produced and paid for. And expired stock recovers nothing; it is a write-off,
+and the group-broker skill document forbids proposing otherwise.
+
+Still not measurable, and it bounds everything above: **the hotels' purchasing
+cycle**. A weekly ordering cycle against a 7-day shelf life captures a fraction
+of that 7,640, and that fraction — not the ceiling — is the honest pitch number.
 
 Two further constraints hold regardless of instrumentation. **Three of the five
 hotels are in Bulgaria**; a Jordanian perishable batch cannot serve them, so the
@@ -215,6 +231,26 @@ limits — but a document cannot substitute for the number.
 Re-run the script against the database holding **real** Hourani data before
 quoting any figure. A locally-seeded database proves the query works and proves
 nothing about the business.
+
+## 8b. The self-describing map
+
+```bash
+node scripts/build/build-voac-map.mjs
+```
+
+Emits two artifacts from one source of truth:
+
+- **`docs/architecture/voac.html`** — a self-contained interactive map (no CDN,
+  no build step, opens straight from disk). Click any node for its file, its
+  skill-document version, and its invariants.
+- **`docs/architecture/voac.json`** — the machine-readable twin, for the next
+  agent picking this up cold. Layers, nodes, edges, roles, topologies, models,
+  invariants, and an explicit `openQuestions` list.
+
+Both are **generated by parsing the real registry, topology table, Prisma models
+and skill documents** — not hand-drawn. A hand-drawn architecture diagram is
+accurate exactly once, and a map that silently lies is worse than no map because
+people stop checking it. Re-run the generator whenever `src/lib/voac/` changes.
 
 ## 9. Standing rules
 

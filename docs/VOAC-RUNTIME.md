@@ -162,14 +162,55 @@ Four rules the run store enforces that are easy to get wrong quietly:
   be attached to an ACCEPTED proposal — otherwise the one non-circular signal
   in the system would be fabricated.
 
-**Not shipped, on purpose:** the LLM execution driver. Every pure, testable
-decision the VOAC makes now exists and is verified; wiring it to
-`src/lib/brain/orchestrator.ts` and `council.live.ts` is the next slice, and it
-must reuse those — not reimplement debate. When it lands: request-scoped first,
-persisting each step as it goes, so the durable/cron version is a change of
-driver rather than a rewrite.
+| `src/lib/voac/proposals.ts` | output contract + strict extraction |
+| `src/lib/voac/driver.live.ts` | **the execution driver** — `runVoac()` / `runGroupBroker()` |
+| `scripts/verify/voac-smoke.ts` | end-to-end proof against a real database |
 
-Also not shipped: any UI, and any migration against production D1.
+### The driver
+
+`driver.live.ts` deliberately owns almost no intelligence. It **sequences
+existing machinery and records what happened**:
+
+- topology `parallel` → `src/lib/brain/council.live.ts` (`council().convene`)
+- every other topology → `src/lib/brain/orchestrator.ts` (`runToolLoop`)
+
+Reusing those two is the point. The council already runs five voices in parallel
+with a moderator and handles stub mode; a second debate implementation here
+would drift from the first and be worse. The driver's job is the ledger, the
+budget and the gate.
+
+**Three independent brakes, in this order:** the topology's hop ceiling (refused
+before a token is spent) → the per-tenant LLM budget (`brain/llmBudget.ts`) →
+the roster's daily proposal cap (`budget.ts`, which limits what reaches a
+*human*, not what the model may think about).
+
+**Proposals are never salvaged from prose.** The driver appends a strict output
+contract to the skill document at runtime — not into the `.md`, because that is
+SkillOpt's trainable surface and a machine rewriting its own output contract is
+how a pipeline silently stops parsing. If the contract is not honoured,
+`extractProposals` returns **zero** proposals and records the parse error on the
+run. A parser-invented proposal would carry a confidence nobody assigned.
+
+`STUB` is its own run status. A run with no API key did not *fail* — the
+bookkeeping worked and there was no model behind it. (The smoke test caught this
+being recorded as `FAILED`, which would send someone hunting a defect that does
+not exist.)
+
+Verified end-to-end by `scripts/verify/voac-smoke.ts` — **23/23 checks**: steps
+land contiguously, refusals persist as rows with reasons, the hop ceiling and
+the autonomous opt-in both refuse before spending, council voices are marked
+self-scored, the roster auto-creates, the cap holds, and **no domain table is
+ever mutated**.
+
+```bash
+DATABASE_URL="file:./prisma/schema/dev.db" \
+  npx tsx --tsconfig tsconfig.scripts.json scripts/verify/voac-smoke.ts
+```
+
+**Still not shipped:** any UI (the ledger has no screen), any cron/queue caller
+(the driver is request-scoped — but because every step is persisted as it
+happens, that is a change of caller, not a rewrite), and any migration against
+production D1.
 
 ## 8. The ceiling test — RUN, and the result matters
 

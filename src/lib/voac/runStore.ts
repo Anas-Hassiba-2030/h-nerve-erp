@@ -13,8 +13,22 @@
 import { assertTopologyAllowed, estimateLlmCalls, type Topology } from "./topology";
 import { GROUP_BROKER_ID, getRole, skillVersionFor } from "./roles";
 
-/** AgentRun.status values. */
-export type RunStatus = "RUNNING" | "SUCCEEDED" | "FAILED" | "BUDGET_EXHAUSTED" | "REFUSED";
+/**
+ * AgentRun.status values.
+ *
+ * "STUB" is its own status rather than being folded into FAILED or SUCCEEDED.
+ * A run with no API key configured did not fail — the bookkeeping worked
+ * perfectly and there was simply no model behind it. Calling that FAILED sends
+ * someone hunting a bug that does not exist; calling it SUCCEEDED puts an empty
+ * answer into the ledger dressed as a real one.
+ */
+export type RunStatus =
+  | "RUNNING"
+  | "SUCCEEDED"
+  | "FAILED"
+  | "BUDGET_EXHAUSTED"
+  | "REFUSED"
+  | "STUB";
 
 /** AgentStep.kind values. */
 export type StepKind = "plan" | "tool" | "debate" | "verify" | "narrate";
@@ -165,9 +179,14 @@ export function rollupRun(steps: RollupStep[]): StepTotals {
  */
 export function finalRunStatus(
   totals: StepTotals,
-  opts: { budgetExhausted?: boolean } = {},
+  opts: { budgetExhausted?: boolean; stub?: boolean } = {},
 ): RunStatus {
+  // Budget first: it is the reason the run stopped, and it outranks whatever
+  // partial state the steps happen to be in.
   if (opts.budgetExhausted) return "BUDGET_EXHAUSTED";
+  // Stub before failure: with no model configured there is nothing that COULD
+  // have succeeded, so step-level errors are not evidence of a defect.
+  if (opts.stub) return "STUB";
   if (totals.steps === 0) return "FAILED";
   if (totals.failedSteps > 0) return "FAILED";
   return "SUCCEEDED";

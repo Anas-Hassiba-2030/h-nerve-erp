@@ -141,6 +141,19 @@ describe("finalRunStatus", () => {
     expect(finalRunStatus(rollupRun([{ score: 1 }]), { budgetExhausted: true })).toBe(
       "BUDGET_EXHAUSTED",
     );
+    expect(finalRunStatus(rollupRun([{ error: "x" }]), { budgetExhausted: true, stub: true })).toBe(
+      "BUDGET_EXHAUSTED",
+    );
+  });
+
+  it("a stub run is STUB, never FAILED — no model configured is not a defect", () => {
+    // Folding this into FAILED sends someone hunting a bug that does not exist.
+    expect(finalRunStatus(rollupRun([{ error: "no model" }]), { stub: true })).toBe("STUB");
+    expect(finalRunStatus(rollupRun([]), { stub: true })).toBe("STUB");
+  });
+
+  it("a stub run is not SUCCEEDED either — an empty answer must not look real", () => {
+    expect(finalRunStatus(rollupRun([{ score: 1 }]), { stub: true })).not.toBe("SUCCEEDED");
   });
 
   it("a clean run SUCCEEDS", () => {
@@ -150,13 +163,13 @@ describe("finalRunStatus", () => {
 
 describe("canTransition", () => {
   it("lets a RUNNING run reach any terminal state", () => {
-    for (const to of ["SUCCEEDED", "FAILED", "BUDGET_EXHAUSTED", "REFUSED"] as RunStatus[]) {
+    for (const to of ["SUCCEEDED", "FAILED", "BUDGET_EXHAUSTED", "REFUSED", "STUB"] as RunStatus[]) {
       expect(canTransition("RUNNING", to)).toBe(true);
     }
   });
 
   it("never reopens a finished run — an audit trail cannot be rewritten", () => {
-    for (const from of ["SUCCEEDED", "FAILED", "BUDGET_EXHAUSTED", "REFUSED"] as RunStatus[]) {
+    for (const from of ["SUCCEEDED", "FAILED", "BUDGET_EXHAUSTED", "REFUSED", "STUB"] as RunStatus[]) {
       expect(canTransition(from, "RUNNING")).toBe(false);
       expect(canTransition(from, "SUCCEEDED")).toBe(false);
     }

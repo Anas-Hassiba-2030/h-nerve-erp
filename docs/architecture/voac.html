@@ -1,234 +1,203 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>VOAC — Architecture &amp; Flows | H-Nerve</title>
 <style>
-  :root{
-    --bg:#0a1210; --panel:#0f1b18; --panel-2:#132420; --line:#1e3a32;
-    --ink:#e8f0ec; --ink-dim:#8fa89f; --ink-faint:#5f7a70;
-    --emerald:#2fb98a; --gold:#d9a441; --coral:#e0714a; --violet:#8d7fe0;
-    --mono:ui-monospace,'JetBrains Mono',SFMono-Regular,Menlo,monospace;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);
-    font:14px/1.55 ui-sans-serif,system-ui,'Segoe UI',sans-serif;}
-  header{padding:22px 26px 16px;border-bottom:1px solid var(--line)}
-  h1{margin:0;font-size:19px;letter-spacing:.02em;font-weight:600}
-  h1 .dim{color:var(--ink-faint);font-weight:400}
-  .sub{margin:6px 0 0;color:var(--ink-dim);font-size:13px;max-width:78ch}
-  .warn{margin-top:10px;display:inline-block;border:1px solid var(--line);
-    border-left:3px solid var(--gold);background:var(--panel);padding:7px 11px;
-    font-size:12px;color:var(--ink-dim);border-radius:0 5px 5px 0}
-  .warn b{color:var(--gold)}
-  main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:0;align-items:start}
-  @media(max-width:940px){main{grid-template-columns:1fr}#panel{position:static;border-left:0;border-top:1px solid var(--line)}}
-  #map{padding:22px 26px 40px;overflow-x:auto}
-  .layer{margin-bottom:26px}
-  .layer-head{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
-  .layer-head h2{margin:0;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--emerald);font-weight:600}
-  .layer-head .hint{font-size:11.5px;color:var(--ink-faint);font-family:var(--mono)}
-  .row{display:flex;flex-wrap:wrap;gap:10px}
-  .node{position:relative;text-align:left;cursor:pointer;background:var(--panel);
-    border:1px solid var(--line);border-radius:7px;padding:11px 13px;min-width:168px;
-    color:var(--ink);font:inherit;transition:border-color .14s,background .14s,transform .14s}
-  .node:hover{background:var(--panel-2);border-color:var(--emerald);transform:translateY(-1px)}
-  .node.sel{border-color:var(--gold);background:var(--panel-2);box-shadow:0 0 0 1px var(--gold) inset}
-  .node .t{font-weight:600;font-size:13px}
-  .node .ar{font-size:12px;color:var(--ink-dim);margin-top:2px}
-  .node .k{margin-top:7px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;
-    text-transform:uppercase;color:var(--ink-faint)}
-  .node[data-kind="supervisor"]{border-color:#3c5f52}
-  .node[data-kind="supervisor"] .k{color:var(--emerald)}
-  .node[data-kind="gate"] .k{color:var(--coral)}
-  .node[data-kind="offline"] .k{color:var(--gold)}
-  .node[data-kind="substrate"]{min-width:120px}
-  .node[data-kind="substrate"] .t{font-family:var(--mono);font-size:12px}
-  .flowline{color:var(--ink-faint);font-family:var(--mono);font-size:12px;margin:0 2px;align-self:center}
-  #panel{position:sticky;top:0;height:100vh;overflow-y:auto;border-left:1px solid var(--line);
-    background:var(--panel);padding:22px 20px 40px}
-  #panel h3{margin:0 0 3px;font-size:15px}
-  #panel .ar{color:var(--ink-dim);font-size:13px;margin-bottom:12px}
-  #panel .file{font-family:var(--mono);font-size:11.5px;color:var(--emerald);
-    word-break:break-all;margin-bottom:12px}
-  #panel p{color:var(--ink-dim);font-size:13px}
-  #panel ul{padding-left:16px;margin:8px 0 0}
-  #panel li{color:var(--ink-dim);font-size:12.5px;margin-bottom:6px}
-  #panel .lab{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--ink-faint);margin:18px 0 6px}
-  table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:6px}
-  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
-  th{color:var(--ink-faint);font-weight:500;font-family:var(--mono);font-size:10.5px;
-    letter-spacing:.1em;text-transform:uppercase}
-  td.mono{font-family:var(--mono);color:var(--emerald)}
-  section.block{padding:0 26px 34px}
-  section.block h2{font-size:11px;letter-spacing:.16em;text-transform:uppercase;
-    color:var(--emerald);margin:0 0 10px}
-  .inv{border:1px solid var(--line);border-left:3px solid var(--emerald);background:var(--panel);
-    padding:11px 13px;border-radius:0 6px 6px 0;margin-bottom:9px}
-  .inv b{font-size:13px}
-  .inv p{margin:4px 0 0;color:var(--ink-dim);font-size:12.5px}
-  .inv code{font-family:var(--mono);font-size:11px;color:var(--gold)}
-  .open{border-left-color:var(--coral)}
-  footer{border-top:1px solid var(--line);padding:16px 26px 30px;color:var(--ink-faint);font-size:11.5px}
-  footer code{font-family:var(--mono);color:var(--ink-dim)}
+
+:root{
+  --bg:#080f0d; --panel:#0e1a17; --panel2:#132420; --line:#1d332c;
+  --ink:#e9f1ed; --dim:#93aaa1; --faint:#5f7a70;
+  --emerald:#2fb98a; --gold:#d9a441; --coral:#e0714a;
+  --mono:ui-monospace,'JetBrains Mono',SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.6 ui-sans-serif,system-ui,'Segoe UI',sans-serif;
+  -webkit-font-smoothing:antialiased}
+header{padding:34px 34px 24px;border-bottom:1px solid var(--line);max-width:1400px}
+.eyebrow{font:600 11px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--emerald);margin-bottom:12px}
+h1{margin:0;font-size:27px;font-weight:600;letter-spacing:-.01em}
+h1 .dim{color:var(--faint);font-weight:400;font-size:20px}
+.sub{margin:10px 0 0;color:var(--dim);max-width:82ch;font-size:14.5px}
+.stats{display:flex;flex-wrap:wrap;gap:26px;margin:22px 0 4px}
+.stat b{display:block;font-size:23px;font-weight:600;color:var(--emerald);line-height:1.1}
+.stat span{font:11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.warn{margin-top:20px;display:block;max-width:82ch;border:1px solid var(--line);
+  border-left:3px solid var(--gold);background:var(--panel);padding:10px 14px;
+  font-size:13px;color:var(--dim);border-radius:0 6px 6px 0}
+.warn b{color:var(--gold)}
+code{font-family:var(--mono);font-size:.88em;color:var(--emerald)}
+.diagram-wrap{padding:26px 34px 10px}
+.legend{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-bottom:16px;
+  font:11.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:7px;vertical-align:-1px}
+.legend .tip{margin-left:auto;color:var(--faint);text-transform:none;letter-spacing:.04em}
+.scroller{overflow-x:auto;padding-bottom:8px;border:1px solid var(--line);border-radius:10px;background:#0a1512}
+#diagram{display:block;min-width:1354px;max-width:none}
+.colhead{font:600 11px var(--mono);letter-spacing:.16em}
+.colhint{font:11px var(--mono);fill:#4e6a60}
+.nlabel{font:600 13.5px ui-sans-serif,system-ui,sans-serif}
+.nlabel.mono{font:600 12.5px var(--mono)}
+.nsub{font:11px var(--mono);letter-spacing:.05em}
+#diagram .n{cursor:pointer}
+#diagram .n rect{transition:filter .15s,stroke-width .15s}
+#diagram .n:hover rect{filter:brightness(1.35)}
+#diagram .n:focus{outline:none}
+#diagram .n:focus rect,#diagram .n.sel rect{stroke:var(--gold);stroke-width:2.4}
+.edges path{stroke-width:1.5}
+.e-brok{stroke:#2f6b58}
+.e-bus{stroke:#3d7a64;stroke-width:1.2}
+.e-run{stroke:#53659a}
+.e-chain{stroke:#53659a;stroke-dasharray:3 3}
+.e-gate{stroke:#8a4a34}
+.e-loop{stroke:#a9832f;stroke-dasharray:6 4}
+.edgelabel{font:11.5px var(--mono);letter-spacing:.04em}
+.detail-wrap{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;padding:20px 34px 8px;align-items:start}
+@media(max-width:900px){.detail-wrap{grid-template-columns:1fr}#diagram{min-width:1326px}}
+#panel,.entry{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;min-height:150px}
+#panel h3{margin:0;font-size:17px}
+#panel .ar{color:var(--dim);font-size:14px;margin-top:3px}
+#panel .file{font-family:var(--mono);font-size:12px;color:var(--emerald);word-break:break-all;margin:10px 0}
+#panel p{color:var(--dim);font-size:13.5px}
+#panel ul{padding-left:18px;margin:8px 0 0}
+#panel li{color:var(--dim);font-size:13px;margin-bottom:6px}
+.lab{font:600 10.5px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:18px 0 7px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--faint);font:500 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;width:1%}
+td.mono{font-family:var(--mono);font-size:12px;color:#a8d8c6}
+table.wide th{width:auto}
+.danger{color:var(--coral)}
+section.block{padding:22px 34px 6px;max-width:1400px}
+section.block h2{font:600 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--emerald);margin:0 0 14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
+.inv{border:1px solid var(--line);border-left:3px solid var(--emerald);background:var(--panel);
+  padding:13px 15px;border-radius:0 7px 7px 0}
+.inv b{font-size:14px}
+.inv p{margin:5px 0 8px;color:var(--dim);font-size:13px}
+.inv code{font-size:11.5px;color:var(--gold)}
+.inv.open{border-left-color:var(--coral)}
+.inv.open p{margin-bottom:0}
+footer{border-top:1px solid var(--line);margin-top:28px;padding:20px 34px 34px;color:var(--faint);font-size:12.5px;line-height:1.8}
+
 </style>
 </head>
 <body>
 <header>
-  <h1>VOAC <span class="dim">— Architecture &amp; Flows</span></h1>
-  <p class="sub">VOAC — Virtual Orchestration Agent Company (runtime). One Group Broker over per-company rosters, on a shared trace substrate. Agents propose; a named human commits.</p>
+  <div class="eyebrow">H-Nerve · runtime intelligence</div>
+  <h1>VOAC <span class="dim">— Virtual Orchestration Agent Company</span></h1>
+  <p class="sub">One Group Broker over per-company rosters, on a shared trace substrate. Agents propose; a named human commits. Every box below is read from the real source — registry, topology table, Prisma models, skill documents.</p>
+  <div class="stats">
+    <div class="stat"><b>6</b><span>roles</span></div>
+    <div class="stat"><b>1</b><span>supervisor</span></div>
+    <div class="stat"><b>6</b><span>topologies</span></div>
+    <div class="stat"><b>4</b><span>models</span></div>
+    <div class="stat"><b>6</b><span>skill docs</span></div>
+    <div class="stat"><b>89</b><span>unit tests</span></div>
+  </div>
   <div class="warn"><b>VAOC ≠ VOAC.</b> VAOC is the Claude Code subagent company that writes this repo. VOAC ships inside the product. Same primitive, different lifetime. See <code>docs/VAOC.md</code>.</div>
 </header>
 
-<main>
-<div id="map">
-<div class="layer">
-      <div class="layer-head"><h2>Group</h2><span class="hint">The only supervisor</span></div>
-      <div class="row"><button class="node" data-id="group-broker" data-kind="supervisor">
-             <div class="t">Group Broker</div>
-             <div class="ar">وسيط المجموعة</div>
-             <div class="k">supervisor</div>
-           </button></div>
-    </div><div class="layer">
-      <div class="layer-head"><h2>Company rosters</h2><span class="hint">Data, not an org layer</span></div>
-      <div class="row"><button class="node" data-id="hospitality-revenue-controller" data-kind="role">
-             <div class="t">Hospitality Revenue Controller</div>
-             <div class="ar">مراقب إيرادات الضيافة</div>
-             <div class="k">HOSPITALITY</div>
-           </button><button class="node" data-id="dairy-yield-controller" data-kind="role">
-             <div class="t">Dairy Yield Controller</div>
-             <div class="ar">مراقب إنتاجية الألبان</div>
-             <div class="k">DAIRY</div>
-           </button><button class="node" data-id="feed-supply-planner" data-kind="role">
-             <div class="t">Feed Supply Planner</div>
-             <div class="ar">مخطط إمداد الأعلاف</div>
-             <div class="k">AGRICULTURE</div>
-           </button><button class="node" data-id="education-enrolment-analyst" data-kind="role">
-             <div class="t">Education Enrolment Analyst</div>
-             <div class="ar">محلل الالتحاق التعليمي</div>
-             <div class="k">EDUCATION</div>
-           </button><button class="node" data-id="finance-controller" data-kind="role">
-             <div class="t">Finance Controller</div>
-             <div class="ar">المراقب المالي</div>
-             <div class="k">INVESTMENT</div>
-           </button></div>
-    </div><div class="layer">
-      <div class="layer-head"><h2>Substrate</h2><span class="hint">role → skill → run → step → score</span></div>
-      <div class="row"><button class="node" data-id="substrate:role" data-kind="substrate">
-             <div class="t">role</div>
-             
-             <div class="k">substrate</div>
-           </button><span class="flowline">→</span><button class="node" data-id="substrate:skill.md" data-kind="substrate">
-             <div class="t">skill.md</div>
-             
-             <div class="k">substrate</div>
-           </button><span class="flowline">→</span><button class="node" data-id="substrate:AgentRun" data-kind="substrate">
-             <div class="t">AgentRun</div>
-             
-             <div class="k">substrate</div>
-           </button><span class="flowline">→</span><button class="node" data-id="substrate:AgentStep" data-kind="substrate">
-             <div class="t">AgentStep</div>
-             
-             <div class="k">substrate</div>
-           </button><span class="flowline">→</span><button class="node" data-id="substrate:score" data-kind="substrate">
-             <div class="t">score</div>
-             
-             <div class="k">substrate</div>
-           </button></div>
-    </div><div class="layer">
-      <div class="layer-head"><h2>Human gate</h2><span class="hint">Propose, never commit</span></div>
-      <div class="row"><button class="node" data-id="gate:budget" data-kind="gate">
-             <div class="t">Proposal budget</div>
-             
-             <div class="k">gate</div>
-           </button><span class="flowline">→</span><button class="node" data-id="gate:commit" data-kind="gate">
-             <div class="t">Human commits</div>
-             
-             <div class="k">gate</div>
-           </button><span class="flowline">→</span><button class="node" data-id="gate:outcome" data-kind="gate">
-             <div class="t">Outcome recorded</div>
-             
-             <div class="k">gate</div>
-           </button></div>
-    </div><div class="layer">
-      <div class="layer-head"><h2>Offline learning</h2><span class="hint">SkillOpt, in CI only</span></div>
-      <div class="row"><button class="node" data-id="skillopt" data-kind="offline">
-             <div class="t">SkillOpt (offline, CI only)</div>
-             <div class="ar">سكيل‑أوبت — خارج الخدمة</div>
-             <div class="k">offline</div>
-           </button></div>
-    </div>
-</div>
+<section class="diagram-wrap">
+  <div class="legend">
+    <span><i style="background:#2fb98a"></i>Group</span>
+    <span><i style="background:#77c7a9"></i>Company roles</span>
+    <span><i style="background:#93a5dc"></i>Substrate</span>
+    <span><i style="background:#e0714a"></i>Human gate</span>
+    <span><i style="background:#d9a441"></i>Offline learning</span>
+    <span class="tip">click any box → detail below</span>
+  </div>
+  <div class="scroller"><svg id="diagram" viewBox="0 0 1354 502" width="1354" height="502" role="img" aria-label="VOAC architecture: one Group Broker brokers between five company rosters; all runs land on a shared substrate; output passes a capped human gate; SkillOpt rewrites the skill documents offline."><defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 8 4 L 0 8 z" fill="#6c8c81"/></marker><marker id="ahg" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 8 4 L 0 8 z" fill="#d9a441"/></marker></defs><text x="40" y="18" class="colhead" fill="#2fb98a">GROUP</text><text x="40" y="31" class="colhint">The only supervisor</text><text x="322" y="18" class="colhead" fill="#77c7a9">COMPANY ROSTERS</text><text x="322" y="31" class="colhint">Data, not an org layer</text><text x="648" y="18" class="colhead" fill="#93a5dc">SUBSTRATE</text><text x="648" y="31" class="colhint">One ledger, every run</text><text x="900" y="18" class="colhead" fill="#e0714a">HUMAN GATE</text><text x="900" y="31" class="colhint">Propose, never commit</text><text x="1164" y="18" class="colhead" fill="#d9a441">OFFLINE</text><text x="1164" y="31" class="colhint">CI only, zero runtime cost</text><g class="edges"><path d="M 270 222 C 300 222, 292 70, 322 70" class="e-brok" fill="none" marker-end="url(#ah)"/><path d="M 270 222 C 300 222, 292 146, 322 146" class="e-brok" fill="none" marker-end="url(#ah)"/><path d="M 270 222 C 300 222, 292 222, 322 222" class="e-brok" fill="none" marker-end="url(#ah)"/><path d="M 270 222 C 300 222, 292 298, 322 298" class="e-brok" fill="none" marker-end="url(#ah)"/><path d="M 270 222 C 300 222, 292 374, 322 374" class="e-brok" fill="none" marker-end="url(#ah)"/><path d="M 584 70 L 614 70 L 614 374 L 584 374" class="e-bus" fill="none"/><path d="M 614 222 C 674 222, 588 106, 648 106" class="e-run" fill="none" marker-end="url(#ah)"/><path d="M 743 127 L 743 143" class="e-chain" fill="none" marker-end="url(#ah)"/><path d="M 743 185 L 743 201" class="e-chain" fill="none" marker-end="url(#ah)"/><path d="M 743 243 L 743 259" class="e-chain" fill="none" marker-end="url(#ah)"/><path d="M 743 301 L 743 317" class="e-chain" fill="none" marker-end="url(#ah)"/><path d="M 838 338 C 869 338, 869 146, 900 146" class="e-gate" fill="none" marker-end="url(#ah)"/><path d="M 1007 176 L 1007 192" class="e-gate" fill="none" marker-end="url(#ah)"/><path d="M 1007 252 L 1007 268" class="e-gate" fill="none" marker-end="url(#ah)"/><path d="M 1114 298 C 1144 298, 1134 222, 1164 222" class="e-gate" fill="none" marker-end="url(#ah)"/><path d="M 1239 254 L 1239 456 L 743 456 L 743 185" class="e-loop" fill="none" marker-end="url(#ahg)"/></g><text x="946" y="447" class="edgelabel" text-anchor="middle" fill="#d9a441">SkillOpt rewrites the skill document — offline, in CI, zero runtime cost</text><g class="n" data-id="group-broker" tabindex="0" role="button" aria-label="Group Broker"><rect x="40" y="190" width="230" height="64" rx="9" fill="#0f2f27" stroke="#2fb98a"/><text x="55" y="215" class="nlabel" fill="#a7ecd1">Group Broker</text><text x="55" y="234" class="nsub" fill="#2fb98a">وسيط المجموعة</text></g><g class="n" data-id="hospitality-revenue-controller" tabindex="0" role="button" aria-label="Hospitality Revenue Controller"><rect x="322" y="40" width="262" height="60" rx="9" fill="#13241f" stroke="#3d7a64"/><text x="337" y="65" class="nlabel" fill="#d3e9e0">Hospitality Revenue Controller</text><text x="337" y="84" class="nsub" fill="#77c7a9">HOSPITALITY</text></g><g class="n" data-id="dairy-yield-controller" tabindex="0" role="button" aria-label="Dairy Yield Controller"><rect x="322" y="116" width="262" height="60" rx="9" fill="#13241f" stroke="#3d7a64"/><text x="337" y="141" class="nlabel" fill="#d3e9e0">Dairy Yield Controller</text><text x="337" y="160" class="nsub" fill="#77c7a9">DAIRY</text></g><g class="n" data-id="feed-supply-planner" tabindex="0" role="button" aria-label="Feed Supply Planner"><rect x="322" y="192" width="262" height="60" rx="9" fill="#13241f" stroke="#3d7a64"/><text x="337" y="217" class="nlabel" fill="#d3e9e0">Feed Supply Planner</text><text x="337" y="236" class="nsub" fill="#77c7a9">AGRICULTURE</text></g><g class="n" data-id="education-enrolment-analyst" tabindex="0" role="button" aria-label="Education Enrolment Analyst"><rect x="322" y="268" width="262" height="60" rx="9" fill="#13241f" stroke="#3d7a64"/><text x="337" y="293" class="nlabel" fill="#d3e9e0">Education Enrolment Analyst</text><text x="337" y="312" class="nsub" fill="#77c7a9">EDUCATION</text></g><g class="n" data-id="finance-controller" tabindex="0" role="button" aria-label="Finance Controller"><rect x="322" y="344" width="262" height="60" rx="9" fill="#13241f" stroke="#3d7a64"/><text x="337" y="369" class="nlabel" fill="#d3e9e0">Finance Controller</text><text x="337" y="388" class="nsub" fill="#77c7a9">INVESTMENT</text></g><g class="n" data-id="substrate:role" tabindex="0" role="button" aria-label="role"><rect x="648" y="85" width="190" height="42" rx="9" fill="#161e2c" stroke="#53659a"/><text x="663" y="111" class="nlabel mono" fill="#ccd7f2">role</text></g><g class="n" data-id="substrate:skill.md" tabindex="0" role="button" aria-label="skill.md"><rect x="648" y="143" width="190" height="42" rx="9" fill="#161e2c" stroke="#53659a"/><text x="663" y="169" class="nlabel mono" fill="#ccd7f2">skill.md</text></g><g class="n" data-id="substrate:AgentRun" tabindex="0" role="button" aria-label="AgentRun"><rect x="648" y="201" width="190" height="42" rx="9" fill="#161e2c" stroke="#53659a"/><text x="663" y="227" class="nlabel mono" fill="#ccd7f2">AgentRun</text></g><g class="n" data-id="substrate:AgentStep" tabindex="0" role="button" aria-label="AgentStep"><rect x="648" y="259" width="190" height="42" rx="9" fill="#161e2c" stroke="#53659a"/><text x="663" y="285" class="nlabel mono" fill="#ccd7f2">AgentStep</text></g><g class="n" data-id="substrate:score" tabindex="0" role="button" aria-label="score"><rect x="648" y="317" width="190" height="42" rx="9" fill="#161e2c" stroke="#53659a"/><text x="663" y="343" class="nlabel mono" fill="#ccd7f2">score</text></g><g class="n" data-id="gate:budget" tabindex="0" role="button" aria-label="Proposal budget"><rect x="900" y="116" width="214" height="60" rx="9" fill="#2b1a14" stroke="#b45c3f"/><text x="915" y="151" class="nlabel" fill="#f4cbba">Proposal budget</text></g><g class="n" data-id="gate:commit" tabindex="0" role="button" aria-label="Human commits"><rect x="900" y="192" width="214" height="60" rx="9" fill="#2b1a14" stroke="#b45c3f"/><text x="915" y="227" class="nlabel" fill="#f4cbba">Human commits</text></g><g class="n" data-id="gate:outcome" tabindex="0" role="button" aria-label="Outcome recorded"><rect x="900" y="268" width="214" height="60" rx="9" fill="#2b1a14" stroke="#b45c3f"/><text x="915" y="303" class="nlabel" fill="#f4cbba">Outcome recorded</text></g><g class="n" data-id="skillopt" tabindex="0" role="button" aria-label="SkillOpt"><rect x="1164" y="190" width="150" height="64" rx="9" fill="#2b2314" stroke="#a9832f"/><text x="1179" y="215" class="nlabel" fill="#f3ddad">SkillOpt</text><text x="1179" y="234" class="nsub" fill="#d9a441">تدريب خارج الخدمة</text></g></svg></div>
+</section>
 
-<aside id="panel">
-  <div id="panel-body">
-    <h3>Pick a node</h3>
-    <p>Every box is generated from the real source — the role registry, the topology table, the Prisma models and the skill documents. If the code changes and this page does not, the generator was not re-run.</p>
-    <div class="lab">Topologies</div>
-    <table><tr><th>id</th><th>max hops</th><th>cost</th></tr>
-    <tr><td class="mono">chain</td><td>4</td><td>3×</td></tr><tr><td class="mono">route</td><td>2</td><td>2×</td></tr><tr><td class="mono">parallel</td><td>2</td><td>6×</td></tr><tr><td class="mono">orchestrate</td><td>3</td><td>8×</td></tr><tr><td class="mono">evaluate</td><td>6</td><td>5×</td></tr><tr><td class="mono">autonomous</td><td>12</td><td>20×</td></tr>
-    </table>
-    <div class="lab">Models</div>
-    <table><tr><th>model</th><th>fields</th></tr>
-    <tr><td class="mono">VoacRoster</td><td>8</td></tr><tr><td class="mono">AgentRun</td><td>17</td></tr><tr><td class="mono">AgentStep</td><td>17</td></tr><tr><td class="mono">AgentProposal</td><td>16</td></tr>
+<section class="detail-wrap">
+  <div id="panel">
+    <div class="ph">
+      <h3>Pick a box in the diagram</h3>
+      <p>You will get its file path, its skill-document version hash, and the invariants that box is responsible for.</p>
+    </div>
+  </div>
+  <div class="entry">
+    <div class="lab">Entry points</div>
+    <table>
+      <tr><th>driver</th><td class="mono">src/lib/voac/driver.live.ts — runVoac() / runGroupBroker()</td></tr>
+      <tr><th>reuses</th><td class="mono">src/lib/brain/orchestrator.ts (runToolLoop)<br>src/lib/brain/council.live.ts (convene)</td></tr>
+      <tr><th>verify</th><td class="mono">scripts/verify/voac-smoke.ts</td></tr>
+      <tr><th>ceiling</th><td class="mono">scripts/ops/voac-ceiling.ts</td></tr>
     </table>
   </div>
-</aside>
-</main>
-
-<section class="block">
-  <h2>Invariants</h2>
-  <div class="inv"><b>Exactly one supervisor</b><p>A supervisor over agents that share a company holds neither information nor authority its subordinates lack — a pass-through that costs a hop. Only the Group Broker qualifies.</p><p><code>src/lib/voac/roles.test.ts</code></p></div><div class="inv"><b>The proposal queue is capped</b><p>An uncapped queue is either ignored or rubber-stamped, and rubber-stamping silently deletes the human gate. Precision is the product; recall is a liability.</p><p><code>src/lib/voac/budget.ts</code></p></div><div class="inv"><b>Read-mostly</b><p>The VOAC writes AgentProposal rows and nothing else. Domain mutations go through the ordinary server actions.</p><p><code>docs/VOAC-RUNTIME.md §9</code></p></div><div class="inv"><b>A refusal is still a row</b><p>Refused runs are written with status &quot;REFUSED&quot; and a reason. &quot;The agent declined&quot; must be answerable from the ledger, not invisible.</p><p><code>src/lib/voac/runStore.ts</code></p></div><div class="inv"><b>A finished run never reopens</b><p>An audit trail that can be rewritten is not an audit trail.</p><p><code>src/lib/voac/runStore.ts</code></p></div><div class="inv"><b>Two keys: tenantId isolates, companyId organises</b><p>An AgentStep&#39;s output quotes the tenant&#39;s own documents, so a scoping bug leaks source data — not merely metadata.</p><p><code>src/lib/tenancy/workspaceScope.ts</code></p></div>
 </section>
 
 <section class="block">
-  <h2>Not built yet — read before you promise anything</h2>
-  <div class="inv open"><p>No LLM execution driver yet — wiring must reuse brain/orchestrator.ts and council.live.ts, not reimplement debate.</p></div><div class="inv open"><p>No UI surface. The ledger has no screen yet.</p></div><div class="inv open"><p>SkillOpt has no held-out distribution at one client; treat as regression suite until proposal volume and a second reviewer exist.</p></div><div class="inv open"><p>The flagship cross-company flow is bounded by the hotels&#39; purchasing cycle, which is not yet recorded anywhere.</p></div>
+  <h2>Topologies — which shape fires for which work</h2>
+  <table class="wide">
+    <tr><th>id</th><th>english</th><th>arabic</th><th>max hops</th><th>cost</th><th>human opt-in</th></tr>
+    <tr><td class="mono">chain</td><td>Prompt chain</td><td dir="rtl">سلسلة متتابعة</td><td>4</td><td>3×</td><td>—</td></tr><tr><td class="mono">route</td><td>Routing</td><td dir="rtl">توجيه</td><td>2</td><td>2×</td><td>—</td></tr><tr><td class="mono">parallel</td><td>Parallel + vote</td><td dir="rtl">تفرّع متوازٍ وتصويت</td><td>2</td><td>6×</td><td>—</td></tr><tr><td class="mono">orchestrate</td><td>Orchestrator + workers</td><td dir="rtl">منسّق وعمّال</td><td>3</td><td>8×</td><td>—</td></tr><tr><td class="mono">evaluate</td><td>Evaluator loop</td><td dir="rtl">حلقة تقييم</td><td>6</td><td>5×</td><td>—</td></tr><tr><td class="mono">autonomous</td><td>Autonomous</td><td dir="rtl">ذاتي التشغيل</td><td>12</td><td>20×</td><td><b class="danger">required</b></td></tr>
+  </table>
+</section>
+
+<section class="block">
+  <h2>Invariants — enforced in code, not in prose</h2>
+  <div class="grid">
+  <div class="inv"><b>Exactly one supervisor</b><p>A supervisor over agents that share a company holds neither information nor authority its subordinates lack — a pass-through that costs a hop. Only the Group Broker qualifies.</p><code>src/lib/voac/roles.test.ts</code></div><div class="inv"><b>The proposal queue is capped</b><p>An uncapped queue is either ignored or rubber-stamped, and rubber-stamping silently deletes the human gate. Precision is the product; recall is a liability.</p><code>src/lib/voac/budget.ts</code></div><div class="inv"><b>Read-mostly</b><p>The VOAC writes AgentProposal rows and nothing else. Domain mutations go through the ordinary server actions.</p><code>scripts/verify/voac-smoke.ts</code></div><div class="inv"><b>A refusal is still a row</b><p>Refused runs are written with status REFUSED and a reason. The agent declining must be answerable from the ledger, not invisible.</p><code>src/lib/voac/runStore.ts</code></div><div class="inv"><b>Stub is not failure</b><p>A run with no API key configured did not fail — the bookkeeping worked and there was no model behind it. Folding that into FAILED sends someone hunting a defect that does not exist.</p><code>src/lib/voac/runStore.ts</code></div><div class="inv"><b>A finished run never reopens</b><p>An audit trail that can be rewritten is not an audit trail.</p><code>src/lib/voac/runStore.ts</code></div><div class="inv"><b>Never salvage a proposal from prose</b><p>If the output contract is not honoured, zero proposals are extracted. A parser-invented proposal would carry a confidence nobody assigned and reach a manager looking exactly like one the agent stood behind.</p><code>src/lib/voac/proposals.ts</code></div><div class="inv"><b>Two keys: tenantId isolates, companyId organises</b><p>An AgentStep&#39;s output quotes the tenant&#39;s own documents, so a scoping bug leaks source data — not merely metadata.</p><code>src/lib/tenancy/workspaceScope.ts</code></div>
+  </div>
+</section>
+
+<section class="block">
+  <h2>Not built yet — read before promising anything</h2>
+  <div class="grid">
+  <div class="inv open"><p>No UI surface. The ledger has no screen yet — runs are visible only in the database.</p></div><div class="inv open"><p>The driver is request-scoped. Every step is persisted as it happens, so a cron or queue driver is a change of caller, not a rewrite — but that caller does not exist yet.</p></div><div class="inv open"><p>SkillOpt has no held-out distribution at one client; treat it as a regression suite until proposal volume and a second reviewer exist.</p></div><div class="inv open"><p>The flagship cross-company flow is bounded by the hotels&#39; purchasing cycle, which is not recorded anywhere yet.</p></div>
+  </div>
 </section>
 
 <footer>
-  Generated by <code>scripts/build/build-voac-map.mjs</code> · machine-readable twin: <code>docs/architecture/voac.json</code> · narrative: <code>docs/VOAC-RUNTIME.md</code><br>
-  6 roles · 6 topologies · 4 models · 6 skill documents
+  Generated by <code>scripts/build/build-voac-map.mjs</code> · machine-readable twin <code>docs/architecture/voac.json</code> · narrative <code>docs/VOAC-RUNTIME.md</code><br>
+  Re-run the generator after any change under <code>src/lib/voac/</code> — a map that silently lies is worse than no map.
 </footer>
 
 <script>
-const DATA = {"nodes":[{"id":"group-broker","layer":"group","kind":"supervisor","label":"Group Broker","labelAr":"وسيط المجموعة","file":"src/lib/voac/roles.ts","summary":"The ONLY supervisor. Holds the cross-company view and the standing to arbitrate between two companies' P&Ls — the one layer that has something its subordinates lack.","invariants":["companyId is NULL — it belongs to the group, never to one company","Runs `parallel`: two P&Ls means competing objectives","Must state a transfer-pricing basis before proposing an intercompany move","Cannot propose perishables across a border"]},{"id":"hospitality-revenue-controller","layer":"roster","kind":"role","label":"Hospitality Revenue Controller","labelAr":"مراقب إيرادات الضيافة","sector":"HOSPITALITY","file":"src/lib/voac/skills/hospitality-revenue-controller.md","summary":"Sector HOSPITALITY. Default topology `route`. Tools: pullFacts, simulate, narrate.","invariants":["Company-scoped — a run without a companyId is refused"]},{"id":"dairy-yield-controller","layer":"roster","kind":"role","label":"Dairy Yield Controller","labelAr":"مراقب إنتاجية الألبان","sector":"DAIRY","file":"src/lib/voac/skills/dairy-yield-controller.md","summary":"Sector DAIRY. Default topology `route`. Tools: pullFacts, causalSubgraph, narrate.","invariants":["Company-scoped — a run without a companyId is refused"]},{"id":"feed-supply-planner","layer":"roster","kind":"role","label":"Feed Supply Planner","labelAr":"مخطط إمداد الأعلاف","sector":"AGRICULTURE","file":"src/lib/voac/skills/feed-supply-planner.md","summary":"Sector AGRICULTURE. Default topology `chain`. Tools: pullFacts, simulate, narrate.","invariants":["Company-scoped — a run without a companyId is refused"]},{"id":"education-enrolment-analyst","layer":"roster","kind":"role","label":"Education Enrolment Analyst","labelAr":"محلل الالتحاق التعليمي","sector":"EDUCATION","file":"src/lib/voac/skills/education-enrolment-analyst.md","summary":"Sector EDUCATION. Default topology `route`. Tools: pullFacts, narrate.","invariants":["Company-scoped — a run without a companyId is refused"]},{"id":"finance-controller","layer":"roster","kind":"role","label":"Finance Controller","labelAr":"المراقب المالي","sector":"INVESTMENT","file":"src/lib/voac/skills/finance-controller.md","summary":"Sector INVESTMENT. Default topology `chain`. Tools: pullFacts, causalSubgraph, retrieveDocuments, narrate.","invariants":["Company-scoped — a run without a companyId is refused"]},{"id":"substrate:role","layer":"substrate","kind":"substrate","label":"role","summary":"The identity and its tools","file":"src/lib/voac/roles.ts"},{"id":"substrate:skill.md","layer":"substrate","kind":"substrate","label":"skill.md","summary":"Instructions as a trainable markdown document","file":"src/lib/voac/skills/"},{"id":"substrate:AgentRun","layer":"substrate","kind":"substrate","label":"AgentRun","summary":"One invocation under one topology","file":"prisma/schema/voac.prisma"},{"id":"substrate:AgentStep","layer":"substrate","kind":"substrate","label":"AgentStep","summary":"One step; parentStepId keeps fan-out distinguishable from hand-off","file":"prisma/schema/voac.prisma"},{"id":"substrate:score","layer":"substrate","kind":"substrate","label":"score","summary":"Nullable — unscored must stay visibly unscored","file":"src/lib/voac/runStore.ts"},{"id":"gate:budget","layer":"gate","kind":"gate","label":"Proposal budget","summary":"Hard cap per human per day. Ranks on expected value; reports everything it held back.","file":"src/lib/voac/budget.ts"},{"id":"gate:commit","layer":"gate","kind":"gate","label":"Human commits","summary":"A named approver. Liability sits with whoever clicked.","file":"src/lib/voac/runStore.ts"},{"id":"gate:outcome","layer":"gate","kind":"gate","label":"Outcome recorded","summary":"Realized value, 30–60 days later. The only non-circular signal in the system.","file":"prisma/schema/voac.prisma"},{"id":"skillopt","layer":"learn","kind":"offline","label":"SkillOpt (offline, CI only)","labelAr":"سكيل‑أوبت — خارج الخدمة","file":"scripts/build/build-voac-skills.mjs","summary":"Trains the markdown skill documents against recorded outcomes and ships a static best_skill.md. Python + long-running loop, so it can never run in the Worker — which is why runtime inference cost is unchanged.","invariants":["Never runs at request time — zero extra inference calls","At one client there is no held-out distribution: today this is a regression suite, NOT training","Never train on self-assessed scores alone — that reward is circular"]}],"roles":[{"id":"group-broker","labelAr":"وسيط المجموعة","labelEn":"Group Broker","sector":"GROUP","skillDocId":"group-broker","defaultTopology":"parallel","tools":["pullFacts","causalSubgraph","councilDebate","recallMemory","narrate"]},{"id":"hospitality-revenue-controller","labelAr":"مراقب إيرادات الضيافة","labelEn":"Hospitality Revenue Controller","sector":"HOSPITALITY","skillDocId":"hospitality-revenue-controller","defaultTopology":"route","tools":["pullFacts","simulate","narrate"]},{"id":"dairy-yield-controller","labelAr":"مراقب إنتاجية الألبان","labelEn":"Dairy Yield Controller","sector":"DAIRY","skillDocId":"dairy-yield-controller","defaultTopology":"route","tools":["pullFacts","causalSubgraph","narrate"]},{"id":"feed-supply-planner","labelAr":"مخطط إمداد الأعلاف","labelEn":"Feed Supply Planner","sector":"AGRICULTURE","skillDocId":"feed-supply-planner","defaultTopology":"chain","tools":["pullFacts","simulate","narrate"]},{"id":"education-enrolment-analyst","labelAr":"محلل الالتحاق التعليمي","labelEn":"Education Enrolment Analyst","sector":"EDUCATION","skillDocId":"education-enrolment-analyst","defaultTopology":"route","tools":["pullFacts","narrate"]},{"id":"finance-controller","labelAr":"المراقب المالي","labelEn":"Finance Controller","sector":"INVESTMENT","skillDocId":"finance-controller","defaultTopology":"chain","tools":["pullFacts","causalSubgraph","retrieveDocuments","narrate"]}],"skills":[{"id":"dairy-yield-controller","title":"Dairy Yield Controller","version":"13de0264","chars":2064,"hardLimits":1},{"id":"education-enrolment-analyst","title":"Education Enrolment Analyst","version":"d9474d13","chars":1658,"hardLimits":0},{"id":"feed-supply-planner","title":"Feed Supply Planner","version":"f47d0a65","chars":1808,"hardLimits":1},{"id":"finance-controller","title":"Finance Controller","version":"2f3fddc5","chars":1716,"hardLimits":1},{"id":"group-broker","title":"Group Broker","version":"b113a296","chars":3362,"hardLimits":2},{"id":"hospitality-revenue-controller","title":"Hospitality Revenue Controller","version":"1e25cf52","chars":1921,"hardLimits":1}]};
-const body = document.getElementById('panel-body');
+const DATA = {"nodes":[{"id":"group-broker","layer":"group","kind":"supervisor","label":"Group Broker","labelAr":"وسيط المجموعة","file":"src/lib/voac/roles.ts","summary":"The ONLY supervisor. Holds the cross-company view and the standing to arbitrate between two companies' P&Ls — the one layer that has something its subordinates lack.","invariants":["companyId is NULL — it belongs to the group, never to one company","Runs parallel: two P&Ls means competing objectives","Must state a transfer-pricing basis before proposing an intercompany move","Cannot propose perishables across a border"]},{"id":"hospitality-revenue-controller","layer":"roster","kind":"role","label":"Hospitality Revenue Controller","labelAr":"مراقب إيرادات الضيافة","sector":"HOSPITALITY","file":"src/lib/voac/skills/hospitality-revenue-controller.md","summary":"Sector HOSPITALITY. Default topology route. Tools: pullFacts, simulate, narrate.","invariants":["Company-scoped — a run without a companyId is refused"]},{"id":"dairy-yield-controller","layer":"roster","kind":"role","label":"Dairy Yield Controller","labelAr":"مراقب إنتاجية الألبان","sector":"DAIRY","file":"src/lib/voac/skills/dairy-yield-controller.md","summary":"Sector DAIRY. Default topology route. Tools: pullFacts, causalSubgraph, narrate.","invariants":["Company-scoped — a run without a companyId is refused"]},{"id":"feed-supply-planner","layer":"roster","kind":"role","label":"Feed Supply Planner","labelAr":"مخطط إمداد الأعلاف","sector":"AGRICULTURE","file":"src/lib/voac/skills/feed-supply-planner.md","summary":"Sector AGRICULTURE. Default topology chain. Tools: pullFacts, simulate, narrate.","invariants":["Company-scoped — a run without a companyId is refused"]},{"id":"education-enrolment-analyst","layer":"roster","kind":"role","label":"Education Enrolment Analyst","labelAr":"محلل الالتحاق التعليمي","sector":"EDUCATION","file":"src/lib/voac/skills/education-enrolment-analyst.md","summary":"Sector EDUCATION. Default topology route. Tools: pullFacts, narrate.","invariants":["Company-scoped — a run without a companyId is refused"]},{"id":"finance-controller","layer":"roster","kind":"role","label":"Finance Controller","labelAr":"المراقب المالي","sector":"INVESTMENT","file":"src/lib/voac/skills/finance-controller.md","summary":"Sector INVESTMENT. Default topology chain. Tools: pullFacts, causalSubgraph, retrieveDocuments, narrate.","invariants":["Company-scoped — a run without a companyId is refused"]},{"id":"substrate:role","layer":"substrate","kind":"substrate","label":"role","summary":"The identity and its tools","file":"src/lib/voac/roles.ts"},{"id":"substrate:skill.md","layer":"substrate","kind":"substrate","label":"skill.md","summary":"Instructions as a trainable markdown document","file":"src/lib/voac/skills/"},{"id":"substrate:AgentRun","layer":"substrate","kind":"substrate","label":"AgentRun","summary":"One invocation under one topology","file":"prisma/schema/voac.prisma"},{"id":"substrate:AgentStep","layer":"substrate","kind":"substrate","label":"AgentStep","summary":"One step; parentStepId keeps fan-out distinguishable from hand-off","file":"prisma/schema/voac.prisma"},{"id":"substrate:score","layer":"substrate","kind":"substrate","label":"score","summary":"Nullable — unscored must stay visibly unscored","file":"src/lib/voac/runStore.ts"},{"id":"gate:budget","layer":"gate","kind":"gate","label":"Proposal budget","summary":"Hard cap per human per day. Ranks on expected value; reports everything it held back.","file":"src/lib/voac/budget.ts"},{"id":"gate:commit","layer":"gate","kind":"gate","label":"Human commits","summary":"A named approver. Liability sits with whoever clicked.","file":"src/lib/voac/runStore.ts"},{"id":"gate:outcome","layer":"gate","kind":"gate","label":"Outcome recorded","summary":"Realized value, 30-60 days later. The only non-circular signal in the system.","file":"prisma/schema/voac.prisma"},{"id":"skillopt","layer":"learn","kind":"offline","label":"SkillOpt","labelAr":"تدريب خارج الخدمة","file":"scripts/build/build-voac-skills.mjs","summary":"Trains the markdown skill documents against recorded outcomes and ships a static best_skill.md. Python plus a long-running loop, so it can never run in the Worker — which is why runtime inference cost is unchanged.","invariants":["Never runs at request time — zero extra inference calls","At one client there is no held-out distribution: today this is a regression suite, NOT training","Never train on self-assessed scores alone — that reward is circular"]}],"roles":[{"id":"group-broker","labelAr":"وسيط المجموعة","labelEn":"Group Broker","sector":"GROUP","skillDocId":"group-broker","defaultTopology":"parallel","tools":["pullFacts","causalSubgraph","councilDebate","recallMemory","narrate"]},{"id":"hospitality-revenue-controller","labelAr":"مراقب إيرادات الضيافة","labelEn":"Hospitality Revenue Controller","sector":"HOSPITALITY","skillDocId":"hospitality-revenue-controller","defaultTopology":"route","tools":["pullFacts","simulate","narrate"]},{"id":"dairy-yield-controller","labelAr":"مراقب إنتاجية الألبان","labelEn":"Dairy Yield Controller","sector":"DAIRY","skillDocId":"dairy-yield-controller","defaultTopology":"route","tools":["pullFacts","causalSubgraph","narrate"]},{"id":"feed-supply-planner","labelAr":"مخطط إمداد الأعلاف","labelEn":"Feed Supply Planner","sector":"AGRICULTURE","skillDocId":"feed-supply-planner","defaultTopology":"chain","tools":["pullFacts","simulate","narrate"]},{"id":"education-enrolment-analyst","labelAr":"محلل الالتحاق التعليمي","labelEn":"Education Enrolment Analyst","sector":"EDUCATION","skillDocId":"education-enrolment-analyst","defaultTopology":"route","tools":["pullFacts","narrate"]},{"id":"finance-controller","labelAr":"المراقب المالي","labelEn":"Finance Controller","sector":"INVESTMENT","skillDocId":"finance-controller","defaultTopology":"chain","tools":["pullFacts","causalSubgraph","retrieveDocuments","narrate"]}],"skills":[{"id":"dairy-yield-controller","title":"Dairy Yield Controller","version":"13de0264","chars":2064,"hardLimits":1},{"id":"education-enrolment-analyst","title":"Education Enrolment Analyst","version":"d9474d13","chars":1658,"hardLimits":0},{"id":"feed-supply-planner","title":"Feed Supply Planner","version":"f47d0a65","chars":1808,"hardLimits":1},{"id":"finance-controller","title":"Finance Controller","version":"2f3fddc5","chars":1716,"hardLimits":1},{"id":"group-broker","title":"Group Broker","version":"b113a296","chars":3362,"hardLimits":2},{"id":"hospitality-revenue-controller","title":"Hospitality Revenue Controller","version":"1e25cf52","chars":1921,"hardLimits":1}]};
+const panel = document.getElementById('panel');
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function render(n){
   const role = DATA.roles.find(r => r.id === n.id);
   const skill = role ? DATA.skills.find(s => s.id === role.skillDocId) : null;
-  let h = '<h3>' + n.label + '</h3>';
-  if (n.labelAr) h += '<div class="ar">' + n.labelAr + '</div>';
-  if (n.file) h += '<div class="file">' + n.file + '</div>';
-  h += '<p>' + n.summary + '</p>';
+  let h = '<div class="ph"><h3>' + esc(n.label) + '</h3>';
+  if (n.labelAr) h += '<div class="ar" dir="rtl">' + esc(n.labelAr) + '</div>';
+  h += '</div>';
+  if (n.file) h += '<div class="file">' + esc(n.file) + '</div>';
+  h += '<p>' + esc(n.summary) + '</p>';
   if (role) {
     h += '<div class="lab">Role</div><table>'
-      + '<tr><th>sector</th><td class="mono">' + role.sector + '</td></tr>'
-      + '<tr><th>topology</th><td class="mono">' + role.defaultTopology + '</td></tr>'
-      + '<tr><th>tools</th><td>' + (role.tools.join(', ') || '—') + '</td></tr>'
+      + '<tr><th>sector</th><td class="mono">' + esc(role.sector) + '</td></tr>'
+      + '<tr><th>topology</th><td class="mono">' + esc(role.defaultTopology) + '</td></tr>'
+      + '<tr><th>tools</th><td>' + esc(role.tools.join(', ') || 'none') + '</td></tr>'
       + '</table>';
   }
   if (skill) {
     h += '<div class="lab">Skill document</div><table>'
-      + '<tr><th>version</th><td class="mono">' + skill.version + '</td></tr>'
+      + '<tr><th>version</th><td class="mono">' + esc(skill.version) + '</td></tr>'
       + '<tr><th>size</th><td>' + skill.chars + ' chars</td></tr>'
       + '<tr><th>hard limits</th><td>' + skill.hardLimits + '</td></tr>'
       + '</table>';
   }
   if (n.invariants && n.invariants.length) {
-    h += '<div class="lab">Invariants</div><ul>' + n.invariants.map(i => '<li>' + i + '</li>').join('') + '</ul>';
+    h += '<div class="lab">Invariants</div><ul>' + n.invariants.map(i => '<li>' + esc(i) + '</li>').join('') + '</ul>';
   }
-  body.innerHTML = h;
+  panel.innerHTML = h;
+  panel.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
-document.querySelectorAll('.node').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.node').forEach(b => b.classList.remove('sel'));
-    btn.classList.add('sel');
-    const n = DATA.nodes.find(x => x.id === btn.dataset.id);
-    if (n) render(n);
-  });
+function select(g){
+  document.querySelectorAll('#diagram .n').forEach(x => x.classList.remove('sel'));
+  g.classList.add('sel');
+  const n = DATA.nodes.find(x => x.id === g.dataset.id);
+  if (n) render(n);
+}
+document.querySelectorAll('#diagram .n').forEach(g => {
+  g.addEventListener('click', () => select(g));
+  g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(g); } });
 });
 </script>
 </body>

@@ -88,7 +88,7 @@ export async function appendStep(input: AppendStepInput) {
 /** Close a run, rolling its totals up from the steps actually recorded. */
 export async function closeRun(
   runId: string,
-  opts: { budgetExhausted?: boolean; llmCalls?: number } = {},
+  opts: { budgetExhausted?: boolean; stub?: boolean; llmCalls?: number } = {},
 ): Promise<{ status: RunStatus }> {
   const steps = await prisma.agentStep.findMany({
     where: { runId },

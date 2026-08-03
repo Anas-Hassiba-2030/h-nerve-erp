@@ -11,6 +11,22 @@
   "docs": [
     "docs/VOAC-RUNTIME.md"
   ],
+  "entryPoints": {
+    "driver": "src/lib/voac/driver.live.ts — runVoac() / runGroupBroker()",
+    "reuses": [
+      "src/lib/brain/orchestrator.ts (runToolLoop)",
+      "src/lib/brain/council.live.ts (convene)"
+    ],
+    "verify": "scripts/verify/voac-smoke.ts",
+    "ceiling": "scripts/ops/voac-ceiling.ts"
+  },
+  "stats": {
+    "roles": 6,
+    "topologies": 6,
+    "models": 4,
+    "skillDocs": 6,
+    "unitTests": 89
+  },
   "layers": [
     {
       "id": "group",
@@ -28,7 +44,7 @@
       "id": "substrate",
       "label": "Substrate",
       "labelAr": "الأساس",
-      "hint": "role → skill → run → step → score"
+      "hint": "One ledger, every run"
     },
     {
       "id": "gate",
@@ -38,9 +54,9 @@
     },
     {
       "id": "learn",
-      "label": "Offline learning",
-      "labelAr": "تعلّم خارج الخدمة",
-      "hint": "SkillOpt, in CI only"
+      "label": "Offline",
+      "labelAr": "خارج الخدمة",
+      "hint": "CI only, zero runtime cost"
     }
   ],
   "nodes": [
@@ -54,7 +70,7 @@
       "summary": "The ONLY supervisor. Holds the cross-company view and the standing to arbitrate between two companies' P&Ls — the one layer that has something its subordinates lack.",
       "invariants": [
         "companyId is NULL — it belongs to the group, never to one company",
-        "Runs `parallel`: two P&Ls means competing objectives",
+        "Runs parallel: two P&Ls means competing objectives",
         "Must state a transfer-pricing basis before proposing an intercompany move",
         "Cannot propose perishables across a border"
       ]
@@ -67,7 +83,7 @@
       "labelAr": "مراقب إيرادات الضيافة",
       "sector": "HOSPITALITY",
       "file": "src/lib/voac/skills/hospitality-revenue-controller.md",
-      "summary": "Sector HOSPITALITY. Default topology `route`. Tools: pullFacts, simulate, narrate.",
+      "summary": "Sector HOSPITALITY. Default topology route. Tools: pullFacts, simulate, narrate.",
       "invariants": [
         "Company-scoped — a run without a companyId is refused"
       ]
@@ -80,7 +96,7 @@
       "labelAr": "مراقب إنتاجية الألبان",
       "sector": "DAIRY",
       "file": "src/lib/voac/skills/dairy-yield-controller.md",
-      "summary": "Sector DAIRY. Default topology `route`. Tools: pullFacts, causalSubgraph, narrate.",
+      "summary": "Sector DAIRY. Default topology route. Tools: pullFacts, causalSubgraph, narrate.",
       "invariants": [
         "Company-scoped — a run without a companyId is refused"
       ]
@@ -93,7 +109,7 @@
       "labelAr": "مخطط إمداد الأعلاف",
       "sector": "AGRICULTURE",
       "file": "src/lib/voac/skills/feed-supply-planner.md",
-      "summary": "Sector AGRICULTURE. Default topology `chain`. Tools: pullFacts, simulate, narrate.",
+      "summary": "Sector AGRICULTURE. Default topology chain. Tools: pullFacts, simulate, narrate.",
       "invariants": [
         "Company-scoped — a run without a companyId is refused"
       ]
@@ -106,7 +122,7 @@
       "labelAr": "محلل الالتحاق التعليمي",
       "sector": "EDUCATION",
       "file": "src/lib/voac/skills/education-enrolment-analyst.md",
-      "summary": "Sector EDUCATION. Default topology `route`. Tools: pullFacts, narrate.",
+      "summary": "Sector EDUCATION. Default topology route. Tools: pullFacts, narrate.",
       "invariants": [
         "Company-scoped — a run without a companyId is refused"
       ]
@@ -119,7 +135,7 @@
       "labelAr": "المراقب المالي",
       "sector": "INVESTMENT",
       "file": "src/lib/voac/skills/finance-controller.md",
-      "summary": "Sector INVESTMENT. Default topology `chain`. Tools: pullFacts, causalSubgraph, retrieveDocuments, narrate.",
+      "summary": "Sector INVESTMENT. Default topology chain. Tools: pullFacts, causalSubgraph, retrieveDocuments, narrate.",
       "invariants": [
         "Company-scoped — a run without a companyId is refused"
       ]
@@ -185,17 +201,17 @@
       "layer": "gate",
       "kind": "gate",
       "label": "Outcome recorded",
-      "summary": "Realized value, 30–60 days later. The only non-circular signal in the system.",
+      "summary": "Realized value, 30-60 days later. The only non-circular signal in the system.",
       "file": "prisma/schema/voac.prisma"
     },
     {
       "id": "skillopt",
       "layer": "learn",
       "kind": "offline",
-      "label": "SkillOpt (offline, CI only)",
-      "labelAr": "سكيل‑أوبت — خارج الخدمة",
+      "label": "SkillOpt",
+      "labelAr": "تدريب خارج الخدمة",
       "file": "scripts/build/build-voac-skills.mjs",
-      "summary": "Trains the markdown skill documents against recorded outcomes and ships a static best_skill.md. Python + long-running loop, so it can never run in the Worker — which is why runtime inference cost is unchanged.",
+      "summary": "Trains the markdown skill documents against recorded outcomes and ships a static best_skill.md. Python plus a long-running loop, so it can never run in the Worker — which is why runtime inference cost is unchanged.",
       "invariants": [
         "Never runs at request time — zero extra inference calls",
         "At one client there is no held-out distribution: today this is a regression suite, NOT training",
@@ -540,12 +556,18 @@
       "id": "read-mostly",
       "title": "Read-mostly",
       "body": "The VOAC writes AgentProposal rows and nothing else. Domain mutations go through the ordinary server actions.",
-      "enforcedBy": "docs/VOAC-RUNTIME.md §9"
+      "enforcedBy": "scripts/verify/voac-smoke.ts"
     },
     {
       "id": "refusal-is-a-row",
       "title": "A refusal is still a row",
-      "body": "Refused runs are written with status \"REFUSED\" and a reason. \"The agent declined\" must be answerable from the ledger, not invisible.",
+      "body": "Refused runs are written with status REFUSED and a reason. The agent declining must be answerable from the ledger, not invisible.",
+      "enforcedBy": "src/lib/voac/runStore.ts"
+    },
+    {
+      "id": "stub-is-not-failure",
+      "title": "Stub is not failure",
+      "body": "A run with no API key configured did not fail — the bookkeeping worked and there was no model behind it. Folding that into FAILED sends someone hunting a defect that does not exist.",
       "enforcedBy": "src/lib/voac/runStore.ts"
     },
     {
@@ -555,6 +577,12 @@
       "enforcedBy": "src/lib/voac/runStore.ts"
     },
     {
+      "id": "no-invented-proposals",
+      "title": "Never salvage a proposal from prose",
+      "body": "If the output contract is not honoured, zero proposals are extracted. A parser-invented proposal would carry a confidence nobody assigned and reach a manager looking exactly like one the agent stood behind.",
+      "enforcedBy": "src/lib/voac/proposals.ts"
+    },
+    {
       "id": "two-keys",
       "title": "Two keys: tenantId isolates, companyId organises",
       "body": "An AgentStep's output quotes the tenant's own documents, so a scoping bug leaks source data — not merely metadata.",
@@ -562,9 +590,9 @@
     }
   ],
   "openQuestions": [
-    "No LLM execution driver yet — wiring must reuse brain/orchestrator.ts and council.live.ts, not reimplement debate.",
-    "No UI surface. The ledger has no screen yet.",
-    "SkillOpt has no held-out distribution at one client; treat as regression suite until proposal volume and a second reviewer exist.",
-    "The flagship cross-company flow is bounded by the hotels' purchasing cycle, which is not yet recorded anywhere."
+    "No UI surface. The ledger has no screen yet — runs are visible only in the database.",
+    "The driver is request-scoped. Every step is persisted as it happens, so a cron or queue driver is a change of caller, not a rewrite — but that caller does not exist yet.",
+    "SkillOpt has no held-out distribution at one client; treat it as a regression suite until proposal volume and a second reviewer exist.",
+    "The flagship cross-company flow is bounded by the hotels' purchasing cycle, which is not recorded anywhere yet."
   ]
 }

@@ -73,7 +73,9 @@ model AgentRun {
   topology  String
 
   objective String
-  /// "RUNNING" | "SUCCEEDED" | "FAILED" | "BUDGET_EXHAUSTED" | "REFUSED"
+  /// "RUNNING" | "SUCCEEDED" | "FAILED" | "BUDGET_EXHAUSTED" | "REFUSED" | "STUB"
+  /// STUB is separate from FAILED on purpose: a run with no API key configured
+  /// did not fail — there was simply no model behind it. See runStore.ts.
   status    String   @default("RUNNING")
 
   /// Which version of the role's skill document produced this run. Without

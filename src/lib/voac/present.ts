@@ -93,7 +93,14 @@ export function scoreLabel(
  * is not calibrated, and rendering "0.62" implies a precision that does not
  * exist.
  */
-export function confidenceBand(confidence: number): Labelled {
+export function confidenceBand(confidence: number | null | undefined): Labelled {
+  // An unstated confidence must NOT fall back to a middle band. Rendering
+  // "medium confidence" for a proposal whose agent never claimed one puts a
+  // fabricated signal in front of someone making a decision — and it is
+  // indistinguishable from a genuine 0.5.
+  if (confidence === null || confidence === undefined || Number.isNaN(confidence)) {
+    return { ar: "ثقة غير مذكورة", en: "Confidence not stated", tone: "muted" };
+  }
   const c = Math.min(1, Math.max(0, confidence));
   if (c >= 0.7) return { ar: "ثقة عالية", en: "High confidence", tone: "ok" };
   if (c >= 0.4) return { ar: "ثقة متوسطة", en: "Medium confidence", tone: "warn" };

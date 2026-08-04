@@ -95,14 +95,21 @@ export default async function VoacPage() {
         ) : (
           <ul className="vo-list">
             {pending.map((p) => {
-              const band = confidenceBand(0.5);
+              // The agent's OWN stated confidence — the number budget.ts ranked
+              // this proposal by. Shown next to the value so "why is this one
+              // first?" is answerable, and shown as "not stated" when the agent
+              // never claimed one.
+              const band = confidenceBand(p.confidence);
               return (
                 <li key={p.id} className="vo-card">
                   <div className="vo-card-head">
                     <h3>{p.title}</h3>
-                    <span className={`vo-tag vo-${band.tone}`}>
+                    <span className="vo-tag">
                       {valueLabel(p.estimatedValueJod, ar ? "ar" : "en")}
                     </span>
+                  </div>
+                  <div className="vo-conf">
+                    <span className={`vo-tag vo-${band.tone}`}>{ar ? band.ar : band.en}</span>
                   </div>
                   <p className="vo-rationale">{p.rationale}</p>
                   <div className="vo-meta">

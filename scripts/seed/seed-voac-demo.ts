@@ -85,6 +85,9 @@ async function main() {
       rationale:
         "المشطوب خلال الفترة 41,377 د.أ مقابل 3,711 د.أ فقط قابلة للاسترداد من الدفعات القريبة من انتهاء الصلاحية — نسبة أحد عشر إلى واحد. الخسارة تنشأ قبل التوزيع، في حجم الإنتاج نفسه. خفض مؤقت بنسبة 12٪ على الصنفين الأكثر هدراً يعالج المصدر بدل معالجة الأثر. يُراجَع بعد أسبوعين مقابل خط المبيعات.",
       estimatedValueJod: 9800,
+      // Stated by the agent and used by budget.ts to rank — so it must be
+      // visible to whoever reads the queue.
+      confidence: 0.82,
     },
   });
 
@@ -94,7 +97,11 @@ async function main() {
       title: "مراجعة إعدادات التبريد في خط الزبادي",
       rationale:
         "قراءات سلسلة التبريد وفاقد الإنتاجية يتحركان معاً على خط الزبادي. المؤشر واضح، أما السبب فيحتاج فحصاً هندسياً — لا يُقترح هنا تشخيص للعطل.",
+      // Deliberately unquantified AND low-confidence: the queue must be able to
+      // show an honest "I noticed something but cannot size it" without that
+      // reading as a confident recommendation.
       estimatedValueJod: null,
+      confidence: 0.35,
     },
   });
 
@@ -124,6 +131,7 @@ async function main() {
         rationale:
           "التوريد الداخلي يخصم من هامش المها ويوفّر على الفنادق — أي أن مدير الشركة الأولى محقّ في رفضه ما لم توجد قاعدة تسعير معتمدة. المقترح هنا هو القاعدة نفسها (أساس التسعير ومن يتحمّل الفرق)، لا الصفقة. قرار المدير المالي للمجموعة.",
         estimatedValueJod: 2400,
+        confidence: 0.55,
       },
     });
   }

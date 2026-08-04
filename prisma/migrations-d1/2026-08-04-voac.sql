@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS "AgentProposal" (
     "decisionNote" TEXT,
     "realizedValueJod" REAL,
     "realizedAt" DATETIME,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, "confidence" REAL,
     CONSTRAINT "AgentProposal_runId_fkey" FOREIGN KEY ("runId") REFERENCES "AgentRun" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE IF NOT EXISTS "AgentRun" (

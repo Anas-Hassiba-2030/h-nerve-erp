@@ -288,6 +288,7 @@ export async function runVoac(input: RunVoacInput): Promise<RunVoacResult> {
       title: p.title,
       rationale: p.rationale,
       estimatedValueJod: p.estimatedValueJod ?? null,
+      confidence: p.confidence,
     });
     created += 1;
   }

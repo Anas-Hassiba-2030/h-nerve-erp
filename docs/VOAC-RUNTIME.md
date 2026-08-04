@@ -228,6 +228,11 @@ Three editorial stances are enforced here, not merely intended:
 3. **A self-assessed score never looks like a human one.** `scoreLabel` names
    the source in the label itself and marks self-scores untrustworthy — that is
    how a circular reward loop gets built by accident.
+4. **Confidence is shown, and never invented.** `budget.ts` *ranks* the queue by
+   the agent's stated confidence, so it is persisted on `AgentProposal` and
+   displayed — a queue ordered by a number the reader cannot see is unauditable,
+   and "why is this one first?" has to be answerable. When the agent stated
+   none, the card reads **"confidence not stated"**, never a middle band.
 
 Accepting a proposal records the decision **only**. Carrying it out remains an
 ordinary action in the relevant module; the VOAC still never touches a domain

@@ -177,6 +177,16 @@ model AgentProposal {
   /// diagram — so the system is built to produce one from day one.
   estimatedValueJod Float?
 
+  /// 0..1 — how much the agent believed its OWN estimate, as stated in the
+  /// output contract. Persisted because budget.ts ranks on it: a queue ordered
+  /// by a number the reader cannot see is unauditable, and "why is this one
+  /// first?" has to be answerable.
+  ///
+  /// NULLABLE, and the UI must say "not stated" rather than assuming a middle
+  /// value. A displayed confidence nobody asserted is a fabricated signal in
+  /// front of someone making a decision.
+  confidence Float?
+
   /// "PENDING" | "ACCEPTED" | "REJECTED" | "EXPIRED"
   status      String   @default("PENDING")
   /// User.id of the human who committed or rejected it. Liability sits with

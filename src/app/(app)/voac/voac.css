@@ -26,6 +26,8 @@
 }
 .vo-card-head h3 { margin: 0; font-size: 15px; font-weight: 600; line-height: 1.4; }
 
+.vo-conf { margin: 0 0 8px; }
+
 .vo-rationale { margin: 0 0 10px; font-size: 13.5px; line-height: 1.65; color: var(--dl-ink-dim, #6b6355); }
 
 .vo-meta {

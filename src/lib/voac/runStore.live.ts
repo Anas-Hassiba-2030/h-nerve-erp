@@ -121,6 +121,8 @@ export type ProposalInput = {
   title: string;
   rationale: string;
   estimatedValueJod?: number | null;
+  /** 0..1, as stated by the agent. Null when it did not state one. */
+  confidence?: number | null;
 };
 
 /**
@@ -138,6 +140,9 @@ export async function createProposal(input: ProposalInput) {
       title: input.title,
       rationale: input.rationale,
       estimatedValueJod: input.estimatedValueJod ?? null,
+      // Kept, not dropped: budget.ts ranked this proposal using it, so the
+      // reader has to be able to see the number that put it where it is.
+      confidence: input.confidence ?? null,
       status: "PENDING",
     },
   });

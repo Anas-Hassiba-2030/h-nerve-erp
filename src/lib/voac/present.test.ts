@@ -96,6 +96,19 @@ describe("confidenceBand", () => {
     expect(confidenceBand(9).en).toBe("High confidence");
     expect(confidenceBand(-1).en).toBe("Low confidence");
   });
+
+  it("NEVER invents a band for an unstated confidence", () => {
+    // The original page hardcoded confidenceBand(0.5), so every proposal showed
+    // "medium confidence" whether or not the agent claimed one — a fabricated
+    // signal in front of someone making a decision, indistinguishable from a
+    // genuine 0.5.
+    for (const missing of [null, undefined, NaN]) {
+      const b = confidenceBand(missing);
+      expect(b.en, String(missing)).toBe("Confidence not stated");
+      expect(b.tone, String(missing)).toBe("muted");
+    }
+    expect(confidenceBand(0.5).en).toBe("Medium confidence");
+  });
 });
 
 describe("valueLabel", () => {

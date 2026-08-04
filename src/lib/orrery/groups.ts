@@ -83,6 +83,11 @@ const INTEL_SUBGROUPS: OrrerySubgroup[] = [
     nameAr: "الإجراءات",
     nameEn: "Act",
     children: [
+      // First in "Act" because it is the only surface here where the system is
+      // waiting on a NAMED human before anything happens. Alerts and plans can
+      // be read and left; a proposal queue that is left unread quietly becomes
+      // the rubber-stamp failure the whole VOAC design exists to prevent.
+      { label: "مجلس التشغيل", labelEn: "Agent Company", route: "/voac" },
       { label: "التنبيهات", labelEn: "Alerts", route: "/alerts" },
       { label: "خطط العمل", labelEn: "Action Plans", route: "/plans" },
       { label: "الوثائق", labelEn: "Documents", route: "/documents" },

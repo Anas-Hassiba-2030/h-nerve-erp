@@ -38,6 +38,7 @@ const ENTRIES_AR: Item[] = [
   { href: "/education",      label: "حاضنة The Tank",       hint: "AAU",         icon: GraduationCap,    group: "العمليات", keys: ["education","tank","aau","حاضنة"] },
   { href: "/supply-chain",   label: "سلسلة التوريد التنبؤية", hint: "AI Bridge",   icon: Brain,            group: "الذكاء", keys: ["supply","ai","brain","تنبؤ"] },
   { href: "/insights",       label: "إشارات الذكاء",         hint: "تنبيهات",      icon: Sparkles,         group: "الذكاء", keys: ["insights","إشارات"] },
+  { href: "/voac",           label: "مجلس التشغيل الافتراضي", hint: "مقترحات",      icon: Users,            group: "الذكاء", keys: ["voac","agents","proposals","مقترحات","وكلاء","مجلس"] },
   { href: "/finance",        label: "المركز المالي",         hint: "إيرادات/مصاريف", icon: Wallet,         group: "النمو", keys: ["finance","مالية","money"] },
   { href: "/markets",        label: "الأسواق العالمية",      hint: "أسهم",         icon: TrendingUp,       group: "النمو", keys: ["markets","stocks","أسواق"] },
   { href: "/sustainability", label: "الاستدامة و ESG",       hint: "بيئة + حوكمة",  icon: Leaf,             group: "النمو", keys: ["sustainability","esg","استدامة"] },

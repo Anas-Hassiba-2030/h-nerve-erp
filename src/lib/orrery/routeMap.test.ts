@@ -10,6 +10,12 @@ describe("mapOrreryHref", () => {
     expect(mapOrreryHref("sections/supply.html")).toBe("/supply-chain");
   });
 
+  it("maps the VOAC proposal queue", () => {
+    // Without this the hub pill silently falls back to /dashboard, and the
+    // queue is reachable only by typing the URL.
+    expect(mapOrreryHref("sections/voac.html")).toBe("/voac");
+  });
+
   it("maps brain sub-sections", () => {
     expect(mapOrreryHref("sections/causal.html")).toBe("/brain/graph");
     expect(mapOrreryHref("sections/whatif.html")).toBe("/brain/scenarios");

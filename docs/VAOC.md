@@ -7,6 +7,15 @@ The operating manual for the company of agents that builds and maintains
 H-Nerve. This file is the **single source of truth** for how work is routed,
 who reviews whom, and what nobody is allowed to do.
 
+> **VAOC ≠ VOAC — the names are one transposed letter apart, so check which one
+> you want.** This document is the **build-time** company: Claude Code
+> subagents that write this repo. [`VOAC-RUNTIME.md`](VOAC-RUNTIME.md) is the
+> **runtime** company: agents that ship inside the product and reason about the
+> Hourani Group's operations, one roster per company under a single Group
+> Broker. They deliberately share one primitive — `role → skill doc →
+> AgentRun → AgentStep → score` — so the two can eventually run on the same
+> substrate instead of becoming two half-products.
+
 - The agent briefs live in `.claude/agents/`. The Managing Director is
   [`orchestrator.md`](../.claude/agents/orchestrator.md).
 - The roster + MCP servers are catalogued in [`SUBAGENTS-AND-MCP-CATALOG.md`](SUBAGENTS-AND-MCP-CATALOG.md).

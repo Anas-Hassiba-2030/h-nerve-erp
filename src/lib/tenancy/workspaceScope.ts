@@ -97,6 +97,17 @@ export const TENANT_SCOPED_MODELS = new Set<string>([
   "Lead",
   "Opportunity",
   "CrmActivity",
+  // VOAC — the agent-company trace substrate (prisma/schema/voac.prisma).
+  // These rows carry BOTH keys: the opaque tenantId slug (isolation, filtered
+  // here) and a companyId (org — which company's roster, null = Group Broker).
+  // Scoping on tenantId matters more here than almost anywhere else: an
+  // AgentStep's `input`/`output` hold reasoning quoted from that tenant's own
+  // documents and ledger, so a leak is a leak of the source data, not just of
+  // metadata about a run.
+  "VoacRoster",
+  "AgentRun",
+  "AgentStep",
+  "AgentProposal",
   // Bank reconciliation (docs/HOURANI-ERP-GAPS.md #1). BankStatementLine
   // carries a denormalized tenantId (same precedent as Booking/Crop) so
   // the middleware filters without joining through BankStatement.

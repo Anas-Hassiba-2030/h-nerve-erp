@@ -14,6 +14,7 @@ const STEM_MAP: Record<string, string> = {
   supply: "/supply-chain",
   brain: "/brain",
   insights: "/insights",
+  voac: "/voac",
   alerts: "/alerts",
   plans: "/plans",
   documents: "/documents",

@@ -1,0 +1,210 @@
+// prisma/schema/voac.prisma — the VOAC (Virtual Orchestration Agent Company)
+// trace substrate.
+//
+// This file is the FIRST artifact of the VOAC, on purpose. Everything the
+// company needs is downstream of one honest record of what an agent did:
+//   • the audit trail a family conglomerate's auditors will ask for
+//   • the data source for every VOAC screen
+//   • the training set SkillOpt reads offline (see src/lib/voac/skills/)
+//   • the evidence that the brain ever beat a manager's instinct
+// Build the ledger first and the rest is cheap. Build the agents first and
+// you have opinions with no receipts.
+//
+// TWO KEYS, DELIBERATELY:
+//   tenantId  — Tenant.slug, the ISOLATION key every scoped model carries.
+//               Non-negotiable (docs/ISOLATION.md). Register these models in
+//               TENANT_SCOPED_MODELS.
+//   companyId — Company.id, the ORG key: whose VOAC this is.
+//               NULL means the Group Broker — the one supervisor that sits
+//               above all companies. That null is load-bearing, not laziness.
+// The two coordinate systems already meet in COMPANY_CODE_TO_TENANT_SLUG
+// (src/lib/tenancy/tenancy.ts); VOAC reuses that seam rather than inventing
+// a second one. See src/lib/supply/bridge.ts for the precedent.
+//
+// companyId is a plain String, not a Prisma relation, for the same reason
+// tenantId is: the substrate must be able to record runs that belong to no
+// Company at all (the Group Broker, and the build-time agents we may fold
+// onto this same table later). A hard FK would forbid exactly the rows the
+// design depends on.
+//
+// String columns + TS unions everywhere — SQLite/D1 has no enums.
+
+/// Which roles are active for one company. A roster is DATA, not an org
+/// layer: there is no per-company supervisor agent, because a supervisor
+/// over co-located agents has neither information nor authority its
+/// subordinates lack. It would be a pass-through that costs a hop.
+model VoacRoster {
+  id        String   @id @default(cuid())
+  tenantId  String
+  companyId String
+
+  /// Role ids from src/lib/voac/roles.ts, comma-separated.
+  /// Comma-joined rather than a join table: a roster is read whole, every
+  /// time, and never queried by individual member.
+  roleIds   String   @default("")
+
+  /// Hard cap on proposals this company's roster may put in front of a human
+  /// per day. The council's sharpest finding: "agents propose, humans commit"
+  /// converts every mediocre proposal into a claim on finite attention, and
+  /// an uncapped queue is rubber-stamped — which silently deletes the safety
+  /// boundary. Precision is the product; recall is a liability.
+  dailyProposalCap Int @default(5)
+
+  /// How often the scheduled fire may run each role on this roster, in hours.
+  /// Per-roster rather than per-role because an operator thinks "review this
+  /// company daily", not "run the yield controller every 18 hours".
+  /// A non-positive value is treated as a misconfiguration and skipped by
+  /// src/lib/voac/schedule.ts — never as "run on every fire".
+  cadenceHours Int @default(24)
+
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, companyId])
+  @@index([tenantId])
+}
+
+/// One invocation of the VOAC: a role (or the Group Broker) pursuing one
+/// objective under one orchestration topology.
+model AgentRun {
+  id        String   @id @default(cuid())
+  tenantId  String
+  /// NULL = the Group Broker (cross-company). Set = that company's roster.
+  companyId String?
+
+  /// Role id from src/lib/voac/roles.ts, or "group-broker".
+  roleId    String
+  /// Topology from src/lib/voac/topology.ts:
+  /// "chain" | "route" | "parallel" | "orchestrate" | "evaluate" | "autonomous"
+  topology  String
+
+  objective String
+  /// "RUNNING" | "SUCCEEDED" | "FAILED" | "BUDGET_EXHAUSTED" | "REFUSED" | "STUB"
+  /// STUB is separate from FAILED on purpose: a run with no API key configured
+  /// did not fail — there was simply no model behind it. See runStore.ts.
+  status    String   @default("RUNNING")
+
+  /// Which version of the role's skill document produced this run. Without
+  /// this, a score cannot be attributed to a skill revision and SkillOpt has
+  /// nothing to learn from.
+  skillVersion String @default("v0")
+
+  /// Cost accounting — cheap to record, impossible to reconstruct later.
+  /// Rolled up from AgentStep by closeRun().
+  ///
+  /// HONEST STATE: llmCalls and latencyMs are populated. tokensIn/tokensOut are
+  /// NOT — src/lib/brain/orchestrator.ts does not return provider usage, so
+  /// there is nothing truthful to write. The columns stay (adding them later to
+  /// D1 is a migration; leaving them is free) but read them as "not yet
+  /// instrumented", not as "this run was free".
+  llmCalls  Int      @default(0)
+  tokensIn  Int      @default(0)
+  tokensOut Int      @default(0)
+  latencyMs Int      @default(0)
+
+  error     String?
+
+  steps     AgentStep[]
+  proposals AgentProposal[]
+
+  createdAt DateTime @default(now())
+  endedAt   DateTime?
+
+  @@index([tenantId, companyId])
+  @@index([tenantId, roleId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+/// One step inside a run. parentStepId makes the tree explicit, so a
+/// fan-out (parallel) and a hand-off (chain) are distinguishable after the
+/// fact instead of flattened into an undifferentiated log.
+model AgentStep {
+  id           String   @id @default(cuid())
+  tenantId     String
+  runId        String
+  run          AgentRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  parentStepId String?
+
+  /// Ordinal within its parent — a stable sort that survives equal timestamps.
+  seq          Int      @default(0)
+  roleId       String
+  /// "plan" | "tool" | "debate" | "verify" | "narrate"
+  kind         String
+
+  input        String
+  output       String?
+
+  /// 0..1 quality score. NULLABLE ON PURPOSE — an unscored step must be
+  /// visibly unscored. A default of 0 would be indistinguishable from a
+  /// genuinely terrible step and would poison the SkillOpt training set.
+  score        Float?
+  /// Who produced the score: "human" | "rubric" | "self".
+  /// Self-scores are recorded but must never be trained on alone — that is
+  /// the circular-reward failure the council named.
+  scoredBy     String?
+
+  tokensIn     Int      @default(0)
+  tokensOut    Int      @default(0)
+  latencyMs    Int      @default(0)
+  error        String?
+
+  createdAt    DateTime @default(now())
+
+  @@index([runId, seq])
+  @@index([tenantId])
+  @@index([parentStepId])
+}
+
+/// What an agent asks a human to do. The read-mostly boundary made durable:
+/// the VOAC writes rows HERE, never to domain tables. A proposal becomes real
+/// only when a named human commits it through the ordinary server action.
+model AgentProposal {
+  id          String   @id @default(cuid())
+  tenantId    String
+  runId       String
+  run         AgentRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  /// Proposing company. NULL = the Group Broker proposing across companies.
+  companyId   String?
+  /// For cross-company brokerage: who is being asked to act.
+  counterpartyCompanyId String?
+
+  title       String
+  rationale   String
+  /// Estimated value in JOD. The pitch is a number, not an architecture
+  /// diagram — so the system is built to produce one from day one.
+  estimatedValueJod Float?
+
+  /// 0..1 — how much the agent believed its OWN estimate, as stated in the
+  /// output contract. Persisted because budget.ts ranks on it: a queue ordered
+  /// by a number the reader cannot see is unauditable, and "why is this one
+  /// first?" has to be answerable.
+  ///
+  /// NULLABLE, and the UI must say "not stated" rather than assuming a middle
+  /// value. A displayed confidence nobody asserted is a fabricated signal in
+  /// front of someone making a decision.
+  confidence Float?
+
+  /// "PENDING" | "ACCEPTED" | "REJECTED" | "EXPIRED"
+  status      String   @default("PENDING")
+  /// User.id of the human who committed or rejected it. Liability sits with
+  /// the person who clicked, and the row has to be able to say who that was.
+  decidedById String?
+  decidedAt   DateTime?
+  /// Free-text reason. Accept/reject alone conflates "wrong", "already knew",
+  /// "politically impossible" and "bad timing" — four different lessons.
+  decisionNote String?
+
+  /// Measured 30–60 days later. This is the only non-circular reward signal
+  /// in the system, and therefore the only thing worth training on.
+  realizedValueJod Float?
+  realizedAt  DateTime?
+
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId, status])
+  @@index([runId])
+  @@index([companyId])
+}

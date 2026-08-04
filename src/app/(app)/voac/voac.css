@@ -1,0 +1,164 @@
+/* app/(app)/voac/voac.css — the VOAC ledger surface.
+ *
+ * Heritage Modern on the cream daylight base (../daylight.css supplies the
+ * shell, panels and KPI grid).
+ *
+ * EVERY selector here is prefixed .vo-. That is not a style preference: a page
+ * stylesheet that styles bare generics (`.card`, `.table`, even `.dl-page`)
+ * bleeds into every other page once the client-side router swaps content
+ * without a full reload. That has bitten this codebase before — see the
+ * messages.css incident in the hardening notes. Prefix, always.
+ */
+
+.vo-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+
+.vo-card {
+  border: 1px solid var(--dl-line, #e3dcc9);
+  border-radius: 10px;
+  padding: 14px 16px;
+  background: var(--dl-surface, #fffdf7);
+}
+.vo-card-flat { background: transparent; }
+
+.vo-card-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; margin-bottom: 6px;
+}
+.vo-card-head h3 { margin: 0; font-size: 15px; font-weight: 600; line-height: 1.4; }
+
+.vo-conf { margin: 0 0 8px; }
+
+.vo-rationale { margin: 0 0 10px; font-size: 13.5px; line-height: 1.65; color: var(--dl-ink-dim, #6b6355); }
+
+.vo-meta {
+  display: flex; flex-wrap: wrap; gap: 7px; align-items: center;
+  font-size: 11.5px; color: var(--dl-ink-faint, #8c8474);
+  font-family: ui-monospace, "JetBrains Mono", Menlo, monospace;
+  margin-bottom: 10px;
+}
+.vo-cross { color: var(--dl-accent, #9a6b1f); font-weight: 600; }
+
+/* --- decision row ------------------------------------------------- */
+.vo-decide { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.vo-note-input { flex: 1 1 320px; min-width: 0; font-size: 13px; }
+.vo-btn { white-space: nowrap; }
+.vo-btn-sm { padding: 4px 10px; font-size: 12px; white-space: nowrap; }
+
+.vo-fineprint {
+  margin: 8px 0 0; font-size: 11.5px; color: var(--dl-ink-faint, #8c8474);
+}
+
+.vo-outcome { display: flex; gap: 6px; align-items: center; }
+.vo-outcome-input { width: 110px; font-size: 12px; padding: 4px 8px; }
+
+/* --- tables ------------------------------------------------------- */
+.vo-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.vo-table th, .vo-table td {
+  text-align: start; padding: 9px 10px;
+  border-bottom: 1px solid var(--dl-line, #e3dcc9); vertical-align: top;
+}
+.vo-table th {
+  font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--dl-ink-faint, #8c8474); font-weight: 600; white-space: nowrap;
+}
+.vo-kv th { width: 1%; }
+.vo-reason { max-width: 30ch; color: var(--dl-ink-dim, #6b6355); }
+.vo-reason em { color: var(--dl-ink-faint, #8c8474); }
+
+/* Tabular numerals: a column of figures that jitters between rows reads as
+   sloppy and makes comparison harder. */
+.vo-mono {
+  font-family: ui-monospace, "JetBrains Mono", Menlo, monospace;
+  font-size: 12px; font-variant-numeric: tabular-nums;
+}
+.vo-dim { color: var(--dl-ink-faint, #8c8474); }
+.vo-muted { color: var(--dl-ink-faint, #8c8474); }
+.vo-group { font-weight: 600; color: var(--dl-accent, #9a6b1f); }
+
+/* --- tags --------------------------------------------------------- */
+.vo-tag {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  font-size: 11.5px; font-weight: 600; white-space: nowrap;
+  background: #efe9da; color: #6b6355; border: 1px solid #e3dcc9;
+}
+.vo-inline { margin-inline-start: 8px; }
+.vo-ok    { background: #e6f3ea; color: #2c6b46; border-color: #c9e4d4; }
+.vo-warn  { background: #fdf0d9; color: #8a5d12; border-color: #f2e0bb; }
+.vo-crit  { background: #fbe6e4; color: #96342a; border-color: #f0cbc6; }
+.vo-info  { background: #e7eef7; color: #2f5680; border-color: #cfdcec; }
+.vo-muted.vo-tag { background: #f1eee6; color: #7d766a; border-color: #e3dcc9; }
+
+.vo-delta { margin-inline-start: 8px; font-weight: 700; font-size: 12px; }
+.vo-delta.vo-ok { color: #2c6b46; }
+.vo-delta.vo-warn { color: #8a5d12; }
+.vo-delta.vo-crit { color: #96342a; }
+
+.vo-err {
+  margin-top: 5px; font-size: 12px; color: #96342a;
+  font-family: ui-monospace, "JetBrains Mono", Menlo, monospace;
+}
+
+.vo-empty {
+  margin: 0; padding: 18px 4px; font-size: 13.5px;
+  color: var(--dl-ink-dim, #6b6355); line-height: 1.7; max-width: 70ch;
+}
+.vo-note { font-size: 11.5px; color: var(--dl-ink-faint, #8c8474); }
+
+.vo-link { color: var(--dl-accent, #9a6b1f); font-weight: 600; text-decoration: none; }
+.vo-link:hover { text-decoration: underline; }
+.vo-back { display: inline-flex; align-items: center; gap: 5px; }
+
+/* --- execution trace ---------------------------------------------- */
+.vo-trace { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+
+.vo-step {
+  border: 1px solid var(--dl-line, #e3dcc9);
+  border-inline-start: 3px solid var(--dl-line, #e3dcc9);
+  /* Single-sided accent borders must not be rounded — the radius on the other
+     three sides leaves a visible notch where the accent meets the corner. */
+  border-radius: 0 9px 9px 0;
+  padding: 11px 14px;
+  background: var(--dl-surface, #fffdf7);
+}
+[dir="rtl"] .vo-step { border-radius: 9px 0 0 9px; }
+
+.vo-step-plan    { border-inline-start-color: #a8a394; }
+.vo-step-tool    { border-inline-start-color: #5b7fae; }
+.vo-step-debate  { border-inline-start-color: #7a6bb0; }
+.vo-step-verify  { border-inline-start-color: #c08a3e; }
+.vo-step-narrate { border-inline-start-color: #3f8a63; }
+
+.vo-step-head {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin-bottom: 8px;
+}
+.vo-seq {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 21px; height: 21px; border-radius: 50%;
+  background: #efe9da; color: #6b6355;
+  font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.vo-kind { font-size: 12.5px; font-weight: 600; }
+
+.vo-step-io { margin-top: 6px; }
+.vo-io-label {
+  font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--dl-ink-faint, #8c8474); margin-bottom: 3px;
+}
+
+/* Traces contain tool payloads and quoted documents; they must wrap and cap
+   their height rather than stretching the page to thousands of pixels. */
+.vo-pre {
+  margin: 0; padding: 8px 10px;
+  background: #f7f3e9; border: 1px solid var(--dl-line, #e3dcc9); border-radius: 6px;
+  font-family: ui-monospace, "JetBrains Mono", Menlo, monospace;
+  font-size: 11.5px; line-height: 1.6; color: #4f4a40;
+  white-space: pre-wrap; word-break: break-word;
+  max-height: 220px; overflow-y: auto;
+}
+
+@media (max-width: 640px) {
+  .vo-decide { flex-direction: column; align-items: stretch; }
+  .vo-note-input { flex: 1 1 auto; }
+  .vo-table { font-size: 12px; }
+  .vo-table th, .vo-table td { padding: 7px 6px; }
+}

@@ -10,6 +10,15 @@ model DairyBatch {
   product        String
   productAr      String
   quantityLiters Float    @default(0)
+  /// Full-price sale value per litre, in JOD. NULLABLE ON PURPOSE — an unknown
+  /// price must stay visibly unknown. Defaulting to 0 would let the VOAC's
+  /// ceiling calculation silently report "0 JOD recoverable" for a batch whose
+  /// price simply was not entered, which is a fabricated finding.
+  pricePerLiter  Float?
+  /// Production cost per litre, in JOD. Recovered value on a diverted batch is
+  /// (price − cost) at best, never the full price: the litre was already paid
+  /// for. Without this, every recovery figure is overstated.
+  costPerLiter   Float?
   qualityGrade   String   @default("A")
   fatContent     Float    @default(3.5)
   productionDate DateTime

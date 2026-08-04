@@ -47,6 +47,10 @@ const MODULES: Module[] = [
   { href: "/education", ar: "حاضنة The Tank", en: "The Tank", desc_ar: "ستارت أب تحت مظلة الجامعة الأهلية.", desc_en: "Startups under the AAU umbrella." },
   { href: "/supply-chain", ar: "جسر AI", en: "AI Bridge", desc_ar: "تنبؤات تربط إشغال الفنادق بإنتاج الألبان والزراعة.", desc_en: "Forecasts linking occupancy → dairy/produce." },
   { href: "/insights", ar: "إشارات الذكاء", en: "Insights", desc_ar: "تنبيهات ذكية وفرص اكتشفها AI.", desc_en: "AI-discovered alerts & opportunities." },
+  // Described by what it ASKS OF YOU, not by what it is. Someone opening the
+  // help index wants to know why a screen would need them, and this is the one
+  // surface that waits on a person before anything happens.
+  { href: "/voac", ar: "مجلس التشغيل", en: "Agent Company", desc_ar: "وكلاء لكل شركة يقترحون، وأنت من يقرّر — كل قرار يُسجَّل باسم صاحبه.", desc_en: "Per-company agents propose; you decide. Every decision recorded against a name." },
   { href: "/finance", ar: "المركز المالي", en: "Finance", desc_ar: "السجل المالي عبر كل الشركات.", desc_en: "Cross-company ledger." },
   { href: "/markets", ar: "الأسواق العالمية", en: "Markets", desc_ar: "متابعة أسهم MENA + عالمية.", desc_en: "MENA + global watchlist." },
   { href: "/sustainability", ar: "الاستدامة ESG", en: "Sustainability", desc_ar: "بيئة + اجتماعي + حوكمة.", desc_en: "Environmental + social + governance." },

@@ -263,6 +263,7 @@ old root `workflows/` dir in the 2026-07 root-hygiene pass.)
 | `theater/` | director.ts | Decision Theater orchestration |
 | `theme/` | theme.ts, theme.server.ts | Cookie-driven theme switching |
 | `utils/` | utils.ts, timemachine.ts, toast.ts, logger.ts, gamification.ts, inbox.ts, env.ts, companyBrand.ts, changelogData.ts, formState.ts | cn(), formatMoney(), formatDate(), Time Machine cursor, flash toast |
+| `voac/` | driver.live.ts, topology.ts, budget.ts, schedule.ts(+.live), roles.ts, runStore.ts(+.live), proposals.ts, present.ts, skills/*.md | The **runtime** agent company — one Group Broker over per-company rosters. `driver.live.ts` is the entry point (`runVoac`/`runGroupBroker`); it reuses `brain/orchestrator.ts` + `brain/council.live.ts` rather than reimplementing debate. UI at `/voac`, schedule at `/api/cron/voac`. See `docs/VOAC-RUNTIME.md`. (Not `docs/VAOC.md`, which is the build-time subagent company.) |
 | `workflows/` | templates.ts + engine | Workflow automation templates |
 | `workspace/` | workspace data helpers | Unit-level workspace queries |
 

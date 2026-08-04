@@ -1,0 +1,598 @@
+{
+  "$schema": "hnerve.voac.architecture/1",
+  "generatedBy": "scripts/build/build-voac-map.mjs",
+  "system": "H-Nerve ERP",
+  "component": "VOAC — Virtual Orchestration Agent Company (runtime)",
+  "notToBeConfusedWith": {
+    "name": "VAOC (build-time)",
+    "doc": "docs/VAOC.md",
+    "difference": "VAOC is the Claude Code subagent company that writes this repo. VOAC ships inside the product. Same primitive, different lifetime."
+  },
+  "docs": [
+    "docs/VOAC-RUNTIME.md"
+  ],
+  "entryPoints": {
+    "driver": "src/lib/voac/driver.live.ts — runVoac() / runGroupBroker()",
+    "reuses": [
+      "src/lib/brain/orchestrator.ts (runToolLoop)",
+      "src/lib/brain/council.live.ts (convene)"
+    ],
+    "verify": "scripts/verify/voac-smoke.ts",
+    "ceiling": "scripts/ops/voac-ceiling.ts"
+  },
+  "stats": {
+    "roles": 6,
+    "topologies": 6,
+    "models": 4,
+    "skillDocs": 6,
+    "unitTests": 124
+  },
+  "layers": [
+    {
+      "id": "group",
+      "label": "Group",
+      "labelAr": "المجموعة",
+      "hint": "The only supervisor"
+    },
+    {
+      "id": "roster",
+      "label": "Company rosters",
+      "labelAr": "فرق الشركات",
+      "hint": "Data, not an org layer"
+    },
+    {
+      "id": "substrate",
+      "label": "Substrate",
+      "labelAr": "الأساس",
+      "hint": "One ledger, every run"
+    },
+    {
+      "id": "gate",
+      "label": "Human gate",
+      "labelAr": "بوابة القرار",
+      "hint": "Propose, never commit"
+    },
+    {
+      "id": "learn",
+      "label": "Offline",
+      "labelAr": "خارج الخدمة",
+      "hint": "CI only, zero runtime cost"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "group-broker",
+      "layer": "group",
+      "kind": "supervisor",
+      "label": "Group Broker",
+      "labelAr": "وسيط المجموعة",
+      "file": "src/lib/voac/roles.ts",
+      "summary": "The ONLY supervisor. Holds the cross-company view and the standing to arbitrate between two companies' P&Ls — the one layer that has something its subordinates lack.",
+      "invariants": [
+        "companyId is NULL — it belongs to the group, never to one company",
+        "Runs parallel: two P&Ls means competing objectives",
+        "Must state a transfer-pricing basis before proposing an intercompany move",
+        "Cannot propose perishables across a border"
+      ]
+    },
+    {
+      "id": "hospitality-revenue-controller",
+      "layer": "roster",
+      "kind": "role",
+      "label": "Hospitality Revenue Controller",
+      "labelAr": "مراقب إيرادات الضيافة",
+      "sector": "HOSPITALITY",
+      "file": "src/lib/voac/skills/hospitality-revenue-controller.md",
+      "summary": "Sector HOSPITALITY. Default topology route. Tools: pullFacts, simulate, narrate.",
+      "invariants": [
+        "Company-scoped — a run without a companyId is refused"
+      ]
+    },
+    {
+      "id": "dairy-yield-controller",
+      "layer": "roster",
+      "kind": "role",
+      "label": "Dairy Yield Controller",
+      "labelAr": "مراقب إنتاجية الألبان",
+      "sector": "DAIRY",
+      "file": "src/lib/voac/skills/dairy-yield-controller.md",
+      "summary": "Sector DAIRY. Default topology route. Tools: pullFacts, causalSubgraph, narrate.",
+      "invariants": [
+        "Company-scoped — a run without a companyId is refused"
+      ]
+    },
+    {
+      "id": "feed-supply-planner",
+      "layer": "roster",
+      "kind": "role",
+      "label": "Feed Supply Planner",
+      "labelAr": "مخطط إمداد الأعلاف",
+      "sector": "AGRICULTURE",
+      "file": "src/lib/voac/skills/feed-supply-planner.md",
+      "summary": "Sector AGRICULTURE. Default topology chain. Tools: pullFacts, simulate, narrate.",
+      "invariants": [
+        "Company-scoped — a run without a companyId is refused"
+      ]
+    },
+    {
+      "id": "education-enrolment-analyst",
+      "layer": "roster",
+      "kind": "role",
+      "label": "Education Enrolment Analyst",
+      "labelAr": "محلل الالتحاق التعليمي",
+      "sector": "EDUCATION",
+      "file": "src/lib/voac/skills/education-enrolment-analyst.md",
+      "summary": "Sector EDUCATION. Default topology route. Tools: pullFacts, narrate.",
+      "invariants": [
+        "Company-scoped — a run without a companyId is refused"
+      ]
+    },
+    {
+      "id": "finance-controller",
+      "layer": "roster",
+      "kind": "role",
+      "label": "Finance Controller",
+      "labelAr": "المراقب المالي",
+      "sector": "INVESTMENT",
+      "file": "src/lib/voac/skills/finance-controller.md",
+      "summary": "Sector INVESTMENT. Default topology chain. Tools: pullFacts, causalSubgraph, retrieveDocuments, narrate.",
+      "invariants": [
+        "Company-scoped — a run without a companyId is refused"
+      ]
+    },
+    {
+      "id": "substrate:role",
+      "layer": "substrate",
+      "kind": "substrate",
+      "label": "role",
+      "summary": "The identity and its tools",
+      "file": "src/lib/voac/roles.ts"
+    },
+    {
+      "id": "substrate:skill.md",
+      "layer": "substrate",
+      "kind": "substrate",
+      "label": "skill.md",
+      "summary": "Instructions as a trainable markdown document",
+      "file": "src/lib/voac/skills/"
+    },
+    {
+      "id": "substrate:AgentRun",
+      "layer": "substrate",
+      "kind": "substrate",
+      "label": "AgentRun",
+      "summary": "One invocation under one topology",
+      "file": "prisma/schema/voac.prisma"
+    },
+    {
+      "id": "substrate:AgentStep",
+      "layer": "substrate",
+      "kind": "substrate",
+      "label": "AgentStep",
+      "summary": "One step; parentStepId keeps fan-out distinguishable from hand-off",
+      "file": "prisma/schema/voac.prisma"
+    },
+    {
+      "id": "substrate:score",
+      "layer": "substrate",
+      "kind": "substrate",
+      "label": "score",
+      "summary": "Nullable — unscored must stay visibly unscored",
+      "file": "src/lib/voac/runStore.ts"
+    },
+    {
+      "id": "gate:budget",
+      "layer": "gate",
+      "kind": "gate",
+      "label": "Proposal budget",
+      "summary": "Hard cap per human per day. Ranks on expected value; reports everything it held back.",
+      "file": "src/lib/voac/budget.ts"
+    },
+    {
+      "id": "gate:commit",
+      "layer": "gate",
+      "kind": "gate",
+      "label": "Human commits",
+      "summary": "A named approver. Liability sits with whoever clicked.",
+      "file": "src/lib/voac/runStore.ts"
+    },
+    {
+      "id": "gate:outcome",
+      "layer": "gate",
+      "kind": "gate",
+      "label": "Outcome recorded",
+      "summary": "Realized value, 30-60 days later. The only non-circular signal in the system.",
+      "file": "prisma/schema/voac.prisma"
+    },
+    {
+      "id": "skillopt",
+      "layer": "learn",
+      "kind": "offline",
+      "label": "SkillOpt",
+      "labelAr": "تدريب خارج الخدمة",
+      "file": "scripts/build/build-voac-skills.mjs",
+      "summary": "Trains the markdown skill documents against recorded outcomes and ships a static best_skill.md. Python plus a long-running loop, so it can never run in the Worker — which is why runtime inference cost is unchanged.",
+      "invariants": [
+        "Never runs at request time — zero extra inference calls",
+        "At one client there is no held-out distribution: today this is a regression suite, NOT training",
+        "Never train on self-assessed scores alone — that reward is circular"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "group-broker",
+      "to": "hospitality-revenue-controller",
+      "kind": "brokers",
+      "label": "brokers between"
+    },
+    {
+      "from": "group-broker",
+      "to": "dairy-yield-controller",
+      "kind": "brokers",
+      "label": "brokers between"
+    },
+    {
+      "from": "group-broker",
+      "to": "feed-supply-planner",
+      "kind": "brokers",
+      "label": "brokers between"
+    },
+    {
+      "from": "group-broker",
+      "to": "education-enrolment-analyst",
+      "kind": "brokers",
+      "label": "brokers between"
+    },
+    {
+      "from": "group-broker",
+      "to": "finance-controller",
+      "kind": "brokers",
+      "label": "brokers between"
+    },
+    {
+      "from": "substrate:role",
+      "to": "substrate:skill.md",
+      "kind": "flows",
+      "label": ""
+    },
+    {
+      "from": "substrate:skill.md",
+      "to": "substrate:AgentRun",
+      "kind": "flows",
+      "label": ""
+    },
+    {
+      "from": "substrate:AgentRun",
+      "to": "substrate:AgentStep",
+      "kind": "flows",
+      "label": ""
+    },
+    {
+      "from": "substrate:AgentStep",
+      "to": "substrate:score",
+      "kind": "flows",
+      "label": ""
+    },
+    {
+      "from": "hospitality-revenue-controller",
+      "to": "substrate:role",
+      "kind": "runs-on",
+      "label": ""
+    },
+    {
+      "from": "dairy-yield-controller",
+      "to": "substrate:role",
+      "kind": "runs-on",
+      "label": ""
+    },
+    {
+      "from": "feed-supply-planner",
+      "to": "substrate:role",
+      "kind": "runs-on",
+      "label": ""
+    },
+    {
+      "from": "education-enrolment-analyst",
+      "to": "substrate:role",
+      "kind": "runs-on",
+      "label": ""
+    },
+    {
+      "from": "finance-controller",
+      "to": "substrate:role",
+      "kind": "runs-on",
+      "label": ""
+    },
+    {
+      "from": "group-broker",
+      "to": "substrate:role",
+      "kind": "runs-on",
+      "label": ""
+    },
+    {
+      "from": "gate:budget",
+      "to": "gate:commit",
+      "kind": "flows",
+      "label": ""
+    },
+    {
+      "from": "gate:commit",
+      "to": "gate:outcome",
+      "kind": "flows",
+      "label": ""
+    },
+    {
+      "from": "substrate:score",
+      "to": "gate:budget",
+      "kind": "flows",
+      "label": ""
+    },
+    {
+      "from": "gate:outcome",
+      "to": "skillopt",
+      "kind": "trains",
+      "label": "trains on real outcomes"
+    },
+    {
+      "from": "skillopt",
+      "to": "substrate:skill.md",
+      "kind": "rewrites",
+      "label": "rewrites"
+    }
+  ],
+  "roles": [
+    {
+      "id": "group-broker",
+      "labelAr": "وسيط المجموعة",
+      "labelEn": "Group Broker",
+      "sector": "GROUP",
+      "skillDocId": "group-broker",
+      "defaultTopology": "parallel",
+      "tools": [
+        "pullFacts",
+        "causalSubgraph",
+        "councilDebate",
+        "recallMemory",
+        "narrate"
+      ]
+    },
+    {
+      "id": "hospitality-revenue-controller",
+      "labelAr": "مراقب إيرادات الضيافة",
+      "labelEn": "Hospitality Revenue Controller",
+      "sector": "HOSPITALITY",
+      "skillDocId": "hospitality-revenue-controller",
+      "defaultTopology": "route",
+      "tools": [
+        "pullFacts",
+        "simulate",
+        "narrate"
+      ]
+    },
+    {
+      "id": "dairy-yield-controller",
+      "labelAr": "مراقب إنتاجية الألبان",
+      "labelEn": "Dairy Yield Controller",
+      "sector": "DAIRY",
+      "skillDocId": "dairy-yield-controller",
+      "defaultTopology": "route",
+      "tools": [
+        "pullFacts",
+        "causalSubgraph",
+        "narrate"
+      ]
+    },
+    {
+      "id": "feed-supply-planner",
+      "labelAr": "مخطط إمداد الأعلاف",
+      "labelEn": "Feed Supply Planner",
+      "sector": "AGRICULTURE",
+      "skillDocId": "feed-supply-planner",
+      "defaultTopology": "chain",
+      "tools": [
+        "pullFacts",
+        "simulate",
+        "narrate"
+      ]
+    },
+    {
+      "id": "education-enrolment-analyst",
+      "labelAr": "محلل الالتحاق التعليمي",
+      "labelEn": "Education Enrolment Analyst",
+      "sector": "EDUCATION",
+      "skillDocId": "education-enrolment-analyst",
+      "defaultTopology": "route",
+      "tools": [
+        "pullFacts",
+        "narrate"
+      ]
+    },
+    {
+      "id": "finance-controller",
+      "labelAr": "المراقب المالي",
+      "labelEn": "Finance Controller",
+      "sector": "INVESTMENT",
+      "skillDocId": "finance-controller",
+      "defaultTopology": "chain",
+      "tools": [
+        "pullFacts",
+        "causalSubgraph",
+        "retrieveDocuments",
+        "narrate"
+      ]
+    }
+  ],
+  "topologies": [
+    {
+      "id": "chain",
+      "labelEn": "Prompt chain",
+      "labelAr": "سلسلة متتابعة",
+      "maxHops": 4,
+      "costMultiplier": 3,
+      "requiresHumanOptIn": false
+    },
+    {
+      "id": "route",
+      "labelEn": "Routing",
+      "labelAr": "توجيه",
+      "maxHops": 2,
+      "costMultiplier": 2,
+      "requiresHumanOptIn": false
+    },
+    {
+      "id": "parallel",
+      "labelEn": "Parallel + vote",
+      "labelAr": "تفرّع متوازٍ وتصويت",
+      "maxHops": 2,
+      "costMultiplier": 6,
+      "requiresHumanOptIn": false
+    },
+    {
+      "id": "orchestrate",
+      "labelEn": "Orchestrator + workers",
+      "labelAr": "منسّق وعمّال",
+      "maxHops": 3,
+      "costMultiplier": 8,
+      "requiresHumanOptIn": false
+    },
+    {
+      "id": "evaluate",
+      "labelEn": "Evaluator loop",
+      "labelAr": "حلقة تقييم",
+      "maxHops": 6,
+      "costMultiplier": 5,
+      "requiresHumanOptIn": false
+    },
+    {
+      "id": "autonomous",
+      "labelEn": "Autonomous",
+      "labelAr": "ذاتي التشغيل",
+      "maxHops": 12,
+      "costMultiplier": 20,
+      "requiresHumanOptIn": true
+    }
+  ],
+  "models": [
+    {
+      "name": "VoacRoster",
+      "summary": "Which roles are active for one company. A roster is DATA, not an org layer: there is no per-company supervisor agent, because a supervisor over co-located agents has neither information nor authority its subordinates lack. It would be a pass-through that costs a hop.",
+      "fieldCount": 9
+    },
+    {
+      "name": "AgentRun",
+      "summary": "One invocation of the VOAC: a role (or the Group Broker) pursuing one objective under one orchestration topology.",
+      "fieldCount": 17
+    },
+    {
+      "name": "AgentStep",
+      "summary": "One step inside a run. parentStepId makes the tree explicit, so a fan-out (parallel) and a hand-off (chain) are distinguishable after the fact instead of flattened into an undifferentiated log.",
+      "fieldCount": 17
+    },
+    {
+      "name": "AgentProposal",
+      "summary": "What an agent asks a human to do. The read-mostly boundary made durable: the VOAC writes rows HERE, never to domain tables. A proposal becomes real only when a named human commits it through the ordinary server action.",
+      "fieldCount": 16
+    }
+  ],
+  "skills": [
+    {
+      "id": "dairy-yield-controller",
+      "title": "Dairy Yield Controller",
+      "version": "13de0264",
+      "chars": 2064,
+      "hardLimits": 1
+    },
+    {
+      "id": "education-enrolment-analyst",
+      "title": "Education Enrolment Analyst",
+      "version": "d9474d13",
+      "chars": 1658,
+      "hardLimits": 0
+    },
+    {
+      "id": "feed-supply-planner",
+      "title": "Feed Supply Planner",
+      "version": "f47d0a65",
+      "chars": 1808,
+      "hardLimits": 1
+    },
+    {
+      "id": "finance-controller",
+      "title": "Finance Controller",
+      "version": "2f3fddc5",
+      "chars": 1716,
+      "hardLimits": 1
+    },
+    {
+      "id": "group-broker",
+      "title": "Group Broker",
+      "version": "b113a296",
+      "chars": 3362,
+      "hardLimits": 2
+    },
+    {
+      "id": "hospitality-revenue-controller",
+      "title": "Hospitality Revenue Controller",
+      "version": "1e25cf52",
+      "chars": 1921,
+      "hardLimits": 1
+    }
+  ],
+  "invariants": [
+    {
+      "id": "one-supervisor",
+      "title": "Exactly one supervisor",
+      "body": "A supervisor over agents that share a company holds neither information nor authority its subordinates lack — a pass-through that costs a hop. Only the Group Broker qualifies.",
+      "enforcedBy": "src/lib/voac/roles.test.ts"
+    },
+    {
+      "id": "capped-proposals",
+      "title": "The proposal queue is capped",
+      "body": "An uncapped queue is either ignored or rubber-stamped, and rubber-stamping silently deletes the human gate. Precision is the product; recall is a liability.",
+      "enforcedBy": "src/lib/voac/budget.ts"
+    },
+    {
+      "id": "read-mostly",
+      "title": "Read-mostly",
+      "body": "The VOAC writes AgentProposal rows and nothing else. Domain mutations go through the ordinary server actions.",
+      "enforcedBy": "scripts/verify/voac-smoke.ts"
+    },
+    {
+      "id": "refusal-is-a-row",
+      "title": "A refusal is still a row",
+      "body": "Refused runs are written with status REFUSED and a reason. The agent declining must be answerable from the ledger, not invisible.",
+      "enforcedBy": "src/lib/voac/runStore.ts"
+    },
+    {
+      "id": "stub-is-not-failure",
+      "title": "Stub is not failure",
+      "body": "A run with no API key configured did not fail — the bookkeeping worked and there was no model behind it. Folding that into FAILED sends someone hunting a defect that does not exist.",
+      "enforcedBy": "src/lib/voac/runStore.ts"
+    },
+    {
+      "id": "terminal-is-terminal",
+      "title": "A finished run never reopens",
+      "body": "An audit trail that can be rewritten is not an audit trail.",
+      "enforcedBy": "src/lib/voac/runStore.ts"
+    },
+    {
+      "id": "no-invented-proposals",
+      "title": "Never salvage a proposal from prose",
+      "body": "If the output contract is not honoured, zero proposals are extracted. A parser-invented proposal would carry a confidence nobody assigned and reach a manager looking exactly like one the agent stood behind.",
+      "enforcedBy": "src/lib/voac/proposals.ts"
+    },
+    {
+      "id": "two-keys",
+      "title": "Two keys: tenantId isolates, companyId organises",
+      "body": "An AgentStep's output quotes the tenant's own documents, so a scoping bug leaks source data — not merely metadata.",
+      "enforcedBy": "src/lib/tenancy/workspaceScope.ts"
+    }
+  ],
+  "openQuestions": [
+    "No UI surface. The ledger has no screen yet — runs are visible only in the database.",
+    "The driver is request-scoped. Every step is persisted as it happens, so a cron or queue driver is a change of caller, not a rewrite — but that caller does not exist yet.",
+    "SkillOpt has no held-out distribution at one client; treat it as a regression suite until proposal volume and a second reviewer exist.",
+    "The flagship cross-company flow is bounded by the hotels' purchasing cycle, which is not recorded anywhere yet."
+  ]
+}

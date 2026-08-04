@@ -282,8 +282,41 @@ skip branch (0.3 h vs 24 h cadence) exercised against real data.
   `(no answer produced)` next to a green status. An empty final answer after the
   tools ran is now a step error, so the run is `FAILED` and findable.
 
-**Still not shipped:** any migration against production D1. The schema is local
-only — deploying it is a deliberate, separate step.
+### Deploying to production D1 — prepared, not applied
+
+The schema is **local only**. The migration is generated and rehearsed but
+deliberately **not run** — applying it touches a live client database, which is
+an owner decision.
+
+```bash
+node scripts/build/gen-voac-d1-migration.mjs   # generate + rehearse, touches nothing remote
+```
+
+Emits `prisma/migrations-d1/2026-08-04-voac.sql` from the local database's own
+`sqlite_master` — so the SQL is exactly what Prisma created, not hand-written
+drift — then **rehearses it against a throwaway copy of a pre-VOAC snapshot**
+and asserts both that every table landed and that existing row counts are
+unchanged.
+
+Rehearsal matters because **D1 has no interactive transactions**: a migration
+that fails halfway leaves the database half-migrated with no rollback. Every
+statement is therefore `IF NOT EXISTS`, so a re-run after a partial failure is
+safe.
+
+Last rehearsal: 18 statements, 4 tables created, `Company` 5→5, `DairyBatch`
+24→24, `Transaction` 65→65 — all unchanged. Verified content: **0 destructive
+statements**; the only two `ALTER`s are `ADD COLUMN` of nullable `REAL`s.
+
+When you decide to apply it — **take a backup first** (`docs/RUNBOOK.md`
+§ D1 backup); additive or not, a live client database deserves one:
+
+```bash
+npx wrangler d1 execute h-nerve-erp-db --remote --file prisma/migrations-d1/2026-08-04-voac.sql
+```
+
+**Do not wire the cron trigger until after this runs.** A scheduled fire against
+a database with no `AgentRun` table would error on every invocation — the same
+`no such table` failure that the auth redirect masked locally (§ above).
 
 > **Local-DB trap, learned the hard way.** `npm run db:push` resolves
 > `file:./dev.db` **relative to the schema folder** and writes

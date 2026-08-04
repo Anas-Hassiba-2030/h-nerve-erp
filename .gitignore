@@ -18,6 +18,10 @@ dev.log
 # DB (SQLite dev artifact — schema lives in prisma/schema.prisma)
 prisma/dev.db
 prisma/dev.db-journal
+# Throwaway copy used by scripts/build/gen-voac-d1-migration.mjs to rehearse the
+# D1 migration. Deleted on a clean run; ignored so a crashed run can't leave a
+# database sitting in a commit.
+prisma/.voac-migration-rehearsal.db
 # Prisma uses a schema FOLDER (prisma/schema/), so a local sqlite dev DB
 # lands here, not at prisma/ root. Ignore it so the binary never gets committed.
 prisma/schema/dev.db

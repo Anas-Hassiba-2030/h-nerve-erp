@@ -16,8 +16,13 @@ describe("Intelligence clustering", () => {
     expect(intel.children).toEqual(fromClusters);
   });
 
-  it("still carries all 14 sections", () => {
-    expect(intel.children).toHaveLength(14);
+  it("still carries every section — 15 since the VOAC queue joined 'Act'", () => {
+    // Deliberately an EXACT count, not a floor. The owner's constraint was
+    // "keep every section IN Intelligence, don't shrink anything", so this is
+    // a tripwire: bump it only when a section is added on purpose, never to
+    // make a red test go green after one silently disappeared.
+    expect(intel.children).toHaveLength(15);
+    expect(intel.children.map((c) => c.route)).toContain("/voac");
   });
 
   it("places every section in exactly one cluster", () => {

@@ -207,10 +207,52 @@ DATABASE_URL="file:./prisma/schema/dev.db" \
   npx tsx --tsconfig tsconfig.scripts.json scripts/verify/voac-smoke.ts
 ```
 
-**Still not shipped:** any UI (the ledger has no screen), any cron/queue caller
-(the driver is request-scoped — but because every step is persisted as it
-happens, that is a change of caller, not a rewrite), and any migration against
-production D1.
+### The ledger surface — `/voac`
+
+| File | Role |
+|---|---|
+| `src/app/(app)/voac/page.tsx` | the queue, recent decisions, run ledger |
+| `src/app/(app)/voac/[runId]/page.tsx` | run card + full execution trace |
+| `src/app/(app)/voac/actions.ts` | `decideProposal`, `recordOutcome` |
+| `src/lib/voac/present.ts` | pure status/tone/label logic (20 tests) |
+
+Three editorial stances are enforced here, not merely intended:
+
+1. **A rejection requires a reason.** The action refuses a `REJECTED` decision
+   with no note. Accept/reject alone conflates *wrong*, *already knew*,
+   *politically impossible* and *bad timing*, and this is the last moment that
+   distinction exists.
+2. **A refusal is never painted as a failure.** `REFUSED`, `STUB` and
+   `BUDGET_EXHAUSTED` are muted, never red. Colouring a correct refusal as an
+   incident teaches operators to treat the safety boundary as a bug.
+3. **A self-assessed score never looks like a human one.** `scoreLabel` names
+   the source in the label itself and marks self-scores untrustworthy — that is
+   how a circular reward loop gets built by accident.
+
+Accepting a proposal records the decision **only**. Carrying it out remains an
+ordinary action in the relevant module; the VOAC still never touches a domain
+table.
+
+Verified in a real browser against the real dev database, signed in: the queue
+renders RTL with Arabic-Indic numerals, reject-without-reason leaves the row
+`PENDING` untouched, reject-with-reason writes `decidedById` for the actual
+signed-in user, and the trace page shows a rubric score as `78٪ — معيار`
+distinctly from unscored steps.
+
+**Still not shipped:** any cron/queue caller (the driver is request-scoped — but
+because every step is persisted as it happens, that is a change of caller, not a
+rewrite), and any migration against production D1.
+
+> **Local-DB trap, learned the hard way.** `npm run db:push` resolves
+> `file:./dev.db` **relative to the schema folder** and writes
+> `prisma/schema/dev.db` — but the Next dev server reads the **root** `./dev.db`.
+> Pushing the VOAC schema appeared to succeed while `/voac` still returned
+> `no such table: main.AgentProposal`. To target the app's database:
+> ```bash
+> DATABASE_URL="file:../../dev.db" npx prisma db push --skip-generate
+> ```
+> The route's auth redirect (307 → `/login`) masked the error entirely until the
+> server log was read — a passing HTTP status is not a rendering page.
 
 ## 8. The ceiling test — RUN, and the result matters
 
@@ -239,16 +281,17 @@ modelled at all (`Transaction.category` was free text, so "F&B", "f and b" and
 
 | | JOD |
 |---|---|
-| Margin on at-risk stock (7-day window) | **7,640** |
-| Already written off (expired × cost) | **33,678** |
+| Margin on at-risk stock (7-day window) | **3,711** |
+| Already written off (expired × cost) | **41,377** |
 | Annualised hotel dairy demand | 55,078 |
-| **Ceiling, capped by demand** | **7,640** |
+| **Ceiling, capped by demand** | **3,711** |
 
-*(Local seeded data — representative, not Hourani's actuals. Re-run against real
-data before quoting anything.)*
+*(Run against the app's own dev database — representative seed prices, not
+Hourani's actuals. Re-run against production data before quoting anything.)*
 
 **Read the second row, not the first.** Recovery of near-expiry stock is capped
-around 7.6k; stock already written off is **4× larger**. That inverts the pitch:
+around 3.7k; stock already written off is **eleven times larger**. That inverts
+the pitch:
 the money is in *preventing* the overproduction, not in *rerouting* its output —
 which is exactly what `dairy-yield-controller.md` already instructs ("prefer a
 proposal that prevents the next loss over one that recovers the current one;

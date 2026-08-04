@@ -56,7 +56,7 @@ export const POLICY: Record<Exclude<PermRole, "ADMIN">, string[]> = {
     "/plans", "/alerts", "/companies", "/customers", "/suppliers",
     "/crm", "/assets", "/projects", "/employees", "/hr", "/users",
     "/documents", "/supply-chain", "/workflows", "/workspace",
-    "/system", "/theater", "/empire", "/admin",
+    "/system", "/theater", "/empire", "/admin", "/voac",
   ],
   // Operational: verticals, sales/purchasing cycle, production,
   // maintenance, HR, the ERP consoles. No treasury, no Brain/Empire,
@@ -70,6 +70,11 @@ export const POLICY: Record<Exclude<PermRole, "ADMIN">, string[]> = {
     "/statements", "/e-invoicing", "/pos", "/manufacturing",
     "/maintenance", "/assets", "/hr", "/users", "/admin",
     "/workspace", "/theater",
+    // The VOAC ledger. MANAGER is the role that DECIDES proposals (the
+    // decide/record actions require it), so the queue has to be reachable —
+    // a gate the decider cannot open is just a broken feature. STAFF is
+    // deliberately excluded: accepting a proposal is a commitment.
+    "/voac",
   ],
   // Front-line operational pages only: the verticals they work in,
   // the POS register, shop-floor manufacturing, maintenance tickets.

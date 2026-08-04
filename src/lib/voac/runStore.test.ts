@@ -156,6 +156,17 @@ describe("finalRunStatus", () => {
     expect(finalRunStatus(rollupRun([{ score: 1 }]), { stub: true })).not.toBe("SUCCEEDED");
   });
 
+  it("a live run whose loop produced no final answer is FAILED, not SUCCEEDED", () => {
+    // Caught in a real cron fire: three tools executed, reply empty, run
+    // recorded SUCCEEDED with narrative "(no answer produced)". A run with no
+    // answer sitting beside runs that produced one is a defect nobody finds.
+    const steps = rollupRun([
+      { latencyMs: 120 },
+      { error: "The tool loop finished after 4 round(s) with no final answer." },
+    ]);
+    expect(finalRunStatus(steps)).toBe("FAILED");
+  });
+
   it("a clean run SUCCEEDS", () => {
     expect(finalRunStatus(rollupRun([{ score: 0.9 }]))).toBe("SUCCEEDED");
   });

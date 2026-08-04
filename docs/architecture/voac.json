@@ -25,7 +25,7 @@
     "topologies": 6,
     "models": 4,
     "skillDocs": 6,
-    "unitTests": 109
+    "unitTests": 124
   },
   "layers": [
     {
@@ -477,7 +477,7 @@
     {
       "name": "VoacRoster",
       "summary": "Which roles are active for one company. A roster is DATA, not an org layer: there is no per-company supervisor agent, because a supervisor over co-located agents has neither information nor authority its subordinates lack. It would be a pass-through that costs a hop.",
-      "fieldCount": 8
+      "fieldCount": 9
     },
     {
       "name": "AgentRun",

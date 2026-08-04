@@ -50,6 +50,13 @@ model VoacRoster {
   /// boundary. Precision is the product; recall is a liability.
   dailyProposalCap Int @default(5)
 
+  /// How often the scheduled fire may run each role on this roster, in hours.
+  /// Per-roster rather than per-role because an operator thinks "review this
+  /// company daily", not "run the yield controller every 18 hours".
+  /// A non-positive value is treated as a misconfiguration and skipped by
+  /// src/lib/voac/schedule.ts — never as "run on every fire".
+  cadenceHours Int @default(24)
+
   enabled   Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -84,6 +91,13 @@ model AgentRun {
   skillVersion String @default("v0")
 
   /// Cost accounting — cheap to record, impossible to reconstruct later.
+  /// Rolled up from AgentStep by closeRun().
+  ///
+  /// HONEST STATE: llmCalls and latencyMs are populated. tokensIn/tokensOut are
+  /// NOT — src/lib/brain/orchestrator.ts does not return provider usage, so
+  /// there is nothing truthful to write. The columns stay (adding them later to
+  /// D1 is a migration; leaving them is free) but read them as "not yet
+  /// instrumented", not as "this run was free".
   llmCalls  Int      @default(0)
   tokensIn  Int      @default(0)
   tokensOut Int      @default(0)

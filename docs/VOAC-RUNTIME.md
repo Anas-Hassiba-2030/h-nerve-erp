@@ -239,9 +239,51 @@ renders RTL with Arabic-Indic numerals, reject-without-reason leaves the row
 signed-in user, and the trace page shows a rubric score as `78٪ — معيار`
 distinctly from unscored steps.
 
-**Still not shipped:** any cron/queue caller (the driver is request-scoped — but
-because every step is persisted as it happens, that is a change of caller, not a
-rewrite), and any migration against production D1.
+### The scheduled fire — `GET /api/cron/voac`
+
+The driver runs one role; the cron runs the company. `schedule.ts` (pure, 15
+tests) decides what is due; `schedule.live.ts` fetches the inputs; the route
+only authenticates, fans out and reports.
+
+**Three cost brakes stack**, because a scheduled fan-out is the one place this
+system could quietly spend real money:
+
+1. `MAX_RUNS_PER_FIRE` (12) — truncated **most-stale-first**, so a cap never
+   starves whichever tenant sorts last alphabetically;
+2. each roster's `cadenceHours` — a role that ran recently is skipped;
+3. the per-tenant LLM budget inside the driver, which refuses before spending.
+
+Fails **closed**: no `CRON_SECRET` → `503`, wrong bearer → `401`. Nothing is
+truncated silently — the response carries the skipped count and sample reasons,
+because a fire that quietly did a tenth of the work looks identical in a log to
+one that had nothing to do.
+
+Dry-run it without spending a token — same code path the route uses:
+
+```bash
+DATABASE_URL="file:./dev.db" \
+  npx tsx --tsconfig tsconfig.scripts.json scripts/verify/voac-cron-check.ts
+```
+
+Verified live end-to-end: unauthorized → `401`, authorized → `200` with
+`considered:1, started:1, skipped:0`, both the due branch (72 h stale) and the
+skip branch (0.3 h vs 24 h cadence) exercised against real data.
+
+**Two defects the live fire caught** — neither visible to unit tests:
+
+- **Cost accounting reported nothing.** `closeRun` rolls totals up from steps,
+  and the driver never set per-step `latencyMs`, so every run claimed 0 ms. Now
+  measured (389 ms on the next fire). `tokensIn`/`tokensOut` remain **honestly
+  unpopulated** — `orchestrator.ts` does not return provider usage, so there is
+  nothing truthful to write. Read them as *not yet instrumented*, never as *this
+  run was free*.
+- **A run with no answer was recorded `SUCCEEDED`.** The tool loop executed
+  three tools, exhausted its rounds and returned empty text; the narrative read
+  `(no answer produced)` next to a green status. An empty final answer after the
+  tools ran is now a step error, so the run is `FAILED` and findable.
+
+**Still not shipped:** any migration against production D1. The schema is local
+only — deploying it is a deliberate, separate step.
 
 > **Local-DB trap, learned the hard way.** `npm run db:push` resolves
 > `file:./dev.db` **relative to the schema folder** and writes

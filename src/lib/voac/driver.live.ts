@@ -157,6 +157,12 @@ export async function runVoac(input: RunVoacInput): Promise<RunVoacResult> {
       output: `Topology ${topology}; skill ${skill?.id ?? "none"}@${skill?.version ?? "unknown"}.`,
     });
 
+    // Wall-clock per phase. closeRun rolls step latency up to the run, so a
+    // step that records nothing leaves the run claiming 0 ms — which is how a
+    // cost-accounting field ends up looking implemented while reporting
+    // nothing. Measured here because it is the only layer that spans the call.
+    const startedMs = Date.now();
+
     if (topology === "parallel") {
       // ---- Debate path: reuse the council verbatim -----------------------
       // Competing objectives (two companies' P&Ls) is exactly what the council
@@ -188,6 +194,7 @@ export async function runVoac(input: RunVoacInput): Promise<RunVoacResult> {
         tenantId: input.tenantId, runId, roleId: input.roleId, kind: "narrate",
         input: "synthesis",
         output: replyText,
+        latencyMs: Date.now() - startedMs,
       });
     } else {
       // ---- Tool-loop path: reuse the orchestrator ------------------------
@@ -208,6 +215,13 @@ export async function runVoac(input: RunVoacInput): Promise<RunVoacResult> {
         });
       }
 
+      // An empty final answer AFTER the tools ran is not success. The loop can
+      // exhaust its rounds mid-investigation and return no synthesis; recording
+      // that as SUCCEEDED puts a run with no answer next to runs that produced
+      // one, and nobody goes looking. Caught live: 3 tools executed, reply
+      // empty, status SUCCEEDED, narrative "(no answer produced)".
+      const noAnswer = !loop.stub && !replyText.trim();
+
       await appendStep({
         tenantId: input.tenantId, runId, roleId: input.roleId, kind: "narrate",
         input: input.objective,
@@ -215,6 +229,10 @@ export async function runVoac(input: RunVoacInput): Promise<RunVoacResult> {
         // is carried on the run's status instead. Recording it as an error here
         // would make every key-less run look like a defect.
         output: loop.stub ? "(stub mode — no model configured)" : replyText || "(no answer produced)",
+        latencyMs: Date.now() - startedMs,
+        error: noAnswer
+          ? `The tool loop finished after ${loop.rounds} round(s) with no final answer.`
+          : null,
       });
     }
 

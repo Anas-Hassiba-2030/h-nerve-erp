@@ -18,7 +18,12 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { prisma } from "@/lib/db/db";
+// CROSS-TENANT INTENT: VOAC is group-wide by design (see ../page.tsx) — a
+// MANAGER deciding a proposal must be able to reach it regardless of which
+// tenant their cookie happens to be pinned to. Using the scoped client here
+// silently turned "wrong company in the cookie" into "المقترح غير موجود",
+// which is indistinguishable from an actual bug from the operator's side.
+import { prismaUnscoped as prisma } from "@/lib/db/db";
 import { requireUser } from "@/lib/auth/session";
 import { requireRole } from "@/lib/auth/authz";
 import { logActivity } from "@/lib/auth/activityLog";
@@ -61,8 +66,6 @@ export async function decideProposal(formData: FormData) {
   }
 
   try {
-    // The scoped client returns null for another tenant's proposal, so this
-    // doubles as the authorization check.
     const before = await prisma.agentProposal.findUnique({ where: { id } });
     if (!before) {
       await flashToast({ type: "info", entity: "info", label: "المقترح غير موجود." });

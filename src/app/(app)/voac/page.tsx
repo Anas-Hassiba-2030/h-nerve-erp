@@ -1,5 +1,13 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db/db";
+// CROSS-TENANT INTENT: the VOAC ledger is group-wide by design — the Group
+// Broker (companyId=null) exists specifically to broker value BETWEEN
+// companies, and a manager reviewing one company's roster still needs to see
+// the group-scope proposals that concern it. Scoping this page by the
+// operator's currently-pinned tenant cookie (the ordinary `prisma` client)
+// silently empties it the moment that cookie points anywhere other than the
+// tenant the seed happened to use — which is exactly what happened here: the
+// data was never missing, this page just couldn't see past the cookie.
+import { prismaUnscoped as prisma } from "@/lib/db/db";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi, DaylightPanel } from "@/components/orrery/daylight";
 import { formatShortDate } from "@/lib/utils/utils";

@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { prisma } from "@/lib/db/db";
+// CROSS-TENANT INTENT: see the note in ../page.tsx — VOAC is group-wide by
+// design (the Group Broker's whole purpose is cross-company), so a run must
+// remain reachable regardless of which tenant is currently pinned in the
+// operator's cookie. This also means the tenant cookie is no longer an
+// authorization boundary for this lookup — /voac's own MANAGER+ role gate
+// (permissions.ts) is what protects the page, not the scoped client.
+import { prismaUnscoped as prisma } from "@/lib/db/db";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
 import { formatShortDate } from "@/lib/utils/utils";
@@ -18,8 +24,6 @@ export default async function VoacRunPage({ params }: { params: Promise<{ runId:
   const ar = locale === "ar";
   const L = <T,>(a: T, e: T) => (ar ? a : e);
 
-  // The scoped client returns null for another tenant's run, so this is the
-  // authorization check as well as the lookup.
   const run = await prisma.agentRun.findUnique({
     where: { id: runId },
     include: {

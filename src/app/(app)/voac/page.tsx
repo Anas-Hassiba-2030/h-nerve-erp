@@ -57,6 +57,11 @@ export default async function VoacPage() {
           "الوكلاء يقترحون. أنت من يقرّر. كل قرار يُسجَّل باسم صاحبه.",
           "The agents propose. You decide. Every decision is recorded against a name.",
         )}
+        actions={
+          <Link href="/voac/map" className="btn vo-btn">
+            {L("خريطة التنسيق", "Orchestration map")}
+          </Link>
+        }
       />
 
       <DaylightKpiGrid>

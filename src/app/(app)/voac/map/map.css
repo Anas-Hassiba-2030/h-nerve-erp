@@ -1,0 +1,262 @@
+/* app/(app)/voac/map/map.css — the orchestration map.
+ *
+ * Heritage Modern, same cream/emerald/gold as the rest of the operator surface.
+ * Animation is used to carry MEANING, never decoration:
+ *   • the spine pulse travels broker → rosters, showing the direction of
+ *     brokerage (down), not of authority-for-its-own-sake;
+ *   • only "waiting" nodes breathe, because only they are asking a human for
+ *     something. If everything pulsed, nothing would read as urgent.
+ * Every animation is disabled under prefers-reduced-motion.
+ */
+
+.om-chart {
+  position: relative;
+  margin: 8px 0 4px;
+}
+
+/* ── Tier 1 — the single supervisor ─────────────────────────────── */
+.om-tier-group { display: flex; justify-content: center; }
+
+.om-broker {
+  position: relative;
+  max-width: 760px;
+  width: 100%;
+  background: linear-gradient(180deg, #ffffff 0%, #fffdf7 100%);
+  border: 1px solid var(--dl-line, #e6e0d2);
+  border-top: 3px solid var(--dl-emerald, #1f5a45);
+  border-radius: 14px;
+  padding: 20px 24px 18px;
+  box-shadow: 0 10px 30px -22px rgba(31, 90, 69, 0.55);
+  animation: om-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.om-broker-eyebrow {
+  font: 600 10.5px/1 var(--dl-mono, ui-monospace, monospace);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dl-gold-ink, #8a5d12);
+  margin-bottom: 9px;
+}
+
+.om-broker-name {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--dl-display, Fraunces, Georgia, serif);
+  font-size: 25px; font-weight: 600;
+  color: var(--dl-emerald, #1f5a45);
+  line-height: 1.2;
+}
+
+.om-broker-why {
+  margin-top: 8px;
+  font-size: 13.5px; line-height: 1.65;
+  color: var(--dl-ink-dim, #6b6355);
+  max-width: 62ch;
+}
+
+.om-broker-stats {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+  margin-top: 14px; padding-top: 12px;
+  border-top: 1px solid var(--dl-line, #e6e0d2);
+  font-size: 12.5px; color: var(--dl-ink-dim, #6b6355);
+}
+.om-broker-stats b { color: var(--dl-ink, #2a2a26); font-size: 14px; }
+
+/* ── The spine ──────────────────────────────────────────────────── */
+.om-spine {
+  position: relative;
+  height: 46px;
+  display: flex; justify-content: center;
+}
+.om-spine-line {
+  position: absolute; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--dl-emerald, #1f5a45) 0%, rgba(31, 90, 69, 0.15) 100%);
+  border-radius: 2px;
+}
+.om-spine-pulse {
+  position: absolute; top: 0;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--dl-gold, #c99a2e);
+  box-shadow: 0 0 0 3px rgba(201, 154, 46, 0.18);
+  animation: om-travel 2.8s ease-in-out infinite;
+}
+
+.om-rosters-label {
+  text-align: center;
+  font-size: 12px;
+  color: var(--dl-ink-dim, #6b6355);
+  margin-bottom: 16px;
+  padding: 0 12px;
+}
+
+/* ── Tier 2 — the branches ──────────────────────────────────────── */
+.om-tier-branches {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.om-branch {
+  background: var(--dl-card, #fffdf7);
+  border: 1px solid var(--dl-line, #e6e0d2);
+  border-radius: 12px;
+  padding: 14px 16px 16px;
+  animation: om-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.om-branch-hot { border-color: rgba(201, 154, 46, 0.55); }
+
+.om-branch-head {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+  padding-bottom: 10px; margin-bottom: 12px;
+  border-bottom: 1px solid var(--dl-line, #e6e0d2);
+}
+.om-branch-code {
+  font: 600 11px/1 var(--dl-mono, ui-monospace, monospace);
+  letter-spacing: 0.1em;
+  color: var(--dl-emerald, #1f5a45);
+  background: rgba(31, 90, 69, 0.07);
+  padding: 4px 8px; border-radius: 5px;
+}
+.om-branch-name { font-size: 14.5px; font-weight: 600; color: var(--dl-ink, #2a2a26); }
+.om-branch-sector {
+  font: 10.5px/1 var(--dl-mono, ui-monospace, monospace);
+  letter-spacing: 0.08em;
+  color: var(--dl-ink-faint, #9a9484);
+}
+
+.om-branch-agents { display: grid; gap: 10px; }
+
+/* ── Agent card ─────────────────────────────────────────────────── */
+.om-agent {
+  border: 1px solid var(--dl-line, #e6e0d2);
+  border-left: 3px solid var(--dl-line, #e6e0d2);
+  border-radius: 0 9px 9px 0;
+  background: #fff;
+  padding: 11px 13px;
+  animation: om-rise 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+[dir="rtl"] .om-agent { border-left: 1px solid var(--dl-line, #e6e0d2); border-right: 3px solid var(--dl-line, #e6e0d2); border-radius: 9px 0 0 9px; }
+.om-agent:hover { transform: translateY(-2px); box-shadow: 0 10px 24px -20px rgba(0,0,0,0.45); }
+
+.om-agent-top { display: flex; align-items: center; gap: 8px; }
+.om-agent-name { font-size: 13.5px; font-weight: 600; color: var(--dl-ink, #2a2a26); }
+.om-agent-state { margin: 4px 0 0 16px; font-size: 11.5px; color: var(--dl-ink-dim, #6b6355); }
+[dir="rtl"] .om-agent-state { margin: 4px 16px 0 0; }
+
+.om-agent-meta {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 7px; font-size: 11px; color: var(--dl-ink-faint, #9a9484);
+}
+.om-mono { font-family: var(--dl-mono, ui-monospace, monospace); }
+.om-dim { color: var(--dl-ink-faint, #9a9484); }
+.om-sep { opacity: 0.5; }
+
+.om-agent-stats {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  margin-top: 9px; font-size: 11.5px; color: var(--dl-ink-dim, #6b6355);
+}
+.om-agent-stats b { color: var(--dl-ink, #2a2a26); }
+.om-pending { color: var(--dl-gold-ink, #8a5d12); font-weight: 600; }
+
+.om-tools { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+.om-tool {
+  font: 10px/1 var(--dl-mono, ui-monospace, monospace);
+  color: var(--dl-ink-faint, #9a9484);
+  background: rgba(31, 90, 69, 0.05);
+  border: 1px solid rgba(31, 90, 69, 0.08);
+  padding: 3px 6px; border-radius: 4px;
+}
+
+/* ── State tones ────────────────────────────────────────────────── */
+.om-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; display: inline-block; }
+.om-dot-waiting   { background: #c99a2e; box-shadow: 0 0 0 3px rgba(201,154,46,0.18); }
+.om-dot-attention { background: #c0532f; box-shadow: 0 0 0 3px rgba(192,83,47,0.16); }
+.om-dot-active    { background: #2f8f6b; box-shadow: 0 0 0 3px rgba(47,143,107,0.16); }
+.om-dot-idle      { background: #b9b2a1; }
+.om-dot-dormant   { background: #d8d2c4; }
+
+.om-agent.om-waiting   { border-left-color: #c99a2e; background: #fffcf3; }
+.om-agent.om-attention { border-left-color: #c0532f; }
+.om-agent.om-active    { border-left-color: #2f8f6b; }
+[dir="rtl"] .om-agent.om-waiting   { border-right-color: #c99a2e; }
+[dir="rtl"] .om-agent.om-attention { border-right-color: #c0532f; }
+[dir="rtl"] .om-agent.om-active    { border-right-color: #2f8f6b; }
+
+/* ONLY the waiting state breathes — it is the one asking a human for
+ * something. If every state animated, none would read as urgent. */
+.om-agent.om-waiting .om-dot-waiting { animation: om-breathe 2.2s ease-in-out infinite; }
+.om-broker.om-waiting .om-dot-waiting { animation: om-breathe 2.2s ease-in-out infinite; }
+
+.om-chip {
+  font: 600 10.5px/1 var(--dl-mono, ui-monospace, monospace);
+  letter-spacing: 0.06em;
+  padding: 5px 9px; border-radius: 999px;
+}
+.om-chip-waiting   { background: rgba(201,154,46,0.14); color: #8a5d12; }
+.om-chip-attention { background: rgba(192,83,47,0.12); color: #8f3d21; }
+.om-chip-active    { background: rgba(47,143,107,0.12); color: #1f5a45; }
+.om-chip-idle,
+.om-chip-dormant   { background: rgba(0,0,0,0.045); color: #6b6355; }
+
+/* ── Uncovered companies — the honest gap ───────────────────────── */
+.om-uncovered {
+  margin-top: 18px; padding: 14px 16px;
+  border: 1px dashed rgba(192, 83, 47, 0.35);
+  border-radius: 10px;
+  background: rgba(192, 83, 47, 0.03);
+}
+.om-uncovered-label {
+  font: 600 10.5px/1 var(--dl-mono, ui-monospace, monospace);
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: #8f3d21;
+}
+.om-uncovered-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+.om-uncovered-chip {
+  font: 11px/1 var(--dl-mono, ui-monospace, monospace);
+  padding: 5px 8px; border-radius: 5px;
+  background: #fff; border: 1px solid rgba(192,83,47,0.25); color: #8f3d21;
+}
+.om-uncovered-note {
+  margin: 9px 0 0; font-size: 12px; line-height: 1.6;
+  color: var(--dl-ink-dim, #6b6355); max-width: 78ch;
+}
+
+/* ── Legend ─────────────────────────────────────────────────────── */
+.om-legend {
+  display: flex; flex-wrap: wrap; gap: 16px;
+  margin: 18px 0 4px; padding-top: 14px;
+  border-top: 1px solid var(--dl-line, #e6e0d2);
+  font-size: 11.5px; color: var(--dl-ink-dim, #6b6355);
+}
+.om-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+
+/* ── Motion ─────────────────────────────────────────────────────── */
+@keyframes om-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes om-travel {
+  0%   { top: 0; opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { top: calc(100% - 6px); opacity: 0; }
+}
+@keyframes om-breathe {
+  0%, 100% { transform: scale(1);    box-shadow: 0 0 0 3px rgba(201,154,46,0.18); }
+  50%      { transform: scale(1.18); box-shadow: 0 0 0 6px rgba(201,154,46,0.06); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .om-broker, .om-branch, .om-agent { animation: none; }
+  .om-spine-pulse { animation: none; opacity: 0.7; top: 40%; }
+  .om-agent.om-waiting .om-dot-waiting,
+  .om-broker.om-waiting .om-dot-waiting { animation: none; }
+  .om-agent:hover { transform: none; }
+}
+
+@media (max-width: 720px) {
+  .om-broker { padding: 16px 16px 14px; }
+  .om-broker-name { font-size: 21px; }
+  .om-tier-branches { grid-template-columns: 1fr; }
+}

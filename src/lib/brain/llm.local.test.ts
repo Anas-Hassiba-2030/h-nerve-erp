@@ -116,7 +116,9 @@ describe("callLlm against a local server", () => {
     expect(res.isStub).toBe(false);
     expect(res.text).toBe("local answer");
 
-    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    // The mock is declared with no parameters, so its recorded call tuple is
+    // typed `[]`; go through unknown to read the arguments fetch was given.
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe("http://localhost:11434/v1/chat/completions");
     // A local server has nothing to authenticate; some reject an unexpected
     // Authorization header outright.

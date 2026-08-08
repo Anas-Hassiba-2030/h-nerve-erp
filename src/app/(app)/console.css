@@ -152,6 +152,17 @@
   color: var(--dl-emerald, #1f5a45) !important;
   transform: translateY(-1px);
 }
+/* The language switch carries TEXT, not a glyph, so it needs its own type
+   treatment — "EN"/"ع" at glyph size reads as a typo. Auto width because the
+   Arabic label is one narrow character and the Latin one is two wide ones. */
+.hn-console-lang {
+  width: auto; min-width: 32px; padding-inline: 8px;
+  border: 1px solid var(--dl-line, #e6e0d2);
+  background: transparent;
+  font: 600 11.5px/1 var(--dl-mono, ui-monospace, monospace);
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
 
 /* ── The shell switch (present in BOTH shells) ──────────────────── */
 .hn-shell-switch { position: fixed; bottom: 18px; inset-inline-end: 18px; z-index: 70; }

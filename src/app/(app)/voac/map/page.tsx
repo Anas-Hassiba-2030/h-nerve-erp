@@ -8,6 +8,7 @@ import {
   pipelineFor,
   runtimeChildren,
   runtimeChildKindLabel,
+  rosterTemplate,
   type AgentNode,
 } from "@/lib/voac/orgMap";
 import { skillVersionFor } from "@/lib/voac/roles";
@@ -276,6 +277,38 @@ export default async function VoacMapPage() {
         <div className="om-trunk" aria-hidden>
           <span className="om-trunk-line" />
           <span className="om-trunk-pulse" />
+        </div>
+
+        {/* The template — what a company in each business is STAFFED with.
+            The chart below answers "who exists right now"; this answers "what
+            does a company in this sector get", which is the question you ask
+            before you have any companies. Without it, two hotels showing the
+            same three agents reads as duplication instead of a template
+            applied twice. */}
+        <div className="om-tier-label">
+          {L("القالب — طاقم كل قطاع", "The template — what each sector is staffed with")}
+        </div>
+        <div className="om-template">
+          {rosterTemplate().map((row) => (
+            <div key={row.sector} className="om-tpl-row">
+              <div className="om-tpl-head">
+                <span className="om-tpl-sector">{row.sector}</span>
+                <span className="om-tpl-count">
+                  {row.roles.length} {L("وكلاء لكل شركة", row.roles.length === 1 ? "agent per company" : "agents per company")}
+                </span>
+              </div>
+              <div className="om-tpl-roles">
+                {row.roles.map((r) => (
+                  <span key={r.id} className="om-tpl-role">
+                    <span className="om-tpl-role-name">{ar ? r.ar : r.en}</span>
+                    <span className="om-tpl-role-meta">
+                      {r.topology} · {r.toolCount} {L("أدوات", "tools")}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Tier 2 — one branch per company, hanging off a single spine.

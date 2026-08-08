@@ -3,7 +3,7 @@ import {
   buildOrgMap, agentState, statKey, stateMeta, runtimeChildren, COUNCIL_VOICES,
   type AgentStats, type CompanyInput,
 } from "./orgMap";
-import { GROUP_BROKER_ID } from "./roles";
+import { GROUP_BROKER_ID, defaultRosterFor } from "./roles";
 import { SPECIALIST_AGENTS } from "@/lib/brain/agents";
 
 const NOW = new Date("2026-08-06T12:00:00Z");
@@ -73,9 +73,34 @@ describe("buildOrgMap", () => {
   it("reports uncovered companies instead of silently dropping them", () => {
     // A company the agent company cannot serve is a real gap. Omitting it from
     // both the map and the count is how you believe coverage is complete.
-    const map = build({}, [...COMPANIES, { id: "c-x", code: "TABAQAT", name: "طبقات", sector: "TRADE" }]);
-    expect(map.totals.uncovered).toContain("TABAQAT");
-    expect(map.branches.some((b) => b.code === "TABAQAT")).toBe(false);
+    //
+    // Uses a deliberately fictional sector rather than a real one: TRADE used
+    // to be the example here because MAHER/TABAQAT genuinely had no role, and
+    // then TRADE roles were added. A test that asserts a real sector stays
+    // uncovered turns closing a coverage gap into a build failure — exactly
+    // backwards. The invariant worth guarding is the BEHAVIOUR, so pin it to a
+    // sector that can never acquire a role.
+    const map = build({}, [
+      ...COMPANIES,
+      { id: "c-x", code: "SPACEPORT", name: "ميناء فضائي", sector: "SPACE_TOURISM" },
+    ]);
+    expect(map.totals.uncovered).toContain("SPACEPORT");
+    expect(map.branches.some((b) => b.code === "SPACEPORT")).toBe(false);
+  });
+
+  it("covers the TRADE sector — the gap the map used to list", () => {
+    const map = build({}, [{ id: "c-t", code: "TABAQAT", name: "طبقات", sector: "TRADE" }]);
+    expect(map.totals.uncovered).not.toContain("TABAQAT");
+    expect(map.branches.find((b) => b.code === "TABAQAT")?.agents.length).toBeGreaterThan(0);
+  });
+
+  it("gives every sector more than a single agent, so a roster is a team", () => {
+    // The map was accurate and still read as thin: one box per company is a
+    // labelled company, not an org chart. Every operating sector now carries
+    // at least two distinct roles.
+    for (const sector of ["HOSPITALITY", "DAIRY", "AGRICULTURE", "EDUCATION", "INVESTMENT", "TRADE"]) {
+      expect(defaultRosterFor(sector).length, sector).toBeGreaterThanOrEqual(2);
+    }
   });
 
   it("floats branches with pending proposals to the top", () => {

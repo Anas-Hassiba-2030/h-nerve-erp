@@ -148,6 +148,20 @@ Retrieval-Augmented Generation makes the brain answer from the tenant's **own** 
 | `serialize.ts` | Renders prompt context as a Python literal (read more accurately than JSON). |
 | `converse.ts` | The conversational brain behind `/api/converse` (the "Talk to the Brain" overlay). |
 
+**LLM provider precedence** (`lib/brain/llm.ts`): `LOCAL_LLM_BASE_URL` (or
+`OLLAMA_HOST`) → `ANTHROPIC_API_KEY` → `OPENROUTER_API_KEY` → stub. **Local
+deliberately outranks a configured key** — setting it means "keep inference on
+this machine", and a stale key silently winning would mean a surprise bill.
+Local reuses the OpenAI `/v1/chat/completions` path (Ollama, LM Studio,
+llama.cpp) with no auth header and a 180s default timeout (first call loads the
+model; the 20s hosted default would abort it and look like a failure). Verify
+with `scripts/verify/local-llm-check.ts`. **⚠️ Local is dev/self-hosted only —
+the production Worker cannot reach a laptop's localhost, and `wrangler.jsonc`
+sets `global_fetch_strictly_public` which blocks private addresses outright;
+prod-on-local would need a public tunnel.** Small local models often answer in
+prose without emitting `tool_use`, which degrades the orchestrator loop to a
+plain answer — that is a model-capability limit, not a seam defect.
+
 **Note:** retrieval is fully semantic only when an embedding key is set; otherwise it uses the local fallback (works, but rougher). The causal graph must be populated (`scripts/seed/seed-brain-local.ts`) for Graph RAG to have nodes.
 
 **Boundary rule:** the Brain is **read-mostly**. It proposes; it does not mutate domain data directly. All mutations go through the existing server actions in `app/(app)/<resource>/actions.ts`. This keeps the brain auditable, replayable, and safe to self-tune.

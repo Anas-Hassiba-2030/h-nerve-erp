@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { ORRERY_GROUPS, detectOrreryGroup } from "@/lib/orrery/groups";
+import { setLocale } from "@/app/actions/preferences";
 
 type Locale = "ar" | "en";
 
@@ -115,6 +116,22 @@ export function ConsoleNav({ locale }: { locale: Locale }) {
       </ul>
 
       <div className="hn-console-tail">
+        {/* Language. The Console shell shipped without one — the Orbit shell's
+            AR/EN pill lives in OrbitReturn, which this shell does not render,
+            so switching to Console stranded you in whichever language you
+            happened to be in. A bilingual product cannot hide its language
+            switch behind the other shell. */}
+        <form action={setLocale}>
+          <input type="hidden" name="locale" value={ar ? "en" : "ar"} />
+          <button
+            type="submit"
+            className="hn-console-tail-btn hn-console-lang"
+            title={ar ? "Switch to English" : "التبديل إلى العربية"}
+            aria-label={ar ? "Switch to English" : "التبديل إلى العربية"}
+          >
+            {ar ? "EN" : "ع"}
+          </button>
+        </form>
         <Link href="/search" className="hn-console-tail-btn" title={ar ? "بحث" : "Search"}>
           <span aria-hidden>⌕</span>
         </Link>

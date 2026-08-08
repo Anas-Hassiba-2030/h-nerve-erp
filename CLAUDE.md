@@ -252,6 +252,14 @@ here so it never has to be re-learned.
   it with typecheck. Land big reorgs as their own focused PRs, one concern each.
 - **Never commit secrets or environment-specific identifiers** (tokens, API keys, internal
   model IDs) into any tracked file — code, comments, commit messages, or PR text.
+- **CLAUDE.md is the source of truth for infrastructure facts** (production URL,
+  database, deploy pipeline, credentials policy). Memory notes and older docs are
+  history; when they disagree with this file, this file wins. When infra changes,
+  update this file in the same session.
+- **Never verify features by mutating production data.** No test rows in prod D1
+  "just to check", even if deleted after. Verify on the local dev server (seed
+  scripts + `admin@hourani.jo`/`admin123`); production checks stay read-only.
+  Explicit user authorization is required for any prod write (migrations, seeds).
 
 ## Default credentials (seeded)
 

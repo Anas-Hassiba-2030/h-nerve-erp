@@ -240,9 +240,13 @@ here so it never has to be re-learned.
 - **Always start from `origin/main`.** Before any reorg/refactor, fetch and fast-forward.
   A stale local checkout silently re-does or conflicts with work already merged (this has
   bitten us — see the lib reorg #162 landing while a local copy still showed flat files).
-- **Schema stays `postgresql` in committed code.** Local dev may flip the Prisma provider
-  to `sqlite` for speed, but restore `postgresql` before committing. Migrations under
-  `prisma/migrations/` are the production source of truth.
+- **Schema provider is `sqlite` — permanently.** Production is Cloudflare D1
+  (SQLite); the committed `datasource` in `prisma/schema/schema.prisma` says
+  `provider = "sqlite"` and must never be flipped back to `postgresql` (that era
+  ended with the 2026-07 Cloudflare cutover — the DB section above is the source
+  of truth). `prisma/migrations/` is Postgres-era history only; schema changes
+  ship via `db push` locally + generated, rehearsed SQL under
+  `prisma/migrations-d1/` against prod.
 - **Refactors are behaviour-preserving.** Moving/renaming/extracting must not change what
   the app does. When you move a file, rewire every importer in the same commit and prove
   it with typecheck. Land big reorgs as their own focused PRs, one concern each.

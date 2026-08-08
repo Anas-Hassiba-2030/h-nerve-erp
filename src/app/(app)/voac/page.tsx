@@ -58,8 +58,10 @@ export default async function VoacPage() {
           "The agents propose. You decide. Every decision is recorded against a name.",
         )}
         actions={
-          <Link href="/voac/map" className="btn vo-btn">
-            {L("خريطة التنسيق", "Orchestration map")}
+          <Link href="/voac/map" className="vo-map-cta">
+            <span className="vo-map-cta-dot" aria-hidden />
+            {L("خريطة التنسيق الكاملة", "Full orchestration map")}
+            <span className="vo-map-cta-arrow" aria-hidden>{ar ? "←" : "→"}</span>
           </Link>
         }
       />

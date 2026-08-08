@@ -44,6 +44,41 @@
 .vo-btn { white-space: nowrap; }
 .vo-btn-sm { padding: 4px 10px; font-size: 12px; white-space: nowrap; }
 
+/* --- the map CTA ---------------------------------------------------
+ * The doorway to /voac/map. It kept getting missed as a plain header
+ * link, so it is deliberately the loudest element on the page: emerald
+ * fill, gold live-dot, hover lift. One CTA — nothing else competes. */
+.vo-map-cta {
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 11px 20px;
+  background: var(--dl-emerald, #1f5a45);
+  color: #fdf9ee !important;
+  border-radius: 999px;
+  font-size: 14px; font-weight: 700; text-decoration: none;
+  box-shadow: 0 8px 22px -12px rgba(31, 90, 69, 0.7);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  white-space: nowrap;
+}
+.vo-map-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px -14px rgba(31, 90, 69, 0.85);
+}
+.vo-map-cta-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--dl-gold, #c99a2e);
+  box-shadow: 0 0 0 3px rgba(201, 154, 46, 0.25);
+  animation: vo-cta-breathe 2.2s ease-in-out infinite;
+}
+.vo-map-cta-arrow { font-size: 15px; line-height: 1; }
+@keyframes vo-cta-breathe {
+  0%, 100% { transform: scale(1);    box-shadow: 0 0 0 3px rgba(201,154,46,0.25); }
+  50%      { transform: scale(1.25); box-shadow: 0 0 0 6px rgba(201,154,46,0.08); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vo-map-cta-dot { animation: none; }
+  .vo-map-cta:hover { transform: none; }
+}
+
 .vo-fineprint {
   margin: 8px 0 0; font-size: 11.5px; color: var(--dl-ink-faint, #8c8474);
 }

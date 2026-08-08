@@ -18,6 +18,7 @@ import { cookies } from "next/headers";
 import { requireUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/db";
 import { scoped } from "@/lib/utils/logger";
+import { flashToast } from "@/lib/utils/toast";
 
 const log = scoped("tenancy");
 import {
@@ -29,6 +30,14 @@ import {
   type ProvisioningStepKey,
 } from "@/lib/tenancy/tenancy";
 import { THEME_PRESETS, type ThemeKey, type PackKey } from "@/lib/brand/themes";
+import {
+  isModuleKey,
+  canEnableModule,
+  dependentsOf,
+  resolveStarterModules,
+  type IndustryKey,
+} from "@/lib/tenancy/moduleCatalog";
+import { invalidateModuleCache } from "@/lib/tenancy/moduleGate";
 
 const VALID_PACKS: PackKey[] = ["hospitality", "dairy", "agri", "education", "finance"];
 
@@ -39,7 +48,16 @@ export async function createTenant(formData: FormData): Promise<void> {
   const adminEmail = String(formData.get("adminEmail") ?? "").trim().toLowerCase().slice(0, 120);
   const region = String(formData.get("region") ?? "MENA").trim().slice(0, 32);
   const theme = String(formData.get("theme") ?? "heritage") as ThemeKey;
-  const packs = formData.getAll("packs").map((p) => String(p)) as PackKey[];
+  // The wizard's "industry packs" checkboxes pick a starting vertical, not
+  // individual modules — expand each chosen industry into its starter
+  // module bundle (moduleCatalog.ts) so every TenantPack row written here
+  // is a real ModuleKey, never the raw industry string. See
+  // docs/SYSTEM-BLUEPRINT.md §9.3.
+  const industries = formData
+    .getAll("packs")
+    .map((p) => String(p))
+    .filter((p): p is IndustryKey => VALID_PACKS.includes(p as PackKey));
+  const moduleKeys = resolveStarterModules(industries);
 
   if (!name || name.length < 2) throw new Error("name required");
   if (!isValidSlug(slugRaw)) throw new Error("invalid slug");
@@ -75,9 +93,7 @@ export async function createTenant(formData: FormData): Promise<void> {
         },
       },
       packs: {
-        create: packs
-          .filter((p): p is PackKey => VALID_PACKS.includes(p))
-          .map((p) => ({ packKey: p, enabled: true })),
+        create: moduleKeys.map((key) => ({ packKey: key, enabled: true })),
       },
     },
   });
@@ -193,6 +209,72 @@ export async function clearViewAs(): Promise<void> {
   revalidatePath("/admin/tenants");
   // Exiting preview returns the admin to the console, not the operator UI.
   redirect("/admin/tenants");
+}
+
+/**
+ * Toggle one module on/off for a tenant — the write path behind
+ * /admin/tenants/[id]/modules. Enforces the catalog's `requires` edges
+ * server-side in both directions so a checkbox alone can never produce an
+ * incoherent tenant (docs/SYSTEM-BLUEPRINT.md §9.3 item 4):
+ *   - enabling: every dependency must already be on.
+ *   - disabling: nothing currently-enabled may still depend on this module.
+ * Blocked attempts flash a toast naming exactly what's missing/blocking —
+ * a disabled-looking button with no feedback reads as broken (feedback:
+ * every mutating control needs visible confirmation).
+ */
+export async function toggleTenantModule(formData: FormData): Promise<void> {
+  await requireUser();
+  const tenantId = String(formData.get("tenantId") ?? "");
+  const moduleKey = String(formData.get("moduleKey") ?? "");
+  const nextEnabled = String(formData.get("enabled") ?? "") === "true";
+
+  if (!tenantId || !isModuleKey(moduleKey)) {
+    await flashToast({ type: "info", entity: "info", label: "Invalid module toggle" });
+    return;
+  }
+
+  const current = await prisma.tenantPack.findMany({
+    where: { tenantId, enabled: true },
+    select: { packKey: true },
+  });
+  const enabledKeys = current.map((c) => c.packKey).filter(isModuleKey);
+
+  if (nextEnabled) {
+    const { ok, missing } = canEnableModule(moduleKey, enabledKeys);
+    if (!ok) {
+      await flashToast({
+        type: "info",
+        entity: "info",
+        label: `⚠ Enable ${missing.join(", ")} first`,
+      });
+      revalidatePath(`/admin/tenants/${tenantId}/modules`);
+      return;
+    }
+  } else {
+    const dependents = dependentsOf(moduleKey, enabledKeys);
+    if (dependents.length > 0) {
+      await flashToast({
+        type: "info",
+        entity: "info",
+        label: `⚠ ${dependents.join(", ")} still need this`,
+      });
+      revalidatePath(`/admin/tenants/${tenantId}/modules`);
+      return;
+    }
+  }
+
+  await prisma.tenantPack.upsert({
+    where: { tenantId_packKey: { tenantId, packKey: moduleKey } },
+    create: { tenantId, packKey: moduleKey, enabled: nextEnabled },
+    update: { enabled: nextEnabled },
+  });
+  // The (app) layout's module gate (moduleGate.ts) caches this tenant's
+  // enabled set for 60s — invalidate now so a toggle is visible on the
+  // toggling admin's very next navigation, not up to a minute later.
+  invalidateModuleCache(tenantId);
+
+  revalidatePath(`/admin/tenants/${tenantId}/modules`);
+  revalidatePath(`/admin/tenants/${tenantId}`);
 }
 
 export async function deleteTenant(formData: FormData): Promise<void> {

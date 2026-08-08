@@ -61,11 +61,17 @@ model TenantTheme {
   updatedAt    DateTime @updatedAt
 }
 
+// Module-grained per docs/SYSTEM-BLUEPRINT.md §9. packKey is a ModuleKey
+// from src/lib/tenancy/moduleCatalog.ts (MODULE_CATALOG) — e.g. "pos",
+// "payroll", "bookings-mgmt" — not a whole industry vertical. Same column,
+// same uniqueness constraint as before; only which strings are valid
+// changed. Dependency edges (`requires`) live in the catalog, not here —
+// enforce them in the toggle server action via canEnableModule(), never
+// trust the checkbox alone.
 model TenantPack {
   id        String   @id @default(cuid())
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  // "hospitality" | "dairy" | "agri" | "education" | "finance"
   packKey   String
   enabled   Boolean  @default(true)
 

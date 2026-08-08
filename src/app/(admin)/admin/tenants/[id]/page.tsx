@@ -5,8 +5,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db/db";
-import { ArrowLeft, Eye, Trash2, Copy, Calendar } from "lucide-react";
-import { THEME_PRESETS, PACK_CATALOG, type ThemeKey } from "@/lib/brand/themes";
+import { ArrowLeft, Eye, Trash2, Copy, Calendar, Blocks } from "lucide-react";
+import { THEME_PRESETS, type ThemeKey } from "@/lib/brand/themes";
+import { isModuleKey } from "@/lib/tenancy/moduleCatalog";
 import { viewAsTenant, deleteTenant } from "../actions";
 import { getLocale, getMessages } from "@/lib/i18n/i18n.server";
 
@@ -165,33 +166,25 @@ export default async function TenantDetail(
         </div>
       </section>
 
-      {/* Packs */}
+      {/* Modules — summary + link to the full plugin manager */}
       <section className="admin-section">
         <header className="admin-section-head">
           <span className="admin-eyebrow">{m["admin.eyebrow.industryPacks"]}</span>
           <h2 className="admin-h2">
-            {ar
-              ? `${tenant.packs.length} ${tenant.packs.length === 1 ? "حزمة مُفعَّلة" : "حزم مُفعَّلة"}`
-              : `${tenant.packs.length} pack${tenant.packs.length === 1 ? "" : "s"} enabled`}
+            {(() => {
+              const enabledCount = tenant.packs.filter(
+                (p) => p.enabled && isModuleKey(p.packKey),
+              ).length;
+              return ar
+                ? `${enabledCount} وحدة مُفعَّلة`
+                : `${enabledCount} module${enabledCount === 1 ? "" : "s"} enabled`;
+            })()}
           </h2>
         </header>
-        <div className="admin-pack-grid">
-          {PACK_CATALOG.map((p) => {
-            const enabled = tenant.packs.some((pk) => pk.packKey === p.key);
-            return (
-              <div
-                key={p.key}
-                className="admin-pack-tile"
-                data-enabled={enabled ? "true" : "false"}
-              >
-                <span className="admin-pack-key">{ar ? p.nameAr : p.nameEn}</span>
-                <span className="admin-pack-state">
-                  {enabled ? "ENABLED" : "OFF"}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+        <Link href={`/admin/tenants/${tenant.id}/modules`} className="admin-cta-primary">
+          <Blocks className="h-4 w-4" strokeWidth={1.5} />
+          {ar ? "إدارة الوحدات" : "Manage modules"}
+        </Link>
       </section>
 
       {/* Provisioning trail */}

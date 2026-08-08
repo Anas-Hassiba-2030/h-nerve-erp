@@ -44,6 +44,18 @@ export function otherShell(mode: ShellMode): ShellMode {
   return mode === "orbit" ? "console" : "orbit";
 }
 
+/**
+ * The home surface of a shell — where the switch lands you.
+ *
+ * Each shell HAS one, and they are opposites by design: the Orrery is the
+ * cinematic bloom you fly through, /console is every group and every section
+ * on one screen with a filter. Neither grants access; both are pure navigation
+ * over the same ORRERY_GROUPS list, which is why both sit in UNIVERSAL.
+ */
+export function shellHome(mode: ShellMode): string {
+  return mode === "orbit" ? "/orrery" : "/console";
+}
+
 /** Bilingual label for a shell, for the toggle button and its tooltip. */
 export function shellLabel(mode: ShellMode): { ar: string; en: string } {
   return mode === "orbit"

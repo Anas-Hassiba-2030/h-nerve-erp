@@ -1,9 +1,10 @@
 import { describe, it, expect } from "vitest";
 import {
-  buildOrgMap, agentState, statKey, stateMeta,
+  buildOrgMap, agentState, statKey, stateMeta, runtimeChildren, COUNCIL_VOICES,
   type AgentStats, type CompanyInput,
 } from "./orgMap";
 import { GROUP_BROKER_ID } from "./roles";
+import { SPECIALIST_AGENTS } from "@/lib/brain/agents";
 
 const NOW = new Date("2026-08-06T12:00:00Z");
 const hoursAgo = (h: number) => new Date(NOW.getTime() - h * 3_600_000);
@@ -125,6 +126,32 @@ describe("buildOrgMap", () => {
     const roleIds = map.branches.map((b) => b.agents.map((a) => a.roleId).join());
     expect(roleIds[0]).toBe(roleIds[1]); // same role...
     expect(map.branches[0].companyId).not.toBe(map.branches[1].companyId); // ...different company
+  });
+});
+
+describe("runtimeChildren", () => {
+  // The map claims the broker convenes THESE named voices. If the council
+  // roster changes and this mirror does not, the chart lies about who ran.
+  it("mirrors the real council roster exactly", () => {
+    const mirrored = COUNCIL_VOICES.filter((v) => !v.moderator).map((v) => v.id).sort();
+    const real = SPECIALIST_AGENTS.map((a) => a.id).sort();
+    expect(mirrored).toEqual(real);
+  });
+
+  it("expands a parallel node into the council plus its moderator", () => {
+    const kids = runtimeChildren({ topology: "parallel", tools: ["pullFacts"] });
+    expect(kids).toHaveLength(SPECIALIST_AGENTS.length + 1);
+    expect(kids.filter((k) => k.kind === "moderator")).toHaveLength(1);
+    // The tools list is NOT what a parallel node runs — the council is.
+    expect(kids.some((k) => k.id === "pullFacts")).toBe(false);
+  });
+
+  it("expands every other topology into the tools it may call", () => {
+    for (const topology of ["route", "chain", "single"]) {
+      const kids = runtimeChildren({ topology, tools: ["pullFacts", "narrate"] });
+      expect(kids.map((k) => k.id)).toEqual(["pullFacts", "narrate"]);
+      expect(kids.every((k) => k.kind === "tool")).toBe(true);
+    }
   });
 });
 

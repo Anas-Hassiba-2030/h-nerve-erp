@@ -1,8 +1,9 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { SHELL_COOKIE, parseShell, otherShell, type ShellMode } from "@/lib/theme/shell";
+import { SHELL_COOKIE, parseShell, otherShell, shellHome, type ShellMode } from "@/lib/theme/shell";
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
 
@@ -28,4 +29,10 @@ export async function toggleShell(): Promise<void> {
     httpOnly: false,
   });
   revalidatePath("/", "layout");
+  // Land on the shell you switched INTO, not on the page you happened to be on.
+  // Swapping only the chrome around the current page is the change nobody sees:
+  // the operator clicks the switch, the middle of the screen is identical, and
+  // they conclude the button is broken. Each shell has a home that IS the shell
+  // — the Orrery bloom, or the everything-at-once board — so show it.
+  redirect(shellHome(next));
 }

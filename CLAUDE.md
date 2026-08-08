@@ -97,6 +97,18 @@ The App Router uses **four** groups, each with its own `layout.tsx`:
 - `app/m/` — mobile-first surface (Phase 14, see `lib/mobile/today.ts`).
 - `app/page.tsx` — bare router: signed-in → `/orrery` (the Orrery hub), otherwise → `/login`.
 
+**Two shells, one app** (`lib/theme/shell.ts`, cookie `h_nerve_shell`). Same
+routes, same data, same background — only the way you MOVE changes. `orbit` is
+the signature surface (Orrery hub + ConstellationRail); `console` is the
+conventional ERP shell (`ConsoleNav` top bar + `/console`, the
+everything-on-one-screen board with a filter). `shellHome()` names each shell's
+home and `toggleShell()` redirects there, so the switch lands you on the shell
+you chose instead of only reskinning the page you were on. Both homes are in
+`UNIVERSAL` (permissions.ts) — a shell home grants nothing, and gating one
+strands that role on a redirect. `ConsoleHome` and `ConsoleNav` both read
+`ORRERY_GROUPS`, the same source as the rail and the static hub: add a section
+there once and it ships into every navigation surface.
+
 ### Where mutations live
 
 - **Server Actions are the default** for CRUD: `app/(app)/<resource>/actions.ts`, `"use server"`, exports `createX` / `updateX(id, formData)` / `deleteX(formData)`. Each action calls `requireUser()`, validates with `zod`, writes via `prisma`, then `revalidatePath(...)` and `redirect(...)` if appropriate. Pages stay server components; use `<form action={serverAction}>` for plain CRUD.

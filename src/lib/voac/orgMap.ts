@@ -232,6 +232,69 @@ export function pipelineFor(topology: string): { ar: string; en: string }[] {
   }
 }
 
+/**
+ * The council roster, mirrored as pure data.
+ *
+ * driver.live.ts routes `parallel` topology into brain/council.live.ts, which
+ * runs SPECIALIST_AGENTS in parallel and then the Moderator. Those are real,
+ * named agents — so the map must show them, or the "one supervisor" tier looks
+ * like a single box when it is in fact six agents deep at run time.
+ *
+ * Mirrored rather than imported because brain/agents/index.ts reaches
+ * transitively into ../llm (network, env), and this module is the pure core the
+ * chart is tested against. orgMap.test.ts asserts these ids match
+ * SPECIALIST_AGENTS exactly, so the mirror cannot drift silently.
+ */
+export const COUNCIL_VOICES: { id: string; ar: string; en: string; moderator?: true }[] = [
+  { id: "hospitality-expert", ar: "خبير الضيافة", en: "Hospitality Expert" },
+  { id: "dairy-expert", ar: "خبير الألبان", en: "Dairy Expert" },
+  { id: "agri-expert", ar: "خبير الزراعة", en: "Agriculture Expert" },
+  { id: "finance-brain", ar: "العقل المالي", en: "Finance Brain" },
+  { id: "risk-officer", ar: "ضابط المخاطر", en: "Risk Officer" },
+  { id: "moderator", ar: "المُيَسّر", en: "Moderator", moderator: true },
+];
+
+export type RuntimeChild = {
+  id: string;
+  ar: string;
+  en: string;
+  /** "voice" = an agent that speaks; "tool" = a brain tool it may call. */
+  kind: "voice" | "moderator" | "tool";
+};
+
+/**
+ * What this node expands into when it actually runs — the layer below the
+ * org chart, which is where the orchestration really happens.
+ *
+ * A `parallel` node convenes the council: five specialists argue at once, then
+ * the Moderator reconciles. Every other topology runs the orchestrator's tool
+ * loop, so its children are the brain tools it is permitted to call. Both are
+ * read straight off what driver.live.ts does — nothing invented for the picture.
+ */
+export function runtimeChildren(node: Pick<AgentNode, "topology" | "tools">): RuntimeChild[] {
+  if (node.topology === "parallel") {
+    return COUNCIL_VOICES.map((v) => ({
+      id: v.id,
+      ar: v.ar,
+      en: v.en,
+      kind: v.moderator ? ("moderator" as const) : ("voice" as const),
+    }));
+  }
+  return node.tools.map((t) => ({ id: t, ar: t, en: t, kind: "tool" as const }));
+}
+
+/** Bilingual gloss of what a runtime child contributes. */
+export function runtimeChildKindLabel(kind: RuntimeChild["kind"]): { ar: string; en: string } {
+  switch (kind) {
+    case "voice":
+      return { ar: "صوت في المجلس — يتحدّث بالتوازي", en: "Council voice — argues in parallel" };
+    case "moderator":
+      return { ar: "يرجّح الأصوات بعد أن تتحدّث", en: "Reconciles the voices after they speak" };
+    case "tool":
+      return { ar: "أداة يستدعيها في حلقة الأدوات", en: "Tool it may call in the loop" };
+  }
+}
+
 /** Display metadata per state — colour tone and bilingual label. */
 export function stateMeta(state: AgentState): {
   ar: string;

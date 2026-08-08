@@ -25,7 +25,11 @@ export const UNIVERSAL = [
   "/dashboard", "/settings", "/search", "/help", "/messages",
   "/tasks", "/pinned", "/showcase", "/changelog", "/roadmap",
   "/achievements", "/digest", "/notifications", "/inbox",
-  "/me", "/activity", "/orrery", "/m", "/learning", "/design-system",
+  // /orrery and /console are the two shell HOMES (lib/theme/shell.ts). Both are
+  // pure navigation over ORRERY_GROUPS and grant nothing — every destination
+  // they link to is gated on its own. Gating a shell home would strand a role
+  // on a page with no way out.
+  "/me", "/activity", "/orrery", "/console", "/m", "/learning", "/design-system",
   "/portal", "/dev", "/protocol",
 ];
 

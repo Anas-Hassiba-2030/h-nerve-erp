@@ -38,7 +38,10 @@ export function ConsoleNav({ locale }: { locale: Locale }) {
 
   return (
     <nav className="hn-console" aria-label={ar ? "التنقل" : "Navigation"}>
-      <Link href="/orrery" className="hn-console-brand">
+      {/* The brand is the way home, and in THIS shell home is /console — the
+          everything-at-once board. Pointing it at /orrery (as it did) threw the
+          operator back into the other shell's metaphor on every logo click. */}
+      <Link href="/console" className="hn-console-brand">
         <span className="hn-console-mark" aria-hidden>✦</span>
         <span className="hn-console-wordmark">H-Nerve</span>
       </Link>

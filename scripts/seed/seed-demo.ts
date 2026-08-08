@@ -23,6 +23,7 @@
 
 import { makePrismaClient } from "../_prisma";
 import { PrismaClient, Prisma } from "@prisma/client";
+import { resolveEnabledModules, type ModuleKey } from "@/lib/tenancy/moduleCatalog";
 
 const prisma = makePrismaClient();
 
@@ -37,7 +38,11 @@ type TenantSeed = {
   adminEmail: string;
   theme: "heritage" | "ocean" | "ember" | "forest" | "monolith" | "pearl";
   emblem: string;
-  packs: ("hospitality" | "dairy" | "agri" | "education" | "finance")[];
+  // Module keys from src/lib/tenancy/moduleCatalog.ts — module-grained per
+  // docs/SYSTEM-BLUEPRINT.md §9, not the old 5-industry-key shape. Each
+  // tenant's list must be a coherent, requires-satisfying set; asserted
+  // below via resolveEnabledModules() rather than trusted by inspection.
+  packs: ModuleKey[];
 };
 
 const TENANTS: TenantSeed[] = [
@@ -47,7 +52,11 @@ const TENANTS: TenantSeed[] = [
     adminEmail: "admin@hourani.jo",
     theme: "heritage",
     emblem: "◆",
-    packs: ["hospitality", "finance"],
+    packs: [
+      "sales", "pos", "inventory", "clients", "client-follow-up",
+      "bookings-mgmt", "employees", "payroll", "org-structure",
+      "finance", "chart-of-accounts", "branches",
+    ],
   },
   {
     slug: "maha-dairy",
@@ -55,7 +64,10 @@ const TENANTS: TenantSeed[] = [
     adminEmail: "ops@maha.jo",
     theme: "ocean",
     emblem: "◉",
-    packs: ["dairy", "finance"],
+    packs: [
+      "inventory", "purchase-cycle", "work-orders", "manufacturing",
+      "employees", "payroll", "finance", "chart-of-accounts",
+    ],
   },
   {
     slug: "loran-agri",
@@ -63,7 +75,10 @@ const TENANTS: TenantSeed[] = [
     adminEmail: "ops@loran.jo",
     theme: "forest",
     emblem: "✱",
-    packs: ["agri", "finance"],
+    packs: [
+      "inventory", "purchase-cycle", "work-orders",
+      "employees", "payroll", "finance",
+    ],
   },
   {
     slug: "tank-incubator",
@@ -71,9 +86,24 @@ const TENANTS: TenantSeed[] = [
     adminEmail: "ops@thetank.jo",
     theme: "ember",
     emblem: "▲",
-    packs: ["education", "finance"],
+    packs: [
+      "clients", "membership", "client-attendance",
+      "employees", "org-structure", "finance",
+    ],
   },
 ];
+
+// Guard the seed itself against ever writing an incoherent module set —
+// same discipline as the Prisma FK checks, applied before the DB round trip.
+for (const t of TENANTS) {
+  const { blocked } = resolveEnabledModules(t.packs);
+  if (Object.keys(blocked).length > 0) {
+    throw new Error(
+      `seed-demo: tenant "${t.slug}" has an incoherent module set — ` +
+      `blocked: ${JSON.stringify(blocked)}`,
+    );
+  }
+}
 
 // ---------------------------------------------------------------------
 // 2. Companies — one per arm. Company is NOT tenant-scoped in the schema

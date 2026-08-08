@@ -56,6 +56,7 @@ export const VOAC_ROLES: VoacRole[] = [
     defaultTopology: "parallel",
     tools: ["pullFacts", "causalSubgraph", "councilDebate", "recallMemory", "narrate"],
   },
+  // ── HOSPITALITY ────────────────────────────────────────────────────
   {
     id: "hospitality-revenue-controller",
     labelAr: "مراقب إيرادات الضيافة",
@@ -66,6 +67,29 @@ export const VOAC_ROLES: VoacRole[] = [
     tools: ["pullFacts", "simulate", "narrate"],
   },
   {
+    id: "occupancy-forecaster",
+    labelAr: "متنبّئ الإشغال",
+    labelEn: "Occupancy Forecaster",
+    sector: "HOSPITALITY",
+    skillDocId: "occupancy-forecaster",
+    // Forward-looking work is a chain by nature: you cannot reason about next
+    // month's occupancy before this month's bookings and the seasonal shape
+    // are on the table. Parallelising it would mean guessing first.
+    defaultTopology: "chain",
+    tools: ["pullFacts", "simulate", "recallMemory", "narrate"],
+  },
+  {
+    id: "fnb-cost-controller",
+    labelAr: "مراقب تكلفة الأغذية والمشروبات",
+    labelEn: "F&B Cost Controller",
+    sector: "HOSPITALITY",
+    skillDocId: "fnb-cost-controller",
+    defaultTopology: "route",
+    tools: ["pullFacts", "causalSubgraph", "narrate"],
+  },
+
+  // ── DAIRY ──────────────────────────────────────────────────────────
+  {
     id: "dairy-yield-controller",
     labelAr: "مراقب إنتاجية الألبان",
     labelEn: "Dairy Yield Controller",
@@ -74,6 +98,20 @@ export const VOAC_ROLES: VoacRole[] = [
     defaultTopology: "route",
     tools: ["pullFacts", "causalSubgraph", "narrate"],
   },
+  {
+    id: "expiry-routing-officer",
+    labelAr: "ضابط توجيه الصلاحية",
+    labelEn: "Expiry Routing Officer",
+    sector: "DAIRY",
+    skillDocId: "expiry-routing-officer",
+    // Diversion is a sequence with a hard gate in the middle: read the batch,
+    // simulate the recovery, and only THEN check it against the receiving
+    // buyer's ordering cycle. A route topology would skip the gate.
+    defaultTopology: "chain",
+    tools: ["pullFacts", "simulate", "causalSubgraph", "narrate"],
+  },
+
+  // ── AGRICULTURE ────────────────────────────────────────────────────
   {
     id: "feed-supply-planner",
     labelAr: "مخطط إمداد الأعلاف",
@@ -84,6 +122,17 @@ export const VOAC_ROLES: VoacRole[] = [
     tools: ["pullFacts", "simulate", "narrate"],
   },
   {
+    id: "crop-cycle-planner",
+    labelAr: "مخطط الدورة الزراعية",
+    labelEn: "Crop Cycle Planner",
+    sector: "AGRICULTURE",
+    skillDocId: "crop-cycle-planner",
+    defaultTopology: "chain",
+    tools: ["pullFacts", "simulate", "recallMemory", "narrate"],
+  },
+
+  // ── EDUCATION ──────────────────────────────────────────────────────
+  {
     id: "education-enrolment-analyst",
     labelAr: "محلل الالتحاق التعليمي",
     labelEn: "Education Enrolment Analyst",
@@ -93,6 +142,17 @@ export const VOAC_ROLES: VoacRole[] = [
     tools: ["pullFacts", "narrate"],
   },
   {
+    id: "student-retention-analyst",
+    labelAr: "محلل بقاء الطلبة",
+    labelEn: "Student Retention Analyst",
+    sector: "EDUCATION",
+    skillDocId: "student-retention-analyst",
+    defaultTopology: "route",
+    tools: ["pullFacts", "causalSubgraph", "narrate"],
+  },
+
+  // ── INVESTMENT ─────────────────────────────────────────────────────
+  {
     id: "finance-controller",
     labelAr: "المراقب المالي",
     labelEn: "Finance Controller",
@@ -100,6 +160,39 @@ export const VOAC_ROLES: VoacRole[] = [
     skillDocId: "finance-controller",
     defaultTopology: "chain",
     tools: ["pullFacts", "causalSubgraph", "retrieveDocuments", "narrate"],
+  },
+  {
+    id: "cash-flow-controller",
+    labelAr: "مراقب التدفّق النقدي",
+    labelEn: "Cash Flow Controller",
+    sector: "INVESTMENT",
+    skillDocId: "cash-flow-controller",
+    defaultTopology: "chain",
+    tools: ["pullFacts", "simulate", "narrate"],
+  },
+
+  // ── TRADE ──────────────────────────────────────────────────────────
+  // Added to close a real coverage gap: the map listed MAHER and TABAQAT under
+  // "companies with no matching role yet" because no TRADE role existed. That
+  // listing was honest, and the honest fix is roles, not hiding the list.
+  {
+    id: "trade-margin-controller",
+    labelAr: "مراقب هامش التجارة",
+    labelEn: "Trade Margin Controller",
+    sector: "TRADE",
+    skillDocId: "trade-margin-controller",
+    defaultTopology: "route",
+    tools: ["pullFacts", "causalSubgraph", "narrate"],
+  },
+  {
+    id: "supplier-terms-analyst",
+    labelAr: "محلل شروط الموردين",
+    labelEn: "Supplier Terms Analyst",
+    sector: "TRADE",
+    skillDocId: "supplier-terms-analyst",
+    // Contract terms live in documents, so this one reads before it reasons.
+    defaultTopology: "chain",
+    tools: ["pullFacts", "retrieveDocuments", "narrate"],
   },
 ];
 

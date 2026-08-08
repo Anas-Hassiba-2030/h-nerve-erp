@@ -168,3 +168,22 @@
   .ex-thesis p { font-size: 16.5px; }
   .ex-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Dependency roster (the stack page's "libraries" panel) ───────
+ * Chips, not a table: a version is a 5-character fact and a table row per
+ * package would be 90% whitespace. */
+.ex-pkgs { display: flex; flex-wrap: wrap; gap: 6px; }
+.ex-pkg {
+  display: inline-flex; align-items: baseline; gap: 6px;
+  padding: 4px 8px; border-radius: 5px;
+  background: rgba(31, 90, 69, 0.05);
+  border: 1px solid rgba(31, 90, 69, 0.1);
+}
+.ex-pkg-name {
+  font: 11px/1.4 var(--dl-mono, ui-monospace, monospace);
+  color: var(--dl-ink, #2a2a26);
+}
+.ex-pkg-ver {
+  font: 10px/1.4 var(--dl-mono, ui-monospace, monospace);
+  color: var(--dl-gold-ink, #8a5d12);
+}

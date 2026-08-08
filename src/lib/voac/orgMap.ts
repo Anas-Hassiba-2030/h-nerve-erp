@@ -232,6 +232,44 @@ export function pipelineFor(topology: string): { ar: string; en: string }[] {
   }
 }
 
+export type RosterTemplateRow = {
+  sector: string;
+  roles: { id: string; ar: string; en: string; topology: string; toolCount: number }[];
+};
+
+/**
+ * The ROSTER TEMPLATE: what any company in a given sector is staffed with.
+ *
+ * The live chart answers "who exists right now"; this answers "what does a
+ * company in this business GET" — the question you ask before you have any
+ * companies, and the one an owner asks when deciding whether the thing is
+ * substantial. They are different questions and the map needs both: without
+ * this, two hotels showing the same three agents reads as duplication rather
+ * than as a template applied twice.
+ *
+ * Derived from the registry, never hand-listed, so a role added in roles.ts
+ * appears here with no edit. The Group Broker is excluded — it belongs to the
+ * group, not to any company roster.
+ */
+export function rosterTemplate(roles: VoacRole[] = VOAC_ROLES): RosterTemplateRow[] {
+  const bySector = new Map<string, RosterTemplateRow["roles"]>();
+  for (const r of roles) {
+    if (r.id === GROUP_BROKER_ID) continue;
+    const list = bySector.get(r.sector) ?? [];
+    list.push({
+      id: r.id,
+      ar: r.labelAr,
+      en: r.labelEn,
+      topology: r.defaultTopology,
+      toolCount: r.tools.length,
+    });
+    bySector.set(r.sector, list);
+  }
+  return [...bySector.entries()]
+    .map(([sector, rolesInSector]) => ({ sector, roles: rolesInSector }))
+    .sort((a, b) => b.roles.length - a.roles.length || a.sector.localeCompare(b.sector));
+}
+
 /**
  * The council roster, mirrored as pure data.
  *

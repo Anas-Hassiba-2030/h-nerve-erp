@@ -1,12 +1,26 @@
 // llm.ts — LLM client with deterministic stub fallback.
 //
 // Provider precedence:
-//   1. ANTHROPIC_API_KEY  → direct Anthropic Messages API (preferred).
+//   0. LOCAL_LLM_BASE_URL → a model running on YOUR machine (Ollama, LM Studio,
+//      llama.cpp — anything serving the OpenAI-compatible /v1/chat/completions
+//      shape). No key, no per-token cost, no data leaving the building.
+//   1. ANTHROPIC_API_KEY  → direct Anthropic Messages API.
 //   2. OPENROUTER_API_KEY → OpenRouter's OpenAI-compatible chat/completions
 //      API, translated to/from the Anthropic content-block shapes the rest
 //      of the brain speaks. Same models (anthropic/* slugs), one gateway key.
-//   3. Neither            → stub mode: editorial-quality canned responses so
+//   3. None of the above  → stub mode: editorial-quality canned responses so
 //      the UI ships and demos cleanly in any environment.
+//
+// WHY LOCAL WINS OVER A CONFIGURED KEY: setting LOCAL_LLM_BASE_URL is an
+// explicit instruction to keep inference on this machine. If a stale key in
+// the environment could silently outrank it, "run it locally" would quietly
+// bill an API instead — the one outcome the setting exists to prevent.
+//
+// ⚠️ LOCAL IS A DEV/SELF-HOSTED PATH, NOT A PRODUCTION ONE. Production is a
+// Cloudflare Worker; it cannot reach a laptop's localhost, and wrangler.jsonc
+// sets `global_fetch_strictly_public`, which blocks private addresses outright.
+// Pointing prod at a local model needs a public tunnel to the machine running
+// it — a deliberate infrastructure decision, not a config flip.
 //
 // Phase 3 of docs/PHASES-INTELLIGENCE.md.
 
@@ -20,7 +34,27 @@ const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const DEFAULT_OPENROUTER_MODEL = "anthropic/claude-sonnet-4.5";
 const OPENROUTER_FAST_MODEL = "anthropic/claude-haiku-4.5";
 
-export type LlmProvider = "anthropic" | "openrouter";
+export type LlmProvider = "anthropic" | "openrouter" | "local";
+
+/** Default model when running locally. Small enough to run on a laptop;
+ *  override with LOCAL_LLM_MODEL for anything you have actually pulled. */
+const DEFAULT_LOCAL_MODEL = "llama3.1:8b";
+
+/**
+ * Normalise a local base URL to its OpenAI-compatible chat endpoint.
+ *
+ * Accepts what a person would actually paste: "localhost:11434",
+ * "http://localhost:11434", ".../v1", or the full ".../v1/chat/completions".
+ * Ollama and LM Studio both serve that path; getting this wrong produces a
+ * 404 that reads as "local models don't work".
+ */
+export function localChatUrl(raw: string): string {
+  let base = raw.trim().replace(/\/+$/, "");
+  if (!/^https?:\/\//i.test(base)) base = `http://${base}`;
+  if (base.endsWith("/chat/completions")) return base;
+  if (base.endsWith("/v1")) return `${base}/chat/completions`;
+  return `${base}/v1/chat/completions`;
+}
 
 export type LlmRequest = {
   system: string;
@@ -55,6 +89,21 @@ export function llmConfig(): {
   apiKey: string | null;
   model: string;
 } {
+  // Highest precedence on purpose — see the header note. Accepts OLLAMA_HOST
+  // too, because that is the variable Ollama users already have set.
+  const localBase =
+    process.env.LOCAL_LLM_BASE_URL?.trim() || process.env.OLLAMA_HOST?.trim();
+  if (localBase) {
+    return {
+      provider: "local",
+      enabled: true,
+      // No key: a local server has nothing to authenticate against. The field
+      // stays non-null so every `cfg.apiKey` guard downstream still passes.
+      apiKey: "local",
+      model: process.env.LOCAL_LLM_MODEL?.trim() || DEFAULT_LOCAL_MODEL,
+    };
+  }
+
   const anthropicKey = process.env.ANTHROPIC_API_KEY?.trim();
   if (anthropicKey) {
     return {
@@ -88,9 +137,12 @@ export function llmConfig(): {
 export function councilModel(): string {
   const override = process.env.BRAIN_COUNCIL_MODEL?.trim();
   if (override) return override;
-  return llmConfig().provider === "openrouter"
-    ? OPENROUTER_FAST_MODEL
-    : "claude-haiku-4-5-20251001";
+  const cfg = llmConfig();
+  // A local runtime has exactly the model you pulled. Naming a hosted "fast"
+  // model there would 404 every council call and look like the council is
+  // broken, when the real answer is that there is no second model to pick.
+  if (cfg.provider === "local") return cfg.model;
+  return cfg.provider === "openrouter" ? OPENROUTER_FAST_MODEL : "claude-haiku-4-5-20251001";
 }
 
 // The Planner emits one compact, schema-shaped JSON plan (goal + 3-6 steps).
@@ -103,9 +155,9 @@ export function councilModel(): string {
 export function plannerModel(): string {
   const override = process.env.BRAIN_PLANNER_MODEL?.trim();
   if (override) return override;
-  return llmConfig().provider === "openrouter"
-    ? OPENROUTER_FAST_MODEL
-    : "claude-haiku-4-5-20251001";
+  const cfg = llmConfig();
+  if (cfg.provider === "local") return cfg.model;
+  return cfg.provider === "openrouter" ? OPENROUTER_FAST_MODEL : "claude-haiku-4-5-20251001";
 }
 
 // Phase D — runaway cost guard. A single process makes at most
@@ -157,21 +209,40 @@ export async function callLlm(req: LlmRequest, stub: StubGenerator): Promise<Llm
   // of hanging the whole ask()/convene() request indefinitely. Abort lands in
   // the catch below, which already returns the stub fallback.
   const controller = new AbortController();
-  const timeoutMs = Number(process.env.BRAIN_LLM_TIMEOUT_MS) || 20_000;
+  // Local inference on CPU is far slower than a hosted API — a first call that
+  // also loads the model into memory routinely takes a minute. The hosted
+  // default would abort it and degrade to the stub, which reads as "the local
+  // model doesn't work" when it was simply still thinking.
+  const defaultTimeout = cfg.provider === "local" ? 180_000 : 20_000;
+  const timeoutMs = Number(process.env.BRAIN_LLM_TIMEOUT_MS) || defaultTimeout;
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const model = req.model || cfg.model;
     const userContent = serializeUser(req.user, req.context);
+    // Both OpenRouter and every local runtime worth using speak OpenAI's
+    // chat/completions shape; only the URL and the auth header differ.
+    const openAiShaped = cfg.provider === "openrouter" || cfg.provider === "local";
     let res: Response;
-    if (cfg.provider === "openrouter") {
-      res = await fetch(OPENROUTER_URL, {
+    if (openAiShaped) {
+      const isLocal = cfg.provider === "local";
+      const url = isLocal
+        ? localChatUrl(process.env.LOCAL_LLM_BASE_URL?.trim() || process.env.OLLAMA_HOST!.trim())
+        : OPENROUTER_URL;
+      res = await fetch(url, {
         method: "POST",
-        headers: openrouterHeaders(cfg.apiKey),
+        // A local server has no key to send, and some reject an Authorization
+        // header they did not ask for.
+        headers: isLocal
+          ? { "content-type": "application/json" }
+          : openrouterHeaders(cfg.apiKey),
         body: JSON.stringify({
           model,
           max_tokens: req.maxTokens ?? 700,
           temperature: req.temperature ?? 0.7,
+          // Ollama streams by default on some builds; the parser below reads a
+          // single JSON body, so ask for one explicitly.
+          ...(isLocal ? { stream: false } : {}),
           messages: [
             { role: "system", content: req.system },
             { role: "user", content: userContent },
@@ -210,7 +281,7 @@ export async function callLlm(req: LlmRequest, stub: StubGenerator): Promise<Llm
 
     const json: any = await res.json();
     const text =
-      cfg.provider === "openrouter"
+      openAiShaped
         ? (typeof json?.choices?.[0]?.message?.content === "string"
             ? json.choices[0].message.content.trim()
             : "")
@@ -314,18 +385,31 @@ export async function callLlmWithTools(args: {
   __llmCallCount++;
 
   const controller = new AbortController();
-  const timeoutMs = Number(process.env.BRAIN_LLM_TIMEOUT_MS) || 20_000;
+  const defaultTimeout = cfg.provider === "local" ? 180_000 : 20_000;
+  const timeoutMs = Number(process.env.BRAIN_LLM_TIMEOUT_MS) || defaultTimeout;
   const timer = setTimeout(() => controller.abort(), timeoutMs);
+  // Same OpenAI chat/completions shape for both — see callLlm above. Local
+  // runtimes vary in how well they honour tool-calling; when one returns no
+  // tool_calls the loop simply gets a text answer, which is the same
+  // degradation path an unhelpful hosted model produces.
+  const openAiShaped = cfg.provider === "openrouter" || cfg.provider === "local";
   try {
     let res: Response;
-    if (cfg.provider === "openrouter") {
-      res = await fetch(OPENROUTER_URL, {
+    if (openAiShaped) {
+      const isLocal = cfg.provider === "local";
+      const url = isLocal
+        ? localChatUrl(process.env.LOCAL_LLM_BASE_URL?.trim() || process.env.OLLAMA_HOST!.trim())
+        : OPENROUTER_URL;
+      res = await fetch(url, {
         method: "POST",
-        headers: openrouterHeaders(cfg.apiKey),
+        headers: isLocal
+          ? { "content-type": "application/json" }
+          : openrouterHeaders(cfg.apiKey),
         body: JSON.stringify({
           model: cfg.model,
           max_tokens: args.maxTokens ?? 700,
           temperature: args.temperature ?? 0.4,
+          ...(isLocal ? { stream: false } : {}),
           messages: [
             { role: "system", content: args.system },
             ...anthropicMessagesToOpenAi(args.messages),
@@ -362,7 +446,7 @@ export async function callLlmWithTools(args: {
       return { content: [], stopReason: "stub", isStub: true, ms: Date.now() - t0 };
     }
     const json: any = await res.json();
-    if (cfg.provider === "openrouter") {
+    if (openAiShaped) {
       const translated = openAiChoiceToAnthropic(json);
       return { ...translated, isStub: false, model: cfg.model, ms: Date.now() - t0 };
     }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
+import { STACK_GROUPS, PILLARS, stackTotals } from "@/lib/voac/stackManifest";
 import "../../daylight.css";
 import "../voac.css";
 import "../how/explain.css";
@@ -22,6 +23,7 @@ export default async function VoacStackPage() {
   const locale = await getLocale();
   const ar = locale === "ar";
   const L = <T,>(a: T, e: T) => (ar ? a : e);
+  const totals = stackTotals();
 
   const layers = [
     {
@@ -234,6 +236,77 @@ export default async function VoacStackPage() {
                 <td>{ar ? p.ar : p.en}</td>
                 <td><code className="ex-path">{p.cmd}</code></td>
                 <td>{p.note}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </DaylightPanel>
+
+      {/* The dependency roster. Versions are read from package.json at build
+          time, so this section cannot drift from what actually ships. */}
+      <DaylightPanel
+        title={L(
+          `المكتبات — ${totals.packages} حزمة في ${totals.groups} مجموعات`,
+          `The libraries — ${totals.packages} packages across ${totals.groups} groups`,
+        )}
+        aside={
+          <span className="vo-note">
+            {L(
+              "الإصدارات تُقرأ من package.json عند البناء، لا تُكتب يدوياً.",
+              "Versions are read from package.json at build time, never hand-typed.",
+            )}
+          </span>
+        }
+      >
+        <div className="ex-layers">
+          {STACK_GROUPS.map((g, i) => (
+            <div key={g.id} className="ex-layer" style={{ animationDelay: `${i * 50}ms` }}>
+              <div className="ex-layer-head">
+                <span className="ex-layer-name">{ar ? g.ar : g.en}</span>
+                <span className="vo-note">{g.packages.length}</span>
+              </div>
+              <div className="ex-layer-what">
+                <span className="ex-pkgs">
+                  {g.packages.map((p) => (
+                    <span key={p.name} className="ex-pkg">
+                      <span className="ex-pkg-name">{p.name}</span>
+                      <span className="ex-pkg-ver">{p.version}</span>
+                    </span>
+                  ))}
+                </span>
+              </div>
+              <div className="ex-layer-why">{ar ? g.whyAr : g.whyEn}</div>
+            </div>
+          ))}
+        </div>
+      </DaylightPanel>
+
+      {/* What none of those packages gave us — i.e. the actual product. */}
+      <DaylightPanel
+        title={L("ما بُني هنا", "What was built here")}
+        aside={
+          <span className="vo-note">
+            {L(
+              "لا يمكن تثبيت أيٍّ من هذه من npm — هذه هي المنتَج.",
+              "None of these can be installed from npm — this is the product.",
+            )}
+          </span>
+        }
+      >
+        <table className="vo-table">
+          <thead>
+            <tr>
+              <th>{L("الركيزة", "Pillar")}</th>
+              <th>{L("المسار", "Path")}</th>
+              <th>{L("ما هي", "What it is")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {PILLARS.map((p) => (
+              <tr key={p.path}>
+                <td>{ar ? p.ar : p.en}</td>
+                <td><code className="ex-path">{p.path}</code></td>
+                <td>{ar ? p.noteAr : p.noteEn}</td>
               </tr>
             ))}
           </tbody>

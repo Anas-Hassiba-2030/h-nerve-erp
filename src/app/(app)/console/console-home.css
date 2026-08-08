@@ -69,8 +69,23 @@
  * one ended. It also mirrors correctly in RTL for free, which is the default
  * locale here. `break-inside: avoid` is what keeps a card whole. */
 .ch-grid {
-  columns: 4 300px;
-  column-gap: 16px;
+  /* Three, not four. Multicol balances by height but cannot split a card, so
+     with 7 uneven groups four columns strand the first one short — the tall
+     Intelligence card doesn't fit under Group Board and jumps to column 2,
+     leaving a hole. Three wider columns pair a tall group with a short one and
+     give the section labels room to breathe. Capped so an ultrawide screen
+     doesn't stretch a list of links to 800px of dead space. */
+  columns: 3 340px;
+  column-gap: 18px;
+  max-width: 1500px;
+  margin-inline: auto;
+  /* Clearance for the FabRail, which is `position: fixed` against the viewport
+     edge and floats OVER page content. Most pages get away with it because
+     their far edge is margin; this board is links all the way out, so without
+     this two of them sit under the rail and cannot be clicked. Dropped on
+     narrow screens, where the rail and this padding would fight for the same
+     scarce width. */
+  padding-inline: 46px;
 }
 
 .ch-card {
@@ -161,6 +176,10 @@
   /* Routes stay visible when motion is off — a hover-reveal is a transition,
      and without one the label would simply never appear. */
   .ch-link-route { opacity: 1; }
+}
+
+@media (max-width: 900px) {
+  .ch-grid { padding-inline: 0; }
 }
 
 @media (max-width: 720px) {

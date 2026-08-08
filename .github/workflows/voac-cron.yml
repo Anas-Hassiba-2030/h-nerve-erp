@@ -1,0 +1,76 @@
+# Daily VOAC fire — the agent company running itself.
+#
+# Same precedent as brain-cron.yml and recurring-invoices-cron.yml: there is no
+# platform-native cron on this Cloudflare Workers deploy (no `triggers.crons` in
+# wrangler.jsonc), so the scheduler lives here and fires the HTTP route with the
+# bearer secret. Until this workflow existed, /api/cron/voac was reachable but
+# nothing ever called it — the agent company only ran when a human asked.
+#
+# CADENCE. Daily, because VoacRoster.cadenceHours defaults to 24: firing more
+# often would simply have every roster skipped as "ran N.Nh ago", spending a
+# request to do nothing. If a roster is ever set to a shorter cadence, raise the
+# schedule here to match — the route can only run what a fire offers it.
+#
+# COST — THIS IS THE ONE WORKFLOW THAT SPENDS MONEY.
+# Every started run is LLM calls. Four limits stack before a token is spent:
+#   0. VOAC_CRON_ENABLED below — this workflow no-ops until it is "true";
+#   1. MAX_RUNS_PER_FIRE=12 in the route, truncated most-stale-first;
+#   2. each roster's cadenceHours;
+#   3. the per-tenant LLM budget, which refuses and records BUDGET_EXHAUSTED.
+# Limit 0 exists so that merging this file changes nothing: enabling autonomous
+# spend is a deliberate, revocable act by the repo owner, not a side effect of a
+# deploy. Flip it at Settings → Secrets and variables → Actions → Variables.
+#
+# Required repository secrets:
+#   APP_URL      production base URL, no trailing slash
+#   CRON_SECRET  must equal the CRON_SECRET set on the Cloudflare Worker
+# Required repository variable to actually run:
+#   VOAC_CRON_ENABLED = true
+#
+# Dry-run what a fire WOULD do, spending nothing:
+#   npx tsx --tsconfig tsconfig.scripts.json scripts/verify/voac-cron-check.ts
+name: VOAC daily fire
+
+on:
+  schedule:
+    # 04:00 UTC — an hour after the recurring-invoice run, so the two never
+    # contend for the same Worker cold start.
+    - cron: "0 4 * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: voac-cron
+  cancel-in-progress: false
+
+jobs:
+  fire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # The gate. Scheduled fires stay inert until the owner opts in; a manual
+    # workflow_dispatch is always allowed, because that IS someone asking.
+    if: vars.VOAC_CRON_ENABLED == 'true' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Fire /api/cron/voac
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "::error::APP_URL and CRON_SECRET repository secrets must be set."
+            exit 1
+          fi
+          code=$(curl -sS --max-time 600 -o /tmp/voac.json -w "%{http_code}" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$APP_URL/api/cron/voac")
+          echo "HTTP $code"
+          cat /tmp/voac.json || true
+          echo
+          if [ "$code" != "200" ]; then
+            echo "::error::VOAC cron returned HTTP $code (expected 200)."
+            exit 1
+          fi
+          # A fire that started nothing is normal (everything within cadence);
+          # a fire that SKIPPED everything for a reason other than cadence is
+          # not, and is the failure this echo makes visible in the run log.
+          echo "--- skipped reasons (if any) ---"
+          node -e "const r=require('/tmp/voac.json');console.log('started',r.started,'skipped',r.skipped);(r.skippedReasons||[]).forEach(s=>console.log('•',typeof s==='string'?s:JSON.stringify(s)))" || true

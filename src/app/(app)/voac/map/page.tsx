@@ -211,9 +211,13 @@ export default async function VoacMapPage() {
           hint={L("مشرف واحد فقط", "Exactly one supervisor")}
         />
         <DaylightKpi
-          label={L("أصوات وقت التشغيل", "Run-time voices")}
+          // "agents", not "voices": the count includes the Moderator, which
+          // reconciles rather than argues. The broker card says "5 voices, then
+          // a moderator" three lines below — a KPI that says 6 voices next to
+          // it is a small lie on the one surface built to prove precision.
+          label={L("وكلاء وقت التشغيل", "Run-time agents")}
           value={brokerKids.length}
-          hint={L("يستدعيها الوسيط عند كل قرار", "Convened by the broker on every decision")}
+          hint={L("يستدعيهم الوسيط عند كل قرار", "Convened by the broker on every decision")}
         />
         <DaylightKpi label={L("شركات مُغطّاة", "Companies covered")} value={map.totals.companies} />
         <DaylightKpi

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { parseShell, otherShell, shellLabel, DEFAULT_SHELL } from "./shell";
+import { parseShell, otherShell, shellLabel, shellHome, DEFAULT_SHELL } from "./shell";
+import { UNIVERSAL } from "@/lib/auth/permissions";
 
 describe("parseShell", () => {
   it("accepts the two real shells", () => {
@@ -21,6 +22,21 @@ describe("otherShell", () => {
     expect(otherShell("orbit")).toBe("console");
     expect(otherShell("console")).toBe("orbit");
     expect(otherShell(otherShell("orbit"))).toBe("orbit");
+  });
+});
+
+describe("shellHome", () => {
+  it("gives each shell its own distinct home", () => {
+    expect(shellHome("orbit")).toBe("/orrery");
+    expect(shellHome("console")).toBe("/console");
+  });
+
+  // toggleShell() redirects here. A home that any role can be bounced off would
+  // strand that role: the switch lands them on a redirect, every time.
+  it("keeps both homes reachable by every authenticated role", () => {
+    for (const m of ["orbit", "console"] as const) {
+      expect(UNIVERSAL).toContain(shellHome(m));
+    }
   });
 });
 

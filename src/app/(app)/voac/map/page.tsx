@@ -3,7 +3,13 @@ import { ArrowLeft } from "lucide-react";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { DaylightShell, DaylightHeader, DaylightKpiGrid, DaylightKpi } from "@/components/orrery/daylight";
 import { loadOrgMap } from "@/lib/voac/orgMap.live";
-import { stateMeta, pipelineFor, type AgentNode } from "@/lib/voac/orgMap";
+import {
+  stateMeta,
+  pipelineFor,
+  runtimeChildren,
+  runtimeChildKindLabel,
+  type AgentNode,
+} from "@/lib/voac/orgMap";
 import { skillVersionFor } from "@/lib/voac/roles";
 import { formatShortDate } from "@/lib/utils/utils";
 import "../../daylight.css";
@@ -32,101 +38,134 @@ function topologyWhy(topology: string, ar: boolean): string {
   }
 }
 
-/** One agent card — identity, live state, the pipeline it runs, and the detail on demand. */
-function AgentCard({ node, ar, delay }: { node: AgentNode; ar: boolean; delay: number }) {
+/** The run pipeline, rendered as an ordered strip of steps. */
+function Pipeline({ topology, ar }: { topology: string; ar: boolean }) {
+  const steps = pipelineFor(topology);
+  return (
+    <div className="om-pipe" aria-label={ar ? "مسار التشغيل" : "Run pipeline"}>
+      {steps.map((step, i) => (
+        <span key={step.en} className="contents">
+          <span
+            className={`om-pipe-step${i === 0 ? " om-pipe-step-in" : ""}${
+              i === steps.length - 1 ? " om-pipe-step-out" : ""
+            }`}
+            style={{ animationDelay: `${i * 320}ms` }}
+          >
+            {ar ? step.ar : step.en}
+          </span>
+          {i < steps.length - 1 ? (
+            <span className="om-pipe-arrow" aria-hidden>{ar ? "←" : "→"}</span>
+          ) : null}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * The layer BELOW the org chart: what this node expands into when it runs.
+ *
+ * This is the part an org chart normally hides. A box labelled "Group Broker"
+ * tells you nothing about the six agents that actually convene inside it; the
+ * whole point of the map is that you can see them.
+ */
+function RuntimeTree({ node, ar }: { node: Pick<AgentNode, "topology" | "tools">; ar: boolean }) {
+  const kids = runtimeChildren(node);
+  if (kids.length === 0) return null;
+  const isCouncil = node.topology === "parallel";
+
+  return (
+    <div className="om-runtime">
+      <div className="om-runtime-label">
+        {isCouncil
+          ? (ar
+              ? `يستدعي مجلساً — ${kids.length - 1} أصوات تتحدّث بالتوازي، ثم مُيَسّر يرجّح`
+              : `Convenes a council — ${kids.length - 1} voices argue in parallel, then a moderator reconciles`)
+          : (ar
+              ? `يستدعي ${kids.length} أدوات في حلقة الأدوات`
+              : `Calls ${kids.length} tools in the tool loop`)}
+      </div>
+      <div className={`om-tree om-tree-leaf${isCouncil ? " om-tree-council" : ""}`}>
+        {kids.map((k, i) => {
+          // The gloss is only rendered where it ADDS something. Five sibling
+          // rows each captioned "council voice" is five copies of the heading
+          // above them; the moderator is the one child that behaves
+          // differently, so it is the one that says so.
+          const gloss = k.kind === "moderator" ? runtimeChildKindLabel(k.kind) : null;
+          return (
+            <div
+              key={k.id}
+              className={`om-node om-leaf om-leaf-${k.kind}`}
+              style={{ animationDelay: `${i * 70}ms` }}
+            >
+              <span className="om-leaf-name">{ar ? k.ar : k.en}</span>
+              {gloss ? <span className="om-leaf-role">{ar ? gloss.ar : gloss.en}</span> : null}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/** One agent node — identity, live state, the pipeline it runs, what it convenes. */
+function AgentNodeCard({ node, ar, delay }: { node: AgentNode; ar: boolean; delay: number }) {
   const m = stateMeta(node.state);
   const version = skillVersionFor(node.roleId);
-  const pipeline = pipelineFor(node.topology);
   const L = <T,>(a: T, e: T) => (ar ? a : e);
 
   return (
-    <div
-      className={`om-agent om-${m.tone}`}
-      style={{ animationDelay: `${delay}ms` }}
-      title={`${node.labelEn} · ${node.topology}`}
-    >
-      <div className="om-agent-top">
-        <span className={`om-dot om-dot-${m.tone}`} aria-hidden />
-        <span className="om-agent-name">{ar ? node.labelAr : node.labelEn}</span>
-      </div>
-      <div className="om-agent-state">{ar ? m.ar : m.en}</div>
-
-      <div className="om-agent-meta">
-        <span className="om-mono">{node.topology}</span>
-        <span className="om-sep">·</span>
-        <span className="om-mono om-dim">{version}</span>
-      </div>
-
-      <div className="om-agent-stats">
-        <span>
-          <b>{node.stats.runs}</b> {L("تشغيل", "runs")}
-        </span>
-        {node.stats.pendingProposals > 0 ? (
-          <span className="om-pending">
-            <b>{node.stats.pendingProposals}</b> {L("بانتظارك", "waiting")}
-          </span>
-        ) : null}
-        {node.stats.lastRunAt ? (
-          <span className="om-dim">{formatShortDate(node.stats.lastRunAt)}</span>
-        ) : null}
-      </div>
-
-      {/* What one run of this agent actually does, in order. */}
-      <div className="om-pipe" aria-label={L("مسار التشغيل", "Run pipeline")}>
-        {pipeline.map((step, i) => (
-          <span key={step.en} className="contents">
-            <span
-              className={`om-pipe-step${i === 0 ? " om-pipe-step-in" : ""}${
-                i === pipeline.length - 1 ? " om-pipe-step-out" : ""
-              }`}
-              style={{ animationDelay: `${i * 320}ms` }}
-            >
-              {ar ? step.ar : step.en}
-            </span>
-            {i < pipeline.length - 1 ? (
-              <span className="om-pipe-arrow" aria-hidden>{ar ? "←" : "→"}</span>
-            ) : null}
-          </span>
-        ))}
-      </div>
-
-      <details className="om-more">
-        <summary>{L("التفاصيل الكاملة", "Full detail")}</summary>
-        <div className="om-more-body">
-          <div className="om-more-row">
-            <span className="om-more-key">{L("النمط", "Topology")}</span>
-            <span>{topologyWhy(node.topology, ar)}</span>
-          </div>
-          <div className="om-more-row">
-            <span className="om-more-key">{L("المهارة", "Skill doc")}</span>
-            <span className="om-mono">
-              {node.skillDocId}.md @ {version}
-            </span>
-          </div>
-          <div className="om-more-row">
-            <span className="om-more-key">{L("النطاق", "Scope")}</span>
-            <span>
-              {node.companyCode
-                ? L(`شركة واحدة — ${node.companyCode}`, `One company — ${node.companyCode}`)
-                : L("المجموعة كلها", "The whole group")}
-            </span>
-          </div>
-          <div className="om-more-row">
-            <span className="om-more-key">{L("آخر حالة", "Last status")}</span>
-            <span className="om-mono">{node.stats.lastStatus ?? L("لم يعمل بعد", "never run")}</span>
-          </div>
-          <div className="om-more-row">
-            <span className="om-more-key">{L("الأدوات", "Tools")}</span>
-            <span>
-              <span className="om-tools">
-                {node.tools.map((t) => (
-                  <span key={t} className="om-tool">{t}</span>
-                ))}
-              </span>
-            </span>
-          </div>
+    <div className="om-node" style={{ animationDelay: `${delay}ms` }}>
+      <div className={`om-agent om-${m.tone}`} title={`${node.labelEn} · ${node.topology}`}>
+        <div className="om-agent-top">
+          <span className={`om-dot om-dot-${m.tone}`} aria-hidden />
+          <span className="om-agent-name">{ar ? node.labelAr : node.labelEn}</span>
+          <span className={`om-chip om-chip-${m.tone}`}>{ar ? m.ar : m.en}</span>
         </div>
-      </details>
+
+        <div className="om-agent-meta">
+          <span className="om-mono">{node.topology}</span>
+          <span className="om-sep">·</span>
+          <span className="om-mono om-dim">{node.skillDocId}.md @ {version}</span>
+          <span className="om-sep">·</span>
+          <span>
+            <b>{node.stats.runs}</b> {L("تشغيل", "runs")}
+          </span>
+          {node.stats.pendingProposals > 0 ? (
+            <span className="om-pending">
+              <b>{node.stats.pendingProposals}</b> {L("بانتظارك", "waiting")}
+            </span>
+          ) : null}
+          {node.stats.lastRunAt ? (
+            <span className="om-dim">{formatShortDate(node.stats.lastRunAt)}</span>
+          ) : null}
+        </div>
+
+        <Pipeline topology={node.topology} ar={ar} />
+        <RuntimeTree node={node} ar={ar} />
+
+        <details className="om-more">
+          <summary>{L("لماذا يعمل هكذا", "Why it runs this way")}</summary>
+          <div className="om-more-body">
+            <div className="om-more-row">
+              <span className="om-more-key">{L("النمط", "Topology")}</span>
+              <span>{topologyWhy(node.topology, ar)}</span>
+            </div>
+            <div className="om-more-row">
+              <span className="om-more-key">{L("النطاق", "Scope")}</span>
+              <span>
+                {node.companyCode
+                  ? L(`شركة واحدة — ${node.companyCode}`, `One company — ${node.companyCode}`)
+                  : L("المجموعة كلها", "The whole group")}
+              </span>
+            </div>
+            <div className="om-more-row">
+              <span className="om-more-key">{L("آخر حالة", "Last status")}</span>
+              <span className="om-mono">{node.stats.lastStatus ?? L("لم يعمل بعد", "never run")}</span>
+            </div>
+          </div>
+        </details>
+      </div>
     </div>
   );
 }
@@ -138,7 +177,7 @@ export default async function VoacMapPage() {
 
   const map = await loadOrgMap();
   const bm = stateMeta(map.broker.state);
-  const brokerPipeline = pipelineFor(map.broker.topology);
+  const brokerKids = runtimeChildren(map.broker);
 
   return (
     <DaylightShell dir={ar ? "rtl" : "ltr"} wide>
@@ -150,8 +189,8 @@ export default async function VoacMapPage() {
         }
         title={L("خريطة التنسيق", "The orchestration map")}
         subtitle={L(
-          "كل وكيل، وأين يقف، ومن يشرف على من — وما الذي يفعله الآن.",
-          "Every agent, where it sits, who supervises whom — and what it is doing right now.",
+          "كل وكيل، وأين يقف، ومن يشرف على من — وما الذي يستدعيه حين يعمل.",
+          "Every agent, where it sits, who supervises whom — and what it convenes when it runs.",
         )}
         actions={
           <span className="vo-header-links">
@@ -166,9 +205,17 @@ export default async function VoacMapPage() {
       />
 
       <DaylightKpiGrid>
-        <DaylightKpi label={L("وكلاء", "Agents")} value={map.totals.agents} hint={L("مشرف واحد فقط", "Exactly one supervisor")} />
+        <DaylightKpi
+          label={L("وكلاء في الخريطة", "Agents on the chart")}
+          value={map.totals.agents}
+          hint={L("مشرف واحد فقط", "Exactly one supervisor")}
+        />
+        <DaylightKpi
+          label={L("أصوات وقت التشغيل", "Run-time voices")}
+          value={brokerKids.length}
+          hint={L("يستدعيها الوسيط عند كل قرار", "Convened by the broker on every decision")}
+        />
         <DaylightKpi label={L("شركات مُغطّاة", "Companies covered")} value={map.totals.companies} />
-        <DaylightKpi label={L("تشغيلات", "Runs")} value={map.totals.runs} />
         <DaylightKpi
           label={L("بانتظار قرار", "Awaiting a decision")}
           value={map.totals.pending}
@@ -180,7 +227,7 @@ export default async function VoacMapPage() {
       <div className="om-chart" role="group" aria-label={L("خريطة الوكلاء", "Agent map")}>
         {/* Tier 0 — the company the chart is of */}
         <div className="om-tier-label">{L("الطبقة ٠ — الشركة", "Tier 0 — the company")}</div>
-        <div className="om-tier om-tier-root">
+        <div className="om-tier-root">
           <div className="om-root">
             <span className="om-root-name">
               {L("مجلس التشغيل الافتراضي", "Virtual Orchestration Agent Company")}
@@ -191,19 +238,20 @@ export default async function VoacMapPage() {
           </div>
         </div>
 
-        <div className="om-trunk om-trunk-short" aria-hidden>
+        <div className="om-trunk" aria-hidden>
           <span className="om-trunk-line" />
           <span className="om-trunk-pulse" />
         </div>
 
         {/* Tier 1 — the only supervisor */}
         <div className="om-tier-label">{L("الطبقة ١ — الإشراف", "Tier 1 — supervision")}</div>
-        <div className="om-tier om-tier-group">
+        <div className="om-tier-group">
           <div className={`om-broker om-${bm.tone}`}>
             <div className="om-broker-eyebrow">{L("المشرف الوحيد", "The only supervisor")}</div>
             <div className="om-broker-name">
               <span className={`om-dot om-dot-${bm.tone}`} aria-hidden />
               {ar ? map.broker.labelAr : map.broker.labelEn}
+              <span className={`om-chip om-chip-${bm.tone}`}>{ar ? bm.ar : bm.en}</span>
             </div>
             <div className="om-broker-why">
               {L(
@@ -214,70 +262,57 @@ export default async function VoacMapPage() {
             <div className="om-broker-stats">
               <span><b>{map.broker.stats.runs}</b> {L("تشغيل", "runs")}</span>
               <span className="om-mono">{map.broker.topology}</span>
-              <span className={`om-chip om-chip-${bm.tone}`}>{ar ? bm.ar : bm.en}</span>
+              <span className="om-mono om-dim">{map.broker.skillDocId}.md</span>
             </div>
-            <div className="om-pipe">
-              {brokerPipeline.map((step, i) => (
-                <span key={step.en} className="contents">
-                  <span
-                    className={`om-pipe-step${i === 0 ? " om-pipe-step-in" : ""}${
-                      i === brokerPipeline.length - 1 ? " om-pipe-step-out" : ""
-                    }`}
-                    style={{ animationDelay: `${i * 320}ms` }}
-                  >
-                    {ar ? step.ar : step.en}
-                  </span>
-                  {i < brokerPipeline.length - 1 ? (
-                    <span className="om-pipe-arrow" aria-hidden>{ar ? "←" : "→"}</span>
-                  ) : null}
-                </span>
-              ))}
-            </div>
+            <Pipeline topology={map.broker.topology} ar={ar} />
+            <RuntimeTree node={map.broker} ar={ar} />
           </div>
         </div>
 
-        {/* The fan — one supervisor splitting out to every roster */}
-        <div className="om-fan" aria-hidden>
-          <span className="om-fan-drop" />
-          <span className="om-fan-rail" />
-          <span className="om-fan-charge" />
+        <div className="om-trunk" aria-hidden>
+          <span className="om-trunk-line" />
+          <span className="om-trunk-pulse" />
         </div>
 
-        {/* Tier 2 — one branch per company */}
+        {/* Tier 2 — one branch per company, hanging off a single spine.
+            A spine, not a grid: a wrapping grid puts row 2 under nothing, and
+            a connector that points at empty space is what makes an org chart
+            read as a pile of cards. */}
         <div className="om-tier-label">
           {L("الطبقة ٢ — فرق الشركات", "Tier 2 — company rosters")}
         </div>
-        <div className="om-tier om-tier-branches">
-          {map.branches.length === 0 ? (
-            <p className="vo-empty">
-              {L("لا شركات مُغطّاة بعد.", "No companies covered yet.")}
-            </p>
-          ) : (
-            map.branches.map((b, bi) => (
+        {map.branches.length === 0 ? (
+          <p className="vo-empty">{L("لا شركات مُغطّاة بعد.", "No companies covered yet.")}</p>
+        ) : (
+          <div className="om-tree om-tree-root">
+            {map.branches.map((b, bi) => (
               <section
                 key={b.companyId}
-                className={`om-branch${b.pendingProposals > 0 ? " om-branch-hot" : ""}`}
-                style={{ animationDelay: `${160 + bi * 90}ms` }}
+                className={`om-node om-branch${b.pendingProposals > 0 ? " om-branch-hot" : ""}`}
+                style={{ animationDelay: `${120 + bi * 70}ms` }}
               >
                 <header className="om-branch-head">
                   <span className="om-branch-code">{b.code}</span>
                   <span className="om-branch-name">{b.name}</span>
                   <span className="om-branch-sector">{b.sector}</span>
+                  <span className="om-branch-count">
+                    {b.agents.length} {L("وكيل", b.agents.length === 1 ? "agent" : "agents")}
+                  </span>
                   {b.pendingProposals > 0 ? (
                     <span className="om-chip om-chip-waiting">
                       {b.pendingProposals} {L("بانتظارك", "waiting")}
                     </span>
                   ) : null}
                 </header>
-                <div className="om-branch-agents">
+                <div className="om-tree om-tree-branch">
                   {b.agents.map((a, ai) => (
-                    <AgentCard key={a.roleId} node={a} ar={ar} delay={220 + bi * 90 + ai * 60} />
+                    <AgentNodeCard key={a.roleId} node={a} ar={ar} delay={160 + bi * 70 + ai * 50} />
                   ))}
                 </div>
               </section>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Honest gap — companies the agent company cannot serve */}
         {map.totals.uncovered.length > 0 ? (

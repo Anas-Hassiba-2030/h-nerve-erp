@@ -1,0 +1,214 @@
+/* app/(app)/console.css — the Console shell.
+ *
+ * The second of two navigation shells (see lib/theme/shell.ts). Orbit is the
+ * signature surface; Console is the one you want on a working Tuesday: one
+ * dense bar, every group and section two clicks away, nothing behind a
+ * metaphor.
+ *
+ * Scoping rule, same as every page stylesheet in this app: EVERY selector is
+ * prefixed .hn-console- or .hn-shell-. A layout stylesheet that styles bare
+ * generics bleeds into all 80 pages on client-side navigation.
+ *
+ * IMPORTANT: this file styles NAVIGATION ONLY. The ambient background
+ * (LivingAtmosphere) is untouched by the shell switch by design — it is the
+ * system's signature and renders identically in both shells.
+ */
+
+/* Palette. The console bar sits OUTSIDE .dl-page (it wraps the page, it is not
+ * inside one), so it cannot inherit daylight.css's tokens — it carries the
+ * Heritage values itself. Same hexes as daylight.css; keep them in step. */
+.hn-console, .hn-shell-switch {
+  --dl-emerald:   #1f4d3f;
+  --dl-gold:      #c2a35a;
+  --dl-gold-ink:  #8a5d12;
+  --dl-ink:       #2a2a26;
+  --dl-ink-dim:   #6b6459;
+  --dl-ink-faint: #9a9484;
+  --dl-line:      #e4dccb;
+  --dl-display: "Fraunces", "Reem Kufi", Georgia, serif;
+  --dl-mono: ui-monospace, "JetBrains Mono", Menlo, monospace;
+}
+
+/* ── The bar ────────────────────────────────────────────────────── */
+.hn-console {
+  position: sticky; top: 0; z-index: 60;
+  display: flex; align-items: stretch; gap: 4px;
+  padding: 0 14px;
+  min-height: 52px;
+  background: rgba(253, 250, 242, 0.92);
+  backdrop-filter: saturate(1.4) blur(14px);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  border-bottom: 1px solid var(--dl-line, #e6e0d2);
+  box-shadow: 0 6px 24px -22px rgba(31, 90, 69, 0.7);
+  animation: hn-console-drop 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hn-console-brand {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding-inline-end: 14px;
+  margin-inline-end: 6px;
+  border-inline-end: 1px solid var(--dl-line, #e6e0d2);
+  text-decoration: none;
+  color: var(--dl-emerald, #1f5a45) !important;
+  flex: none;
+}
+.hn-console-mark {
+  font-size: 15px;
+  color: var(--dl-gold, #c99a2e);
+  animation: hn-console-twinkle 4s ease-in-out infinite;
+}
+.hn-console-wordmark {
+  font-family: var(--dl-display, Fraunces, Georgia, serif);
+  font-size: 16px; font-weight: 600; letter-spacing: 0.01em;
+}
+
+/* ── Group triggers ─────────────────────────────────────────────── */
+.hn-console-groups {
+  display: flex; align-items: stretch; flex-wrap: wrap;
+  list-style: none; margin: 0; padding: 0;
+  flex: 1; min-width: 0;
+}
+.hn-console-group { position: relative; display: flex; }
+
+.hn-console-trigger {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 0 13px;
+  border: 0; background: none; cursor: pointer;
+  font-size: 13px; font-weight: 600;
+  color: var(--dl-ink-dim, #6b6355);
+  white-space: nowrap;
+  transition: color 160ms ease, background 160ms ease;
+}
+.hn-console-trigger:hover,
+.hn-console-trigger.open { color: var(--dl-emerald, #1f5a45); background: rgba(31, 90, 69, 0.045); }
+
+/* The active group carries an underline that grows in — a plain colour change
+   is invisible on a bar where hover also changes colour. */
+.hn-console-trigger.here { color: var(--dl-emerald, #1f5a45); }
+.hn-console-trigger.here::after {
+  content: "";
+  position: absolute; left: 11px; right: 11px; bottom: 0;
+  height: 2px; border-radius: 2px 2px 0 0;
+  background: var(--dl-gold, #c99a2e);
+  animation: hn-console-underline 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hn-console-caret { font-size: 8px; opacity: 0.55; transition: transform 180ms ease; }
+.hn-console-trigger.open .hn-console-caret { transform: rotate(180deg); }
+
+/* ── Dropdown ───────────────────────────────────────────────────── */
+.hn-console-menu {
+  position: absolute; top: 100%; inset-inline-start: 0;
+  display: flex; gap: 22px;
+  min-width: 220px; max-width: min(92vw, 760px);
+  padding: 14px 18px 16px;
+  background: #fffdf7;
+  border: 1px solid var(--dl-line, #e6e0d2);
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 22px 48px -30px rgba(0, 0, 0, 0.55);
+  animation: hn-console-open 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  z-index: 61;
+}
+.hn-console-col { display: flex; flex-direction: column; gap: 1px; min-width: 168px; }
+.hn-console-col-label {
+  font: 600 9.5px/1 var(--dl-mono, ui-monospace, monospace);
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--dl-ink-faint, #9a9484);
+  padding: 2px 8px 7px;
+}
+.hn-console-link {
+  display: block;
+  padding: 7px 9px;
+  border-radius: 6px;
+  font-size: 12.8px;
+  color: var(--dl-ink-dim, #6b6355) !important;
+  text-decoration: none;
+  transition: background 140ms ease, color 140ms ease, padding-inline-start 140ms ease;
+}
+.hn-console-link:hover {
+  background: rgba(31, 90, 69, 0.06);
+  color: var(--dl-emerald, #1f5a45) !important;
+  padding-inline-start: 13px;
+}
+.hn-console-link.cur {
+  background: rgba(201, 154, 46, 0.13);
+  color: var(--dl-gold-ink, #8a5d12) !important;
+  font-weight: 600;
+}
+
+/* ── Tail (search / settings) ───────────────────────────────────── */
+.hn-console-tail { display: flex; align-items: center; gap: 4px; flex: none; padding-inline-start: 8px; }
+.hn-console-tail-btn {
+  display: grid; place-items: center;
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  font-size: 15px;
+  color: var(--dl-ink-dim, #6b6355) !important;
+  text-decoration: none;
+  transition: background 140ms ease, transform 140ms ease;
+}
+.hn-console-tail-btn:hover {
+  background: rgba(31, 90, 69, 0.07);
+  color: var(--dl-emerald, #1f5a45) !important;
+  transform: translateY(-1px);
+}
+
+/* ── The shell switch (present in BOTH shells) ──────────────────── */
+.hn-shell-switch { position: fixed; bottom: 18px; inset-inline-end: 18px; z-index: 70; }
+
+.hn-shell-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 15px;
+  border: 1px solid rgba(31, 90, 69, 0.22);
+  border-radius: 999px;
+  background: rgba(253, 250, 242, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--dl-emerald, #1f5a45);
+  font-size: 12.5px; font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 26px -18px rgba(31, 90, 69, 0.8);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+.hn-shell-btn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(201, 154, 46, 0.6);
+  box-shadow: 0 16px 32px -18px rgba(31, 90, 69, 0.9);
+}
+.hn-shell-btn:active { transform: translateY(0); }
+.hn-shell-glyph { font-size: 14px; color: var(--dl-gold, #c99a2e); }
+
+/* ── Motion ─────────────────────────────────────────────────────── */
+@keyframes hn-console-drop {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes hn-console-open {
+  from { opacity: 0; transform: translateY(-6px) scale(0.99); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes hn-console-underline {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@keyframes hn-console-twinkle {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hn-console, .hn-console-menu { animation: none; }
+  .hn-console-mark { animation: none; }
+  .hn-console-trigger.here::after { animation: none; }
+  .hn-console-link:hover { padding-inline-start: 9px; }
+  .hn-console-tail-btn:hover, .hn-shell-btn:hover { transform: none; }
+}
+
+@media (max-width: 860px) {
+  .hn-console { flex-wrap: wrap; padding: 6px 10px; }
+  .hn-console-brand { border-inline-end: 0; }
+  .hn-console-trigger { padding: 6px 9px; font-size: 12.5px; }
+  .hn-console-menu { position: static; box-shadow: none; border-radius: 10px; flex-wrap: wrap; }
+  .hn-shell-switch { bottom: 12px; inset-inline-end: 12px; }
+  .hn-shell-lbl { display: none; }
+}

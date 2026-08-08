@@ -1,0 +1,170 @@
+/* app/(app)/voac/how/explain.css — shared by /voac/how and /voac/stack.
+ *
+ * Every selector is prefixed .ex- for the same reason voac.css prefixes .vo-:
+ * a page stylesheet that styles bare generics bleeds into every other page once
+ * the client router swaps content without a full reload.
+ *
+ * Motion here is entrance-only (content revealing in reading order). Nothing
+ * loops — an explainer that keeps moving while you read it is fighting you.
+ */
+
+/* ── The one-sentence thesis ────────────────────────────────────── */
+.ex-thesis {
+  margin: 4px 0 20px;
+  padding: 18px 22px;
+  border-inline-start: 3px solid var(--dl-gold, #c99a2e);
+  background: linear-gradient(90deg, rgba(201, 154, 46, 0.07), transparent);
+  border-radius: 0 10px 10px 0;
+  animation: ex-in 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+[dir="rtl"] .ex-thesis { border-radius: 10px 0 0 10px; }
+.ex-thesis p {
+  margin: 0;
+  font-family: var(--dl-display, Fraunces, Georgia, serif);
+  font-size: 19px; line-height: 1.6; font-weight: 500;
+  color: var(--dl-emerald, #1f5a45);
+  max-width: 72ch;
+}
+
+/* ── Numbered steps ─────────────────────────────────────────────── */
+.ex-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+
+.ex-step {
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--dl-line, #e6e0d2);
+  animation: ex-in 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.ex-step:last-child { border-bottom: 0; }
+
+.ex-step-n {
+  flex: none;
+  display: grid; place-items: center;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(31, 90, 69, 0.08);
+  border: 1px solid rgba(31, 90, 69, 0.18);
+  color: var(--dl-emerald, #1f5a45);
+  font: 600 13px/1 var(--dl-mono, ui-monospace, monospace);
+  transition: background 200ms ease, transform 200ms ease;
+}
+.ex-step:hover .ex-step-n {
+  background: rgba(201, 154, 46, 0.16);
+  transform: scale(1.08);
+}
+
+.ex-step-body h3 {
+  margin: 4px 0 5px;
+  font-size: 15px; font-weight: 600;
+  color: var(--dl-ink, #2a2a26);
+}
+.ex-step-body p {
+  margin: 0;
+  font-size: 13.5px; line-height: 1.7;
+  color: var(--dl-ink-dim, #6b6355);
+  max-width: 76ch;
+}
+
+/* ── Card grid (promises, guardrails) ───────────────────────────── */
+.ex-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+.ex-card {
+  padding: 15px 17px;
+  border: 1px solid var(--dl-line, #e6e0d2);
+  border-radius: 10px;
+  background: var(--dl-card, #fffdf7);
+  animation: ex-in 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+.ex-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(201, 154, 46, 0.4);
+  box-shadow: 0 14px 30px -24px rgba(0, 0, 0, 0.5);
+}
+.ex-card h4 {
+  margin: 0 0 7px;
+  font-size: 14px; font-weight: 600;
+  color: var(--dl-emerald, #1f5a45);
+}
+.ex-card p {
+  margin: 0;
+  font-size: 12.8px; line-height: 1.65;
+  color: var(--dl-ink-dim, #6b6355);
+}
+
+/* ── Layer rows (the stack) ─────────────────────────────────────── */
+.ex-layers { display: grid; gap: 2px; }
+
+.ex-layer {
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--dl-line, #e6e0d2);
+  animation: ex-in 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: background 180ms ease;
+}
+.ex-layer:last-child { border-bottom: 0; }
+.ex-layer:hover { background: rgba(31, 90, 69, 0.02); }
+
+.ex-layer-head {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
+  margin-bottom: 5px;
+}
+.ex-layer-name {
+  font-size: 14.5px; font-weight: 600;
+  color: var(--dl-emerald, #1f5a45);
+}
+.ex-layer-what {
+  font-size: 13px; color: var(--dl-ink, #2a2a26);
+  margin-bottom: 5px;
+}
+.ex-layer-why {
+  margin: 0;
+  font-size: 12.8px; line-height: 1.65;
+  color: var(--dl-ink-dim, #6b6355);
+  max-width: 82ch;
+}
+
+.ex-path {
+  display: inline-block;
+  font: 11px/1.5 var(--dl-mono, ui-monospace, monospace);
+  color: var(--dl-ink-faint, #8c8474);
+  background: rgba(31, 90, 69, 0.05);
+  border: 1px solid rgba(31, 90, 69, 0.09);
+  padding: 3px 7px; border-radius: 4px;
+  margin-top: 6px;
+  word-break: break-all;
+}
+.ex-layer-head .ex-path { margin-top: 0; }
+
+/* ── "What this is not" list ────────────────────────────────────── */
+.ex-nots { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.ex-nots li {
+  position: relative;
+  padding-inline-start: 22px;
+  font-size: 13.5px; line-height: 1.7;
+  color: var(--dl-ink-dim, #6b6355);
+  max-width: 82ch;
+}
+.ex-nots li::before {
+  content: "—";
+  position: absolute; inset-inline-start: 0;
+  color: var(--dl-gold, #c99a2e); font-weight: 700;
+}
+
+@keyframes ex-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ex-thesis, .ex-step, .ex-card, .ex-layer { animation: none; }
+  .ex-card:hover { transform: none; }
+  .ex-step:hover .ex-step-n { transform: none; }
+}
+
+@media (max-width: 720px) {
+  .ex-thesis p { font-size: 16.5px; }
+  .ex-grid { grid-template-columns: 1fr; }
+}

@@ -1,26 +1,98 @@
 /* app/(app)/voac/map/map.css — the orchestration map.
  *
  * Heritage Modern, same cream/emerald/gold as the rest of the operator surface.
- * Animation is used to carry MEANING, never decoration:
- *   • the spine pulse travels broker → rosters, showing the direction of
- *     brokerage (down), not of authority-for-its-own-sake;
+ *
+ * This is a REAL org chart: drawn connectors, not stacked cards. The hierarchy
+ * is three tiers — the company, its one supervisor, the per-company rosters —
+ * and the lines between them are the point of the picture. A grid of cards can
+ * be read as five peers; a tree cannot.
+ *
+ * Connectors are CSS pseudo-elements, not SVG: they reflow with the grid for
+ * free, so the chart stays correct at every breakpoint with no measuring code.
+ *
+ * Animation carries MEANING, never decoration:
+ *   • the trunk pulse travels broker → rosters, showing the direction of
+ *     brokerage (down), not authority-for-its-own-sake;
  *   • only "waiting" nodes breathe, because only they are asking a human for
- *     something. If everything pulsed, nothing would read as urgent.
+ *     something. If everything pulsed, nothing would read as urgent;
+ *   • pipeline steps light in sequence, so an agent reads as a process.
  * Every animation is disabled under prefers-reduced-motion.
  */
 
+/* ── Chart frame ────────────────────────────────────────────────── */
 .om-chart {
   position: relative;
-  margin: 8px 0 4px;
+  margin: 10px 0 4px;
+  padding: 4px 0 8px;
 }
+
+.om-tier-label {
+  display: flex; align-items: center; gap: 10px;
+  font: 600 10px/1 var(--dl-mono, ui-monospace, monospace);
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--dl-ink-faint, #9a9484);
+  margin-bottom: 10px;
+}
+.om-tier-label::after {
+  content: ""; flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--dl-line, #e6e0d2), transparent);
+}
+[dir="rtl"] .om-tier-label::after {
+  background: linear-gradient(270deg, var(--dl-line, #e6e0d2), transparent);
+}
+
+/* ── Tier 0 — the company itself ────────────────────────────────── */
+.om-tier-root { display: flex; justify-content: center; }
+
+.om-root {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 10px 22px;
+  border: 1px solid var(--dl-line, #e6e0d2);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffffff, #fffcf4);
+  box-shadow: 0 6px 20px -16px rgba(31, 90, 69, 0.6);
+  animation: om-rise 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.om-root-name {
+  font-family: var(--dl-display, Fraunces, Georgia, serif);
+  font-size: 17px; font-weight: 600;
+  color: var(--dl-emerald, #1f5a45);
+}
+.om-root-meta {
+  font: 11px/1 var(--dl-mono, ui-monospace, monospace);
+  color: var(--dl-ink-faint, #9a9484);
+}
+
+/* ── Trunk — the animated spine between tiers ───────────────────── */
+.om-trunk {
+  position: relative;
+  height: 40px;
+  display: flex; justify-content: center;
+}
+.om-trunk-line {
+  position: absolute; top: 0; bottom: 0;
+  width: 2px; border-radius: 2px;
+  background: linear-gradient(180deg,
+    rgba(31, 90, 69, 0.15) 0%,
+    var(--dl-emerald, #1f5a45) 45%,
+    rgba(31, 90, 69, 0.15) 100%);
+}
+.om-trunk-pulse {
+  position: absolute; top: 0;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--dl-gold, #c99a2e);
+  box-shadow: 0 0 0 3px rgba(201, 154, 46, 0.18);
+  animation: om-travel 2.8s ease-in-out infinite;
+}
+.om-trunk-short { height: 28px; }
 
 /* ── Tier 1 — the single supervisor ─────────────────────────────── */
 .om-tier-group { display: flex; justify-content: center; }
 
 .om-broker {
   position: relative;
-  max-width: 760px;
-  width: 100%;
+  max-width: 780px; width: 100%;
   background: linear-gradient(180deg, #ffffff 0%, #fffdf7 100%);
   border: 1px solid var(--dl-line, #e6e0d2);
   border-top: 3px solid var(--dl-emerald, #1f5a45);
@@ -28,12 +100,12 @@
   padding: 20px 24px 18px;
   box-shadow: 0 10px 30px -22px rgba(31, 90, 69, 0.55);
   animation: om-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 80ms;
 }
 
 .om-broker-eyebrow {
   font: 600 10.5px/1 var(--dl-mono, ui-monospace, monospace);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  letter-spacing: 0.18em; text-transform: uppercase;
   color: var(--dl-gold-ink, #8a5d12);
   margin-bottom: 9px;
 }
@@ -61,49 +133,65 @@
 }
 .om-broker-stats b { color: var(--dl-ink, #2a2a26); font-size: 14px; }
 
-/* ── The spine ──────────────────────────────────────────────────── */
-.om-spine {
+/* ── The fan — one trunk splitting into N branch stubs ──────────── */
+.om-fan {
   position: relative;
-  height: 46px;
-  display: flex; justify-content: center;
+  height: 34px;
+  margin-bottom: 2px;
 }
-.om-spine-line {
-  position: absolute; top: 0; bottom: 0;
-  width: 2px;
-  background: linear-gradient(180deg, var(--dl-emerald, #1f5a45) 0%, rgba(31, 90, 69, 0.15) 100%);
-  border-radius: 2px;
+/* The horizontal rail the stubs hang from. Inset so it never overhangs the
+   outermost branch — an overhanging rail reads as a connection to nothing. */
+.om-fan-rail {
+  position: absolute; top: 16px; left: 12%; right: 12%;
+  height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg,
+    rgba(31, 90, 69, 0.12), rgba(31, 90, 69, 0.45), rgba(31, 90, 69, 0.12));
 }
-.om-spine-pulse {
-  position: absolute; top: 0;
-  width: 6px; height: 6px; border-radius: 50%;
+.om-fan-drop {
+  position: absolute; top: 0; left: 50%;
+  width: 2px; height: 16px;
+  background: rgba(31, 90, 69, 0.45);
+  transform: translateX(-50%);
+}
+/* Charge travelling out along the rail — brokerage reaching the rosters. */
+.om-fan-charge {
+  position: absolute; top: 13px; left: 12%;
+  width: 8px; height: 8px; border-radius: 50%;
   background: var(--dl-gold, #c99a2e);
-  box-shadow: 0 0 0 3px rgba(201, 154, 46, 0.18);
-  animation: om-travel 2.8s ease-in-out infinite;
-}
-
-.om-rosters-label {
-  text-align: center;
-  font-size: 12px;
-  color: var(--dl-ink-dim, #6b6355);
-  margin-bottom: 16px;
-  padding: 0 12px;
+  box-shadow: 0 0 0 3px rgba(201, 154, 46, 0.16);
+  animation: om-sweep 4.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
 /* ── Tier 2 — the branches ──────────────────────────────────────── */
 .om-tier-branches {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  gap: 18px 16px;
 }
 
 .om-branch {
+  position: relative;
   background: var(--dl-card, #fffdf7);
   border: 1px solid var(--dl-line, #e6e0d2);
   border-radius: 12px;
   padding: 14px 16px 16px;
   animation: om-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
 }
-.om-branch-hot { border-color: rgba(201, 154, 46, 0.55); }
+/* Stub connecting each branch up to the fan rail. */
+.om-branch::before {
+  content: "";
+  position: absolute; top: -18px; left: 50%;
+  width: 2px; height: 18px;
+  background: rgba(31, 90, 69, 0.3);
+  transform: translateX(-50%);
+}
+.om-branch:hover { box-shadow: 0 14px 32px -26px rgba(0, 0, 0, 0.5); }
+.om-branch-hot {
+  border-color: rgba(201, 154, 46, 0.55);
+  background: linear-gradient(180deg, #fffdf4, #fffdf7);
+}
+.om-branch-hot::before { background: var(--dl-gold, #c99a2e); }
 
 .om-branch-head {
   display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
@@ -134,9 +222,13 @@
   background: #fff;
   padding: 11px 13px;
   animation: om-rise 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
-[dir="rtl"] .om-agent { border-left: 1px solid var(--dl-line, #e6e0d2); border-right: 3px solid var(--dl-line, #e6e0d2); border-radius: 9px 0 0 9px; }
+[dir="rtl"] .om-agent {
+  border-left: 1px solid var(--dl-line, #e6e0d2);
+  border-right: 3px solid var(--dl-line, #e6e0d2);
+  border-radius: 9px 0 0 9px;
+}
 .om-agent:hover { transform: translateY(-2px); box-shadow: 0 10px 24px -20px rgba(0,0,0,0.45); }
 
 .om-agent-top { display: flex; align-items: center; gap: 8px; }
@@ -159,7 +251,58 @@
 .om-agent-stats b { color: var(--dl-ink, #2a2a26); }
 .om-pending { color: var(--dl-gold-ink, #8a5d12); font-weight: 600; }
 
-.om-tools { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+/* ── The pipeline — what one run of this agent actually does ─────── */
+.om-pipe {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 5px;
+  margin-top: 10px; padding-top: 9px;
+  border-top: 1px dashed var(--dl-line, #e6e0d2);
+}
+.om-pipe-step {
+  font: 10px/1 var(--dl-mono, ui-monospace, monospace);
+  color: var(--dl-ink-dim, #6b6355);
+  background: rgba(31, 90, 69, 0.05);
+  border: 1px solid rgba(31, 90, 69, 0.1);
+  padding: 4px 7px; border-radius: 4px;
+  animation: om-glow 3.6s ease-in-out infinite;
+}
+.om-pipe-arrow { color: var(--dl-ink-faint, #b8b0a0); font-size: 10px; }
+.om-pipe-step-in  { border-color: rgba(31, 90, 69, 0.22); color: var(--dl-emerald, #1f5a45); }
+.om-pipe-step-out {
+  border-color: rgba(201, 154, 46, 0.35);
+  background: rgba(201, 154, 46, 0.08);
+  color: var(--dl-gold-ink, #8a5d12);
+}
+
+/* ── Expandable detail (native <details>, no JS) ─────────────────── */
+.om-more { margin-top: 9px; }
+.om-more > summary {
+  cursor: pointer; list-style: none;
+  font: 10.5px/1 var(--dl-mono, ui-monospace, monospace);
+  letter-spacing: 0.06em;
+  color: var(--dl-emerald, #1f5a45);
+  padding: 4px 0;
+  transition: opacity 140ms ease;
+}
+.om-more > summary::-webkit-details-marker { display: none; }
+.om-more > summary::before { content: "▸ "; display: inline-block; transition: transform 180ms ease; }
+.om-more[open] > summary::before { content: "▾ "; }
+.om-more > summary:hover { opacity: 0.7; }
+.om-more-body {
+  margin-top: 8px; padding: 9px 11px;
+  background: rgba(31, 90, 69, 0.035);
+  border-radius: 7px;
+  font-size: 11.5px; line-height: 1.6;
+  color: var(--dl-ink-dim, #6b6355);
+  animation: om-unfold 240ms ease both;
+}
+.om-more-row { display: flex; gap: 8px; padding: 2px 0; }
+.om-more-key {
+  flex: none; min-width: 82px;
+  font: 10.5px/1.6 var(--dl-mono, ui-monospace, monospace);
+  color: var(--dl-ink-faint, #9a9484);
+}
+
+.om-tools { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
 .om-tool {
   font: 10px/1 var(--dl-mono, ui-monospace, monospace);
   color: var(--dl-ink-faint, #9a9484);
@@ -201,7 +344,7 @@
 
 /* ── Uncovered companies — the honest gap ───────────────────────── */
 .om-uncovered {
-  margin-top: 18px; padding: 14px 16px;
+  margin-top: 20px; padding: 14px 16px;
   border: 1px dashed rgba(192, 83, 47, 0.35);
   border-radius: 10px;
   background: rgba(192, 83, 47, 0.03);
@@ -225,7 +368,7 @@
 /* ── Legend ─────────────────────────────────────────────────────── */
 .om-legend {
   display: flex; flex-wrap: wrap; gap: 16px;
-  margin: 18px 0 4px; padding-top: 14px;
+  margin: 20px 0 4px; padding-top: 14px;
   border-top: 1px solid var(--dl-line, #e6e0d2);
   font-size: 11.5px; color: var(--dl-ink-dim, #6b6355);
 }
@@ -236,20 +379,40 @@
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+@keyframes om-unfold {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 @keyframes om-travel {
   0%   { top: 0; opacity: 0; }
   15%  { opacity: 1; }
   85%  { opacity: 1; }
   100% { top: calc(100% - 6px); opacity: 0; }
 }
+/* The charge sweeps the fan rail left→right, then fades. Direction is
+   deliberate: it is the broker reaching outward to the rosters. */
+@keyframes om-sweep {
+  0%   { left: 12%; opacity: 0; }
+  10%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { left: calc(88% - 8px); opacity: 0; }
+}
 @keyframes om-breathe {
   0%, 100% { transform: scale(1);    box-shadow: 0 0 0 3px rgba(201,154,46,0.18); }
   50%      { transform: scale(1.18); box-shadow: 0 0 0 6px rgba(201,154,46,0.06); }
 }
+/* Pipeline steps warm in sequence (delays set inline per step index), so a
+   glance reads the agent as a process rather than a bag of labels. */
+@keyframes om-glow {
+  0%, 70%, 100% { background: rgba(31, 90, 69, 0.05); }
+  18%           { background: rgba(201, 154, 46, 0.14); }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .om-broker, .om-branch, .om-agent { animation: none; }
-  .om-spine-pulse { animation: none; opacity: 0.7; top: 40%; }
+  .om-root, .om-broker, .om-branch, .om-agent, .om-more-body { animation: none; }
+  .om-trunk-pulse { animation: none; opacity: 0.7; top: 40%; }
+  .om-fan-charge  { animation: none; opacity: 0.7; left: 50%; }
+  .om-pipe-step   { animation: none; }
   .om-agent.om-waiting .om-dot-waiting,
   .om-broker.om-waiting .om-dot-waiting { animation: none; }
   .om-agent:hover { transform: none; }
@@ -259,4 +422,7 @@
   .om-broker { padding: 16px 16px 14px; }
   .om-broker-name { font-size: 21px; }
   .om-tier-branches { grid-template-columns: 1fr; }
+  /* One column → the fan is a straight line, so the rail would draw a
+     stray horizontal bar across nothing. Hide it, keep the stubs. */
+  .om-fan-rail, .om-fan-charge { display: none; }
 }

@@ -10,6 +10,27 @@
  * messages.css incident in the hardening notes. Prefix, always.
  */
 
+/* Palette bridge. daylight.css defines the REAL Heritage tokens on .dl-page
+ * (--emerald/--gold/--ink/--line/--cream); the VOAC stylesheets were written
+ * against --dl-* names that never existed, so every colour silently resolved to
+ * its hardcoded fallback — close to Heritage, but not it (#1f5a45 vs the real
+ * #1f4d3f), and immune to tenant themes.
+ *
+ * Aliasing here instead of renaming ~60 usages across four files: one block,
+ * and the VOAC surface now tracks whatever palette the shell is wearing. */
+.dl-page {
+  --dl-emerald:   var(--emerald, #1f4d3f);
+  --dl-gold:      var(--gold, #c2a35a);
+  --dl-gold-ink:  #8a5d12;
+  --dl-ink:       var(--ink, #2a2a26);
+  --dl-ink-dim:   var(--ink-muted, #6b6459);
+  --dl-ink-faint: #9a9484;
+  --dl-line:      var(--line, #e4dccb);
+  --dl-surface:   var(--cream, #fefcf7);
+  --dl-card:      var(--cream, #fefcf7);
+  --dl-mono: ui-monospace, "JetBrains Mono", Menlo, monospace;
+}
+
 .vo-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
 
 .vo-card {
@@ -78,6 +99,28 @@
   .vo-map-cta-dot { animation: none; }
   .vo-map-cta:hover { transform: none; }
 }
+
+/* --- secondary header links (map ↔ how ↔ stack) --------------------
+ * Ghost pills. Deliberately quieter than .vo-map-cta: the CTA is the one
+ * doorway that kept getting missed; these are siblings, not competitors. */
+.vo-header-links { display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.vo-ghost-btn {
+  display: inline-flex; align-items: center;
+  padding: 8px 14px;
+  border: 1px solid var(--dl-line, #e3dcc9);
+  border-radius: 999px;
+  background: var(--dl-surface, #fffdf7);
+  color: var(--dl-emerald, #1f5a45) !important;
+  font-size: 12.5px; font-weight: 600; text-decoration: none;
+  white-space: nowrap;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+.vo-ghost-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(201, 154, 46, 0.5);
+  background: #fffcf3;
+}
+@media (prefers-reduced-motion: reduce) { .vo-ghost-btn:hover { transform: none; } }
 
 .vo-fineprint {
   margin: 8px 0 0; font-size: 11.5px; color: var(--dl-ink-faint, #8c8474);

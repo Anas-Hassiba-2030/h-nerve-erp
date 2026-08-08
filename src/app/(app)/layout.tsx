@@ -20,13 +20,23 @@ import { Companion } from "@/components/companion/Companion";
 import { prisma, prismaUnscoped } from "@/lib/db/db";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { readFlash } from "@/lib/utils/toast";
-import { getViewAsTenant, getTenantThemeCookie } from "@/lib/tenancy/tenancy";
+import {
+  getViewAsTenant,
+  getTenantThemeCookie,
+  getActiveTenantSlug,
+  DEFAULT_TENANT_SLUG,
+} from "@/lib/tenancy/tenancy";
 import { THEME_PRESETS, themeCssVars, type ThemeKey } from "@/lib/brand/themes";
 import { permsEnforced, effectiveCanAccess } from "@/lib/auth/permissions";
+import { modulesEnforced, getEnabledModuleSet } from "@/lib/tenancy/moduleGate";
+import { moduleAccessible } from "@/lib/tenancy/moduleCatalog";
 import { LivingAtmosphere } from "@/components/orrery/LivingAtmosphere";
 import { OrbitReturn } from "@/components/orrery/OrbitReturn";
 import { DiveReveal } from "@/components/orrery/DiveReveal";
 import { ConstellationRail } from "@/components/orrery/ConstellationRail";
+import { ConsoleNav } from "@/components/orrery/ConsoleNav";
+import { ShellSwitch } from "@/components/orrery/ShellSwitch";
+import { SHELL_COOKIE, parseShell } from "@/lib/theme/shell";
 import { FabRail } from "@/components/orrery/FabRail";
 import { MorningBrief } from "@/components/brain/MorningBrief";
 import "./living.css";
@@ -39,6 +49,10 @@ import "./living.css";
 // briefly resolved to nothing → wrong colours + headings falling back to the
 // body font ("letters don't appear well"), correcting only on a hard refresh.
 import "./daylight.css";
+// The Console shell's navigation + the shell switch. Imported unconditionally
+// (a conditional import is not a thing) — the CSS is inert unless the Console
+// nav actually renders, and the switch itself is present in BOTH shells.
+import "./console.css";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getCurrentUser();
@@ -48,13 +62,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Stale session (e.g. DB reset since login). Force a fresh sign-in.
   if (!dbUser) redirect("/logout");
 
+  const pathname = (await headers()).get("x-pathname") ?? "";
+
   // Phase P5 follow-up — layout-level enforcement layered over the
   // interactive RolePermission editor at /admin/permissions-preview.
   // Middleware is edge-runtime and can't read Prisma; this is where the
   // override check lives. Only fires when H_NERVE_PERMS_ENFORCED=true so
   // the dev/staging path stays unchanged.
   if (permsEnforced() && session.role !== "ADMIN") {
-    const pathname = (await headers()).get("x-pathname") ?? "";
     const allowed = await effectiveCanAccess(
       session.role,
       pathname,
@@ -67,8 +82,36 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     if (!allowed) redirect("/dashboard");
   }
 
+  // docs/SYSTEM-BLUEPRINT.md §9.3 items 5-6 — module gating. Orthogonal to
+  // the role check above: this constrains which FEATURES the tenant's
+  // business has enabled, not who is allowed to see them, so it applies to
+  // every role including ADMIN (the seeded admin@hourani.jo account is the
+  // primary day-to-day operator, not exempt). Only fires when
+  // H_NERVE_MODULES_ENFORCED=true — ships inert until a tenant's
+  // TenantPack rows are actually reviewed (see OWNER-ACTIONS before
+  // flipping this in production).
+  if (modulesEnforced()) {
+    const tenantSlug = (await getActiveTenantSlug()) ?? DEFAULT_TENANT_SLUG;
+    const tenantRow = await prisma.tenant.findUnique({
+      where: { slug: tenantSlug },
+      select: { id: true },
+    });
+    const enabledModules = await getEnabledModuleSet(tenantRow?.id ?? null, (tenantId) =>
+      prisma.tenantPack.findMany({
+        where: { tenantId },
+        select: { packKey: true, enabled: true },
+      }),
+    );
+    if (!moduleAccessible(enabledModules, pathname)) redirect("/dashboard");
+  }
+
   const locale = await getLocale();
   const initialFlash = await readFlash();
+
+  // Which navigation shell the operator is wearing (see lib/theme/shell.ts).
+  // A view preference, so it is a cookie — same class of thing as the locale
+  // and the theme, and deliberately NOT part of the session.
+  const shell = parseShell((await cookies()).get(SHELL_COOKIE)?.value);
 
   // Phase 16 — Time Machine cursor (cookie-driven). Banner surfaces only
   // when traveling; pill is always visible.
@@ -130,14 +173,23 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           states, un-ported pages). Navigation is now exclusively the Orrery
           hub (/orrery) + the global ↺ Orbit return pill below. One removal =
           no page can ever show the old chrome again. */}
+      {/* The ambient background is OUTSIDE the shell switch on purpose — it is
+          the system's signature and renders identically in both shells. */}
       <LivingAtmosphere />
-      <OrbitReturn locale={locale} userName={dbUser.name} />
+      {/* Orbit-only chrome: the return pill is how you get back to the hub, and
+          in the Console shell the hub is already on the bar. */}
+      {shell === "orbit" ? <OrbitReturn locale={locale} userName={dbUser.name} /> : null}
       <FabRail locale={locale} />
       <div className="flex min-h-screen flex-1 flex-col nerve-bg">
-        <ConstellationRail locale={locale} />
+        {shell === "orbit" ? (
+          <ConstellationRail locale={locale} />
+        ) : (
+          <ConsoleNav locale={locale} />
+        )}
         <main className="flex-1"><DiveReveal>{children}</DiveReveal></main>
         <Footer />
       </div>
+      <ShellSwitch mode={shell} locale={locale} />
       <ToastProvider initialFlash={initialFlash} />
       <QuickAddFAB locale={locale} />
       <Conversational locale={locale} />

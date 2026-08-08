@@ -194,6 +194,44 @@ export function buildOrgMap(args: {
   };
 }
 
+/**
+ * The steps ONE run of this agent actually performs, in order.
+ *
+ * Derived from the topology rather than stored, because the topology already
+ * determines the shape of the run in driver.live.ts — storing it twice is two
+ * places to drift. Shown on the map so an agent reads as a process ("it pulls
+ * facts, then it writes") instead of a labelled box.
+ */
+export function pipelineFor(topology: string): { ar: string; en: string }[] {
+  switch (topology) {
+    case "parallel":
+      return [
+        { ar: "توزيع", en: "split" },
+        { ar: "أصوات متوازية", en: "parallel voices" },
+        { ar: "ترجيح", en: "reconcile" },
+        { ar: "صياغة", en: "narrate" },
+      ];
+    case "chain":
+      return [
+        { ar: "خطة", en: "plan" },
+        { ar: "سحب وقائع", en: "pull facts" },
+        { ar: "استنتاج", en: "reason" },
+        { ar: "صياغة", en: "narrate" },
+      ];
+    case "route":
+      return [
+        { ar: "تصنيف", en: "classify" },
+        { ar: "سحب وقائع", en: "pull facts" },
+        { ar: "صياغة", en: "narrate" },
+      ];
+    default:
+      return [
+        { ar: "تشغيل", en: "run" },
+        { ar: "صياغة", en: "narrate" },
+      ];
+  }
+}
+
 /** Display metadata per state — colour tone and bilingual label. */
 export function stateMeta(state: AgentState): {
   ar: string;

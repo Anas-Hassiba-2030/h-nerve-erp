@@ -168,7 +168,10 @@ export async function runVoac(input: RunVoacInput): Promise<RunVoacResult> {
       output: `Refused before spending: this shape needs ${planned} call(s) and the tenant has ${Math.max(0, budget.cap - budget.used)} left (${budget.used}/${budget.cap}).`,
       error: "BUDGET_EXHAUSTED",
     });
-    await closeRun(runId, { budgetExhausted: true });
+    // llmCalls: 0 explicitly. closeRun falls back to the STEP COUNT when it is
+    // omitted, so the refusal step itself would be stamped as one LLM call —
+    // on the one path whose entire purpose is to prove nothing was spent.
+    await closeRun(runId, { budgetExhausted: true, llmCalls: 0 });
     return {
       runId, status: "BUDGET_EXHAUSTED", narrative: "", proposalsCreated: 0,
       proposalsSuppressed: 0, stub: false,
@@ -179,13 +182,22 @@ export async function runVoac(input: RunVoacInput): Promise<RunVoacResult> {
   let replyText = "";
   let stub = false;
   let llmCalls = 0;
+  /** Calls that reached a model. Billed; may be fewer than llmCalls. */
+  let billableCalls = 0;
 
   try {
-    await appendStep({
-      tenantId: input.tenantId, runId, roleId: input.roleId, kind: "plan",
-      input: input.objective,
-      output: `Topology ${topology}; skill ${skill?.id ?? "none"}@${skill?.version ?? "unknown"}.`,
-    });
+    // Loop and council paths only. The graph records a node per stage, and this
+    // extra step carries no `N·stage — ` prefix, so traceLanes gives it a lane
+    // of its own — drawing a 3-stage route as 4 lanes, with chain/evaluate
+    // showing "Plan" twice. Everything it reported (topology, skill version)
+    // is already columns on AgentRun and already on the run card.
+    if (!spec) {
+      await appendStep({
+        tenantId: input.tenantId, runId, roleId: input.roleId, kind: "plan",
+        input: input.objective,
+        output: `Topology ${topology}; skill ${skill?.id ?? "none"}@${skill?.version ?? "unknown"}.`,
+      });
+    }
 
     // Wall-clock per phase. closeRun rolls step latency up to the run, so a
     // step that records nothing leaves the run claiming 0 ms — which is how a
@@ -205,6 +217,7 @@ export async function runVoac(input: RunVoacInput): Promise<RunVoacResult> {
       );
       llmCalls = session.voices.length + 1;
       stub = session.sources?.engine === "stub";
+      billableCalls = stub ? 0 : llmCalls;
 
       for (const voice of session.voices) {
         await appendStep({
@@ -254,7 +267,24 @@ export async function runVoac(input: RunVoacInput): Promise<RunVoacResult> {
 
       stub = flow.stub;
       llmCalls = flow.llmCalls;
+      // Only the calls that reached a model. A throttled call inside an
+      // otherwise live graph must not make the whole run free.
+      billableCalls = flow.realCalls;
       replyText = flow.text;
+
+      if (flow.answerStubbed) {
+        // Some calls were real, but the one that writes the answer was not — so
+        // what ships to the user is a placeholder saying "no model configured",
+        // which is false and looks like a considered reply. Record it as a
+        // fault; the run is degraded, not stubbed.
+        await appendStep({
+          tenantId: input.tenantId, runId, roleId: input.roleId, kind: "verify",
+          input: "graph result",
+          output: null,
+          error: `The model answered ${flow.realCalls} of ${flow.llmCalls} call(s); the final answer is a placeholder, not a reply.`,
+          latencyMs: Date.now() - startedMs,
+        });
+      }
 
       if (flow.emptyAnswer) {
         // The graph ran and produced nothing readable. Recording that as a
@@ -280,6 +310,7 @@ export async function runVoac(input: RunVoacInput): Promise<RunVoacResult> {
       });
       stub = loop.stub;
       llmCalls = loop.rounds;
+      billableCalls = stub ? 0 : llmCalls;
       replyText = loop.text;
 
       for (const call of loop.toolCalls) {
@@ -311,12 +342,6 @@ export async function runVoac(input: RunVoacInput): Promise<RunVoacResult> {
       });
     }
 
-    // One tick per call actually made, not one per run. A council costs six
-    // calls and a graph costs two or three; charging each of them a single
-    // tick made the daily cap read far tighter than it enforced.
-    if (!stub) {
-      for (let i = 0; i < Math.max(1, llmCalls); i++) consumeTenantLlmBudget(input.tenantId);
-    }
   } catch (err) {
     // A thrown driver leaves the ledger claiming RUNNING forever. Record, then
     // close — never let the exception escape past the run's own bookkeeping.
@@ -330,6 +355,19 @@ export async function runVoac(input: RunVoacInput): Promise<RunVoacResult> {
       runId, status: closed.status, narrative: "", proposalsCreated: 0,
       proposalsSuppressed: 0, stub, refusedReason: "The run failed; see the recorded step.",
     };
+  } finally {
+    // BILLED IN `finally`, not at the end of the try.
+    //
+    // The calls are already paid for the moment they return; anything that
+    // throws afterwards — a transient D1 write on a step, a failed closeRun —
+    // used to skip consumption entirely while the run row still recorded the
+    // calls. A council burning six real calls and ticking the tenant zero is
+    // how a daily cap silently stops capping. `finally` runs on the catch's
+    // return path too.
+    //
+    // One tick per call that reached a model, not one per run: a six-call
+    // council charged as one made the cap read six times tighter than it was.
+    for (let i = 0; i < billableCalls; i++) consumeTenantLlmBudget(input.tenantId);
   }
 
   // ---- 3. Extract proposals, honestly ------------------------------------

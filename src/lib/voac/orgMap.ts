@@ -298,10 +298,17 @@ export type RuntimeChild = {
  * What this node expands into when it actually runs — the layer below the
  * org chart, which is where the orchestration really happens.
  *
- * A `parallel` node convenes the council: five specialists argue at once, then
- * the Moderator reconciles. Every other topology runs the orchestrator's tool
- * loop, so its children are the brain tools it is permitted to call. Both are
- * read straight off what driver.live.ts does — nothing invented for the picture.
+ * THREE CASES, matching driver.live.ts exactly:
+ *   • `parallel` convenes the council: five specialists argue at once, then the
+ *     Moderator reconciles.
+ *   • A GRAPHED topology (route/chain/evaluate) returns nothing here — its
+ *     shape is the flow spec, which the page already draws as a pipeline. This
+ *     used to return `node.tools` verbatim under the label "calls N tools in
+ *     the tool loop", which was wrong twice over once the graph landed: those
+ *     roles no longer run the loop, and the list included tools the graph never
+ *     binds (`simulate` is excluded from gather stages because its input cannot
+ *     be derived from an objective). Two contradictory pictures on one card.
+ *   • The loop topologies keep the tool list, because that IS what they run.
  */
 export function runtimeChildren(node: Pick<AgentNode, "topology" | "tools">): RuntimeChild[] {
   if (node.topology === "parallel") {
@@ -312,6 +319,7 @@ export function runtimeChildren(node: Pick<AgentNode, "topology" | "tools">): Ru
       kind: v.moderator ? ("moderator" as const) : ("voice" as const),
     }));
   }
+  if (isGraphed(node.topology)) return [];
   return node.tools.map((t) => ({ id: t, ar: t, en: t, kind: "tool" as const }));
 }
 

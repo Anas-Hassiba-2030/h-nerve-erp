@@ -124,6 +124,51 @@ describe("runFlow", () => {
     expect(stubbed.emptyAnswer).toBe(false);
   });
 
+  it("does not let ONE degraded call mark a live run stubbed", async () => {
+    // callLlm never throws — a 429, a timeout, or the global call cap all come
+    // back as {isStub:true}. ORing that across nodes made a three-call graph
+    // where one call was throttled report as "no model configured", which
+    // skipped billing for the two calls that were really paid for.
+    let n = 0;
+    callLlm.mockImplementation(async () => {
+      n += 1;
+      return n === 1
+        ? { text: "(stub)", isStub: true, ms: 1 }
+        : { text: "real answer", isStub: false, ms: 1 };
+    });
+    const res = await runFlow(base());
+    expect(res.llmCalls).toBe(3);
+    expect(res.realCalls).toBe(2); // only the paid ones
+    expect(res.stub).toBe(false);
+    expect(res.answerStubbed).toBe(false);
+  });
+
+  it("flags a placeholder answer shipped from an otherwise live run", async () => {
+    // The worst version: the narrate call is the one that degrades, so the text
+    // handed to the user literally says "no model configured" — false, and it
+    // reads like a considered reply.
+    let n = 0;
+    callLlm.mockImplementation(async () => {
+      n += 1;
+      return n === 3
+        ? { text: "(stub — no model configured; …)", isStub: true, ms: 1 }
+        : { text: "real", isStub: false, ms: 1 };
+    });
+    const res = await runFlow(base());
+    expect(res.stub).toBe(false);
+    expect(res.answerStubbed).toBe(true);
+    expect(res.realCalls).toBe(2);
+  });
+
+  it("reports a wholly stubbed run as stubbed, and bills nothing", async () => {
+    callLlm.mockImplementation(async () => ({ text: "(stub)", isStub: true, ms: 1 }));
+    const res = await runFlow(base());
+    expect(res.stub).toBe(true);
+    expect(res.realCalls).toBe(0);
+    // answerStubbed is noise when every node is a placeholder.
+    expect(res.answerStubbed).toBe(false);
+  });
+
   it("persists each node as it lands, in stage order", async () => {
     const seen: string[] = [];
     await runFlow({ ...base(), onNode: async (n) => { seen.push(`${n.stageIndex}:${n.node.id}`); } });

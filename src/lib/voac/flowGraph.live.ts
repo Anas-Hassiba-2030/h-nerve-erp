@@ -63,8 +63,23 @@ export type RunFlowInput = {
 export type RunFlowResult = {
   /** The final answer. Empty string is a real outcome, not an error to hide. */
   text: string;
+  /** Every LLM node that ran, whether it reached a model or not. */
   llmCalls: number;
+  /**
+   * The calls that actually reached a model — what the tenant owes for.
+   *
+   * Kept separate from `llmCalls` because `callLlm` NEVER throws: a 429, a
+   * timeout, the global call cap, or an empty completion all come back as
+   * `{ isStub: true }`. Collapsing that into one run-wide boolean means a
+   * single throttled call in a three-call graph marks the whole run "stub",
+   * which skips billing for the two calls that were really paid for and labels
+   * a run that answered as one with no model configured.
+   */
+  realCalls: number;
+  /** True only when NOTHING reached a model — the genuine no-model case. */
   stub: boolean;
+  /** The final answer is a stub placeholder even though other calls were real. */
+  answerStubbed: boolean;
   nodes: FlowNodeResult[];
   /** Set when the graph ran but produced nothing a human can read. */
   emptyAnswer: boolean;
@@ -132,7 +147,8 @@ export async function runFlow(input: RunFlowInput): Promise<RunFlowResult> {
   const nodes: FlowNodeResult[] = [];
   const carry: string[] = [];
   let llmCalls = 0;
-  let stub = false;
+  let realCalls = 0;
+  let answerStubbed = false;
   let text = "";
   let grade: RunFlowResult["grade"] = null;
 
@@ -227,7 +243,11 @@ export async function runFlow(input: RunFlowInput): Promise<RunFlowResult> {
               `(stub — no model configured; node "${node.id}" would have run over ${Object.keys(facts).length} gathered fact set(s))`,
           );
           llmCalls += 1;
-          if (res.isStub) stub = true;
+          if (res.isStub) {
+            if (isNarrate) answerStubbed = true;
+          } else {
+            realCalls += 1;
+          }
 
           if (isNarrate) text = res.text;
           else carry.push(`[${node.labelEn}] ${res.text}`);
@@ -252,10 +272,18 @@ export async function runFlow(input: RunFlowInput): Promise<RunFlowResult> {
     );
   }
 
+  // "Stub" means no model was reachable AT ALL. A partially degraded run is a
+  // real run that went badly, and must be billed and labelled as one.
+  const stub = llmCalls > 0 && realCalls === 0;
+
   return {
     text,
     llmCalls,
+    realCalls,
     stub,
+    // Only interesting when the run was NOT wholly stubbed: in a real stub run
+    // every node is a placeholder and saying so per-node is noise.
+    answerStubbed: answerStubbed && !stub,
     nodes,
     // Stub mode is the ABSENCE of a model, not an empty answer — flagging it
     // here would make every key-less run look like a defect.

@@ -349,6 +349,58 @@
   color: var(--dl-gold-ink, #8a5d12);
 }
 
+/* ── The drawn run shape — the graph, not a list of words ────────────
+ * Stages left to right; the nodes INSIDE a stage stack vertically, because
+ * stacking is what "these fire at the same moment" looks like. A gather stage
+ * with four tools is visibly four boxes deep while the stages either side are
+ * one — which is the whole claim the page is making, made visible instead of
+ * asserted in prose.
+ *
+ * Logical properties only, so the flow mirrors for Arabic on its own. */
+.om-flow {
+  display: flex; align-items: stretch; flex-wrap: wrap; gap: 5px;
+  margin-top: 10px; padding-top: 9px;
+  border-top: 1px dashed var(--dl-line, #e6e0d2);
+}
+.om-flow-stage { display: flex; flex-direction: column; gap: 3px; min-inline-size: 0; }
+.om-flow-name {
+  font: 700 9.5px/1.2 var(--dl-mono, ui-monospace, monospace);
+  letter-spacing: 0.03em;
+  color: var(--dl-emerald, #1f5a45);
+  padding-inline: 2px;
+}
+.om-flow-nodes { display: flex; flex-direction: column; gap: 3px; }
+.om-flow-node {
+  font: 10px/1.15 var(--dl-mono, ui-monospace, monospace);
+  color: var(--dl-ink-dim, #6b6355);
+  background: rgba(31, 90, 69, 0.05);
+  border: 1px solid rgba(31, 90, 69, 0.12);
+  padding: 4px 7px; border-radius: 4px;
+  animation: om-glow 3.6s ease-in-out infinite;
+}
+.om-flow-reason  { border-color: rgba(31, 90, 69, 0.26); color: var(--dl-emerald, #1f5a45); }
+.om-flow-grade   {
+  border-color: rgba(201, 154, 46, 0.4);
+  background: rgba(201, 154, 46, 0.07);
+  color: var(--dl-gold-ink, #8a5d12);
+}
+.om-flow-narrate {
+  border-color: rgba(201, 154, 46, 0.35);
+  background: rgba(201, 154, 46, 0.1);
+  color: var(--dl-gold-ink, #8a5d12);
+}
+/* The bracket that says "all of these, together". */
+.om-flow-fan .om-flow-nodes {
+  padding-inline-start: 6px;
+  border-inline-start: 2px solid rgba(31, 90, 69, 0.3);
+  border-start-start-radius: 4px;
+  border-end-start-radius: 4px;
+}
+.om-flow-arrow {
+  color: var(--dl-ink-faint, #b8b0a0); font-size: 10px;
+  align-self: center;
+}
+
 /* ── Expandable detail (native <details>, no JS) ─────────────────── */
 .om-more { margin-top: 9px; }
 .om-more > summary {
@@ -477,6 +529,7 @@
   .om-root, .om-broker, .om-branch, .om-leaf, .om-more-body { animation: none; }
   .om-trunk-pulse { animation: none; opacity: 0.7; top: 40%; }
   .om-pipe-step   { animation: none; }
+  .om-flow-node   { animation: none; }
   .om-agent.om-waiting .om-dot-waiting,
   .om-broker.om-waiting .om-dot-waiting { animation: none; }
   .om-agent:hover { transform: none; }

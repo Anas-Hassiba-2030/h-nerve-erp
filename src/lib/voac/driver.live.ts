@@ -26,6 +26,8 @@
 // table. It writes AgentRun / AgentStep / AgentProposal and stops.
 
 import { runToolLoop } from "@/lib/brain/orchestrator";
+import { flowSpecFor, llmNodeCount } from "./flowGraph";
+import { runFlow, plannedLlmCalls } from "./flowGraph.live";
 import { council } from "@/lib/brain/council.live";
 import { checkTenantLlmBudget, consumeTenantLlmBudget } from "@/lib/brain/llmBudget";
 import { log } from "@/lib/utils/logger";
@@ -34,7 +36,7 @@ import { openRun, appendStep, closeRun, createProposal, ensureRoster, proposalsU
 import { clipToBudget, type ProposalCandidate } from "./budget";
 import { extractProposals, stripProposalBlock, PROPOSAL_OUTPUT_CONTRACT } from "./proposals";
 import type { Topology } from "./topology";
-import type { RunStatus } from "./runStore";
+import type { RunStatus, StepKind } from "./runStore";
 
 export type RunVoacInput = {
   tenantId: string;
@@ -62,6 +64,21 @@ export type RunVoacResult = {
   /** True when no API key is configured — the brain's stub mode. */
   stub: boolean;
   refusedReason?: string;
+};
+
+/**
+ * A graph node's kind, as the ledger records it.
+ *
+ * `grade` maps to "verify" because that is exactly what it is — a check of the
+ * draft against the facts. `reason` gets its own kind rather than borrowing
+ * "plan": a trace that calls the thinking "planning" reads as a run that
+ * planned twice and never thought.
+ */
+const STEP_KIND_FOR_NODE: Record<string, StepKind> = {
+  tool: "tool",
+  reason: "reason",
+  grade: "verify",
+  narrate: "narrate",
 };
 
 /** Roster cap lookup, defaulting conservatively when no roster row exists. */
@@ -94,7 +111,16 @@ function startOfToday(): Date {
 export async function runVoac(input: RunVoacInput): Promise<RunVoacResult> {
   const locale = input.locale ?? "ar";
   const role = getRole(input.roleId);
-  const hops = input.hops ?? 2;
+
+  // Resolve the topology HERE rather than reading it back off the created row,
+  // because the graph has to exist before openRun in order to declare its true
+  // hop count. `hops` used to be a flat default of 2, which meant the ceiling
+  // in topology.ts gated a number nobody derived from the work — a chain
+  // costing three model passes still claimed two. A graph knows exactly.
+  // (Same resolution order as startRun: explicit → role default → route.)
+  const topology = (input.topology ?? role?.defaultTopology ?? "route") as Topology;
+  const spec = flowSpecFor(topology, role?.tools ?? []);
+  const hops = input.hops ?? (spec ? llmNodeCount(spec) : 2);
 
   // ---- 1. Open the run (validates scope, topology, hop ceiling) ----------
   const opened = await openRun({
@@ -102,13 +128,12 @@ export async function runVoac(input: RunVoacInput): Promise<RunVoacResult> {
     companyId: input.companyId,
     roleId: input.roleId,
     objective: input.objective,
-    topology: input.topology,
+    topology,
     hops,
     humanOptIn: input.humanOptIn,
   });
 
   const runId = opened.run.id;
-  const topology = opened.run.topology as Topology;
 
   if (!opened.ok) {
     // Refusals are already persisted with status REFUSED by openRun.
@@ -123,28 +148,33 @@ export async function runVoac(input: RunVoacInput): Promise<RunVoacResult> {
     };
   }
 
+  const skill = skillDocFor(input.roleId);
+  const system = `${skill?.body ?? ""}\n\n${PROPOSAL_OUTPUT_CONTRACT}`.trim();
+
   // ---- 2. Per-tenant LLM budget -----------------------------------------
+  // A graph knows EXACTLY how many calls it will make before it makes the
+  // first one, so it can be refused up front instead of stopping halfway with
+  // a half-formed answer already paid for. The loop path can only claim one.
+  const planned = spec ? plannedLlmCalls(spec) : 1;
   const budget = checkTenantLlmBudget(input.tenantId);
-  if (!budget.allowed) {
+  const overspends = budget.cap > 0 && budget.used + planned > budget.cap;
+  if (!budget.allowed || overspends) {
     await appendStep({
       tenantId: input.tenantId,
       runId,
       roleId: input.roleId,
       kind: "plan",
       input: input.objective,
-      output: `Refused before spending: tenant LLM budget exhausted (${budget.used}/${budget.cap}).`,
+      output: `Refused before spending: this shape needs ${planned} call(s) and the tenant has ${Math.max(0, budget.cap - budget.used)} left (${budget.used}/${budget.cap}).`,
       error: "BUDGET_EXHAUSTED",
     });
     await closeRun(runId, { budgetExhausted: true });
     return {
       runId, status: "BUDGET_EXHAUSTED", narrative: "", proposalsCreated: 0,
       proposalsSuppressed: 0, stub: false,
-      refusedReason: `Tenant LLM budget exhausted (${budget.used}/${budget.cap}).`,
+      refusedReason: `Tenant LLM budget exhausted (${budget.used}/${budget.cap}; this run needs ${planned}).`,
     };
   }
-
-  const skill = skillDocFor(input.roleId);
-  const system = `${skill?.body ?? ""}\n\n${PROPOSAL_OUTPUT_CONTRACT}`.trim();
 
   let replyText = "";
   let stub = false;
@@ -196,8 +226,53 @@ export async function runVoac(input: RunVoacInput): Promise<RunVoacResult> {
         output: replyText,
         latencyMs: Date.now() - startedMs,
       });
+    } else if (spec) {
+      // ---- Graph path: a predetermined shape, run stage by stage ----------
+      // The tools are chosen by flowGraph.ts before the run starts, not by the
+      // model mid-loop. That is what lets a weak (or local) model still produce
+      // a grounded answer: it never has to emit tool_use to make progress.
+      const flow = await runFlow({
+        spec,
+        objective: input.objective,
+        system,
+        locale,
+        // Persist each node the instant it lands, so a crash mid-graph still
+        // leaves a readable partial trace instead of one silent gap.
+        onNode: async (n) => {
+          await appendStep({
+            tenantId: input.tenantId,
+            runId,
+            roleId: input.roleId,
+            kind: STEP_KIND_FOR_NODE[n.node.kind],
+            input: `${n.stageIndex}·${n.stageId} — ${n.input}`.slice(0, 900),
+            output: n.output?.slice(0, 4000) ?? null,
+            error: n.error,
+            latencyMs: n.latencyMs,
+          });
+        },
+      });
+
+      stub = flow.stub;
+      llmCalls = flow.llmCalls;
+      replyText = flow.text;
+
+      if (flow.emptyAnswer) {
+        // The graph ran and produced nothing readable. Recording that as a
+        // success would file it next to runs that answered, and nobody would
+        // ever go looking.
+        await appendStep({
+          tenantId: input.tenantId, runId, roleId: input.roleId, kind: "verify",
+          input: "graph result",
+          output: null,
+          error: `The graph completed ${flow.nodes.length} node(s) but the final answer was empty.`,
+          latencyMs: Date.now() - startedMs,
+        });
+      }
     } else {
       // ---- Tool-loop path: reuse the orchestrator ------------------------
+      // Reached only by orchestrate/autonomous — the shapes whose subtasks are
+      // discovered at runtime, where a predetermined graph would be a lie
+      // about the plan.
       const loop = await runToolLoop({
         system,
         question: input.objective,
@@ -236,7 +311,12 @@ export async function runVoac(input: RunVoacInput): Promise<RunVoacResult> {
       });
     }
 
-    if (!stub) consumeTenantLlmBudget(input.tenantId);
+    // One tick per call actually made, not one per run. A council costs six
+    // calls and a graph costs two or three; charging each of them a single
+    // tick made the daily cap read far tighter than it enforced.
+    if (!stub) {
+      for (let i = 0; i < Math.max(1, llmCalls); i++) consumeTenantLlmBudget(input.tenantId);
+    }
   } catch (err) {
     // A thrown driver leaves the ledger claiming RUNNING forever. Record, then
     // close — never let the exception escape past the run's own bookkeeping.

@@ -31,7 +31,7 @@ export type RunStatus =
   | "STUB";
 
 /** AgentStep.kind values. */
-export type StepKind = "plan" | "tool" | "debate" | "verify" | "narrate";
+export type StepKind = "plan" | "tool" | "reason" | "debate" | "verify" | "narrate";
 
 /** AgentProposal.status values. */
 export type ProposalStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "EXPIRED";

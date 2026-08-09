@@ -129,7 +129,52 @@ async function main() {
   });
   check("driver never mutated a domain table", (await prisma.dairyBatch.count()) === batchesBefore);
 
-  // --- 5. Ledger totals --------------------------------------------------
+  // --- 5. The graph path actually executed as a graph --------------------
+  // route/chain/evaluate no longer fall into the generic tool loop. Proving
+  // that needs the LEDGER, not the types: a graph that quietly degraded back to
+  // one loop call would still typecheck, still succeed, and still look fine.
+  const { flowSpecFor, llmNodeCount } = await import("../../src/lib/voac/flowGraph");
+  const { traceLanes } = await import("../../src/lib/voac/present");
+  const { getRole } = await import("../../src/lib/voac/roles");
+
+  const graphRole = getRole("dairy-yield-controller")!;
+  const spec = flowSpecFor(graphRole.defaultTopology, graphRole.tools);
+  check("route topology has a flow spec", Boolean(spec), graphRole.defaultTopology);
+
+  const gsteps = await prisma.agentStep.findMany({
+    where: { runId: r1.runId }, orderBy: { seq: "asc" },
+  });
+  const staged = gsteps.filter((s) => /^\d+·[a-z]+ — /.test(s.input));
+  check("graph nodes stamped their stage", staged.length > 0, `${staged.length}/${gsteps.length} staged`);
+
+  const lanes = traceLanes(gsteps.map((s) => ({
+    id: s.id, seq: s.seq, kind: s.kind, roleId: s.roleId,
+    input: s.input, output: s.output, error: s.error, latencyMs: s.latencyMs,
+  })));
+  check(
+    "the trace redraws as the graph's stages",
+    lanes.some((l) => l.id === "gather") && lanes.some((l) => l.id === "narrate"),
+    lanes.map((l) => l.id).join(" → "),
+  );
+  const gather = lanes.find((l) => l.id === "gather");
+  check(
+    "the gather stage really fanned out",
+    Boolean(gather && gather.steps.length > 1),
+    `${gather?.steps.length ?? 0} tool node(s) in one lane`,
+  );
+  check(
+    "a reasoning step is recorded as `reason`, not mislabelled `plan`",
+    gsteps.some((s) => s.kind === "reason"),
+    gsteps.map((s) => s.kind).join(","),
+  );
+  // Stub mode makes no real calls, so only assert the count on the live path.
+  check(
+    "llmCalls matches what the graph declared",
+    r1.stub || run1?.llmCalls === llmNodeCount(spec!),
+    `${run1?.llmCalls} vs planned ${spec ? llmNodeCount(spec) : "?"}`,
+  );
+
+  // --- 6. Ledger totals --------------------------------------------------
   const runs = await prisma.agentRun.count({ where: { tenantId } });
   const props = await prisma.agentProposal.count({ where: { tenantId } });
   const roster = await prisma.voacRoster.findFirst({ where: { tenantId, companyId: dairy.id } });

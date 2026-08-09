@@ -180,11 +180,23 @@
 }
 
 /* ── The roster template — staffing per sector ───────────────────── */
+/* Wide columns, few of them. At minmax(300px) on a large screen this became
+ * six columns of ~200px each once the browser divided the remainder — and a
+ * job sentence in a 200px column is a sliver of two-word lines. Sectors are
+ * read one at a time, not compared across six. */
 .om-template {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 12px;
   margin-bottom: 22px;
+  /* The template sits below the fold on most screens; skip its layout and
+     paint until it is scrolled near. Costs nothing when it IS visible. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 420px;
+}
+@media (min-width: 1500px) {
+  /* Never more than three, however wide the screen gets. */
+  .om-template { grid-template-columns: repeat(3, 1fr); }
 }
 .om-tpl-row {
   border: 1px solid var(--dl-line, #e6e0d2);
@@ -339,7 +351,7 @@
   background: rgba(31, 90, 69, 0.05);
   border: 1px solid rgba(31, 90, 69, 0.1);
   padding: 4px 7px; border-radius: 4px;
-  animation: om-glow 3.6s ease-in-out infinite;
+  /* Also de-animated — same reason as .om-flow-node above. */
 }
 .om-pipe-arrow { color: var(--dl-ink-faint, #b8b0a0); font-size: 10px; }
 .om-pipe-step-in  { border-color: rgba(31, 90, 69, 0.22); color: var(--dl-emerald, #1f5a45); }
@@ -414,7 +426,11 @@
   background: rgba(31, 90, 69, 0.05);
   border: 1px solid rgba(31, 90, 69, 0.12);
   padding: 4px 7px; border-radius: 4px;
-  animation: om-glow 3.6s ease-in-out infinite;
+  /* NO animation. This selector used to carry `om-glow ... infinite`, which
+     animates `background` — a repaint every frame, not a compositor-only
+     property. With a mini-graph drawn per role the page held 100+ of these,
+     all repainting forever, and it read exactly as it was: laggy. The glow
+     was decoration; the shape is the information. */
 }
 .om-flow-reason  { border-color: rgba(31, 90, 69, 0.26); color: var(--dl-emerald, #1f5a45); }
 .om-flow-grade   {

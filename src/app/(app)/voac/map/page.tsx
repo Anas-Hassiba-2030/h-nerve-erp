@@ -231,6 +231,9 @@ export default async function VoacMapPage() {
         )}
         actions={
           <span className="vo-header-links">
+            <Link href="/voac/flow" className="vo-ghost-btn">
+              {L("مسار التشغيل", "The workflow")}
+            </Link>
             <Link href="/voac/how" className="vo-ghost-btn">
               {L("كيف يعمل النظام", "How it works")}
             </Link>
@@ -343,10 +346,15 @@ export default async function VoacMapPage() {
                   <span key={r.id} className="om-tpl-role">
                     <span className="om-tpl-role-name">{ar ? r.ar : r.en}</span>
                     <span className="om-tpl-role-job">{ar ? r.jobAr : r.jobEn}</span>
+                    {/* A compact shape chip, NOT the full mini-graph. The
+                        template answers "what does a company get"; the drawn
+                        shape belongs on the agent card and on /voac/flow,
+                        where there is room for it. Rendering it once per role
+                        here squeezed six columns into unreadable slivers and
+                        put 100+ animating nodes on one screen. */}
                     <span className="om-tpl-role-meta">
                       {r.topology} · {r.toolCount} {L("أدوات", "tools")}
                     </span>
-                    <Pipeline topology={r.topology} tools={r.tools} ar={ar} />
                   </span>
                 ))}
               </div>

@@ -26,6 +26,7 @@ const UNLISTED = [
   shellHome("orbit"),
   shellHome("console"),
   "/voac/map",
+  "/voac/flow",
   "/voac/how",
   "/voac/stack",
   "/hr",

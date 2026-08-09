@@ -349,6 +349,44 @@
   color: var(--dl-gold-ink, #8a5d12);
 }
 
+/* ── The job line — what this agent actually does ────────────────────
+ * Deliberately the most readable text on the card: full prose, generous
+ * measure, no monospace. Everything around it (topology, tool count, skill
+ * hash) is the system describing itself; this is the one line written for the
+ * person reading it, so it gets the typographic weight to match. */
+.om-job {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--dl-ink, #2a2a26);
+  max-inline-size: 62ch;
+}
+.om-job-broker { font-size: 13.5px; }
+
+.om-asks {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px;
+  margin: 7px 0 0;
+  font-size: 12.5px; line-height: 1.5;
+  color: var(--dl-ink-dim, #6b6355);
+  max-inline-size: 62ch;
+}
+.om-asks-label {
+  flex: none;
+  font: 700 9.5px/1.4 var(--dl-mono, ui-monospace, monospace);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--dl-gold-ink, #8a5d12);
+  background: rgba(201, 154, 46, 0.12);
+  border: 1px solid rgba(201, 154, 46, 0.3);
+  padding: 2px 6px; border-radius: 4px;
+}
+
+.om-tpl-role-job {
+  display: block;
+  margin-top: 3px;
+  font-size: 11.5px; line-height: 1.45;
+  color: var(--dl-ink-dim, #6b6355);
+}
+
 /* ── The drawn run shape — the graph, not a list of words ────────────
  * Stages left to right; the nodes INSIDE a stage stack vertically, because
  * stacking is what "these fire at the same moment" looks like. A gather stage

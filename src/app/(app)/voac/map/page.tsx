@@ -150,6 +150,16 @@ function AgentNodeCard({ node, ar, delay }: { node: AgentNode; ar: boolean; dela
           <span className={`om-chip om-chip-${m.tone}`}>{ar ? m.ar : m.en}</span>
         </div>
 
+        {/* THE JOB. Everything else on this card is metadata about an agent
+            whose purpose the reader still had to guess. Name, topology and
+            tool count are what the system knows about itself; this is the
+            only line written for the person reading it. */}
+        <p className="om-job">{ar ? node.jobAr : node.jobEn}</p>
+        <p className="om-asks">
+          <span className="om-asks-label">{L("يسألك", "Asks you")}</span>
+          {ar ? node.asksAr : node.asksEn}
+        </p>
+
         <div className="om-agent-meta">
           <span className="om-mono">{node.topology}</span>
           <span className="om-sep">·</span>
@@ -284,6 +294,11 @@ export default async function VoacMapPage() {
               {ar ? map.broker.labelAr : map.broker.labelEn}
               <span className={`om-chip om-chip-${bm.tone}`}>{ar ? bm.ar : bm.en}</span>
             </div>
+            <p className="om-job om-job-broker">{ar ? map.broker.jobAr : map.broker.jobEn}</p>
+            <p className="om-asks">
+              <span className="om-asks-label">{L("يسألك", "Asks you")}</span>
+              {ar ? map.broker.asksAr : map.broker.asksEn}
+            </p>
             <div className="om-broker-why">
               {L(
                 "يملك ما لا يملكه من تحته: رؤية عابرة للشركات، وصلاحية الترجيح بين ميزانيتين. لا يوجد مشرف لكل شركة عمداً — مشرف فوق وكلاء يشتركون في الشركة نفسها لا يملك معلومة ولا صلاحية تزيد عمّن تحته، فيكون مجرد ممرّ يكلّف خطوة.",
@@ -327,6 +342,7 @@ export default async function VoacMapPage() {
                 {row.roles.map((r) => (
                   <span key={r.id} className="om-tpl-role">
                     <span className="om-tpl-role-name">{ar ? r.ar : r.en}</span>
+                    <span className="om-tpl-role-job">{ar ? r.jobAr : r.jobEn}</span>
                     <span className="om-tpl-role-meta">
                       {r.topology} · {r.toolCount} {L("أدوات", "tools")}
                     </span>

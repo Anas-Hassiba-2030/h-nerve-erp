@@ -1,4 +1,35 @@
 import { describe, it, expect } from "vitest";
+import { VOAC_ROLES as ROLES_FOR_JOBS } from "./roles";
+
+describe("every role explains itself", () => {
+  // The map showed names, topologies and tool counts — and an owner looking at
+  // it still could not answer "what does this one DO". A role without a job
+  // line is a labelled box.
+  it("gives every role a bilingual job and a decision it asks for", () => {
+    for (const r of ROLES_FOR_JOBS) {
+      for (const [field, value] of Object.entries({
+        jobAr: r.jobAr, jobEn: r.jobEn, asksAr: r.asksAr, asksEn: r.asksEn,
+      })) {
+        expect(value.trim().length, `${r.id}.${field}`).toBeGreaterThan(20);
+      }
+    }
+  });
+
+  it("keeps the job in plain language — no topology jargon", () => {
+    // "route", "chain", "parallel" are our words, not the owner's. They belong
+    // on the shape diagram, not in the sentence explaining the job.
+    for (const r of ROLES_FOR_JOBS) {
+      expect(/\b(route|chain|parallel|topology|orchestrat)/i.test(r.jobEn), r.id).toBe(false);
+    }
+  });
+
+  it("phrases every ask as a question a human answers", () => {
+    for (const r of ROLES_FOR_JOBS) {
+      expect(r.asksEn.trim().endsWith("?"), `${r.id}.asksEn`).toBe(true);
+      expect(r.asksAr.trim().endsWith("؟"), `${r.id}.asksAr`).toBe(true);
+    }
+  });
+});
 import {
   VOAC_ROLES,
   GROUP_BROKER_ID,

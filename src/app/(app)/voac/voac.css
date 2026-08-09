@@ -120,6 +120,59 @@
 .vg-node-body { padding: 0 11px 11px; border-block-start: 1px solid var(--dl-line, #e4dccb); }
 .vg-node[open] .vg-node-title { white-space: normal; }
 
+/* ── The two explainer panels on the agent-company page ──────────────
+ * Asked for as a SECTION next to the company, not a link. Two columns that
+ * stack on narrow screens; logical properties so they mirror for Arabic. */
+.vo-explain {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  gap: 14px;
+  margin-block: 18px 4px;
+}
+.vo-explain-card {
+  border: 1px solid var(--dl-line, #e4dccb);
+  border-start-start-radius: 12px;
+  border-start-end-radius: 12px;
+  border-end-start-radius: 12px;
+  border-end-end-radius: 12px;
+  border-inline-start: 3px solid var(--dl-emerald, #1f4d3f);
+  background: var(--dl-card, #fefcf7);
+  padding: 15px 17px;
+}
+.vo-explain-card h2 {
+  margin: 0 0 7px;
+  font-size: 14px; font-weight: 700;
+  color: var(--dl-emerald, #1f4d3f);
+}
+.vo-explain-card > p {
+  margin: 0; font-size: 12.5px; line-height: 1.6;
+  color: var(--dl-ink, #2a2a26);
+}
+.vo-explain-list {
+  list-style: none; margin: 10px 0 0; padding: 0;
+  display: grid; gap: 6px;
+}
+.vo-explain-list li {
+  font-size: 12px; line-height: 1.55;
+  color: var(--dl-ink-dim, #6b6459);
+  padding-inline-start: 11px;
+  position: relative;
+}
+.vo-explain-list li::before {
+  content: ""; position: absolute;
+  inset-inline-start: 0; top: 0.62em;
+  inline-size: 4px; block-size: 4px; border-radius: 50%;
+  background: var(--dl-gold, #c2a35a);
+}
+.vo-explain-list b { color: var(--dl-ink, #2a2a26); font-weight: 700; }
+.vo-explain-more {
+  display: inline-block; margin-block-start: 11px;
+  font-size: 12px; font-weight: 700;
+  color: var(--dl-emerald, #1f4d3f);
+  text-decoration: none;
+}
+.vo-explain-more:hover { text-decoration: underline; }
+
 .vo-why {
   margin-block-start: 3px; max-inline-size: 62ch;
   font-size: 12px; line-height: 1.5;

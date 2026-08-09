@@ -96,6 +96,77 @@ export default async function VoacPage() {
         />
       </DaylightKpiGrid>
 
+      {/* ── How this works / what it runs on ────────────────────────
+          Asked for twice as a SECTION beside the agent company, not a link.
+          The depth still lives on /voac/how and /voac/stack; what belongs
+          here is enough to answer "what am I looking at" without leaving. */}
+      <div className="vo-explain">
+        <section className="vo-explain-card">
+          <h2>{L("كيف يعمل هذا", "How this works")}</h2>
+          <p>
+            {L(
+              "الوكلاء يقرأون بياناتك، ويكتبون مقترحاً واحداً حين يستحق الأمر قراراً، ثم يتوقّفون. لا ينفّذون شيئاً بأنفسهم — القرار لك، ويُسجَّل باسمك.",
+              "The agents read your data, write one proposal when something warrants a decision, then stop. They never act on their own — the decision is yours, and it is recorded against your name.",
+            )}
+          </p>
+          <ul className="vo-explain-list">
+            <li>
+              <b>{L("مجلس", "A council")}</b>
+              {L(
+                " — حين تتنازع شركتان، تُطرح المواقف بالتوازي ثم تُرجَّح، بدل أن يقرّر صوت واحد عن الطرفين.",
+                " — when two companies' interests collide, the positions are argued in parallel and reconciled instead of one voice deciding for both.",
+              )}
+            </li>
+            <li>
+              <b>{L("رسم محدَّد مسبقاً", "A predetermined graph")}</b>
+              {L(
+                " — للأسئلة الواضحة: الكود يختار الأدوات ويجلب الوقائع، والنموذج يستنتج فوقها فقط.",
+                " — for clear questions: our code picks the tools and fetches the facts, and the model only reasons over them.",
+              )}
+            </li>
+            <li>
+              <b>{L("حلقة أدوات", "A tool loop")}</b>
+              {L(
+                " — فقط حين لا تُعرف الخطوات إلا أثناء التشغيل.",
+                " — only where the steps are unknowable until the work starts.",
+              )}
+            </li>
+          </ul>
+          <Link href="/voac/how" className="vo-explain-more">
+            {L("التفصيل الكامل ←", "The full explanation →")}
+          </Link>
+        </section>
+
+        <section className="vo-explain-card">
+          <h2>{L("على ماذا يعمل", "What it runs on")}</h2>
+          <p>
+            {L(
+              "سبع أدوات يقرأ بها الدماغ قاعدة بياناتك: الوقائع، الرسم السببي، المحاكاة، الذاكرة، المستندات، المجلس، والصياغة. لا يكتب أيٌّ منها في جداول عملك.",
+              "Seven tools the brain reads your database with: facts, the causal graph, simulation, memory, documents, the council, and narration. None of them writes to your operating tables.",
+            )}
+          </p>
+          <ul className="vo-explain-list">
+            <li>
+              <b>{L("ثلاثة مكابح", "Three brakes")}</b>
+              {L(
+                " — سقف لكل نمط، وميزانية يومية لكل مستأجر، وحدّ أعلى لما يصل إلى إنسان.",
+                " — a ceiling per shape, a daily budget per tenant, and a hard cap on what reaches a human.",
+              )}
+            </li>
+            <li>
+              <b>{L("نموذج على جهازك", "A model on your machine")}</b>
+              {L(
+                " — يمكن تشغيل الاستدلال محلياً بلا مفتاح واجهة برمجية (بيئة التطوير).",
+                " — inference can run locally with no API key (development only).",
+              )}
+            </li>
+          </ul>
+          <Link href="/voac/stack" className="vo-explain-more">
+            {L("كل المكتبات المستخدمة ←", "Every library used →")}
+          </Link>
+        </section>
+      </div>
+
       {/* ── The queue ─────────────────────────────────────────────── */}
       <DaylightPanel
         title={L("طابور المقترحات", "The proposal queue")}

@@ -39,6 +39,12 @@ export type AgentNode = {
   roleId: string;
   labelAr: string;
   labelEn: string;
+  /** What it does, plainly. The question the chart previously could not answer. */
+  jobAr: string;
+  jobEn: string;
+  /** The decision it brings a human. */
+  asksAr: string;
+  asksEn: string;
   sector: string;
   topology: string;
   tools: string[];
@@ -117,6 +123,10 @@ function toNode(
     roleId: role.id,
     labelAr: role.labelAr,
     labelEn: role.labelEn,
+    jobAr: role.jobAr,
+    jobEn: role.jobEn,
+    asksAr: role.asksAr,
+    asksEn: role.asksEn,
     sector: role.sector,
     topology: role.defaultTopology,
     tools: role.tools,
@@ -225,7 +235,10 @@ export function pipelineFor(topology: string): { ar: string; en: string }[] {
 
 export type RosterTemplateRow = {
   sector: string;
-  roles: { id: string; ar: string; en: string; topology: string; toolCount: number; tools: string[] }[];
+  roles: {
+    id: string; ar: string; en: string; topology: string; toolCount: number; tools: string[];
+    jobAr: string; jobEn: string;
+  }[];
 };
 
 /**
@@ -256,6 +269,8 @@ export function rosterTemplate(roles: VoacRole[] = VOAC_ROLES): RosterTemplateRo
       // Carried so the template can DRAW each role's shape, not just name its
       // topology. "route" tells an owner nothing; four boxes firing at once does.
       tools: r.tools,
+      jobAr: r.jobAr,
+      jobEn: r.jobEn,
     });
     bySector.set(r.sector, list);
   }

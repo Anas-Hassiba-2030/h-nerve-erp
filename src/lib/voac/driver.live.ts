@@ -26,7 +26,7 @@
 // table. It writes AgentRun / AgentStep / AgentProposal and stops.
 
 import { runToolLoop } from "@/lib/brain/orchestrator";
-import { flowSpecFor, llmNodeCount } from "./flowGraph";
+import { flowSpecFor, llmNodeCount, type FlowSpec } from "./flowGraph";
 import { runFlow, plannedLlmCalls } from "./flowGraph.live";
 import { council } from "@/lib/brain/council.live";
 import { checkTenantLlmBudget, consumeTenantLlmBudget } from "@/lib/brain/llmBudget";
@@ -80,6 +80,13 @@ const STEP_KIND_FOR_NODE: Record<string, StepKind> = {
   grade: "verify",
   narrate: "narrate",
 };
+
+/** How many LLM calls the skipped stages would have cost. Reported, never guessed at. */
+function skippedLlmCalls(skipped: string[], spec: FlowSpec): number {
+  return spec.stages
+    .filter((s) => skipped.includes(s.id))
+    .reduce((n, s) => n + s.nodes.filter((x) => x.kind === "reason" || x.kind === "narrate").length, 0);
+}
 
 /** Roster cap lookup, defaulting conservatively when no roster row exists. */
 async function dailyCapFor(tenantId: string, companyId: string | null, sector?: string): Promise<number> {
@@ -271,6 +278,34 @@ export async function runVoac(input: RunVoacInput): Promise<RunVoacResult> {
       // otherwise live graph must not make the whole run free.
       billableCalls = flow.realCalls;
       replyText = flow.text;
+
+      if (flow.quiet) {
+        // Not a failure and not an empty answer — a decision. Recorded as its
+        // own step so the ledger can show WHY nothing reached the queue, and
+        // given a real narrative so the run does not read as blank.
+        await appendStep({
+          tenantId: input.tenantId, runId, roleId: input.roleId, kind: "verify",
+          input: "routing decision",
+          output: `Nothing material found; the write-up stage was skipped (saved ${skippedLlmCalls(flow.skipped, spec)} call(s)).`,
+          latencyMs: Date.now() - startedMs,
+        });
+        replyText = locale === "ar"
+          ? "لا شيء يستحق انتباهك في هذه الدورة — راجع الوقائع المسحوبة في أثر التنفيذ."
+          : "Nothing this cycle warrants your attention — the gathered facts are in the execution trace.";
+      }
+
+      if (flow.quietVetoed) {
+        // The model asked to report nothing while holding evidence that says
+        // otherwise. It was overruled — and the attempt is recorded, because a
+        // model that silences findings is a fact about that model.
+        await appendStep({
+          tenantId: input.tenantId, runId, roleId: input.roleId, kind: "verify",
+          input: "routing decision",
+          output: null,
+          error: "The reasoning asked to stay quiet, but the gathered facts carry signal. Overruled; the answer was written.",
+          latencyMs: Date.now() - startedMs,
+        });
+      }
 
       if (flow.answerStubbed) {
         // Some calls were real, but the one that writes the answer was not — so

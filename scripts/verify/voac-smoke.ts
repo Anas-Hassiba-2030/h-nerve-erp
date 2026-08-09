@@ -203,7 +203,47 @@ async function main() {
     `${run1?.llmCalls} vs planned ${spec ? llmNodeCount(spec) : "?"}`,
   );
 
-  // --- 6. Ledger totals --------------------------------------------------
+  // --- 6. The conditional edges ------------------------------------------
+  // `evaluate` is a topology NO role defaults to, so nothing else in this
+  // script would ever execute its guarded stages. Requested explicitly here,
+  // because an unexercised branch is where a guard silently inverts.
+  const ev = await runVoac({
+    tenantId, companyId: dairy.id, roleId: "dairy-yield-controller",
+    objective: "Grade your own figures on this week's batches.",
+    topology: "evaluate", sector: "DAIRY", locale: "en",
+  });
+  check("an evaluate run is allowed by the hop ceiling", ev.status !== "REFUSED", ev.refusedReason ?? String(ev.status));
+
+  const evSteps = await prisma.agentStep.findMany({
+    where: { runId: ev.runId }, orderBy: { seq: "asc" },
+  });
+  const evLanes = traceLanes(evSteps.map((s) => ({
+    id: s.id, seq: s.seq, kind: s.kind, roleId: s.roleId,
+    input: s.input, output: s.output, error: s.error, latencyMs: s.latencyMs,
+  })));
+  const laneIds = evLanes.map((l) => l.id);
+  check("evaluate grades before it writes", laneIds.includes("grade"), laneIds.join(" → "));
+  // The revise cycle fires only when the draft's figures did not ground. In
+  // stub mode the placeholder text carries a digit that no fact supports, so
+  // this SHOULD fire — if it stops firing, the guard has inverted.
+  check(
+    "the critic cycle ran, and ran once",
+    evLanes.filter((l) => l.id === "revise").length === 1,
+    laneIds.join(" → "),
+  );
+  check(
+    "each attempt drew its OWN lane — no two iterations merged",
+    evLanes.every((l) => l.id === "gather" || !l.parallel),
+    evLanes.filter((l) => l.parallel).map((l) => l.id).join(",") || "(only gather is parallel)",
+  );
+  check(
+    "the run never exceeded the ceiling it declared",
+    (await prisma.agentRun.findUnique({ where: { id: ev.runId } }))!.llmCalls <=
+      llmNodeCount(flowSpecFor("evaluate", graphRole.tools)!),
+    `${(await prisma.agentRun.findUnique({ where: { id: ev.runId } }))!.llmCalls} <= ${llmNodeCount(flowSpecFor("evaluate", graphRole.tools)!)}`,
+  );
+
+  // --- 7. Ledger totals --------------------------------------------------
   const runs = await prisma.agentRun.count({ where: { tenantId } });
   const props = await prisma.agentProposal.count({ where: { tenantId } });
   const roster = await prisma.voacRoster.findFirst({ where: { tenantId, companyId: dairy.id } });

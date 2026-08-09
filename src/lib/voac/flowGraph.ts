@@ -47,18 +47,127 @@ export type FlowNode = {
   labelEn: string;
 };
 
+/**
+ * A guard on a stage — the graph's only conditional edge.
+ *
+ * Named, not a closure, so a spec stays plain serialisable data that a test can
+ * read and the UI can draw. The executor owns what each name MEANS; this file
+ * owns which stages carry one.
+ *
+ * The rule these exist to keep: **routing is decided by our code reading state,
+ * never by the model choosing an edge.** A model writes into state; a guard
+ * reads it. That is the same inversion as binding the tool inputs, applied to
+ * control flow.
+ */
+export type StageGuard =
+  /** The draft's figures did not ground well enough — revise it once. */
+  | "revisionNeeded"
+  /** The reasoning found something worth a person's attention. */
+  | "hasSomethingToSay";
+
 export type FlowStage = {
   id: string;
   labelAr: string;
   labelEn: string;
   /** Nodes in a stage are independent and run at once. Stages run in order. */
   nodes: FlowNode[];
+  /** When set, the stage runs only if the guard holds. */
+  runIf?: StageGuard;
 };
 
 export type FlowSpec = {
   topology: Topology;
   stages: FlowStage[];
 };
+
+/**
+ * Coverage at or above which a draft is considered grounded.
+ *
+ * Shared by the grade node's revise decision and the narrator's hedging warning
+ * so the two cannot disagree about what "grounded" means.
+ */
+export const GROUNDED_COVERAGE = 0.8;
+
+/**
+ * The exact token a reasoning node emits when it has nothing material to say.
+ *
+ * Matched against the WHOLE trimmed output, never searched for inside prose.
+ * `proposals.ts` learned this the hard way: a parser that salvages intent from
+ * prose invents a decision nobody made. A model that merely mentions the token
+ * while writing a real answer must not silence that answer.
+ */
+export const QUIET_TOKEN = "NOTHING-MATERIAL";
+
+/**
+ * Does the gathered evidence contain anything that warrants a person's time?
+ *
+ * WHY THIS EXISTS — a measured failure, not a hypothetical. The quiet edge was
+ * first built on the model's word alone: emit QUIET_TOKEN and the write-up is
+ * skipped. Probed twice against the local qwen2.5-coder:3b on a fact pack
+ * carrying an open HIGH-severity insight and four batches near expiry, it
+ * answered correctly once and emitted QUIET_TOKEN the second time. A model that
+ * silences a real finding leaves NO trace of what it silenced.
+ *
+ * So the model no longer decides. It gets a vote; this function holds the veto,
+ * and both must agree before anything is skipped. That restores the rule the
+ * rest of this module runs on: our code reads state and picks the edge.
+ *
+ * FAILS TOWARD SPEAKING. An unrecognised tool result counts as signal, because
+ * "we could not prove this was quiet" and "this is quiet" are different claims
+ * and only one of them is safe to act on. Adding a gather tool therefore
+ * disables the quiet edge for that role until its shape is handled here —
+ * inconvenient, and the correct direction to be inconvenient in.
+ */
+export function factsCarrySignal(facts: Record<string, unknown>): boolean {
+  const entries = Object.entries(facts);
+  // Nothing was gathered at all: we know nothing, which is not the same as
+  // knowing nothing is wrong.
+  if (entries.length === 0) return true;
+
+  return entries.some(([tool, value]) => {
+    const v = value as Record<string, unknown> | null;
+    if (!v || typeof v !== "object") return true;
+
+    // A KNOWN tool returning an UNEXPECTED shape is the dangerous case, and the
+    // one a `?? []` fallback hides: if pullFacts ever renames `insights`, every
+    // absent field reads as empty and every run goes quiet over real findings.
+    // So each branch asserts the shape it understands, and anything else counts
+    // as signal.
+    const list = (x: unknown): unknown[] | null => (Array.isArray(x) ? x : null);
+
+    switch (tool) {
+      case "pullFacts": {
+        const insights = list(v.insights);
+        const plans = list(v.plans);
+        const integrations = list(v.integrations) as { errorCount?: number }[] | null;
+        const dairy = v.dairy as { nearExpiry?: unknown } | undefined;
+        if (!insights || !plans || !integrations || typeof dairy?.nearExpiry !== "number") return true;
+        return (
+          insights.length > 0 ||
+          plans.length > 0 ||
+          dairy.nearExpiry > 0 ||
+          integrations.some((i) => (i.errorCount ?? 0) > 0)
+        );
+      }
+      // These three return retrieved material. Retrieval finding nothing is a
+      // genuine "no evidence"; finding something is something to talk about.
+      case "causalSubgraph": {
+        const nodes = list(v.nodes);
+        return nodes === null || nodes.length > 0;
+      }
+      case "recallMemory": {
+        const items = list(v.memories) ?? list(v.results);
+        return items === null || items.length > 0;
+      }
+      case "retrieveDocuments": {
+        const items = list(v.documents) ?? list(v.results);
+        return items === null || items.length > 0;
+      }
+      default:
+        return true; // a tool this function has never heard of → assume it matters
+    }
+  });
+}
 
 /**
  * Tools whose inputs can be derived from the objective alone.
@@ -122,12 +231,21 @@ export function flowSpecFor(topology: string, tools: string[]): FlowSpec | null 
     labelEn: "Gather in parallel",
     nodes: gather,
   };
-  const narrateStage: FlowStage = {
+  const narrateStage = (guarded: boolean): FlowStage => ({
     id: "narrate",
     labelAr: "صياغة",
     labelEn: "Write the answer",
     nodes: [{ id: "narrate", kind: "narrate", labelAr: "صياغة", labelEn: "Narrate" }],
-  };
+    // THE QUIET EDGE. When the reasoning found nothing material, writing it up
+    // anyway costs a call to say nothing. VOAC's doctrine already holds that
+    // "nothing worth your attention" is a correct answer — this is the first
+    // place that belief saves money instead of spending it.
+    //
+    // Only where there IS a reasoning node between the gather and the narrate.
+    // `route` has none — its only post-gather call IS the narrate, so there is
+    // nothing to skip and nothing that could have decided to skip it.
+    ...(guarded ? { runIf: "hasSomethingToSay" as const } : {}),
+  });
 
   switch (topology) {
     // Classify once, gather, answer. The cheapest controllable shape: one
@@ -144,7 +262,7 @@ export function flowSpecFor(topology: string, tools: string[]): FlowSpec | null 
             nodes: [{ id: "classify", kind: "reason", labelAr: "تصنيف", labelEn: "Classify" }],
           },
           gatherStage,
-          narrateStage,
+          narrateStage(false),
         ],
       };
 
@@ -167,14 +285,28 @@ export function flowSpecFor(topology: string, tools: string[]): FlowSpec | null 
             labelEn: "Reason",
             nodes: [{ id: "reason", kind: "reason", labelAr: "استنتاج", labelEn: "Reason" }],
           },
-          narrateStage,
+          narrateStage(true),
         ],
       };
 
-    // Chain plus a critic. The grade node is PURE — it re-reads the draft's
-    // numeric claims against the facts that were actually pulled, with no
-    // second model. A model grading its own output is the cheapest way to buy
-    // confidence you have not earned.
+    // Chain plus a critic that can send the work back — ONCE.
+    //
+    // topology.ts has always described this shape as "generate → grade →
+    // revise until it passes", and the first cut of this file did not revise:
+    // it graded and moved on. That is the same defect the whole module exists
+    // to remove — a label describing work the code does not do — so the cycle
+    // is now real, and bounded.
+    //
+    // BOUNDED AT ONE REVISION, deliberately. A critic loop with no ceiling is
+    // an unbounded bill, and a second revision that still cannot ground its
+    // figures is not short of attempts — it is short of FACTS, and another pass
+    // over the same fact pack cannot produce them. The honest move at that
+    // point is to hedge the answer, which the narrate node already does.
+    //
+    // The grade node stays PURE — it re-reads the draft's numeric claims
+    // against the facts that were actually pulled, with no second model. A
+    // model grading its own output is the cheapest way to buy confidence you
+    // have not earned.
     case "evaluate":
       return {
         topology: "evaluate",
@@ -198,7 +330,27 @@ export function flowSpecFor(topology: string, tools: string[]): FlowSpec | null 
             labelEn: "Check the numbers",
             nodes: [{ id: "grade", kind: "grade", labelAr: "تدقيق", labelEn: "Grade" }],
           },
-          narrateStage,
+          // The cycle, expressed as two guarded stages rather than a back-edge.
+          // Distinct stage ids on purpose: a second visit re-using the earlier
+          // id would merge into that lane on the run page and flip its
+          // "ran at once" badge on — drawing two sequential attempts as a
+          // parallel fan-out, which is exactly the class of chart lie this
+          // module was built to stop.
+          {
+            id: "revise",
+            labelAr: "مراجعة",
+            labelEn: "Revise",
+            runIf: "revisionNeeded",
+            nodes: [{ id: "revise", kind: "reason", labelAr: "مراجعة", labelEn: "Revise" }],
+          },
+          {
+            id: "regrade",
+            labelAr: "إعادة التدقيق",
+            labelEn: "Check again",
+            runIf: "revisionNeeded",
+            nodes: [{ id: "regrade", kind: "grade", labelAr: "تدقيق", labelEn: "Grade" }],
+          },
+          narrateStage(true),
         ],
       };
 
@@ -208,15 +360,29 @@ export function flowSpecFor(topology: string, tools: string[]): FlowSpec | null 
 }
 
 /**
- * How many LLM calls this graph will make.
+ * The MOST LLM calls this graph can make.
  *
  * Known before the first token — which is the point. topology.ts can only
- * estimate from a cost multiplier; once a graph exists the number is exact, and
- * a budget check against an exact number can refuse honestly.
+ * estimate from a cost multiplier; a graph knows its own ceiling.
+ *
+ * WORST CASE, INCLUDING GUARDED STAGES, and that direction is not arbitrary:
+ * `driver.live.ts` refuses a run up front when `used + planned > cap`. A
+ * `planned` that assumed every guard skips would let a run start inside its
+ * budget and finish outside it — the refusal would be honest about a graph
+ * that never ran. Declaring the ceiling and billing the actual `realCalls`
+ * errs toward refusing work we could have afforded, which is the safe side.
  */
 export function llmNodeCount(spec: FlowSpec): number {
   return spec.stages.reduce(
     (n, s) => n + s.nodes.filter((x) => x.kind === "reason" || x.kind === "narrate").length,
+    0,
+  );
+}
+
+/** The fewest calls this graph can make — every guard skipping. Reporting only. */
+export function minLlmNodeCount(spec: FlowSpec): number {
+  return spec.stages.reduce(
+    (n, s) => (s.runIf ? n : n + s.nodes.filter((x) => x.kind === "reason" || x.kind === "narrate").length),
     0,
   );
 }

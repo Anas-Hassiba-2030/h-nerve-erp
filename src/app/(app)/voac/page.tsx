@@ -64,6 +64,10 @@ export default async function VoacPage() {
               {L("خريطة التنسيق الكاملة", "Full orchestration map")}
               <span className="vo-map-cta-arrow" aria-hidden>{ar ? "←" : "→"}</span>
             </Link>
+            <Link href="/voac/flow" className="vo-map-cta vo-map-cta-alt">
+              {L("مسار التشغيل", "The workflow")}
+              <span className="vo-map-cta-arrow" aria-hidden>{ar ? "←" : "→"}</span>
+            </Link>
             <Link href="/voac/how" className="vo-ghost-btn">
               {L("كيف يعمل النظام", "How it works")}
             </Link>

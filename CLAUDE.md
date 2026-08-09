@@ -277,7 +277,7 @@ Tailwind with H-Nerve brand classes in `app/globals.css` (`.btn`, `.btn-primary`
   dismisses on ESC + backdrop click. A new overlay must follow the same rules —
   serial click-eating modals read as a frozen app.
 - **Companies + Hotels are the canonical CRUD pattern** — list, create, edit, delete via server actions, with `Topbar` + KPI cards on the index page. Mirror them when adding new resources.
-- **`Topbar` (`components/Topbar.tsx`) is the shared page header** — every authenticated page should render one with title (Arabic), optional subtitle, and an actions slot. Don't ship a page without it.
+- **`Topbar` (`components/layout/Topbar.tsx`) is the shared page header** — every authenticated page should render one with title (Arabic), optional subtitle, and an actions slot. Don't ship a page without it.
 - **`lib/utils/utils.ts` provides `cn()`, `formatMoney()`, `formatDate()`, `formatNumber()`, `generateNumber()`, `arabicMonth()`** — use these rather than reimplementing.
 - **All UI text defaults to Arabic.** English appears as a secondary label only when the data is genuinely English (emails, codes, ISO).
 - **String columns + TS unions over DB enums** for any role/status/sector/tier — keeps the schema portable to the sqlite dev provider and migrations simple.

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  flowSpecFor, isGraphed, llmNodeCount, nodeCount, stageLabels,
+  flowSpecFor, isGraphed, llmNodeCount, minLlmNodeCount, nodeCount, stageLabels,
   GATHERABLE_TOOLS, GRAPHED_TOPOLOGIES,
 } from "./flowGraph";
 import { VOAC_ROLES } from "./roles";
@@ -68,11 +68,56 @@ describe("flowSpecFor", () => {
 
   it("grades with a free, model-free node — no self-scoring model", () => {
     const spec = flowSpecFor("evaluate", ALL_TOOLS)!;
-    const grade = spec.stages.find((s) => s.id === "grade")!;
-    expect(grade.nodes[0].kind).toBe("grade");
-    // The grade node must NOT be counted as an LLM call.
-    expect(llmNodeCount(spec)).toBe(3);
-    expect(nodeCount(spec)).toBe(llmNodeCount(spec) + 4 + 1);
+    const grades = spec.stages.flatMap((s) => s.nodes).filter((n) => n.kind === "grade");
+    expect(grades).toHaveLength(2); // grade, then re-grade after a revision
+    // Grade nodes must NOT be counted as LLM calls — they are pure.
+    expect(llmNodeCount(spec)).toBe(4); // plan, draft, revise, narrate
+    expect(nodeCount(spec)).toBe(4 + 4 + 2); // + gather tools + grades
+  });
+
+  it("actually revises — the shape topology.ts has always advertised", () => {
+    // topology.ts describes evaluate as "generate → grade → revise until it
+    // passes" with maxHops 6. The first cut of this file graded and moved on,
+    // which is the same labels-over-a-loop defect the module exists to remove.
+    const ids = flowSpecFor("evaluate", ALL_TOOLS)!.stages.map((s) => s.id);
+    expect(ids).toEqual(["plan", "gather", "draft", "grade", "revise", "regrade", "narrate"]);
+  });
+
+  it("bounds the critic cycle — revise is guarded and appears exactly once", () => {
+    // An unbounded critic loop is an unbounded bill. A second revision that
+    // still cannot ground its figures is short of FACTS, not of attempts.
+    const spec = flowSpecFor("evaluate", ALL_TOOLS)!;
+    const revises = spec.stages.filter((s) => s.id === "revise");
+    expect(revises).toHaveLength(1);
+    expect(revises[0].runIf).toBe("revisionNeeded");
+    expect(spec.stages.find((s) => s.id === "regrade")!.runIf).toBe("revisionNeeded");
+  });
+
+  it("gives the revise/regrade iteration its OWN stage ids", () => {
+    // Re-using "draft"/"grade" for the second pass would merge the two attempts
+    // into one lane on the run page and flip its "ran at once" badge — drawing
+    // two sequential attempts as a parallel fan-out.
+    const ids = flowSpecFor("evaluate", ALL_TOOLS)!.stages.map((s) => s.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("puts the quiet edge only where there is a call to save", () => {
+    // route's only post-gather LLM node IS the narrate, so there is nothing to
+    // skip and no earlier reasoning that could have decided to skip it.
+    expect(flowSpecFor("route", ALL_TOOLS)!.stages.find((s) => s.id === "narrate")!.runIf).toBeUndefined();
+    for (const t of ["chain", "evaluate"]) {
+      expect(flowSpecFor(t, ALL_TOOLS)!.stages.find((s) => s.id === "narrate")!.runIf, t)
+        .toBe("hasSomethingToSay");
+    }
+  });
+
+  it("declares the WORST case, because the budget refuses on it", () => {
+    // driver.live.ts refuses when `used + planned > cap`. A `planned` that
+    // assumed every guard skips would let a run start inside its budget and
+    // finish outside it.
+    const spec = flowSpecFor("evaluate", ALL_TOOLS)!;
+    expect(llmNodeCount(spec)).toBeGreaterThan(minLlmNodeCount(spec));
+    expect(minLlmNodeCount(spec)).toBe(2); // plan + draft; revise and narrate both guarded
   });
 
   it("always ends by writing something a human reads", () => {

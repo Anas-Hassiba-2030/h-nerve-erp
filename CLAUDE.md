@@ -183,7 +183,40 @@ declares `stages` (a stage is a parallel group; stages run in order),
   static graph over a runtime-discovered plan is a lie about the plan.
 - **`llmNodeCount(spec)` is passed as the run's `hops`**, so `topology.ts`'s
   `maxHops` ceiling gates the real cost, and the budget refuses up front when
-  `used + planned > cap`. The ceiling counts MODEL passes, not stages.
+  `used + planned > cap`. The ceiling counts MODEL passes, not stages, and it
+  is the **worst case including guarded stages** — a `planned` that assumed
+  guards skip would let a run start inside budget and finish outside it.
+- **Conditional edges are `stage.runIf`, a NAMED guard** (`StageGuard`), never a
+  closure: a spec stays plain data a test can read and the UI can draw. The
+  executor owns what a name means. **Routing is decided by our code reading
+  state, never by the model choosing an edge** — the same inversion as binding
+  the tool inputs, applied to control flow.
+  - `revisionNeeded` — `evaluate` is a real bounded critic loop
+    (`draft → grade → revise → regrade → narrate`), capped at ONE revision.
+    The revise prompt carries the specific ungrounded figures from
+    `verifyNarrative`; "your draft scored badly" makes a model rewrite blind
+    and reproduce the same numbers. A draft with **zero** numeric claims is
+    unquantified, not ungrounded — no revision.
+  - `hasSomethingToSay` — the **quiet edge**: the narrate call is skipped when
+    the reasoning replies `QUIET_TOKEN` **and** `factsCarrySignal()` agrees.
+    **The model gets a vote, never the decision** — measured twice against the
+    local 3B on an open HIGH insight + 4 batches near expiry, it emitted the
+    quiet token once; a silenced finding leaves no trace of itself. A veto is
+    recorded (`quietVetoed`) as a step error. `factsCarrySignal` **fails toward
+    speaking**: an unknown tool, or a known tool whose payload does not match
+    the shape it asserts, counts as signal — a `?? []` fallback would make a
+    renamed `insights` field silence every run. Token match is whole-output
+    only (`proposals.ts` discipline) but case/wrapping-insensitive, because a
+    strict `===` never fired: the 3B writes `Nothing-MATERIAL`. Never read off
+    a stub. A quiet run is SUCCEEDED with a canned narrative + a `verify` step,
+    NOT `emptyAnswer`; `quiet` is derived from `skipped.includes("narrate")`,
+    never from the model's vote. Not on `route`: its only post-gather LLM node
+    *is* the narrate.
+- **A skipped stage records nothing** — `traceLanes` draws what ran, so an
+  absent lane is the honest picture. `RunFlowResult.skipped` reports the ids.
+- **An iteration needs its OWN stage id** (`revise`/`regrade`, not a second
+  `draft`/`grade`): re-using an id merges the attempts into one lane and flips
+  its "ran at once" badge, drawing two sequential passes as a parallel fan-out.
 - **Persistence inside a graph must be serialised** even though the work is
   parallel: `appendStep` derives `seq` from a live `count()`, so concurrent
   writes collide (observed `0,1,2,2,4`). `flowGraph.live.ts` chains its writes.

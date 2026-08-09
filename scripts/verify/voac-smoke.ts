@@ -61,7 +61,15 @@ async function main() {
 
   const steps1 = await prisma.agentStep.findMany({ where: { runId: r1.runId }, orderBy: { seq: "asc" } });
   check("steps were appended", steps1.length > 0, `${steps1.length} step(s)`);
-  check("first step is the plan", steps1[0]?.kind === "plan", String(steps1[0]?.kind));
+  // A graphed run's first step is its first STAGE. It used to be a bookkeeping
+  // "plan" step that the driver wrote before branching — removed, because it
+  // carried no stage prefix and so drew a phantom lane on the run page. Loop
+  // and council runs still open with it.
+  check(
+    "the first step is the first thing that ran",
+    steps1[0]?.kind === "reason" || steps1[0]?.kind === "plan",
+    String(steps1[0]?.kind),
+  );
   check(
     "step seq is contiguous from 0",
     steps1.every((s, i) => s.seq === i),
@@ -84,6 +92,18 @@ async function main() {
   check("refused run is still a ROW", Boolean(badRun));
   check("refused run has status REFUSED", badRun?.status === "REFUSED", String(badRun?.status));
   check("refused run records why", Boolean(badRun?.error), badRun?.error ?? "");
+
+  // A refusal's entire point is to prove nothing was spent. closeRun falls back
+  // to the STEP COUNT when llmCalls is omitted, so the refusal step itself was
+  // being stamped as one LLM call on exactly that path.
+  const refusedRuns = await prisma.agentRun.findMany({
+    where: { tenantId, status: { in: ["REFUSED", "BUDGET_EXHAUSTED"] } },
+  });
+  check(
+    "a refused run records zero LLM calls",
+    refusedRuns.every((r) => r.llmCalls === 0),
+    refusedRuns.map((r) => `${r.status}:${r.llmCalls}`).join(" "),
+  );
 
   const overHops = await runVoac({
     tenantId, companyId: dairy.id, roleId: "dairy-yield-controller",
@@ -129,7 +149,61 @@ async function main() {
   });
   check("driver never mutated a domain table", (await prisma.dairyBatch.count()) === batchesBefore);
 
-  // --- 5. Ledger totals --------------------------------------------------
+  // --- 5. The graph path actually executed as a graph --------------------
+  // route/chain/evaluate no longer fall into the generic tool loop. Proving
+  // that needs the LEDGER, not the types: a graph that quietly degraded back to
+  // one loop call would still typecheck, still succeed, and still look fine.
+  const { flowSpecFor, llmNodeCount } = await import("../../src/lib/voac/flowGraph");
+  const { traceLanes } = await import("../../src/lib/voac/present");
+  const { getRole } = await import("../../src/lib/voac/roles");
+
+  const graphRole = getRole("dairy-yield-controller")!;
+  const spec = flowSpecFor(graphRole.defaultTopology, graphRole.tools);
+  check("route topology has a flow spec", Boolean(spec), graphRole.defaultTopology);
+
+  const gsteps = await prisma.agentStep.findMany({
+    where: { runId: r1.runId }, orderBy: { seq: "asc" },
+  });
+  const staged = gsteps.filter((s) => /^\d+·[a-z]+ — /.test(s.input));
+  check("graph nodes stamped their stage", staged.length > 0, `${staged.length}/${gsteps.length} staged`);
+
+  const lanes = traceLanes(gsteps.map((s) => ({
+    id: s.id, seq: s.seq, kind: s.kind, roleId: s.roleId,
+    input: s.input, output: s.output, error: s.error, latencyMs: s.latencyMs,
+  })));
+  check(
+    "the trace redraws as the graph's stages",
+    lanes.some((l) => l.id === "gather") && lanes.some((l) => l.id === "narrate"),
+    lanes.map((l) => l.id).join(" → "),
+  );
+  // /voac/map and /voac/<runId> exist to prove each other. A bookkeeping step
+  // with no stage prefix used to add a phantom lane, so the trace drew one more
+  // lane than the map drew stages — and on chain/evaluate two of them said
+  // "Plan".
+  check(
+    "the trace draws exactly as many lanes as the map draws stages",
+    lanes.length === spec!.stages.length,
+    `${lanes.length} lanes vs ${spec!.stages.length} stages`,
+  );
+  const gather = lanes.find((l) => l.id === "gather");
+  check(
+    "the gather stage really fanned out",
+    Boolean(gather && gather.steps.length > 1),
+    `${gather?.steps.length ?? 0} tool node(s) in one lane`,
+  );
+  check(
+    "a reasoning step is recorded as `reason`, not mislabelled `plan`",
+    gsteps.some((s) => s.kind === "reason"),
+    gsteps.map((s) => s.kind).join(","),
+  );
+  // Stub mode makes no real calls, so only assert the count on the live path.
+  check(
+    "llmCalls matches what the graph declared",
+    r1.stub || run1?.llmCalls === llmNodeCount(spec!),
+    `${run1?.llmCalls} vs planned ${spec ? llmNodeCount(spec) : "?"}`,
+  );
+
+  // --- 6. Ledger totals --------------------------------------------------
   const runs = await prisma.agentRun.count({ where: { tenantId } });
   const props = await prisma.agentProposal.count({ where: { tenantId } });
   const roster = await prisma.voacRoster.findFirst({ where: { tenantId, companyId: dairy.id } });

@@ -171,11 +171,22 @@ describe("runtimeChildren", () => {
     expect(kids.some((k) => k.id === "pullFacts")).toBe(false);
   });
 
-  it("expands every other topology into the tools it may call", () => {
-    for (const topology of ["route", "chain", "single"]) {
+  it("expands a LOOP topology into the tools it may call", () => {
+    for (const topology of ["orchestrate", "autonomous"]) {
       const kids = runtimeChildren({ topology, tools: ["pullFacts", "narrate"] });
       expect(kids.map((k) => k.id)).toEqual(["pullFacts", "narrate"]);
       expect(kids.every((k) => k.kind === "tool")).toBe(true);
+    }
+  });
+
+  it("says nothing for a graphed topology — the flow spec is its shape", () => {
+    // This test used to assert route/chain returned the raw tool list, which
+    // the card rendered as "calls N tools in the tool loop". Once those
+    // topologies stopped running the loop that became two contradictory
+    // pictures on one card — and the list included `simulate`, which the graph
+    // never binds. The stale assertion is what would have hidden it.
+    for (const topology of ["route", "chain", "evaluate"]) {
+      expect(runtimeChildren({ topology, tools: ["pullFacts", "simulate", "narrate"] }), topology).toEqual([]);
     }
   });
 });

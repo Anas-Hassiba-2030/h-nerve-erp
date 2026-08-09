@@ -49,6 +49,10 @@ export function proposalStatusLabel(status: string): Labelled {
 const STEP_KIND: Record<string, { ar: string; en: string }> = {
   plan: { ar: "تخطيط", en: "Plan" },
   tool: { ar: "أداة", en: "Tool" },
+  // A graph's substantive thinking pass. Distinct from "plan" on purpose: a
+  // trace that labels the reasoning as planning reads as a run that planned
+  // twice and never thought.
+  reason: { ar: "استنتاج", en: "Reason" },
   debate: { ar: "مداولة", en: "Debate" },
   verify: { ar: "تحقّق", en: "Verify" },
   narrate: { ar: "صياغة", en: "Narrate" },
@@ -56,6 +60,175 @@ const STEP_KIND: Record<string, { ar: string; en: string }> = {
 
 export function stepKindLabel(kind: string): { ar: string; en: string } {
   return STEP_KIND[kind] ?? { ar: kind, en: kind };
+}
+
+/**
+ * Why this agent runs the shape it runs, in plain language.
+ *
+ * chooseTopology() already returns a `reason` and its own comment says a
+ * manager should be able to disagree with the choice — but nothing rendered it,
+ * so the shape arrived as an unexplained keyword. Lives here rather than in one
+ * page so the map and the run card cannot give different explanations of the
+ * same word.
+ */
+export function topologyWhy(topology: string, locale: "ar" | "en"): string {
+  const ar = locale === "ar";
+  switch (topology) {
+    case "parallel":
+      return ar
+        ? "عمل عابر للشركات = أهداف متنافسة. المواقف تُطرح بالتوازي ثم تُرجَّح، بدل أن يقرّر صوت واحد بهدوء عن الطرفين."
+        : "Cross-company work means competing objectives. Positions are argued in parallel and reconciled, rather than one voice quietly deciding for both.";
+    case "chain":
+      return ar
+        ? "الاستنتاج يعتمد على ما قبله، فيمشي بالتسلسل — لكن سحب الوقائع لا يعتمد على شيء، فيجري كله دفعة واحدة."
+        : "The reasoning depends on what came before it, so it runs in sequence — but the fact-gathering depends on nothing, so all of it fires at once.";
+    case "route":
+      return ar
+        ? "سؤال واحد واضح: يُصنَّف أولاً، ثم تُجلب وقائعه معاً، ثم يُكتب الجواب. أرخص نمط قابل للتحكّم."
+        : "One clear question: classify it, gather its facts together, write the answer. The cheapest controllable shape.";
+    case "evaluate":
+      return ar
+        ? "المخرج قابل للتدقيق: تُكتب مسودة، ثم تُطابَق أرقامها بالوقائع المسحوبة — بلا نموذج ثانٍ — قبل صياغة الجواب."
+        : "The output can be checked: a draft is written, then its figures are matched against the facts that were pulled — with no second model — before the answer is written.";
+    case "orchestrate":
+      return ar
+        ? "المهام لا تُعرف إلا أثناء التشغيل، فلا يمكن رسم شكل مسبق — منسّق يقرّر، وعمّال ينفّذون."
+        : "The subtasks are only knowable at runtime, so no shape can be drawn in advance — a planner decides them and workers execute.";
+    case "autonomous":
+      return ar
+        ? "لا نقطة توقّف محدّدة مسبقاً، ولهذا يتطلّب موافقة بشرية صريحة قبل أن يعمل."
+        : "No predetermined stopping point, which is why it may not run without explicit human opt-in.";
+    default:
+      return "";
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Redrawing a finished run as the graph it actually executed
+// ─────────────────────────────────────────────────────────────────────
+
+/** The subset of an AgentStep row this needs. Keeps the core free of Prisma. */
+export type TraceStep = {
+  id: string;
+  seq: number;
+  kind: string;
+  roleId: string;
+  input: string;
+  output: string | null;
+  error: string | null;
+  latencyMs: number | null;
+  score?: number | null;
+  scoredBy?: string | null;
+};
+
+export type TraceLane = {
+  /** Stage id when the run was graphed; a synthetic id otherwise. */
+  id: string;
+  ar: string;
+  en: string;
+  steps: TraceStep[];
+  /** True when more than one node ran at the same time in this lane. */
+  parallel: boolean;
+  /** Wall-clock of the slowest node — a parallel lane costs its slowest node. */
+  latencyMs: number;
+  failed: boolean;
+};
+
+/** The prefix flowGraph's executor stamps on every step: `2·gather — …`. */
+const STAGE_PREFIX = /^(\d+)·([A-Za-z][\w-]*) — ([\s\S]*)$/;
+
+const LANE_LABELS: Record<string, { ar: string; en: string }> = {
+  classify: { ar: "تصنيف", en: "Classify" },
+  plan: { ar: "خطة", en: "Plan" },
+  gather: { ar: "جمع متوازٍ", en: "Gather in parallel" },
+  reason: { ar: "استنتاج", en: "Reason" },
+  draft: { ar: "مسودة", en: "Draft" },
+  grade: { ar: "تدقيق الأرقام", en: "Check the numbers" },
+  narrate: { ar: "صياغة", en: "Write the answer" },
+  debate: { ar: "أصوات متوازية", en: "Voices in parallel" },
+};
+
+function laneLabel(id: string, fallbackKind: string): { ar: string; en: string } {
+  return LANE_LABELS[id] ?? stepKindLabel(fallbackKind);
+}
+
+/**
+ * Rebuild the lanes a run executed, from its recorded steps alone.
+ *
+ * WHY FROM THE STEPS AND NOT FROM THE SPEC. The spec says what was *meant* to
+ * run. The steps say what *did*. Drawing the spec would produce a chart that
+ * stays pretty while a node fails, which is precisely the picture you must not
+ * show an operator. If a lane is missing here, it is missing because it never
+ * ran.
+ *
+ * Two shapes arrive:
+ *   • Graphed runs carry a `N·stageId — ` prefix, so lanes are exact.
+ *   • Council and loop runs carry none. Consecutive `debate` steps genuinely
+ *     ran at once (council.live fans out its voices), so they collapse into one
+ *     parallel lane; everything else stands alone. That is a reconstruction,
+ *     not a claim about a spec that never existed.
+ */
+export function traceLanes(steps: TraceStep[]): TraceLane[] {
+  const lanes: TraceLane[] = [];
+  const byStage = new Map<string, TraceLane>();
+
+  const push = (lane: TraceLane) => { lanes.push(lane); return lane; };
+  const stamp = (lane: TraceLane, s: TraceStep) => {
+    lane.steps.push(s);
+    lane.parallel = lane.steps.length > 1;
+    // A parallel lane's cost is its SLOWEST node, not the sum — summing would
+    // report a fan-out as slower than the serial version it replaced.
+    lane.latencyMs = Math.max(lane.latencyMs, s.latencyMs ?? 0);
+    if (s.error) lane.failed = true;
+  };
+
+  for (const s of [...steps].sort((a, b) => a.seq - b.seq)) {
+    const m = STAGE_PREFIX.exec(s.input);
+    if (m) {
+      const key = `${m[1]}·${m[2]}`;
+      const clean = { ...s, input: m[3] };
+      const existing = byStage.get(key);
+      if (existing) { stamp(existing, clean); continue; }
+      const lane = push({
+        id: m[2], ...laneLabel(m[2], s.kind), steps: [], parallel: false, latencyMs: 0, failed: false,
+      });
+      byStage.set(key, lane);
+      stamp(lane, clean);
+      continue;
+    }
+
+    const last = lanes[lanes.length - 1];
+    if (s.kind === "debate" && last && last.id === "debate") { stamp(last, s); continue; }
+    stamp(push({
+      id: s.kind === "debate" ? "debate" : `s${s.seq}`,
+      ...laneLabel(s.kind === "debate" ? "debate" : "", s.kind),
+      steps: [], parallel: false, latencyMs: 0, failed: false,
+    }), s);
+  }
+
+  return lanes;
+}
+
+/**
+ * The one line that makes the drawing worth showing: how much wall-clock the
+ * parallel lanes saved versus running every node one after another.
+ *
+ * Returns null in two cases, both deliberate:
+ *   • nothing ran in parallel — claiming any saving would be a lie;
+ *   • the parallel nodes recorded no measurable latency, so there is nothing
+ *     to compare. Council voices are the live example: council.live.ts records
+ *     its per-voice steps without a latencyMs, so the arithmetic comes out at
+ *     exactly zero — and printing "0 ms saved" beside a genuine five-way
+ *     fan-out reads as "the parallelism did nothing", which is worse than
+ *     saying nothing at all.
+ */
+export function parallelSaving(lanes: TraceLane[]): { serialMs: number; actualMs: number; savedMs: number } | null {
+  if (!lanes.some((l) => l.parallel)) return null;
+  const serialMs = lanes.reduce((n, l) => n + l.steps.reduce((m, s) => m + (s.latencyMs ?? 0), 0), 0);
+  const actualMs = lanes.reduce((n, l) => n + l.latencyMs, 0);
+  const savedMs = serialMs - actualMs;
+  if (savedMs <= 0) return null;
+  return { serialMs, actualMs, savedMs };
 }
 
 /**

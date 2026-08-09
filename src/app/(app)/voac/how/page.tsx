@@ -200,6 +200,48 @@ export default async function VoacHowPage() {
         </div>
       </DaylightPanel>
 
+      {/* ── Loop vs graph ─────────────────────────────────────────────
+          The single most-asked question about this layer, answered where it
+          is asked rather than in a doc nobody opens. */}
+      <DaylightPanel
+        title={L("لماذا شكل محدَّد مسبقاً، لا حلقة", "Why a predetermined shape, not a loop")}
+        aside={
+          <span className="vo-note">
+            {L("الشكل يُقرَّر قبل أول رمز.", "The shape is decided before the first token.")}
+          </span>
+        }
+      >
+        <div className="ex-grid">
+          <div className="ex-card">
+            <h4>{L("الحلقة", "The loop")}</h4>
+            <p>
+              {L(
+                "النموذج يقرّر الخطوة التالية في كل دورة. مرن — لكنه يتوقّف عن التقدّم إن لم يطلب أداة، وهذا بالضبط ما تفعله النماذج الصغيرة المحلية: تجيب نثراً بلا استدعاء، فتتحوّل الحلقة إلى ردّ واحد بلا أساس.",
+                "The model decides the next step each round. Flexible — but it only advances if it asks for a tool, and that is exactly what small local models fail to do: they answer in prose without calling anything, so the loop collapses into one ungrounded reply.",
+              )}
+            </p>
+          </div>
+          <div className="ex-card">
+            <h4>{L("الرسم", "The graph")}</h4>
+            <p>
+              {L(
+                "الكود يختار الأدوات قبل بدء التشغيل، ويشغّل المستقلّ منها دفعة واحدة، ثم يعطي النموذج النتائج ليستنتج فقط. الكلفة معروفة قبل الإنفاق، والنموذج الضعيف يظلّ مؤسَّساً على وقائع.",
+                "Our code picks the tools before the run starts, fires the independent ones at once, and hands the model results to reason over. The cost is known before it is spent, and even a weak model stays grounded in facts.",
+              )}
+            </p>
+          </div>
+          <div className="ex-card">
+            <h4>{L("ما بقي حلقةً عمداً", "What stays a loop, deliberately")}</h4>
+            <p>
+              {L(
+                "الأنماط التي لا تُعرف مهامّها إلا أثناء التشغيل (منسّق، ذاتي التشغيل) تبقى على الحلقة: رسمُ شكلٍ ثابتٍ لخطّة تُكتشف لاحقاً كذبٌ على الخطة. والمجلس يبقى مجلساً — فهو أصلاً رسم: تفرّع ثم ترجيح.",
+                "Shapes whose subtasks are only knowable at runtime (orchestrate, autonomous) keep the loop: drawing a fixed shape over a plan discovered later is a lie about the plan. And the council stays the council — it already is a graph: fan out, then reconcile.",
+              )}
+            </p>
+          </div>
+        </div>
+      </DaylightPanel>
+
       {/* ── The roster, in one table ──────────────────────────────── */}
       <DaylightPanel
         title={L("من يعمل عندك", "Who works for you")}

@@ -11,7 +11,9 @@ import { prismaUnscoped as prisma } from "@/lib/db/db";
 import { getLocale } from "@/lib/i18n/i18n.server";
 import { DaylightShell, DaylightHeader, DaylightPanel } from "@/components/orrery/daylight";
 import { formatShortDate } from "@/lib/utils/utils";
-import { runStatusLabel, stepKindLabel, scoreLabel, valueLabel } from "@/lib/voac/present";
+import {
+  runStatusLabel, stepKindLabel, scoreLabel, valueLabel, traceLanes, parallelSaving, topologyWhy,
+} from "@/lib/voac/present";
 import { skillVersionFor, getRole } from "@/lib/voac/roles";
 import "../../daylight.css";
 import "../voac.css";
@@ -36,6 +38,11 @@ export default async function VoacRunPage({ params }: { params: Promise<{ runId:
 
   const st = runStatusLabel(run.status);
   const role = getRole(run.roleId);
+  // Drawn from the STEPS, never from the spec: a chart built from the intended
+  // shape stays pretty while a node fails, which is the one picture an operator
+  // must never be shown.
+  const lanes = traceLanes(run.steps);
+  const saving = parallelSaving(lanes);
   const currentVersion = skillVersionFor(run.roleId);
   const drifted = currentVersion !== "unknown" && currentVersion !== run.skillVersion;
 
@@ -65,7 +72,13 @@ export default async function VoacRunPage({ params }: { params: Promise<{ runId:
             </tr>
             <tr>
               <th>{L("النمط", "Topology")}</th>
-              <td className="vo-mono">{run.topology}</td>
+              <td>
+                <span className="vo-mono">{run.topology}</span>
+                {/* The shape used to arrive as an unexplained keyword. The
+                    selector's own comment says a manager should be able to
+                    disagree with it — which needs the reason on the page. */}
+                <div className="vo-why">{topologyWhy(run.topology, ar ? "ar" : "en")}</div>
+              </td>
             </tr>
             <tr>
               <th>{L("إصدار وثيقة المهارة", "Skill document version")}</th>
@@ -116,7 +129,7 @@ export default async function VoacRunPage({ params }: { params: Promise<{ runId:
           </span>
         }
       >
-        {run.steps.length === 0 ? (
+        {lanes.length === 0 ? (
           <p className="vo-empty">
             {L(
               "لا خطوات — رُفض التشغيل قبل إنفاق أي رمز.",
@@ -124,33 +137,70 @@ export default async function VoacRunPage({ params }: { params: Promise<{ runId:
             )}
           </p>
         ) : (
-          <ol className="vo-trace">
-            {run.steps.map((s) => {
-              const k = stepKindLabel(s.kind);
-              const sc = scoreLabel(s.score, s.scoredBy);
-              return (
-                <li key={s.id} className={`vo-step vo-step-${s.kind}`}>
-                  <div className="vo-step-head">
-                    <span className="vo-seq">{s.seq}</span>
-                    <span className="vo-kind">{ar ? k.ar : k.en}</span>
-                    <span className="vo-mono vo-dim">{s.roleId}</span>
-                    <span className={`vo-tag vo-${sc.tone}`}>{ar ? sc.text.ar : sc.text.en}</span>
+          <>
+            {saving ? (
+              <p className="vg-saving">
+                {L(
+                  `العُقد المتوازية وفّرت ${saving.savedMs} م.ث — ${saving.actualMs} م.ث بدل ${saving.serialMs} لو نُفِّذت واحدة تلو الأخرى.`,
+                  `Running those nodes at once took ${saving.actualMs} ms instead of ${saving.serialMs} ms — ${saving.savedMs} ms saved.`,
+                )}
+              </p>
+            ) : null}
+
+            <ol className="vg-graph">
+              {lanes.map((lane, i) => (
+                <li key={`${lane.id}-${i}`} className={`vg-lane${lane.parallel ? " vg-lane-par" : ""}`}>
+                  <div className="vg-lane-head">
+                    <span className="vg-lane-no">{i + 1}</span>
+                    <span className="vg-lane-name">{ar ? lane.ar : lane.en}</span>
+                    {lane.parallel ? (
+                      <span className="vg-badge">
+                        {L(`${lane.steps.length} معاً`, `${lane.steps.length} at once`)}
+                      </span>
+                    ) : null}
+                    <span className="vg-lane-ms">{lane.latencyMs} ms</span>
                   </div>
-                  <div className="vo-step-io">
-                    <div className="vo-io-label">{L("المُدخل", "in")}</div>
-                    <pre className="vo-pre">{s.input}</pre>
+
+                  <div className="vg-nodes">
+                    {lane.steps.map((s) => {
+                      const k = stepKindLabel(s.kind);
+                      const sc = scoreLabel(s.score, s.scoredBy);
+                      const title = s.input.split("(")[0].trim() || (ar ? k.ar : k.en);
+                      return (
+                        <details
+                          key={s.id}
+                          className={`vg-node vg-node-${s.kind}${s.error ? " vg-node-bad" : ""}`}
+                        >
+                          <summary className="vg-node-head">
+                            <span className="vg-node-kind">{ar ? k.ar : k.en}</span>
+                            <span className="vg-node-title">{title.slice(0, 46)}</span>
+                            {s.latencyMs ? <span className="vg-node-ms">{s.latencyMs} ms</span> : null}
+                          </summary>
+                          <div className="vg-node-body">
+                            {s.roleId !== run.roleId ? (
+                              <div className="vo-mono vo-dim">{s.roleId}</div>
+                            ) : null}
+                            {sc.trustworthy || s.score !== null ? (
+                              <span className={`vo-tag vo-${sc.tone}`}>{ar ? sc.text.ar : sc.text.en}</span>
+                            ) : null}
+                            <div className="vo-io-label">{L("المُدخل", "in")}</div>
+                            <pre className="vo-pre">{s.input}</pre>
+                            {s.output ? (
+                              <>
+                                <div className="vo-io-label">{L("المُخرج", "out")}</div>
+                                <pre className="vo-pre">{s.output}</pre>
+                              </>
+                            ) : null}
+                            {s.error ? <div className="vo-err">{s.error}</div> : null}
+                          </div>
+                        </details>
+                      );
+                    })}
                   </div>
-                  {s.output ? (
-                    <div className="vo-step-io">
-                      <div className="vo-io-label">{L("المُخرج", "out")}</div>
-                      <pre className="vo-pre">{s.output}</pre>
-                    </div>
-                  ) : null}
-                  {s.error ? <div className="vo-err">{s.error}</div> : null}
                 </li>
-              );
-            })}
-          </ol>
+              ))}
+            </ol>
+          </>
         )}
       </DaylightPanel>
 

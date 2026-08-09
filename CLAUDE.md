@@ -160,7 +160,36 @@ the production Worker cannot reach a laptop's localhost, and `wrangler.jsonc`
 sets `global_fetch_strictly_public` which blocks private addresses outright;
 prod-on-local would need a public tunnel.** Small local models often answer in
 prose without emitting `tool_use`, which degrades the orchestrator loop to a
-plain answer — that is a model-capability limit, not a seam defect.
+plain answer — that is a model-capability limit, not a seam defect. **The VOAC
+graph path (below) is the answer to it:** a graph fetches its facts whether or
+not the model asks, so a weak model stays grounded. Compare the two engines on
+one question with `scripts/verify/loop-vs-graph.ts`.
+
+#### Graph orchestration (`lib/voac/flowGraph.ts` + `.live.ts`)
+
+VOAC once executed only TWO paths: `parallel` → the council, and every other
+topology → the same generic `runToolLoop`. So `chain`/`route`/`evaluate` were
+labels over one loop. They now run a **predetermined graph**: `flowGraph.ts`
+declares `stages` (a stage is a parallel group; stages run in order),
+`flowGraph.live.ts` runs `for (stage) await Promise.all(nodes)`.
+
+- **Our code binds the tool inputs**, before the run starts — the model never
+  picks a tool. That inversion is the point.
+- **A tool is only graphable if its input derives from the objective alone.**
+  `simulate` needs a specific causal nodeId + delta, so it is excluded
+  (`GATHERABLE_TOOLS`); guessing a node id yields a confident answer about the
+  wrong entity. `councilDebate` is excluded because it *is* the parallel shape.
+- **`parallel` stays the council; `orchestrate`/`autonomous` stay the loop.** A
+  static graph over a runtime-discovered plan is a lie about the plan.
+- **`llmNodeCount(spec)` is passed as the run's `hops`**, so `topology.ts`'s
+  `maxHops` ceiling gates the real cost, and the budget refuses up front when
+  `used + planned > cap`. The ceiling counts MODEL passes, not stages.
+- **Persistence inside a graph must be serialised** even though the work is
+  parallel: `appendStep` derives `seq` from a live `count()`, so concurrent
+  writes collide (observed `0,1,2,2,4`). `flowGraph.live.ts` chains its writes.
+- `present.ts` `traceLanes()` redraws a finished run from its **recorded steps**
+  (never from the spec — a chart drawn from intent stays pretty while a node
+  fails). Verify the whole path with `scripts/verify/voac-smoke.ts`.
 
 **Note:** retrieval is fully semantic only when an embedding key is set; otherwise it uses the local fallback (works, but rougher). The causal graph must be populated (`scripts/seed/seed-brain-local.ts`) for Graph RAG to have nodes.
 

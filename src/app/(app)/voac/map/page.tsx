@@ -11,6 +11,8 @@ import {
   rosterTemplate,
   type AgentNode,
 } from "@/lib/voac/orgMap";
+import { flowSpecFor } from "@/lib/voac/flowGraph";
+import { topologyWhy } from "@/lib/voac/present";
 import { skillVersionFor } from "@/lib/voac/roles";
 import { formatShortDate } from "@/lib/utils/utils";
 import "../../daylight.css";
@@ -19,28 +21,52 @@ import "./map.css";
 
 export const dynamic = "force-dynamic";
 
-/** Plain-language gloss of each topology — why this agent runs the way it does. */
-function topologyWhy(topology: string, ar: boolean): string {
-  switch (topology) {
-    case "parallel":
-      return ar
-        ? "عمل عابر للشركات = أهداف متنافسة. المواقف تُطرح بالتوازي ثم تُرجَّح، بدل أن يقرّر صوت واحد بهدوء عن الطرفين."
-        : "Cross-company work means competing objectives. Positions are argued in parallel and reconciled, rather than one voice quietly deciding for both.";
-    case "chain":
-      return ar
-        ? "كل خطوة تعتمد على التي قبلها، فتُنفَّذ بالتسلسل — التوازي هنا يعني الاستنتاج قبل وصول الوقائع."
-        : "Each step depends on the one before it, so they run in sequence — parallelising here would mean reasoning before the facts land.";
-    case "route":
-      return ar
-        ? "سؤال واحد واضح: يُصنَّف، ثم يُوجَّه إلى الأداة المناسبة له وحدها. أرخص نمط، ويكفي لأغلب الأسئلة."
-        : "One clear question: classify it, then send it to the single tool that answers it. The cheapest pattern, and enough for most questions.";
-    default:
-      return "";
-  }
-}
+/**
+ * The run shape, drawn.
+ *
+ * When the topology is graphed, this renders the ACTUAL spec the executor runs
+ * — including the fan: the gather stage shows its tool nodes stacked, because
+ * they genuinely fire at the same moment. Naming a topology told an owner
+ * nothing; drawing the fan is the difference between "route" and "it pulls four
+ * things at once, then writes".
+ *
+ * Loop and council topologies have no static spec, so they keep the honest
+ * label strip — inventing boxes for a shape decided at runtime would be a
+ * diagram of something that does not exist.
+ */
+function Pipeline({ topology, tools, ar }: { topology: string; tools?: string[]; ar: boolean }) {
+  const spec = tools ? flowSpecFor(topology, tools) : null;
 
-/** The run pipeline, rendered as an ordered strip of steps. */
-function Pipeline({ topology, ar }: { topology: string; ar: boolean }) {
+  if (spec) {
+    return (
+      <div className="om-flow" aria-label={ar ? "شكل التشغيل" : "Run shape"}>
+        {spec.stages.map((stage, i) => (
+          <span key={stage.id} className="contents">
+            <span className={`om-flow-stage${stage.nodes.length > 1 ? " om-flow-fan" : ""}`}>
+              <span className="om-flow-name">{ar ? stage.labelAr : stage.labelEn}</span>
+              {stage.nodes.length > 0 ? (
+                <span className="om-flow-nodes">
+                  {stage.nodes.map((n, j) => (
+                    <span
+                      key={n.id}
+                      className={`om-flow-node om-flow-${n.kind}`}
+                      style={{ animationDelay: `${i * 260 + j * 70}ms` }}
+                    >
+                      {ar ? n.labelAr : n.labelEn}
+                    </span>
+                  ))}
+                </span>
+              ) : null}
+            </span>
+            {i < spec.stages.length - 1 ? (
+              <span className="om-flow-arrow" aria-hidden>{ar ? "←" : "→"}</span>
+            ) : null}
+          </span>
+        ))}
+      </div>
+    );
+  }
+
   const steps = pipelineFor(topology);
   return (
     <div className="om-pipe" aria-label={ar ? "مسار التشغيل" : "Run pipeline"}>
@@ -142,7 +168,7 @@ function AgentNodeCard({ node, ar, delay }: { node: AgentNode; ar: boolean; dela
           ) : null}
         </div>
 
-        <Pipeline topology={node.topology} ar={ar} />
+        <Pipeline topology={node.topology} tools={node.tools} ar={ar} />
         <RuntimeTree node={node} ar={ar} />
 
         <details className="om-more">
@@ -150,7 +176,7 @@ function AgentNodeCard({ node, ar, delay }: { node: AgentNode; ar: boolean; dela
           <div className="om-more-body">
             <div className="om-more-row">
               <span className="om-more-key">{L("النمط", "Topology")}</span>
-              <span>{topologyWhy(node.topology, ar)}</span>
+              <span>{topologyWhy(node.topology, ar ? "ar" : "en")}</span>
             </div>
             <div className="om-more-row">
               <span className="om-more-key">{L("النطاق", "Scope")}</span>
@@ -304,6 +330,7 @@ export default async function VoacMapPage() {
                     <span className="om-tpl-role-meta">
                       {r.topology} · {r.toolCount} {L("أدوات", "tools")}
                     </span>
+                    <Pipeline topology={r.topology} tools={r.tools} ar={ar} />
                   </span>
                 ))}
               </div>

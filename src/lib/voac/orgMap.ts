@@ -16,6 +16,7 @@
 // MEANS is made here, where it can be tested.
 
 import { VOAC_ROLES, GROUP_BROKER_ID, type VoacRole } from "./roles";
+import { isGraphed, stageLabels } from "./flowGraph";
 
 /**
  * What a node is doing, in the order a reader cares about.
@@ -197,44 +198,34 @@ export function buildOrgMap(args: {
 /**
  * The steps ONE run of this agent actually performs, in order.
  *
- * Derived from the topology rather than stored, because the topology already
- * determines the shape of the run in driver.live.ts — storing it twice is two
- * places to drift. Shown on the map so an agent reads as a process ("it pulls
- * facts, then it writes") instead of a labelled box.
+ * For the graphed topologies this DELEGATES to flowGraph.ts — the same spec the
+ * executor runs. It used to hand-list the steps, which meant the chart could
+ * describe a pipeline the code no longer executed and nothing would fail. One
+ * source or none.
+ *
+ * `parallel` is hand-written because its shape lives in the council, not in a
+ * flow spec; the loop-driven topologies get the honest two-step gloss, because
+ * a loop genuinely has no predetermined stages to name.
  */
 export function pipelineFor(topology: string): { ar: string; en: string }[] {
-  switch (topology) {
-    case "parallel":
-      return [
-        { ar: "توزيع", en: "split" },
-        { ar: "أصوات متوازية", en: "parallel voices" },
-        { ar: "ترجيح", en: "reconcile" },
-        { ar: "صياغة", en: "narrate" },
-      ];
-    case "chain":
-      return [
-        { ar: "خطة", en: "plan" },
-        { ar: "سحب وقائع", en: "pull facts" },
-        { ar: "استنتاج", en: "reason" },
-        { ar: "صياغة", en: "narrate" },
-      ];
-    case "route":
-      return [
-        { ar: "تصنيف", en: "classify" },
-        { ar: "سحب وقائع", en: "pull facts" },
-        { ar: "صياغة", en: "narrate" },
-      ];
-    default:
-      return [
-        { ar: "تشغيل", en: "run" },
-        { ar: "صياغة", en: "narrate" },
-      ];
+  if (isGraphed(topology)) return stageLabels(topology);
+  if (topology === "parallel") {
+    return [
+      { ar: "توزيع", en: "split" },
+      { ar: "أصوات متوازية", en: "parallel voices" },
+      { ar: "ترجيح", en: "reconcile" },
+      { ar: "صياغة", en: "narrate" },
+    ];
   }
+  return [
+    { ar: "حلقة أدوات", en: "tool loop" },
+    { ar: "صياغة", en: "narrate" },
+  ];
 }
 
 export type RosterTemplateRow = {
   sector: string;
-  roles: { id: string; ar: string; en: string; topology: string; toolCount: number }[];
+  roles: { id: string; ar: string; en: string; topology: string; toolCount: number; tools: string[] }[];
 };
 
 /**
@@ -262,6 +253,9 @@ export function rosterTemplate(roles: VoacRole[] = VOAC_ROLES): RosterTemplateRo
       en: r.labelEn,
       topology: r.defaultTopology,
       toolCount: r.tools.length,
+      // Carried so the template can DRAW each role's shape, not just name its
+      // topology. "route" tells an owner nothing; four boxes firing at once does.
+      tools: r.tools,
     });
     bySector.set(r.sector, list);
   }
@@ -304,10 +298,17 @@ export type RuntimeChild = {
  * What this node expands into when it actually runs — the layer below the
  * org chart, which is where the orchestration really happens.
  *
- * A `parallel` node convenes the council: five specialists argue at once, then
- * the Moderator reconciles. Every other topology runs the orchestrator's tool
- * loop, so its children are the brain tools it is permitted to call. Both are
- * read straight off what driver.live.ts does — nothing invented for the picture.
+ * THREE CASES, matching driver.live.ts exactly:
+ *   • `parallel` convenes the council: five specialists argue at once, then the
+ *     Moderator reconciles.
+ *   • A GRAPHED topology (route/chain/evaluate) returns nothing here — its
+ *     shape is the flow spec, which the page already draws as a pipeline. This
+ *     used to return `node.tools` verbatim under the label "calls N tools in
+ *     the tool loop", which was wrong twice over once the graph landed: those
+ *     roles no longer run the loop, and the list included tools the graph never
+ *     binds (`simulate` is excluded from gather stages because its input cannot
+ *     be derived from an objective). Two contradictory pictures on one card.
+ *   • The loop topologies keep the tool list, because that IS what they run.
  */
 export function runtimeChildren(node: Pick<AgentNode, "topology" | "tools">): RuntimeChild[] {
   if (node.topology === "parallel") {
@@ -318,6 +319,7 @@ export function runtimeChildren(node: Pick<AgentNode, "topology" | "tools">): Ru
       kind: v.moderator ? ("moderator" as const) : ("voice" as const),
     }));
   }
+  if (isGraphed(node.topology)) return [];
   return node.tools.map((t) => ({ id: t, ar: t, en: t, kind: "tool" as const }));
 }
 

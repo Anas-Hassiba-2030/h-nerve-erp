@@ -172,10 +172,20 @@ export async function getInvoicePaidTotal(tx: Tx, invoiceId: string): Promise<nu
   return Number(agg._sum.amount ?? 0);
 }
 
+// Money reaches here as a JS number: the callers read Prisma `Decimal`
+// columns and pass `Number(invoice.total)`. A single Decimal→Number
+// conversion of a 2-dp amount is exact, but `total` is itself a SUM of
+// line totals plus tax, and 0.1 + 0.2 !== 0.3 — so `paid === total` on
+// raw floats leaves a fully-paid invoice sitting at PARTIAL forever.
+// Compare in integer cents instead; the currencies in play are all 2-dp.
+const cents = (n: number) => Math.round(n * 100);
+
 export function statusForPaid(total: number, paid: number): string {
-  if (paid <= 0) return "UNPAID";
-  if (paid < total) return "PARTIAL";
-  if (paid === total) return "PAID";
+  const t = cents(total);
+  const p = cents(paid);
+  if (p <= 0) return "UNPAID";
+  if (p < t) return "PARTIAL";
+  if (p === t) return "PAID";
   return "OVERPAID";
 }
 

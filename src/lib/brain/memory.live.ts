@@ -3,8 +3,10 @@
 // Phase RAG-1: recall runs on DENSE embeddings via the pluggable seam in
 // ./embeddings (getEmbedder()). New memories are stored as a dense vector
 // (vectorVersion 2) in vectorJson and scored with cosineSim in-process;
-// when an embedding API key (VOYAGE/OPENAI) is set, getEmbedder() returns a
-// real provider and recall becomes truly semantic with zero changes here.
+// on a Node server getEmbedder() returns the local MiniLM model (no key) and
+// recall becomes truly semantic with zero changes here; on Workers it is the
+// hash embedder (see embeddings.ts). Vectors of a different length than the
+// query vector are skipped in recall(), so re-embed after switching backends.
 // Legacy bag-of-words rows (vectorVersion 1) still score via the original
 // sparse path below, so the upgrade is backward-compatible. (A native
 // pgvector column is a later scale optimization; in-process cosine is fine
@@ -18,6 +20,7 @@ import type { Memory, MemoryLake, RecallQuery } from "./memory";
 // New memories store a dense vector (vectorVersion 2); legacy sparse rows
 // (version 1) still score via the bag-of-words path below.
 import { getEmbedder, cosineSim } from "./embeddings";
+import { memoryCorpus } from "./memory.corpus";
 
 /** Embed one string into a dense, L2-normalized vector via the active embedder. */
 async function embedText(text: string): Promise<number[]> {
@@ -112,24 +115,7 @@ function deserialize(json: string): Map<string, number> {
   return out;
 }
 
-/** Combine the editorial fields of a memory into a single string for vectorizing. */
-function memoryCorpus(m: {
-  headlineEn: string;
-  bodyEn: string;
-  lessonEn: string | null | undefined;
-  tags?: string[];
-  module?: string;
-}): string {
-  return [
-    m.headlineEn,
-    m.bodyEn,
-    m.lessonEn ?? "",
-    (m.tags ?? []).join(" "),
-    m.module ?? "",
-  ]
-    .filter(Boolean)
-    .join("\n");
-}
+// memoryCorpus() lives in ./memory.corpus (shared with the re-index script).
 
 // ─────────────────────────────────────────────────────────────────────
 // MemoryLake implementation

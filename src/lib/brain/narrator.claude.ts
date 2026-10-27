@@ -3,7 +3,7 @@
 // Cache key: (scope, topic, register, locale, sha1(canonicalFacts))
 // TTL: 1 hour by default — controlled per-request via NarrativeRequest.ttlMs.
 //
-// Stub mode (no ANTHROPIC_API_KEY) returns a topic-aware editorial template.
+// Stub mode (no GW_API_KEY) returns a topic-aware editorial template.
 // The template is deliberately rich — it cites the actual numbers from the
 // facts payload — so the UI never feels like it's printing placeholder text.
 //

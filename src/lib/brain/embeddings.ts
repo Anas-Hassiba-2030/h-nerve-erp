@@ -1,24 +1,33 @@
 // lib/brain/embeddings.ts — the RAG embedding seam (Phase RAG-1).
 //
-// The brain's memory recall (memory.live.ts) currently uses a bag-of-words
-// vectorizer. The RAG roadmap (docs/RE-INFRASTRUCTURE-PLAN.md §2) upgrades
-// recall to real dense embeddings + pgvector. This file is the *seam* that
-// makes that swap a one-line config change:
+// getEmbedder() returns ONE of two embedders. There is no embeddings API and no
+// provider key anywhere (Anthropic has none; Gemini/OpenAI/Voyage were removed):
 //
-//   getEmbedder() → a real API embedder when an embedding key is set
-//                 → otherwise a deterministic LOCAL embedder (works offline,
-//                   in tests, and in unauthenticated demos)
+//   transformers  a LOCAL model run in-process with @huggingface/transformers
+//                 (feature-extraction, mean pooling, L2-normalised, 384 dims).
+//                 Multilingual (Arabic + English) because the data is bilingual:
+//                 Xenova/paraphrase-multilingual-MiniLM-L12-v2. Lazy-loaded
+//                 singleton; the model downloads once into the HF cache on first
+//                 use. Node server runtime ONLY.
+//   local-hash-v1 a deterministic feature-hashing embedder (256 dims). Needs
+//                 nothing, so it is the default under tests, on the browser, and
+//                 the honest fallback when the model cannot load.
 //
-// Anthropic has no embeddings API, so the real provider is Google Gemini,
-// OpenAI, or Voyage AI — set GEMINI_API_KEY (or GOOGLE_API_KEY), OPENAI_API_KEY,
-// or VOYAGE_API_KEY on Railway to light it up (Gemini takes precedence). On any
-// API error the embedder falls back to local, so a bad key never crashes the
-// brain; until a key is set the local embedder keeps recall working offline.
+// ⚠️ CLOUDFLARE WORKERS CANNOT RUN transformers.js: it needs onnxruntime-node
+// (native) or a WASM + filesystem model cache that workerd does not provide.
+// Production here is a Worker (wrangler.jsonc), so on Workers getEmbedder()
+// resolves to the hash embedder. Semantic (transformers) vectors therefore come
+// from a Node deployment (self-hosted / Railway-style) or from the offline
+// re-index script, NOT from the Worker. Vectors of different dims are never
+// compared: memory.live.ts skips stored vectors whose length differs from the
+// query vector's, so a mixed corpus degrades to misses, never to noise.
 //
-// Pure + dependency-free (no Prisma, no network at import time) so it unit-tests
-// with no DB and no API.
+// Pure + dependency-free at import time (no Prisma, no network, the model
+// package is imported lazily) so it unit-tests with no DB and no model.
 
-export const EMBED_DIM = 256;
+export const EMBED_DIM = 256; // the hash embedder
+export const MODEL_DIM = 384; // MiniLM-L12 multilingual
+export const DEFAULT_EMBED_MODEL = "Xenova/paraphrase-multilingual-MiniLM-L12-v2";
 
 export type Embedder = {
   readonly name: string;
@@ -31,8 +40,7 @@ export type Embedder = {
 // Local deterministic embedder — feature-hashing over token unigrams +
 // bigrams into a fixed EMBED_DIM space, then L2-normalized. Same text →
 // same vector, always. Not as semantically rich as a trained model, but
-// it is a correct, dense, cosine-comparable vector that needs no API and
-// keeps the public contract identical to the real provider.
+// it is a correct, dense, cosine-comparable vector that needs no API.
 // ─────────────────────────────────────────────────────────────────────
 
 const WORD_RE = /[\p{L}\p{N}_]+/gu;
@@ -102,38 +110,82 @@ function l2normalize(v: number[]): number[] {
   return v.map((x) => x / norm);
 }
 
-/** True if a real embedding provider key is configured. */
-export function hasEmbeddingProvider(): boolean {
-  return !!(
-    process.env.GEMINI_API_KEY?.trim() ||
-    process.env.GOOGLE_API_KEY?.trim() ||
-    process.env.VOYAGE_API_KEY?.trim() ||
-    process.env.OPENAI_API_KEY?.trim() ||
-    process.env.EMBEDDING_API_KEY?.trim()
-  );
+// ─────────────────────────────────────────────────────────────────────
+// Local MODEL embedder (transformers.js)
+// ─────────────────────────────────────────────────────────────────────
+
+/** Batch embed function: texts → raw (pooled) vectors. Injected in tests. */
+export type ExtractFn = (texts: string[]) => Promise<number[][]>;
+
+let _extract: ExtractFn | null = null; // loaded singleton (or test injection)
+let _loading: Promise<ExtractFn> | null = null;
+let _failed = false; // sticky: do not retry a load that cannot work here
+
+/** Test seam: inject (or clear with null) the model extractor and reset state. */
+export function __setExtractorForTest(fn: ExtractFn | null): void {
+  _extract = fn;
+  _loading = null;
+  _failed = false;
+  MODEL_CACHE.clear();
+  _embedder = null;
+  _embedderSig = "";
 }
 
-// ─────────────────────────────────────────────────────────────────────
-// Real provider embedders. Each calls its HTTP API, L2-normalizes the
-// result (so cosineSim == dot holds), and FALLS BACK to the local embedder
-// on any error — a bad key or network blip degrades retrieval quality
-// instead of crashing the brain. A small in-process cache avoids
-// re-embedding identical strings (the council re-embeds node labels every
-// convene); pgvector is the durable cache, this is the cheap in-memory one.
-// ─────────────────────────────────────────────────────────────────────
+function modelId(): string {
+  return process.env.EMBED_MODEL?.trim() || DEFAULT_EMBED_MODEL;
+}
 
-const CACHE = new Map<string, number[]>();
+function onWorkers(): boolean {
+  const nav = (globalThis as { navigator?: { userAgent?: string } }).navigator;
+  return nav?.userAgent === "Cloudflare-Workers";
+}
+
+/** Which backend should be tried: "transformers" or "hash". */
+export function embedBackend(): "transformers" | "hash" {
+  const forced = process.env.EMBED_BACKEND?.trim().toLowerCase();
+  if (forced === "hash") return "hash";
+  if (typeof window !== "undefined") return "hash"; // server-only
+  if (onWorkers()) return "hash"; // workerd cannot run onnxruntime
+  if (forced === "transformers") return "transformers";
+  // Default: the model on a Node server, hash under tests (no 100+ MB download).
+  if (process.env.VITEST || process.env.NODE_ENV === "test") return "hash";
+  return "transformers";
+}
+
+async function loadExtractor(): Promise<ExtractFn> {
+  if (_extract) return _extract;
+  if (!_loading) {
+    _loading = (async () => {
+      // Variable specifier + webpackIgnore: bundlers (Next, OpenNext/esbuild)
+      // must not try to resolve the native onnxruntime tree at build time.
+      const spec = "@huggingface/transformers";
+      const mod: any = await import(/* webpackIgnore: true */ /* @vite-ignore */ spec);
+      const pipe = await mod.pipeline("feature-extraction", modelId(), { dtype: "q8" });
+      const fn: ExtractFn = async (texts) => {
+        const out = await pipe(texts, { pooling: "mean", normalize: true });
+        return out.tolist() as number[][];
+      };
+      _extract = fn;
+      return fn;
+    })();
+  }
+  return _loading;
+}
+
+const MODEL_CACHE = new Map<string, number[]>();
 const CACHE_CAP = 4000;
+const BATCH = 32;
+const MAX_CHARS = 2000; // the model truncates to its window anyway; bound the work
 
 function cacheSet(key: string, v: number[]) {
-  if (CACHE.size >= CACHE_CAP) {
+  if (MODEL_CACHE.size >= CACHE_CAP) {
     let n = Math.ceil(CACHE_CAP * 0.1);
-    for (const k of CACHE.keys()) {
-      CACHE.delete(k);
+    for (const k of MODEL_CACHE.keys()) {
+      MODEL_CACHE.delete(k);
       if (--n <= 0) break;
     }
   }
-  CACHE.set(key, v);
+  MODEL_CACHE.set(key, v);
 }
 
 function chunk<T>(arr: T[], size: number): T[][] {
@@ -143,141 +195,76 @@ function chunk<T>(arr: T[], size: number): T[][] {
 }
 
 let _warned = false;
-function warnOnce(provider: string, err: unknown) {
+function warnOnce(err: unknown) {
   if (_warned) return;
   _warned = true;
-  console.error(`[embeddings] ${provider} failed — falling back to local embedder:`, String(err));
+  console.error(
+    "[embeddings] local model unavailable — falling back to the hash embedder:",
+    String((err as Error)?.message ?? err).slice(0, 300),
+  );
 }
 
-/**
- * Build a real Embedder from a batch-embed function. Handles caching, the
- * empty-string edge, and per-batch fallback to localEmbed on any failure.
- */
-function makeRemoteEmbedder(
-  name: string,
-  batchSize: number,
-  call: (texts: string[]) => Promise<number[][]>,
-): Embedder {
+function modelEmbedder(): Embedder {
+  const name = `transformers:${modelId()}`;
   return {
     name,
-    // Provider-native dim (e.g. Gemini 768). cosineSim compares same-provider
-    // vectors, so the absolute size doesn't matter; 0 signals "variable".
-    dim: 0,
+    // Honest dim: 384 while the model works, 256 once we have fallen back.
+    get dim() {
+      return _failed ? EMBED_DIM : MODEL_DIM;
+    },
     async embed(texts: string[]): Promise<number[][]> {
-      const out: (number[] | null)[] = texts.map((t) => CACHE.get(`${name}:${t}`) ?? null);
+      if (_failed) return texts.map((t) => localEmbed(t));
+      const out: (number[] | null)[] = texts.map((t) => MODEL_CACHE.get(`${name}:${t}`) ?? null);
       const missing = out.map((v, i) => (v === null ? i : -1)).filter((i) => i >= 0);
       if (missing.length === 0) return out as number[][];
 
-      const toEmbed = missing.map((i) => texts[i] || " ");
+      const toEmbed = missing.map((i) => (texts[i] || " ").slice(0, MAX_CHARS));
       try {
+        const extract = await loadExtractor();
         const vecs: number[][] = [];
-        for (const part of chunk(toEmbed, batchSize)) {
-          for (const v of await call(part)) vecs.push(l2normalize(v));
+        for (const part of chunk(toEmbed, BATCH)) {
+          for (const v of await extract(part)) vecs.push(l2normalize(v));
         }
-        // A partial provider response (fewer vectors than inputs) would mix
-        // provider-dim vectors with 256-dim local fallbacks in the same result,
-        // making cosineSim compare across dimensions and return noise. If the
-        // count doesn't match exactly, fail into the catch so the WHOLE batch
-        // falls back to local — one consistent dimensionality, nothing cached
-        // under the provider key.
+        // A partial answer would mix 384-dim vectors with 256-dim fallbacks in
+        // one result; fail the WHOLE batch into the fallback instead.
         if (vecs.length !== toEmbed.length) {
-          throw new Error(
-            `embedder ${name} returned ${vecs.length}/${toEmbed.length} vectors`,
-          );
+          throw new Error(`extractor returned ${vecs.length}/${toEmbed.length} vectors`);
         }
         missing.forEach((origIdx, j) => {
           cacheSet(`${name}:${texts[origIdx]}`, vecs[j]);
           out[origIdx] = vecs[j];
         });
       } catch (err) {
-        warnOnce(name, err);
-        missing.forEach((origIdx) => {
-          out[origIdx] = localEmbed(texts[origIdx]);
-        });
+        warnOnce(err);
+        _failed = true; // sticky for this process (e.g. Workers, model not downloadable)
+        _loading = null;
+        // Whole result falls back, including cache hits, so dims stay uniform.
+        return texts.map((t) => localEmbed(t));
       }
       return out as number[][];
     },
   };
 }
 
-function geminiEmbedder(key: string): Embedder {
-  // gemini-embedding-001 is the current GA model (text-embedding-004 is retired
-  // for newer keys). It defaults to 3072 dims; we request a lighter 1536 to
-  // keep stored memory vectors compact — makeRemoteEmbedder L2-normalizes,
-  // which Google requires for any reduced dimensionality. Both overridable.
-  const model = process.env.GEMINI_EMBED_MODEL?.trim() || "gemini-embedding-001";
-  const outputDimensionality = Number(process.env.GEMINI_EMBED_DIM) || 1536;
-  return makeRemoteEmbedder(`gemini:${model}`, 96, async (texts) => {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:batchEmbedContents?key=${encodeURIComponent(key)}`,
-      {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          requests: texts.map((t) => ({
-            model: `models/${model}`,
-            content: { parts: [{ text: t }] },
-            outputDimensionality,
-          })),
-        }),
-      },
-    );
-    if (!res.ok) throw new Error(`gemini ${res.status}: ${await res.text()}`);
-    const json = (await res.json()) as { embeddings: Array<{ values: number[] }> };
-    return json.embeddings.map((e) => e.values);
-  });
-}
-
-function openaiEmbedder(key: string): Embedder {
-  const model = process.env.OPENAI_EMBED_MODEL?.trim() || "text-embedding-3-small";
-  return makeRemoteEmbedder(`openai:${model}`, 128, async (texts) => {
-    const res = await fetch("https://api.openai.com/v1/embeddings", {
-      method: "POST",
-      headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
-      body: JSON.stringify({ model, input: texts }),
-    });
-    if (!res.ok) throw new Error(`openai ${res.status}: ${await res.text()}`);
-    const json = (await res.json()) as { data: Array<{ embedding: number[]; index: number }> };
-    return json.data.sort((a, b) => a.index - b.index).map((d) => d.embedding);
-  });
-}
-
-function voyageEmbedder(key: string): Embedder {
-  const model = process.env.VOYAGE_EMBED_MODEL?.trim() || "voyage-3";
-  return makeRemoteEmbedder(`voyage:${model}`, 128, async (texts) => {
-    const res = await fetch("https://api.voyageai.com/v1/embeddings", {
-      method: "POST",
-      headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
-      body: JSON.stringify({ model, input: texts }),
-    });
-    if (!res.ok) throw new Error(`voyage ${res.status}: ${await res.text()}`);
-    const json = (await res.json()) as { data: Array<{ embedding: number[] }> };
-    return json.data.map((d) => d.embedding);
-  });
+/** True when the local MODEL embedder is the active one (not the hash fallback). */
+export function hasEmbeddingProvider(): boolean {
+  return embedBackend() === "transformers" && !_failed;
 }
 
 // Memoize the active embedder per process so the cache + factory are shared,
-// re-deriving only if the configured key class changes.
+// re-deriving only if the backend selection changes.
 let _embedder: Embedder | null = null;
 let _embedderSig = "";
 
 /**
- * Return the active embedder. Picks a real provider when its key is set
- * (Gemini → OpenAI → Voyage precedence), else the deterministic local one.
- * Set GEMINI_API_KEY (or GOOGLE_API_KEY) — or OPENAI_API_KEY / VOYAGE_API_KEY —
- * on Railway to light up real semantic search with zero other changes.
+ * Return the active embedder: the local MiniLM model on a Node server, else the
+ * deterministic hash embedder (tests, browser, Workers, or after a load failure).
  */
 export function getEmbedder(): Embedder {
-  const gemini = process.env.GEMINI_API_KEY?.trim() || process.env.GOOGLE_API_KEY?.trim();
-  const openai = process.env.OPENAI_API_KEY?.trim();
-  const voyage = process.env.VOYAGE_API_KEY?.trim();
-  const sig = gemini ? "g" : openai ? "o" : voyage ? "v" : "local";
+  const useModel = embedBackend() === "transformers" && !_failed;
+  const sig = useModel ? `m:${modelId()}` : "hash";
   if (_embedder && _embedderSig === sig) return _embedder;
-
   _embedderSig = sig;
-  if (gemini) _embedder = geminiEmbedder(gemini);
-  else if (openai) _embedder = openaiEmbedder(openai);
-  else if (voyage) _embedder = voyageEmbedder(voyage);
-  else _embedder = localEmbedder;
+  _embedder = useModel ? modelEmbedder() : localEmbedder;
   return _embedder;
 }

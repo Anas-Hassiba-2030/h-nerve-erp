@@ -11,8 +11,7 @@
 // Run it and read the "tools used" line of each block. That one line is the
 // whole argument, or its refutation.
 //
-//   LOCAL_LLM_BASE_URL="http://127.0.0.1:11434" \
-//   LOCAL_LLM_MODEL="qwen2.5-coder:3b" \
+//   GW_API_KEY (already in the environment; model via GW_MODEL, e.g. claude-haiku-5-5) \
 //   DATABASE_URL="file:<abs path to a LOCAL dev db>" \
 //   npx tsx --tsconfig tsconfig.scripts.json scripts/verify/loop-vs-graph.ts
 //
@@ -34,7 +33,7 @@ async function main() {
   console.log(`\nprovider=${cfg.provider}  model=${cfg.model}`);
   if (!cfg.enabled) {
     console.log("\nNo model configured — both engines would return stubs and prove nothing.");
-    console.log("Set LOCAL_LLM_BASE_URL (or an API key) and run again.");
+    console.log("Set GW_API_KEY and run again.");
     return;
   }
 

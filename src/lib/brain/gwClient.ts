@@ -109,6 +109,8 @@ async function resolveBinding(): Promise<Fetcher | null> {
 }
 
 async function gwFetch(url: string, init: RequestInit): Promise<Response> {
+  // Never follow a redirect: it would carry the gateway key to whatever host answers.
+  init = { ...init, redirect: "error" };
   const binding = await resolveBinding();
   if (binding) {
     try {

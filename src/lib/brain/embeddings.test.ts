@@ -138,9 +138,9 @@ describe("local model embedder (transformers.js, pipeline mocked)", () => {
     expect(extractor).toHaveBeenCalledTimes(3); // 32 + 32 + 6
   });
 
-  it("a model that cannot load falls back to hash vectors, stickily, and never throws", async () => {
+  it("a one-off extractor error falls back to hash for that call only, never throws, and the next call retries", async () => {
     const boom = vi.fn(async () => {
-      throw new Error("onnxruntime unavailable");
+      throw new Error("onnxruntime hiccup");
     });
     __setExtractorForTest(boom);
     process.env.EMBED_BACKEND = "transformers";
@@ -148,11 +148,10 @@ describe("local model embedder (transformers.js, pipeline mocked)", () => {
     const [v] = await getEmbedder().embed(["Maha dairy cold chain"]);
     expect(v).toEqual(localEmbed("Maha dairy cold chain"));
     expect(v.length).toBe(EMBED_DIM);
-    // sticky: the next call does not retry the load, and the factory now hands out hash
-    expect(getEmbedder().name).toBe("local-hash-v1");
-    expect(hasEmbeddingProvider()).toBe(false);
+    // not sticky: the model stays the active backend and the next call tries it again
+    expect(hasEmbeddingProvider()).toBe(true);
     await getEmbedder().embed(["again"]);
-    expect(boom).toHaveBeenCalledTimes(1);
+    expect(boom).toHaveBeenCalledTimes(2);
     spy.mockRestore();
   });
 

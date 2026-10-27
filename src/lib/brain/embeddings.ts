@@ -219,8 +219,16 @@ function modelEmbedder(): Embedder {
       if (missing.length === 0) return out as number[][];
 
       const toEmbed = missing.map((i) => (texts[i] || " ").slice(0, MAX_CHARS));
+      let extract: Awaited<ReturnType<typeof loadExtractor>>;
       try {
-        const extract = await loadExtractor();
+        extract = await loadExtractor();
+      } catch (err) {
+        warnOnce(err);
+        _failed = true; // sticky only when the model cannot LOAD here (e.g. Workers, not downloadable)
+        _loading = null;
+        return texts.map((t) => localEmbed(t));
+      }
+      try {
         const vecs: number[][] = [];
         for (const part of chunk(toEmbed, BATCH)) {
           for (const v of await extract(part)) vecs.push(l2normalize(v));
@@ -236,9 +244,8 @@ function modelEmbedder(): Embedder {
         });
       } catch (err) {
         warnOnce(err);
-        _failed = true; // sticky for this process (e.g. Workers, model not downloadable)
-        _loading = null;
-        // Whole result falls back, including cache hits, so dims stay uniform.
+        // A one-off extractor error: this call falls back (whole result, so dims stay uniform);
+        // the next call tries the model again.
         return texts.map((t) => localEmbed(t));
       }
       return out as number[][];

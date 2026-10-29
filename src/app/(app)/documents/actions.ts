@@ -10,8 +10,8 @@ import { scoped } from "@/lib/utils/logger";
 const docLog = scoped("docintel");
 import {
   parseDocument,
-  visionEnabled,
-  isVisionEligible,
+  llmParseEnabled,
+  isTextEligible,
 } from "@/lib/docintel/parser";
 import { guardLlmAction, llmGuardLabel } from "@/lib/brain/actionGuard";
 import { getLocale } from "@/lib/i18n/i18n.server";
@@ -66,7 +66,7 @@ export async function uploadDocument(formData: FormData): Promise<UploadResult> 
   // charge the tenant's daily LLM budget only when Vision will actually run —
   // the stub path is free and must stay free. Thrown message surfaces in the
   // drop-zone UI the same way the size/type errors above do.
-  const willUseVision = visionEnabled() && isVisionEligible(file.type);
+  const willUseVision = llmParseEnabled() && isTextEligible(file.type);
   const guard = await guardLlmAction("doc-upload", user.id, {
     max: 10,
     consumesBudget: willUseVision,
@@ -92,7 +92,8 @@ export async function uploadDocument(formData: FormData): Promise<UploadResult> 
   // The parser can throw on malformed input / vision-API failure. If we let
   // it bubble, the Document row stays stuck in PARSING forever and the user
   // sees a half-broken entry with no explanation — flip to FAILED + rethrow.
-  const useVision = visionEnabled() && isVisionEligible(file.type);
+  // (gw-front is text-only: only text-like files are ever sent; images/PDF = stub.)
+  const useVision = llmParseEnabled() && isTextEligible(file.type);
   const bytes = useVision
     ? Buffer.from(await file.arrayBuffer())
     : undefined;

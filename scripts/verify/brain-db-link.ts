@@ -57,8 +57,8 @@ async function main() {
   console.log("1. Configuration");
   console.log(`   DATABASE_URL : ${maskUrl(url)}`);
   console.log(`   URL provider : ${urlProvider}`);
-  const keys = ["ANTHROPIC_API_KEY", "GEMINI_API_KEY", "OPENAI_API_KEY", "VOYAGE_API_KEY"].filter((k) => process.env[k]);
-  console.log(`   Keys set     : ${keys.length ? keys.join(", ") : DIM("none → STUB brain + local-fallback embedder (zero cost)")}`);
+  const keys = ["GW_API_KEY"].filter((k) => process.env[k]);
+  console.log(`   Keys set     : ${keys.length ? keys.join(", ") : DIM("none → STUB brain (embeddings are local, no key)")}`);
   const mcpScoped = process.env.H_NERVE_MCP_WORKSPACE && process.env.H_NERVE_MCP_TENANT;
   console.log(
     `   MCP scope    : ${

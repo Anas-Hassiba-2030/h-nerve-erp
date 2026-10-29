@@ -16,9 +16,8 @@ const REQUIRED = {
 
 // ─── Optional with defaults ─────────────────────────────────────────────────
 const OPTIONAL = {
-  ANTHROPIC_API_KEY:  { desc: "Claude API key — brain runs in stub mode if absent" },
-  OPENROUTER_API_KEY: { desc: "OpenRouter gateway key — brain fallback provider when no Anthropic key" },
-  LLM_API_KEY:        { desc: "Alias for ANTHROPIC_API_KEY" },
+  GW_API_KEY:         { desc: "gw-front gateway credential — brain runs in stub mode if absent" },
+  GW_BASE_URL:        { desc: "gw-front base URL (default https://gw-front.anashasiba91.workers.dev)" },
   SESSION_SECRET:     { desc: "iron-session cookie secret (32+ chars recommended)" },
   SEED_ADMIN_PASSWORD:{ desc: "One-time seed endpoint password" },
   NEXT_PUBLIC_APP_URL:{ desc: "Public base URL — used in absolute links" },
@@ -52,13 +51,9 @@ export function checkEnv(): EnvReport {
   return { ok: missing.length === 0, missing, warnings };
 }
 
-/** True if an LLM API key is present (brain can make live calls). */
+/** True if the gw-front credential is present (brain can make live calls). */
 export function hasLLMKey(): boolean {
-  return !!(
-    process.env.ANTHROPIC_API_KEY ??
-    process.env.OPENROUTER_API_KEY ??
-    process.env.LLM_API_KEY
-  );
+  return !!process.env.GW_API_KEY?.trim();
 }
 
 /** The public app URL, defaulting to localhost for dev. */

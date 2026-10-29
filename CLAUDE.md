@@ -138,7 +138,7 @@ Retrieval-Augmented Generation makes the brain answer from the tenant's **own** 
 
 | File | Role |
 |------|------|
-| `embeddings.ts` | The embedder seam. `getEmbedder()` → a real provider when a key is set (**Gemini** `gemini-embedding-001` → OpenAI → Voyage, with `GEMINI_API_KEY`/`OPENAI_API_KEY`/`VOYAGE_API_KEY`), else a deterministic local hash embedder. Falls back to local on any API error. |
+| `embeddings.ts` | The embedder seam. `getEmbedder()` → the LOCAL multilingual MiniLM model (`@huggingface/transformers`, 384 dims, no key) on a Node server, else the deterministic 256-dim hash embedder (tests, Workers, or after a load failure). No provider keys. Re-embed with `scripts/reindex-embeddings.ts`. LLM calls: all via gw-front (`gwClient.ts`, `GW_API_KEY`). |
 | `retriever.ts` | Pure `rankByRelevance` — embed query + items, rank by cosine. |
 | `documents.retrieve.ts` | DB-backed document retrieval (`Document` + clauses) → `converse.ts` + the council. |
 | `graphrag.ts` / `graphrag.live.ts` | Graph RAG: Personalized PageRank (HippoRAG) over the causal graph → relevant multi-hop subgraph. |

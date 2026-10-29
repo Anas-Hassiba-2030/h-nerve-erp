@@ -9,8 +9,8 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { councilModel, plannerModel } from "./llm";
 
-const FAST_MODEL = "claude-haiku-4-5-20251001";
-const SLOW_DEFAULT = "claude-sonnet-4-6"; // DEFAULT_MODEL in llm.ts
+const FAST_MODEL = "claude-haiku-5-5";
+const SLOW_DEFAULT = "claude-sonnet-5-5"; // GW_MODELS.default in gwClient.ts
 
 describe("brain fast-model latency guards", () => {
   afterEach(() => {

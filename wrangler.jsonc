@@ -5,7 +5,7 @@
   // Preview: npm run cf:preview   (local workerd)
   // Deploy:  npm run cf:deploy    (needs CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID)
   //
-  // Secrets (ANTHROPIC_API_KEY, SESSION_PASSWORD, NEON_DATABASE_URL, CRON_SECRET, …)
+  // Secrets (GW_API_KEY, SESSION_PASSWORD, NEON_DATABASE_URL, CRON_SECRET, …)
   // are NOT set here — use `wrangler secret put <NAME>` / the dashboard. Setting
   // them fresh doubles as the rotation owed per docs/RUNBOOK.md §1.
   "$schema": "node_modules/wrangler/config-schema.json",
@@ -39,6 +39,14 @@
       // above (see https://opennext.js.org/cloudflare/caching).
       "binding": "WORKER_SELF_REFERENCE",
       "service": "h-nerve-erp"
+    },
+    {
+      // The model front door. A same-account workers.dev fetch from one Worker
+      // to another returns 404, so src/lib/brain/gwClient.ts calls gw-front
+      // through this binding (env.SVC_GWFRONT.fetch) and falls back to plain
+      // fetch where the binding is absent (Node dev, tests).
+      "binding": "SVC_GWFRONT",
+      "service": "gw-front"
     }
   ],
   "vars": {

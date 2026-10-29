@@ -34,7 +34,7 @@ const { prisma, runAgent, runModerator, llmEnabled, ROSTER } = vi.hoisted(() => 
 vi.mock("@/lib/db/db", () => ({ prisma }));
 vi.mock("./graph.prisma", () => ({ causalGraph: {} }));
 vi.mock("./llm", () => ({
-  llmConfig: () => ({ enabled: llmEnabled.value, model: llmEnabled.value ? "claude-sonnet-4-6" : null }),
+  llmConfig: () => ({ enabled: llmEnabled.value, model: llmEnabled.value ? "claude-sonnet-5-5" : null }),
 }));
 
 vi.mock("./agents", () => ({
@@ -179,7 +179,7 @@ describe("LiveCouncil.convene — orchestration", () => {
     expect(prisma.councilSession.create.mock.calls[0][0].data.usedLiveLlm).toBe(true);
     const voiceData = prisma.councilVoice.createMany.mock.calls[0][0].data[0];
     expect(voiceData.isStub).toBe(false);
-    expect(voiceData.llmModel).toBe("claude-sonnet-4-6");
+    expect(voiceData.llmModel).toBe("claude-sonnet-5-5");
   });
 
   it("marks the session FAILED and rethrows when the Moderator throws", async () => {

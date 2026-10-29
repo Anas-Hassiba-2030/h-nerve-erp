@@ -6,7 +6,7 @@
 // Phase 15 of docs/PHASES-INTELLIGENCE.md.
 //
 // Two modes:
-// - LIVE — ANTHROPIC_API_KEY is set. Calls Claude with system prompt + the
+// - LIVE — GW_API_KEY is set. Calls Claude through gw-front with system prompt + the
 //   prior turns + a snapshot of relevant facts (insights, plans,
 //   integrations) for grounding.
 // - STUB — no API key. The deterministic stub picks the most relevant
@@ -545,7 +545,7 @@ async function askSingleShot(input: AskInput): Promise<AskResult> {
 
   // Build the prompt — we always use the stub generator's payload as the
   // factual ground truth; the LLM gets the same fact pack so it can write
-  // a more natural answer when ANTHROPIC_API_KEY is present.
+  // a more natural answer when GW_API_KEY is present.
   const stubResult = stubAnswer(input.question, facts, locale);
 
   // Phase RAG-5 — Corrective RAG. Grade the retrieval before we ground on it.

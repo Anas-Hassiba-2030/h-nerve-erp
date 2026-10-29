@@ -3,7 +3,7 @@
 // wrong canned extraction live. Pure; synthetic latency driven by fake timers.
 
 import { vi, describe, it, expect, afterEach } from "vitest";
-import { parseDocument, isVisionEligible, visionEnabled } from "./parser";
+import { parseDocument, isTextEligible, llmParseEnabled } from "./parser";
 
 afterEach(() => vi.useRealTimers());
 
@@ -55,39 +55,40 @@ describe("parseDocument — filename routing (priority order)", () => {
   });
 });
 
-describe("W10 — Vision gate (pure, no API)", () => {
-  it("isVisionEligible: images + PDF only, everything else stub", () => {
-    expect(isVisionEligible("image/png")).toBe(true);
-    expect(isVisionEligible("image/jpeg")).toBe(true);
-    expect(isVisionEligible("image/webp")).toBe(true);
-    expect(isVisionEligible("application/pdf")).toBe(true);
-    expect(isVisionEligible("text/csv")).toBe(false);
-    expect(isVisionEligible("application/vnd.ms-excel")).toBe(false);
-    expect(isVisionEligible(undefined)).toBe(false);
+describe("LLM parse gate (pure, no API) — gw-front is text-only", () => {
+  it("isTextEligible: text-like files only; images + PDF are NOT sent (no vision)", () => {
+    expect(isTextEligible("text/csv")).toBe(true);
+    expect(isTextEligible("text/plain")).toBe(true);
+    expect(isTextEligible("application/json")).toBe(true);
+    expect(isTextEligible("image/png")).toBe(false);
+    expect(isTextEligible("image/jpeg")).toBe(false);
+    expect(isTextEligible("application/pdf")).toBe(false);
+    expect(isTextEligible("application/vnd.ms-excel")).toBe(false);
+    expect(isTextEligible(undefined)).toBe(false);
   });
 
-  it("visionEnabled is OFF unless flag AND key are both set", () => {
-    const flag = process.env.DOCINTEL_USE_VISION;
-    const key = process.env.ANTHROPIC_API_KEY;
+  it("llmParseEnabled is OFF unless flag AND GW_API_KEY are both set", () => {
+    const flag = process.env.DOCINTEL_USE_LLM;
+    const key = process.env.GW_API_KEY;
     try {
-      delete process.env.DOCINTEL_USE_VISION;
-      delete process.env.ANTHROPIC_API_KEY;
-      expect(visionEnabled()).toBe(false);
-      process.env.DOCINTEL_USE_VISION = "true";
-      expect(visionEnabled()).toBe(false); // key still missing
-      process.env.ANTHROPIC_API_KEY = "sk-ant-test";
-      expect(visionEnabled()).toBe(true); // both set
-      process.env.DOCINTEL_USE_VISION = "false";
-      expect(visionEnabled()).toBe(false); // flag explicitly off
+      delete process.env.DOCINTEL_USE_LLM;
+      delete process.env.GW_API_KEY;
+      expect(llmParseEnabled()).toBe(false);
+      process.env.DOCINTEL_USE_LLM = "true";
+      expect(llmParseEnabled()).toBe(false); // key still missing
+      process.env.GW_API_KEY = "test-key";
+      expect(llmParseEnabled()).toBe(true); // both set
+      process.env.DOCINTEL_USE_LLM = "false";
+      expect(llmParseEnabled()).toBe(false); // flag explicitly off
     } finally {
-      if (flag === undefined) delete process.env.DOCINTEL_USE_VISION;
-      else process.env.DOCINTEL_USE_VISION = flag;
-      if (key === undefined) delete process.env.ANTHROPIC_API_KEY;
-      else process.env.ANTHROPIC_API_KEY = key;
+      if (flag === undefined) delete process.env.DOCINTEL_USE_LLM;
+      else process.env.DOCINTEL_USE_LLM = flag;
+      if (key === undefined) delete process.env.GW_API_KEY;
+      else process.env.GW_API_KEY = key;
     }
   });
 
-  it("Vision OFF → parseDocument still returns the rich stub (regression)", async () => {
+  it("LLM parse OFF → parseDocument still returns the rich stub (regression)", async () => {
     const d = await parse("supplier_contract.pdf");
     expect(d.kind).toBe("contract");
     expect(d.linkedTo).toBe("LORAN");

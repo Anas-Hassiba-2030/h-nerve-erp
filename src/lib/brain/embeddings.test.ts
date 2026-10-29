@@ -2,14 +2,17 @@
 // The local embedder must be deterministic, dense, L2-normalized, and
 // cosine-comparable — the contract the real provider will also satisfy.
 
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect, afterEach, beforeEach, vi } from "vitest";
 import {
   localEmbed,
   localEmbedder,
   cosineSim,
   getEmbedder,
   hasEmbeddingProvider,
+  embedBackend,
+  __setExtractorForTest,
   EMBED_DIM,
+  MODEL_DIM,
 } from "./embeddings";
 
 describe("localEmbed", () => {
@@ -72,47 +75,92 @@ describe("getEmbedder / localEmbedder contract", () => {
   });
 });
 
-describe("real provider selection (Gemini / OpenAI / Voyage)", () => {
-  const KEYS = ["GEMINI_API_KEY", "GOOGLE_API_KEY", "OPENAI_API_KEY", "VOYAGE_API_KEY", "EMBEDDING_API_KEY"];
+describe("local model embedder (transformers.js, pipeline mocked)", () => {
+  const ENV = ["EMBED_BACKEND", "EMBED_MODEL"];
+  // A fake pooled+normalised 384-dim "model": deterministic, no download.
+  const fakeVec = (t: string) => {
+    const v = new Array(MODEL_DIM).fill(0);
+    v[t.length % MODEL_DIM] = 3; // un-normalised on purpose: the embedder must normalise
+    return v;
+  };
+  const extractor = vi.fn(async (texts: string[]) => texts.map(fakeVec));
+
+  beforeEach(() => {
+    extractor.mockClear();
+    __setExtractorForTest(extractor);
+    process.env.EMBED_BACKEND = "transformers";
+  });
   afterEach(() => {
-    for (const k of KEYS) delete process.env[k];
+    for (const k of ENV) delete process.env[k];
+    __setExtractorForTest(null);
     vi.unstubAllGlobals();
   });
 
-  it("no key → local embedder", () => {
+  it("under tests the default is the hash embedder (no model download)", () => {
+    delete process.env.EMBED_BACKEND;
+    expect(embedBackend()).toBe("hash");
     expect(getEmbedder().name).toBe("local-hash-v1");
     expect(hasEmbeddingProvider()).toBe(false);
   });
 
-  it("GEMINI_API_KEY → gemini embedder, and hasEmbeddingProvider is true", () => {
-    process.env.GEMINI_API_KEY = "test-key";
-    expect(getEmbedder().name).toMatch(/^gemini:/);
+  it("EMBED_BACKEND=hash forces the hash embedder", () => {
+    process.env.EMBED_BACKEND = "hash";
+    expect(getEmbedder().name).toBe("local-hash-v1");
+  });
+
+  it("EMBED_BACKEND=transformers → model embedder, 384 dims, multilingual model id", () => {
+    const e = getEmbedder();
+    expect(e.name).toBe("transformers:Xenova/paraphrase-multilingual-MiniLM-L12-v2");
+    expect(e.dim).toBe(MODEL_DIM);
     expect(hasEmbeddingProvider()).toBe(true);
   });
 
-  it("OPENAI_API_KEY → openai embedder", () => {
-    process.env.OPENAI_API_KEY = "test-key";
-    expect(getEmbedder().name).toMatch(/^openai:/);
+  it("embeds a batch: mean-pooled output is L2-normalised, one vector per text", async () => {
+    const out = await getEmbedder().embed(["Maha dairy cold chain", "مبيعات الألبان"]);
+    expect(out).toHaveLength(2);
+    for (const v of out) {
+      expect(v).toHaveLength(MODEL_DIM);
+      expect(Math.sqrt(v.reduce((s, x) => s + x * x, 0))).toBeCloseTo(1, 5);
+    }
   });
 
-  it("VOYAGE_API_KEY → voyage embedder", () => {
-    process.env.VOYAGE_API_KEY = "test-key";
-    expect(getEmbedder().name).toMatch(/^voyage:/);
+  it("caches identical strings (the model is not re-run)", async () => {
+    const e = getEmbedder();
+    await e.embed(["same text"]);
+    await e.embed(["same text"]);
+    expect(extractor).toHaveBeenCalledTimes(1);
   });
 
-  it("Gemini takes precedence when several keys are set", () => {
-    process.env.OPENAI_API_KEY = "o";
-    process.env.VOYAGE_API_KEY = "v";
-    process.env.GEMINI_API_KEY = "g";
-    expect(getEmbedder().name).toMatch(/^gemini:/);
+  it("splits large inputs into batches", async () => {
+    const texts = Array.from({ length: 70 }, (_, i) => `text number ${i}`);
+    const out = await getEmbedder().embed(texts);
+    expect(out).toHaveLength(70);
+    expect(extractor).toHaveBeenCalledTimes(3); // 32 + 32 + 6
   });
 
-  it("a real provider falls back to local vectors when the API call fails", async () => {
-    process.env.GEMINI_API_KEY = "bad-key";
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network down")));
+  it("a one-off extractor error falls back to hash for that call only, never throws, and the next call retries", async () => {
+    const boom = vi.fn(async () => {
+      throw new Error("onnxruntime hiccup");
+    });
+    __setExtractorForTest(boom);
+    process.env.EMBED_BACKEND = "transformers";
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     const [v] = await getEmbedder().embed(["Maha dairy cold chain"]);
-    // Fallback returns a local EMBED_DIM vector — retrieval degrades, never crashes.
-    expect(v.length).toBe(EMBED_DIM);
     expect(v).toEqual(localEmbed("Maha dairy cold chain"));
+    expect(v.length).toBe(EMBED_DIM);
+    // not sticky: the model stays the active backend and the next call tries it again
+    expect(hasEmbeddingProvider()).toBe(true);
+    await getEmbedder().embed(["again"]);
+    expect(boom).toHaveBeenCalledTimes(2);
+    spy.mockRestore();
+  });
+
+  it("a partial extractor answer fails the WHOLE batch into hash vectors (uniform dims)", async () => {
+    __setExtractorForTest(async (texts) => texts.slice(1).map(fakeVec));
+    process.env.EMBED_BACKEND = "transformers";
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const out = await getEmbedder().embed(["a text", "b text"]);
+    expect(out.every((v) => v.length === EMBED_DIM)).toBe(true);
+    spy.mockRestore();
   });
 });
